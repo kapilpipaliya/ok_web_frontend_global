@@ -5,7 +5,7 @@
       L: "Page",
       P: {
         key: "YTOHome",
-        url: "/yto",
+        url: "/home",
         signinRequired: true,
         fns: '''
 return {
@@ -54,7 +54,7 @@ const checkOnboarding = async () => {
 
     if (result.success && !result.data.isOnboarded) {
       // User hasn't completed onboarding, redirect them
-      args.navigate('/yto/onboarding');
+      args.navigate('/onboarding');
       return false;
     }
     return true;
@@ -450,14 +450,14 @@ return {
       label: "Channels",
       icon: "mdi:youtube",
       count: channelsCount,
-      href: "/yto/content?type=channels"
+      href: "/content?type=channels"
     },
     {
       id: "playlists",
       label: "Playlists",
       icon: "mdi:playlist-play",
       count: playlistsCount,
-      href: "/yto/content?type=playlists"
+      href: "/content?type=playlists"
     },
     {
       id: "videos",

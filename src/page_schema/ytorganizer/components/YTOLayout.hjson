@@ -248,11 +248,11 @@ const navigationSectionsData = [
     items: [
       {
         id: "home",
-        href: "/yto",
+        href: "/home",
         label: "Home",
         icon: "carbon:home",
         title: "Dashboard and overview",
-        pathCheck: (pathname) => pathname === "/yto" || pathname === "/yto/"
+        pathCheck: (pathname) => pathname === "/" || pathname === ""
       }
     ]
   },
@@ -262,35 +262,35 @@ const navigationSectionsData = [
     items: [
       {
         id: "search",
-        href: "/yto/content?q=",
+        href: "/content?q=",
         label: "Search",
         icon: "mdi:magnify",
         title: "Search for YouTube channels and playlists",
-        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.q !== undefined
+        pathCheck: (pathname) => pathname === "/content" && args.searchParams?.q !== undefined
       },
       {
         id: "channels",
-        href: "/yto/content?type=channels",
+        href: "/content?type=channels",
         label: "Channels",
         icon: "mdi:youtube",
         title: "View and manage YouTube channels",
-        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "channels"
+        pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "channels"
       },
       {
         id: "playlists",
-        href: "/yto/content?type=playlists",
+        href: "/content?type=playlists",
         label: "Playlists",
         icon: "mdi:playlist-play",
         title: "View and manage YouTube playlists",
-        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "playlists"
+        pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "playlists"
       },
       {
         id: "favourites",
-        href: "/yto/content?type=favourites",
+        href: "/content?type=favourites",
         label: "Favourites",
         icon: "carbon:favorite",
         title: "View your favourite videos, channels and playlists",
-        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "favourites"
+        pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "favourites"
       }
     ]
   },
@@ -301,11 +301,11 @@ const navigationSectionsData = [
     items: [
       {
         id: "settings",
-        href: "/yto/settings",
+        href: "/settings",
         label: "Settings",
         icon: "carbon:settings",
         title: "App configuration and preferences",
-        pathCheck: (pathname) => pathname.startsWith("/yto/settings")
+        pathCheck: (pathname) => pathname.startsWith("/settings")
       },
       {
         id: "logout",
@@ -351,62 +351,62 @@ const [navigationSections, setNavigationSections] = args.createSignal(filteredNa
 const mobileNavigationItemsData = [
   {
     id: "home",
-    href: "/yto",
+    href: "/home",
     label: "Home",
     icon: "carbon:home",
     title: "Dashboard and overview",
-    pathCheck: (pathname) => pathname === "/yto" || pathname === "/yto/"
+    pathCheck: (pathname) => pathname === "/" || pathname === ""
   },
   {
     id: "search",
-    href: "/yto/content?q=",
+    href: "/content?q=",
     label: "Search",
     icon: "mdi:magnify",
     title: "Search for YouTube channels and playlists",
-    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.q !== undefined
+    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.q !== undefined
   },
   {
     id: "channels",
-    href: "/yto/content?type=channels",
+    href: "/content?type=channels",
     label: "Channels",
     icon: "mdi:youtube",
     title: "View and manage YouTube channels",
-    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "channels"
+    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "channels"
   },
   {
     id: "playlists",
-    href: "/yto/content?type=playlists",
+    href: "/content?type=playlists",
     label: "Playlists",
     icon: "mdi:playlist-play",
     title: "View and manage YouTube playlists",
-    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "playlists"
+    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "playlists"
   },
   {
     id: "favourites",
-    href: "/yto/content?type=favourites",
+    href: "/content?type=favourites",
     label: "Favourites",
     icon: "carbon:favorite",
     title: "View your favourite videos, channels and playlists",
-    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "favourites"
-  },
-  {
-    id: "admin_dashboard",
-    href: "/yto/admin",
-    label: "Admin",
-    icon: "carbon:dashboard-reference",
-    title: "Admin dashboard home",
-    pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/",
-    // Only show for admin users
-    showIf: checkAdminRole
+    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "favourites"
   },
   {
     id: "settings",
-    href: "/yto/settings",
+    href: "/settings",
     label: "Settings",
     icon: "carbon:settings",
     title: "App configuration and preferences",
-    pathCheck: (pathname) => pathname.startsWith("/yto/settings")
-  }
+    pathCheck: (pathname) => pathname.startsWith("/settings")
+  },
+  {
+    id: "admin_dashboard",
+    href: "/admin_home",
+    label: "Admin",
+    icon: "carbon:dashboard-reference",
+    title: "Admin dashboard home",
+    pathCheck: (pathname) => pathname === "/admin_home" || pathname === "/admin_home/",
+    // Only show for admin users
+    showIf: checkAdminRole
+  },
 ];
 
 // Filter mobile navigation items based on showIf condition
@@ -509,6 +509,7 @@ return `._id {
   flex: 1;
   padding-bottom: 80px;
   overflow-y: auto;
+  position: relative;
 }
 
 @media (min-width: 768px) {
@@ -657,7 +658,7 @@ return `._id {
         props: '''
 return {
   as: "a",
-  href: "/yto"
+  href: "/home"
 };
 ''',
         css: '''

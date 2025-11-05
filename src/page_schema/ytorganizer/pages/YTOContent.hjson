@@ -5,7 +5,7 @@
       L: "Page",
       P: {
         key: "YTOContent",
-        url: "/yto/content",
+        url: "/content",
         signinRequired: true,
         fns: '''
 return {
@@ -634,7 +634,7 @@ const handleSearch = async (e) => {
   if (e) e.preventDefault();
   const query = searchInput().trim();
   if (query) {
-    args.navigate(`/yto/content?q=${encodeURIComponent(query)}`);
+    args.navigate(`/content?q=${encodeURIComponent(query)}`);
   }
 };
 
@@ -655,11 +655,11 @@ const filteredItems = args.createMemo(() => {
 const navigateToDetail = (item) => {
   const data = contentType === "playlists" ? item.playlist : item.channel;
   const id = data?.P?.youtubeId || "";
-  args.navigate(`/yto/content?type=${contentType}&id=${id}`);
+  args.navigate(`/content?type=${contentType}&id=${id}`);
 };
 
 const navigateBack = () => {
-  args.navigate(`/yto/content?type=${contentType}`);
+  args.navigate(`/content?type=${contentType}`);
 };
 
 // Menu actions

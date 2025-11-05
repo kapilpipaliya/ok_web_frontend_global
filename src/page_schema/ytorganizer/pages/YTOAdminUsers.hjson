@@ -157,7 +157,7 @@ const startImpersonation = async (userUuid) => {
 
     setStore('impersonatedUserUuid', userUuid);
     args.showSuccessToast("Now viewing as user");
-    args.navigate('/yto/content');
+    args.navigate('/content');
   } else {
     args.showErrorToast(serverResult?.message || "Failed to start impersonation");
   }

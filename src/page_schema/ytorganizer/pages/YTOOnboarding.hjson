@@ -5,7 +5,7 @@
       L: "Page"
       P: {
         key: "YTOOnboarding"
-        url: "/yto/onboarding"
+        url: "/onboarding"
         signinRequired: true,
         fns: '''
 return {
@@ -51,7 +51,7 @@ const completeOnboarding = async () => {
       args.showSuccessToast("Welcome to YouTube Organizer!");
       // Navigate to home after a short delay
       setTimeout(() => {
-        args.navigate('/yto');
+        args.navigate('/home');
       }, 500);
     } else {
       args.showErrorToast("Failed to complete onboarding");
@@ -263,7 +263,7 @@ const features = [
     iconColor: "primary",
     title: "Manage Channels",
     description: "Add your favorite YouTube channels and keep track of all their content in one organized place.",
-    href: "/yto/content?type=channels"
+    href: "/content?type=channels"
   },
   {
     id: "playlists",
@@ -271,7 +271,7 @@ const features = [
     iconColor: "success",
     title: "Organize Playlists",
     description: "Create custom playlists and organize videos exactly how you want them.",
-    href: "/yto/content?type=playlists"
+    href: "/content?type=playlists"
   },
   {
     id: "mobile",

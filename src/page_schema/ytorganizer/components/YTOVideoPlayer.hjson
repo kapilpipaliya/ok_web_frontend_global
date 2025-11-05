@@ -767,17 +767,19 @@ args.createEffect(() => {
   const getCurrentVideo = args.untrack(() => args.contextData.props?.currentVideo);
   const video = getCurrentVideo?.();
   const currentId = video?.P?.youtubeId || "";
-  const player = args.fns.playerState.player;
-  const isReady = args.fns.playerState.isPlayerReady;
+  args.untrack(() => {
+    const player = args.fns.playerState.player;
+    const isReady = args.fns.playerState.isPlayerReady;
 
-  if (player && isReady && currentId) {
-    try {
-      // Use loadVideoById to change video without creating history entry
-      player.loadVideoById(currentId);
-    } catch (e) {
-      console.error('Error loading video:', e);
+    if (player && isReady && currentId) {
+      try {
+        // Use loadVideoById to change video without creating history entry
+        player.loadVideoById(currentId);
+      } catch (e) {
+        console.error('Error loading video:', e);
+      }
     }
-  }
+  });
 });
 
 return {};

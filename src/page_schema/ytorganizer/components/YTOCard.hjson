@@ -59,10 +59,10 @@ if (itemType === "video") {
   href = `https://www.youtube.com/watch?v=${youtubeId}`;
   target = "_blank";
 } else if (itemType === "playlist") {
-  href = `/yto/content?type=playlists&id=${youtubeId}`;
+  href = `/content?type=playlists&id=${youtubeId}`;
   target = "_self";
 } else {
-  href = `/yto/content?type=channels&id=${youtubeId}`;
+  href = `/content?type=channels&id=${youtubeId}`;
   target = "_self";
 }
 
@@ -79,9 +79,9 @@ return {
     if (itemType === "video") {
       args.fns.playVideo?.(item);
     } else if (itemType === "playlist") {
-      args.navigate(`/yto/content?type=playlists&id=${youtubeId}`);
+      args.navigate(`/content?type=playlists&id=${youtubeId}`);
     } else {
-      args.navigate(`/yto/content?type=channels&id=${youtubeId}`);
+      args.navigate(`/content?type=channels&id=${youtubeId}`);
     }
   }
 };

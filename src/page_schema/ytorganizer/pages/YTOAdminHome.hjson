@@ -169,7 +169,7 @@ return {
       icon: "carbon:key",
       iconBg: "warning_light_100",
       hoverBorder: "warning",
-      link: "/yto/api-keys",
+      link: "/yto/admin/api-keys",
       linkText: "Manage API Keys",
       enabled: true
     },

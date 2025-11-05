@@ -17,7 +17,7 @@
         description: "Admin layout container",
         fns: '''
 if (!args.fns.checkAdminRole()) {
-  args.navigate('/yto');
+  args.navigate('/home');
   args.showErrorToast("Admin access required");
   return {};
 }
@@ -26,68 +26,73 @@ if (!args.fns.checkAdminRole()) {
 return {
   as: "div",
   onMount: () => {
-    // Add admin navigation sections
-    if (args.fns.setNavigationSections) {
-      const adminNavigationSections = [
-        {
-          id: "admin",
-          title: "Admin",
-          items: [
-            // {
-            //   id: "admin_home",
-            //   href: "/yto/admin",
-            //   label: "Dashboard",
-            //   icon: "carbon:dashboard-reference",
-            //   title: "Admin dashboard home",
-            //   pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/"
-            // },
-            {
-              id: "worker_health",
-              href: "/yto/admin/worker-health",
-              label: "Worker Health",
-              icon: "carbon:dashboard",
-              title: "Monitor background workers and queue status",
-              pathCheck: (pathname) => pathname === "/yto/admin/worker-health"
-            },
-            {
-              id: "user_management",
-              href: "/yto/admin/users",
-              label: "Manage Users",
-              icon: "carbon:user-multiple",
-              title: "View and manage all users",
-              pathCheck: (pathname) => pathname === "/yto/admin/users"
-            },
-            {
-              id: "api_keys",
-              href: "/yto/api-keys",
-              label: "API Keys",
-              icon: "carbon:key",
-              title: "Manage YouTube API keys",
-              pathCheck: (pathname) => pathname === "/yto/api-keys"
-            },
-            {
-              id: "global_settings",
-              href: "/admin/GlobalSettings",
-              label: "Global Settings",
-              icon: "carbon:settings",
-              title: "Configure system-wide settings",
-              pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && !args.searchParams?.tab,
-              openInNewTab: true
-            },
-            {
-              id: "workers",
-              href: "/admin/GlobalSettings?tab=workers",
-              label: "Workers",
-              icon: "carbon:task",
-              title: "Manage background workers and scheduled tasks",
-              pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && args.searchParams?.tab === "workers",
-              openInNewTab: true
-            }
-          ]
-        }
-      ];
+    // Add admin navigation sections only if not already added
+    if (args.fns.setNavigationSections && args.fns.navigationSections) {
+      const currentSections = args.fns.navigationSections();
+      const hasAdminSection = currentSections.some(section => section.id === "admin");
 
-      args.fns.setNavigationSections(v => [...v, ...adminNavigationSections]);
+      if (!hasAdminSection) {
+        const adminNavigationSections = [
+          {
+            id: "admin",
+            title: "Admin",
+            items: [
+              // {
+              //   id: "admin_home",
+              //   href: "/yto/admin",
+              //   label: "Dashboard",
+              //   icon: "carbon:dashboard-reference",
+              //   title: "Admin dashboard home",
+              //   pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/"
+              // },
+              {
+                id: "worker_health",
+                href: "/yto/admin/worker-health",
+                label: "Worker Health",
+                icon: "carbon:dashboard",
+                title: "Monitor background workers and queue status",
+                pathCheck: (pathname) => pathname === "/yto/admin/worker-health"
+              },
+              {
+                id: "user_management",
+                href: "/yto/admin/users",
+                label: "Manage Users",
+                icon: "carbon:user-multiple",
+                title: "View and manage all users",
+                pathCheck: (pathname) => pathname === "/yto/admin/users"
+              },
+              {
+                id: "api_keys",
+                href: "/yto/admin/api-keys",
+                label: "API Keys",
+                icon: "carbon:key",
+                title: "Manage YouTube API keys",
+                pathCheck: (pathname) => pathname === "/yto/admin/api-keys"
+              },
+              {
+                id: "global_settings",
+                href: "/admin/GlobalSettings",
+                label: "Global Settings",
+                icon: "carbon:settings",
+                title: "Configure system-wide settings",
+                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && !args.searchParams?.tab,
+                openInNewTab: true
+              },
+              {
+                id: "workers",
+                href: "/admin/GlobalSettings?tab=workers",
+                label: "Workers",
+                icon: "carbon:task",
+                title: "Manage background workers and scheduled tasks",
+                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && args.searchParams?.tab === "workers",
+                openInNewTab: true
+              }
+            ]
+          }
+        ];
+
+        args.fns.setNavigationSections(v => [...v, ...adminNavigationSections]);
+      }
     }
   }
 };

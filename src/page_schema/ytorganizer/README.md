@@ -73,11 +73,9 @@ YouTube Organizer uses Neo4j graph database with the following schema:
 
 ## URL Structure
 
-All YouTube Organizer URLs start with `/yto/`:
-
-- **Home/Dashboard**: `/yto/` - Overview with stats and quick actions
-- **Content Pages**: `/yto/content?type=channels` or `/yto/content?type=playlists` - Unified content listing
-- **Settings**: `/yto/settings` - Application settings and data management
+- **Home/Dashboard**: `/home` - Overview with stats and quick actions
+- **Content Pages**: `/content?type=channels` or `/content?type=playlists` - Unified content listing
+- **Settings**: `/settings` - Application settings and data management
 
 ### Query Parameters
 
@@ -87,9 +85,9 @@ The content page uses query parameters instead of separate URLs:
 
 Example:
 ```
-/yto/content?type=channels        # List all channels
-/yto/content?type=playlists       # List all playlists
-/yto/content?type=channels&id=123 # Channel detail view (future)
+/content?type=channels        # List all channels
+/content?type=playlists       # List all playlists
+/content?type=channels&id=123 # Channel detail view (future)
 ```
 
 ## Components
@@ -148,13 +146,13 @@ Common icons used:
 
 ## Pages
 
-### YTOHome (`/yto/`)
+### YTOHome (`/home`)
 Dashboard page with:
 - Statistics cards (channel count, playlist count)
 - Quick action buttons to navigate to content pages
 - Uses `getUserChannels` and `getUserPlaylists` server functions on mount
 
-### YTOContent (`/yto/content`)
+### YTOContent (`/content`)
 Unified content page for channels and playlists with virtualization:
 - Reads `args.searchParams.type` to determine content type
 - Loads data from server functions (`getUserChannels` or `getUserPlaylists`)
@@ -170,7 +168,7 @@ Unified content page for channels and playlists with virtualization:
 - Displays subscriber count (channels) or video count (playlists)
 - Adapts item height based on screen size (mobile vs desktop)
 
-### YTOSettings (`/yto/settings`)
+### YTOSettings (`/settings`)
 Settings page with:
 - Navigation cards to channels and playlists
 - Appearance section with theme toggle (light/dark mode)

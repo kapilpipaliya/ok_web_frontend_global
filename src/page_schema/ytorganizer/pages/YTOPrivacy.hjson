@@ -7,7 +7,7 @@
         key: "YTOPrivacy",
         url: "/privacy",
         title: "Privacy Policy - YouTube Organizer",
-        description: "Privacy policy for YouTube Organizer",
+        description: "Privacy policy for YouTube Organizer - Learn how we handle your YouTube data in compliance with Google's API Services requirements",
         fns: '''
 return {
   enabled: true
@@ -347,8 +347,10 @@ return `._id {
   margin: 0 auto;
   padding: 3rem 1.5rem;
   width: 100%;
+}
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
+  ._id {
     padding: 2rem 1rem;
   }
 }`;
@@ -374,8 +376,10 @@ return `._id {
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: ${args.theme.var.color.text};
+}
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
+  ._id {
     font-size: 2rem;
   }
 }`;
@@ -436,15 +440,83 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "YouTube Organizer (\"we\", \"our\", or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service."
+  text: "YouTube Organizer (\"we\", \"our\", or \"us\") is committed to protecting your privacy and ensuring transparency in how we handle your data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service, which integrates with YouTube API Services."
 };
 ''',
         css: '''
 return `._id {
-  line-height: 1.6;
+  line-height: 1.7;
   color: ${args.theme.var.color.text};
   margin-bottom: 1rem;
+  font-size: 1.05rem;
 }`;
+'''
+      }
+    },
+    // YouTube API Services Notice (MANDATORY)
+    {
+      id: "privacy_youtube_notice",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.info_light_100};
+  border-left: 4px solid ${args.theme.var.color.info};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_youtube_notice_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Important: YouTube API Services"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: ${args.theme.var.color.info};
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_youtube_notice_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  innerHTML: `
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; font-size: 1.05rem;">YouTube Organizer uses <strong>YouTube API Services</strong> to access and organize your YouTube content. By using our service, you agree to be bound by:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a></strong></li>
+      <li style="margin-bottom: 0.5rem;"><strong><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a></strong></li>
+      <li style="margin-bottom: 0.5rem;"><strong><a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube API Services Developer Policies</a></strong></li>
+    </ul>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; font-size: 1.05rem;"><strong>You can revoke YouTube Organizer's access to your data at any time</strong> via the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google security settings page</a>.</p>
+  `
+};
 '''
       }
     },
@@ -453,7 +525,7 @@ return `._id {
       id: "privacy_section_1",
       L: "Attr",
       P: {
-        displayOrder: 4,
+        displayOrder: 5,
         componentName: "Html",
         props: '''
 return {
@@ -476,15 +548,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "1. Information We Collect"
+  text: "1. Information We Collect and Access"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -499,30 +573,33 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.1 YouTube Data</h3>
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you connect your YouTube account, we access and store:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
-      <li>Your YouTube channel information (name, description, subscriber count)</li>
-      <li>Your YouTube playlists (titles, descriptions, video counts)</li>
-      <li>Your YouTube videos (titles, descriptions, thumbnails, metadata)</li>
-      <li>Your YouTube watch history and liked videos (if you choose to sync them)</li>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.1 YouTube Data We Access</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you connect your YouTube account through Google OAuth, we access and temporarily store the following YouTube data via YouTube API Services:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong>Channel Information:</strong> Channel name, description, thumbnail, subscriber count, video count, upload dates</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Playlist Information:</strong> Playlist titles, descriptions, thumbnails, video counts, privacy status</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Video Metadata:</strong> Video titles, descriptions, thumbnails, channel information, publication dates</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Public Statistics:</strong> View counts, like counts, and other publicly available metrics</li>
+    </ul>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding: 1rem; background: ${args.theme.var.color.warning_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.warning};"><strong>Important:</strong> We only access publicly available YouTube data. We do <strong>not</strong> access your private videos, watch history, or any data you have not explicitly made public on YouTube. We never download or cache actual video files.</p>
+
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.2 Account Information</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you create an account with YouTube Organizer, we collect:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;">Email address (for authentication and notifications)</li>
+      <li style="margin-bottom: 0.5rem;">Username (for your account identification)</li>
+      <li style="margin-bottom: 0.5rem;">Password (encrypted using industry-standard bcrypt hashing)</li>
+      <li style="margin-bottom: 0.5rem;">Profile preferences and settings</li>
     </ul>
 
-    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.2 Account Information</h3>
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We collect information you provide when creating an account:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
-      <li>Email address</li>
-      <li>Username</li>
-      <li>Profile information</li>
-      <li>Password (encrypted and securely stored)</li>
-    </ul>
-
-    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.3 User-Generated Content</h3>
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We store content you create within our service:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
-      <li>Personal notes on videos</li>
-      <li>Custom names and tags for channels and playlists</li>
-      <li>Favorite selections and organization preferences</li>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.3 User-Generated Organization Data</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We store your personal organization preferences and notes:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;">Custom names and tags for channels and playlists</li>
+      <li style="margin-bottom: 0.5rem;">Personal notes and comments on videos</li>
+      <li style="margin-bottom: 0.5rem;">Favorite/bookmark selections</li>
+      <li style="margin-bottom: 0.5rem;">Custom playlist ordering and organization preferences</li>
+      <li style="margin-bottom: 0.5rem;">Watch status and progress tracking</li>
     </ul>
   `
 };
@@ -534,7 +611,7 @@ return {
       id: "privacy_section_2",
       L: "Attr",
       P: {
-        displayOrder: 5,
+        displayOrder: 6,
         componentName: "Html",
         props: '''
 return {
@@ -562,10 +639,12 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -580,28 +659,28 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We use the collected information for the following purposes:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;">To provide and maintain our service</li>
-      <li style="margin-bottom: 0.5rem;">To organize and display your YouTube content</li>
-      <li style="margin-bottom: 0.5rem;">To sync and update your YouTube data</li>
-      <li style="margin-bottom: 0.5rem;">To save your notes, favorites, and custom settings</li>
-      <li style="margin-bottom: 0.5rem;">To improve and optimize our service</li>
-      <li style="margin-bottom: 0.5rem;">To communicate with you about service updates</li>
-      <li style="margin-bottom: 0.5rem;">To provide customer support</li>
-      <li style="margin-bottom: 0.5rem;">To detect and prevent fraud or abuse</li>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We use the collected information <strong>solely</strong> for the following legitimate purposes:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.75rem;"><strong>Service Provision:</strong> To provide, operate, and maintain the YouTube Organizer service, including displaying and organizing your YouTube channels, playlists, and videos</li>
+      <li style="margin-bottom: 0.75rem;"><strong>Data Synchronization:</strong> To periodically refresh your YouTube data (channels, playlists, video metadata) to keep your collection up-to-date</li>
+      <li style="margin-bottom: 0.75rem;"><strong>Organization Features:</strong> To enable you to add custom names, tags, notes, and organize your YouTube content according to your preferences</li>
+      <li style="margin-bottom: 0.75rem;"><strong>Account Management:</strong> To create and manage your account, authenticate your identity, and provide customer support</li>
+      <li style="margin-bottom: 0.75rem;"><strong>Service Improvement:</strong> To understand usage patterns, improve features, optimize performance, and develop new functionality</li>
+      <li style="margin-bottom: 0.75rem;"><strong>Communication:</strong> To send you service-related notifications, updates about new features, and respond to your inquiries</li>
+      <li style="margin-bottom: 0.75rem;"><strong>Security:</strong> To detect, prevent, and address technical issues, fraud, abuse, and unauthorized access</li>
     </ul>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; padding: 1rem; background: ${args.theme.var.color.success_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.success};"><strong>We do NOT:</strong> Use your YouTube data for advertising, sell your data to third parties, train AI models on your content, or use your data for any purpose other than providing you with the YouTube Organizer service.</p>
   `
 };
 '''
       }
     },
-    // Section 3: Data Storage and Security
+    // Section 3: Data Storage and Retention
     {
       id: "privacy_section_3",
       L: "Attr",
       P: {
-        displayOrder: 6,
+        displayOrder: 7,
         componentName: "Html",
         props: '''
 return {
@@ -624,15 +703,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "3. Data Storage and Security"
+  text: "3. Data Storage, Retention, and Security"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -647,26 +728,47 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We implement industry-standard security measures to protect your data:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;">Encrypted data transmission using HTTPS/SSL</li>
-      <li style="margin-bottom: 0.5rem;">Secure password storage using encryption</li>
-      <li style="margin-bottom: 0.5rem;">Regular security audits and updates</li>
-      <li style="margin-bottom: 0.5rem;">Restricted access to personal data</li>
-      <li style="margin-bottom: 0.5rem;">Secure database infrastructure with Neo4j</li>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">3.1 YouTube API Data Retention</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>In compliance with YouTube API Services Terms:</strong></p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong>Maximum Storage Period:</strong> YouTube data (channel info, playlist metadata, video details) is stored for a maximum of 30 calendar days before being refreshed or deleted</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Authorization Verification:</strong> We verify that your YouTube authorization remains valid every 30 days</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Automatic Deletion:</strong> If you revoke access through Google security settings, we delete all your YouTube data within 30 calendar days</li>
+      <li style="margin-bottom: 0.5rem;"><strong>User-Initiated Deletion:</strong> If you request data deletion through our service, we delete your YouTube data within 7 calendar days</li>
+      <li style="margin-bottom: 0.5rem;"><strong>No Permanent Caching:</strong> We do not permanently cache YouTube videos, thumbnails, or other media files beyond the necessary display period</li>
     </ul>
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text};">Your data is stored securely and is only accessible to you and authorized system processes.</p>
+
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">3.2 Your Personal Data Retention</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">Your account information and personal notes are retained as follows:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong>Account Data:</strong> Retained as long as your account is active</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Custom Notes & Tags:</strong> Retained indefinitely as part of your personal data until you delete them or close your account</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Inactive Accounts:</strong> Accounts inactive for more than 2 years may be deleted after email notification</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Account Deletion:</strong> When you delete your account, all your personal data is permanently deleted within 30 days</li>
+    </ul>
+
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">3.3 Security Measures</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We implement industry-standard security measures to protect your data:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong>Encryption in Transit:</strong> All data transmission uses HTTPS/TLS encryption</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Encryption at Rest:</strong> Sensitive data is encrypted in our Neo4j database</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Password Security:</strong> Passwords are hashed using bcrypt with salt</li>
+      <li style="margin-bottom: 0.5rem;"><strong>OAuth 2.0:</strong> YouTube access uses secure Google OAuth 2.0 authentication</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Access Control:</strong> Strict role-based access control limits who can access your data</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Regular Audits:</strong> We conduct regular security audits and updates</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Secure Infrastructure:</strong> Data is stored on secure servers with firewall protection and intrusion detection</li>
+    </ul>
   `
 };
 '''
       }
     },
-    // Section 4: Third-Party Services
+    // Section 4: Data Sharing and Third Parties
     {
       id: "privacy_section_4",
       L: "Attr",
       P: {
-        displayOrder: 7,
+        displayOrder: 8,
         componentName: "Html",
         props: '''
 return {
@@ -689,15 +791,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "4. Third-Party Services"
+  text: "4. Data Sharing and Third-Party Services"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -712,23 +816,44 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">YouTube API Services</h3>
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YouTube Organizer uses YouTube API Services to access your YouTube data. By using our service, you are also agreeing to be bound by the <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a>.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.1 YouTube API Services</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem;">YouTube Organizer uses <strong>YouTube API Services</strong> provided by Google LLC. When you connect your YouTube account:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;">Your authentication is handled directly by Google through OAuth 2.0</li>
+      <li style="margin-bottom: 0.5rem;">We access your YouTube data only through official Google APIs</li>
+      <li style="margin-bottom: 0.5rem;">By using our service, you agree to <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube's Terms of Service</a> and <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google's Privacy Policy</a></li>
+      <li style="margin-bottom: 0.5rem;">You can revoke our access at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google's security settings</a></li>
+    </ul>
 
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You can revoke YouTube Organizer's access to your YouTube data at any time through the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google security settings page</a>.</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.2 No Third-Party Data Sharing</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>We do NOT share, sell, rent, or trade your YouTube data or personal information with third parties for their marketing or advertising purposes.</strong></p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We may share your data only in the following limited circumstances:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong>With Your Consent:</strong> When you explicitly authorize us to share specific information</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Service Providers:</strong> With trusted hosting and infrastructure providers who help us operate the service (e.g., cloud hosting) under strict data protection agreements. These providers cannot use your data for their own purposes.</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Legal Requirements:</strong> When required by law, court order, or government regulation, or to protect our legal rights, prevent fraud, or ensure user safety</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets, with advance notice to you</li>
+    </ul>
 
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text};">We do not share your YouTube data with any third parties except as necessary to provide our service (e.g., hosting providers with appropriate data protection agreements).</p>
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.3 Analytics and Cookies</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We use essential cookies for:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;"><strong>Authentication:</strong> Keeping you signed in securely</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Preferences:</strong> Remembering your settings and theme choices</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Performance:</strong> Understanding how users interact with our service to improve functionality</li>
+    </ul>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-top: 1rem;">You can control cookies through your browser settings, but disabling certain cookies may affect service functionality.</p>
   `
 };
 '''
       }
     },
-    // Section 5: Your Rights
+    // Section 5: Your Rights and Control
     {
       id: "privacy_section_5",
       L: "Attr",
       P: {
-        displayOrder: 8,
+        displayOrder: 9,
         componentName: "Html",
         props: '''
 return {
@@ -751,15 +876,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "5. Your Rights"
+  text: "5. Your Rights and Data Control"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -774,26 +901,39 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You have the following rights regarding your personal data:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;"><strong>Access:</strong> Request access to your personal data</li>
-      <li style="margin-bottom: 0.5rem;"><strong>Correction:</strong> Request correction of inaccurate data</li>
-      <li style="margin-bottom: 0.5rem;"><strong>Deletion:</strong> Request deletion of your account and data</li>
-      <li style="margin-bottom: 0.5rem;"><strong>Export:</strong> Request a copy of your data in a portable format</li>
-      <li style="margin-bottom: 0.5rem;"><strong>Revocation:</strong> Revoke YouTube access permissions at any time</li>
-      <li style="margin-bottom: 0.5rem;"><strong>Objection:</strong> Object to processing of your personal data</li>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">You have comprehensive rights regarding your personal data:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 1rem;"><strong>Access:</strong> Request a copy of all personal data we hold about you in a portable format (JSON or CSV)</li>
+      <li style="margin-bottom: 1rem;"><strong>Correction:</strong> Update or correct any inaccurate information in your account settings at any time</li>
+      <li style="margin-bottom: 1rem;"><strong>Deletion:</strong> Request deletion of your account and all associated data. We will permanently delete your data within 7 calendar days (YouTube data) or 30 days (account data)</li>
+      <li style="margin-bottom: 1rem;"><strong>YouTube Access Revocation:</strong> Revoke YouTube Organizer's access to your YouTube data at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google's security settings page</a>. We will delete all YouTube data within 30 days of revocation.</li>
+      <li style="margin-bottom: 1rem;"><strong>Data Portability:</strong> Export your custom notes, tags, and organization preferences to take them to another service</li>
+      <li style="margin-bottom: 1rem;"><strong>Objection:</strong> Object to processing of your personal data for specific purposes</li>
+      <li style="margin-bottom: 1rem;"><strong>Restriction:</strong> Request that we limit how we use your data while maintaining your account</li>
+      <li style="margin-bottom: 1rem;"><strong>Withdraw Consent:</strong> Withdraw consent for data processing at any time (note: this may limit service functionality)</li>
     </ul>
+
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.primary_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.primary};"><strong>Important for EU Users:</strong> These rights are guaranteed under the General Data Protection Regulation (GDPR). If you are located in the European Economic Area (EEA), you have additional rights including the right to lodge a complaint with your local data protection authority.</p>
+
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">How to Exercise Your Rights</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">To exercise any of these rights, you can:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;">Use the settings and data management tools in your account dashboard</li>
+      <li style="margin-bottom: 0.5rem;">Contact us at <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></li>
+      <li style="margin-bottom: 0.5rem;">Submit a data request through our support system</li>
+    </ul>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-top: 1rem;">We will respond to your request within 30 days and may verify your identity before processing sensitive requests.</p>
   `
 };
 '''
       }
     },
-    // Section 6: Cookies and Tracking
+    // Section 6: Children's Privacy (COPPA Compliance)
     {
       id: "privacy_section_6",
       L: "Attr",
       P: {
-        displayOrder: 9,
+        displayOrder: 10,
         componentName: "Html",
         props: '''
 return {
@@ -816,15 +956,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "6. Cookies and Tracking"
+  text: "6. Children's Privacy (COPPA Compliance)"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -839,25 +981,26 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We use cookies and similar technologies for:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;">Authentication and session management</li>
-      <li style="margin-bottom: 0.5rem;">Remembering your preferences and settings</li>
-      <li style="margin-bottom: 0.5rem;">Understanding how you use our service</li>
-      <li style="margin-bottom: 0.5rem;">Improving service performance and user experience</li>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>Our service is not intended for children under 13 years of age.</strong></p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We comply with the Children's Online Privacy Protection Act (COPPA) and do not knowingly collect personal information from children under 13. If you are under 13, please do not:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;">Create an account on YouTube Organizer</li>
+      <li style="margin-bottom: 0.5rem;">Use our service or provide any personal information</li>
+      <li style="margin-bottom: 0.5rem;">Connect your YouTube account to our platform</li>
     </ul>
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text};">You can control cookies through your browser settings, but disabling certain cookies may affect service functionality.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>If you are a parent or guardian</strong> and believe your child under 13 has provided us with personal information, please contact us immediately at <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a>. We will promptly delete such information from our servers.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text};">YouTube Organizer takes child safety seriously and is committed to protecting children's privacy online in accordance with COPPA and international regulations.</p>
   `
 };
 '''
       }
     },
-    // Section 7: Data Retention
+    // Section 7: International Data Transfers
     {
       id: "privacy_section_7",
       L: "Attr",
       P: {
-        displayOrder: 10,
+        displayOrder: 11,
         componentName: "Html",
         props: '''
 return {
@@ -880,15 +1023,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "7. Data Retention"
+  text: "7. International Data Transfers and EU User Rights"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -901,24 +1046,34 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "p",
-  text: "We retain your personal data only as long as necessary to provide our service and fulfill the purposes outlined in this Privacy Policy. When you delete your account, we will delete your personal data within 30 days, except where we are required to retain it for legal or regulatory purposes."
+  as: "div",
+  innerHTML: `
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YouTube Organizer may store and process your data in various locations to provide our service globally. If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, please be aware that:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;">Your data may be transferred to and processed in countries outside the EEA</li>
+      <li style="margin-bottom: 0.5rem;">We ensure appropriate safeguards are in place for international transfers, including standard contractual clauses</li>
+      <li style="margin-bottom: 0.5rem;">Your data is protected by this Privacy Policy regardless of where it is processed</li>
+    </ul>
+
+    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">EU User Consent Policy</h3>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">In compliance with YouTube API Services requirements and GDPR:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.5rem;">We obtain your explicit consent before accessing your YouTube data</li>
+      <li style="margin-bottom: 0.5rem;">You have the right to withdraw consent at any time through Google's security settings</li>
+      <li style="margin-bottom: 0.5rem;">We comply with all GDPR requirements for lawful data processing</li>
+      <li style="margin-bottom: 0.5rem;">You have the right to lodge complaints with your local data protection authority</li>
+    </ul>
+  `
 };
-''',
-        css: '''
-return `._id {
-  line-height: 1.6;
-  color: ${args.theme.var.color.text};
-}`;
 '''
       }
     },
-    // Section 8: Children's Privacy
+    // Section 8: Changes to Privacy Policy
     {
       id: "privacy_section_8",
       L: "Attr",
       P: {
-        displayOrder: 11,
+        displayOrder: 12,
         componentName: "Html",
         props: '''
 return {
@@ -941,15 +1096,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "8. Children's Privacy"
+  text: "8. Changes to This Privacy Policy"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -963,23 +1120,23 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Our service is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us, and we will delete such information."
+  text: "We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. When we make significant changes, we will notify you by email (if you have provided an email address) and/or by posting a prominent notice on our service at least 30 days before the changes take effect. We encourage you to review this Privacy Policy periodically. The \"Last updated\" date at the top of this page indicates when the policy was last revised. Your continued use of our service after any modifications indicates your acceptance of the updated Privacy Policy. If you do not agree to the changes, you should discontinue use of the service and may request deletion of your account."
 };
 ''',
         css: '''
 return `._id {
-  line-height: 1.6;
+  line-height: 1.7;
   color: ${args.theme.var.color.text};
 }`;
 '''
       }
     },
-    // Section 9: Changes to Privacy Policy
+    // Section 9: Contact Information
     {
       id: "privacy_section_9",
       L: "Attr",
       P: {
-        displayOrder: 12,
+        displayOrder: 13,
         componentName: "Html",
         props: '''
 return {
@@ -1002,15 +1159,17 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "9. Changes to This Privacy Policy"
+  text: "9. Contact Us"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1rem;
   color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
 }`;
 '''
       }
@@ -1023,24 +1182,26 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "p",
-  text: "We may update this Privacy Policy from time to time. We will notify you of any changes by updating the \"Last updated\" date at the top of this Privacy Policy. We encourage you to review this Privacy Policy periodically for any changes. Your continued use of our service after any modifications indicates your acceptance of the updated Privacy Policy."
+  as: "div",
+  innerHTML: `
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
+    <div style="padding: 1.5rem; background: ${args.theme.var.color.background_light_100}; border-radius: 0.5rem; margin-top: 1rem;">
+      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 0.75rem;"><strong>Email:</strong> <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></p>
+      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 0.75rem;"><strong>Website:</strong> <a href="https://ysaar.com" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">ysaar.com</a></p>
+      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin: 0;"><strong>Support:</strong> Available through your account dashboard</p>
+    </div>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-top: 1.5rem;">We are committed to resolving any privacy concerns you may have and will respond to your inquiry within 30 days.</p>
+  `
 };
-''',
-        css: '''
-return `._id {
-  line-height: 1.6;
-  color: ${args.theme.var.color.text};
-}`;
 '''
       }
     },
-    // Section 10: Contact Us
+    // Important Links Section
     {
       id: "privacy_section_10",
       L: "Attr",
       P: {
-        displayOrder: 13,
+        displayOrder: 14,
         componentName: "Html",
         props: '''
 return {
@@ -1049,7 +1210,11 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
 }`;
 '''
       }
@@ -1063,7 +1228,7 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "10. Contact Us"
+  text: "Important Links and Resources"
 };
 ''',
         css: '''
@@ -1086,10 +1251,23 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">If you have any questions about this Privacy Policy or our data practices, please contact us:</p>
-    <ul style="line-height: 1.6; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;">Email: privacy@ysaar.com</li>
-      <li style="margin-bottom: 0.5rem;">Website: <a href="https://ysaar.com" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">ysaar.com</a></li>
+    <ul style="line-height: 1.8; color: ${args.theme.var.color.text}; padding-left: 0; list-style: none;">
+      <li style="margin-bottom: 0.75rem;">
+        <strong style="display: inline-block; width: 200px;">YouTube Terms:</strong>
+        <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">youtube.com/t/terms</a>
+      </li>
+      <li style="margin-bottom: 0.75rem;">
+        <strong style="display: inline-block; width: 200px;">Google Privacy Policy:</strong>
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">policies.google.com/privacy</a>
+      </li>
+      <li style="margin-bottom: 0.75rem;">
+        <strong style="display: inline-block; width: 200px;">Developer Policies:</strong>
+        <a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">developers.google.com/youtube/terms/developer-policies</a>
+      </li>
+      <li style="margin-bottom: 0.75rem;">
+        <strong style="display: inline-block; width: 200px;">Revoke Access:</strong>
+        <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">security.google.com/settings/security/permissions</a>
+      </li>
     </ul>
   `
 };
@@ -1137,8 +1315,10 @@ return `._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
+  ._id {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
@@ -1157,7 +1337,7 @@ return `._id {
 const year = new Date().getFullYear();
 return {
   as: "p",
-  text: `© ${year} YouTube Organizer. All rights reserved.`
+  text: `© ${year} YouTube Organizer by Ysaar. All rights reserved.`
 };
 ''',
         css: '''
@@ -1183,8 +1363,10 @@ return {
 return `._id {
   display: flex;
   gap: 2rem;
+}
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
+  ._id {
     gap: 1rem;
   }
 }`;
@@ -1215,10 +1397,10 @@ return `._id {
   transition: color 0.2s ease;
   cursor: pointer;
   font-weight: 500;
+}
 
-  &:hover {
-    color: ${args.theme.var.color.primary_dark_200};
-  }
+._id:hover {
+  color: ${args.theme.var.color.primary_dark_200};
 }`;
 '''
       }
@@ -1243,10 +1425,10 @@ return `._id {
   font-size: 0.875rem;
   transition: color 0.2s ease;
   cursor: pointer;
+}
 
-  &:hover {
-    color: ${args.theme.var.color.primary};
-  }
+._id:hover {
+  color: ${args.theme.var.color.primary};
 }`;
 '''
       }
@@ -1274,6 +1456,11 @@ return `._id {
     { id: "e_main_updated", T: "Attr", S: "privacy_main", E: "privacy_updated" },
     { id: "e_main_intro", T: "Attr", S: "privacy_main", E: "privacy_intro" },
     { id: "e_intro_text", T: "Attr", S: "privacy_intro", E: "privacy_intro_text" },
+
+    // YouTube Notice (MANDATORY)
+    { id: "e_main_youtube_notice", T: "Attr", S: "privacy_main", E: "privacy_youtube_notice" },
+    { id: "e_youtube_notice_title", T: "Attr", S: "privacy_youtube_notice", E: "privacy_youtube_notice_title" },
+    { id: "e_youtube_notice_content", T: "Attr", S: "privacy_youtube_notice", E: "privacy_youtube_notice_content" },
 
     // Section 1
     { id: "e_main_section1", T: "Attr", S: "privacy_main", E: "privacy_section_1" },
