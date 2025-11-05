@@ -72,30 +72,77 @@ export async function initWorkersCore() {
       console.error('[Workers] Failed to start email worker:', error);
     }
 
-    // Handle graceful shutdown for all workers (platform and all subdomains)
+    /**
+     * Handle graceful shutdown for all resources
+     *
+     * Shutdown sequence:
+     * 1. Close all BullMQ workers (email, subdomain-specific workers)
+     * 2. Close Neo4j driver connection pool
+     *
+     * This ensures:
+     * - No jobs are processed during shutdown
+     * - All database connections are properly closed
+     * - Neo4j server is notified of client disconnect
+     * - No connection leaks remain
+     *
+     * Called on:
+     * - SIGTERM (graceful shutdown, e.g., from container orchestrator)
+     * - SIGINT (Ctrl+C in terminal)
+     * - Uncaught exceptions (after logging error)
+     * - Unhandled promise rejections (after logging error)
+     */
     const shutdown = async () => {
-      console.log('[Workers] Shutting down gracefully...');
+      console.log('[Server] ═══════════════════════════════════════════');
+      console.log('[Server] Starting graceful shutdown...');
+      console.log('[Server] ═══════════════════════════════════════════');
+
+      // Step 1: Close all workers
       await closeAllWorkersForShutdown();
-      console.log('[Workers] Shutdown complete');
+      console.log('[Workers] ✓ All workers stopped');
+
+      // Step 2: Close Neo4j driver connection pool
+      // This releases all connections back to Neo4j server
+      console.log('[Database] Closing Neo4j driver connection pool...');
+      const { closeDriver } = await import('~/cypher/core/driver');
+      await closeDriver();
+      console.log('[Database] ✓ Neo4j driver closed (all connections released)');
+
+      console.log('[Server] ═══════════════════════════════════════════');
+      console.log('[Server] ✓ Graceful shutdown complete');
+      console.log('[Server] ═══════════════════════════════════════════');
     };
 
     process.on('SIGTERM', async () => {
+      console.log('[Server] Received SIGTERM signal');
       await shutdown();
       process.exit(0);
     });
 
     process.on('SIGINT', async () => {
+      console.log('[Server] Received SIGINT signal (Ctrl+C)');
       await shutdown();
       process.exit(0);
     });
 
-    // Handle uncaught errors
-    process.on('uncaughtException', (error) => {
-      console.error('[Workers] Uncaught exception:', error);
+    // Handle uncaught errors with cleanup
+    process.on('uncaughtException', async (error) => {
+      console.error('[Server] Uncaught exception:', error);
+      try {
+        await shutdown();
+      } catch (shutdownError) {
+        console.error('[Server] Error during shutdown after uncaught exception:', shutdownError);
+      }
+      process.exit(1);
     });
 
-    process.on('unhandledRejection', (reason, promise) => {
-      console.error('[Workers] Unhandled rejection at:', promise, 'reason:', reason);
+    process.on('unhandledRejection', async (reason, promise) => {
+      console.error('[Server] Unhandled rejection at:', promise, 'reason:', reason);
+      try {
+        await shutdown();
+      } catch (shutdownError) {
+        console.error('[Server] Error during shutdown after unhandled rejection:', shutdownError);
+      }
+      process.exit(1);
     });
 
     console.log('[Workers] Platform-level workers started successfully');

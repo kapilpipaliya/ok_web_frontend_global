@@ -92,10 +92,20 @@ export async function getDriver(): Promise<Driver> {
  * - No connection leaks remain
  *
  * Note: After calling this, getDriver() will create a new driver instance
+ *
+ * Called automatically on:
+ * - SIGTERM (graceful shutdown, e.g., docker stop, kubernetes pod termination)
+ * - SIGINT (Ctrl+C in terminal)
+ * - Uncaught exceptions
+ * - Unhandled promise rejections
  */
 export async function closeDriver() {
   if (driverInstance) {
+    console.log('[Neo4j Driver] Closing connection pool...');
     await driverInstance.close();
     driverInstance = null;
+    console.log('[Neo4j Driver] Connection pool closed successfully');
+  } else {
+    console.log('[Neo4j Driver] No active driver instance to close');
   }
 }
