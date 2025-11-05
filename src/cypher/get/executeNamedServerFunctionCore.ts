@@ -21,6 +21,20 @@ export interface NamedServerFunctionRequest {
 /**
  * Core function execution logic (without "use server")
  * Used by both executeNamedServerFunction and executeNamedServerFunctionDirect
+ *
+ * Executes server-side functions stored in the Neo4j database by:
+ * 1. Fetching the function definition from database
+ * 2. Creating an async function from the stored body
+ * 3. Executing it with proper context and error handling
+ *
+ * CRITICAL FIXES:
+ * - Database connection errors are now caught and serialized properly
+ * - Session creation is inside try-catch to prevent H3Error serialization failures
+ * - User-friendly error messages for connection issues
+ *
+ * @param request - Function name and context data to pass to the function
+ * @param context - Execution context with nodes, relationships, and optional session
+ * @returns ServerResult with function execution result or error
  */
 export async function executeNamedServerFunctionCore(
   request: NamedServerFunctionRequest,
@@ -32,18 +46,24 @@ export async function executeNamedServerFunctionCore(
     vertexes: undefined as any,
   },
 ): Promise<ServerResult> {
-  let dbSession: Session;
+  // Session lifecycle tracking
+  let dbSession: Session | undefined;
   let sessionCreatedLocally = false;
 
-  if (context.dbSession) {
-    dbSession = context.dbSession;
-  } else {
-    ({dbSession} = await getDBSessionForSubdomain());
-    sessionCreatedLocally = true;
-    context.dbSession = dbSession;
-  }
-
   try {
+    // IMPORTANT: Session creation is inside try-catch
+    // Previously this was outside, causing non-serializable Neo4j driver errors
+    // to propagate unhandled, resulting in H3Error: "cannot serialize function"
+    if (context.dbSession) {
+      // Reuse existing session from context
+      dbSession = context.dbSession;
+    } else {
+      // Create new session
+      // If getDBSessionForSubdomain() fails (e.g., Neo4j down), error is caught below
+      ({dbSession} = await getDBSessionForSubdomain());
+      sessionCreatedLocally = true;
+      context.dbSession = dbSession;
+    }
     // Query to find the Function vertex with the given key
     const query = `
       MATCH (f:Function {key: $functionName})
@@ -112,14 +132,37 @@ export async function executeNamedServerFunctionCore(
     };
   } catch (error: any) {
     console.error(`Error executing named function '${request.functionName}':`, error, error.cause);
+
+    // Error classification and message sanitization
+    // Neo4j driver errors contain non-serializable objects (functions, circular refs)
+    // We extract only serializable information for the API response
+    let errorMessage = error.message || 'Unknown error';
+    let errorType = 'ExecutionError';
+
+    // Detect database connection errors and provide helpful messages
+    // These patterns indicate Neo4j server is unavailable or unreachable
+    if (errorMessage.includes('Could not perform discovery') ||
+        errorMessage.includes('connect') ||
+        errorMessage.includes('ECONNREFUSED') ||
+        errorMessage.includes('database') ||
+        error.code === 'ServiceUnavailable') {
+      errorType = 'DatabaseConnectionError';
+      errorMessage = 'Unable to connect to the database. Please ensure the database is running and try again.';
+    }
+
+    // Return serializable error object
+    // This prevents H3Error: "The value [object Function] cannot be parsed/serialized"
     return {
-      error: `Failed to execute function '${request.functionName}': ${error.message}`
+      error: `Failed to execute function '${request.functionName}': ${errorMessage}`,
+      errorType
     };
   } finally {
-    // Clean up: close the session if created locally and remove from context
+    // CRITICAL: Session cleanup to prevent leaks
+    // Only close sessions we created in this function
+    // Sessions from parent context must not be closed here
     if (sessionCreatedLocally && dbSession) {
-      await dbSession.close();
-      delete context.dbSession;
+      await dbSession.close(); // Release connection back to pool
+      delete context.dbSession; // Remove from context to prevent reuse
     }
   }
 }

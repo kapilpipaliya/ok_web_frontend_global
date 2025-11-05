@@ -6,7 +6,7 @@
       P: {
         key: "YTOHome",
         url: "/yto",
-        siginRequired: true,
+        signinRequired: true,
         fns: '''
 return {
   enabled: true

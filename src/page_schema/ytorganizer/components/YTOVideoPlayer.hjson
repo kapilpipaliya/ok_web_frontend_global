@@ -764,7 +764,7 @@ return `._id {
         fns: '''
 // Watch for video changes and update player without changing iframe src
 args.createEffect(() => {
-  const getCurrentVideo = args.contextData.props?.currentVideo;
+  const getCurrentVideo = args.untrack(() => args.contextData.props?.currentVideo);
   const video = getCurrentVideo?.();
   const currentId = video?.P?.youtubeId || "";
   const player = args.fns.playerState.player;

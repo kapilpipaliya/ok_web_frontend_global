@@ -12,12 +12,20 @@ import { encodeUserData } from "~/lib/auth/userDataEncoder";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
+/**
+ * Prepare auto sign-in for cross-subdomain authentication
+ *
+ * CRITICAL SESSION MANAGEMENT:
+ * - Creates database session to generate secure token
+ * - MUST close session in finally block to prevent leaks
+ * - Session leak was causing Neo4j to become unresponsive over time
+ */
 export async function GET({ request }: APIEvent) {
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+
   try {
     const url = new URL(request.url);
     const { targetDomain, targetSubdomain } = validateRequest(url);
-
-    const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
     if (subDomain !== ADMIN_DB_NAME) {
       throw new APIError(
@@ -54,6 +62,11 @@ export async function GET({ request }: APIEvent) {
     });
   } catch (error) {
     return handleAPIError(error);
+  } finally {
+    // CRITICAL: Close session to prevent leak
+    // This function is called on every cross-subdomain navigation
+    // Without this cleanup, sessions accumulate and exhaust Neo4j connection pool
+    await dbSession.close();
   }
 }
 

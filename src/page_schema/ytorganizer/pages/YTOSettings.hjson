@@ -6,7 +6,7 @@
       P: {
         key: "YTOSettings",
         url: "/yto/settings",
-        siginRequired: true,
+        signinRequired: true,
         fns: '''
 // Feedback modal state
 const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);

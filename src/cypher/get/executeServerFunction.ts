@@ -13,6 +13,21 @@ interface ServerFunctionRequest {
   contextData?: any;
 }
 
+/**
+ * Execute server-side function from provided function body string
+ *
+ * Similar to executeNamedServerFunction, but accepts the function body directly
+ * instead of looking it up in the database.
+ *
+ * Session Management:
+ * - Reuses session from context if available
+ * - Creates new session if needed and closes it in finally block
+ * - Prevents session leaks by tracking ownership
+ *
+ * @param request - Function body string and context data
+ * @param context - Execution context with optional existing session
+ * @returns ServerResult with function execution result or error
+ */
 export async function executeServerFunction(
   request: ServerFunctionRequest,
   context: EvalExpressionContext & {
@@ -25,19 +40,22 @@ export async function executeServerFunction(
 ): Promise<ServerResult> {
   "use server";
 
+  // Session lifecycle tracking
   let dbSession: Session;
   let sessionCreatedLocally = false;
 
   if (context.dbSession) {
+    // Reuse existing session from context
     dbSession = context.dbSession;
   } else {
+    // Create new session - will be closed in finally block
     ({ dbSession } = await getDBSessionForSubdomain());
     sessionCreatedLocally = true;
     context.dbSession = dbSession;
   }
 
   try {
-    // Create the function from the provided body
+    // Create the function from the provided body string
     // The function has access to args object with session, context, and contextData
     const AsyncFunction = Object.getPrototypeOf(
       async function () {},
@@ -73,12 +91,15 @@ export async function executeServerFunction(
     };
   } catch (error: any) {
     console.error("Error in executeServerFunction:", error, error.cause);
+    // Return serializable error message only
     return { error: error.message };
   } finally {
-    // Clean up: close the session if created locally and remove from context
+    // CRITICAL: Session cleanup to prevent leaks
+    // Only close sessions we created (sessionCreatedLocally = true)
+    // Never close sessions from parent context
     if (sessionCreatedLocally && dbSession) {
-      await dbSession.close();
-      delete context.dbSession;
+      await dbSession.close(); // Release connection back to pool
+      delete context.dbSession; // Remove from context to prevent reuse
     }
   }
 }
