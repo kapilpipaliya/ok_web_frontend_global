@@ -17,7 +17,7 @@ export function mutateArgsValidation(args: MutationArgs): any {
 
   const requiredKeys = ["txnId", "vertexIdMap", "edgeIdMap", "transactions"];
   for (const key of requiredKeys) {
-    if (!args.hasOwnProperty(key)) {
+    if (!Object.hasOwn(args, key)) {
       return { error: `Invalid argument shape, missing required key: ${key}` };
     }
   }

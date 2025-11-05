@@ -22,7 +22,7 @@ export async function fetchFormMetaData(
     const form = FormMetaData[pageVertexName!];
     // can't return form, if it contins functions
     return { form };
-  } else if (pageVertexName === "Function") {
+  }if (pageVertexName === "Function") {
     const form = FormMetaData[pageVertexName!];
     return { form };
   }

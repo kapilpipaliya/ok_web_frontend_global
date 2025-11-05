@@ -4,9 +4,12 @@ import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunction";
+import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
-import { convertNodeToJson, neo4jConvert } from "../conversion/convertNodeToJson";
+import {
+  convertNodeToJson,
+  neo4jConvert,
+} from "../conversion/convertNodeToJson";
 
 interface ServerFunctionRequest {
   functionBody: string;
@@ -58,7 +61,7 @@ export async function executeServerFunction(
     // Create the function from the provided body string
     // The function has access to args object with session, context, and contextData
     const AsyncFunction = Object.getPrototypeOf(
-      async function () {},
+      async () => {},
     ).constructor;
     const serverFunction = new AsyncFunction("args", request.functionBody);
 

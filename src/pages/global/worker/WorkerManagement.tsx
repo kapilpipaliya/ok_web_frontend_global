@@ -44,7 +44,9 @@ export function WorkerManagement() {
       setRefreshKey((prev) => prev + 1);
     } catch (error) {
       showErrorToast(
-        error instanceof Error ? error.message : "Failed to initialize subdomain workers",
+        error instanceof Error
+          ? error.message
+          : "Failed to initialize subdomain workers",
       );
     }
   };
@@ -56,9 +58,7 @@ export function WorkerManagement() {
       setRefreshKey((prev) => prev + 1);
     } catch (error) {
       showErrorToast(
-        error instanceof Error
-          ? error.message
-          : "Failed to stop all workers",
+        error instanceof Error ? error.message : "Failed to stop all workers",
       );
     }
   };
@@ -139,8 +139,9 @@ export function WorkerManagement() {
   line-height: 1.5;
 }\`;`}
         >
-          This page manages subdomain-specific workers only. Platform-level workers (like the email worker)
-          are managed automatically on app startup and cannot be controlled from this interface.
+          This page manages subdomain-specific workers only. Platform-level
+          workers (like the email worker) are managed automatically on app
+          startup and cannot be controlled from this interface.
         </As>
       </As>
 
@@ -251,8 +252,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${status().enabled ? `\${args.theme.var.color.success_light_900}` : `\${args.theme.var.color.error_light_900}`};
-  color: ${status().enabled ? `\${args.theme.var.color.success_dark_300}` : `\${args.theme.var.color.error_dark_300}`};
+  background: ${status().enabled ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
+  color: ${status().enabled ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
 }\`;`}
                   >
                     {status().enabled ? "Enabled" : "Disabled"}
@@ -296,8 +297,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${status().initialized ? `\${args.theme.var.color.info_light_900}` : `\${args.theme.var.color.background_light_300}`};
-  color: ${status().initialized ? `\${args.theme.var.color.info_dark_300}` : `\${args.theme.var.color.text_light_600}`};
+  background: ${status().initialized ? "${args.theme.var.color.info_light_900}" : "${args.theme.var.color.background_light_300}"};
+  color: ${status().initialized ? "${args.theme.var.color.info_dark_300}" : "${args.theme.var.color.text_light_600}"};
 }\`;`}
                   >
                     {status().initialized ? "Yes" : "No"}
@@ -465,8 +466,8 @@ export function WorkerManagement() {
   margin-top: 0.5rem;
 }\`;`}
                   >
-                    Create Function vertices with keys starting with 'process' or
-                    'background' to see them here.
+                    Create Function vertices with keys starting with 'process'
+                    or 'background' to see them here.
                   </As>
                   <As
                     as="p"
@@ -476,8 +477,8 @@ export function WorkerManagement() {
   color: \${args.theme.var.color.muted};
 }\`;`}
                   >
-                    Note: Platform-level workers (like email worker) are managed automatically
-                    and do not appear here.
+                    Note: Platform-level workers (like email worker) are managed
+                    automatically and do not appear here.
                   </As>
                 </As>
               }
@@ -552,8 +553,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: ${worker.active ? `\${args.theme.var.color.success_light_900}` : `\${args.theme.var.color.error_light_900}`};
-  color: ${worker.active ? `\${args.theme.var.color.success_dark_300}` : `\${args.theme.var.color.error_dark_300}`};
+  background: ${worker.active ? "${args.theme.var.color.success_light_900}" : "${args.theme.var.color.error_light_900}"};
+  color: ${worker.active ? "${args.theme.var.color.success_dark_300}" : "${args.theme.var.color.error_dark_300}"};
 }\`;`}
                         >
                           {worker.active ? "Active" : "Inactive"}

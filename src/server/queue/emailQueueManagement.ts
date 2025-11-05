@@ -4,14 +4,17 @@
  * Server functions for managing and monitoring the email queue
  */
 
-import { getEmailQueueStats as getQueueStats, cleanEmailQueue as cleanQueue } from './emailQueue';
+import {
+  getEmailQueueStats as getQueueStats,
+  cleanEmailQueue as cleanQueue,
+} from "./emailQueue";
 
 /**
  * Get email queue statistics
  * Can be called via server functions
  */
 export async function getEmailQueueStatistics() {
-  "use server"
+  "use server";
 
   try {
     const stats = await getQueueStats();
@@ -19,19 +22,19 @@ export async function getEmailQueueStatistics() {
     if (!stats) {
       return {
         success: false,
-        error: 'Failed to get queue statistics'
+        error: "Failed to get queue statistics",
       };
     }
 
     return {
       success: true,
-      data: stats
+      data: stats,
     };
   } catch (error: any) {
-    console.error('[EmailQueue] Error getting stats:', error);
+    console.error("[EmailQueue] Error getting stats:", error);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -41,7 +44,7 @@ export async function getEmailQueueStatistics() {
  * Can be called via server functions
  */
 export async function cleanEmailQueueJobs() {
-  "use server"
+  "use server";
 
   try {
     const result = await cleanQueue();
@@ -49,19 +52,19 @@ export async function cleanEmailQueueJobs() {
     if (!result.success) {
       return {
         success: false,
-        error: 'Failed to clean queue'
+        error: "Failed to clean queue",
       };
     }
 
     return {
       success: true,
-      message: 'Email queue cleaned successfully'
+      message: "Email queue cleaned successfully",
     };
   } catch (error: any) {
-    console.error('[EmailQueue] Error cleaning queue:', error);
+    console.error("[EmailQueue] Error cleaning queue:", error);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }

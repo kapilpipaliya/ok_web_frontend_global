@@ -63,7 +63,7 @@ export async function GET({ request }: APIEvent) {
 
     const clientId = oauthSettings.googleClientId;
 
-    if (!clientId || !clientSecret) {
+    if (!(clientId && clientSecret)) {
       throw new APIError(
         "Google OAuth credentials are not properly configured",
         400,
@@ -177,8 +177,7 @@ export async function GET({ request }: APIEvent) {
           googleId: googleUser.id,
           googleProfilePicture: googleUser.picture || "",
           name: googleUser.name || "",
-          username:
-            googleUser.email.split("@")[0] + "_" + uuidv7().slice(0, 8),
+          username: googleUser.email.split("@")[0] + "_" + uuidv7().slice(0, 8),
           uuid,
         },
       );

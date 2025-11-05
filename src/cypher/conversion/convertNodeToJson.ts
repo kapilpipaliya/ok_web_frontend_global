@@ -17,7 +17,7 @@ export const neo4jConvert = {
       return value.toStandardDate().toISOString();
     }
     if (value instanceof types.Date) {
-      return value.toStandardDate().toISOString().split('T')[0]; // Return YYYY-MM-DD format for Neo4j Date
+      return value.toStandardDate().toISOString().split("T")[0]; // Return YYYY-MM-DD format for Neo4j Date
     }
     if (value instanceof types.Time) {
       return value.toString();
@@ -27,7 +27,7 @@ export const neo4jConvert = {
     }
     if (value instanceof types.Integer) {
       //return value.toBigInt();
-      return value.toNumber();// loss precision for big number
+      return value.toNumber(); // loss precision for big number
     }
     if (Array.isArray(value)) {
       return value.slice().map(neo4jConvert.js);
@@ -46,9 +46,9 @@ export const neo4jConvert = {
     if (value instanceof Date) {
       return types.DateTime.fromStandardDate(value);
     }
-    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
       // Convert YYYY-MM-DD string to Neo4j Date
-      return types.Date.fromStandardDate(new Date(value + 'T00:00:00.000Z'));
+      return types.Date.fromStandardDate(new Date(value + "T00:00:00.000Z"));
     }
     if (value instanceof BigInt) {
       return types.Integer.fromString(value.toString());

@@ -19,7 +19,7 @@ export function AddNewButton(
     <IconButton
       css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
       icon="ph:plus"
-      iconCss={`return \`._id {margin-right: 5px;}\`;`}
+      iconCss={"return `._id {margin-right: 5px;}`;"}
       size={22}
       title="Add New"
       {...rest}

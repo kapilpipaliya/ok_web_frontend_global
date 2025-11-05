@@ -2,7 +2,10 @@ import { createMemo } from "solid-js";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { useDataContext, DataContext } from "~/features/page_attr_render/context/DataContext";
+import {
+  useDataContext,
+  DataContext,
+} from "~/features/page_attr_render/context/DataContext";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { getComponentDefaultValues } from "~/components/fields/component/functions/getComponentDefaultValues";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
@@ -46,7 +49,7 @@ export function ComponentWrapper(props: ComponentWrapperProps) {
       return target[key];
     },
   });
-  
+
   return (
     <DataContext.Provider value={newDataContext}>
       <PageAttrRender

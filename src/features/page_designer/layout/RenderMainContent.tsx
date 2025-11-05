@@ -99,7 +99,7 @@ const Panel: Component<PanelProps> = (props) => {
           >
             <As
               as="h1"
-              css={`return \`._id { font-weight: 600; font-size: inherit; }\`;`}
+              css={"return `._id { font-weight: 600; font-size: inherit; }`;"}
             >
               {props.title}
             </As>

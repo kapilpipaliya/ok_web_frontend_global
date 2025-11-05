@@ -1,11 +1,16 @@
 import { findUserByEmailOrUuid } from "~/cypher/mutate/user/findUserByEmailOrUuid";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import {APIErrorResponse, handleAPIError} from "~/lib/api/server/apiErrorHandler";
+import {
+  type APIErrorResponse,
+  handleAPIError,
+} from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 
-export async function getUserRPC(): Promise<UserData | APIErrorResponse | null> {
+export async function getUserRPC(): Promise<
+  UserData | APIErrorResponse | null
+> {
   "use server";
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
   try {
@@ -25,7 +30,8 @@ export async function getUserRPC(): Promise<UserData | APIErrorResponse | null> 
       delete data.user.P.password;
 
       // Use the globalSetting returned from findUserByEmailOrUuid
-      const configuredRedirectUrl = data.globalSetting?.P?.redirectUrlAfterSignin;
+      const configuredRedirectUrl =
+        data.globalSetting?.P?.redirectUrlAfterSignin;
 
       updateRedirectUrl(data.user, subDomain!, configuredRedirectUrl);
     }

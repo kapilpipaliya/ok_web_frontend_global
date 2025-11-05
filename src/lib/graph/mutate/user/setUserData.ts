@@ -4,7 +4,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import { UserData } from "~/lib/graph/mutate/user/loadUser";
+import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export function setUserData(

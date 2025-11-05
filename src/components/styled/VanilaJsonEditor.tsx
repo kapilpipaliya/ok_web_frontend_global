@@ -51,7 +51,7 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
 
   // Function to update height based on content
   const updateHeight = () => {
-    if (!containerRef || !props.autoHeight) return;
+    if (!(containerRef && props.autoHeight)) return;
 
     // Find the main container and contents
     const mainContainer = containerRef.querySelector(".jse-main");

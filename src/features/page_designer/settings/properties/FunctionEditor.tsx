@@ -74,13 +74,13 @@ export function FunctionEditor(props: {
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   // Determine which vertex to track - either specific vertex or selected
-  const targetVertexId = () => props.vertexId ?? formStoreVertex()?.P.selectedId;
+  const targetVertexId = () =>
+    props.vertexId ?? formStoreVertex()?.P.selectedId;
 
   // Derived state
   const propertyKey = () => props.keyName || "props";
   const getPropertyValue = () => {
-    const currentValue =
-      graph.vertexes[targetVertexId()]?.P[propertyKey()];
+    const currentValue = graph.vertexes[targetVertexId()]?.P[propertyKey()];
 
     // If value exists, return it
     if (currentValue !== undefined && currentValue !== null) {
@@ -119,9 +119,10 @@ export function FunctionEditor(props: {
     on(
       () => {
         const vertexId = targetVertexId();
-        const propertyValue = vertexId !== -1 && vertexId !== undefined
-          ? graph.vertexes[vertexId]?.P[propertyKey()]
-          : undefined;
+        const propertyValue =
+          vertexId !== -1 && vertexId !== undefined
+            ? graph.vertexes[vertexId]?.P[propertyKey()]
+            : undefined;
         return { vertexId, propertyValue };
       },
       ({ vertexId, propertyValue }) => {
@@ -131,7 +132,7 @@ export function FunctionEditor(props: {
           setEditorValue(newValue);
           setOriginalValue(newValue);
           setHasChanges(false);
-          
+
           // Update Monaco editor if it exists
           if (editorRef) {
             const model = editorRef.getModel();
@@ -322,7 +323,7 @@ export function FunctionEditor(props: {
           </EditorButton>
 
           <Show when={isModalOpen()}>
-            <As as="div" css={`return \`._id { margin-left: auto; }\`;`}>
+            <As as="div" css={"return `._id { margin-left: auto; }`;"}>
               <EditorButton
                 color={"${args.theme.var.color.error_light_800}"}
                 onClick={() => setIsModalOpen(false)}
@@ -351,10 +352,10 @@ export function FunctionEditor(props: {
 
   return (
     <>
-      <As as="div" css={`return \`._id { margin-top: 5px; }\`;`}>
+      <As as="div" css={"return `._id { margin-top: 5px; }`;"}>
         <As
           as="span"
-          css={`return \`._id { display: flex; align-items: center; }\`;`}
+          css={"return `._id { display: flex; align-items: center; }`;"}
         >
           {props.label}
           <IconButton

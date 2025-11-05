@@ -86,10 +86,7 @@ export function useMetadata(
         metaVertex?.P?.isNoPermissionCheck ||
         options.previewStore.isNoPermissionCheck;
 
-      const idLocal =
-        constants.dataId === "new"
-          ? undefined
-          : constants.dataId;
+      const idLocal = constants.dataId === "new" ? undefined : constants.dataId;
 
       if (idLocal && !constants.getFormData) {
         const dataResult = await fetchFormData(
@@ -149,10 +146,7 @@ export function useMetadata(
 
     if (metaResult.data) {
       const constants = options.constants();
-      if (
-        constants.formId &&
-        options.graph.vertexes[constants.formId]
-      ) {
+      if (constants.formId && options.graph.vertexes[constants.formId]) {
         delete metaResult.data.graph!.vertexes[constants.formId];
       }
       setGraphData(options.graph, options.setGraph, metaResult.data.graph!);
@@ -174,7 +168,7 @@ export function useMetadata(
     }
     const form = metaResult.form;
     if (!(props.formMetaId || formMetaId || form)) {
-       const constants = options.constants();
+      const constants = options.constants();
       options.setFormStore(
         "error",
         `${constants.pageVertexName} is not configured`,

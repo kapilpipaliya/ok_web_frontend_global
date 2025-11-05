@@ -101,11 +101,11 @@ export async function getDriver(): Promise<Driver> {
  */
 export async function closeDriver() {
   if (driverInstance) {
-    console.log('[Neo4j Driver] Closing connection pool...');
+    console.log("[Neo4j Driver] Closing connection pool...");
     await driverInstance.close();
     driverInstance = null;
-    console.log('[Neo4j Driver] Connection pool closed successfully');
+    console.log("[Neo4j Driver] Connection pool closed successfully");
   } else {
-    console.log('[Neo4j Driver] No active driver instance to close');
+    console.log("[Neo4j Driver] No active driver instance to close");
   }
 }

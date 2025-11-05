@@ -5,10 +5,10 @@
  * existing email infrastructure (SMTP/Mailgun/etc.)
  */
 
-import { Worker, type Job } from 'bullmq';
-import { redisConnection } from '../redisConfig';
-import { sendEmailDirect } from '~/lib/playwright/sendEmail';
-import type { EmailJobData } from '../emailQueue';
+import { Worker, type Job } from "bullmq";
+import { redisConnection } from "../redisConfig";
+import { sendEmailDirect } from "~/lib/playwright/sendEmail";
+import type { EmailJobData } from "../emailQueue";
 
 /**
  * Email worker state stored globally to share across module instances
@@ -31,7 +31,9 @@ if (!global.__emailWorkerStartPromise) {
  * Process a single email job
  */
 async function processEmailJob(job: Job<EmailJobData>) {
-  console.log(`[EmailWorker] Processing email job ${job.id} for ${job.data.to}`);
+  console.log(
+    `[EmailWorker] Processing email job ${job.id} for ${job.data.to}`,
+  );
 
   try {
     // Send the email using the direct send function (bypasses queue)
@@ -47,7 +49,10 @@ async function processEmailJob(job: Job<EmailJobData>) {
     console.log(`[EmailWorker] Successfully sent email to ${job.data.to}`);
     return { success: true, messageId: result?.messageId };
   } catch (error) {
-    console.error(`[EmailWorker] Failed to send email to ${job.data.to}:`, error);
+    console.error(
+      `[EmailWorker] Failed to send email to ${job.data.to}:`,
+      error,
+    );
     throw error; // Let BullMQ handle retries
   }
 }
@@ -65,42 +70,38 @@ export async function startEmailWorker() {
 
   // Create the start promise
   global.__emailWorkerStartPromise = (async () => {
-    console.log('[EmailWorker] Starting email worker...');
+    console.log("[EmailWorker] Starting email worker...");
 
-    const newWorker = new Worker<EmailJobData>(
-      'email',
-      processEmailJob,
-      {
-        connection: redisConnection,
-        concurrency: 5, // Process up to 5 emails concurrently
-        limiter: {
-          max: 10, // Maximum 10 emails
-          duration: 1000, // per second (rate limiting)
-        },
-      }
-    );
+    const newWorker = new Worker<EmailJobData>("email", processEmailJob, {
+      connection: redisConnection,
+      concurrency: 5, // Process up to 5 emails concurrently
+      limiter: {
+        max: 10, // Maximum 10 emails
+        duration: 1000, // per second (rate limiting)
+      },
+    });
 
     // Worker event listeners
-    newWorker.on('completed', (job) => {
+    newWorker.on("completed", (job) => {
       console.log(`[EmailWorker] Job ${job.id} completed successfully`);
     });
 
-    newWorker.on('failed', (job, err) => {
+    newWorker.on("failed", (job, err) => {
       console.error(`[EmailWorker] Job ${job?.id} failed:`, err.message);
     });
 
-    newWorker.on('error', (err) => {
-      console.error('[EmailWorker] Worker error:', err);
+    newWorker.on("error", (err) => {
+      console.error("[EmailWorker] Worker error:", err);
     });
 
-    newWorker.on('stalled', (jobId) => {
+    newWorker.on("stalled", (jobId) => {
       console.warn(`[EmailWorker] Job ${jobId} stalled`);
     });
 
     // Assign to global variable
     global.__emailWorker = newWorker;
 
-    console.log('[EmailWorker] Email worker started successfully');
+    console.log("[EmailWorker] Email worker started successfully");
 
     return newWorker;
   })();
@@ -113,15 +114,15 @@ export async function startEmailWorker() {
  */
 export async function stopEmailWorker() {
   if (!global.__emailWorker) {
-    console.log('[EmailWorker] Worker not running');
+    console.log("[EmailWorker] Worker not running");
     return;
   }
 
-  console.log('[EmailWorker] Stopping email worker...');
+  console.log("[EmailWorker] Stopping email worker...");
   await global.__emailWorker.close();
   global.__emailWorker = undefined;
   global.__emailWorkerStartPromise = undefined; // Reset promise so worker can be restarted
-  console.log('[EmailWorker] Email worker stopped');
+  console.log("[EmailWorker] Email worker stopped");
 }
 
 /**
@@ -130,8 +131,8 @@ export async function stopEmailWorker() {
 export function getEmailWorkerStatus() {
   return {
     running: global.__emailWorker !== undefined,
-    isRunning: global.__emailWorker?.isRunning() || false,
-    isPaused: global.__emailWorker?.isPaused() || false,
+    isRunning: global.__emailWorker?.isRunning(),
+    isPaused: global.__emailWorker?.isPaused(),
   };
 }
 
@@ -140,10 +141,10 @@ export function getEmailWorkerStatus() {
  */
 export async function pauseEmailWorker() {
   if (!global.__emailWorker) {
-    throw new Error('Worker not running');
+    throw new Error("Worker not running");
   }
   await global.__emailWorker.pause();
-  console.log('[EmailWorker] Worker paused');
+  console.log("[EmailWorker] Worker paused");
 }
 
 /**
@@ -151,8 +152,8 @@ export async function pauseEmailWorker() {
  */
 export async function resumeEmailWorker() {
   if (!global.__emailWorker) {
-    throw new Error('Worker not running');
+    throw new Error("Worker not running");
   }
   await global.__emailWorker.resume();
-  console.log('[EmailWorker] Worker resumed');
+  console.log("[EmailWorker] Worker resumed");
 }

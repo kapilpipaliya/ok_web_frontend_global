@@ -112,7 +112,7 @@ export const SortableRow = (
   border: none;
 }\`;`}
               icon="material-symbols:drag-indicator"
-              iconCss={`return \`._id {transition: transform 2s ease-in-out}\`;`}
+              iconCss={"return `._id {transition: transform 2s ease-in-out}`;"}
               size={20}
             />
             <Show when={expandVertex()}>
@@ -123,7 +123,7 @@ export const SortableRow = (
   border: none;
 }\`;`}
                 icon={expanded() ? "ph:caret-right" : "ph:caret-down"}
-                iconCss={`return \`._id {transition: transform 2s ease-in-out}\`;`}
+                iconCss={"return `._id {transition: transform 2s ease-in-out}`;"}
                 onClick={toggleExpanded}
                 size={20}
               />

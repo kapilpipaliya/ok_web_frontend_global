@@ -92,7 +92,7 @@ export function CompanySettings() {
           },
           getErrorSchema(
             "companyName",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -116,7 +116,7 @@ export function CompanySettings() {
           },
           getErrorSchema(
             "address",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -142,7 +142,7 @@ export function CompanySettings() {
           },
           getErrorSchema(
             "contactEmail",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -165,7 +165,7 @@ export function CompanySettings() {
           },
           getErrorSchema(
             "phone",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",

@@ -224,7 +224,9 @@ async function setupBrowserAndPage(
   const domainPort = process.env.DOMAIN_PORT
     ? `:${process.env.DOMAIN_PORT}`
     : "";
-  const isDomainLocalhost = process.env.DOMAIN === "localhost" || process.env.DOMAIN === "localhost.com";
+  const isDomainLocalhost =
+    process.env.DOMAIN === "localhost" ||
+    process.env.DOMAIN === "localhost.com";
   const subDomainPart =
     subDomain && subDomain !== "admin"
       ? `${subDomain}.`

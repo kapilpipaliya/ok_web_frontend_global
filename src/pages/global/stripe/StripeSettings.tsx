@@ -9,10 +9,7 @@ import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import {
-  getStripeSettings,
-  saveStripeSettings,
-} from "./stripeServerFunctions";
+import { getStripeSettings, saveStripeSettings } from "./stripeServerFunctions";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -135,7 +132,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripeEnabled",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -165,7 +162,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripePublishableKey",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -196,7 +193,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripeSecretKey",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -223,7 +220,7 @@ export function StripeSettings() {
           },
           getErrorSchema(
             "stripeWebhookSecret",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -262,14 +259,15 @@ export function StripeSettings() {
                             settings.P as StripeSettingsData,
                           );
 
-                          if (!response.error) {
+                          if (response.error) {
+                            showErrorToast(
+                              response.error ||
+                                "Failed to save Stripe settings",
+                            );
+                          } else {
                             showSuccessToast(
                               response.message ||
                                 "Stripe settings saved successfully",
-                            );
-                          } else {
-                            showErrorToast(
-                              response.error || "Failed to save Stripe settings",
                             );
                           }
                         } catch (error) {

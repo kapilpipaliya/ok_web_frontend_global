@@ -35,7 +35,7 @@ async function fetchEntities(
   for (const record of result.records) {
     const entityId = record.get("id");
     const entityKey = record.get("key");
-    if (!entityKey || !entityId) continue;
+    if (!(entityKey && entityId)) continue;
 
     // Fetch entity data using fetchFormMetaData
     const fetchResult = await fetchFormMetaData(

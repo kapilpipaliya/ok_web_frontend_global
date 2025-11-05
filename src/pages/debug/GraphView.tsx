@@ -28,7 +28,7 @@ export function GraphView() {
         //   { id: 2, start: 2, end: 3, label: "ON" },
         // ];
         // First `Orb` is just a namespace of the JS package
-        // @ts-ignore
+        // @ts-expect-error
         const orb = new Orb.Orb(container);
 
         // Initialize nodes and edges
@@ -39,11 +39,11 @@ export function GraphView() {
           orb.view.recenter();
         });
 
-        // @ts-ignore
+        // @ts-expect-error
         orb.events.on(Orb.OrbEventType.NODE_CLICK, (event) => {
           setJson({ ...event.node.data });
         });
-        // @ts-ignore
+        // @ts-expect-error
         orb.events.on(Orb.OrbEventType.EDGE_CLICK, (event) => {
           setJson({ ...event.edge.data });
         });

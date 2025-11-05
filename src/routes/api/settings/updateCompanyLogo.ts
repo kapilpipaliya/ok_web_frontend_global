@@ -26,7 +26,10 @@ export async function POST({ request }: APIEvent) {
 
     const { rectangularLogo, squareLogo, favicon } = await request.json();
     if (!(rectangularLogo || squareLogo || favicon)) {
-      throw new APIError("At least one company logo or favicon is required", 400);
+      throw new APIError(
+        "At least one company logo or favicon is required",
+        400,
+      );
     }
 
     // First ensure GlobalSetting exists

@@ -156,7 +156,7 @@ export function getThemeColorsFromContext(
 
   // Get all color keys, filtering out shade variations (keys with _l or _d)
   const colorKeys = Object.keys(colors).filter(
-    (key) => !key.includes("_l") && !key.includes("_d"),
+    (key) => !(key.includes("_l") || key.includes("_d")),
   );
 
   return colorKeys.map((key) => [

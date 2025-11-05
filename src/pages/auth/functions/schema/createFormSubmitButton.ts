@@ -14,7 +14,7 @@ export function createFormSubmitButton(
 ) {
   return {
     as: "button",
-    css: [STYLES.button2Css, `return \`._id {width:100%; margin-top:16px;}\`;`],
+    css: [STYLES.button2Css, "return `._id {width:100%; margin-top:16px;}`;"],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       disabled: options.contextData.submitState[0]?.isLoading,

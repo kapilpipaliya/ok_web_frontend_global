@@ -24,7 +24,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
     <>
       <As
         as="div"
-        css={`return \`._id {display: flex; align-items: center; gap: 8px;}\`;`}
+        css={"return `._id {display: flex; align-items: center; gap: 8px;}`;"}
       >
         <IconButton
           icon={currentMode() === "dark" ? "ph:sun-fill" : "ph:moon-fill"}

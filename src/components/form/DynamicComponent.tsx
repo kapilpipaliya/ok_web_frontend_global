@@ -48,7 +48,7 @@ import { createDynamicFunctions } from "~/components/form/dynamic_component/func
 import { createValueUpdater } from "~/components/form/dynamic_component/functions/value/createValueUpdater";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { createStore } from "solid-js/store";
-import {Style2} from "~/components/StyleRenderer";
+import { Style2 } from "~/components/StyleRenderer";
 
 export type DynamicComponentProps = Readonly<{
   componentName?: string;
@@ -182,7 +182,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
     );
 
   const getFunctionArgumentWithValue = createMemo(() =>
-    createFunctionArgumentWithValue(getFunctionArgument, value)
+    createFunctionArgumentWithValue(getFunctionArgument, value),
   );
 
   const dynamicProps = createDynamicPropsMemo(props, {
@@ -222,8 +222,6 @@ export function DynamicComponent(props: DynamicComponentProps) {
     getFunctionArgumentWithValue,
   });
 
-
-
   const repeaterStore = createStore({
     get context() {
       return getFunctionArgumentWithValue();
@@ -236,44 +234,44 @@ export function DynamicComponent(props: DynamicComponentProps) {
       setMounted,
     });
 
-  onCleanup(() => {
-    setRef(null);
-    setMounted(false);
-  });
+    onCleanup(() => {
+      setRef(null);
+      setMounted(false);
+    });
 
-    return  <ContentWrapper
-          meta={props.meta}
-          data={props.data}
-          children={props.children}
-          dynamicProps={dynamicProps}
-          mergedClasses={mergedClasses}
-          permissions={permissions}
-          component={component}
-          processedText={processedText}
-          // disabled={
-          //   isNoPermissionCheck()
-          //     ? props.meta.P.disabled
-          //     : (props.disabled ??
-          //       previewStore?.isViewOnly ??
-          //       isDisabledByPermissions() ??
-          //       props.meta.P.disabled)
-          // }
-          ref={ref}
-          setRef={setRef}
-          isNoPermissionCheck={isNoPermissionCheck}
-        />
-  }
+    return (
+      <ContentWrapper
+        meta={props.meta}
+        data={props.data}
+        children={props.children}
+        dynamicProps={dynamicProps}
+        mergedClasses={mergedClasses}
+        permissions={permissions}
+        component={component}
+        processedText={processedText}
+        // disabled={
+        //   isNoPermissionCheck()
+        //     ? props.meta.P.disabled
+        //     : (props.disabled ??
+        //       previewStore?.isViewOnly ??
+        //       isDisabledByPermissions() ??
+        //       props.meta.P.disabled)
+        // }
+        ref={ref}
+        setRef={setRef}
+        isNoPermissionCheck={isNoPermissionCheck}
+      />
+    );
+  };
 
   // Create the main content component that will be wrapped conditionally
   const ContentInner = () => (
     <Switch>
-      <Match when={isHidden()}></Match>
+      <Match when={isHidden()} />
       <Match when={!component()}>NO INPUT {componentName() as string}</Match>
 
-      <Match
-        when={component() && (isNoPermissionCheck() || hasPermission())}
-      >
-       <ContentWrapperWithMount/>
+      <Match when={component() && (isNoPermissionCheck() || hasPermission())}>
+        <ContentWrapperWithMount />
       </Match>
       <Match when={getGlobalStore(graph).P.isDevelopment}>
         Hidden component

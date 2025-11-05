@@ -201,8 +201,9 @@ export const Page: IFormMetaData = {
               key: "componentName",
               labelKey: "::'P.key'",
               valueKey: "::'P.key'",
-              saveValue: true
-            }],
+              saveValue: true,
+            },
+          ],
           componentName: "DynamicTable",
           hide: true,
           key: "Layout",

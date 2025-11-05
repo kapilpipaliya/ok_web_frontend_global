@@ -36,7 +36,7 @@ export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
   }\`;`,
       ]}
       icon={icon()}
-      iconCss={`return \`._id { transition:transform 0.2s; }\`;`}
+      iconCss={"return `._id { transition:transform 0.2s; }`;"}
       onClick={(e) => {
         e.stopPropagation();
         toggleHidden(props.metaVertex.id, formStoreId!, graph, setGraph);

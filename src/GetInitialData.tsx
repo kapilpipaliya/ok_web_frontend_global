@@ -16,7 +16,7 @@ import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { SimpleErrorMessage } from "~/components/SimpleErrorMessage";
 import { loadWebsiteSchemasForSubdomain } from "~/createAppState";
-import {APIErrorResponse} from "~/lib/api/server/apiErrorHandler";
+import type { APIErrorResponse } from "~/lib/api/server/apiErrorHandler";
 
 interface GetInitialDataProps extends ParentProps {
   dontRedirectToLogin?: boolean;
@@ -42,7 +42,10 @@ export function GetInitialData(props: GetInitialDataProps) {
   const graph = useGraph();
   const navigate = useNavigate();
 
-  const setData = (initialData: ServerResult, userData?: UserData | APIErrorResponse | null) => {
+  const setData = (
+    initialData: ServerResult,
+    userData?: UserData | APIErrorResponse | null,
+  ) => {
     if (initialData.error) {
       mergeVertexProperties<GlobalProperties>(
         0,
@@ -104,16 +107,20 @@ export function GetInitialData(props: GetInitialDataProps) {
     }
   };
 
-  const reSetData = async (count: number | undefined, freshData: ReturnType<typeof fetchData>) => {
+  const reSetData = async (
+    count: number | undefined,
+    freshData: ReturnType<typeof fetchData>,
+  ) => {
     // Only refetch if count is greater than 0 (skip initial load)
     if (count && count > 0) {
       setData(freshData.initialData, freshData.userData);
     }
-  }
+  };
 
   const data = createAsync(
     async () => {
-      const trackedCountBeforeFetch = getGlobalStore(graph[0]).P.initialDataRefreshCount;
+      const trackedCountBeforeFetch = getGlobalStore(graph[0]).P
+        .initialDataRefreshCount;
       const result = await fetchData();
       reSetData(trackedCountBeforeFetch, result);
       return result;

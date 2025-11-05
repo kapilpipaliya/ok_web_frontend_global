@@ -48,7 +48,7 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
     font-weight: ${local.hasChildren ? "bold" : "normal"};
     width: 100%;
     border-radius: ${local.hasChildren ? "5px" : "0 5px 5px 0"};
-    ${local.isHovered ? `background-color: \${args.theme.var.color.background_light_150};` : ""}
+    ${local.isHovered ? "background-color: ${args.theme.var.color.background_light_150};" : ""}
     ${local.isSelected ? getSelectedItemStyle() : ""}
     ${!local.isDragOver && local.hasChildren ? "box-shadow: rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px;" : ""}
     padding: 2px 0;

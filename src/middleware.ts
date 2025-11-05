@@ -13,8 +13,10 @@ export default createMiddleware({
     // Initialize workers on first request (server-side only)
     async (event) => {
       // Only run on server
-      if (typeof window === 'undefined') {
-        const { initializeWorkersIfNeeded } = await import("./server/initWorkersOnStartup");
+      if (typeof window === "undefined") {
+        const { initializeWorkersIfNeeded } = await import(
+          "./server/initWorkersOnStartup"
+        );
         await initializeWorkersIfNeeded();
       }
     },

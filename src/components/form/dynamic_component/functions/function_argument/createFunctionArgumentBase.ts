@@ -9,7 +9,7 @@ import {
   onCleanup,
   on,
   batch,
-  untrack
+  untrack,
 } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -35,7 +35,7 @@ import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
-import {getMemberVertex} from "~/lib/graph/get/sync/store/getMemberVertex";
+import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -265,6 +265,6 @@ export function createFunctionArgumentBase(
       return getMemberVertex(hooks.graph);
     },
     executeServerFunction,
-    executeNamedServerFunction
+    executeNamedServerFunction,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

@@ -219,9 +219,9 @@ export function LayoutTreeItem(
     }
 
     if (isSelectedLayoutId(props.metaVertex.id)) {
-      boxShadow += ` background-color:\${args.theme.var.color.primary_light_300}; color:\${args.theme.var.color.primary_light_300_text};`;
+      boxShadow += " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
     } else if (isSelectedHoverId(props.metaVertex.id)) {
-      boxShadow += ` background-color:\${args.theme.var.color.primary_light_750}; color:\${args.theme.var.color.primary_light_750_text};`;
+      boxShadow += " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
     }
 
     return boxShadow;
@@ -364,63 +364,63 @@ export function LayoutTreeItem(
   }) => {
     const [isOpen, setIsOpen] = createSignal(false);
     const [buttonRef, setButtonRef] = createSignal<HTMLButtonElement>();
-    
+
     let timeoutId: number | null = null;
-    
+
     onCleanup(() => {
       if (timeoutId) {
         window.clearTimeout(timeoutId);
       }
     });
-    
+
     const handleButtonClick = (e: MouseEvent) => {
       e.stopPropagation();
       setIsOpen(!isOpen());
     };
-    
+
     const handleButtonMouseEnter = (e: MouseEvent) => {
       e.stopPropagation();
-      
+
       if (timeoutId) {
         window.clearTimeout(timeoutId);
         timeoutId = null;
       }
-      
+
       timeoutId = window.setTimeout(() => {
         setIsOpen(true);
       }, 500);
     };
-    
+
     const handleButtonMouseLeave = (e: MouseEvent) => {
       e.stopPropagation();
-      
+
       if (timeoutId) {
         window.clearTimeout(timeoutId);
         timeoutId = null;
       }
-      
+
       timeoutId = window.setTimeout(() => {
         setIsOpen(false);
       }, 300);
     };
-    
+
     const handleDropdownMouseEnter = (e: MouseEvent) => {
       e.stopPropagation();
-      
+
       if (timeoutId) {
         window.clearTimeout(timeoutId);
         timeoutId = null;
       }
     };
-    
+
     const handleDropdownMouseLeave = (e: MouseEvent) => {
       e.stopPropagation();
-      
+
       timeoutId = window.setTimeout(() => {
         setIsOpen(false);
       }, 300);
     };
-    
+
     // Handle property value changes
     const handleSetPropertyValue = (meta: Vertex, value: unknown) => {
       mergeVertexProperties(
@@ -440,7 +440,7 @@ export function LayoutTreeItem(
       const code = props.code || "";
       return code.includes("=") || code.includes("data:");
     };
-    
+
     return (
       <>
         <IconButton
@@ -451,7 +451,7 @@ export function LayoutTreeItem(
             `return \`._id {
               background-color: transparent;
               border: none;
-              ${hasSpecialContent() ? `color: \${args.theme.var.color.warning};` : ""}
+              ${hasSpecialContent() ? "color: ${args.theme.var.color.warning};" : ""}
             }\`;`,
           ]}
           icon={props.icon}
@@ -462,7 +462,7 @@ export function LayoutTreeItem(
           ref={setButtonRef}
           // title={props.title}
         />
-        
+
         <Show when={isOpen() && buttonRef()}>
           <DropdownMenu
             css={`return \`._id {

@@ -18,8 +18,8 @@ export function FilePickerModal(props: {
 }) {
   return (
     <CustomModal
-      containerCss={`return \`._id {z-index: 2000;}\`;`}
-      dialogCss={`return \`._id {width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;}\`;`}
+      containerCss={"return `._id {z-index: 2000;}`;"}
+      dialogCss={"return `._id {width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;}`;"}
       footer={() => (
         <DialogFooter
           buttonText="Select"
@@ -30,7 +30,7 @@ export function FilePickerModal(props: {
               margin-right: 8px;
             }\`;`,
           ]}
-          containerCss={`return \`._id {margin-top: auto;}\`;`}
+          containerCss={"return `._id {margin-top: auto;}`;"}
           onClick={() => {
             return props.onFileSelected(props.selectedFileVertex[0]);
           }}

@@ -45,7 +45,7 @@ export function undoTxn(
 
   // Process each action in the transaction
   for (const action in actions) {
-    if (!actions.hasOwnProperty(action)) {
+    if (!Object.hasOwn(actions, action)) {
       continue;
     }
 

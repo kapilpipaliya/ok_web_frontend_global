@@ -51,7 +51,7 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
             }\`;`,
           ]}
           icon="ph:arrow-line-up"
-          iconCss={`return \`._id {transition:transform 0.2s;}\`;`}
+          iconCss={"return `._id {transition:transform 0.2s;}`;"}
           onClick={(e) => {
             e.stopPropagation();
             setShowBeforeMenu(true);
@@ -91,7 +91,7 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
             }\`;`,
           ]}
           icon="ph:arrow-line-down"
-          iconCss={`return \`._id {transition:transform 0.2s;}\`;`}
+          iconCss={"return `._id {transition:transform 0.2s;}`;"}
           onClick={(e) => {
             e.stopPropagation();
             setShowAfterMenu(true);
@@ -132,7 +132,7 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
           }\`;`,
         ]}
         icon="ph:plus-circle"
-        iconCss={`return \`._id {transition:transform 0.2s;}\`;`}
+        iconCss={"return `._id {transition:transform 0.2s;}`;"}
         onClick={(e) => {
           e.stopPropagation();
           setShowInsideMenu(true);

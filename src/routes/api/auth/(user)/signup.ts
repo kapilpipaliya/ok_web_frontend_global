@@ -23,8 +23,7 @@ export async function POST({ request }: APIEvent) {
     };
   }
 
-  const { dbSession, subDomain } =
-    await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   const tx = dbSession.beginTransaction();
 
   try {

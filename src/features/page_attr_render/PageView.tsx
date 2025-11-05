@@ -1,4 +1,12 @@
-import { createMemo, Match, Show, Switch, getOwner, createSignal, onCleanup } from "solid-js";
+import {
+  createMemo,
+  Match,
+  Show,
+  Switch,
+  getOwner,
+  createSignal,
+  onCleanup,
+} from "solid-js";
 import { createStore } from "solid-js/store";
 import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/styled/modal/Toast";
@@ -15,9 +23,7 @@ import {
   usePreviewContext,
   type PreviewStoreObject,
 } from "~/features/page_designer/context/PreviewContext";
-import {
-  DataContext,
-} from "~/features/page_attr_render/context/DataContext";
+import { DataContext } from "~/features/page_attr_render/context/DataContext";
 import {
   PageRenderContextProvider,
   type PageRenderObject,
@@ -37,7 +43,7 @@ import { createFunctionArgumentBase } from "~/components/form/dynamic_component/
 import { createDynamicFunctions } from "~/components/form/dynamic_component/functions/function_argument/createDynamicFunctions";
 import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
 import { HtmlField } from "~/components/fields/HtmlField";
-import {DataInternal} from "~/components/fields/data/DataInternal";
+import { DataInternal } from "~/components/fields/data/DataInternal";
 
 export function PageView(
   props: Readonly<{
@@ -70,34 +76,43 @@ export function PageView(
   const logLayoutVertexes = () => {
     if (props.metaVertex) {
       // First get all Layout vertices from the data vertex
-      const layoutVertices = evalExpression("->$0Layout", {
-        graph,
-        setGraph,
-        vertexes: [props.metaVertex],
-      }) || [];
-      
+      const layoutVertices =
+        evalExpression("->$0Layout", {
+          graph,
+          setGraph,
+          vertexes: [props.metaVertex],
+        }) || [];
+
       // Sort by displayOrder
-      const sortedLayouts = layoutVertices.sort((a: Vertex, b: Vertex) => 
-        (a.P.displayOrder || 0) - (b.P.displayOrder || 0)
+      const sortedLayouts = layoutVertices.sort(
+        (a: Vertex, b: Vertex) =>
+          (a.P.displayOrder || 0) - (b.P.displayOrder || 0),
       );
 
       // Collect all component vertices
       const allComponents: Vertex[] = [];
-      
+
       // For each sorted layout, find its Component
       for (const layoutVertex of sortedLayouts) {
         const componentName = layoutVertex.P.componentName;
-        const components = componentName 
-          ? [findVertexByLabelAndUniqueId(graph, "Component", "key", componentName)].filter(Boolean) as Vertex[]
+        const components = componentName
+          ? ([
+              findVertexByLabelAndUniqueId(
+                graph,
+                "Component",
+                "key",
+                componentName,
+              ),
+            ].filter(Boolean) as Vertex[])
           : [];
-        
+
         // Add components to the array
         allComponents.push(...components);
       }
-      
+
       return allComponents;
     }
-    
+
     return [];
   };
 
@@ -148,23 +163,21 @@ export function PageView(
   // Inner component to handle recursive layout rendering
   const LayoutRenderer = (innerProps: { index: number }) => {
     const currentLayout = createMemo(() =>
-      innerProps.index < layouts().length ? layouts()[innerProps.index] : null
+      innerProps.index < layouts().length ? layouts()[innerProps.index] : null,
     );
-    
+
     const LayoutContent = () => {
       const SlotChildren = (childProps: { slot?: string }) => {
         return (
           <Show
-            when={!childProps.slot || childProps.slot === 'children'}
+            when={!childProps.slot || childProps.slot === "children"}
             fallback={null}
           >
-            <LayoutRenderer
-              index={innerProps.index + 1}
-            />
+            <LayoutRenderer index={innerProps.index + 1} />
           </Show>
         );
       };
-      
+
       return (
         <SlotContext.Provider value={[SlotChildren]}>
           {/*<Show*/}
@@ -179,21 +192,18 @@ export function PageView(
           {/*    </DataContext.Provider>*/}
           {/*  }*/}
           {/*>*/}
-            <ComponentWrapper 
-              metaVertex={currentLayout()!}
-              data={props.data}
-              isNoPermissionCheck={props.isNoPermissionCheck}
-            />
+          <ComponentWrapper
+            metaVertex={currentLayout()!}
+            data={props.data}
+            isNoPermissionCheck={props.isNoPermissionCheck}
+          />
           {/*</Show>*/}
         </SlotContext.Provider>
       );
     };
-    
+
     return (
-      <Show
-        when={currentLayout()}
-        fallback={<MainContentDataWrapper/>}
-      >
+      <Show when={currentLayout()} fallback={<MainContentDataWrapper />}>
         <LayoutContent />
       </Show>
     );
@@ -250,7 +260,7 @@ export function PageView(
           formVertex: () => ({}) as any,
           formId: "page-view",
           componentName,
-          isNoPermissionCheck: () => props.isNoPermissionCheck || false,
+          isNoPermissionCheck: () => props.isNoPermissionCheck,
           isViewMode: () => false,
           mounted,
           parentMeta,
@@ -258,10 +268,10 @@ export function PageView(
           setRef,
           updateValue: () => {},
           onChange: () => {},
-          hasFullPermission: () => props.hasFullPermission || true,
-          hasEditPermission: () => props.hasEditPermission || true,
-          hasCreatePermission: () => props.hasCreatePermission || true,
-          hasViewPermission: () => props.hasViewPermission || true,
+          hasFullPermission: () => true,
+          hasEditPermission: () => true,
+          hasCreatePermission: () => true,
+          hasViewPermission: () => true,
         },
         {
           graph,
@@ -288,7 +298,11 @@ export function PageView(
 
     // Evaluate dynamic props from metaVertex
     const dynamicProps = createDynamicPropsMemo(
-      { get meta() { return props.metaVertex } },
+      {
+        get meta() {
+          return props.metaVertex;
+        },
+      },
       {
         graph,
         getFunctionArgumentWithValue,
@@ -296,12 +310,12 @@ export function PageView(
     );
 
     // Lifecycle setup using useComponentLifecycle hook
-      useComponentLifecycle({
-        dynamicProps,
-        getFunctionArgumentWithValue,
-        setMounted,
-        reMount: true
-      });
+    useComponentLifecycle({
+      dynamicProps,
+      getFunctionArgumentWithValue,
+      setMounted,
+      reMount: true,
+    });
 
     onCleanup(() => {
       setRef(null);
@@ -317,17 +331,23 @@ export function PageView(
         };
       },
     } as PageRenderObject);
-    
+
     const MainContent = () => (
       <Switch>
         <Match when={props.metaVertex?.L[0] === "Component"}>
-          <ComponentWrapper 
+          <ComponentWrapper
             metaVertex={props.metaVertex!}
             data={props.data}
             isNoPermissionCheck={props.isNoPermissionCheck}
           />
         </Match>
-        <Match when={dynamicProps().data || dynamicProps().expression || dynamicProps().serverFunction}>
+        <Match
+          when={
+            dynamicProps().data ||
+            dynamicProps().expression ||
+            dynamicProps().serverFunction
+          }
+        >
           <PageAttrRender
             data={props.data}
             isNoPermissionCheck={props.isNoPermissionCheck!}
@@ -346,11 +366,17 @@ export function PageView(
         </Match>
       </Switch>
     );
-    
+
     return (
       <PageRenderContextProvider store={repeterStore}>
         <Switch>
-          <Match when={dynamicProps().data || dynamicProps().expression || dynamicProps().serverFunction}>
+          <Match
+            when={
+              dynamicProps().data ||
+              dynamicProps().expression ||
+              dynamicProps().serverFunction
+            }
+          >
             <HtmlField
               data={dynamicProps().data}
               expression={dynamicProps().expression}
@@ -373,12 +399,9 @@ export function PageView(
   return (
     <Show when={props.metaVertex}>
       <PreviewContext.Provider value={previewStore}>
-          <Show
-            when={layouts().length > 0}
-            fallback={<MainContentDataWrapper/>}
-          >
-            <LayoutRenderer index={0} />
-          </Show>
+        <Show when={layouts().length > 0} fallback={<MainContentDataWrapper />}>
+          <LayoutRenderer index={0} />
+        </Show>
       </PreviewContext.Provider>
     </Show>
   );

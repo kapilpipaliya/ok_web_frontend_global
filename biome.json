@@ -1,21 +1,16 @@
 {
   "$schema": "https://unpkg.com/@biomejs/biome/configuration_schema.json",
-  "files": {
-    "ignore": ["node_modules/**/*"]
-  },
   "vcs": {
     "useIgnoreFile": true
   },
   "linter": {
     "enabled": true,
-    "ignore": ["node_modules/**/*"],
     "rules": {
       "a11y": {
         "noAccessKey": "error",
         "noAriaHiddenOnFocusable": "off",
         "noAriaUnsupportedElements": "error",
         "noAutofocus": "error",
-        "noBlankTarget": "error",
         "noDistractingElements": "error",
         "noHeaderScope": "error",
         "noInteractiveElementToNoninteractiveRole": "error",
@@ -43,11 +38,11 @@
         "useValidLang": "error"
       },
       "complexity": {
+        "noAdjacentSpacesInRegex": "warn",
         "noBannedTypes": "error",
         "noExcessiveCognitiveComplexity": "error",
         "noExtraBooleanCast": "error",
         "noForEach": "error",
-        "noMultipleSpacesInRegularExpressionLiterals": "warn",
         "noStaticOnlyClass": "error",
         "noThisInStatic": "error",
         "noUselessCatch": "error",
@@ -60,14 +55,14 @@
         "noUselessThisAlias": "error",
         "noUselessTypeConstraint": "error",
         "noVoid": "off",
-        "noWith": "error",
         "useArrowFunction": "error",
         "useFlatMap": "error",
         "useLiteralKeys": "error",
         "useOptionalChain": "warn",
         "useRegexLiterals": "error",
         "useSimpleNumberKeys": "error",
-        "useSimplifiedLogicExpression": "error"
+        "useSimplifiedLogicExpression": "error",
+        "useWhile": "error"
       },
       "correctness": {
         "noChildrenProp": "error",
@@ -79,8 +74,7 @@
         "noGlobalObjectCalls": "error",
         "noInnerDeclarations": "error",
         "noInvalidConstructorSuper": "error",
-        "noInvalidNewBuiltin": "error",
-        "noNewSymbol": "error",
+        "noInvalidBuiltinInstantiation": "error",
         "noNonoctalDecimalEscape": "error",
         "noPrecisionLoss": "error",
         "noRenderReturnValue": "error",
@@ -89,7 +83,6 @@
         "noStringCaseMismatch": "error",
         "noSwitchDeclarations": "error",
         "noUndeclaredVariables": "error",
-        "noUnnecessaryContinue": "error",
         "noUnusedImports": "error",
         "noUnreachable": "error",
         "noUnreachableSuper": "error",
@@ -114,8 +107,6 @@
         "noDangerouslySetInnerHtmlWithChildren": "error"
       },
       "style": {
-        "noArguments": "error",
-        "noCommaOperator": "off",
         "noDefaultExport": "off",
         "noImplicitBoolean": "off",
         "noInferrableTypes": "error",
@@ -128,7 +119,6 @@
         "noShoutyConstants": "error",
         "noUnusedTemplateLiteral": "error",
         "noUselessElse": "error",
-        "noVar": "error",
         "useAsConstAssertion": "error",
         "useBlockStatements": "error",
         "useCollapsedElseIf": "error",
@@ -139,14 +129,10 @@
         "useFragmentSyntax": "error",
         "useLiteralEnumMembers": "error",
         "useNamingConvention": "off",
-        "useNumericLiterals": "error",
         "useSelfClosingElements": "error",
-        "useShorthandArrayType": "error",
         "useShorthandAssign": "error",
-        "useSingleCaseStatement": "error",
         "useSingleVarDeclarator": "error",
-        "useTemplate": "off",
-        "useWhile": "error"
+        "useTemplate": "off"
       },
       "suspicious": {
         "noApproximativeNumericConstant": "error",
@@ -159,7 +145,7 @@
         "noCompareNegZero": "error",
         "noConfusingLabels": "error",
         "noConfusingVoidType": "error",
-        "noConsoleLog": "warn",
+        "noConsole": "warn",
         "noConstEnum": "off",
         "noControlCharactersInRegex": "error",
         "noDebugger": "off",
@@ -189,29 +175,22 @@
         "noSparseArray": "off",
         "noUnsafeDeclarationMerging": "error",
         "noUnsafeNegation": "error",
+        "noVar": "error",
+        "noWith": "error",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",
         "useIsArray": "error",
-        "useNamespaceKeyword": "error",
-        "useValidTypeof": "error"
-      },
-      "nursery": {
-        "useImportRestrictions": "off"
+        "useNamespaceKeyword": "error"
       }
     }
   },
   "formatter": {
     "enabled": true,
-    "ignore": ["node_modules/**/*"],
     "formatWithErrors": false,
     "indentWidth": 2,
     "indentStyle": "space",
     "lineEnding": "lf",
     "lineWidth": 80
-  },
-  "organizeImports": {
-    "enabled": true,
-    "ignore": ["node_modules/**/*"]
   },
   "javascript": {
     "formatter": {

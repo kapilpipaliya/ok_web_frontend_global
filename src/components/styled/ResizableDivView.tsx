@@ -213,9 +213,9 @@ export function ResizableContainer(
   border-top: 1px solid \${args.theme.var.color.border};
 }\`;`,
           isDraggingOver()
-            ? `return \`._id { background-color: \${args.theme.var.color.primary_light_150}; }\`;`
+            ? "return `._id { background-color: ${args.theme.var.color.primary_light_150}; }`;"
             : "",
-          resizing() ? `return \`._id { user-select: none; }\`;` : "",
+          resizing() ? "return `._id { user-select: none; }`;" : "",
         ]}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}

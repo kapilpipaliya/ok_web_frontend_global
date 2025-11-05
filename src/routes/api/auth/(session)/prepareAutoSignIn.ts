@@ -81,9 +81,10 @@ function buildautoSignInUrl(
 
   // Check if this is a localhost environment (localhost, *.localhost, or *.localhost.*)
   const parsed = parse(hostname);
-  const isLocalhost = hostname === "localhost" ||
-                      hostname.endsWith(".localhost") ||
-                      (parsed.domain && parsed.domain.startsWith("localhost."));
+  const isLocalhost =
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    (parsed.domain && parsed.domain.startsWith("localhost."));
 
   if (isLocalhost) {
     // For localhost environments, build URL with targetSubdomain or targetDomain

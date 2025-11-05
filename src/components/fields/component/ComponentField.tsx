@@ -1,7 +1,17 @@
-import { createMemo, Show, splitProps, useContext, Switch, Match } from "solid-js";
+import {
+  createMemo,
+  Show,
+  splitProps,
+  useContext,
+  Switch,
+  Match,
+} from "solid-js";
 import { createAsync } from "@solidjs/router";
 
-import { SlotContext, SlotContextType } from "~/components/fields/component/contexts/SlotContext";
+import {
+  SlotContext,
+  type SlotContextType,
+} from "~/components/fields/component/contexts/SlotContext";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
@@ -161,7 +171,7 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
     );
   };
 
-  const Children = (props: { slot: string, class?: string }) => {
+  const Children = (props: { slot: string; class?: string }) => {
     const currentSlotComponents = useContext(SlotContext) || [];
 
     const slotFilter = (vertex: Vertex) => {
@@ -182,9 +192,12 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
             const level = parseInt(levelStr, 10);
 
             // Use the parent slot component at the specified level
-            const SlotComponentParent = level > 0 && level <= currentSlotComponents.length
-              ? currentSlotComponents[currentSlotComponents.length - level - 1]
-              : null as unknown as SlotContextType;
+            const SlotComponentParent =
+              level > 0 && level <= currentSlotComponents.length
+                ? currentSlotComponents[
+                    currentSlotComponents.length - level - 1
+                  ]
+                : (null as unknown as SlotContextType);
 
             return (
               <Show when={SlotComponentParent}>

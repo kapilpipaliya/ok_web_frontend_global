@@ -64,16 +64,17 @@ const getOptionValue = (option: Option, optionValueKey?: string): unknown => {
   return (option as { id: string }).id;
 };
 
-export const getOptionLabel = (option: Option, displayValueKey?: string): unknown => {
+export const getOptionLabel = (
+  option: Option,
+  displayValueKey?: string,
+): unknown => {
   if (isObject(option) && displayValueKey) {
     if (displayValueKey.includes("::")) {
       return evalExpression(displayValueKey, option) || "";
     }
     return option[displayValueKey as keyof Option] || "";
   }
-  return isObject(option)
-    ? (option as { label?: string }).label || ""
-    : option;
+  return isObject(option) ? (option as { label?: string }).label || "" : option;
 };
 
 function SelectedTag(props: {
@@ -197,7 +198,7 @@ function SingleOption(props: SingleOptionProps) {
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${props.isSelected ? `background-color: \${args.theme.var.color.primary_light_200};` : ""}
+  ${props.isSelected ? "background-color: ${args.theme.var.color.primary_light_200};" : ""}
   &:hover {
     background-color: \${args.theme.var.color.primary_light_200};
   }
@@ -584,7 +585,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
           as="div"
           css={[
             props.selectionLimit !== 1
-              ? `return \`._id {flex-wrap: wrap;}\`;`
+              ? "return `._id {flex-wrap: wrap;}`;"
               : "",
             `return \`._id {
   align-items: center;

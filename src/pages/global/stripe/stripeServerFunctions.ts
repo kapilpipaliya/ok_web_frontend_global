@@ -86,9 +86,8 @@ export async function saveStripeSettings(settings: {
     // Encrypt the webhook secret if provided
     let encryptedWebhookSecret = stripeWebhookSecret;
     if (stripeWebhookSecret && stripeWebhookSecret.trim() !== "") {
-      encryptedWebhookSecret = Buffer.from(stripeWebhookSecret).toString(
-        "base64",
-      );
+      encryptedWebhookSecret =
+        Buffer.from(stripeWebhookSecret).toString("base64");
     }
 
     // Check if StripeSettings vertex exists
@@ -108,7 +107,7 @@ export async function saveStripeSettings(settings: {
       `;
 
       await dbSession.run(updateQuery, {
-        stripeEnabled: stripeEnabled || false,
+        stripeEnabled: stripeEnabled,
         stripePublishableKey: stripePublishableKey || "",
         stripeSecretKey: encryptedSecretKey || "",
         stripeWebhookSecret: encryptedWebhookSecret || "",
@@ -126,7 +125,7 @@ export async function saveStripeSettings(settings: {
       `;
 
       await dbSession.run(createQuery, {
-        stripeEnabled: stripeEnabled || false,
+        stripeEnabled: stripeEnabled,
         stripePublishableKey: stripePublishableKey || "",
         stripeSecretKey: encryptedSecretKey || "",
         stripeWebhookSecret: encryptedWebhookSecret || "",

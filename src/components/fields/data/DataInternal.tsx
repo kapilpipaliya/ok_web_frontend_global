@@ -1,4 +1,4 @@
-import { Switch, Match, JSX } from "solid-js";
+import { Switch, Match, type JSX } from "solid-js";
 import {
   DataContext,
   useDataContext,
@@ -36,12 +36,12 @@ export function DataInternal(props: {
   return (
     <DataContext.Provider value={repeaterStore}>
       <Switch>
-        <Match when={props.renderChildren}>
-          {props.children}
-        </Match>
+        <Match when={props.renderChildren}>{props.children}</Match>
         <Match when={true}>
           <PageAttrRender
-            data={isVertex(props.repeaterValue) ? props.repeaterValue : props.data}
+            data={
+              isVertex(props.repeaterValue) ? props.repeaterValue : props.data
+            }
             metaVertex={props.meta}
             isNoPermissionCheck={props.isNoPermissionCheck}
           />

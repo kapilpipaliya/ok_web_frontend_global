@@ -1,6 +1,6 @@
 import type { Session } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import {Vertex} from "~/lib/graph/type/vertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 /**
  * Platform function: Set impersonation state with audit logging
@@ -14,13 +14,13 @@ import {Vertex} from "~/lib/graph/type/vertex";
 export async function setImpersonation(
   session: Session,
   adminUser: Vertex,
-  targetUserUuid: string
+  targetUserUuid: string,
 ) {
   // Verify admin role
   const adminCheck = await session.run(
     `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
      RETURN u`,
-    { userId: adminUser.P.uuid }
+    { userId: adminUser.P.uuid },
   );
 
   if (adminCheck.records.length === 0) {
@@ -29,15 +29,15 @@ export async function setImpersonation(
 
   // Verify target user exists
   const targetResult = await session.run(
-    `MATCH (u:User {uuid: $uuid}) RETURN u`,
-    { uuid: targetUserUuid }
+    "MATCH (u:User {uuid: $uuid}) RETURN u",
+    { uuid: targetUserUuid },
   );
 
   if (targetResult.records.length === 0) {
     throw new Error("Target user not found");
   }
 
-  const targetUser = convertNodeToJson(targetResult.records[0].get('u'));
+  const targetUser = convertNodeToJson(targetResult.records[0].get("u"));
 
   // Create audit log
   await session.run(
@@ -49,11 +49,11 @@ export async function setImpersonation(
        timestamp: datetime(),
        details: "Admin started impersonating user"
      })-[:AuditLogTarget]->(target)`,
-    { adminId: adminUser.P.uuid, targetUserUuid }
+    { adminId: adminUser.P.uuid, targetUserUuid },
   );
 
   return {
     impersonatedUserUuid: targetUserUuid,
-    impersonatedUser: targetUser
+    impersonatedUser: targetUser,
   };
 }

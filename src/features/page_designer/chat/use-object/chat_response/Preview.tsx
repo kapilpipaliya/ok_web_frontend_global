@@ -70,7 +70,7 @@ export function Preview(props: {
           <As
             as="div"
             css={[
-              `return \`._id {text-align: center; padding: 16px; color: \${args.theme.var.color.primary};}\`;`,
+              "return `._id {text-align: center; padding: 16px; color: ${args.theme.var.color.primary};}`;",
             ]}
           >
             No Preview Available

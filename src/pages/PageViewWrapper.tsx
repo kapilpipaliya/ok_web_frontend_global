@@ -1,6 +1,15 @@
 // ADD a Feature:
 // When nested PageViewWrapper is used, children should get parent context too.
-import { batch, createMemo, createEffect, on, Match, Show, Switch, untrack } from "solid-js";
+import {
+  batch,
+  createMemo,
+  createEffect,
+  on,
+  Match,
+  Show,
+  Switch,
+  untrack,
+} from "solid-js";
 
 import { FormContext } from "~/components/form/context/FormContext";
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
@@ -38,8 +47,8 @@ import type {
   FetchFormMetaDataResult,
 } from "~/pages/functions/fetchPageData";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import {SaveCancelButton} from "~/components/form/SaveCancelButton";
-import {isDisabledTxn} from "~/lib/graph/transaction/value/isDisabledTxn";
+import { SaveCancelButton } from "~/components/form/SaveCancelButton";
+import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 
 export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const [graph, setGraph] = useGraph();
@@ -97,7 +106,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
         formVertex: () => formStore() as any,
         formId: formStore().id,
         componentName,
-        isNoPermissionCheck: () => props.isNoPermissionCheck || false,
+        isNoPermissionCheck: () => props.isNoPermissionCheck,
         isViewMode: () => false,
         mounted,
         parentMeta,
@@ -131,10 +140,11 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   };
 
   const getFunctionArgumentWithValue = () =>
-    createFunctionArgumentWithValue(getFunctionArgument, ()=> undefined);
+    createFunctionArgumentWithValue(getFunctionArgument, () => undefined);
 
   // Evaluate dynamic props from metaVertex
-  const dynamicProps = (() => { // cant use createMemo, as it is giving error: tempate is not defined during ssr. must fix letter
+  const dynamicProps = () => {
+    // cant use createMemo, as it is giving error: tempate is not defined during ssr. must fix letter
     const meta = metaVertex();
     if (!meta) return {};
 
@@ -145,7 +155,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
         getFunctionArgumentWithValue,
       },
     )();
-  });
+  };
 
   const isNoPermissionCheck = () =>
     props.isNoPermissionCheck ||
@@ -163,17 +173,39 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   });
 
   const constants = (): PageViewConstants => ({
-    get dataId() { return props.dataId; },
-    get expression() { return props.expression; },
-    get formDataId() { return props.formDataId; },
-    get formId() { return props.formId; },
-    get formMetaId() { return untrack(()=>props.formMetaId) },
-    get getFormData() { return !!props.getFormData; },
-    get isDesignMode() { return props.isDesignMode; },
-    get isNoPermissionCheck() { return props.isNoPermissionCheck; },
-    get pageKeyName() { return props.pageKeyName; },
-    get pageVertexName() { return props.pageVertexName; },
-    get url() { return props.url; },
+    get dataId() {
+      return props.dataId;
+    },
+    get expression() {
+      return props.expression;
+    },
+    get formDataId() {
+      return props.formDataId;
+    },
+    get formId() {
+      return props.formId;
+    },
+    get formMetaId() {
+      return untrack(() => props.formMetaId);
+    },
+    get getFormData() {
+      return !!props.getFormData;
+    },
+    get isDesignMode() {
+      return props.isDesignMode;
+    },
+    get isNoPermissionCheck() {
+      return props.isNoPermissionCheck;
+    },
+    get pageKeyName() {
+      return props.pageKeyName;
+    },
+    get pageVertexName() {
+      return props.pageVertexName;
+    },
+    get url() {
+      return props.url;
+    },
   });
 
   // Initialize metadata handling
@@ -213,9 +245,10 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
       ["Page"].includes(metaVertex()?.L[0])
     ) {
       const dynamicFns = getDynamicFns();
-      const enabled = typeof dynamicFns.enabled === 'function'
-        ? dynamicFns.enabled()
-        : dynamicFns.enabled;
+      const enabled =
+        typeof dynamicFns.enabled === "function"
+          ? dynamicFns.enabled()
+          : dynamicFns.enabled;
 
       if (!enabled) {
         const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
@@ -313,8 +346,8 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
             processResult(result);
           }
         },
-        { defer: true }
-      )
+        { defer: true },
+      ),
     );
     return (
       <>
@@ -359,12 +392,17 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
                 }
               >
                 <Content />
-                <Show when={isNoPermissionCheck() && !(props.hideSaveCancelButton ?? true)}>
-                <SaveCancelButton
-                  closePopUp={props.closePopUp}
-                  disabled={isDisabledTxn(formStore().P.txnId, graph)}
-                />
-              </Show>
+                <Show
+                  when={
+                    isNoPermissionCheck() &&
+                    !(props.hideSaveCancelButton ?? true)
+                  }
+                >
+                  <SaveCancelButton
+                    closePopUp={props.closePopUp}
+                    disabled={isDisabledTxn(formStore().P.txnId, graph)}
+                  />
+                </Show>
               </Match>
             </Switch>
           </FormContext.Provider>
@@ -399,4 +437,3 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     </Show>
   );
 }
-

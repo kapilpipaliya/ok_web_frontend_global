@@ -70,7 +70,7 @@ export function SimpleAlert(props: Readonly<SimpleAlertProps>): JSX.Element {
           : `return \`._id { border-color: \${args.theme.var.color.${config().defaultBorder}}; }\`;`,
         props.padding
           ? `return \`._id { padding: ${props.padding}; }\`;`
-          : `return \`._id { padding: 1rem; }\`;`,
+          : "return `._id { padding: 1rem; }`;",
       ]}
     >
       <As

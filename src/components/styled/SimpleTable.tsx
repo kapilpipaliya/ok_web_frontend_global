@@ -81,7 +81,7 @@ export function TableBodyCell(
         }
       }\`;`,
         props.index && props.index % 2 !== 0
-          ? `return \`._id { background-color: \${args.theme.var.color.primary_light_800}; color: \${args.theme.var.color.primary_light_800_text}; }\`;`
+          ? "return `._id { background-color: ${args.theme.var.color.primary_light_800}; color: ${args.theme.var.color.primary_light_800_text}; }`;"
           : "",
         ...ensureArray(props.css),
       ]}

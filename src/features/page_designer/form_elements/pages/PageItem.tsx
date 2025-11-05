@@ -161,13 +161,13 @@ export function PageItem(
         <Show when={props.child.P.icon}>
           <Icon height={20} icon={props.child.P.icon} noobserver width={20} />
         </Show>
-        <As as="div" css={`return \`._id {font-size: 14px;}\`;`}>
+        <As as="div" css={"return `._id {font-size: 14px;}`;"}>
           {toTitle(props.child.key)}
         </As>
         <Show when={shouldShowButtons()}>
           <As
             as="div"
-            css={`return \`._id {margin-left: auto; display: flex;}\`;`}
+            css={"return `._id {margin-left: auto; display: flex;}`;"}
           >
             <ComponentPreview
               item={props.child}

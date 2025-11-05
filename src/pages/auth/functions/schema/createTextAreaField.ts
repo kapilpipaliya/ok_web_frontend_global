@@ -19,7 +19,7 @@ export function createTextAreaField(
   return [
     {
       as: "div",
-      css: [SETTINGS_CONSTANTS.LABEL_CSS, `return \`._id {margin-top:5px;}\`;`],
+      css: [SETTINGS_CONSTANTS.LABEL_CSS, "return `._id {margin-top:5px;}`;"],
       componentName: "Html",
       text: label,
     },

@@ -4,7 +4,12 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-export type DeletableVertexType = "Page" | "EmailTemplate" | "Component" | "Function" | "Theme";
+export type DeletableVertexType =
+  | "Page"
+  | "EmailTemplate"
+  | "Component"
+  | "Function"
+  | "Theme";
 
 export async function deleteVertex(
   dbSession: Session,

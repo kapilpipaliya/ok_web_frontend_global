@@ -29,7 +29,7 @@ export function DialogWithButtons(
   return (
     <CustomModal
       customTitle={<span>{props.title}</span>}
-      dialogCss={`return \`._id {min-width: 20%; border-radius: 10px; padding: 0;}\`;`}
+      dialogCss={"return `._id {min-width: 20%; border-radius: 10px; padding: 0;}`;"}
       footer={() => (
         <As as="div" css={[SETTINGS_CONSTANTS.MODAL.FOOTER.CSS]}>
           <Show when={props.hasPermission ?? true}>
@@ -44,8 +44,8 @@ export function DialogWithButtons(
           </Show>
           <As
             as="button"
-            ref={el=>{
-              setTimeout(() => el.focus(), 200)
+            ref={(el) => {
+              setTimeout(() => el.focus(), 200);
             }}
             css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
             onClick={props.onCancel}

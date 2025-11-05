@@ -115,7 +115,7 @@ const sectionCardStyles = (gridArea?: string) => {
 const HeaderSection = () => (
   <As
     as="div"
-    css={`return \`._id { grid-area: header; text-align: center; margin-bottom: 1rem; }\`;`}
+    css={"return `._id { grid-area: header; text-align: center; margin-bottom: 1rem; }`;"}
   >
     <As as="h1" css={mainHeaderStyles}>
       Theme Designer
@@ -148,7 +148,7 @@ const ThemeControlsSection = () => {
       </As>
       <As
         as="div"
-        css={`return \`._id > * { margin-bottom: 1rem; } ._id > *:last-child { margin-bottom: 0; }\`;`}
+        css={"return `._id > * { margin-bottom: 1rem; } ._id > *:last-child { margin-bottom: 0; }`;"}
       >
         <As as="button" css={buttonStyles} onClick={toggleTheme}>
           Toggle {currentMode() === "dark" ? "Light" : "Dark"} Mode

@@ -4,15 +4,18 @@
  * Checks if Redis is running and provides helpful error messages
  */
 
-import { Redis } from 'ioredis';
+import { Redis } from "ioredis";
 
 /**
  * Check if Redis is running and accessible
  */
-export async function checkRedisConnection(): Promise<{ connected: boolean; error?: string }> {
+export async function checkRedisConnection(): Promise<{
+  connected: boolean;
+  error?: string;
+}> {
   const redis = new Redis({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379"),
     password: process.env.REDIS_PASSWORD || undefined,
     maxRetriesPerRequest: 1,
     retryStrategy: () => null, // Don't retry on connection failure
@@ -28,8 +31,7 @@ export async function checkRedisConnection(): Promise<{ connected: boolean; erro
   } catch (error: any) {
     return {
       connected: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
-

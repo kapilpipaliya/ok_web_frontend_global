@@ -238,7 +238,7 @@ async function preprocessSchemaForExistingNodes(
     if (!roleKey) continue;
 
     const existingRoleResult = await tx.run(
-      `MATCH (r:Role {key: $key}) RETURN elementId(r) as id`,
+      "MATCH (r:Role {key: $key}) RETURN elementId(r) as id",
       { key: roleKey },
     );
 
@@ -258,7 +258,7 @@ async function preprocessSchemaForExistingNodes(
 
     // Try to find existing file by fileName
     const existingFileResult = await tx.run(
-      `MATCH (f:File {fileName: $fileName}) RETURN elementId(f) as id LIMIT 1`,
+      "MATCH (f:File {fileName: $fileName}) RETURN elementId(f) as id LIMIT 1",
       { fileName },
     );
 
@@ -314,11 +314,14 @@ async function activateTheme(tx: Transaction, themeKey: string): Promise<void> {
     `);
 
     // Create new theme relationship
-    await tx.run(`
+    await tx.run(
+      `
       MATCH (gs:GlobalSetting {key: 'Default'})
       MATCH (theme:Theme {key: $themeKey})
       MERGE (gs)-[:GlobalSettingTheme]->(theme)
-    `, { themeKey });
+    `,
+      { themeKey },
+    );
   } catch (error) {
     console.error(`Failed to activate theme ${themeKey}:`, error);
     // Don't throw - this is a nice-to-have feature
@@ -463,7 +466,9 @@ async function importSchemas(
 
   // Process functions
   if (websiteSchemas.functions) {
-    for (const [functionKey, schema] of Object.entries(websiteSchemas.functions)) {
+    for (const [functionKey, schema] of Object.entries(
+      websiteSchemas.functions,
+    )) {
       const result = await importSingleSchema(
         schema,
         graph,
@@ -538,10 +543,7 @@ export async function GET({ request }: APIEvent) {
     const websiteSchemas = getWebsiteSchemasSync(websiteName);
 
     if (
-      !websiteSchemas.components &&
-      !websiteSchemas.pages &&
-      !websiteSchemas.themes &&
-      !websiteSchemas.functions
+      !(((websiteSchemas.components ||websiteSchemas.pages ) ||websiteSchemas.themes ) ||websiteSchemas.functions)
     ) {
       throw new APIError(`No schemas found for website: ${websiteName}`, 404);
     }

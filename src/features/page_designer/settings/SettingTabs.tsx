@@ -77,8 +77,6 @@ export function SettingTabs() {
                   <UniqueConstrains />
                 </Show>
 
-
-
                 <Show
                   when={isPermissionsConfigurable(
                     graph,

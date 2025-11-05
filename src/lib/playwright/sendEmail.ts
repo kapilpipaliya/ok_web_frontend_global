@@ -9,7 +9,7 @@ import { getDriver } from "~/cypher/core/driver";
 
 import { useEmail } from "./functions/getEmailService";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import {queueEmail} from "~/server/queue/emailQueue";
+import { queueEmail } from "~/server/queue/emailQueue";
 
 interface EmailOptions {
   attachmentName?: string;
@@ -38,7 +38,9 @@ export async function sendEmail(options: EmailOptions) {
       attachmentPath: options.attachmentPath,
     });
 
-    console.log(`[Email] Email queued for ${options.to} with job ID: ${result.jobId}`);
+    console.log(
+      `[Email] Email queued for ${options.to} with job ID: ${result.jobId}`,
+    );
     return result;
   } catch (error) {
     console.error("[Email] Failed to queue email:", error);

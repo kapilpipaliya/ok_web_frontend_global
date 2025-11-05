@@ -7,7 +7,8 @@ import {
   createMemo,
   For,
   createUniqueId,
-  Component, useContext,
+  type Component,
+  useContext,
 } from "solid-js";
 import { Dynamic, Portal } from "solid-js/web";
 import { untrack } from "solid-js";
@@ -40,9 +41,9 @@ import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { DataInternal } from "./data/DataInternal";
 import { As } from "~/components/As";
-import {SolidMarkdown} from "~/components/solid-markdown";
+import { SolidMarkdown } from "~/components/solid-markdown";
 import remarkGfm from "remark-gfm";
-import {SlotContext} from "~/components/fields/component/contexts/SlotContext";
+import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
 const MetaTag = (
   tag: string,
   props: { [k: string]: any },
@@ -140,31 +141,36 @@ export function replacePlaceholderWithUrl(
 
 // HtmlField
 // Helper function to parse serverFunction and extract accessed properties and function calls
-function parseContextAccess(functionBody: string): { properties: string[], functionCalls: Array<{match: string, property: string}> } {
+function parseContextAccess(functionBody: string): {
+  properties: string[];
+  functionCalls: Array<{ match: string; property: string }>;
+} {
   const properties: string[] = [];
-  const functionCalls: Array<{match: string, property: string}> = [];
-  
+  const functionCalls: Array<{ match: string; property: string }> = [];
+
   // Match function calls like args.contextData.propertyName()
-  const functionRegex = /args\.contextData\.(\w+)\(\)|args\.contextData\[['"]([^'"]+)['"]\]\(\)/g;
-  
+  const functionRegex =
+    /args\.contextData\.(\w+)\(\)|args\.contextData\[['"]([^'"]+)['"]\]\(\)/g;
+
   let match;
   while ((match = functionRegex.exec(functionBody)) !== null) {
     const property = match[1] || match[2];
     if (property) {
       functionCalls.push({
         match: match[0],
-        property: property
+        property: property,
       });
     }
   }
-  
+
   // Match property access (non-function)
   // This regex captures:
   // 1. args.contextData.propertyName (dot notation, not followed by parentheses)
   // 2. args.contextData['propertyName'] (bracket notation with single quotes, not followed by parentheses)
   // 3. args.contextData["propertyName"] (bracket notation with double quotes, not followed by parentheses)
-  const propertyRegex = /args\.contextData\.(\w+)(?!\()|args\.contextData\[['"]([^'"]+)['"]\](?!\()/g;
-  
+  const propertyRegex =
+    /args\.contextData\.(\w+)(?!\()|args\.contextData\[['"]([^'"]+)['"]\](?!\()/g;
+
   match = null;
   while ((match = propertyRegex.exec(functionBody)) !== null) {
     // match[1] is for dot notation, match[2] is for bracket notation
@@ -173,33 +179,36 @@ function parseContextAccess(functionBody: string): { properties: string[], funct
       properties.push(property);
     }
   }
-  
+
   return { properties, functionCalls };
 }
 
 // Helper function to create a new context object from the proxy and process function body
-function createContextObject(contextData: any, functionBody: string): { context: any, processedFunctionBody: string } {
+function createContextObject(
+  contextData: any,
+  functionBody: string,
+): { context: any; processedFunctionBody: string } {
   // Parse the function to find properties and function calls
   const { properties, functionCalls } = parseContextAccess(functionBody);
-  
+
   // Create a new object with only the accessed properties
   const newContext: any = {};
-  
+
   for (const prop of properties) {
     newContext[prop] = contextData[prop];
   }
-  
+
   // Process function calls and replace them with their values
   let processedFunctionBody = functionBody;
-  
+
   for (const { match, property } of functionCalls) {
-    if (typeof contextData[property] === 'function') {
+    if (typeof contextData[property] === "function") {
       try {
         const result = contextData[property]();
         // Replace the function call with its result (properly stringified)
         processedFunctionBody = processedFunctionBody.replace(
           match,
-          JSON.stringify(result)
+          JSON.stringify(result),
         );
       } catch (error) {
         console.error(`Error calling contextData.${property}():`, error);
@@ -207,7 +216,7 @@ function createContextObject(contextData: any, functionBody: string): { context:
       }
     }
   }
-  
+
   return { context: newContext, processedFunctionBody };
 }
 
@@ -262,9 +271,12 @@ export function HtmlField(
 
   const DataField = () => {
     // Check if local.data is an async function
-    const isAsyncDataFunction = (() => {
-      return typeof local.data === "function" && local.data.constructor.name === "AsyncFunction";
-    });
+    const isAsyncDataFunction = () => {
+      return (
+        typeof local.data === "function" &&
+        local.data.constructor.name === "AsyncFunction"
+      );
+    };
 
     // DataField logic - Fetch data if expression is provided and no static data
     const selectionOptionsData = createAsync<ServerResult>(
@@ -285,7 +297,7 @@ export function HtmlField(
           }
         }
 
-        if ((!local.expression && !local.serverFunction) || local.data) {
+        if ((!(local.expression || local.serverFunction)) || local.data) {
           // Return empty result when no fetch is needed
           return {
             success: true,
@@ -294,7 +306,10 @@ export function HtmlField(
 
         // If serverFunction is provided, execute it
         if (local.serverFunction) {
-          const { context, processedFunctionBody } = createContextObject(contextData, local.serverFunction);
+          const { context, processedFunctionBody } = createContextObject(
+            contextData,
+            local.serverFunction,
+          );
           return executeServerFunction(
             {
               functionBody: processedFunctionBody,
@@ -334,7 +349,9 @@ export function HtmlField(
         }
 
         // If no expression, server function, or async data, return empty
-        if (!local.expression && !local.serverFunction && !isAsyncDataFunction()) {
+        if (
+          !((local.expression ||local.serverFunction ) ||isAsyncDataFunction())
+        ) {
           return { options: [], error: null };
         }
 
@@ -355,7 +372,10 @@ export function HtmlField(
           }
 
           // For async data function or server function, use the result directly
-          if ((isAsyncDataFunction() || local.serverFunction) && fetchedData.result !== undefined) {
+          if (
+            (isAsyncDataFunction() || local.serverFunction) &&
+            fetchedData.result !== undefined
+          ) {
             return { options: fetchedData.result, error: null };
           }
 
@@ -409,7 +429,13 @@ export function HtmlField(
               }}
             </For>
           </Match>
-          <Match when={processedData().options && local.contextName && props.renderChildren}>
+          <Match
+            when={
+              processedData().options &&
+              local.contextName &&
+              props.renderChildren
+            }
+          >
             <DataInternal
               data={data()}
               index={0}
@@ -481,16 +507,14 @@ export function HtmlField(
   const Content = () => {
     const TextContent = () => {
       return (
-
-              <Show
-                when={local.textType === "markdown"}
-                fallback={local.text}
-              >
-                <SolidMarkdown renderingStrategy="reconcile" remarkPlugins={[remarkGfm]}>
-                  {local.text}
-                </SolidMarkdown>
-              </Show>
-
+        <Show when={local.textType === "markdown"} fallback={local.text}>
+          <SolidMarkdown
+            renderingStrategy="reconcile"
+            remarkPlugins={[remarkGfm]}
+          >
+            {local.text}
+          </SolidMarkdown>
+        </Show>
       );
     };
 
@@ -567,7 +591,7 @@ export function HtmlField(
         </Portal>
       </Match>
       <Match when={asLowerCase() === "slot"}>
-        <Content/>
+        <Content />
       </Match>
       <Match when={true}>
         <Dynamic

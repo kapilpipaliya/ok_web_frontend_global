@@ -9,7 +9,7 @@ export default function PageShareView() {
   const [graph] = useGraph();
 
   const entityVertex = createMemo(() => {
-    if (!params.entityname || !params.entity) return undefined;
+    if (!(params.entityname && params.entity)) return undefined;
     if (params.entity !== "Page") {
       return;
     }

@@ -28,7 +28,7 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import {getGlobalSettingVertex} from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
+import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<
@@ -52,7 +52,7 @@ export function SignupForm() {
   // Check if Google OAuth is enabled
   const googleOAuthEnabled = createAsync(async () => {
     const response = await isGoogleOAuthEnabled();
-    return response.result || false;
+    return response.result;
   });
 
   // Use our utility hooks
@@ -62,7 +62,8 @@ export function SignupForm() {
 
   // Function to trigger refresh of initial data
   const triggerRefresh = () => {
-    const currentCount = getGlobalStore(graph[0]).P.initialDataRefreshCount || 0;
+    const currentCount =
+      getGlobalStore(graph[0]).P.initialDataRefreshCount || 0;
     mergeVertexProperties<GlobalProperties>(
       0,
       "globalStoreId",
@@ -390,7 +391,10 @@ export function SignupForm() {
 }\`;`,
                         props: () => ({
                           onClick: () => {
-                            navigate(getGlobalSettingVertex(graph[0])?.P.privacyPageUrl || "/terms");
+                            navigate(
+                              getGlobalSettingVertex(graph[0])?.P
+                                .privacyPageUrl || "/terms",
+                            );
                           },
                         }),
                         text: "Terms of Service",
@@ -410,7 +414,7 @@ export function SignupForm() {
                 as: "button",
                 css: [
                   STYLES.button2Css,
-                  `return \`._id {width:100%; margin-top:16px;}\`;`,
+                  "return `._id {width:100%; margin-top:16px;}`;",
                 ],
                 componentName: "Html",
                 props: (options: SignupFormFunctionArgumentType) => ({

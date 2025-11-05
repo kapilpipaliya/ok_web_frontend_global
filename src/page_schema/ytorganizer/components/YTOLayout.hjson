@@ -144,6 +144,97 @@ const addToQueue = (video) => {
   args.showSuccessToast("Added to queue");
 };
 
+// Play playlist (loads videos and plays first one)
+const playPlaylist = async (playlist) => {
+  try {
+    const playlistId = playlist?.P?.youtubeId;
+    if (!playlistId) {
+      args.showErrorToast("Invalid playlist");
+      return;
+    }
+
+    // Get playlist videos
+    const result = await executeYTOFunction("getPlaylistVideos", { playlistId });
+
+    if (result?.result?.success && result?.result?.data?.videos) {
+      const videos = result.result.data.videos;
+
+      if (videos.length === 0) {
+        args.showWarningToast("Playlist has no videos");
+        return;
+      }
+
+      // Play first video
+      const firstVideo = videos[0]?.video;
+      if (firstVideo) {
+        setCurrentVideo(firstVideo);
+        setPlayerState("minimized");
+
+        // Add remaining videos to queue
+        const remainingVideos = videos.slice(1).map(v => v.video);
+        setVideoQueue([...videoQueue(), ...remainingVideos]);
+
+        args.showSuccessToast(`Playing playlist: ${playlist?.P?.title || 'Playlist'}`);
+      }
+    } else {
+      args.showErrorToast("Failed to load playlist videos");
+    }
+  } catch (error) {
+    console.error("Error playing playlist:", error);
+    args.showErrorToast("Failed to play playlist");
+  }
+};
+
+// Add all playlist videos to queue
+const addPlaylistToQueue = async (playlist) => {
+  try {
+    const playlistId = playlist?.P?.youtubeId;
+    if (!playlistId) {
+      args.showErrorToast("Invalid playlist");
+      return;
+    }
+
+    // Get playlist videos
+    const result = await executeYTOFunction("getPlaylistVideos", { playlistId });
+
+    if (result?.result?.success && result?.result?.data?.videos) {
+      const videos = result.result.data.videos;
+
+      if (videos.length === 0) {
+        args.showWarningToast("Playlist has no videos");
+        return;
+      }
+
+      const queue = videoQueue();
+      const newVideos = [];
+
+      // Filter out videos already in queue
+      videos.forEach(item => {
+        const video = item.video;
+        const videoId = video?.P?.youtubeId;
+        const alreadyInQueue = queue.some(v => v?.P?.youtubeId === videoId);
+
+        if (!alreadyInQueue && !newVideos.some(v => v?.P?.youtubeId === videoId)) {
+          newVideos.push(video);
+        }
+      });
+
+      if (newVideos.length === 0) {
+        args.showWarningToast("All playlist videos are already in queue");
+        return;
+      }
+
+      setVideoQueue([...queue, ...newVideos]);
+      args.showSuccessToast(`Added ${newVideos.length} video${newVideos.length !== 1 ? 's' : ''} to queue`);
+    } else {
+      args.showErrorToast("Failed to load playlist videos");
+    }
+  } catch (error) {
+    console.error("Error adding playlist to queue:", error);
+    args.showErrorToast("Failed to add playlist to queue");
+  }
+};
+
 // Play next video from queue
 const playNext = () => {
   const queue = videoQueue();
@@ -434,6 +525,7 @@ return {
   playerState,
   currentVideo,
   playVideo,
+  playPlaylist,
   togglePlayerState,
   closePlayer,
   playerPosition,
@@ -442,6 +534,7 @@ return {
   setPlayerSize,
   videoQueue,
   addToQueue,
+  addPlaylistToQueue,
   playNext,
   removeFromQueue,
   clearQueue,

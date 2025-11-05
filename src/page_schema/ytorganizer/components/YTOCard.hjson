@@ -504,15 +504,19 @@ const itemType = args.contextData.props?.itemType;
 
 return {
   as: "button",
-  hide: itemType !== "video",
+  hide: itemType === "channel",
   onClick: async (e) => {
     e.stopPropagation();
     if (item) {
-      args.fns.addToQueue?.(item);
+      if (itemType === "video") {
+        args.fns.addToQueue?.(item);
+      } else if (itemType === "playlist") {
+        args.fns.addPlaylistToQueue?.(item);
+      }
     }
   },
-  title: "Add to queue",
-  "aria-label": "Add to queue"
+  title: itemType === "playlist" ? "Add playlist to queue" : "Add to queue",
+  "aria-label": itemType === "playlist" ? "Add playlist to queue" : "Add to queue"
 };
 ''',
         css: '''
@@ -693,6 +697,30 @@ return {
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.openNoteModal?.(item, itemType, note);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    },
+    {
+      id: "menu_item_play_playlist",
+      L: "Attr",
+      P: {
+        displayOrder: 1.5,
+        componentName: "YTOMenuItem",
+        slot: "menu-items",
+        props: '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+return {
+  icon: "carbon:play-filled",
+  text: "Play playlist",
+  hide: itemType !== "playlist",
+  onClick: (e) => {
+    e?.stopPropagation();
+    args.fns.playPlaylist?.(item);
     args.contextData.floatingMenuContext?.closeMenu?.();
   }
 };
@@ -925,6 +953,7 @@ return {
     { id: "e15", T: "Attr", S: "card_container", E: "card_actions" },
     { id: "e16", T: "Attr", S: "card_actions", E: "card_menu" },
     { id: "e17", T: "Attr", S: "card_menu", E: "menu_item_add_note" },
+    { id: "e17_5", T: "Attr", S: "card_menu", E: "menu_item_play_playlist" },
     { id: "e18", T: "Attr", S: "card_menu", E: "menu_item_toggle_favourite" },
     { id: "e19", T: "Attr", S: "card_menu", E: "menu_item_add_to_playlist" },
     { id: "e20", T: "Attr", S: "card_menu", E: "menu_divider" },

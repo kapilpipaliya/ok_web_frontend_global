@@ -34,8 +34,8 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
       />
       <Show when={open()}>
         <CustomModal
-          bodyCss={`return \`._id {height: 100%;}\`;`}
-          dialogCss={`return \`._id {width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;}\`;`}
+          bodyCss={"return `._id {height: 100%;}`;"}
+          dialogCss={"return `._id {width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;}`;"}
           footer={() => (
             <DialogFooter
               buttonText="Close"

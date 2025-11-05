@@ -134,7 +134,7 @@ export function FileManagerConfigIcons(
               }\`;`,
             ]}
             icon="ic:round-download"
-            iconCss={`return \`._id {transition: transform 0.2s}\`;`}
+            iconCss={"return `._id {transition: transform 0.2s}`;"}
             onClick={() => openInNewTab(getDownloadLink(props.metaVertex))}
             size={18}
             title="Download"
@@ -151,7 +151,7 @@ export function FileManagerConfigIcons(
               }\`;`,
           ]}
           icon="ph:gear"
-          iconCss={`return \`._id {transition: transform 0.2s}\`;`}
+          iconCss={"return `._id {transition: transform 0.2s}`;"}
           onClick={() => setIsEditModalOpen(true)}
           size={18}
           title="Settings"
@@ -167,7 +167,7 @@ export function FileManagerConfigIcons(
             }\`;`,
           ]}
           icon="ph:folder-plus"
-          iconCss={`return \`._id {transition: transform 0.2s}\`;`}
+          iconCss={"return `._id {transition: transform 0.2s}`;"}
           onClick={(e) =>
             openDialog(
               "Add New Directory",
@@ -191,7 +191,7 @@ export function FileManagerConfigIcons(
             }\`;`,
           ]}
           icon="ph:file-plus"
-          iconCss={`return \`._id {transition: transform 0.2s}\`;`}
+          iconCss={"return `._id {transition: transform 0.2s}`;"}
           onClick={(e) =>
             openDialog(
               "Add New File",
@@ -222,7 +222,7 @@ export function FileManagerConfigIcons(
               }\`;`,
             ]}
             icon="ph:textbox"
-            iconCss={`return \`._id {transition: transform 0.2s}\`;`}
+            iconCss={"return `._id {transition: transform 0.2s}`;"}
             onClick={(e) =>
               openDialog(
                 `Rename ${props.metaVertex.L[0]}`,
@@ -246,7 +246,7 @@ export function FileManagerConfigIcons(
               }\`;`,
             ]}
             icon="ph:trash"
-            iconCss={`return \`._id {transition: transform 0.2s}\`;`}
+            iconCss={"return `._id {transition: transform 0.2s}`;"}
             onClick={() => {}}
             size={18}
             title="Delete"

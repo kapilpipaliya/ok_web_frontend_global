@@ -77,7 +77,7 @@ export function importGraphStructure(
     const endId = vertexIdMap.get(edge.E);
 
     // Skip if we can't find the mapped IDs
-    if (!startId || !endId) {
+    if (!(startId && endId)) {
       console.warn(
         `Skipping edge ${edge.id}: missing vertex mapping for S:${edge.S} or E:${edge.E}`,
       );

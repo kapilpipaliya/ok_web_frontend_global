@@ -1,6 +1,6 @@
 import type { Session } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import {Vertex} from "~/lib/graph/type/vertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 /**
  * Core platform function: Returns impersonated user if admin is impersonating,
@@ -15,7 +15,7 @@ import {Vertex} from "~/lib/graph/type/vertex";
 export async function getEffectiveUser(
   session: Session,
   actualUser: Vertex,
-  contextData?: { impersonatedUserUuid?: string }
+  contextData?: { impersonatedUserUuid?: string },
 ): Promise<Vertex> {
   // If no impersonation requested, return actual user
   if (!contextData?.impersonatedUserUuid) {
@@ -26,7 +26,7 @@ export async function getEffectiveUser(
   const adminCheck = await session.run(
     `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
      RETURN u`,
-    { userId: actualUser.P.uuid }
+    { userId: actualUser.P.uuid },
   );
 
   if (adminCheck.records.length === 0) {
@@ -35,13 +35,13 @@ export async function getEffectiveUser(
 
   // Get impersonated user
   const impersonatedResult = await session.run(
-    `MATCH (u:User {uuid: $uuid}) RETURN u`,
-    { uuid: contextData.impersonatedUserUuid }
+    "MATCH (u:User {uuid: $uuid}) RETURN u",
+    { uuid: contextData.impersonatedUserUuid },
   );
 
   if (impersonatedResult.records.length === 0) {
     throw new Error("Impersonated user not found");
   }
 
-  return convertNodeToJson(impersonatedResult.records[0].get('u'));
+  return convertNodeToJson(impersonatedResult.records[0].get("u"));
 }

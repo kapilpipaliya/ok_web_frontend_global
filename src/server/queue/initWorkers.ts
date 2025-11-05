@@ -6,9 +6,13 @@
  * Subdomain-specific workers can be managed via the Worker Management UI.
  */
 
-import {getDBSessionForSubdomain} from "~/cypher/session/getSessionForSubdomain";
-import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunction";
-import {closeAllWorkers, initSubdomainWorkers, workerState} from "~/server/queue/initWorkersCore";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
+import {
+  closeAllWorkers,
+  initSubdomainWorkers,
+  workerState,
+} from "~/server/queue/initWorkersCore";
 
 /**
  * Initialize subdomain-specific workers from database
@@ -16,7 +20,7 @@ import {closeAllWorkers, initSubdomainWorkers, workerState} from "~/server/queue
  * Uses current subdomain from request context automatically
  */
 export async function initSubdomainWorkersUI() {
-  "use server"
+  "use server";
   return await initSubdomainWorkers();
 }
 
@@ -24,10 +28,10 @@ export async function initSubdomainWorkersUI() {
  * Stop subdomain workers for current subdomain
  */
 export async function stopWorkers() {
-  "use server"
+  "use server";
 
   await closeAllWorkers();
-  console.log('[Workers] Stopped all workers for current subdomain');
+  console.log("[Workers] Stopped all workers for current subdomain");
 }
 
 /**
@@ -35,7 +39,7 @@ export async function stopWorkers() {
  * Platform-level workers (like emailWorker) are not included
  */
 export async function getWorkerList() {
-  "use server"
+  "use server";
 
   const workers = [];
 
@@ -55,16 +59,16 @@ export async function getWorkerList() {
 
     const result = await dbSession.run(query);
 
-    const dbWorkers = result.records.map(record => ({
-      key: record.get('key'),
-      description: record.get('description'),
-      active: subdomainWorkers?.has(record.get('key')) || false,
-      type: 'subdomain'
+    const dbWorkers = result.records.map((record) => ({
+      key: record.get("key"),
+      description: record.get("description"),
+      active: subdomainWorkers?.has(record.get("key")),
+      type: "subdomain",
     }));
 
     workers.push(...dbWorkers);
   } catch (error) {
-    console.error('[Workers] Error getting worker list:', error);
+    console.error("[Workers] Error getting worker list:", error);
   } finally {
     await dbSession.close();
   }
@@ -78,26 +82,27 @@ export async function getWorkerList() {
  * Uses Promise-based singleton to prevent duplicate starts
  */
 export async function startWorker(workerKey: string) {
-  "use server"
+  "use server";
 
   try {
     // Prevent managing platform-level workers from UI
-    if (workerKey === 'emailWorker') {
+    if (workerKey === "emailWorker") {
       return {
         success: false,
-        error: 'Platform-level workers are managed automatically and cannot be controlled from the UI'
+        error:
+          "Platform-level workers are managed automatically and cannot be controlled from the UI",
       };
     }
 
     // Get current subdomain
-    const {subDomain} = await getDBSessionForSubdomain();
+    const { subDomain } = await getDBSessionForSubdomain();
 
     // Check if worker is already running
     const subdomainWorkers = workerState.activeWorkers.get(subDomain);
     if (subdomainWorkers?.has(workerKey)) {
       return {
         success: false,
-        error: 'Worker is already running'
+        error: "Worker is already running",
       };
     }
 
@@ -112,7 +117,9 @@ export async function startWorker(workerKey: string) {
 
     // Create the start promise
     const startPromise = (async () => {
-      console.log(`[Workers] Starting subdomain worker: ${workerKey} for subdomain: ${subDomain}`);
+      console.log(
+        `[Workers] Starting subdomain worker: ${workerKey} for subdomain: ${subDomain}`,
+      );
 
       // Get or create worker map for this subdomain
       const workers = workerState.activeWorkers.get(subDomain) || new Map();
@@ -124,12 +131,15 @@ export async function startWorker(workerKey: string) {
       const workerResult = await executeNamedServerFunction({
         functionName: workerKey,
         contextData: {
-          action: 'start'
-        }
+          action: "start",
+        },
       });
 
       if (workerResult.error) {
-        console.error(`[Workers] Failed to start ${workerKey}:`, workerResult.error);
+        console.error(
+          `[Workers] Failed to start ${workerKey}:`,
+          workerResult.error,
+        );
         return { success: false, error: workerResult.error };
       }
 
@@ -138,7 +148,9 @@ export async function startWorker(workerKey: string) {
         workers.set(workerKey, workerResult.result);
       }
 
-      console.log(`[Workers] Successfully started: ${workerKey} for subdomain: ${subDomain}`);
+      console.log(
+        `[Workers] Successfully started: ${workerKey} for subdomain: ${subDomain}`,
+      );
       return { success: true };
     })();
 
@@ -162,20 +174,25 @@ export async function startWorker(workerKey: string) {
  * Stop a specific worker from current subdomain
  */
 export async function stopWorker(workerKey: string) {
-  "use server"
+  "use server";
 
   // Get current subdomain
-  const {subDomain} = await getDBSessionForSubdomain();
+  const { subDomain } = await getDBSessionForSubdomain();
 
   const subdomainWorkers = workerState.activeWorkers.get(subDomain);
   const worker = subdomainWorkers?.get(workerKey);
 
   if (!worker) {
-    return { success: false, error: `Worker not found or not running in subdomain: ${subDomain}` };
+    return {
+      success: false,
+      error: `Worker not found or not running in subdomain: ${subDomain}`,
+    };
   }
 
   try {
-    console.log(`[Workers] Stopping worker: ${workerKey} for subdomain: ${subDomain}`);
+    console.log(
+      `[Workers] Stopping worker: ${workerKey} for subdomain: ${subDomain}`,
+    );
     await worker.stop();
     subdomainWorkers!.delete(workerKey);
 
@@ -188,7 +205,9 @@ export async function stopWorker(workerKey: string) {
       workerState.activeWorkers.delete(subDomain);
     }
 
-    console.log(`[Workers] Successfully stopped: ${workerKey} for subdomain: ${subDomain}`);
+    console.log(
+      `[Workers] Successfully stopped: ${workerKey} for subdomain: ${subDomain}`,
+    );
     return { success: true };
   } catch (error: any) {
     console.error(`[Workers] Error stopping ${workerKey}:`, error);
@@ -200,9 +219,9 @@ export async function stopWorker(workerKey: string) {
  * Get worker status for current subdomain
  */
 export async function getWorkerStatus() {
-  "use server"
+  "use server";
 
-  const {subDomain} = await getDBSessionForSubdomain();
+  const { subDomain } = await getDBSessionForSubdomain();
   const workers = await getWorkerList();
 
   // Get active workers count for this subdomain
@@ -217,6 +236,6 @@ export async function getWorkerStatus() {
     enabled: true,
     totalWorkers: workers.length,
     activeWorkers: activeWorkersCount,
-    workers
+    workers,
   };
 }

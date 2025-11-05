@@ -153,7 +153,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "active",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -183,7 +183,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpHost",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -214,7 +214,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpPort",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -244,7 +244,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpUsername",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -275,7 +275,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpPassword",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -306,7 +306,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "sendGridApiKey",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -342,7 +342,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "fromEmail",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -368,7 +368,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "secure",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -506,7 +506,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "toEmail",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -539,7 +539,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "emailContent",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -551,10 +551,14 @@ export function EmailSettings() {
                     css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
                     props: (options: EmailSettingsFunctionArgumentType) => ({
-                      disabled: options.contextData.testEmailState[0]?.isLoading,
+                      disabled:
+                        options.contextData.testEmailState[0]?.isLoading,
                       onClick: async () => {
                         try {
-                          options.contextData.testEmailState[1]("isLoading", true);
+                          options.contextData.testEmailState[1](
+                            "isLoading",
+                            true,
+                          );
                           const testData = options.data;
 
                           // Validate test email data
@@ -596,7 +600,10 @@ export function EmailSettings() {
                         } catch (error) {
                           showErrorToast((error as Error).message);
                         } finally {
-                          options.contextData.testEmailState[1]("isLoading", false);
+                          options.contextData.testEmailState[1](
+                            "isLoading",
+                            false,
+                          );
                         }
                       },
                       text: options.contextData.testEmailState[0]?.isLoading

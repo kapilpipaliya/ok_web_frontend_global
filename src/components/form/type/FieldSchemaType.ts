@@ -98,8 +98,14 @@ export interface FunctionArgumentBaseType {
   userSetting: Record<string, unknown> | undefined;
   saveUserSetting: (settings: Record<string, unknown>) => void;
   // Server function execution
-  executeServerFunction: (request: {functionBody: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
-  executeNamedServerFunction: (request: {functionName: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
+  executeServerFunction: (
+    request: { functionBody: string; contextData?: any },
+    context?: Record<string, unknown>,
+  ) => Promise<ServerResult>;
+  executeNamedServerFunction: (
+    request: { functionName: string; contextData?: any },
+    context?: Record<string, unknown>,
+  ) => Promise<ServerResult>;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

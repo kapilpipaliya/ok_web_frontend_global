@@ -84,7 +84,7 @@ export function CommonAddComponent(
         </As>
         <IconButton
           icon="ic:round-check"
-          iconCss={`return \`._id { margin-left: 2px; }\`;`}
+          iconCss={"return `._id { margin-left: 2px; }`;"}
           onClick={() => props.addNewState(stateName())}
           size={21}
         />

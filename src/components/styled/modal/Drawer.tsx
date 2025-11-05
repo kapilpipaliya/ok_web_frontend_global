@@ -131,11 +131,11 @@ export function Drawer(props: Readonly<DrawerProps>) {
             z-index: ${zIndex};
           }\`;`,
           isOpen()
-            ? `return \`._id { right: 0; }\`;`
+            ? "return `._id { right: 0; }`;"
             : `return \`._id { right: -${drawerWidth()}; }\`;`,
           mainDivHover()
-            ? `return \`._id { border-left: 2px solid \${args.theme.var.color.primary}; }\`;`
-            : `return \`._id { border-left: none; }\`;`,
+            ? "return `._id { border-left: 2px solid ${args.theme.var.color.primary}; }`;"
+            : "return `._id { border-left: none; }`;",
         ]}
         ref={setFloating}
       >

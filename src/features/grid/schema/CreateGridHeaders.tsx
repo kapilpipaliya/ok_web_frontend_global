@@ -349,7 +349,9 @@ export function CreateGridHeaders(
                   <SchemaRenderer
                     form={gridState.editSchema!}
                     formDataId={info.row.original.id}
-                    hideSaveCancelButton={gridState.formMetaData().hideSaveCancelButton}
+                    hideSaveCancelButton={
+                      gridState.formMetaData().hideSaveCancelButton
+                    }
                   />
                 </Match>
                 <Match when={formNew.isInlineEditable}>
@@ -365,7 +367,9 @@ export function CreateGridHeaders(
                       )
                     }
                     fetchTableData={gridState.fetchTableData}
-                    hideSaveCancelButton={gridState.formMetaData().hideSaveCancelButton} // todo fix this
+                    hideSaveCancelButton={
+                      gridState.formMetaData().hideSaveCancelButton
+                    } // todo fix this
                   />
                 </Match>
                 <Match when={true}>
@@ -529,8 +533,7 @@ function InlineEditButton(props: {
         <CustomModal
           open={() => showEditModal()}
           setOpen={(open) => {
-            if (!open) handleClose();
-            else setShowEditModal(true);
+            if (open) setShowEditModal(true); else handleClose();
           }}
           title={`Edit ${props.tableId}`}
           containerCss={`return \`._id {
@@ -557,7 +560,9 @@ function InlineEditButton(props: {
             dataId={props.dataId}
             pageVertexName={props.tableId}
             isNoPermissionCheck={true}
-            initializeFormStoreParent={(id) => { formStoreId = id; }}
+            initializeFormStoreParent={(id) => {
+              formStoreId = id;
+            }}
             hideSaveCancelButton={props.hideSaveCancelButton}
             closePopUp={handleClose}
           />

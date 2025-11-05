@@ -667,9 +667,9 @@ export default class JsxParser {
     const wrappedJsx = `<root>${jsx}</root>`;
     let parsed: AcornJSX.Expression[] = [];
     try {
-      // @ts-ignore - AcornJsx doesn't have typescript typings
+      // @ts-expect-error - AcornJsx doesn't have typescript typings
       parsed = parser.parse(wrappedJsx, { ecmaVersion: "latest" });
-      // @ts-ignore - AcornJsx doesn't have typescript typings
+      // @ts-expect-error - AcornJsx doesn't have typescript typings
       parsed = parsed.body[0].expression.children || [];
     } catch (error) {
       if (this.props.showWarnings) {

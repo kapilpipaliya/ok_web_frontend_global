@@ -5,7 +5,7 @@ export function getErrorSchema(key: string, customCss?: string) {
     as: "span",
     css:
       customCss ||
-      `return \`._id {color:red; grid-column:span 2; margin-top:-22px;}\`;`,
+      "return `._id {color:red; grid-column:span 2; margin-top:-22px;}`;",
     componentName: "Html",
     key: key,
     props: (args: FunctionArgumentType) => ({

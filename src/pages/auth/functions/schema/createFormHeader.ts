@@ -10,9 +10,9 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 export function createFormHeader(title: string, subheader?: string) {
   return [
     getLogoSchema(
-      `return \`._id {display:grid; place-items:center;}\`;`,
-      `return \`._id {height:80px;}\`;`,
-      `return \`._id {color: \${args.theme.var.color.text_dark_600};}\`;`,
+      "return `._id {display:grid; place-items:center;}`;",
+      "return `._id {height:80px;}`;",
+      "return `._id {color: ${args.theme.var.color.text_dark_600};}`;",
     ),
     {
       as: "h1",

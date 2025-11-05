@@ -18,10 +18,10 @@ export function LayoutTable() {
 
   // Page.attributes is wrapped in a div, so we need to access the nested attributes
   const pageAttributes = Page.attributes?.[0]?.attributes || [];
-  
-  const layoutMetaAttribute = klona(
-    pageAttributes,
-  ).find((meta) => meta.key === "Layout");
+
+  const layoutMetaAttribute = klona(pageAttributes).find(
+    (meta) => meta.key === "Layout",
+  );
 
   if (!layoutMetaAttribute) {
     console.error("Layout attribute not found in Page metadata");
@@ -29,13 +29,14 @@ export function LayoutTable() {
   }
 
   if (!layoutMetaAttribute.attributes) {
-    console.error("Layout attribute found but has no attributes property", layoutMetaAttribute);
+    console.error(
+      "Layout attribute found but has no attributes property",
+      layoutMetaAttribute,
+    );
     return null;
   }
 
-  const { metaVertexId } = generateTableInputMeta(
-    layoutMetaAttribute,
-  );
+  const { metaVertexId } = generateTableInputMeta(layoutMetaAttribute);
 
   return (
     <TablePanel

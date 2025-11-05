@@ -61,15 +61,11 @@ export function ResendVerificationForm() {
           navigate(API.urls.admin.signIn);
         }, 3000);
       } else {
-        showErrorToast(
-          response.error || "Failed to send verification email",
-        );
+        showErrorToast(response.error || "Failed to send verification email");
       }
     } catch (error) {
       showErrorToast(
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred",
+        error instanceof Error ? error.message : "An unexpected error occurred",
       );
     }
   };

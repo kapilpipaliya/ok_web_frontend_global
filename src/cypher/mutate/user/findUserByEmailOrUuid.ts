@@ -63,7 +63,7 @@ export async function findUserByEmailOrUuid(
     result.records,
     context,
     ["u", "s", "p", "g", "roles"],
-    ["userSettingRels", "userRoleRels", "profileImageRels"]
+    ["userSettingRels", "userRoleRels", "profileImageRels"],
   );
 
   const record = result.records[0];

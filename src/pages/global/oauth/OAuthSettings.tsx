@@ -9,10 +9,7 @@ import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import {
-  getOAuthSettings,
-  saveOAuthSettings,
-} from "./oauthServerFunctions";
+import { getOAuthSettings, saveOAuthSettings } from "./oauthServerFunctions";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -111,7 +108,10 @@ export function OAuthSettings() {
   margin-bottom: 1.5rem;
 }\`;`,
             componentName: "Html",
-            text: "Configure Google OAuth to allow users to sign in with their Google accounts. The redirect URI will be: " + window.location.origin + "/api/auth/google/callback",
+            text:
+              "Configure Google OAuth to allow users to sign in with their Google accounts. The redirect URI will be: " +
+              window.location.origin +
+              "/api/auth/google/callback",
           },
           {
             as: "div",
@@ -134,8 +134,115 @@ export function OAuthSettings() {
           },
           getErrorSchema(
             "googleEnabled",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Import Google Client Secret JSON",
+              },
+              {
+                as: "input",
+                css: `return \`._id {
+  padding: 0.5rem;
+  border: 1px solid \${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: \${args.theme.var.color.background};
+  color: \${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: \${args.theme.var.color.primary};
+  }
+
+  &::file-selector-button {
+    padding: 0.375rem 0.75rem;
+    margin-right: 0.75rem;
+    background: \${args.theme.var.color.primary};
+    color: \${args.theme.var.color.primary_text};
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+
+    &:hover {
+      background: \${args.theme.var.color.primary_dark_200};
+    }
+  }
+}\`;`,
+                componentName: "Html",
+                props: (options: FunctionArgumentType) => ({
+                  type: "file",
+                  accept: ".json,application/json",
+                  onChange: async (e: Event) => {
+                    const input = e.target as HTMLInputElement;
+                    const file = input.files?.[0];
+
+                    if (!file) return;
+
+                    try {
+                      const text = await file.text();
+                      const json = JSON.parse(text);
+
+                      // Extract client_id and client_secret from the JSON
+                      const clientId =
+                        json.web?.client_id || json.installed?.client_id;
+                      const clientSecret =
+                        json.web?.client_secret ||
+                        json.installed?.client_secret;
+
+                      if (!(clientId && clientSecret)) {
+                        showErrorToast(
+                          "Invalid JSON format. Please ensure the file contains client_id and client_secret.",
+                        );
+                        return;
+                      }
+
+                      // Update form fields
+                      replaceVertexProperties(0, formDataId, graph, setGraph, {
+                        ...graph.vertexes[formDataId].P,
+                        googleClientId: clientId,
+                        googleClientSecret: clientSecret,
+                        googleEnabled: true,
+                      });
+
+                      showSuccessToast(
+                        "Google credentials imported successfully",
+                      );
+
+                      // Clear the file input
+                      input.value = "";
+                    } catch (error) {
+                      showErrorToast(
+                        `Failed to parse JSON file: ${(error as Error).message}`,
+                      );
+                      input.value = "";
+                    }
+                  },
+                }),
+              },
+              {
+                as: "p",
+                css: `return \`._id {
+  font-size: 0.75rem;
+  color: \${args.theme.var.color.text_dark_300};
+  margin-top: 0.25rem;
+}\`;`,
+                componentName: "Html",
+                text: "Upload the JSON file downloaded from Google Cloud Console",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+            props: (options: OAuthSettingsFunctionArgumentType) => ({
+              hide: () => !options.data?.P.googleEnabled,
+            }),
+          },
           {
             as: "div",
             attributes: [
@@ -164,7 +271,7 @@ export function OAuthSettings() {
           },
           getErrorSchema(
             "googleClientId",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -195,7 +302,7 @@ export function OAuthSettings() {
           },
           getErrorSchema(
             "googleClientSecret",
-            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {
             as: "div",
@@ -234,14 +341,14 @@ export function OAuthSettings() {
                             settings.P as OAuthSettingsData,
                           );
 
-                          if (!response.error) {
+                          if (response.error) {
+                            showErrorToast(
+                              response.error || "Failed to save OAuth settings",
+                            );
+                          } else {
                             showSuccessToast(
                               response.message ||
                                 "OAuth settings saved successfully",
-                            );
-                          } else {
-                            showErrorToast(
-                              response.error || "Failed to save OAuth settings",
                             );
                           }
                         } catch (error) {

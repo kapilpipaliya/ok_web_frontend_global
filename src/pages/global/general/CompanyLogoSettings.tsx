@@ -240,7 +240,7 @@ export function CompanyLogoSettings() {
             as: "button",
             css: [
               SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
-              `return \`._id {margin-right: auto;}\`;`,
+              "return `._id {margin-right: auto;}`;",
             ],
             componentName: "Html",
             props: () => ({
@@ -286,7 +286,7 @@ export function CompanyLogoSettings() {
             as: "button",
             css: [
               SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
-              `return \`._id {margin-right: auto;}\`;`,
+              "return `._id {margin-right: auto;}`;",
             ],
             componentName: "Html",
             props: () => ({
@@ -332,7 +332,7 @@ export function CompanyLogoSettings() {
             as: "button",
             css: [
               SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
-              `return \`._id {margin-right: auto;}\`;`,
+              "return `._id {margin-right: auto;}`;",
             ],
             componentName: "Html",
             props: () => ({
@@ -361,7 +361,9 @@ export function CompanyLogoSettings() {
                     const favicon = companyFaviconVertex()[0];
 
                     if (!(rectangularLogo || squareLogo || favicon)) {
-                      showErrorToast("Please select at least one company logo or favicon");
+                      showErrorToast(
+                        "Please select at least one company logo or favicon",
+                      );
                       return;
                     }
 

@@ -48,7 +48,12 @@ function processSchemaFile(
     const schema = parseHjsonPreservingMultiline(content);
 
     // Handle both AllWebsiteSchemas and WebsiteSchemas types
-    if ("components" in schemas || "pages" in schemas || "themes" in schemas || "functions" in schemas) {
+    if (
+      "components" in schemas ||
+      "pages" in schemas ||
+      "themes" in schemas ||
+      "functions" in schemas
+    ) {
       // WebsiteSchemas
       const websiteSchemas = schemas as WebsiteSchemas;
       if (!websiteSchemas[parsedPath.schemaType]) {
@@ -100,7 +105,12 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
     return websiteSchemaCache.get(websiteName)!;
   }
 
-  const schemas: WebsiteSchemas = { components: {}, pages: {}, themes: {}, functions: {} };
+  const schemas: WebsiteSchemas = {
+    components: {},
+    pages: {},
+    themes: {},
+    functions: {},
+  };
 
   // We have to use the general pattern, but we'll filter efficiently
   // Use explicit default import for better compatibility
@@ -134,10 +144,9 @@ export function getSchemasForSubdomain(
   if (websiteName === null) {
     // Return all schemas - need to load them all
     return loadAllWebsiteSchemasSync();
-  } else {
+  }
     // Return only specific website schemas
     return getWebsiteSchemasSync(websiteName);
-  }
 }
 
 // Load all website schemas synchronously (used when we need all schemas)

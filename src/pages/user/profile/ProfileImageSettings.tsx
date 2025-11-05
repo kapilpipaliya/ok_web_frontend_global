@@ -135,7 +135,7 @@ export function ProfileImageSettings() {
             as: "button",
             css: [
               SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
-              `return \`._id {margin-right:auto;}\`;`,
+              "return `._id {margin-right:auto;}`;",
             ],
             componentName: "Html",
             props: () => ({

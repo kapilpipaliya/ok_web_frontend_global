@@ -11,7 +11,11 @@ import {
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { MultiSelectField, type Option, getOptionLabel } from "~/components/styled/MultiSelect";
+import {
+  MultiSelectField,
+  type Option,
+  getOptionLabel,
+} from "~/components/styled/MultiSelect";
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
@@ -286,12 +290,10 @@ export function SelectField(
             }
             if (!Array.isArray(value) && getComponent() === "Select") {
               const valueKey = meta().P.valueKey ?? "id";
-              const option = options().find(
-                (option) => {
-                  const optionValue = getOptionLabel(option, valueKey);
-                  return value === optionValue;
-                }
-              );
+              const option = options().find((option) => {
+                const optionValue = getOptionLabel(option, valueKey);
+                return value === optionValue;
+              });
               return option ? [option] : [{ label: value, value }];
             }
             return ensureArray(value);

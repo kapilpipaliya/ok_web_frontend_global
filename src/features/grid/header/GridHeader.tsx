@@ -38,7 +38,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
   const [showNewModal, setShowNewModal] = createSignal(false);
   const [graph, setGraph] = useGraph();
   let formStoreId: string | undefined;
-  
+
   const handleClose = (action?: string) => {
     // Find the form store vertex and revert its transaction
     if (formStoreId && graph.vertexes[formStoreId]) {
@@ -52,7 +52,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
       gridState.fetchTableData();
     }
   };
-  
+
   const onAddNew = () => {
     // Check if form is inline editable
     if (props.formMetaData?.isInlineEditable) {
@@ -111,7 +111,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           icon={gridState.isLoading ? "ph:spinner-gap" : "ph:arrows-clockwise"}
           iconCss={
             gridState.isLoading
-              ? `return \`._id {transition: transform 1s infinite linear;}\`;`
+              ? "return `._id {transition: transform 1s infinite linear;}`;"
               : ""
           }
           onClick={handleRefresh}
@@ -145,14 +145,13 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           </TooltipWrapper>
         </Show>
       </As>
-      
+
       {/* Modal for inline editable forms */}
       <Show when={showNewModal() && props.formMetaData?.isInlineEditable}>
         <CustomModal
           open={() => showNewModal()}
           setOpen={(open) => {
-            if (!open) handleClose();
-            else setShowNewModal(true);
+            if (open) setShowNewModal(true); else handleClose();
           }}
           title={`Add New ${gridState.tableId}`}
           containerCss={`return \`._id {
@@ -178,7 +177,9 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           <PageViewWrapper
             dataId="new"
             pageVertexName={gridState.tableId!}
-            initializeFormStoreParent={(id) => { formStoreId = id; }}
+            initializeFormStoreParent={(id) => {
+              formStoreId = id;
+            }}
             closePopUp={handleClose}
           />
         </CustomModal>

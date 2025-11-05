@@ -84,11 +84,11 @@ export function ComponentItem(
 
   const getItemStyle = () => {
     const backgroundColor = isNegative(props.child.id)
-      ? `\${args.theme.var.color.success_light_600}`
-      : `\${args.theme.var.color.background_light_50}`;
+      ? "${args.theme.var.color.success_light_600}"
+      : "${args.theme.var.color.background_light_50}";
     const textColor = isNegative(props.child.id)
-      ? `\${args.theme.var.color.success_light_600_text}`
-      : `\${args.theme.var.color.background_light_50_text}`;
+      ? "${args.theme.var.color.success_light_600_text}"
+      : "${args.theme.var.color.background_light_50_text}";
     return [
       baseItemStyle,
       `return \`._id {
@@ -185,7 +185,7 @@ export function ComponentItem(
         <Show when={shouldShowButtons() && !props.hideActionButtons}>
           <As
             as="div"
-            css={`return \`._id {margin-left: auto; display: flex;}\`;`}
+            css={"return `._id {margin-left: auto; display: flex;}`;"}
           >
             <ComponentPreview
               item={props.child}

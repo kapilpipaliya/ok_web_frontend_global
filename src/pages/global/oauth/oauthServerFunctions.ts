@@ -84,7 +84,7 @@ export async function saveOAuthSettings(settings: {
       await dbSession.run(updateQuery, {
         googleClientId: googleClientId || "",
         googleClientSecret: encryptedSecret || "",
-        googleEnabled: googleEnabled || false,
+        googleEnabled: googleEnabled,
       });
     } else {
       // Create new settings
@@ -100,7 +100,7 @@ export async function saveOAuthSettings(settings: {
       await dbSession.run(createQuery, {
         googleClientId: googleClientId || "",
         googleClientSecret: encryptedSecret || "",
-        googleEnabled: googleEnabled || false,
+        googleEnabled: googleEnabled,
       });
     }
 

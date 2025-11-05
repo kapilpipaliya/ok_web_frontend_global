@@ -25,7 +25,7 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import {getGlobalSettingVertex} from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
+import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<
@@ -50,26 +50,30 @@ export function SignInForm() {
   // Check if Google OAuth is enabled
   const googleOAuthEnabled = createAsync(async () => {
     const response = await isGoogleOAuthEnabled();
-    return response.result || false;
+    return response.result;
   });
 
   // Check if user is already logged in
-  const authData = createAsync(async () => {
-    try {
-      const userData = await getUserRPC();
-      if (userData?.user && !userData.error) {
-        // User is logged in, redirect them
-        // Use redirectUrl from query params if present, otherwise use the one from getUserRPC
-        const redirectUrl = searchParams.redirectUrl || userData.user.P.redirectUrl;
+  const authData = createAsync(
+    async () => {
+      try {
+        const userData = await getUserRPC();
+        if (userData?.user && !userData.error) {
+          // User is logged in, redirect them
+          // Use redirectUrl from query params if present, otherwise use the one from getUserRPC
+          const redirectUrl =
+            searchParams.redirectUrl || userData.user.P.redirectUrl;
 
-        navigate(redirectUrl, { replace: true });
-        return userData;
+          navigate(redirectUrl, { replace: true });
+          return userData;
+        }
+        return null;
+      } catch {
+        return null;
       }
-      return null;
-    } catch {
-      return null;
-    }
-  }, { deferStream: true });
+    },
+    { deferStream: true },
+  );
 
   // Use our utility hooks
   const [showPassword, toggleVisibility] = usePasswordVisibility(["password"]);
@@ -78,7 +82,8 @@ export function SignInForm() {
 
   // Function to trigger refresh of initial data
   const triggerRefresh = () => {
-    const currentCount = getGlobalStore(graph[0]).P.initialDataRefreshCount || 0;
+    const currentCount =
+      getGlobalStore(graph[0]).P.initialDataRefreshCount || 0;
     mergeVertexProperties<GlobalProperties>(
       0,
       "globalStoreId",
@@ -443,8 +448,7 @@ export function SignInForm() {
                 componentName: "Html",
                 props: (options: SignInFormFunctionArgumentType) => {
                   const isFormEmpty =
-                    !options.data?.P?.email?.trim() ||
-                    !options.data?.P?.password?.trim();
+                    !(options.data?.P?.email?.trim() &&options.data?.P?.password?.trim());
                   const isLoading =
                     options.contextData.submitState[0]?.isLoading;
 

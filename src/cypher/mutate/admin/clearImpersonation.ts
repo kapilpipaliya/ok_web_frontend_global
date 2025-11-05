@@ -1,5 +1,5 @@
 import type { Session } from "neo4j-driver";
-import {Vertex} from "~/lib/graph/type/vertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 /**
  * Platform function: Clear impersonation state with audit logging
@@ -13,7 +13,7 @@ import {Vertex} from "~/lib/graph/type/vertex";
 export async function clearImpersonation(
   session: Session,
   adminUser: Vertex,
-  impersonatedUserUuid: string
+  impersonatedUserUuid: string,
 ) {
   // Create audit log
   await session.run(
@@ -25,7 +25,7 @@ export async function clearImpersonation(
        timestamp: datetime(),
        details: "Admin stopped impersonating user"
      })-[:AuditLogTarget]->(target)`,
-    { adminId: adminUser.P.uuid, impersonatedUserUuid }
+    { adminId: adminUser.P.uuid, impersonatedUserUuid },
   );
 
   return { success: true };

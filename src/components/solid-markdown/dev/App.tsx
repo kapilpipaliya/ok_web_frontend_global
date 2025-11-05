@@ -1,9 +1,5 @@
 // solid-refresh
-import {
-	createSignal,
-	type Component,
-	For,
-} from "solid-js";
+import { createSignal, type Component, For } from "solid-js";
 import remarkGfm from "remark-gfm";
 import { SolidMarkdown } from "../";
 import type { Components } from "../types";
@@ -34,40 +30,40 @@ A table:
 | Paragraph   | Text        | And more      |`;
 
 const App: Component = () => {
-	const [md, setMd] = createSignal(initial);
+  const [md, setMd] = createSignal(initial);
 
-	return (
-		<div class="container">
-			<textarea
-				rows={md().split(/\r\n|\r|\n/).length + 2}
-				class="editor"
-				onInput={(e) => {
-					setMd(e.currentTarget.value);
-				}}
-				contentEditable
-			>
-				{md()}
-			</textarea>
+  return (
+    <div class="container">
+      <textarea
+        rows={md().split(/\r\n|\r|\n/).length + 2}
+        class="editor"
+        onInput={(e) => {
+          setMd(e.currentTarget.value);
+        }}
+        contentEditable
+      >
+        {md()}
+      </textarea>
 
-			<SolidMarkdown
-				remarkPlugins={[remarkGfm]}
-				components={{
-					h2: Heading2,
-					text: Text,
-				}}
-			>
-				{md()}
-			</SolidMarkdown>
-		</div>
-	);
+      <SolidMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h2: Heading2,
+          text: Text,
+        }}
+      >
+        {md()}
+      </SolidMarkdown>
+    </div>
+  );
 };
 
 const Heading2: Components["h2"] = (props) => {
-	return <p style={{ color: "red" }}>{props.children}</p>;
+  return <p style={{ color: "red" }}>{props.children}</p>;
 };
 
 const Text: Components["text"] = (props) => (
-	<For each={[...props.node.value]}>{(char) => <span>{char}</span>}</For>
+  <For each={[...props.node.value]}>{(char) => <span>{char}</span>}</For>
 );
 
 export default App;

@@ -153,7 +153,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                     <As
                       as="div"
                       css={
-                        isActive() ? "" : `return \`._id {display: none;}\`;`
+                        isActive() ? "" : "return `._id {display: none;}`;"
                       }
                       ref={viewRef}
                     >

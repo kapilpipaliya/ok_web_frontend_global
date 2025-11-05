@@ -27,9 +27,11 @@ export function parseHjsonPreservingMultiline(rawHjson: string): any {
         return tripleQuotedStrings[placeholderIndex];
       }
       return obj;
-    } else if (Array.isArray(obj)) {
+    }
+    if (Array.isArray(obj)) {
       return obj.map(replacePlaceholders);
-    } else if (typeof obj === "object" && obj !== null) {
+    }
+    if (typeof obj === "object" && obj !== null) {
       const result: any = {};
       for (const key in obj) {
         result[key] = replacePlaceholders(obj[key]);

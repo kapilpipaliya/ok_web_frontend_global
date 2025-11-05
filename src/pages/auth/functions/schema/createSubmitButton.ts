@@ -21,7 +21,7 @@ export function createSubmitButton(
         text,
       },
     ],
-    css: [STYLES.button2Css, `return \`._id {width:100%;}\`;`],
+    css: [STYLES.button2Css, "return `._id {width:100%;}`;"],
     componentName: "Html",
     props: () => ({
       disabled: isLoading,
