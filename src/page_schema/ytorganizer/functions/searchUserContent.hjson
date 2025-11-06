@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract search parameters from request
-  const { query, type, isRegex = false } = args.contextData;
+  const { query, type, isRegex = false, ownershipId } = args.contextData;
 
   if (!query || query.trim().length === 0) {
     return {
@@ -59,6 +59,7 @@ try {
       functionName: "getChannelsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Filter by ownership if provided
         customFilter: 'c.title =~ $pattern OR c.description =~ $pattern OR cs.customName =~ $pattern',
         customFilterParams: { pattern: searchPattern },
         orderBy: 'cs.createdAt',
@@ -80,6 +81,7 @@ try {
       functionName: "getPlaylistsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Filter by ownership if provided
         customFilter: 'p.title =~ $pattern OR p.description =~ $pattern OR ps.customName =~ $pattern',
         customFilterParams: { pattern: searchPattern },
         orderBy: 'ps.createdAt',
@@ -101,6 +103,7 @@ try {
       functionName: "getVideosWithDetails",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Filter by ownership if provided
         customFilter: 'v.title =~ $pattern OR v.description =~ $pattern OR v.channelTitle =~ $pattern OR vs.notes =~ $pattern',
         customFilterParams: { pattern: searchPattern },
         includePlaylist: true,

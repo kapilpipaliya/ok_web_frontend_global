@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "deleteChannel",
-        description: "Deletes a channel, its playlists, and videos that are only in this channel",
+        description: "Deletes a channel from a specific ownership, along with its playlists and videos that are only in this channel for this ownership. Supports multi-ownership model.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -15,10 +15,14 @@ try {
   }
 
   // Extract parameters
-  const { item, itemType } = args.contextData;
+  const { item, itemType, ownershipId } = args.contextData;
 
   if (!item || itemType !== "channel") {
     throw new Error("Invalid channel data");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   const channelId = item.P?.youtubeId;
@@ -26,112 +30,122 @@ try {
     throw new Error("Channel ID not found");
   }
 
-  // Step 1: Get all playlists in this channel
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
+  // Step 1: Get all playlists in this channel for this ownership
   const getPlaylistsQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
     MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
     RETURN p.youtubeId as playlistId
   `;
 
   const playlistsResult = await args.session.run(getPlaylistsQuery, {
-    userUuid: user.P.uuid,
+    ownershipId,
     channelId: channelId
   });
 
   const playlistIds = playlistsResult.records.map(record => record.get('playlistId'));
 
-  // Step 2: Delete videos that are only in this channel's playlists
-  // Only delete videos that don't exist in other playlists
+  // Step 2: Delete videos that are only in this channel's playlists for this ownership
+  // Only delete videos that don't exist in other playlists or other ownerships
   if (playlistIds.length > 0) {
     const deleteVideosQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
       WHERE p.youtubeId IN $playlistIds
       MATCH (p)-[:PlaylistVideo]->(v:Video)
-      OPTIONAL MATCH (u)-[:UserVideoSettings]->(vs:VideoSettings)-[:VideoSettingsVideo]->(v)
+      OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSettings]->(vs:VideoSettings)-[:VideoSettingsVideo]->(v)
 
-      // Check if video exists in other playlists
+      // Check if video exists in other playlists not in deletion list
       OPTIONAL MATCH (otherP:Playlist)-[:PlaylistVideo]->(v)
       WHERE NOT otherP.youtubeId IN $playlistIds
 
-      // Check if other users have this video
-      OPTIONAL MATCH (otherU:User)-[:UserVideoSettings]->(otherVS:VideoSettings)-[:VideoSettingsVideo]->(v)
-      WHERE otherU.uuid <> $userUuid
+      // Check if other ownerships have this video
+      OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipVideoSettings]->(otherVS:VideoSettings)-[:VideoSettingsVideo]->(v)
+      WHERE otherO.key <> $ownershipId
 
-      WITH v, vs, otherP, otherU
-      WHERE otherP IS NULL AND otherU IS NULL
+      WITH v, vs, otherP, otherO
+      WHERE otherP IS NULL AND otherO IS NULL
 
-      // Delete video settings and video node only if no other users
+      // Delete video settings and video node only if no other ownerships
       DETACH DELETE vs, v
       RETURN count(v) as deletedVideos
     `;
 
     await args.session.run(deleteVideosQuery, {
-      userUuid: user.P.uuid,
+      ownershipId,
       playlistIds: playlistIds
     });
   }
 
-  // Step 3: Delete all playlists in this channel
+  // Step 3: Delete all playlists in this channel for this ownership
   if (playlistIds.length > 0) {
     const deletePlaylistsQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
       WHERE p.youtubeId IN $playlistIds
 
-      // Check if other users have this playlist before deletion
-      OPTIONAL MATCH (otherU:User)-[:UserPlaylistSetting]->(otherPS:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-      WHERE otherU.uuid <> $userUuid
+      // Check if other ownerships have this playlist before deletion
+      OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(otherPS:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+      WHERE otherO.key <> $ownershipId
 
-      WITH ps, p, otherU
+      WITH ps, p, otherO
 
-      // Delete user's playlist settings
+      // Delete this ownership's playlist settings
       DETACH DELETE ps
 
-      WITH p, otherU
-      WHERE otherU IS NULL
+      WITH p, otherO
+      WHERE otherO IS NULL
 
-      // Delete playlist node only if no other users
+      // Delete playlist node only if no other ownerships
       DETACH DELETE p
 
       RETURN count(p) as deletedPlaylists
     `;
 
     await args.session.run(deletePlaylistsQuery, {
-      userUuid: user.P.uuid,
+      ownershipId,
       playlistIds: playlistIds
     });
   }
 
   // Step 4: Delete the channel settings and check if channel should be deleted
   const deleteChannelQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
 
-    // Get channel title before any deletion and check if other users have this channel
+    // Get channel title before any deletion and check if other ownerships have this channel
     WITH c, cs, c.title as channelTitle
 
-    // Check if other users have this channel before deletion
-    OPTIONAL MATCH (otherU:User)-[:UserChannelSetting]->(otherCS:ChannelSetting)-[:ChannelSettingChannel]->(c)
-    WHERE otherU.uuid <> $userUuid
+    // Check if other ownerships have this channel before deletion
+    OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(otherCS:ChannelSetting)-[:ChannelSettingChannel]->(c)
+    WHERE otherO.key <> $ownershipId
 
-    WITH cs, c, channelTitle, otherU
+    WITH cs, c, channelTitle, otherO
 
-    // Delete user's channel settings
+    // Delete this ownership's channel settings
     DETACH DELETE cs
 
-    WITH c, channelTitle, otherU
-    WHERE otherU IS NULL
+    WITH c, channelTitle, otherO
+    WHERE otherO IS NULL
 
-    // Delete channel node only if no other users
+    // Delete channel node only if no other ownerships
     DETACH DELETE c
 
     RETURN channelTitle
   `;
 
   const channelResult = await args.session.run(deleteChannelQuery, {
-    userUuid: user.P.uuid,
+    ownershipId,
     channelId: channelId
   });
 

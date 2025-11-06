@@ -8,8 +8,8 @@
         description: "Fetches a single playlist's videos for the current user",
         body: '''
 try {
-  // Extract playlist ID from request parameters
-  const { playlistId } = args.contextData;
+  // Extract playlist ID and ownership from request parameters
+  const { playlistId, ownershipId } = args.contextData;
 
   if (!playlistId) {
     throw new Error("Playlist ID is required");
@@ -26,6 +26,7 @@ try {
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership
       playlistIds: [playlistId]
     }
   });
@@ -37,6 +38,7 @@ try {
   const playlistData = playlistResult.result.data[0];
   const playlist = playlistData.playlist;
   const playlistSetting = playlistData.playlistSetting;
+  const ownership = playlistData.ownership;
   const parentChannel = playlistData.channel; // Channel info is already included from getPlaylistsWithVideoCount
 
   // Fetch all videos in this playlist using helper function
@@ -44,6 +46,7 @@ try {
     functionName: "getVideosWithDetails",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership
       playlistId: playlistId,
       orderBy: 'vs.playlistIndex',
       orderDirection: 'ASC',
@@ -59,6 +62,7 @@ try {
       playlist: {
         playlist,
         playlistSetting,
+        ownership,
         channel: parentChannel // Channel vertex from getPlaylistsWithVideoCount
       },
       videos,

@@ -8,7 +8,7 @@
         description: "Fetches processing status for specific channel and playlist IDs",
         body: '''
 try {
-  const { channelIds = [], playlistIds = [] } = args.contextData;
+  const { channelIds = [], playlistIds = [], ownershipId } = args.contextData;
 
   // Get current user
   const user = await args.getUserFromSession();
@@ -28,6 +28,7 @@ try {
       functionName: "getChannelsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Filter by ownership if provided
         channelIds: channelIds,
         statusFilter: ['queued', 'processing']
       }
@@ -44,6 +45,7 @@ try {
       functionName: "getPlaylistsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Filter by ownership if provided
         playlistIds: playlistIds,
         statusFilter: ['queued', 'processing']
       }

@@ -38,12 +38,13 @@ if (args.contextData.action === 'start') {
   try {
     const channelQueue = helpers.result.data.createChannelQueue(args);
 
-    // Get all channels with status 'queued'
+    // Get all channels with status 'queued' through ownership
     const queuedChannels = await args.session.run(`
-      MATCH (u:User)-[:UserChannelSetting]->(cs:ChannelSetting)
+      MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+      MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
             -[:ChannelSettingChannel]->(c:Channel)
       WHERE cs.status = 'queued'
-      RETURN u.uuid as userUuid, u.id as userId, c.youtubeId as channelId, cs.priority as priority
+      RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId, cs.priority as priority
     `);
 
     let addedCount = 0;
@@ -51,11 +52,12 @@ if (args.contextData.action === 'start') {
     for (const record of queuedChannels.records) {
       const userUuid = record.get('userUuid');
       const userId = record.get('userId');
+      const ownershipId = record.get('ownershipId');
       const channelId = record.get('channelId');
       const priority = record.get('priority') || 'normal';
 
-      // Generate unique job ID
-      const jobId = helpers.result.data.createJobId('channel', userUuid, channelId);
+      // Generate unique job ID with ownership context
+      const jobId = helpers.result.data.createJobId('channel', ownershipId, channelId);
 
       // Check if job already exists in waiting state
       const existingJob = await channelQueue.getJob(jobId);
@@ -69,6 +71,7 @@ if (args.contextData.action === 'start') {
           channelId,
           userId,
           userUuid,
+          ownershipId,  // Required for multi-ownership support
           priority
         }, {
           priority: jobPriority
@@ -89,32 +92,32 @@ if (args.contextData.action === 'start') {
 
   // Create worker for channel processing queue
   const worker = new Worker('processChannelQueue', async (job) => {
-    const { channelId, userId, userUuid, customName, priority = 'normal' } = job.data;
+    const { channelId, userId, userUuid, ownershipId, customName, priority = 'normal' } = job.data;
 
-    await logMessage('info', 'Processing channel', { channelId, userId, priority });
+    await logMessage('info', 'Processing channel', { channelId, userId, ownershipId, priority });
 
     // Get a new database session for this job
     const { dbSession: session } = await args.getSession();
 
     try {
-      // QUOTA CHECK: Verify user has enough quota before processing
-      const quotaStatus = await args.isApproachingQuotaLimit(userUuid, session, 0.95);
+      // QUOTA CHECK: Verify ownership has enough quota before processing (10k units/day per ownership)
+      const quotaStatus = await args.isApproachingQuotaLimit(ownershipId, session, 0.95);
       if (quotaStatus.percentUsed >= 95) {
-        await logMessage('warn', 'User quota nearly exhausted, skipping channel', {
+        await logMessage('warn', 'Ownership quota nearly exhausted, skipping channel', {
           channelId,
-          userUuid,
+          ownershipId,
           quotaUsed: quotaStatus.percentUsed,
           remaining: quotaStatus.remainingQuota
         });
 
         // Mark channel as pending_quota instead of failed
         await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
           SET cs.status = 'pending_quota',
               cs.error = 'Daily API quota nearly exhausted. Will resume tomorrow.',
               cs.updatedAt = datetime()
-        `, { userUuid, channelId });
+        `, { ownershipId, channelId });
 
         await session.close();
         return; // Exit without throwing - job completes but channel waits
@@ -122,29 +125,29 @@ if (args.contextData.action === 'start') {
 
       // Update status to processing
       await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
               -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
         SET cs.status = 'processing',
             cs.progress = 0,
             cs.updatedAt = datetime()
         RETURN cs
-      `, { userUuid, channelId });
+      `, { ownershipId, channelId });
 
-      // Get authenticated YouTube client for this user's OAuth
+      // Get authenticated YouTube client for this ownership's OAuth
       let youtube;
       try {
-        youtube = await args.getYouTubeClient(userUuid, session);
+        youtube = await args.getYouTubeClient(ownershipId, session, args.request);
       } catch (error) {
         // Handle OAuth errors - mark channel as failed
         await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
           SET cs.status = 'failed',
               cs.error = $error,
               cs.priority = null,
               cs.updatedAt = datetime()
         `, {
-          userUuid,
+          ownershipId,
           channelId,
           error: error.message.includes('No YouTube authorization') || error.message.includes('revoked')
             ? 'YouTube authorization expired or revoked. Please reconnect your YouTube account in settings.'
@@ -159,8 +162,8 @@ if (args.contextData.action === 'start') {
         id: [channelId]
       });
 
-      // Log API usage: channels.list operation (1 unit)
-      await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+      // Log API usage: channels.list operation (1 unit) - per ownership quota
+      await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
 
       if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
         throw new Error('Channel not found');
@@ -180,8 +183,8 @@ if (args.contextData.action === 'start') {
           pageToken: nextPageToken
         });
 
-        // Log API usage: playlists.list operation (1 unit per page)
-        await args.logAPIUsage(userUuid, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
+        // Log API usage: playlists.list operation (1 unit per page) - per ownership quota
+        await args.logAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
 
         if (playlistsResponse.data.items) {
           allPlaylists = allPlaylists.concat(playlistsResponse.data.items);
@@ -206,13 +209,13 @@ if (args.contextData.action === 'start') {
 
       // Update total counts
       await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
               -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
         SET cs.totalPlaylists = $totalPlaylists,
             cs.processedPlaylists = 0,
             cs.updatedAt = datetime()
         RETURN cs
-      `, { userUuid, channelId, totalPlaylists });
+      `, { ownershipId, channelId, totalPlaylists });
 
       // Create a queue for playlist processing
       const playlistQueue = helpers.result.data.createPlaylistQueue(args);
@@ -253,13 +256,13 @@ if (args.contextData.action === 'start') {
           MERGE (c)-[:ChannelPlaylist]->(p)
         `, { channelId, playlistId: playlist.id });
 
-        // Create user playlist setting and mark as queued
+        // Create ownership playlist setting and mark as queued
         // Inherit priority from parent channel
-        const playlistSettingKey = `playlist_setting_${userId}_${playlist.id}`;
+        const playlistSettingKey = `playlist_setting_${ownershipId}_${playlist.id}`;
         await session.run(`
-          MATCH (u:User {uuid: $userUuid})
+          MATCH (o:YouTubeOwnership {key: $ownershipId})
           MATCH (p:Playlist {youtubeId: $playlistId})
-          MERGE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+          MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
           ON CREATE SET
             ps.key = $playlistSettingKey,
             ps.createdAt = datetime()
@@ -275,7 +278,7 @@ if (args.contextData.action === 'start') {
             ps.queuedAt = datetime(),
             ps.updatedAt = datetime()
         `, {
-          userUuid,
+          ownershipId,
           playlistId: playlist.id,
           playlistSettingKey,
           priority
@@ -288,6 +291,7 @@ if (args.contextData.action === 'start') {
             playlistId: playlist.id,
             userId: userId,
             userUuid: userUuid,
+            ownershipId: ownershipId,  // Required for multi-ownership support
             customName: null,
             channelId: channelId,
             priority: priority
@@ -326,14 +330,14 @@ if (args.contextData.action === 'start') {
       // - Database connection issues
       // Without this, the channel would stay in 'processing' state indefinitely
       await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
               -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
         SET cs.status = 'failed',
             cs.error = $error,
             cs.priority = null,
             cs.progress = 0,
             cs.updatedAt = datetime()
-      `, { userUuid, channelId, error: error.message });
+      `, { ownershipId, channelId, error: error.message });
 
       throw error;
     } finally {

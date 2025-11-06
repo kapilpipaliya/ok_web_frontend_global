@@ -177,12 +177,14 @@ const resetTime = args.fns.getQuotaResetTime?.();
 const usage = args.fns.quotaUsage?.();
 const usedQuota = usage?.totalUnitsUsed || 0;
 const dailyLimit = usage?.dailyLimit || 10000;
+const selectedOwnership = args.fns.selectedOwnership?.();
+const ownershipName = selectedOwnership?.P?.customName || selectedOwnership?.P?.channelName || "Current account";
 
 return {
   as: "span",
   text: isAtLimit
-    ? `You've reached 95% of your daily YouTube API quota (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units). Adding channels and playlists is temporarily disabled. Resets in ${resetTime}.`
-    : `You've used ${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units of your daily YouTube API quota. Resets in ${resetTime}.`
+    ? `You've reached 95% of your daily YouTube API quota for ${ownershipName} (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units). Adding channels and playlists is temporarily disabled. Resets in ${resetTime}.`
+    : `You've used ${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units of your daily YouTube API quota for ${ownershipName}. Resets in ${resetTime}.`
 };
 ''',
         css: '''
@@ -264,6 +266,11 @@ const checkAdminRole = () => {
 // Impersonation state management
 const [impersonatedUser, setImpersonatedUser] = args.createSignal(null);
 
+// YouTube Ownership state management (multi-account support)
+const [ownerships, setOwnerships] = args.createSignal([]);
+const [selectedOwnership, setSelectedOwnership] = args.createSignal(null);
+const [ownershipsLoading, setOwnershipsLoading] = args.createSignal(false);
+
 // Quota usage state management
 const [quotaUsage, setQuotaUsage] = args.createSignal(null);
 const [quotaLoading, setQuotaLoading] = args.createSignal(false);
@@ -309,15 +316,106 @@ const getImpersonatedUserUuid = () => {
   return impersonated?.P?.uuid || null;
 };
 
-// Wrapper for executeNamedServerFunction that automatically includes impersonatedUserUuid
+// Fetch all YouTube ownerships for the user
+const fetchOwnerships = async () => {
+  setOwnershipsLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getYouTubeOwnerships",
+      contextData: {}
+    });
+
+    if (result?.result?.success && result?.result?.data) {
+      const ownershipsList = result.result.data;
+      setOwnerships(ownershipsList);
+
+      // If no ownership is selected and we have ownerships, select the first one
+      // (either primary or first in list)
+      if (!selectedOwnership() && ownershipsList.length > 0) {
+        const primaryOwnership = ownershipsList.find(o => o.P.isPrimary);
+        const defaultOwnership = primaryOwnership || ownershipsList[0];
+        await selectOwnership(defaultOwnership);
+      } else if (selectedOwnership()) {
+        // If an ownership is already selected (from sessionStorage),
+        // verify it still exists in the fetched list
+        const currentOwnershipId = selectedOwnership().P.key;
+        const stillExists = ownershipsList.find(o => o.P.key === currentOwnershipId);
+
+        if (!stillExists && ownershipsList.length > 0) {
+          // Selected ownership no longer exists, select first available
+          const primaryOwnership = ownershipsList.find(o => o.P.isPrimary);
+          const defaultOwnership = primaryOwnership || ownershipsList[0];
+          await selectOwnership(defaultOwnership);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching ownerships:', error);
+    args.showErrorToast('Failed to load YouTube accounts');
+  } finally {
+    setOwnershipsLoading(false);
+  }
+};
+
+// Select a YouTube ownership (account)
+const selectOwnership = async (ownership) => {
+  if (!ownership) return;
+
+  setSelectedOwnership(ownership);
+
+  // Save to sessionStorage
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('yto_selectedOwnership', JSON.stringify(ownership));
+  }
+
+  // Update lastSelected on server
+  try {
+    await args.executeNamedServerFunction({
+      functionName: "updateOwnershipLastSelected",
+      contextData: { ownershipId: ownership.P.key }
+    });
+  } catch (error) {
+    console.error('Error updating ownership lastSelected:', error);
+  }
+
+  // Refresh quota usage for the new ownership
+  await fetchQuotaUsage();
+};
+
+// Load ownership state from sessionStorage
+const loadOwnershipState = () => {
+  if (typeof window !== 'undefined') {
+    const storedOwnership = sessionStorage.getItem('yto_selectedOwnership');
+    if (storedOwnership) {
+      try {
+        const ownership = JSON.parse(storedOwnership);
+        setSelectedOwnership(ownership);
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+  }
+};
+
+// Get selected ownershipId for contextData
+const getSelectedOwnershipId = () => {
+  const ownership = selectedOwnership();
+  return ownership?.P?.key || null;
+};
+
+// Wrapper for executeNamedServerFunction that automatically includes impersonatedUserUuid and ownershipId
 const executeYTOFunction = async (functionName, contextData = {}) => {
   const impersonatedUserUuid = getImpersonatedUserUuid();
+  const ownershipId = getSelectedOwnershipId();
+
   return await args.executeNamedServerFunction({
     functionName,
     contextData: {
       ...contextData,
       // Only add impersonatedUserUuid if it exists (admin is impersonating)
-      ...(impersonatedUserUuid ? { impersonatedUserUuid } : {})
+      ...(impersonatedUserUuid ? { impersonatedUserUuid } : {}),
+      // Add ownershipId if selected (required for most operations)
+      ...(ownershipId ? { ownershipId } : {})
     }
   });
 };
@@ -566,10 +664,7 @@ const closeAddToPlaylistModal = () => {
 
 const addVideoToPlaylists = async (data) => {
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "addVideoToPlaylists",
-      contextData: data
-    });
+    const result = await executeYTOFunction("addVideoToPlaylists", data);
 
     if (result?.result?.success) {
       args.showSuccessToast(result.result.message);
@@ -887,6 +982,13 @@ return {
   getImpersonatedUserUuid,
   executeYTOFunction,
   loadImpersonationState,
+  ownerships,
+  selectedOwnership,
+  ownershipsLoading,
+  fetchOwnerships,
+  selectOwnership,
+  loadOwnershipState,
+  getSelectedOwnershipId,
   quotaUsage,
   fetchQuotaUsage,
   isApproachingQuotaLimit,
@@ -928,8 +1030,15 @@ return {
         props: '''
 return {
   as: "div",
-  onMount: () => {
+  onMount: async () => {
+    // Load saved state from sessionStorage
     args.fns.loadImpersonationState?.();
+    args.fns.loadOwnershipState?.();
+
+    // Fetch ownerships (will auto-select first one if none selected)
+    await args.fns.fetchOwnerships?.();
+
+    // Fetch quota usage for selected ownership
     args.fns.fetchQuotaUsage?.();
 
     // Refresh quota usage every 5 minutes
@@ -1170,6 +1279,90 @@ return `._id {
   object-fit: contain;
   object-position: left center;
 }`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1.5,
+        componentName: "Html",
+        props: '''
+const ownerships = args.fns.ownerships?.() || [];
+const showSelector = ownerships.length > 0;
+
+return {
+  as: "div",
+  hide: !showSelector
+};
+''',
+        css: '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.md};
+  padding-bottom: ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "YouTube Account",
+  for: "ownership-selector"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOTomSelect",
+        props: '''
+const ownerships = args.fns.ownerships?.() || [];
+const selectedOwnership = args.fns.selectedOwnership?.();
+const selectedOwnershipId = selectedOwnership?.P?.key;
+
+// Transform ownerships into options format for TomSelect
+const ownershipOptions = ownerships.map(ownership => ({
+  value: ownership.P.key,
+  label: ownership.P.customName || ownership.P.channelName || ownership.P.key
+}));
+
+return {
+  value: selectedOwnershipId || "",
+  options: ownershipOptions,
+  placeholder: "Select YouTube Account...",
+  search: true,
+  onChange: async (ownershipId) => {
+    const ownership = ownerships.find(o => o.P.key === ownershipId);
+    if (ownership) {
+      await args.fns.selectOwnership?.(ownership);
+      // Reload page to refresh all data with new ownership
+      window.location.reload();
+    }
+  }
+};
 '''
       }
     },
@@ -1678,6 +1871,9 @@ return {
     { id: "e5", T: "Attr", S: "left_nav", E: "left_nav_header" },
     { id: "e6", T: "Attr", S: "left_nav_header", E: "left_nav_logo" },
     { id: "e6b", T: "Attr", S: "left_nav_logo", E: "left_nav_logo_img" },
+    { id: "e6c", T: "Attr", S: "left_nav", E: "ownership_selector_container" },
+    { id: "e6d", T: "Attr", S: "ownership_selector_container", E: "ownership_selector_label" },
+    { id: "e6e", T: "Attr", S: "ownership_selector_container", E: "ownership_selector" },
     { id: "e7", T: "Attr", S: "left_nav", E: "left_nav_menu" },
     { id: "e8", T: "Attr", S: "left_nav_menu", E: "nav_sections_loop" },
     { id: "e9", T: "Attr", S: "nav_sections_loop", E: "nav_section" },

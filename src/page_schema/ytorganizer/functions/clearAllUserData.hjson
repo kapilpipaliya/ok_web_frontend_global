@@ -53,9 +53,10 @@ try {
     userToClear = currentUser;
   }
 
-  // Step 1: Delete all user channel settings and relationships
+  // Step 1: Delete all ownership channel settings and relationships
   const deleteChannelSettingQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
     DETACH DELETE cs
   `;
 
@@ -63,9 +64,10 @@ try {
     userUuid: userToClear.P.uuid
   });
 
-  // Step 2: Delete all user playlist settings and relationships
+  // Step 2: Delete all ownership playlist settings and relationships
   const deletePlaylistSettingsQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
     DETACH DELETE ps
   `;
 
@@ -73,9 +75,10 @@ try {
     userUuid: userToClear.P.uuid
   });
 
-  // Step 3: Delete all user video settings and relationships
+  // Step 3: Delete all ownership video settings and relationships
   const deleteVideoSettingsQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserVideoSetting]->(vs:VideoSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)
     DETACH DELETE vs
   `;
 

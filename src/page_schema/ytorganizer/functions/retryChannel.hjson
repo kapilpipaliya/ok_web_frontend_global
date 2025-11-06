@@ -22,10 +22,14 @@
  */
 
 try {
-  const { channelId } = args.contextData;
+  const { channelId, ownershipId } = args.contextData;
 
   if (!channelId) {
     throw new Error("Channel ID is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Get current authenticated user
@@ -34,12 +38,23 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
   // Check if channel exists and get its current status
   const checkResult = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
           -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
     RETURN c, cs
-  `, { userUuid: user.P.uuid, channelId });
+  `, { userUuid: user.P.uuid, ownershipId, channelId });
 
   if (checkResult.records.length === 0) {
     return {
@@ -70,7 +85,7 @@ try {
   // Reset channel status to queued
   // This clears error state and resets progress counters
   await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
           -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
     SET cs.status = 'queued',
         cs.progress = 0,
@@ -78,22 +93,22 @@ try {
         cs.error = null,
         cs.queuedAt = datetime(),
         cs.updatedAt = datetime()
-  `, { userUuid: user.P.uuid, channelId });
+  `, { ownershipId, channelId });
 
   // Also reset all playlist settings for this channel to queued
   // This ensures playlists are re-processed even if some were completed before
   await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
           -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
     MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     SET ps.status = 'queued',
         ps.progress = 0,
         ps.processedVideos = 0,
         ps.error = null,
         ps.queuedAt = datetime(),
         ps.updatedAt = datetime()
-  `, { userUuid: user.P.uuid, channelId });
+  `, { ownershipId, channelId });
 
   // Re-add channel to processing queue
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
@@ -104,8 +119,8 @@ try {
     const priority = channelSetting.P.priority || 'normal';
     const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
-    // Generate unique job ID
-    const jobId = helpers.result.data.createJobId('channel', user.P.uuid, channelId);
+    // Generate unique job ID with ownership context
+    const jobId = helpers.result.data.createJobId('channel', ownershipId, channelId);
 
     // Remove existing job with this ID if it exists (but not if it's active)
     const { removed, state } = await helpers.result.data.removeExistingJob(channelQueue, jobId, ['active']);
@@ -126,6 +141,7 @@ try {
       channelId,
       userId: user.id,
       userUuid: user.P.uuid,
+      ownershipId,  // Required for multi-ownership support
       customName: channelSetting.P.customName || null,
       priority
     }, {

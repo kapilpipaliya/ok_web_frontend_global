@@ -9,10 +9,14 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { name, description } = args.contextData;
+  const { name, description, ownershipId } = args.contextData;
 
   if (!name || name.trim().length === 0) {
     throw new Error("Playlist name is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Get current authenticated user from session
@@ -20,6 +24,18 @@ try {
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
+  const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
 
   // Generate unique playlist ID for custom playlists
   // Use timestamp + random string to ensure uniqueness
@@ -58,13 +74,13 @@ try {
 
   const playlist = args.convertNodeToJson(playlistResult.records[0].get('p'));
 
-  // Step 2: Create user-specific PlaylistSetting
-  const playlistSettingKey = `playlist_setting_${user.id}_${customPlaylistId}`;
+  // Step 2: Create ownership-specific PlaylistSetting
+  const playlistSettingKey = `playlist_setting_${ownershipId}_${customPlaylistId}`;
 
   const createPlaylistSettingQuery = `
-    MATCH (u:User {uuid: $userUuid})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (p:Playlist {youtubeId: $playlistId})
-    CREATE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    CREATE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     SET
       ps.key = $playlistSettingKey,
       ps.customName = $customName,
@@ -74,13 +90,15 @@ try {
       ps.showThumbnails = true,
       ps.viewMode = 'list',
       ps.isCustom = true,
+      ps.customOrder = [],
+      ps.itemCount = 0,
       ps.createdAt = datetime(),
       ps.updatedAt = datetime()
     RETURN ps
   `;
 
   const playlistSettingResult = await args.session.run(createPlaylistSettingQuery, {
-    userUuid: user.P.uuid,
+    ownershipId,
     playlistId: customPlaylistId,
     playlistSettingKey,
     customName: null // Use original name for custom playlists
@@ -94,6 +112,7 @@ try {
     data: {
       playlist,
       playlistSetting,
+      ownership,
       playlistId: customPlaylistId,
       userId: user.id,
       isCustom: true

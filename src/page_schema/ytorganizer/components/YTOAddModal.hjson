@@ -99,23 +99,17 @@ const handleSave = async () => {
         functionName = "updateChannelSettings";
       }
 
-      result = await args.executeNamedServerFunction({
-        functionName,
-        contextData: {
-          youtubeId,
-          customName: customName().trim() || null
-        }
+      result = await args.fns.executeYTOFunction(functionName, {
+        youtubeId,
+        customName: customName().trim() || null
       });
     } else {
       // Add mode: create new
       const functionName = contentType === "playlists" ? "savePlaylist" : "saveChannel";
-      result = await args.executeNamedServerFunction({
-        functionName,
-        contextData: {
-          url: urlValue,
-          name: customName().trim() || null,
-          priority: priority()
-        }
+      result = await args.fns.executeYTOFunction(functionName, {
+        url: urlValue,
+        name: customName().trim() || null,
+        priority: priority()
       });
     }
 

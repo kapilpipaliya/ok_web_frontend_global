@@ -22,10 +22,14 @@
  */
 
 try {
-  const { playlistId } = args.contextData;
+  const { playlistId, ownershipId } = args.contextData;
 
   if (!playlistId) {
     throw new Error("Playlist ID is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Get current authenticated user
@@ -34,12 +38,23 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
   // Check if playlist exists and get its current status
   const checkResult = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
           -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
     RETURN p, ps
-  `, { userUuid: user.P.uuid, playlistId });
+  `, { userUuid: user.P.uuid, ownershipId, playlistId });
 
   if (checkResult.records.length === 0) {
     return {
@@ -81,7 +96,7 @@ try {
   // Reset playlist status to queued
   // This clears error state and resets progress counters
   await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
           -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
     SET ps.status = 'queued',
         ps.progress = 0,
@@ -89,7 +104,7 @@ try {
         ps.error = null,
         ps.queuedAt = datetime(),
         ps.updatedAt = datetime()
-  `, { userUuid: user.P.uuid, playlistId });
+  `, { ownershipId, playlistId });
 
   // Re-add playlist to processing queue
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
@@ -100,8 +115,8 @@ try {
     const priority = playlistSetting.P.priority || 'normal';
     const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
-    // Generate unique job ID
-    const jobId = helpers.result.data.createJobId('playlist', user.P.uuid, playlistId);
+    // Generate unique job ID with ownership context
+    const jobId = helpers.result.data.createJobId('playlist', ownershipId, playlistId);
 
     // Remove existing job with this ID if it exists (but not if it's active)
     const { removed, state } = await helpers.result.data.removeExistingJob(playlistQueue, jobId, ['active']);
@@ -122,6 +137,7 @@ try {
       playlistId,
       userId: user.id,
       userUuid: user.P.uuid,
+      ownershipId,  // Required for multi-ownership support
       customName: playlistSetting.P.customName || null,
       channelId: channelId,
       priority

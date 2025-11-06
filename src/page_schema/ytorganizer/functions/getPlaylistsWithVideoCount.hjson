@@ -5,13 +5,14 @@
       L: "Function",
       P: {
         key: "getPlaylistsWithVideoCount",
-        description: "Helper function to fetch playlists with video counts for a user. Supports filtering by playlistIds, statusFilter, and custom ordering (orderBy, orderDirection)",
+        description: "Helper function to fetch playlists with video counts for a user. Supports multi-ownership model with optional ownership filtering.",
         body: '''
 /**
- * Get Playlists with Video Counts
+ * Get Playlists with Video Counts - Multi-Ownership Support
  *
  * Parameters (via args.contextData):
  * - userUuid: string (required) - User UUID
+ * - ownershipId: string (optional) - Filter by specific YouTube ownership. If omitted, returns playlists across all ownerships.
  * - playlistIds: string[] (optional) - Filter by specific playlist IDs
  * - statusFilter: string[] (optional) - Filter by status values (e.g., ['queued', 'processing'])
  * - isFavouriteOnly: boolean (optional) - Filter to only favourite playlists (default: false)
@@ -25,12 +26,12 @@
  * - skip: number (optional) - Number of results to skip (for pagination)
  *
  * Returns:
- * - Array of {playlist: Vertex, playlistSetting: Vertex, channel: Vertex|null}
- *   with userVideoCount in playlistSetting.P
+ * - Array of {playlist: Vertex, playlistSetting: Vertex, ownership: Vertex, channel: Vertex|null} with userVideoCount in playlistSetting.P
  */
 try {
   const {
     userUuid,
+    ownershipId = null,  // Optional: filter by specific ownership
     playlistIds = [],
     statusFilter = [],
     isFavouriteOnly = false,
@@ -85,20 +86,26 @@ try {
   const skipClause = skip > 0 ? `SKIP ${skip}` : '';
   const limitClause = limit ? `LIMIT ${limit}` : '';
 
-  // Cypher query to fetch playlists with video counts
+  // Build ownership filter - optional but changes query structure
+  const ownershipMatchClause = ownershipId
+    ? 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})'
+    : 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)';
+
+  // Cypher query to fetch playlists with video counts through ownership
   const query = `
     MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+    ${ownershipMatchClause}
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
     WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
 
-    // Count videos in this playlist that the user has access to
+    // Count videos in this playlist that the ownership has access to
     OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
-    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
 
-    WITH p, ps, c, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+    WITH p, ps, o, c, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
 
-    RETURN p, ps, c, videoCount
+    RETURN p, ps, o, c, videoCount
     ORDER BY ${orderByClause}
     ${skipClause}
     ${limitClause}
@@ -107,6 +114,7 @@ try {
   // Execute the query
   const result = await args.session.run(query, {
     userUuid,
+    ownershipId,
     playlistIds,
     statusFilter,
     ...customFilterParams
@@ -117,7 +125,7 @@ try {
     const playlistSetting = args.convertNodeToJson(record.get('ps'));
     const videoCount = record.get('videoCount');
 
-    // Add user-specific video count to playlist settings
+    // Add ownership-specific video count to playlist settings
     if (playlistSetting && playlistSetting.P) {
       playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
     }
@@ -125,6 +133,7 @@ try {
     return {
       playlist: args.convertNodeToJson(record.get('p')),
       playlistSetting,
+      ownership: args.convertNodeToJson(record.get('o')),  // Include ownership context
       channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null
     };
   });

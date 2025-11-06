@@ -15,10 +15,14 @@ try {
   }
 
   // Extract parameters
-  const { video, playlistIds } = args.contextData;
+  const { video, playlistIds, ownershipId } = args.contextData;
 
   if (!video) {
     throw new Error("Video is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   if (!playlistIds || !Array.isArray(playlistIds) || playlistIds.length === 0) {
@@ -42,7 +46,8 @@ try {
         functionName: "addVideoToPlaylist",
         contextData: {
           playlistId: playlistId,
-          videoYoutubeId: videoId
+          videoYoutubeId: videoId,
+          ownershipId: ownershipId
         }
       });
 

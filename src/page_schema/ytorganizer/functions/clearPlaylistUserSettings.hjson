@@ -7,11 +7,15 @@
         key: "clearPlaylistUserSettings",
         description: "Clears all user-specific settings for a playlist including custom name, sort preferences, and display preferences",
         body: '''
-// Get the playlist ID from the context
-const playlistId = args.contextData.playlistId;
+// Get the playlist ID and ownershipId from the context
+const { playlistId, ownershipId } = args.contextData;
 
 if (!playlistId) {
   throw new Error("Playlist ID is required");
+}
+
+if (!ownershipId) {
+  throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
 }
 
 try {
@@ -21,17 +25,29 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Check if the playlist exists and user has access to it
-  // Following the correct schema: (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
+  const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
+
+  // Check if the playlist exists and ownership has access to it
+  // Following the correct schema: (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
   const playlistQuery = `
     MATCH (p:Playlist {youtubeId: $playlistId})
-    OPTIONAL MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    OPTIONAL MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     RETURN p, ps
   `;
 
   const playlistResult = await args.session.run(playlistQuery, {
     playlistId: playlistId,
-    userUuid: user.P.uuid
+    ownershipId
   });
 
   if (playlistResult.records.length === 0) {
@@ -56,7 +72,7 @@ try {
   // Reset the playlist settings to default values instead of deleting
   // This maintains the relationship structure and follows the same pattern as savePlaylist
   const resetQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
     SET ps.customName = null,
         ps.customOrder = null,
         ps.sortBy = 'index',
@@ -69,7 +85,7 @@ try {
 
   const resetResult = await args.session.run(resetQuery, {
     playlistId: playlistId,
-    userUuid: user.P.uuid
+    ownershipId
   });
 
   const wasReset = resetResult.records.length > 0;

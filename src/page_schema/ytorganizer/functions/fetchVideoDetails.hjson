@@ -66,16 +66,30 @@ const fetchVideoFromYouTube = async (videoId) => {
 
 try {
   // Extract input parameters from the request
-  const { videoUrl } = args.contextData;
+  const { videoUrl, ownershipId } = args.contextData;
 
   if (!videoUrl) {
     throw new Error("Video URL is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Get current authenticated user from session
   const user = await args.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
   }
 
   // Extract video ID from the provided URL
@@ -148,13 +162,13 @@ try {
     isNewVideo = true;
   }
 
-  // Create user-specific VideoSetting if it doesn't exist
-  const videoSettingKey = `video_setting_${user.id}_${videoId}`;
+  // Create ownership-specific VideoSetting if it doesn't exist
+  const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;
 
   const mergeVideoSettingQuery = `
-    MATCH (u:User {uuid: $userUuid})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (v:Video {youtubeId: $videoId})
-    MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
     ON CREATE SET
       vs.key = $videoSettingKey,
       vs.createdAt = datetime()
@@ -168,7 +182,7 @@ try {
   `;
 
   const videoSettingResult = await args.session.run(mergeVideoSettingQuery, {
-    userUuid: user.P.uuid,
+    ownershipId,
     videoId: videoId,
     videoSettingKey
   });

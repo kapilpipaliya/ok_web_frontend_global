@@ -8,7 +8,7 @@
         description: "Get processing status for a specific channel",
         body: '''
 try {
-  const { channelId } = args.contextData;
+  const { channelId, ownershipId } = args.contextData;
 
   if (!channelId) {
     throw new Error("Channel ID is required");
@@ -25,6 +25,7 @@ try {
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
       channelIds: [channelId]
     }
   });
@@ -42,7 +43,8 @@ try {
     success: true,
     data: {
       channel: channelData.channel,
-      channelSetting: channelData.channelSetting
+      channelSetting: channelData.channelSetting,
+      ownership: channelData.ownership
     }
   };
 

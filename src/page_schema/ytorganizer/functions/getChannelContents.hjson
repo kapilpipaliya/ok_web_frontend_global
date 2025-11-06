@@ -5,11 +5,11 @@
       L: "Function",
       P: {
         key: "getChannelContents",
-        description: "Fetches a single channel's playlists for the current user",
+        description: "Fetches a single channel's playlists for the current user. Supports multi-ownership model with optional ownership filtering.",
         body: '''
 try {
-  // Extract channel ID from request parameters
-  const { channelId } = args.contextData;
+  // Extract channel ID and optional ownership filter from request parameters
+  const { channelId, ownershipId = null } = args.contextData;
 
   if (!channelId) {
     throw new Error("Channel ID is required");
@@ -26,6 +26,7 @@ try {
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Optional: filter by specific ownership
       channelIds: [channelId]
     }
   });
@@ -58,6 +59,7 @@ try {
       functionName: "getPlaylistsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Optional: filter by specific ownership
         playlistIds: channelPlaylistIds,
         orderBy: 'p.publishedAt',
         orderDirection: 'DESC'
@@ -79,7 +81,8 @@ try {
         totalPlaylists: playlists.length,
         userSavedPlaylists: playlists.length  // All returned playlists are user-saved
       },
-      userId: user.id
+      userId: user.id,
+      ownershipId  // Include ownership context if filtered
     },
     message: `Found ${playlists.length} saved playlist${playlists.length !== 1 ? 's' : ''} in channel`
   };

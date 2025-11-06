@@ -23,13 +23,14 @@ if (adminCheck.records.length === 0) {
   throw new Error("Unauthorized: Admin role required");
 }
 
-// Query all users with YTO statistics (without filtering yet)
+// Query all users with YTO statistics (aggregated across all ownerships)
 const dataQuery = `
   MATCH (u:User)
   WHERE $searchQuery IS NULL OR u.username CONTAINS $searchQuery OR u.email CONTAINS $searchQuery
-  OPTIONAL MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
-  OPTIONAL MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-  OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+  OPTIONAL MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+  OPTIONAL MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+  OPTIONAL MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+  OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
   WITH u,
        count(DISTINCT cs) as channelCount,
        count(DISTINCT ps) as playlistCount,

@@ -8,7 +8,7 @@
         description: "Get processing status for a specific playlist",
         body: '''
 try {
-  const { playlistId } = args.contextData;
+  const { playlistId, ownershipId } = args.contextData;
 
   if (!playlistId) {
     throw new Error("Playlist ID is required");
@@ -25,6 +25,7 @@ try {
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
       playlistIds: [playlistId]
     }
   });
@@ -43,6 +44,7 @@ try {
     data: {
       playlist: playlistData.playlist,
       playlistSetting: playlistData.playlistSetting,
+      ownership: playlistData.ownership,
       channel: playlistData.channel
     }
   };

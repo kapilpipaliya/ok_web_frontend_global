@@ -9,7 +9,8 @@ YouTube Organizer is a comprehensive page schema implementation that provides:
 - **Channel Management**: Add, organize, and browse YouTube channels
 - **Playlist Management**: Create and manage custom playlists
 - **Video Organization**: View videos from channels and playlists
-- **OAuth 2.0 Authentication**: Secure per-user YouTube API access with 10,000 units/day quota per user
+- **Multi-Ownership Support**: Connect multiple YouTube accounts per user, each with independent 10,000 units/day quota
+- **OAuth 2.0 Authentication**: Secure per-account YouTube API access with encrypted token storage
 - **API Usage Monitoring**: Real-time tracking of YouTube API quota consumption with visual indicators
 - **Mobile-First Design**: Optimized for mobile devices with touch-friendly interfaces
 - **Accessibility**: Screen reader friendly with proper ARIA labels and semantic HTML
@@ -19,33 +20,66 @@ YouTube Organizer is a comprehensive page schema implementation that provides:
 
 ## Graph Schema
 
-The system uses the following Neo4j graph relationships:
+The system uses a multi-ownership architecture where each user can connect multiple YouTube accounts. Each YouTube account (ownership) has its own OAuth token, API quota, and content settings:
 
 ```
-(User)-[:UserChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)
-(User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
-(User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
+(User)-[:UserYouTubeOwnership]->(YouTubeOwnership)
+(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)
+(YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
+(YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
+(YouTubeOwnership)-[:YouTubeOwnershipAPIUsage]->(YouTubeAPIUsage {date, totalCost, callCount, operations})
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
 (User)-[:UserFeedback]->(Feedback)
-(User)-[:UserYouTubeToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
-(User)-[:UserYouTubeAPIUsage]->(YouTubeAPIUsage {date, totalCost, callCount, operations})
 (Channel)-[:ChannelPlaylist]->(Playlist)
 (Playlist)-[:PlaylistVideo]->(Video)
 ```
 
-**Note**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
+**Key Architecture Principles:**
+- **Multi-Ownership**: Users can connect multiple YouTube accounts, each represented by a YouTubeOwnership node
+- **Independent Quotas**: Each ownership has its own 10,000 units/day API quota tracked separately
+- **Separate Settings**: Each ownership maintains its own channel, playlist, and video preferences
+- **Ownership Switching**: Users can switch between connected accounts via dropdown selector
+- **Videos via Playlists**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
 
-### OAuth 2.0 Authentication
+### OAuth 2.0 Authentication & Multi-Ownership
 
-The system uses per-user OAuth 2.0 authentication for YouTube API access:
-- Each user authenticates with their own Google account
-- Tokens are securely stored and encrypted in the database
-- Each user has their own 10,000 units/day API quota
+The system supports connecting multiple YouTube accounts per user, with each account (ownership) having independent OAuth tokens and API quotas:
+
+**Multi-Ownership Features:**
+- Users can connect multiple YouTube/Google accounts to a single application account
+- Each connected account is represented by a YouTubeOwnership node
+- Each ownership has its own OAuth 2.0 tokens stored securely
+- Each ownership has an independent 10,000 units/day API quota
+- Users can switch between connected accounts via a dropdown selector in the navigation
+- Content (channels, playlists, videos) is associated with the specific ownership that added it
+
+**Token Management:**
+- Tokens are encrypted using AES-256-GCM and stored in the database
+- Each ownership has separate access and refresh tokens
 - Tokens are automatically refreshed when expired
+- Multiple accounts can be connected without interfering with each other
+
+**Ownership Properties:**
+- `key`: Unique identifier for the ownership
+- `channelId`: YouTube channel ID of the connected account
+- `channelName`: Display name of the YouTube channel
+- `customName`: User-defined custom name for the ownership (optional)
+- `isPrimary`: Boolean indicating if this is the user's primary account
+- `lastSelected`: Timestamp of when this ownership was last used
+- `createdAt`, `updatedAt`: Timestamps
 
 ### Vertex Types
 
 - **User**: Existing system user vertex (extended with YTO properties)
+- **YouTubeOwnership**: Represents a connected YouTube account (NEW in v3.0)
+  - `key`: Unique identifier (`youtube_ownership_${userUuid}_${channelId}`)
+  - `channelId`: YouTube channel ID of the connected account
+  - `channelName`: Display name of the YouTube channel
+  - `customName`: User-defined custom name for the ownership (optional)
+  - `isPrimary`: Boolean indicating if this is the user's primary account
+  - `lastSelected`: Timestamp of when this ownership was last used
+  - `createdAt`, `updatedAt`: Timestamps
 - **LanguageSetting**: User's language preferences for translations
   - `language`: Language code ('en' for English, 'hi' for Hindi, 'gu' for Gujarati)
   - `isDefault`: Boolean indicating if this is the user's default language
@@ -116,12 +150,70 @@ The system uses per-user OAuth 2.0 authentication for YouTube API access:
 
 ## Architecture
 
+### Multi-Ownership Architecture
+
+The application implements a centralized multi-ownership management system through the YTOLayout component:
+
+#### YTOLayout - Central Ownership Manager
+
+**YTOLayout** serves as the main layout wrapper and ownership state manager for the entire application. It provides:
+
+**Ownership State Management:**
+- `ownerships` - Array of all connected YouTube accounts for the current user
+- `selectedOwnership` - Currently active ownership (account)
+- `ownershipsLoading` - Loading state for ownership data
+
+**Key Functions:**
+- `fetchOwnerships()` - Retrieves all connected accounts and auto-selects primary or first account
+- `selectOwnership(ownership)` - Switches active account, updates lastSelected, refreshes quota
+- `getSelectedOwnershipId()` - Helper to get current ownershipId
+
+**Ownership Selector UI:**
+- Dropdown in left navigation showing all connected YouTube accounts
+- Displays customName or channelName for each account
+- Persists selection in sessionStorage
+- Reloads page when switched to refresh all data
+- Shows which account's quota is currently displayed
+
+**executeYTOFunction Wrapper:**
+All child pages/components access server functions through the `executeYTOFunction` wrapper provided by YTOLayout. This wrapper automatically injects both `impersonatedUserUuid` (for admin) and `ownershipId` (for multi-ownership) into every server function call:
+
+```javascript
+const executeYTOFunction = async (functionName, contextData = {}) => {
+  const impersonatedUserUuid = getImpersonatedUserUuid();
+  const ownershipId = getSelectedOwnershipId();
+
+  return await args.executeNamedServerFunction({
+    functionName,
+    contextData: {
+      ...contextData,
+      ...(impersonatedUserUuid ? { impersonatedUserUuid } : {}),
+      ...(ownershipId ? { ownershipId } : {})
+    }
+  });
+};
+```
+
+**Benefits:**
+- **Zero Page Updates Required**: All child pages automatically work with multi-ownership without code changes
+- **Centralized Logic**: Ownership management in one place (YTOLayout)
+- **Admin Support**: Seamlessly works with user impersonation for admin features
+- **Type Safety**: Consistent API across all pages
+
+**Usage in Pages:**
+```javascript
+// In any YTO page component - ownershipId is automatically included
+const result = await args.fns.executeYTOFunction('getChannels', {
+  // Only pass page-specific data, ownershipId auto-injected
+});
+```
+
 ### Component Structure
 
 All components follow the YTO prefix naming convention:
 
 #### Layout Components
-- **YTOLayout**: Main layout with bottom navigation
+- **YTOLayout**: Main layout with bottom navigation and multi-ownership state management
 - **YTOTabBar**: Tab navigation for channel/playlist detail views
 
 #### UI Components
@@ -150,30 +242,35 @@ All components follow the YTO prefix naming convention:
 
 #### YouTube OAuth 2.0 Integration
 
-The system uses per-user OAuth 2.0 authentication for secure YouTube API access:
+The system uses per-ownership OAuth 2.0 authentication for secure YouTube API access with multi-account support:
 
 **OAuth Flow:**
 1. User clicks "Connect YouTube Account" in settings
 2. Redirected to Google OAuth consent screen
 3. User grants read-only access to their YouTube data
 4. System receives authorization code and exchanges for tokens
-5. Tokens are encrypted and stored in Neo4j database
-6. Each API call uses the user's personal OAuth token
+5. System creates a YouTubeOwnership node with channel info from the connected account
+6. Tokens are encrypted and stored in `(YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken)` relationship
+7. Each ownership maintains independent tokens and quotas
+8. Users can connect multiple accounts and switch between them
 
 **OAuth Endpoints:**
-- `/api/auth/youtube/connect` - Initiates OAuth flow
-- `/api/auth/youtube/callback` - Handles OAuth callback
-- `/api/auth/youtube/disconnect` - Disconnects YouTube account
-- `/api/auth/youtube/status` - Checks connection status
+- `/api/auth/youtube/connect` - Initiates OAuth flow for new account connection
+- `/api/auth/youtube/callback` - Handles OAuth callback and creates ownership
+- `/api/auth/youtube/disconnect` - Disconnects specific YouTube account/ownership
+- `/api/auth/youtube/status` - Checks connection status for current user
+- `/api/auth/youtube/ownerships` - Gets all connected accounts for user
 
 **Token Management:**
 - Tokens are encrypted using AES-256-GCM encryption
+- Each ownership has separate access and refresh tokens
 - Refresh tokens are automatically used to obtain new access tokens
-- Tokens are stored in `(User)-[:UserYouTubeToken]->(YouTubeToken)` relationship
+- Tokens are stored in `(YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken)` relationship
+- Multiple ownerships don't interfere with each other's tokens
 
 #### API Usage Monitoring
 
-The system tracks YouTube API quota consumption per user with a 10,000 units/day limit:
+The system tracks YouTube API quota consumption per ownership (connected YouTube account) with independent 10,000 units/day limits:
 
 **Quota Costs:**
 - `search.list`: 100 units (expensive!)
@@ -183,44 +280,56 @@ The system tracks YouTube API quota consumption per user with a 10,000 units/day
 - `videos.list`: 1 unit
 
 **Usage Tracking:**
-- Automatic logging of all API calls with operation type and cost
-- Daily quota tracking stored in Neo4j: `(User)-[:UserYouTubeAPIUsage]->(YouTubeAPIUsage)`
-- Visual quota display in Settings page with color-coded status:
+- **Per-Ownership Quotas**: Each connected YouTube account has its own independent 10,000 units/day quota
+- Automatic logging of all API calls with operation type and cost per ownership
+- Daily quota tracking stored in Neo4j: `(YouTubeOwnership)-[:YouTubeOwnershipAPIUsage]->(YouTubeAPIUsage)`
+- Visual quota display in navigation showing currently selected ownership's usage with color-coded status:
   - **Good** (green): 0-69% used
   - **Warning** (yellow): 70-89% used
   - **Critical** (red): 90-100% used
-- Real-time progress bar and statistics
+- Real-time progress display showing which account's quota is being displayed
+- Quota updates automatically when switching between connected accounts
 - Automatic cleanup of records older than 30 days
 
 **API Usage Functions:**
-- `logAPIUsage(userUuid, operation, cost, session)` - Log an API call
-- `getTodayAPIUsage(userUuid, session)` - Get today's usage statistics
-- `getAPIUsageHistory(userUuid, days, session)` - Get historical usage data
-- `isApproachingQuotaLimit(userUuid, session, threshold)` - Check if approaching limit
+- `logAPIUsage(ownershipId, operation, cost, session)` - Log an API call for specific ownership
+- `getTodayAPIUsage(ownershipId, session)` - Get today's usage statistics for ownership
+- `getAPIUsageHistory(ownershipId, days, session)` - Get historical usage data for ownership
+- `isApproachingQuotaLimit(ownershipId, session, threshold)` - Check if ownership approaching limit
 
 **API Endpoints:**
-- `/api/youtube/usage` - Get current user's API usage statistics
+- `/api/youtube/usage?ownershipId=xyz` - Get specific ownership's API usage statistics
 
 #### YouTube Data Integration
 
-The system uses the `googleapis` library dynamically imported in server functions to interact with YouTube Data API v3. All API calls now use per-user OAuth tokens instead of a shared API key.
+The system uses the `googleapis` library dynamically imported in server functions to interact with YouTube Data API v3. All API calls use per-ownership OAuth tokens with multi-account support.
 
 ##### Dynamic Import Pattern
 ```javascript
 // Dynamic import of googleapis library in server functions with OAuth
 const { google } = await import('googleapis');
 
-// Get user's OAuth token
+// Get user and ownership from context
 const user = await args.getUserFromSession();
-const tokenResult = await args.session.run(`
-  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
-  RETURN token
-`, { userUuid: user.P.uuid });
+const { ownershipId } = args.contextData;
 
-const token = tokenResult.records[0]?.get('token');
-if (!token) {
-  throw new Error('YouTube account not connected');
+if (!ownershipId) {
+  throw new Error('YouTube Ownership ID is required. Please select a YouTube account.');
 }
+
+// Verify ownership belongs to user and get OAuth token
+const tokenResult = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  MATCH (o)-[:YouTubeOwnershipToken]->(token:YouTubeToken)
+  RETURN token, o
+`, { userUuid: user.P.uuid, ownershipId });
+
+if (tokenResult.records.length === 0) {
+  throw new Error('YouTube ownership not found or access denied');
+}
+
+const token = tokenResult.records[0].get('token');
+const ownership = tokenResult.records[0].get('o');
 
 // Decrypt and use OAuth token
 const oauth2Client = new google.auth.OAuth2(
@@ -238,8 +347,8 @@ const youtube = google.youtube({
   auth: oauth2Client
 });
 
-// Log API usage after each call
-await logAPIUsage(user.P.uuid, 'channels.list', 1, args.session);
+// Log API usage for this ownership after each call
+await logAPIUsage(ownershipId, 'channels.list', 1, args.session);
 ```
 
 ##### Functions
@@ -401,7 +510,7 @@ Users can set their preferred language through LanguageSetting vertex:
 ```
 /src/page_schema/ytorganizer/
 ├── components/
-│   ├── YTOLayout.hjson              # Main layout with bottom nav
+│   ├── YTOLayout.hjson              # Main layout with multi-ownership state management
 │   ├── YTOFloatingButton.hjson      # Basic floating action button
 │   ├── YTOAddChannelButton.hjson    # Channel add button with modal
 │   ├── YTOAddPlaylistButton.hjson   # Playlist add button with modal
@@ -421,18 +530,27 @@ Users can set their preferred language through LanguageSetting vertex:
 │   ├── YTOPlaylistDetail.hjson      # Playlist detail with videos
 │   ├── YTOSettings.hjson            # User settings and YouTube connection
 │   ├── YTOPrivacy.hjson             # Privacy policy page
-│   └── YTOTerms.hjson               # Terms of Service page
+│   ├── YTOTerms.hjson               # Terms of Service page
+│   ├── YTOOnboarding.hjson          # New user onboarding flow
+│   ├── YTOWorkerHealth.hjson        # Admin: Queue/worker health monitoring
+│   ├── YTOWorkerLogs.hjson          # Admin: Worker logs viewer
+│   ├── YTOAdminUsers.hjson          # Admin: User management
+│   └── YTOAPIKeyManagement.hjson    # Admin: API key management
 ├── themes/
 │   └── YTOTheme.hjson               # Custom theme for video content
 ├── functions/
-│   ├── savePlaylist.hjson           # Save YouTube playlist with user settings
-│   ├── saveChannel.hjson            # Save YouTube channel with all playlists and videos
-│   ├── getAPIUsageStats.hjson       # Get user's API usage statistics
+│   ├── savePlaylist.hjson           # Save YouTube playlist (updated for ownership)
+│   ├── saveChannel.hjson            # Save YouTube channel (updated for ownership)
+│   ├── getAPIUsageStats.hjson       # Get ownership's API usage statistics
 │   ├── getChannelsWithVideoCount.hjson  # Get channels with video counts
 │   ├── getPlaylistsWithVideoCount.hjson # Get playlists with video counts
-│   ├── clearAllUserData.hjson       # Clear all user's YTO data
+│   ├── getYouTubeOwnerships.hjson   # Get all connected YouTube accounts (NEW v3.0)
+│   ├── updateOwnershipLastSelected.hjson # Track ownership selection (NEW v3.0)
+│   ├── autoFetchOwnershipChannels.hjson  # Auto-fetch channels for ownership (NEW v3.0)
+│   ├── clearAllUserData.hjson       # Clear all ownership's YTO data
 │   ├── deleteAccount.hjson          # Delete user account
-│   └── saveFeedback.hjson           # Save user feedback
+│   ├── saveFeedback.hjson           # Save user feedback
+│   └── ... (69+ total functions)    # All updated for multi-ownership
 └── docs/
     └── README.md                    # This documentation
 
@@ -570,16 +688,29 @@ The system uses specialized add button components that encapsulate both the floa
 
 #### Component Integration Examples
 ```javascript
+// RECOMMENDED: Use executeYTOFunction wrapper (automatically includes ownershipId)
 // In YTOAddChannelButton - calling saveChannel server function:
-const result = await args.executeNamedServerFunction({
-  functionName: "saveChannel",
-  contextData: { url: channelUrl, name: customName }
+const result = await args.fns.executeYTOFunction('saveChannel', {
+  url: channelUrl,
+  name: customName
+  // ownershipId automatically injected by wrapper
 });
 
 // In YTOAddPlaylistButton - calling savePlaylist server function:
+const result = await args.fns.executeYTOFunction('savePlaylist', {
+  url: playlistUrl,
+  name: customName
+  // ownershipId automatically injected by wrapper
+});
+
+// ALTERNATIVE: Direct call (must manually include ownershipId)
 const result = await args.executeNamedServerFunction({
-  functionName: "savePlaylist",
-  contextData: { url: playlistUrl, name: customName }
+  functionName: "saveChannel",
+  contextData: {
+    url: channelUrl,
+    name: customName,
+    ownershipId: selectedOwnershipId  // Must include manually
+  }
 });
 
 // Navigate to page with query parameters:
@@ -590,34 +721,63 @@ args.navigate('/channel-detail', {
 
 #### Server Function Access Pattern
 ```javascript
-// In server functions - accessing contextData and session:
+// In server functions - accessing contextData with ownership validation:
 try {
   // Extract data from contextData
-  const { url, name } = args.contextData;
+  const { url, name, ownershipId } = args.contextData;
+
+  // Validate ownershipId is provided
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
 
   // Authenticate user
   const user = await args.getUserFromSession();
   if (!user) {
-    throw new Error("User session not found");
+    throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Access database session
-  const result = await args.session.run(
-    `MATCH (u:User) WHERE elementId(u) = $userId RETURN u`,
-    { userId: user.id }
-  );
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, {
+    userUuid: user.P.uuid,
+    ownershipId
+  });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("YouTube ownership not found or access denied");
+  }
+
+  const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
+
+  // Perform operation with validated ownership
+  const result = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    // ... your query here
+    RETURN result
+  `, { ownershipId });
 
   return {
     success: true,
     message: "Operation completed successfully",
-    data: { userId: user.id }
+    data: {
+      ownershipId: ownership.P.key,
+      channelName: ownership.P.channelName
+    }
   };
 
 } catch (error) {
+  console.error("Error in server function:", error);
+
   return {
     success: false,
-    message: "Operation failed",
-    error: error.message
+    message: error.message || "Operation failed",
+    error: {
+      type: error.name || "ServerError",
+      details: error.message
+    }
   };
 }
 ```
@@ -1219,7 +1379,22 @@ This documentation serves as the foundation for implementing the YouTube Organiz
 
 ## Recent Updates
 
-### Version 2.0 - OAuth & API Usage Monitoring (Current)
+### Version 3.0 - Multi-Ownership Support (Current)
+- ✅ **Multi-Account Support**: Users can connect multiple YouTube accounts to one application account
+- ✅ **YouTubeOwnership Node**: New graph structure for managing multiple accounts per user
+- ✅ **Independent Quotas**: Each connected account has its own 10,000 units/day API quota
+- ✅ **Ownership Selector**: Dropdown UI to switch between connected YouTube accounts
+- ✅ **Centralized Architecture**: YTOLayout manages ownership state globally
+- ✅ **executeYTOFunction Wrapper**: Automatically injects ownershipId into all server function calls
+- ✅ **Updated All Server Functions**: Refactored 69+ backend functions for ownership-based relationships
+- ✅ **Per-Ownership Settings**: Each account maintains separate channel, playlist, and video preferences
+- ✅ **Session Persistence**: Selected ownership persists across page reloads
+- ✅ **Quota Display**: Shows which account's quota is currently displayed with auto-refresh on switch
+- ✅ **Zero Page Updates**: All frontend pages automatically compatible through wrapper architecture
+- ✅ **Graph Schema Migration**: From User→Settings to User→YouTubeOwnership→Settings relationships
+- ✅ **Token Isolation**: Each ownership has independent OAuth tokens
+
+### Version 2.0 - OAuth & API Usage Monitoring
 - ✅ Implemented per-user OAuth 2.0 authentication
 - ✅ Added API usage tracking and monitoring
 - ✅ Created comprehensive Privacy Policy page

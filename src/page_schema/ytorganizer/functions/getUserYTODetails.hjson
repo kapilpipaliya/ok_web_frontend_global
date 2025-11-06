@@ -14,6 +14,7 @@ if (!actualUser) {
 
 // Priority: impersonatedUserUuid (from admin impersonation) > userUuid (explicit parameter)
 const targetUserUuid = args.contextData.impersonatedUserUuid || args.contextData.userUuid;
+const { ownershipId } = args.contextData; // Optional: filter by specific ownership
 
 if (!targetUserUuid) {
   throw new Error("userUuid is required");
@@ -36,10 +37,12 @@ if (!isViewingSelf) {
 }
 
 // Get user's channels with video counts using helper function
+// If ownershipId is provided, filter by that ownership; otherwise aggregate across all
 const channelsResult = await args.executeNamedServerFunction({
   functionName: "getChannelsWithVideoCount",
   contextData: {
-    userUuid: targetUserUuid
+    userUuid: targetUserUuid,
+    ownershipId  // Optional: filters by ownership if provided
   }
 });
 
@@ -51,7 +54,8 @@ const channels = channelsResult.result?.success
 const playlistsResult = await args.executeNamedServerFunction({
   functionName: "getPlaylistsWithVideoCount",
   contextData: {
-    userUuid: targetUserUuid
+    userUuid: targetUserUuid,
+    ownershipId  // Optional: filters by ownership if provided
   }
 });
 
@@ -64,6 +68,7 @@ const videosResult = await args.executeNamedServerFunction({
   functionName: "getVideosWithDetails",
   contextData: {
     userUuid: targetUserUuid,
+    ownershipId,  // Optional: filters by ownership if provided
     isFavouriteOnly: true,
     orderBy: 'vs.updatedAt',
     orderDirection: 'DESC',
@@ -75,14 +80,23 @@ const favoriteVideos = videosResult.result?.success
   ? videosResult.result.data
   : [];
 
-// Get total videos count
-const totalVideosQuery = `
-  MATCH (u:User {uuid: $userUuid})
-  MATCH (u)-[:UserVideoSetting]->(:VideoSetting)-[:VideoSettingVideo]->(:Video)
-  RETURN count(*) as totalVideos
-`;
+// Get total videos count (across all ownerships or filtered by ownershipId)
+const totalVideosQuery = ownershipId
+  ? `
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(:VideoSetting)-[:VideoSettingVideo]->(:Video)
+    RETURN count(*) as totalVideos
+  `
+  : `
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(:VideoSetting)-[:VideoSettingVideo]->(:Video)
+    RETURN count(*) as totalVideos
+  `;
 
-const totalVideosResult = await args.session.run(totalVideosQuery, { userUuid: targetUserUuid });
+const totalVideosResult = await args.session.run(totalVideosQuery, {
+  userUuid: targetUserUuid,
+  ...(ownershipId && { ownershipId })
+});
 const totalVideos = totalVideosResult.records.length > 0
   ? Number(totalVideosResult.records[0].get('totalVideos'))
   : 0;

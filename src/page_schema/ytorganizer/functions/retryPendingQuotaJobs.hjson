@@ -10,20 +10,22 @@
 try {
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 
-  // Get all users with pending_quota channels
+  // Get all ownerships with pending_quota channels
   const channelsResult = await args.session.run(`
-    MATCH (u:User)-[:UserChannelSetting]->(cs:ChannelSetting)
+    MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
           -[:ChannelSettingChannel]->(c:Channel)
     WHERE cs.status = 'pending_quota'
-    RETURN u.uuid as userUuid, u.id as userId, c.youtubeId as channelId, cs.priority as priority
+    RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId, cs.priority as priority
   `);
 
-  // Get all users with pending_quota playlists
+  // Get all ownerships with pending_quota playlists
   const playlistsResult = await args.session.run(`
-    MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
           -[:PlaylistSettingPlaylist]->(p:Playlist)
     WHERE ps.status = 'pending_quota'
-    RETURN u.uuid as userUuid, u.id as userId, p.youtubeId as playlistId, ps.priority as priority
+    RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, p.youtubeId as playlistId, ps.priority as priority
   `);
 
   let channelsRetried = 0;
@@ -37,12 +39,13 @@ try {
       for (const record of channelsResult.records) {
         const userUuid = record.get('userUuid');
         const userId = record.get('userId');
+        const ownershipId = record.get('ownershipId');
         const channelId = record.get('channelId');
         const priority = record.get('priority') || 'normal';
         const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
-        // Generate unique job ID
-        const jobId = helpers.result.data.createJobId('channel', userUuid, channelId);
+        // Generate unique job ID with ownership context
+        const jobId = helpers.result.data.createJobId('channel', ownershipId, channelId);
 
         // Remove existing job with this ID if it exists (but not if it's active)
         const { removed, state } = await helpers.result.data.removeExistingJob(channelQueue, jobId, ['active']);
@@ -57,6 +60,7 @@ try {
           channelId,
           userId,
           userUuid,
+          ownershipId,  // Required for multi-ownership support
           priority
         }, {
           priority: jobPriority  // Override default priority
@@ -64,13 +68,13 @@ try {
 
         // Update status back to queued
         await args.session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
           SET cs.status = 'queued',
               cs.error = null,
               cs.queuedAt = datetime(),
               cs.updatedAt = datetime()
-        `, { userUuid, channelId });
+        `, { ownershipId, channelId });
 
         channelsRetried++;
       }
@@ -87,12 +91,13 @@ try {
       for (const record of playlistsResult.records) {
         const userUuid = record.get('userUuid');
         const userId = record.get('userId');
+        const ownershipId = record.get('ownershipId');
         const playlistId = record.get('playlistId');
         const priority = record.get('priority') || 'normal';
         const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
-        // Generate unique job ID
-        const jobId = helpers.result.data.createJobId('playlist', userUuid, playlistId);
+        // Generate unique job ID with ownership context
+        const jobId = helpers.result.data.createJobId('playlist', ownershipId, playlistId);
 
         // Remove existing job with this ID if it exists (but not if it's active)
         const { removed, state } = await helpers.result.data.removeExistingJob(playlistQueue, jobId, ['active']);
@@ -107,6 +112,7 @@ try {
           playlistId,
           userId,
           userUuid,
+          ownershipId,  // Required for multi-ownership support
           priority
         }, {
           priority: jobPriority  // Override default priority
@@ -114,13 +120,13 @@ try {
 
         // Update status back to queued
         await args.session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
                 -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
           SET ps.status = 'queued',
               ps.error = null,
               ps.queuedAt = datetime(),
               ps.updatedAt = datetime()
-        `, { userUuid, playlistId });
+        `, { ownershipId, playlistId });
 
         playlistsRetried++;
       }

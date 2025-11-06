@@ -5,13 +5,17 @@
       L: "Function",
       P: {
         key: "updatePlaylistSortPreference",
-        description: "Updates the sort preference and custom order for a user's playlist settings",
+        description: "Updates the sort preference and custom order for a user's playlist settings. Supports multi-ownership model - requires ownershipId.",
         body: '''
 // Get the parameters from the context
-const { playlistId, sortBy, customOrder } = args.contextData;
+const { playlistId, sortBy, customOrder, ownershipId } = args.contextData;
 
 if (!playlistId || !sortBy) {
   throw new Error("Playlist ID and sort preference are required");
+}
+
+if (!ownershipId) {
+  throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
 }
 
 try {
@@ -21,10 +25,19 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Update the playlist settings with new sort preference
-  // Following the schema: (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
+  // Update the playlist settings with new sort preference for specific ownership
   const updateQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
     SET ps.sortBy = $sortBy,
         ps.customOrder = $customOrder,
         ps.lastUpdated = datetime(),
@@ -34,13 +47,13 @@ try {
 
   const updateResult = await args.session.run(updateQuery, {
     playlistId: playlistId,
-    userUuid: user.P.uuid,
+    ownershipId: ownershipId,
     sortBy: sortBy,
     customOrder: customOrder
   });
 
   if (updateResult.records.length === 0) {
-    throw new Error("Playlist settings not found for this user");
+    throw new Error("Playlist settings not found for this ownership");
   }
 
   // Fetch updated playlist data with video count using helper function
@@ -48,6 +61,7 @@ try {
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by specific ownership
       playlistIds: [playlistId]
     }
   });

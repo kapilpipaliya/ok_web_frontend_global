@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract input parameters from the request
-  const { playlistId, videoYoutubeId, videoUrl } = args.contextData;
+  const { playlistId, videoYoutubeId, videoUrl, ownershipId } = args.contextData;
 
   if (!playlistId) {
     throw new Error("Playlist ID is required");
@@ -19,21 +19,26 @@ try {
     throw new Error("Either Video ID or Video URL is required");
   }
 
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
   // Get current authenticated user from session
   const user = await args.getUserFromSession();
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Verify user has access to this playlist
+  // Verify user has access to this playlist through ownership
   const playlistAccessQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-    RETURN p, ps
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    RETURN p, ps, o
   `;
 
   const playlistAccessResult = await args.session.run(playlistAccessQuery, {
     userUuid: user.P.uuid,
+    ownershipId,
     playlistId: playlistId
   });
 
@@ -110,16 +115,16 @@ try {
 
       const videoId = video.P.youtubeId;
 
-      // Check if video is already in this user's playlist
+      // Check if video is already in this ownership's playlist
       const existingVideoQuery = `
-        MATCH (u:User {uuid: $userUuid})
-        MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (o:YouTubeOwnership {key: $ownershipId})
+        MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         MATCH (p)-[:PlaylistVideo]->(v:Video {youtubeId: $videoId})
         RETURN v
       `;
 
       const existingVideoResult = await args.session.run(existingVideoQuery, {
-        userUuid: user.P.uuid,
+        ownershipId,
         playlistId: playlistId,
         videoId: videoId
       });
@@ -129,41 +134,41 @@ try {
         continue;
       }
 
-      // Get current video count for position (validate user owns playlist)
+      // Get current video count for position
       const countQuery = `
-        MATCH (u:User {uuid: $userUuid})
-        MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (o:YouTubeOwnership {key: $ownershipId})
+        MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         MATCH (p)-[:PlaylistVideo]->(v:Video)
         RETURN COUNT(v) as videoCount
       `;
 
       const countResult = await args.session.run(countQuery, {
-        userUuid: user.P.uuid,
+        ownershipId,
         playlistId: playlistId
       });
       const videoCountValue = countResult.records[0].get('videoCount');
       const currentCount = videoCountValue.low || videoCountValue || 0;
       const newPosition = currentCount + results.length;
 
-      // Add video to playlist - clean edge with no properties (validate user owns playlist)
+      // Add video to playlist - clean edge with no properties (validate ownership owns playlist)
       const addVideoQuery = `
-        MATCH (u:User {uuid: $userUuid})
-        MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (o:YouTubeOwnership {key: $ownershipId})
+        MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         MATCH (v:Video {youtubeId: $videoId})
         MERGE (p)-[:PlaylistVideo]->(v)
       `;
 
       await args.session.run(addVideoQuery, {
-        userUuid: user.P.uuid,
+        ownershipId,
         playlistId: playlistId,
         videoId: videoId
       });
 
-      // Create/update UserVideoSetting (no position - it's in PlaylistSetting.customOrder)
+      // Create/update YouTubeOwnershipVideoSetting (no position - it's in PlaylistSetting.customOrder)
       const videoSettingQuery = `
-        MATCH (u:User {uuid: $userUuid})
+        MATCH (o:YouTubeOwnership {key: $ownershipId})
         MATCH (v:Video {youtubeId: $videoId})
-        MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+        MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
         ON CREATE SET
           vs.key = $videoSettingKey,
           vs.createdAt = datetime(),
@@ -176,9 +181,9 @@ try {
       `;
 
       await args.session.run(videoSettingQuery, {
-        userUuid: user.P.uuid,
+        ownershipId,
         videoId: videoId,
-        videoSettingKey: `video_setting_${user.P.uuid}_${videoId}`
+        videoSettingKey: `video_setting_${ownershipId}_${videoId}`
       });
 
       results.push({
@@ -205,8 +210,8 @@ try {
 
     // Update PlaylistSetting with itemCount, thumbnail, and customOrder
     const updatePlaylistSettingQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
       SET
         ps.customOrder = $customOrder,
         ps.itemCount = $itemCount,
@@ -216,7 +221,7 @@ try {
     `;
 
     const updateParams = {
-      userUuid: user.P.uuid,
+      ownershipId,
       playlistId: playlistId,
       customOrder: newOrder,
       itemCount: newOrder.length

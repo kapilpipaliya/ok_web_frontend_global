@@ -38,12 +38,13 @@ if (args.contextData.action === 'start') {
   try {
     const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 
-    // Get all playlists with status 'queued'
+    // Get all playlists with status 'queued' through ownership
     const queuedPlaylists = await args.session.run(`
-      MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+      MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
             -[:PlaylistSettingPlaylist]->(p:Playlist)
       WHERE ps.status = 'queued'
-      RETURN u.uuid as userUuid, u.id as userId, p.youtubeId as playlistId,
+      RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, p.youtubeId as playlistId,
              ps.priority as priority, p.channelId as channelId
     `);
 
@@ -52,12 +53,13 @@ if (args.contextData.action === 'start') {
     for (const record of queuedPlaylists.records) {
       const userUuid = record.get('userUuid');
       const userId = record.get('userId');
+      const ownershipId = record.get('ownershipId');
       const playlistId = record.get('playlistId');
       const priority = record.get('priority') || 'normal';
       const channelId = record.get('channelId');
 
-      // Generate unique job ID
-      const jobId = helpers.result.data.createJobId('playlist', userUuid, playlistId);
+      // Generate unique job ID with ownership context
+      const jobId = helpers.result.data.createJobId('playlist', ownershipId, playlistId);
 
       // Check if job already exists in waiting state
       const existingJob = await playlistQueue.getJob(jobId);
@@ -71,6 +73,7 @@ if (args.contextData.action === 'start') {
           playlistId,
           userId,
           userUuid,
+          ownershipId,  // Required for multi-ownership support
           channelId,
           priority
         }, {
@@ -92,32 +95,32 @@ if (args.contextData.action === 'start') {
 
   // Create worker for playlist processing queue
   const worker = new Worker('processPlaylistQueue', async (job) => {
-    const { playlistId, userId, userUuid, customName, channelId } = job.data;
+    const { playlistId, userId, userUuid, ownershipId, customName, channelId } = job.data;
 
-    await logMessage('info', 'Processing playlist', { playlistId, userId });
+    await logMessage('info', 'Processing playlist', { playlistId, userId, ownershipId });
 
     // Get a new database session for this job
     const { dbSession: session } = await args.getSession();
 
     try {
-      // QUOTA CHECK: Verify user has enough quota before processing
-      const quotaStatus = await args.isApproachingQuotaLimit(userUuid, session, 0.95);
+      // QUOTA CHECK: Verify ownership has enough quota before processing (10k units/day per ownership)
+      const quotaStatus = await args.isApproachingQuotaLimit(ownershipId, session, 0.95);
       if (quotaStatus.percentUsed >= 95) {
-        await logMessage('warn', 'User quota nearly exhausted, skipping playlist', {
+        await logMessage('warn', 'Ownership quota nearly exhausted, skipping playlist', {
           playlistId,
-          userUuid,
+          ownershipId,
           quotaUsed: quotaStatus.percentUsed,
           remaining: quotaStatus.remainingQuota
         });
 
         // Mark playlist as pending_quota
         await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
                 -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
           SET ps.status = 'pending_quota',
               ps.error = 'Daily API quota nearly exhausted. Will resume tomorrow.',
               ps.updatedAt = datetime()
-        `, { userUuid, playlistId });
+        `, { ownershipId, playlistId });
 
         await session.close();
         return; // Exit without throwing
@@ -125,29 +128,29 @@ if (args.contextData.action === 'start') {
 
       // Update status to processing
       await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
               -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         SET ps.status = 'processing',
             ps.progress = 0,
             ps.updatedAt = datetime()
         RETURN ps
-      `, { userUuid, playlistId });
+      `, { ownershipId, playlistId });
 
-      // Get authenticated YouTube client for this user's OAuth
+      // Get authenticated YouTube client for this ownership's OAuth
       let youtube;
       try {
-        youtube = await args.getYouTubeClient(userUuid, session);
+        youtube = await args.getYouTubeClient(ownershipId, session, args.request);
       } catch (error) {
         // Handle OAuth errors - mark playlist as failed
         await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
                 -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
           SET ps.status = 'failed',
               ps.error = $error,
               ps.priority = null,
               ps.updatedAt = datetime()
         `, {
-          userUuid,
+          ownershipId,
           playlistId,
           error: error.message.includes('No YouTube authorization') || error.message.includes('revoked')
             ? 'YouTube authorization expired or revoked. Please reconnect your YouTube account in settings.'
@@ -168,8 +171,8 @@ if (args.contextData.action === 'start') {
           pageToken: nextPageToken
         });
 
-        // Log API usage: playlistItems.list operation (1 unit per page)
-        await args.logAPIUsage(userUuid, 'playlistItems.list', args.YOUTUBE_API_COSTS['playlistItems.list'], session);
+        // Log API usage: playlistItems.list operation (1 unit per page) - per ownership quota
+        await args.logAPIUsage(ownershipId, 'playlistItems.list', args.YOUTUBE_API_COSTS['playlistItems.list'], session);
 
         if (itemsResponse.data.items) {
           allVideos = allVideos.concat(itemsResponse.data.items);
@@ -182,13 +185,13 @@ if (args.contextData.action === 'start') {
 
       // Update total count
       await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
               -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         SET ps.totalVideos = $totalVideos,
             ps.processedVideos = 0,
             ps.updatedAt = datetime()
         RETURN ps
-      `, { userUuid, playlistId, totalVideos });
+      `, { ownershipId, playlistId, totalVideos });
 
       let processedVideos = 0;
 
@@ -229,12 +232,12 @@ if (args.contextData.action === 'start') {
           MERGE (p)-[:PlaylistVideo]->(v)
         `, { playlistId, videoId });
 
-        // Create user video setting
-        const videoSettingKey = `video_setting_${userId}_${videoId}`;
+        // Create ownership video setting
+        const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;
         await session.run(`
-          MATCH (u:User {uuid: $userUuid})
+          MATCH (o:YouTubeOwnership {key: $ownershipId})
           MATCH (v:Video {youtubeId: $videoId})
-          MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+          MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
           ON CREATE SET
             vs.key = $videoSettingKey,
             vs.createdAt = datetime()
@@ -245,7 +248,7 @@ if (args.contextData.action === 'start') {
             vs.playlistIndex = $position,
             vs.updatedAt = datetime()
         `, {
-          userUuid,
+          ownershipId,
           videoId,
           videoSettingKey,
           position: video.snippet?.position || 0
@@ -258,12 +261,12 @@ if (args.contextData.action === 'start') {
           const progress = Math.round((processedVideos / totalVideos) * 100);
 
           await session.run(`
-            MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+            MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
                   -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
             SET ps.processedVideos = $processedVideos,
                 ps.progress = $progress,
                 ps.updatedAt = datetime()
-          `, { userUuid, playlistId, processedVideos, progress });
+          `, { ownershipId, playlistId, processedVideos, progress });
         }
       }
 
@@ -272,7 +275,7 @@ if (args.contextData.action === 'start') {
 
       // Mark as completed and remove priority (no longer needed)
       await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
               -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         SET ps.status = 'completed',
             ps.progress = 100,
@@ -280,7 +283,7 @@ if (args.contextData.action === 'start') {
             ps.priority = null,
             ps.completedAt = datetime(),
             ps.updatedAt = datetime()
-      `, { userUuid, playlistId, customOrder: videoIds });
+      `, { ownershipId, playlistId, customOrder: videoIds });
 
       await logMessage('info', 'Playlist processing completed', {
         playlistId,
@@ -293,12 +296,12 @@ if (args.contextData.action === 'start') {
         // This is safe for concurrent updates - Neo4j handles the increment atomically
         // Multiple workers can complete playlists simultaneously without losing counts
         const channelUpdateResult = await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
           SET cs.processedPlaylists = coalesce(cs.processedPlaylists, 0) + 1,
               cs.updatedAt = datetime()
           RETURN cs
-        `, { userUuid, channelId });
+        `, { ownershipId, channelId });
 
         if (channelUpdateResult.records.length > 0) {
           const record = channelUpdateResult.records[0];
@@ -315,11 +318,11 @@ if (args.contextData.action === 'start') {
 
           // Update channel progress
           await session.run(`
-            MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+            MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                   -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
             SET cs.progress = $progress,
                 cs.updatedAt = datetime()
-          `, { userUuid, channelId, progress: channelProgress });
+          `, { ownershipId, channelId, progress: channelProgress });
 
           await logMessage('info', 'Channel progress updated', {
             channelId,
@@ -332,14 +335,14 @@ if (args.contextData.action === 'start') {
           if (processedPlaylists >= totalPlaylists && totalPlaylists > 0) {
             // Verify all playlists are indeed completed
             const verifyResult = await session.run(`
-              MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+              MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                     -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
               MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-              MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+              MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
               WITH count(ps) as totalCount,
                    sum(CASE WHEN ps.status = 'completed' THEN 1 ELSE 0 END) as completedCount
               RETURN totalCount, completedCount
-            `, { userUuid, channelId });
+            `, { ownershipId, channelId });
 
             if (verifyResult.records.length > 0) {
               const verifyRecord = verifyResult.records[0];
@@ -349,14 +352,14 @@ if (args.contextData.action === 'start') {
               // If all playlists are completed, mark channel as completed
               if (completedCount >= totalCount && totalCount > 0) {
                 await session.run(`
-                  MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                         -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
                   SET cs.status = 'completed',
                       cs.progress = 100,
                       cs.priority = null,
                       cs.completedAt = datetime(),
                       cs.updatedAt = datetime()
-                `, { userUuid, channelId });
+                `, { ownershipId, channelId });
 
                 await logMessage('info', 'Channel marked as completed', {
                   channelId,
@@ -377,13 +380,13 @@ if (args.contextData.action === 'start') {
 
       // Mark as failed
       await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
               -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         SET ps.status = 'failed',
             ps.error = $error,
             ps.priority = null,
             ps.updatedAt = datetime()
-      `, { userUuid, playlistId, error: error.message });
+      `, { ownershipId, playlistId, error: error.message });
 
       // If this playlist is part of a channel, update channel with error
       if (channelId) {
@@ -391,12 +394,12 @@ if (args.contextData.action === 'start') {
         // This ensures channel completion tracking is accurate even when some playlists fail
         // The counter increment is atomic and safe for concurrent updates
         const channelUpdateResult = await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
           SET cs.processedPlaylists = coalesce(cs.processedPlaylists, 0) + 1,
               cs.updatedAt = datetime()
           RETURN cs
-        `, { userUuid, channelId });
+        `, { ownershipId, channelId });
 
         if (channelUpdateResult.records.length > 0) {
           const record = channelUpdateResult.records[0];
@@ -413,11 +416,11 @@ if (args.contextData.action === 'start') {
 
           // Update channel progress
           await session.run(`
-            MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+            MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                   -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
             SET cs.progress = $progress,
                 cs.updatedAt = datetime()
-          `, { userUuid, channelId, progress: channelProgress });
+          `, { ownershipId, channelId, progress: channelProgress });
 
           await logMessage('info', 'Channel progress updated after playlist failure', {
             channelId,
@@ -430,15 +433,15 @@ if (args.contextData.action === 'start') {
           if (processedPlaylists >= totalPlaylists && totalPlaylists > 0) {
             // Check if any playlists failed
             const statusCheckResult = await session.run(`
-              MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+              MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                     -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
               MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-              MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+              MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
               WITH count(ps) as totalCount,
                    sum(CASE WHEN ps.status = 'completed' THEN 1 ELSE 0 END) as completedCount,
                    sum(CASE WHEN ps.status = 'failed' THEN 1 ELSE 0 END) as failedCount
               RETURN totalCount, completedCount, failedCount
-            `, { userUuid, channelId });
+            `, { ownershipId, channelId });
 
             if (statusCheckResult.records.length > 0) {
               const statusRecord = statusCheckResult.records[0];
@@ -454,7 +457,7 @@ if (args.contextData.action === 'start') {
                   : null;
 
                 await session.run(`
-                  MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                         -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
                   SET cs.status = $status,
                       cs.progress = 100,
@@ -462,7 +465,7 @@ if (args.contextData.action === 'start') {
                       cs.error = $error,
                       cs.completedAt = datetime(),
                       cs.updatedAt = datetime()
-                `, { userUuid, channelId, status: finalStatus, error: errorMessage });
+                `, { ownershipId, channelId, status: finalStatus, error: errorMessage });
 
                 await logMessage('info', 'Channel final status updated', {
                   channelId,

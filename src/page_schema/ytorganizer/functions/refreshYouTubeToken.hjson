@@ -35,7 +35,6 @@ try {
 
   // Import YouTube OAuth utilities
   const { google } = await import('googleapis');
-  const neo4j = await import('neo4j-driver');
 
   // Get user's current token from database
   const tokenResult = await args.session.run(`
@@ -158,7 +157,7 @@ try {
     `, {
       userUuid,
       accessToken: newAccessTokenEncrypted,
-      expiresAt: neo4j.default.int(expiryTime)
+      expiresAt: neo4jDriver.int(expiryTime)
     });
 
     console.log(`[Token Refresh] Successfully refreshed token for user ${userUuid}`);

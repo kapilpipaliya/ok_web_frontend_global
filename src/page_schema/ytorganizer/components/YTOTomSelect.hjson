@@ -198,10 +198,7 @@ const loadOptionsFromFunction = async (optionType, subType) => {
       params.subType = subType;
     }
 
-    const result = await args.executeNamedServerFunction({
-      functionName: "getSelectOptions",
-      contextData: { params }
-    });
+    const result = await args.fns.executeYTOFunction("getSelectOptions", { params });
 
     if (result.error) {
       throw new Error(result.error);
@@ -243,10 +240,7 @@ const loadOptionsFromCustomFunction = async (functionName, singularName, pluralN
   setPlaceholder(tomSelectInstance, `Loading ${itemName.toLowerCase()}...`);
 
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: functionName,
-      contextData: functionContext || {}
-    });
+    const result = await args.fns.executeYTOFunction(functionName, functionContext || {});
 
     if (result.error) {
       throw new Error(result.error);

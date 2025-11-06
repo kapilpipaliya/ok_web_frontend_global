@@ -15,11 +15,15 @@ try {
     throw new Error("User session not found");
   }
 
+  const { ownershipId } = args.contextData;
+
   // Use helper functions to fetch channels and playlists with video counts
+  // ownershipId is optional - if omitted, aggregates across all ownerships
   const channelResult = await args.executeNamedServerFunction({
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
       statusFilter: ['queued', 'processing']
     }
   });
@@ -28,6 +32,7 @@ try {
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
       statusFilter: ['queued', 'processing']
     }
   });

@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "updatePlaylistSettings",
-        description: "Updates playlist settings like custom name",
+        description: "Updates playlist settings like custom name. Supports multi-ownership model - requires ownershipId.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -14,23 +14,37 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  const { youtubeId, customName } = args.contextData;
+  const { youtubeId, customName, ownershipId } = args.contextData;
 
   if (!youtubeId) {
     throw new Error("Playlist ID is required");
   }
 
-  // Step 1: Update PlaylistSetting
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
+  // Step 1: Update PlaylistSetting for specific ownership
   const updateQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $youtubeId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $youtubeId})
     SET ps.customName = $customName,
         ps.updatedAt = datetime()
     RETURN p.youtubeId as youtubeId
   `;
 
   const updateResult = await args.session.run(updateQuery, {
-    userUuid: user.P.uuid,
+    ownershipId,
     youtubeId,
     customName: customName || null
   });
@@ -44,6 +58,7 @@ try {
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by specific ownership
       playlistIds: [youtubeId]
     }
   });

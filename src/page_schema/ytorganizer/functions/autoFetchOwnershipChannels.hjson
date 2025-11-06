@@ -1,0 +1,163 @@
+{
+  vertexes: [
+    {
+      id: "function_root"
+      L: "Function"
+      P: {
+        key: "autoFetchOwnershipChannels"
+        description: "Auto-fetch all channels owned by a YouTube ownership and save them to database"
+        body: '''
+// Get ownershipId from context
+const { ownershipId } = args.contextData;
+
+if (!ownershipId) {
+  throw new Error('ownershipId is required');
+}
+
+try {
+  // Get authenticated YouTube client for this ownership
+  const youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
+
+  // Fetch all channels owned by this YouTube account
+  const channelsResponse = await youtube.channels.list({
+    part: ['snippet', 'contentDetails', 'statistics'],
+    mine: true,
+    maxResults: 50
+  });
+
+  const channels = channelsResponse.data.items || [];
+
+  if (channels.length === 0) {
+    return {
+      success: true,
+      message: 'No channels found',
+      channelCount: 0
+    };
+  }
+
+  // Log API usage - channels.list costs 1 unit per call
+  await args.logAPIUsage(
+    ownershipId,
+    'channels.list',
+    args.calculateOperationCost('channels.list'),
+    args.session
+  );
+
+  const savedChannels = [];
+
+  // Save each channel to the database
+  for (const channel of channels) {
+    const channelData = {
+      youtubeId: channel.id,
+      title: channel.snippet.title,
+      description: channel.snippet.description,
+      customUrl: channel.snippet.customUrl || null,
+      publishedAt: channel.snippet.publishedAt,
+      thumbnailUrl: channel.snippet.thumbnails?.default?.url || null,
+      country: channel.snippet.country || null,
+      viewCount: channel.statistics?.viewCount ? parseInt(channel.statistics.viewCount) : 0,
+      subscriberCount: channel.statistics?.subscriberCount ? parseInt(channel.statistics.subscriberCount) : 0,
+      videoCount: channel.statistics?.videoCount ? parseInt(channel.statistics.videoCount) : 0,
+      uploadsPlaylistId: channel.contentDetails?.relatedPlaylists?.uploads || null
+    };
+
+    // Check if channel already exists
+    const existingChannel = await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+      RETURN c
+    `, {
+      ownershipId,
+      youtubeId: channelData.youtubeId
+    });
+
+    if (existingChannel.records.length > 0) {
+      // Update existing channel
+      await args.session.run(`
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+        SET c.title = $title,
+            c.description = $description,
+            c.customUrl = $customUrl,
+            c.thumbnailUrl = $thumbnailUrl,
+            c.country = $country,
+            c.viewCount = $viewCount,
+            c.subscriberCount = $subscriberCount,
+            c.videoCount = $videoCount,
+            c.uploadsPlaylistId = $uploadsPlaylistId,
+            c.lastUpdated = datetime()
+      `, {
+        ownershipId,
+        ...channelData
+      });
+
+      savedChannels.push({ ...channelData, action: 'updated' });
+    } else {
+      // Create new channel with ChannelSetting
+      const channelKey = args.neo4jDriver.default.types.Integer.fromNumber(Date.now()).toString() + '_' + Math.random().toString(36).substring(7);
+
+      await args.session.run(`
+        MATCH (o:YouTubeOwnership {key: $ownershipId})
+        CREATE (c:Channel {
+          key: $channelKey,
+          youtubeId: $youtubeId,
+          title: $title,
+          description: $description,
+          customUrl: $customUrl,
+          publishedAt: datetime($publishedAt),
+          thumbnailUrl: $thumbnailUrl,
+          country: $country,
+          viewCount: $viewCount,
+          subscriberCount: $subscriberCount,
+          videoCount: $videoCount,
+          uploadsPlaylistId: $uploadsPlaylistId,
+          createdAt: datetime(),
+          lastUpdated: datetime()
+        })
+        CREATE (o)-[:YouTubeOwnershipChannel]->(c)
+        CREATE (cs:ChannelSetting {
+          key: $channelKey + '_setting',
+          customName: null,
+          isEnabled: true,
+          createdAt: datetime()
+        })
+        CREATE (c)-[:ChannelChannelSetting]->(cs)
+        RETURN c
+      `, {
+        ownershipId,
+        channelKey,
+        ...channelData
+      });
+
+      savedChannels.push({ ...channelData, action: 'created' });
+    }
+  }
+
+  return {
+    success: true,
+    message: `Fetched ${channels.length} channels`,
+    channelCount: channels.length,
+    channels: savedChannels
+  };
+
+} catch (error) {
+  console.error('Error auto-fetching channels:', error);
+
+  // Check if quota exceeded
+  if (error.code === 403 && error.message?.includes('quota')) {
+    return {
+      success: false,
+      error: 'YouTube API quota exceeded. Please try again tomorrow.',
+      quotaExceeded: true
+    };
+  }
+
+  return {
+    success: false,
+    error: error.message || 'Failed to fetch channels'
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

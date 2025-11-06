@@ -83,12 +83,9 @@ const addVideosToPlaylist = async () => {
   setIsAddingVideos(true);
 
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "addVideoToPlaylist",
-      contextData: {
-        playlistId: playlist.P.youtubeId,
-        videoUrl: urlsText
-      }
+    const result = await args.fns.executeYTOFunction("addVideoToPlaylist", {
+      playlistId: playlist.P.youtubeId,
+      videoUrl: urlsText
     });
 
     if (result?.result?.success) {

@@ -16,10 +16,7 @@
         contextName: "playlistsData",
         serverFunction: '''
 try {
-  const result = await args.executeNamedServerFunction({
-    functionName: "getUserPlaylists",
-    contextData: {}
-  });
+  const result = await args.fns.executeYTOFunction("getUserPlaylists", {});
 
   if (result?.result?.success && result?.result?.data) {
     return result.result.data;

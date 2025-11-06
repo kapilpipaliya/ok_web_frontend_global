@@ -3,18 +3,36 @@ import { auth, driver as createDriver, type Driver } from "neo4j-driver";
 import { boltPort } from "./boltConstant";
 
 /**
- * Singleton driver instance - prevents creating multiple drivers
+ * Global driver state management
  *
- * IMPORTANT: This MUST be a singleton to prevent connection pool exhaustion.
- * Creating multiple drivers leads to:
- * - Hundreds of connections to Neo4j
- * - Memory leaks
- * - Neo4j becoming unresponsive after some time
+ * Uses global state to persist across HMR (Hot Module Reload) in development.
+ * Without this, Vite/Vinxi module reloads would reset the singleton to null,
+ * causing multiple driver instances to be created.
  *
- * Each driver maintains its own connection pool. With ~20 places calling getDriver(),
- * without singleton pattern we'd have 20 drivers × 50 connections = 1000+ connections!
+ * Similar pattern to workerState in initWorkersCore.ts
  */
-let driverInstance: Driver | null = null;
+declare global {
+  var __neo4jDriverState:
+    | {
+        driverInstance: Driver | null;
+        driverPromise: Promise<Driver> | null;
+        driverWasClosed: boolean;
+      }
+    | undefined;
+}
+
+// Initialize global driver state if not exists
+if (!global.__neo4jDriverState) {
+  console.log("[Neo4j Driver] Initializing global driver state");
+  global.__neo4jDriverState = {
+    driverInstance: null,
+    driverPromise: null,
+    driverWasClosed: false,
+  };
+}
+
+// Export reference to global state for easy access
+const driverState = global.__neo4jDriverState;
 
 /**
  * Get the Neo4j driver instance (singleton pattern)
@@ -32,54 +50,72 @@ let driverInstance: Driver | null = null;
  * @returns Promise<Driver> - Singleton Neo4j driver instance with connection pooling
  */
 export async function getDriver(): Promise<Driver> {
-  // Return existing driver if already created
-  if (driverInstance) {
-    return driverInstance;
+  // If already creating driver, wait for that promise
+  if (driverState.driverPromise) {
+    return driverState.driverPromise;
   }
 
-  const username = process.env.NEO4J_USERNAME || "neo4j";
-  const password = process.env.NEO4J_PASSWORD || "";
+  // If driver exists and wasn't explicitly closed, return it
+  // We don't do health checks on every call as they're wasteful
+  if (driverState.driverInstance && !driverState.driverWasClosed) {
+    return driverState.driverInstance;
+  }
 
-  // Create driver with optimized connection pool settings
-  driverInstance = createDriver(
-    `bolt://localhost:${boltPort}`,
-    auth.basic(username, password),
-    {
-      disableLosslessIntegers: true,
+  // If driver was closed or doesn't exist, create a new one
+  // Create promise for driver initialization
+  // This prevents race conditions where multiple concurrent calls create multiple drivers
+  driverState.driverPromise = (async () => {
+    const username = process.env.NEO4J_USERNAME || "neo4j";
+    const password = process.env.NEO4J_PASSWORD || "";
 
-      // Connection Pool Configuration
-      // These settings prevent connection exhaustion and ensure healthy connection lifecycle
+    console.log("[Neo4j Driver] Creating new driver connection pool...");
+    // Create driver with optimized connection pool settings
+    const driver = createDriver(
+      `bolt://localhost:${boltPort}`,
+      auth.basic(username, password),
+      {
+        disableLosslessIntegers: true,
 
-      maxConnectionPoolSize: 50,
-      // Maximum number of connections in the pool per host
-      // Default: 100. Reduced to 50 to prevent overwhelming Neo4j server
-      // Each connection consumes memory on both client and server
+        // Connection Pool Configuration
+        // These settings prevent connection exhaustion and ensure healthy connection lifecycle
 
-      connectionAcquisitionTimeout: 60000,
-      // Time (ms) to wait for an available connection from the pool
-      // Default: 60000 (60 seconds)
-      // If all connections are busy, new requests wait up to this time
-      // Prevents indefinite blocking when server is under load
+        maxConnectionPoolSize: 50,
+        // Maximum number of connections in the pool per host
+        // Default: 100. Reduced to 50 to prevent overwhelming Neo4j server
+        // Each connection consumes memory on both client and server
 
-      maxConnectionLifetime: 3600000,
-      // Maximum lifetime (ms) of a pooled connection
-      // Default: 3600000 (1 hour)
-      // Connections older than this are closed and replaced
-      // Prevents stale connections and allows load rebalancing
+        connectionAcquisitionTimeout: 60000,
+        // Time (ms) to wait for an available connection from the pool
+        // Default: 60000 (60 seconds)
+        // If all connections are busy, new requests wait up to this time
+        // Prevents indefinite blocking when server is under load
 
-      connectionTimeout: 30000,
-      // Time (ms) to establish a new connection to the database
-      // Default: 30000 (30 seconds)
-      // Fails fast if Neo4j is unreachable instead of hanging indefinitely
+        maxConnectionLifetime: 3600000,
+        // Maximum lifetime (ms) of a pooled connection
+        // Default: 3600000 (1 hour)
+        // Connections older than this are closed and replaced
+        // Prevents stale connections and allows load rebalancing
 
-      maxTransactionRetryTime: 30000,
-      // Maximum time (ms) to retry transient errors (e.g., deadlocks, timeouts)
-      // Default: 30000 (30 seconds)
-      // Driver automatically retries failed transactions within this window
-    },
-  );
+        connectionTimeout: 30000,
+        // Time (ms) to establish a new connection to the database
+        // Default: 30000 (30 seconds)
+        // Fails fast if Neo4j is unreachable instead of hanging indefinitely
 
-  return driverInstance;
+        maxTransactionRetryTime: 30000,
+        // Maximum time (ms) to retry transient errors (e.g., deadlocks, timeouts)
+        // Default: 30000 (30 seconds)
+        // Driver automatically retries failed transactions within this window
+      },
+    );
+
+    console.log("[Neo4j Driver] Connection pool created successfully");
+    driverState.driverInstance = driver;
+    driverState.driverPromise = null; // Clear promise after successful creation
+    driverState.driverWasClosed = false; // Reset flag
+    return driver;
+  })();
+
+  return driverState.driverPromise;
 }
 
 /**
@@ -100,10 +136,12 @@ export async function getDriver(): Promise<Driver> {
  * - Unhandled promise rejections
  */
 export async function closeDriver() {
-  if (driverInstance) {
+  if (driverState.driverInstance) {
     console.log("[Neo4j Driver] Closing connection pool...");
-    await driverInstance.close();
-    driverInstance = null;
+    await driverState.driverInstance.close();
+    driverState.driverInstance = null;
+    driverState.driverPromise = null; // Clear promise as well
+    driverState.driverWasClosed = true; // Mark driver as closed
     console.log("[Neo4j Driver] Connection pool closed successfully");
   } else {
     console.log("[Neo4j Driver] No active driver instance to close");

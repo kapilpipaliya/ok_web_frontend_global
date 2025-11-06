@@ -16,40 +16,53 @@ try {
 
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 
-  // Get all channels that will be paused (need IDs before updating status)
+  // Get all channels that will be paused across all ownerships (need IDs before updating status)
   const channelsToDelete = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
           -[:ChannelSettingChannel]->(c:Channel)
     WHERE cs.status IN ['queued', 'processing']
-    RETURN c.youtubeId as channelId
+    RETURN c.youtubeId as channelId, o.key as ownershipId
   `, { userUuid: user.P.uuid });
 
-  // Get all playlists that will be paused
+  // Get all playlists that will be paused across all ownerships
   const playlistsToDelete = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
           -[:PlaylistSettingPlaylist]->(p:Playlist)
     WHERE ps.status IN ['queued', 'processing']
-    RETURN p.youtubeId as playlistId
+    RETURN p.youtubeId as playlistId, o.key as ownershipId
   `, { userUuid: user.P.uuid });
 
-  const channelIds = channelsToDelete.records.map(r => r.get('channelId'));
-  const playlistIds = playlistsToDelete.records.map(r => r.get('playlistId'));
+  const channelJobs = channelsToDelete.records.map(r => ({
+    channelId: r.get('channelId'),
+    ownershipId: r.get('ownershipId')
+  }));
+  const playlistJobs = playlistsToDelete.records.map(r => ({
+    playlistId: r.get('playlistId'),
+    ownershipId: r.get('ownershipId')
+  }));
 
   let jobsRemoved = 0;
 
   // Remove channel jobs from BullMQ queue
-  if (channelIds.length > 0) {
+  if (channelJobs.length > 0) {
     const channelQueue = helpers.result.data.createChannelQueue(args);
 
     try {
       // Get all waiting and delayed jobs
       const waitingJobs = await channelQueue.getJobs(['waiting', 'delayed']);
 
-      // Filter and remove jobs that match this user's channels
+      // Filter and remove jobs that match this user's channels (by ownership and channelId)
       for (const job of waitingJobs) {
-        if (job.data.userUuid === user.P.uuid && channelIds.includes(job.data.channelId)) {
-          await job.remove();
-          jobsRemoved++;
+        if (job.data.userUuid === user.P.uuid) {
+          const matchingJob = channelJobs.find(
+            cj => cj.channelId === job.data.channelId && cj.ownershipId === job.data.ownershipId
+          );
+          if (matchingJob) {
+            await job.remove();
+            jobsRemoved++;
+          }
         }
       }
     } finally {
@@ -58,18 +71,23 @@ try {
   }
 
   // Remove playlist jobs from BullMQ queue
-  if (playlistIds.length > 0) {
+  if (playlistJobs.length > 0) {
     const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 
     try{
       // Get all waiting and delayed jobs
       const waitingJobs = await playlistQueue.getJobs(['waiting', 'delayed']);
 
-      // Filter and remove jobs that match this user's playlists
+      // Filter and remove jobs that match this user's playlists (by ownership and playlistId)
       for (const job of waitingJobs) {
-        if (job.data.userUuid === user.P.uuid && playlistIds.includes(job.data.playlistId)) {
-          await job.remove();
-          jobsRemoved++;
+        if (job.data.userUuid === user.P.uuid) {
+          const matchingJob = playlistJobs.find(
+            pj => pj.playlistId === job.data.playlistId && pj.ownershipId === job.data.ownershipId
+          );
+          if (matchingJob) {
+            await job.remove();
+            jobsRemoved++;
+          }
         }
       }
     } finally {
@@ -77,9 +95,10 @@ try {
     }
   }
 
-  // Now update database status to paused
+  // Now update database status to paused across all ownerships
   const result = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
     WHERE cs.status IN ['queued', 'processing']
     SET cs.status = 'paused',
         cs.pausedAt = datetime(),
@@ -88,7 +107,8 @@ try {
   `, { userUuid: user.P.uuid });
 
   const playlistResult = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
     WHERE ps.status IN ['queued', 'processing']
     SET ps.status = 'paused',
         ps.pausedAt = datetime(),

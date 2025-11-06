@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "getUserChannels",
-        description: "Fetches all channels saved by the current user with their custom settings",
+        description: "Fetches all channels saved by the current user with their custom settings. Supports multi-ownership model with optional ownership filtering.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -17,11 +17,15 @@ try {
   // Get effective user (handles admin impersonation)
   const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
+  // Optional ownership filter from context
+  const { ownershipId = null } = args.contextData;
+
   // Use helper function to fetch channels with video counts
   const result = await args.executeNamedServerFunction({
     functionName: "getChannelsWithVideoCount",
     contextData: {
-      userUuid: user.P.uuid
+      userUuid: user.P.uuid,
+      ownershipId  // Optional: filter by specific ownership
     }
   });
 
@@ -36,7 +40,8 @@ try {
     data: {
       channels,
       totalCount: channels.length,
-      userId: user.id
+      userId: user.id,
+      ownershipId  // Include ownership context if filtered
     },
     message: `Found ${channels.length} channels`
   };

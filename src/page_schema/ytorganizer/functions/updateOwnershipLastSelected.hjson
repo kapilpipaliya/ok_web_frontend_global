@@ -1,0 +1,69 @@
+{
+  vertexes: [
+    {
+      id: "function_root"
+      L: "Function"
+      P: {
+        key: "updateOwnershipLastSelected"
+        description: "Update the lastSelected timestamp for a YouTube ownership"
+        body: '''
+try {
+  const { ownershipId } = args.contextData;
+
+  if (!ownershipId) {
+    throw new Error("Ownership ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Verify ownership belongs to user and update lastSelected
+  const result = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    SET o.lastSelected = datetime()
+    RETURN o
+  `, {
+    userUuid: user.P.uuid,
+    ownershipId
+  });
+
+  if (result.records.length === 0) {
+    throw new Error("YouTube ownership not found or access denied");
+  }
+
+  return {
+    success: true,
+    message: "Ownership updated successfully"
+  };
+
+} catch (error) {
+  console.error("Error updating ownership lastSelected:", error);
+
+  let userMessage = "Failed to update ownership. Please try again.";
+
+  if (error.message.includes("Ownership ID is required")) {
+    userMessage = "Ownership ID is required.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to update ownership.";
+  } else if (error.message.includes("not found or access denied")) {
+    userMessage = error.message;
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

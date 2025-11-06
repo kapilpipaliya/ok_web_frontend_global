@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "savePlaylist",
-        description: "Fetches basic playlist metadata using per-user OAuth and queues background processing for videos",
+        description: "Fetches basic playlist metadata using per-ownership OAuth and queues background processing for videos. Supports multi-ownership model where each YouTube account has separate quota.",
         body: '''
 /**
  * Extract playlist ID from various YouTube URL formats
@@ -33,18 +33,19 @@ const extractPlaylistId = (url) => {
 };
 
 /**
- * Fetch ONLY basic playlist metadata using per-user OAuth (no videos)
+ * Fetch ONLY basic playlist metadata using per-ownership OAuth (no videos)
  * Full processing will be done in background worker
+ * Each ownership uses its own YouTube account with its own API quota (10k units/day)
  */
-const fetchPlaylistMetadata = async (playlistId, youtube, userUuid, session) => {
+const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) => {
   // Fetch ONLY playlist details (metadata only, no videos)
   const playlistResponse = await youtube.playlists.list({
     part: ['snippet', 'contentDetails', 'status'],
     id: [playlistId]
   });
 
-  // Log API usage: playlists.list operation (1 unit)
-  await args.logAPIUsage(userUuid, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
+  // Log API usage: playlists.list operation (1 unit) - per ownership quota
+  await args.logAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
 
   if (!playlistResponse.data.items || playlistResponse.data.items.length === 0) {
     throw new Error('Playlist not found or is private/deleted');
@@ -62,10 +63,14 @@ const fetchPlaylistMetadata = async (playlistId, youtube, userUuid, session) => 
 
 try {
   // Extract input parameters from the request
-  const { url, name, channelId, refresh = false, priority = 'normal' } = args.contextData;
+  const { url, name, channelId, refresh = false, priority = 'normal', ownershipId } = args.contextData;
 
   if (!url) {
     throw new Error("Playlist URL is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Validate priority value
@@ -78,23 +83,33 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
   // Extract playlist ID from the provided URL
   const playlistId = extractPlaylistId(url);
   if (!playlistId) {
     throw new Error("Invalid YouTube playlist URL. Please provide a valid playlist URL.");
   }
 
-  // DUPLICATE JOB PREVENTION: Check if this playlist is already queued or processing
+  // DUPLICATE JOB PREVENTION: Check if this playlist is already queued or processing for this ownership
   // Prevents multiple concurrent jobs for the same playlist which would waste API quota
   // and potentially cause data inconsistencies
   // REFRESH MODE: If refresh=true, skip this check to allow re-processing completed playlists
   if (!refresh) {
     const existingPlaylistResult = await args.session.run(`
-      MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
             -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
       WHERE ps.status IN ['queued', 'processing']
       RETURN p.youtubeId as playlistId, ps.status as status, p.title as title
-    `, { userUuid: user.P.uuid, playlistId });
+    `, { ownershipId, playlistId });
 
     if (existingPlaylistResult.records.length > 0) {
       const record = existingPlaylistResult.records[0];
@@ -103,7 +118,7 @@ try {
 
       return {
         success: false,
-        message: `Playlist "${title}" is already ${status}. Please wait for it to complete before adding again. Use refresh=true to force re-processing.`,
+        message: `Playlist "${title}" is already ${status} for this YouTube account. Please wait for it to complete before adding again. Use refresh=true to force re-processing.`,
         data: {
           playlistId: record.get('playlistId'),
           status: status,
@@ -113,10 +128,10 @@ try {
     }
   }
 
-  // Get authenticated YouTube client for this user
+  // Get authenticated YouTube client for this ownership
   let youtube;
   try {
-    youtube = await args.getYouTubeClient(user.P.uuid, args.session, args.request);
+    youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
   } catch (error) {
     // Check if this is an OAuth authorization error
     if (error.message.includes('No YouTube authorization') ||
@@ -135,8 +150,8 @@ try {
     throw error;
   }
 
-  // Fetch ONLY basic playlist metadata using user's OAuth (fast operation)
-  const playlistData = await fetchPlaylistMetadata(playlistId, youtube, user.P.uuid, args.session);
+  // Fetch ONLY basic playlist metadata using ownership's OAuth (fast operation)
+  const playlistData = await fetchPlaylistMetadata(playlistId, youtube, ownershipId, args.session);
 
   // STEP 1: Create or update the main Playlist vertex with basic metadata
   const playlistKey = `playlist_${playlistId}`;
@@ -175,13 +190,13 @@ try {
     publishedAt: playlistData.snippet.publishedAt
   });
 
-  // STEP 2: Create user-specific PlaylistSetting with status tracking
-  const playlistSettingKey = `playlist_setting_${user.id}_${playlistId}`;
+  // STEP 2: Create ownership-specific PlaylistSetting with status tracking
+  const playlistSettingKey = `playlist_setting_${ownershipId}_${playlistId}`;
 
   const mergePlaylistSettingQuery = `
-    MATCH (u:User {uuid: $userUuid})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (p:Playlist {youtubeId: $playlistId})
-    MERGE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     ON CREATE SET
       ps.key = $playlistSettingKey,
       ps.createdAt = datetime()
@@ -203,7 +218,7 @@ try {
   `;
 
   await args.session.run(mergePlaylistSettingQuery, {
-    userUuid: user.P.uuid,
+    ownershipId,
     playlistId,
     playlistSettingKey,
     customName: name || null,
@@ -236,6 +251,7 @@ try {
       playlistId,
       userId: user.id,
       userUuid: user.P.uuid,
+      ownershipId: ownershipId,  // Required for multi-ownership support
       customName: name || null,
       channelId: channelId || null,
       priority: playlistPriority
@@ -261,6 +277,7 @@ try {
       totalVideos: playlistData.contentDetails?.itemCount || 0,
       channelTitle: playlistData.snippet.channelTitle,
       userId: user.id,
+      ownershipId: ownershipId,  // Ownership context for multi-account support
       userSpecific: true,
       isRefresh: refresh,
       usesOAuth: true

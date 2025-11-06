@@ -1,8 +1,12 @@
 /**
- * YouTube OAuth Connection Endpoint
+ * YouTube OAuth Connection Endpoint - Multi-Ownership Support
  *
  * Initiates the OAuth flow by redirecting user to Google's authorization page.
  * User must be logged in to connect their YouTube account.
+ * Supports adding multiple YouTube accounts per user.
+ *
+ * Query parameters:
+ * - customName (optional): Custom display name for this ownership
  */
 
 import { getYouTubeAuthUrl } from '~/lib/youtube/youtubeOAuth';
@@ -27,8 +31,17 @@ export async function GET(event: APIEvent) {
       });
     }
 
-    // Generate YouTube OAuth URL
-    const authUrl = await getYouTubeAuthUrl(user.P.uuid, dbSession, event.request);
+    // Get optional custom name from query parameters
+    const url = new URL(event.request.url);
+    const customName = url.searchParams.get('customName') || undefined;
+
+    // Generate YouTube OAuth URL with optional custom name
+    const authUrl = await getYouTubeAuthUrl(
+      user.P.uuid,
+      dbSession,
+      event.request,
+      customName
+    );
 
     // Redirect user to Google authorization page
     return new Response(null, {

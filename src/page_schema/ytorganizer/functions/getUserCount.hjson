@@ -8,10 +8,10 @@
         description: "Gets the total count of users using YouTube Organizer",
         body: '''
 try {
-  // Query to count unique users who have channels or playlists
+  // Query to count unique users who have YouTube ownerships (connected accounts)
   const query = `
     MATCH (u:User)
-    WHERE EXISTS((u)-[:UserChannelSetting]->()) OR EXISTS((u)-[:UserPlaylistSetting]->())
+    WHERE EXISTS((u)-[:UserYouTubeOwnership]->(:YouTubeOwnership))
     RETURN COUNT(DISTINCT u) as totalUsers
   `;
 

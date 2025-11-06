@@ -914,10 +914,7 @@ return {
         ? { channelId: youtubeId }
         : { playlistId: youtubeId };
 
-      const response = await args.executeNamedServerFunction({
-        functionName: functionName,
-        contextData: contextData
-      });
+      const response = await args.fns.executeYTOFunction(functionName, contextData);
 
       if (response.result?.success) {
         args.showSuccessToast(response.result.message || "Processing retry queued successfully");

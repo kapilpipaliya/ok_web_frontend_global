@@ -1,0 +1,42 @@
+{
+  vertexes: [
+    {
+      id: "function_root"
+      L: "Function"
+      P: {
+        key: "getYouTubeOwnerships"
+        description: "Get all YouTube ownerships for a user"
+        body: '''
+// Get user from session
+const user = await args.getUserFromSession(args.request);
+if (!user) {
+  throw new Error('User not authenticated');
+}
+
+// Get all ownerships for the user with active tokens
+const result = await args.session.run(`
+  MATCH (u:User {uuid: $userId})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+        -[:YouTubeOwnershipToken]->(token:YouTubeToken)
+  WHERE token.isRevoked = false
+  RETURN o
+  ORDER BY o.isPrimary DESC, o.lastSelected DESC
+`, {
+  userId: user.P.uuid
+});
+
+// Convert Neo4j nodes to vertex format
+const ownerships = result.records.map((record) => {
+  const ownershipNode = record.get('o');
+  return args.convertNodeToJson(ownershipNode);
+});
+
+return {
+  success: true,
+  data: ownerships
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

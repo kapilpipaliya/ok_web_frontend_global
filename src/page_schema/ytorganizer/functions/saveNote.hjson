@@ -15,14 +15,28 @@ try {
   }
 
   // Extract parameters
-  const { item, itemType, note } = args.contextData;
+  const { item, itemType, note, ownershipId } = args.contextData;
 
   if (!item) {
     throw new Error("Item is required");
   }
 
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
   if (!itemType || !["video", "channel", "playlist"].includes(itemType)) {
     throw new Error("Invalid item type. Must be 'video', 'channel', or 'playlist'");
+  }
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
   }
 
   // Get the item ID
@@ -32,33 +46,33 @@ try {
   }
 
   // Determine the correct node label and relationship
-  let nodeLabel, settingsLabel, userRelation, settingRelation, itemRelation;
+  let nodeLabel, settingsLabel, ownershipRelation, settingRelation, itemRelation;
 
   if (itemType === "video") {
     nodeLabel = "Video";
-    settingsLabel = "VideoSettings";
-    userRelation = "UserVideoSettings";
-    settingRelation = "VideoSettingsVideo";
-    itemRelation = "VideoSettingsVideo";
+    settingsLabel = "VideoSetting";
+    ownershipRelation = "YouTubeOwnershipVideoSetting";
+    settingRelation = "VideoSettingVideo";
+    itemRelation = "VideoSettingVideo";
   } else if (itemType === "channel") {
     nodeLabel = "Channel";
     settingsLabel = "ChannelSetting";
-    userRelation = "UserChannelSetting";
+    ownershipRelation = "YouTubeOwnershipChannelSetting";
     settingRelation = "ChannelSettingChannel";
     itemRelation = "ChannelSettingChannel";
   } else {
     nodeLabel = "Playlist";
     settingsLabel = "PlaylistSetting";
-    userRelation = "UserPlaylistSetting";
+    ownershipRelation = "YouTubeOwnershipPlaylistSetting";
     settingRelation = "PlaylistSettingPlaylist";
     itemRelation = "PlaylistSettingPlaylist";
   }
 
   // Query to create or update the settings node with note
   const query = `
-    MATCH (u:User {uuid: $userUuid})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (item:${nodeLabel} {youtubeId: $itemId})
-    MERGE (u)-[:${userRelation}]->(settings:${settingsLabel})-[:${itemRelation}]->(item)
+    MERGE (o)-[:${ownershipRelation}]->(settings:${settingsLabel})-[:${itemRelation}]->(item)
     ON CREATE SET
       settings.note = $note,
       settings.noteUpdatedAt = datetime(),
@@ -71,7 +85,7 @@ try {
 
   // Execute the query
   const result = await args.session.run(query, {
-    userUuid: user.P.uuid,
+    ownershipId,
     itemId: itemId,
     note: note || ""
   });
@@ -88,6 +102,7 @@ try {
       functionName: "getChannelsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,
         channelIds: [itemId]
       }
     });
@@ -100,6 +115,7 @@ try {
       functionName: "getPlaylistsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,
         playlistIds: [itemId]
       }
     });
@@ -108,10 +124,19 @@ try {
       itemData = playlistResult.result.data[0];
     }
   } else {
-    // For videos, use the original approach
-    const settings = args.convertNodeToJson(result.records[0].get('settings'));
-    const updatedItem = args.convertNodeToJson(result.records[0].get('item'));
-    itemData = { video: updatedItem, videoSettings: settings };
+    // For videos, fetch using helper
+    const videoResult = await args.executeNamedServerFunction({
+      functionName: "getVideosWithDetails",
+      contextData: {
+        userUuid: user.P.uuid,
+        ownershipId,
+        videoIds: [itemId]
+      }
+    });
+
+    if (videoResult.result?.success && videoResult.result.data.length > 0) {
+      itemData = videoResult.result.data[0];
+    }
   }
 
   return {

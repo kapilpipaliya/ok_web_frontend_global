@@ -34,41 +34,49 @@ export async function subdomainRegister(
   const userDbSession = (await getDriver()).session({
     database: data.subDomain,
   });
-  await createDatabaseConstraints(userDbSession);
-  const tx = userDbSession.beginTransaction();
 
   try {
-    await createUserInUserDB(
-      tx,
-      {
-        email: data.email,
-        emailConfirmed: true,
-        username: data.username,
-        uuid: user.P.uuid,
-      },
-      true,
-    );
+    await createDatabaseConstraints(userDbSession);
+    const tx = userDbSession.beginTransaction();
 
-    await createRootFolder(tx);
-    await addAdminRoleToUser(tx, user.P.uuid);
+    try {
+      await createUserInUserDB(
+        tx,
+        {
+          email: data.email,
+          emailConfirmed: true,
+          username: data.username,
+          uuid: user.P.uuid,
+        },
+        true,
+      );
 
-    await insertComponents(tx);
+      await createRootFolder(tx);
+      await addAdminRoleToUser(tx, user.P.uuid);
 
-    // After successful subdomain creation and registration
-    await saveAllEmailTemplates(tx);
+      await insertComponents(tx);
 
-    await tx.commit();
-  } catch (error) {
-    await tx.rollback();
-    throw error;
+      // After successful subdomain creation and registration
+      await saveAllEmailTemplates(tx);
+
+      await tx.commit();
+    } catch (error) {
+      await tx.rollback();
+      throw error;
+    } finally {
+      // Close transaction after commit or rollback
+      await tx.close();
+    }
+
+    // syncNodesAPICall({
+    //   // This is not syncing Root to child relationship.
+    //   nodesToTransfer: ["Comp"], // "DataType", "Nav"
+    //   subDomain: data.subDomain,
+    // });
+
+    return user;
+  } finally {
+    // Always close the session
+    await userDbSession.close();
   }
-
-  // syncNodesAPICall({
-  //   // This is not syncing Root to child relationship.
-  //   nodesToTransfer: ["Comp"], // "DataType", "Nav"
-  //   subDomain: data.subDomain,
-  // });
-  await tx.close();
-  await userDbSession.close();
-  return user;
 }

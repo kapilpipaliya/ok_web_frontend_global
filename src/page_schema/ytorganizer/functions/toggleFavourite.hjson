@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "toggleFavourite",
-        description: "Toggles favourite status for a video, channel, or playlist",
+        description: "Toggles favourite status for a video, channel, or playlist. Supports multi-ownership model - requires ownershipId.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -15,7 +15,7 @@ try {
   }
 
   // Extract parameters
-  const { item, itemType } = args.contextData;
+  const { item, itemType, ownershipId } = args.contextData;
 
   if (!item) {
     throw new Error("Item is required");
@@ -25,40 +25,54 @@ try {
     throw new Error("Invalid item type. Must be 'video', 'channel', or 'playlist'");
   }
 
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
   // Get the item ID
   const itemId = item.P?.youtubeId || item.P?.id;
   if (!itemId) {
     throw new Error("Item ID not found");
   }
 
-  // Determine the correct node label and relationship
-  let nodeLabel, settingsLabel, userRelation, settingRelation, itemRelation;
+  // Determine the correct node label and relationship for ownership-based model
+  let nodeLabel, settingsLabel, ownershipRelation, settingRelation, itemRelation;
 
   if (itemType === "video") {
     nodeLabel = "Video";
-    settingsLabel = "VideoSettings";
-    userRelation = "UserVideoSettings";
-    settingRelation = "VideoSettingsVideo";
-    itemRelation = "VideoSettingsVideo";
+    settingsLabel = "VideoSetting";
+    ownershipRelation = "YouTubeOwnershipVideoSetting";
+    settingRelation = "VideoSettingVideo";
+    itemRelation = "VideoSettingVideo";
   } else if (itemType === "channel") {
     nodeLabel = "Channel";
     settingsLabel = "ChannelSetting";
-    userRelation = "UserChannelSetting";
+    ownershipRelation = "YouTubeOwnershipChannelSetting";
     settingRelation = "ChannelSettingChannel";
     itemRelation = "ChannelSettingChannel";
   } else {
     nodeLabel = "Playlist";
     settingsLabel = "PlaylistSetting";
-    userRelation = "UserPlaylistSetting";
+    ownershipRelation = "YouTubeOwnershipPlaylistSetting";
     settingRelation = "PlaylistSettingPlaylist";
     itemRelation = "PlaylistSettingPlaylist";
   }
 
-  // Query to toggle favourite status
+  // Query to toggle favourite status for specific ownership
   const query = `
-    MATCH (u:User {uuid: $userUuid})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (item:${nodeLabel} {youtubeId: $itemId})
-    MERGE (u)-[:${userRelation}]->(settings:${settingsLabel})-[:${itemRelation}]->(item)
+    MERGE (o)-[:${ownershipRelation}]->(settings:${settingsLabel})-[:${itemRelation}]->(item)
     ON CREATE SET
       settings.isFavourite = true,
       settings.favouritedAt = datetime(),
@@ -74,7 +88,7 @@ try {
 
   // Execute the query
   const result = await args.session.run(query, {
-    userUuid: user.P.uuid,
+    ownershipId: ownershipId,
     itemId: itemId
   });
 
@@ -93,6 +107,7 @@ try {
       functionName: "getChannelsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Filter by specific ownership
         channelIds: [itemId]
       }
     });
@@ -105,6 +120,7 @@ try {
       functionName: "getPlaylistsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
+        ownershipId,  // Filter by specific ownership
         playlistIds: [itemId]
       }
     });
@@ -115,7 +131,7 @@ try {
   } else {
     // For videos, use the original approach
     const updatedItem = args.convertNodeToJson(result.records[0].get('item'));
-    itemData = { video: updatedItem, videoSettings: settings };
+    itemData = { video: updatedItem, videoSetting: settings };
   }
 
   return {

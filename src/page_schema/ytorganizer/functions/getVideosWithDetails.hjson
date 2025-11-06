@@ -12,6 +12,7 @@
  *
  * Parameters (via args.contextData):
  * - userUuid: string (required) - User UUID
+ * - ownershipId: string (optional) - Filter by specific YouTube ownership. If omitted, aggregates across all ownerships
  * - videoIds: string[] (optional) - Filter by specific video IDs
  * - playlistId: string (optional) - Filter videos by specific playlist ID
  * - statusFilter: string[] (optional) - Filter by status values (e.g., ['watched', 'unwatched'])
@@ -28,11 +29,12 @@
  * - skip: number (optional) - Number of results to skip (for pagination)
  *
  * Returns:
- * - Array of {video: Vertex, videoSettings: Vertex, parentPlaylist: {playlist: Vertex, playlistSetting: Vertex}|null}
+ * - Array of {video: Vertex, videoSettings: Vertex, ownership: Vertex, parentPlaylist: {playlist: Vertex, playlistSetting: Vertex}|null}
  */
 try {
   const {
     userUuid,
+    ownershipId = null,
     videoIds = [],
     playlistId = null,
     statusFilter = [],
@@ -97,11 +99,16 @@ try {
     }
   }
 
+  // Build ownership matching clause
+  const ownershipMatchClause = ownershipId
+    ? 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})'
+    : 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)';
+
   // Build playlist matching clause for includePlaylist (different from filtering)
   const playlistInfoClause = includePlaylist && !playlistId ? `
     OPTIONAL MATCH (p:Playlist)-[:PlaylistVideo]->(v)
-    OPTIONAL MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-    WITH v, vs, COLLECT(DISTINCT {playlist: p, playlistSetting: ps}) as playlists
+    OPTIONAL MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    WITH v, vs, o, COLLECT(DISTINCT {playlist: p, playlistSetting: ps}) as playlists
   ` : '';
 
   const playlistReturn = includePlaylist && !playlistId ? ', playlists[0] as firstPlaylist' : '';
@@ -113,11 +120,12 @@ try {
   // Cypher query to fetch videos with details
   const query = `
     MATCH (u:User {uuid: $userUuid})
+    ${ownershipMatchClause}
     ${playlistMatch}
-    MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
     WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     ${playlistInfoClause}
-    RETURN v, vs${playlistReturn}
+    RETURN v, vs, o${playlistReturn}
     ORDER BY ${orderByClause}
     ${skipClause}
     ${limitClause}
@@ -126,6 +134,7 @@ try {
   // Execute the query
   const result = await args.session.run(query, {
     userUuid,
+    ownershipId,
     videoIds,
     playlistId,
     statusFilter,
@@ -136,7 +145,8 @@ try {
   const videos = result.records.map(record => {
     const videoData = {
       video: args.convertNodeToJson(record.get('v')),
-      videoSettings: args.convertNodeToJson(record.get('vs'))
+      videoSettings: args.convertNodeToJson(record.get('vs')),
+      ownership: args.convertNodeToJson(record.get('o'))
     };
 
     // Add playlist information if requested

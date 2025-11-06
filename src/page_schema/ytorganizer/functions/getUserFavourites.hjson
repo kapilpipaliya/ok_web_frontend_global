@@ -14,11 +14,14 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
+  const { ownershipId } = args.contextData;
+
   // Fetch favourite channels using helper function
   const channelsResult = await args.executeNamedServerFunction({
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
       isFavouriteOnly: true,
       orderBy: 'cs.favouritedAt',
       orderDirection: 'DESC'
@@ -34,6 +37,7 @@ try {
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
       isFavouriteOnly: true,
       orderBy: 'ps.favouritedAt',
       orderDirection: 'DESC'
@@ -49,6 +53,7 @@ try {
     functionName: "getVideosWithDetails",
     contextData: {
       userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
       isFavouriteOnly: true,
       orderBy: 'vs.favouritedAt',
       orderDirection: 'DESC'

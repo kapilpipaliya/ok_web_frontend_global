@@ -1,7 +1,8 @@
 /**
- * YouTube Connection Status Endpoint
+ * YouTube Connection Status Endpoint - Multi-Ownership Support
  *
- * Returns the current YouTube connection status for the logged-in user.
+ * Returns all YouTube ownerships for the logged-in user.
+ * Each ownership represents a connected YouTube account with its own token and quota.
  */
 
 import { getYouTubeConnectionStatus } from '~/lib/youtube/youtubeOAuth';

@@ -1,8 +1,9 @@
 /**
- * YouTube API Usage Tracking
+ * YouTube API Usage Tracking - Multi-Ownership Support
  *
- * Tracks YouTube API quota usage per user.
- * Each user has 10,000 units/day with per-user OAuth.
+ * Tracks YouTube API quota usage per ownership.
+ * Each YouTube ownership (connected account) has its own 10,000 units/day quota.
+ * This allows users to connect multiple YouTube accounts with separate quota pools.
  */
 
 import type { Session } from 'neo4j-driver';
@@ -34,9 +35,14 @@ export function calculateOperationCost(operation: string, additionalCost: number
 
 /**
  * Log a YouTube API call for quota tracking
+ *
+ * @param ownershipId - YouTubeOwnership key/ID
+ * @param operation - API operation name (e.g., 'channels.list')
+ * @param cost - Quota cost of the operation
+ * @param session - Neo4j session
  */
 export async function logAPIUsage(
-  userUuid: string,
+  ownershipId: string,
   operation: string,
   cost: number,
   session: Session
@@ -49,8 +55,8 @@ export async function logAPIUsage(
 
     // Create or update usage record for today AND per-operation tracking
     await session.run(`
-      MATCH (u:User {uuid: $userUuid})
-      MERGE (u)-[:UserYouTubeAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MERGE (o)-[:YouTubeOwnershipAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
       ON CREATE SET
         usage.date = $dateKey,
         usage.totalCost = 0,
@@ -62,7 +68,7 @@ export async function logAPIUsage(
         usage.lastOperation = $operation,
         usage.lastUpdated = datetime()
       WITH usage
-      MERGE (usage)-[:OperationUsage]->(op:YouTubeOperationUsage {operation: $operation})
+      MERGE (usage)-[:YouTubeAPIUsageOperation]->(op:YouTubeOperationUsage {operation: $operation})
       ON CREATE SET
         op.operation = $operation,
         op.count = 0,
@@ -74,7 +80,7 @@ export async function logAPIUsage(
         op.lastUsed = datetime()
       RETURN usage, op
     `, {
-      userUuid,
+      ownershipId,
       dateKey,
       cost,
       operation
@@ -86,10 +92,13 @@ export async function logAPIUsage(
 }
 
 /**
- * Get today's API usage for a user
+ * Get today's API usage for an ownership
+ *
+ * @param ownershipId - YouTubeOwnership key/ID
+ * @param session - Neo4j session
  */
 export async function getTodayAPIUsage(
-  userUuid: string,
+  ownershipId: string,
   session: Session
 ): Promise<{
   totalCost: number;
@@ -103,12 +112,12 @@ export async function getTodayAPIUsage(
   const dateKey = today.toISOString().split('T')[0];
 
   const result = await session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
-    OPTIONAL MATCH (usage)-[:OperationUsage]->(op:YouTubeOperationUsage)
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
+    OPTIONAL MATCH (usage)-[:YouTubeAPIUsageOperation]->(op:YouTubeOperationUsage)
     RETURN usage.totalCost as totalCost,
            usage.callCount as callCount,
            COLLECT({operation: op.operation, count: op.count}) as operations
-  `, { userUuid, dateKey });
+  `, { ownershipId, dateKey });
 
   if (result.records.length === 0) {
     return {
@@ -148,9 +157,13 @@ export async function getTodayAPIUsage(
 
 /**
  * Get API usage history for the last N days
+ *
+ * @param ownershipId - YouTubeOwnership key/ID
+ * @param days - Number of days to retrieve
+ * @param session - Neo4j session
  */
 export async function getAPIUsageHistory(
-  userUuid: string,
+  ownershipId: string,
   days: number,
   session: Session
 ): Promise<Array<{
@@ -160,15 +173,15 @@ export async function getAPIUsageHistory(
   operations: Record<string, number>;
 }>> {
   const result = await session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeAPIUsage]->(usage:YouTubeAPIUsage)
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipAPIUsage]->(usage:YouTubeAPIUsage)
     WHERE usage.createdAt >= datetime() - duration({days: $days})
-    OPTIONAL MATCH (usage)-[:OperationUsage]->(op:YouTubeOperationUsage)
+    OPTIONAL MATCH (usage)-[:YouTubeAPIUsageOperation]->(op:YouTubeOperationUsage)
     RETURN usage.date as date,
            usage.totalCost as totalCost,
            usage.callCount as callCount,
            COLLECT({operation: op.operation, count: op.count}) as operations
     ORDER BY usage.date DESC
-  `, { userUuid, days });
+  `, { ownershipId, days });
 
   return result.records.map(record => {
     const operationsList = record.get('operations') || [];
@@ -189,10 +202,14 @@ export async function getAPIUsageHistory(
 }
 
 /**
- * Check if user is approaching quota limit
+ * Check if ownership is approaching quota limit
+ *
+ * @param ownershipId - YouTubeOwnership key/ID
+ * @param session - Neo4j session
+ * @param threshold - Warning threshold (default: 0.8 = 80%)
  */
 export async function isApproachingQuotaLimit(
-  userUuid: string,
+  ownershipId: string,
   session: Session,
   threshold: number = 0.8  // 80% threshold
 ): Promise<{
@@ -200,7 +217,7 @@ export async function isApproachingQuotaLimit(
   percentUsed: number;
   remainingQuota: number;
 }> {
-  const usage = await getTodayAPIUsage(userUuid, session);
+  const usage = await getTodayAPIUsage(ownershipId, session);
   const isApproaching = usage.quotaPercentUsed >= (threshold * 100);
 
   return {

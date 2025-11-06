@@ -17,14 +17,11 @@ try {
     };
   }
 
-  // Import API usage tracking functions
-  const { getTodayAPIUsage, getAPIUsageHistory } = await import('~/lib/youtube/apiUsageTracking');
-
   // Get today's usage
-  const todayUsage = await getTodayAPIUsage(user.P.uuid, args.session);
+  const todayUsage = await args.getTodayAPIUsage(user.P.uuid, args.session);
 
   // Get last 7 days history
-  const history = await getAPIUsageHistory(user.P.uuid, 7, args.session);
+  const history = await args.getAPIUsageHistory(user.P.uuid, 7, args.session);
 
   // Determine status color based on quota usage
   let status = 'good';  // green

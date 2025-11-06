@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "saveChannel",
-        description: "Fetches basic channel metadata using per-user OAuth and queues background processing for playlists and videos",
+        description: "Fetches basic channel metadata using per-ownership OAuth and queues background processing for playlists and videos. Supports multi-ownership model where each YouTube account has separate quota.",
         body: '''
 /**
  * Extract channel ID or identifier from various YouTube URL formats
@@ -60,10 +60,10 @@ const extractChannelId = (url) => {
 };
 
 /**
- * Fetch ONLY basic channel metadata using per-user OAuth
- * Each user uses their own YouTube account with their own API quota
+ * Fetch ONLY basic channel metadata using per-ownership OAuth
+ * Each ownership uses its own YouTube account with its own API quota (10k units/day)
  */
-const fetchChannelMetadata = async (channelInfo, youtube, userUuid, session) => {
+const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) => {
   let channelResponse;
 
   // Resolve channel identifier to actual channel ID using efficient API calls
@@ -74,8 +74,8 @@ const fetchChannelMetadata = async (channelInfo, youtube, userUuid, session) => 
       forHandle: channelInfo.value
     });
 
-    // Log API usage: channels.list with forHandle (1 unit)
-    await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    // Log API usage: channels.list with forHandle (1 unit) - per ownership quota
+    await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'channelId') {
     // Direct channel ID lookup (/channel/UCxxx)
     channelResponse = await youtube.channels.list({
@@ -83,8 +83,8 @@ const fetchChannelMetadata = async (channelInfo, youtube, userUuid, session) => 
       id: [channelInfo.value]
     });
 
-    // Log API usage: channels.list operation (1 unit)
-    await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    // Log API usage: channels.list operation (1 unit) - per ownership quota
+    await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'username') {
     // Legacy username format (/user/username)
     channelResponse = await youtube.channels.list({
@@ -92,8 +92,8 @@ const fetchChannelMetadata = async (channelInfo, youtube, userUuid, session) => 
       forUsername: channelInfo.value
     });
 
-    // Log API usage: channels.list with forUsername (1 unit)
-    await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    // Log API usage: channels.list with forUsername (1 unit) - per ownership quota
+    await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'custom') {
     // Custom URL format (/c/customname) - unfortunately no direct API for this
     // This format is deprecated by YouTube, suggest user to use @handle instead
@@ -117,10 +117,14 @@ const fetchChannelMetadata = async (channelInfo, youtube, userUuid, session) => 
 
 try {
   // Extract input parameters from the request
-  const { url, name, refresh = false, priority = 'normal' } = args.contextData;
+  const { url, name, refresh = false, priority = 'normal', ownershipId } = args.contextData;
 
   if (!url) {
     throw new Error("Channel URL is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Validate priority value
@@ -133,23 +137,33 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
   // Extract channel identifier from the provided URL
   const channelInfo = extractChannelId(url);
   if (!channelInfo) {
     throw new Error("Invalid YouTube channel URL. Please provide a valid channel URL.");
   }
 
-  // DUPLICATE JOB PREVENTION: Check if this channel is already queued or processing
+  // DUPLICATE JOB PREVENTION: Check if this channel is already queued or processing for this ownership
   // For handles and usernames, we can't check by ID yet, so we'll check after fetching
   if (!refresh && channelInfo.type === 'channelId') {
     const existingChannelResult = await args.session.run(`
       MATCH (c:Channel {youtubeId: $channelId})
       WITH c
-      MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
             -[:ChannelSettingChannel]->(c)
       WHERE cs.status IN ['queued', 'processing']
       RETURN c.youtubeId as channelId, cs.status as status, c.title as title
-    `, { userUuid: user.P.uuid, channelId: channelInfo.value });
+    `, { ownershipId, channelId: channelInfo.value });
 
     if (existingChannelResult.records.length > 0) {
       const record = existingChannelResult.records[0];
@@ -158,7 +172,7 @@ try {
 
       return {
         success: false,
-        message: `Channel "${title}" is already ${status}. Please wait for it to complete before adding again. Use refresh=true to force re-processing.`,
+        message: `Channel "${title}" is already ${status} for this YouTube account. Please wait for it to complete before adding again. Use refresh=true to force re-processing.`,
         data: {
           channelId: record.get('channelId'),
           status: status,
@@ -168,10 +182,10 @@ try {
     }
   }
 
-  // Get authenticated YouTube client for this user
+  // Get authenticated YouTube client for this ownership
   let youtube;
   try {
-    youtube = await args.getYouTubeClient(user.P.uuid, args.session, args.request);
+    youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
   } catch (error) {
     // Check if this is an OAuth authorization error
     if (error.message.includes('No YouTube authorization') ||
@@ -190,8 +204,8 @@ try {
     throw error;
   }
 
-  // Fetch ONLY basic channel metadata using user's OAuth
-  const channelData = await fetchChannelMetadata(channelInfo, youtube, user.P.uuid, args.session);
+  // Fetch ONLY basic channel metadata using ownership's OAuth
+  const channelData = await fetchChannelMetadata(channelInfo, youtube, ownershipId, args.session);
 
   // STEP 1: Create or update the main Channel vertex with basic metadata
   const channelKey = `channel_${channelData.id}`;
@@ -234,13 +248,13 @@ try {
     publishedAt: channelData.snippet.publishedAt
   });
 
-  // STEP 2: Create user-specific ChannelSetting with status tracking
-  const channelSettingKey = `channel_setting_${user.id}_${channelData.id}`;
+  // STEP 2: Create ownership-specific ChannelSetting with status tracking
+  const channelSettingKey = `channel_setting_${ownershipId}_${channelData.id}`;
 
   const mergeChannelSettingQuery = `
-    MATCH (u:User {uuid: $userUuid})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (c:Channel {youtubeId: $channelId})
-    MERGE (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
+    MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
     ON CREATE SET
       cs.key = $channelSettingKey,
       cs.createdAt = datetime()
@@ -262,7 +276,7 @@ try {
   `;
 
   await args.session.run(mergeChannelSettingQuery, {
-    userUuid: user.P.uuid,
+    ownershipId,
     channelId: channelData.id,
     channelSettingKey,
     customName: name || null,
@@ -277,11 +291,12 @@ try {
     // Map priority string to BullMQ priority number (lower = higher priority)
     const jobPriority = channelPriority === 'high' ? 1 : channelPriority === 'low' ? 3 : 2;
 
-    // Queue channel for processing with user's OAuth token
+    // Queue channel for processing with ownership's OAuth token
     await helpers.result.data.addChannelJob(channelQueue, {
       channelId: channelData.id,
       userId: user.id,
       userUuid: user.P.uuid,
+      ownershipId: ownershipId,  // Required for multi-ownership support
       customName: name || null,
       priority: channelPriority
     }, {
@@ -306,6 +321,7 @@ try {
       subscriberCount: channelData.statistics?.subscriberCount,
       videoCount: channelData.statistics?.videoCount,
       userId: user.id,
+      ownershipId: ownershipId,  // Ownership context for multi-account support
       userSpecific: true,
       isRefresh: refresh,
       usesOAuth: true

@@ -51,14 +51,14 @@ if (args.contextData.action === 'start') {
       // - Status is 'processing'
       // - updatedAt is older than 2 hours
       const staleChannelsResult = await session.run(`
-        MATCH (u:User)-[:UserChannelSetting]->(cs:ChannelSetting)
+        MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
         WHERE cs.status = 'processing'
           AND datetime(cs.updatedAt) < datetime($cutoffTime)
         SET cs.status = 'failed',
             cs.error = $errorMessage,
             cs.priority = null,
             cs.updatedAt = datetime()
-        WITH cs, u
+        WITH cs, o
         MATCH (cs)-[:ChannelSettingChannel]->(c:Channel)
         RETURN count(cs) as count, collect(c.title) as titles
       `, {
@@ -80,14 +80,14 @@ if (args.contextData.action === 'start') {
       // - Status is 'processing'
       // - updatedAt is older than 2 hours
       const stalePlaylistsResult = await session.run(`
-        MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+        MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
         WHERE ps.status = 'processing'
           AND datetime(ps.updatedAt) < datetime($cutoffTime)
         SET ps.status = 'failed',
             ps.error = $errorMessage,
             ps.priority = null,
             ps.updatedAt = datetime()
-        WITH ps, u
+        WITH ps, o
         MATCH (ps)-[:PlaylistSettingPlaylist]->(p:Playlist)
         RETURN count(ps) as count, collect(p.title) as titles
       `, {
@@ -109,11 +109,11 @@ if (args.contextData.action === 'start') {
       if (stalePlaylistCount > 0) {
         // Find all channels that had stale playlists and update their progress
         await session.run(`
-          MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
                 -[:PlaylistSettingPlaylist]->(p:Playlist)<-[:ChannelPlaylist]-(c:Channel)
           WHERE ps.status = 'failed' AND ps.error CONTAINS 'timeout'
-          WITH u, c, count(ps) as failedCount
-          MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
+          WITH o, c, count(ps) as failedCount
+          MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
           WHERE cs.status = 'processing'
           WITH cs, c, failedCount,
                cs.totalPlaylists as totalPlaylists,
