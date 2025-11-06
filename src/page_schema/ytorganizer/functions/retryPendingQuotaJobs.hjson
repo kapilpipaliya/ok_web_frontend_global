@@ -1,0 +1,160 @@
+{
+  vertexes: [
+    {
+      id: "retry_pending_quota_jobs_function",
+      L: "Function",
+      P: {
+        key: "retryPendingQuotaJobs",
+        description: "Scheduled function to retry all pending_quota jobs (run at midnight UTC)",
+        body: '''
+try {
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  // Get all users with pending_quota channels
+  const channelsResult = await args.session.run(`
+    MATCH (u:User)-[:UserChannelSetting]->(cs:ChannelSetting)
+          -[:ChannelSettingChannel]->(c:Channel)
+    WHERE cs.status = 'pending_quota'
+    RETURN u.uuid as userUuid, u.id as userId, c.youtubeId as channelId, cs.priority as priority
+  `);
+
+  // Get all users with pending_quota playlists
+  const playlistsResult = await args.session.run(`
+    MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          -[:PlaylistSettingPlaylist]->(p:Playlist)
+    WHERE ps.status = 'pending_quota'
+    RETURN u.uuid as userUuid, u.id as userId, p.youtubeId as playlistId, ps.priority as priority
+  `);
+
+  let channelsRetried = 0;
+  let playlistsRetried = 0;
+
+  // Retry channels
+  if (channelsResult.records.length > 0) {
+    const channelQueue = helpers.result.data.createChannelQueue(args);
+
+    try {
+      for (const record of channelsResult.records) {
+        const userUuid = record.get('userUuid');
+        const userId = record.get('userId');
+        const channelId = record.get('channelId');
+        const priority = record.get('priority') || 'normal';
+        const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
+
+        // Generate unique job ID
+        const jobId = helpers.result.data.createJobId('channel', userUuid, channelId);
+
+        // Remove existing job with this ID if it exists (but not if it's active)
+        const { removed, state } = await helpers.result.data.removeExistingJob(channelQueue, jobId, ['active']);
+
+        if (state === 'active') {
+          console.log(`[Quota Retry] Job ${jobId} is currently active, skipping re-queue`);
+          continue;  // Skip to next channel - don't re-queue active jobs
+        }
+
+        // Re-queue the channel
+        await helpers.result.data.addChannelJob(channelQueue, {
+          channelId,
+          userId,
+          userUuid,
+          priority
+        }, {
+          priority: jobPriority  // Override default priority
+        });
+
+        // Update status back to queued
+        await args.session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+          SET cs.status = 'queued',
+              cs.error = null,
+              cs.queuedAt = datetime(),
+              cs.updatedAt = datetime()
+        `, { userUuid, channelId });
+
+        channelsRetried++;
+      }
+    } finally {
+      await channelQueue.close();
+    }
+  }
+
+  // Retry playlists
+  if (playlistsResult.records.length > 0) {
+    const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+
+    try {
+      for (const record of playlistsResult.records) {
+        const userUuid = record.get('userUuid');
+        const userId = record.get('userId');
+        const playlistId = record.get('playlistId');
+        const priority = record.get('priority') || 'normal';
+        const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
+
+        // Generate unique job ID
+        const jobId = helpers.result.data.createJobId('playlist', userUuid, playlistId);
+
+        // Remove existing job with this ID if it exists (but not if it's active)
+        const { removed, state } = await helpers.result.data.removeExistingJob(playlistQueue, jobId, ['active']);
+
+        if (state === 'active') {
+          console.log(`[Quota Retry] Job ${jobId} is currently active, skipping re-queue`);
+          continue;  // Skip to next playlist - don't re-queue active jobs
+        }
+
+        // Re-queue the playlist
+        await helpers.result.data.addPlaylistJob(playlistQueue, {
+          playlistId,
+          userId,
+          userUuid,
+          priority
+        }, {
+          priority: jobPriority  // Override default priority
+        });
+
+        // Update status back to queued
+        await args.session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          SET ps.status = 'queued',
+              ps.error = null,
+              ps.queuedAt = datetime(),
+              ps.updatedAt = datetime()
+        `, { userUuid, playlistId });
+
+        playlistsRetried++;
+      }
+    } finally {
+      await playlistQueue.close();
+    }
+  }
+
+  console.log(`[Midnight Quota Reset] Retried ${channelsRetried} channels and ${playlistsRetried} playlists`);
+
+  return {
+    success: true,
+    message: `Retried ${channelsRetried} channels and ${playlistsRetried} playlists`,
+    data: {
+      channelsRetried,
+      playlistsRetried,
+      retriedAt: new Date().toISOString()
+    }
+  };
+
+} catch (error) {
+  console.error("Error retrying pending quota jobs:", error);
+  return {
+    success: false,
+    message: "Failed to retry pending quota jobs",
+    error: {
+      type: error.name || "RetryError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -7,11 +7,15 @@ A mobile-first YouTube channel and playlist management system built with accessi
 YouTube Organizer is a comprehensive page schema implementation that provides:
 
 - **Channel Management**: Add, organize, and browse YouTube channels
-- **Playlist Management**: Create and manage custom playlists 
+- **Playlist Management**: Create and manage custom playlists
 - **Video Organization**: View videos from channels and playlists
+- **OAuth 2.0 Authentication**: Secure per-user YouTube API access with 10,000 units/day quota per user
+- **API Usage Monitoring**: Real-time tracking of YouTube API quota consumption with visual indicators
 - **Mobile-First Design**: Optimized for mobile devices with touch-friendly interfaces
 - **Accessibility**: Screen reader friendly with proper ARIA labels and semantic HTML
 - **Bottom Navigation**: Easy navigation between main sections
+- **Privacy & Terms**: Comprehensive privacy policy and terms of service compliance
+- **YouTube Branding**: Full compliance with YouTube's branding guidelines
 
 ## Graph Schema
 
@@ -23,11 +27,21 @@ The system uses the following Neo4j graph relationships:
 (User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
 (User)-[:UserFeedback]->(Feedback)
+(User)-[:UserYouTubeToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
+(User)-[:UserYouTubeAPIUsage]->(YouTubeAPIUsage {date, totalCost, callCount, operations})
 (Channel)-[:ChannelPlaylist]->(Playlist)
 (Playlist)-[:PlaylistVideo]->(Video)
 ```
 
 **Note**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
+
+### OAuth 2.0 Authentication
+
+The system uses per-user OAuth 2.0 authentication for YouTube API access:
+- Each user authenticates with their own Google account
+- Tokens are securely stored and encrypted in the database
+- Each user has their own 10,000 units/day API quota
+- Tokens are automatically refreshed when expired
 
 ### Vertex Types
 
@@ -85,6 +99,20 @@ The system uses the following Neo4j graph relationships:
   - `category`: Feedback category ('general', 'bug', 'feature', 'improvement', 'other')
   - `status`: Feedback status (default: 'pending')
   - `createdAt`: Timestamp
+- **YouTubeToken**: OAuth 2.0 tokens for YouTube API access
+  - `key`: Unique identifier (`youtube_token_${userId}`)
+  - `accessToken`: Encrypted OAuth access token
+  - `refreshToken`: Encrypted OAuth refresh token
+  - `expiresAt`: Token expiration timestamp
+  - `scope`: OAuth scope (youtube.readonly)
+  - `createdAt`, `updatedAt`: Timestamps
+- **YouTubeAPIUsage**: Daily API usage tracking per user
+  - `key`: Unique identifier (`api_usage_${userId}_${date}`)
+  - `date`: Usage date (YYYY-MM-DD format)
+  - `totalCost`: Total API units consumed
+  - `callCount`: Number of API calls made
+  - `operations`: JSON object tracking operation counts (e.g., {"channels.list": 5, "playlists.list": 10})
+  - `createdAt`, `updatedAt`: Timestamps
 
 ## Architecture
 
@@ -103,6 +131,10 @@ All components follow the YTO prefix naming convention:
 - **YTOChannelCard**: Channel display card with thumbnail and info
 - **YTOPlaylistCard**: Playlist display card with thumbnail and info
 - **YTOVideoCard**: Video display card with thumbnail and metadata
+- **YTOYouTubeAttribution**: YouTube branding compliance component with clickable logo
+- **YTOButton**: Reusable button component with variants (primary, secondary, danger)
+- **YTOPageTitle**: Consistent page title component
+- **YTOFeedbackModal**: Modal for collecting user feedback
 
 #### Pages
 - **YTOHome**: Dashboard overview of recent activity
@@ -110,22 +142,104 @@ All components follow the YTO prefix naming convention:
 - **YTOPlaylists**: List of user's playlists with add functionality
 - **YTOChannelDetail**: Channel details with videos/playlists tabs
 - **YTOPlaylistDetail**: Playlist details with video list
+- **YTOSettings**: User settings including YouTube connection, theme, and data management
+- **YTOPrivacy**: Privacy policy page with YouTube API Services disclosures
+- **YTOTerms**: Terms of Service page with comprehensive legal information
 
 ### API Functions
 
+#### YouTube OAuth 2.0 Integration
+
+The system uses per-user OAuth 2.0 authentication for secure YouTube API access:
+
+**OAuth Flow:**
+1. User clicks "Connect YouTube Account" in settings
+2. Redirected to Google OAuth consent screen
+3. User grants read-only access to their YouTube data
+4. System receives authorization code and exchanges for tokens
+5. Tokens are encrypted and stored in Neo4j database
+6. Each API call uses the user's personal OAuth token
+
+**OAuth Endpoints:**
+- `/api/auth/youtube/connect` - Initiates OAuth flow
+- `/api/auth/youtube/callback` - Handles OAuth callback
+- `/api/auth/youtube/disconnect` - Disconnects YouTube account
+- `/api/auth/youtube/status` - Checks connection status
+
+**Token Management:**
+- Tokens are encrypted using AES-256-GCM encryption
+- Refresh tokens are automatically used to obtain new access tokens
+- Tokens are stored in `(User)-[:UserYouTubeToken]->(YouTubeToken)` relationship
+
+#### API Usage Monitoring
+
+The system tracks YouTube API quota consumption per user with a 10,000 units/day limit:
+
+**Quota Costs:**
+- `search.list`: 100 units (expensive!)
+- `channels.list`: 1 unit
+- `playlists.list`: 1 unit
+- `playlistItems.list`: 1 unit
+- `videos.list`: 1 unit
+
+**Usage Tracking:**
+- Automatic logging of all API calls with operation type and cost
+- Daily quota tracking stored in Neo4j: `(User)-[:UserYouTubeAPIUsage]->(YouTubeAPIUsage)`
+- Visual quota display in Settings page with color-coded status:
+  - **Good** (green): 0-69% used
+  - **Warning** (yellow): 70-89% used
+  - **Critical** (red): 90-100% used
+- Real-time progress bar and statistics
+- Automatic cleanup of records older than 30 days
+
+**API Usage Functions:**
+- `logAPIUsage(userUuid, operation, cost, session)` - Log an API call
+- `getTodayAPIUsage(userUuid, session)` - Get today's usage statistics
+- `getAPIUsageHistory(userUuid, days, session)` - Get historical usage data
+- `isApproachingQuotaLimit(userUuid, session, threshold)` - Check if approaching limit
+
+**API Endpoints:**
+- `/api/youtube/usage` - Get current user's API usage statistics
+
 #### YouTube Data Integration
 
-The system uses the `googleapis` library dynamically imported in server functions to interact with YouTube Data API v3. The functions are executed server-side with full database access.
+The system uses the `googleapis` library dynamically imported in server functions to interact with YouTube Data API v3. All API calls now use per-user OAuth tokens instead of a shared API key.
 
 ##### Dynamic Import Pattern
 ```javascript
-// Dynamic import of googleapis library in server functions
-const YOUTUBE_API_KEY = 'AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds';
+// Dynamic import of googleapis library in server functions with OAuth
 const { google } = await import('googleapis');
+
+// Get user's OAuth token
+const user = await args.getUserFromSession();
+const tokenResult = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
+  RETURN token
+`, { userUuid: user.P.uuid });
+
+const token = tokenResult.records[0]?.get('token');
+if (!token) {
+  throw new Error('YouTube account not connected');
+}
+
+// Decrypt and use OAuth token
+const oauth2Client = new google.auth.OAuth2(
+  process.env.YOUTUBE_CLIENT_ID,
+  process.env.YOUTUBE_CLIENT_SECRET,
+  process.env.YOUTUBE_REDIRECT_URI
+);
+oauth2Client.setCredentials({
+  access_token: decryptToken(token.P.accessToken),
+  refresh_token: decryptToken(token.P.refreshToken)
+});
+
 const youtube = google.youtube({
   version: 'v3',
-  auth: YOUTUBE_API_KEY
+  auth: oauth2Client
 });
+
+// Log API usage after each call
+await logAPIUsage(user.P.uuid, 'channels.list', 1, args.session);
 ```
 
 ##### Functions
@@ -294,20 +408,49 @@ Users can set their preferred language through LanguageSetting vertex:
 │   ├── YTOChannelCard.hjson         # Channel display card
 │   ├── YTOPlaylistCard.hjson        # Playlist display card
 │   ├── YTOVideoCard.hjson           # Video display card
-│   └── YTOTabBar.hjson              # Tab navigation component
+│   ├── YTOTabBar.hjson              # Tab navigation component
+│   ├── YTOYouTubeAttribution.hjson  # YouTube branding compliance
+│   ├── YTOButton.hjson              # Reusable button component
+│   ├── YTOPageTitle.hjson           # Page title component
+│   └── YTOFeedbackModal.hjson       # User feedback modal
 ├── pages/
 │   ├── YTOHome.hjson                # Dashboard/home page
 │   ├── YTOChannels.hjson            # Channels list page
 │   ├── YTOPlaylists.hjson           # Playlists list page
 │   ├── YTOChannelDetail.hjson       # Channel detail with tabs
-│   └── YTOPlaylistDetail.hjson      # Playlist detail with videos
+│   ├── YTOPlaylistDetail.hjson      # Playlist detail with videos
+│   ├── YTOSettings.hjson            # User settings and YouTube connection
+│   ├── YTOPrivacy.hjson             # Privacy policy page
+│   └── YTOTerms.hjson               # Terms of Service page
 ├── themes/
 │   └── YTOTheme.hjson               # Custom theme for video content
 ├── functions/
 │   ├── savePlaylist.hjson           # Save YouTube playlist with user settings
-│   └── saveChannel.hjson            # Save YouTube channel with all playlists and videos
+│   ├── saveChannel.hjson            # Save YouTube channel with all playlists and videos
+│   ├── getAPIUsageStats.hjson       # Get user's API usage statistics
+│   ├── getChannelsWithVideoCount.hjson  # Get channels with video counts
+│   ├── getPlaylistsWithVideoCount.hjson # Get playlists with video counts
+│   ├── clearAllUserData.hjson       # Clear all user's YTO data
+│   ├── deleteAccount.hjson          # Delete user account
+│   └── saveFeedback.hjson           # Save user feedback
 └── docs/
     └── README.md                    # This documentation
+
+/src/lib/youtube/
+├── youtubeOAuth.ts                  # OAuth 2.0 token management
+└── apiUsageTracking.ts              # API quota tracking functions
+
+/src/lib/auth/
+└── tokenEncryption.ts               # Token encryption/decryption utilities
+
+/src/routes/api/
+├── auth/youtube/
+│   ├── connect.ts                   # Initiate OAuth flow
+│   ├── callback.ts                  # OAuth callback handler
+│   ├── disconnect.ts                # Disconnect YouTube account
+│   └── status.ts                    # Check connection status
+└── youtube/
+    └── usage.ts                     # Get API usage statistics
 ```
 
 ## Usage Patterns
@@ -978,14 +1121,60 @@ Both functions return data in vertex format:
 
 ## API Configuration
 
-### YouTube API Key Setup
+### YouTube OAuth 2.0 Setup
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
 3. Enable YouTube Data API v3
-4. Create credentials (API Key)
-5. Replace `'YOUR_API_KEY_HERE'` in the function files with your actual API key
+4. Create OAuth 2.0 credentials:
+   - Application type: Web application
+   - Authorized redirect URIs: `https://yourdomain.com/api/auth/youtube/callback`
+   - Scopes: `https://www.googleapis.com/auth/youtube.readonly`
+5. Configure environment variables:
+   ```bash
+   YOUTUBE_CLIENT_ID=your_client_id
+   YOUTUBE_CLIENT_SECRET=your_client_secret
+   TOKEN_ENCRYPTION_KEY=your_32_byte_encryption_key
+   ```
 
-**Note**: The API key is defined as a constant at the top of each server function for simplicity. In production, consider storing it in a secure configuration vertex or environment variable.
+### YouTube Branding Compliance
+
+The system complies with YouTube's branding guidelines:
+
+**Requirements:**
+- Display "Powered by YouTube API Services" attribution
+- YouTube logo must link to youtube.com
+- Proper attribution on pages using YouTube data
+- Links to YouTube ToS and Google Privacy Policy
+
+**Implementation:**
+- `YTOYouTubeAttribution` component on Privacy and Terms pages
+- Clickable YouTube logo linking to YouTube.com
+- Required disclosures in Privacy Policy
+- Terms of Service with YouTube API Services section
+
+### Legal Pages
+
+**Privacy Policy (YTOPrivacy):**
+- YouTube API Services disclosures
+- Data collection and usage policies
+- Third-party service integrations
+- User rights and data control
+- Links to YouTube ToS and Google Privacy Policy
+
+**Terms of Service (YTOTerms):**
+- Service description and features
+- YouTube API Services usage terms
+- User responsibilities and acceptable use
+- Intellectual property rights
+- Account termination policies
+- Disclaimers and limitations
+- Contact information
+
+Both pages include:
+- YouTube branding compliance footer
+- Navigation links to related policies
+- Mobile-responsive design
+- Accessible formatting
 
 ## Dependencies
 
@@ -999,6 +1188,7 @@ npm install googleapis
 
 ## Future Enhancements
 
+### Core Features
 - Offline functionality with service workers
 - Push notifications for new videos
 - Advanced filtering and search
@@ -1009,4 +1199,41 @@ npm install googleapis
 - Collaborative playlists
 - Video recommendations
 
+### OAuth & API Enhancements
+- OAuth scope expansion for additional YouTube features
+- API quota optimization and caching strategies
+- Batch API operations to reduce quota usage
+- Background sync for channel/playlist updates
+- Quota alerts via email/notifications
+- Admin dashboard for quota monitoring across all users
+- API usage analytics and reporting
+
+### Security & Compliance
+- Regular security audits of token storage
+- Compliance monitoring for YouTube ToS changes
+- Automated branding guidelines verification
+- GDPR compliance features
+- Data export/portability tools
+
 This documentation serves as the foundation for implementing the YouTube Organizer system and should be referenced for all development decisions and future enhancements.
+
+## Recent Updates
+
+### Version 2.0 - OAuth & API Usage Monitoring (Current)
+- ✅ Implemented per-user OAuth 2.0 authentication
+- ✅ Added API usage tracking and monitoring
+- ✅ Created comprehensive Privacy Policy page
+- ✅ Created Terms of Service page
+- ✅ Implemented YouTube branding compliance
+- ✅ Added visual quota usage display in Settings
+- ✅ Encrypted token storage with AES-256-GCM
+- ✅ Automatic token refresh functionality
+- ✅ User feedback system
+
+### Version 1.0 - Initial Release
+- ✅ Channel and playlist management
+- ✅ Video organization
+- ✅ Mobile-first design
+- ✅ Bottom navigation
+- ✅ Multi-language support (en, hi, gu)
+- ✅ Accessibility features

@@ -9,27 +9,120 @@
         body: '''
 // This is a background worker function that processes playlists
 if (args.contextData.action === 'start') {
-  console.log('Starting playlist processing worker');
-
-  const { Worker } = args.bullmq;
-
-  // Get Redis connection from bullmq config
-  const connection = args.bullmq.redisConnection || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null
+  // Helper function to log messages to database
+  const logMessage = async (level, message, metadata = {}) => {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: 'logWorkerMessage',
+        contextData: {
+          workerName: 'processPlaylistQueue',
+          level,
+          message,
+          metadata
+        }
+      });
+    } catch (error) {
+      // Silent failure - don't break worker if logging fails
+    }
   };
+
+  await logMessage('info', 'Starting playlist processing worker');
+
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+
+  // Queue all playlists that are marked as 'queued' but not in BullMQ queue
+  await logMessage('info', 'Checking for queued playlists to add to queue');
+
+  try {
+    const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+
+    // Get all playlists with status 'queued'
+    const queuedPlaylists = await args.session.run(`
+      MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+            -[:PlaylistSettingPlaylist]->(p:Playlist)
+      WHERE ps.status = 'queued'
+      RETURN u.uuid as userUuid, u.id as userId, p.youtubeId as playlistId,
+             ps.priority as priority, p.channelId as channelId
+    `);
+
+    let addedCount = 0;
+
+    for (const record of queuedPlaylists.records) {
+      const userUuid = record.get('userUuid');
+      const userId = record.get('userId');
+      const playlistId = record.get('playlistId');
+      const priority = record.get('priority') || 'normal';
+      const channelId = record.get('channelId');
+
+      // Generate unique job ID
+      const jobId = helpers.result.data.createJobId('playlist', userUuid, playlistId);
+
+      // Check if job already exists in waiting state
+      const existingJob = await playlistQueue.getJob(jobId);
+      const jobState = existingJob ? await existingJob.getState() : null;
+
+      if (!existingJob || jobState !== 'waiting') {
+        // Job doesn't exist or is not waiting, add it
+        const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
+
+        await helpers.result.data.addPlaylistJob(playlistQueue, {
+          playlistId,
+          userId,
+          userUuid,
+          channelId,
+          priority
+        }, {
+          priority: jobPriority
+        });
+
+        addedCount++;
+      }
+    }
+
+    await playlistQueue.close();
+    await logMessage('info', `Added ${addedCount} queued playlists to queue`, { addedCount });
+  } catch (error) {
+    await logMessage('error', 'Error queuing playlists on startup', {
+      error: error.message,
+      stack: error.stack
+    });
+  }
 
   // Create worker for playlist processing queue
   const worker = new Worker('processPlaylistQueue', async (job) => {
     const { playlistId, userId, userUuid, customName, channelId } = job.data;
 
-    console.log(`Processing playlist ${playlistId} for user ${userId}`);
+    await logMessage('info', 'Processing playlist', { playlistId, userId });
 
     // Get a new database session for this job
     const { dbSession: session } = await args.getSession();
 
     try {
+      // QUOTA CHECK: Verify user has enough quota before processing
+      const quotaStatus = await args.isApproachingQuotaLimit(userUuid, session, 0.95);
+      if (quotaStatus.percentUsed >= 95) {
+        await logMessage('warn', 'User quota nearly exhausted, skipping playlist', {
+          playlistId,
+          userUuid,
+          quotaUsed: quotaStatus.percentUsed,
+          remaining: quotaStatus.remainingQuota
+        });
+
+        // Mark playlist as pending_quota
+        await session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          SET ps.status = 'pending_quota',
+              ps.error = 'Daily API quota nearly exhausted. Will resume tomorrow.',
+              ps.updatedAt = datetime()
+        `, { userUuid, playlistId });
+
+        await session.close();
+        return; // Exit without throwing
+      }
+
       // Update status to processing
       await session.run(`
         MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
@@ -40,21 +133,28 @@ if (args.contextData.action === 'start') {
         RETURN ps
       `, { userUuid, playlistId });
 
-      // Get active API key from database
-      const apiKeyResult = await args.executeNamedServerFunction({
-        functionName: "getActiveYouTubeAPIKey",
-        contextData: {}
-      });
-
-      if (!apiKeyResult?.result?.success || !apiKeyResult?.result?.data) {
-        throw new Error(apiKeyResult?.result?.message || "Failed to get YouTube API key");
+      // Get authenticated YouTube client for this user's OAuth
+      let youtube;
+      try {
+        youtube = await args.getYouTubeClient(userUuid, session);
+      } catch (error) {
+        // Handle OAuth errors - mark playlist as failed
+        await session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          SET ps.status = 'failed',
+              ps.error = $error,
+              ps.priority = null,
+              ps.updatedAt = datetime()
+        `, {
+          userUuid,
+          playlistId,
+          error: error.message.includes('No YouTube authorization') || error.message.includes('revoked')
+            ? 'YouTube authorization expired or revoked. Please reconnect your YouTube account in settings.'
+            : error.message
+        });
+        throw error;
       }
-
-      const apiKeyData = apiKeyResult.result.data;
-
-      // Fetch playlist videos from YouTube API
-      const { google } = await import('googleapis');
-      const youtube = google.youtube({ version: 'v3', auth: apiKeyData.apiKey });
 
       // Fetch ALL playlist videos with pagination
       let allVideos = [];
@@ -68,23 +168,14 @@ if (args.contextData.action === 'start') {
           pageToken: nextPageToken
         });
 
-        // Track API usage for playlistItems.list call
-        await args.executeNamedServerFunction({
-          functionName: "trackYouTubeAPIUsage",
-          contextData: { keyId: apiKeyData.keyId, cost: 3 }
-        });
+        // Log API usage: playlistItems.list operation (1 unit per page)
+        await args.logAPIUsage(userUuid, 'playlistItems.list', args.YOUTUBE_API_COSTS['playlistItems.list'], session);
 
         if (itemsResponse.data.items) {
           allVideos = allVideos.concat(itemsResponse.data.items);
         }
 
         nextPageToken = itemsResponse.data.nextPageToken;
-
-        // TESTING: Wait 5 seconds before fetching next page
-        if (nextPageToken) {
-          console.log(`[Playlist ${playlistId}] Waiting 5 seconds before fetching next page...`);
-          await new Promise(resolve => setTimeout(resolve, 5000));
-        }
       } while (nextPageToken);
 
       const totalVideos = allVideos.length;
@@ -179,18 +270,22 @@ if (args.contextData.action === 'start') {
       // Update customOrder with all video IDs
       const videoIds = allVideos.map(v => v.contentDetails?.videoId).filter(Boolean);
 
-      // Mark as completed
+      // Mark as completed and remove priority (no longer needed)
       await session.run(`
         MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
               -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         SET ps.status = 'completed',
             ps.progress = 100,
             ps.customOrder = $customOrder,
+            ps.priority = null,
             ps.completedAt = datetime(),
             ps.updatedAt = datetime()
       `, { userUuid, playlistId, customOrder: videoIds });
 
-      console.log(`Playlist ${playlistId} processing completed: ${processedVideos} videos`);
+      await logMessage('info', 'Playlist processing completed', {
+        playlistId,
+        processedVideos
+      });
 
       // If this playlist is part of a channel, update channel progress
       if (channelId) {
@@ -226,7 +321,12 @@ if (args.contextData.action === 'start') {
                 cs.updatedAt = datetime()
           `, { userUuid, channelId, progress: channelProgress });
 
-          console.log(`Channel ${channelId} progress: ${processedPlaylists}/${totalPlaylists} playlists (${channelProgress}%)`);
+          await logMessage('info', 'Channel progress updated', {
+            channelId,
+            processedPlaylists,
+            totalPlaylists,
+            channelProgress
+          });
 
           // Check if all playlists for this channel are completed
           if (processedPlaylists >= totalPlaylists && totalPlaylists > 0) {
@@ -253,11 +353,15 @@ if (args.contextData.action === 'start') {
                         -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
                   SET cs.status = 'completed',
                       cs.progress = 100,
+                      cs.priority = null,
                       cs.completedAt = datetime(),
                       cs.updatedAt = datetime()
                 `, { userUuid, channelId });
 
-                console.log(`Channel ${channelId} marked as completed: all ${totalCount} playlists processed`);
+                await logMessage('info', 'Channel marked as completed', {
+                  channelId,
+                  totalCount
+                });
               }
             }
           }
@@ -265,7 +369,11 @@ if (args.contextData.action === 'start') {
       }
 
     } catch (error) {
-      console.error(`Error processing playlist ${playlistId}:`, error);
+      await logMessage('error', 'Error processing playlist', {
+        playlistId,
+        error: error.message,
+        stack: error.stack
+      });
 
       // Mark as failed
       await session.run(`
@@ -273,6 +381,7 @@ if (args.contextData.action === 'start') {
               -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
         SET ps.status = 'failed',
             ps.error = $error,
+            ps.priority = null,
             ps.updatedAt = datetime()
       `, { userUuid, playlistId, error: error.message });
 
@@ -310,7 +419,12 @@ if (args.contextData.action === 'start') {
                 cs.updatedAt = datetime()
           `, { userUuid, channelId, progress: channelProgress });
 
-          console.log(`Channel ${channelId} progress after playlist failure: ${processedPlaylists}/${totalPlaylists} playlists (${channelProgress}%)`);
+          await logMessage('info', 'Channel progress updated after playlist failure', {
+            channelId,
+            processedPlaylists,
+            totalPlaylists,
+            channelProgress
+          });
 
           // Check if all playlists have been processed (completed or failed)
           if (processedPlaylists >= totalPlaylists && totalPlaylists > 0) {
@@ -344,12 +458,18 @@ if (args.contextData.action === 'start') {
                         -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
                   SET cs.status = $status,
                       cs.progress = 100,
+                      cs.priority = null,
                       cs.error = $error,
                       cs.completedAt = datetime(),
                       cs.updatedAt = datetime()
                 `, { userUuid, channelId, status: finalStatus, error: errorMessage });
 
-                console.log(`Channel ${channelId} marked as ${finalStatus}: ${completedCount} completed, ${failedCount} failed`);
+                await logMessage('info', 'Channel final status updated', {
+                  channelId,
+                  finalStatus,
+                  completedCount,
+                  failedCount
+                });
               }
             }
           }
@@ -372,18 +492,22 @@ if (args.contextData.action === 'start') {
     concurrency: 5
   });
 
-  worker.on('completed', (job) => {
-    console.log(`Playlist processing job ${job.id} completed`);
+  worker.on('completed', async (job) => {
+    await logMessage('info', 'Playlist processing job completed', { jobId: job.id });
   });
 
-  worker.on('failed', (job, err) => {
-    console.error(`Playlist processing job ${job?.id} failed:`, err);
+  worker.on('failed', async (job, err) => {
+    await logMessage('error', 'Playlist processing job failed', {
+      jobId: job?.id,
+      error: err.message,
+      stack: err.stack
+    });
   });
 
   // Return stop function for graceful shutdown
   return {
     stop: async () => {
-      console.log('Stopping playlist processing worker');
+      await logMessage('info', 'Stopping playlist processing worker');
       await worker.close();
     }
   };

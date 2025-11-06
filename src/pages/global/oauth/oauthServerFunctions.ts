@@ -3,6 +3,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { encryptClientSecret, decryptClientSecret } from "~/lib/auth/tokenEncryption";
 
 export async function getOAuthSettings(): Promise<ServerResult> {
   "use server";
@@ -19,15 +20,17 @@ export async function getOAuthSettings(): Promise<ServerResult> {
       const node = result.records[0].get("o");
       const vertex = convertNodeToJson(node) as Vertex;
 
-      // Decrypt the client secret in the vertex properties
-      if (vertex.P.googleClientSecret) {
+      // Decrypt the client secret and rename to googleClientSecret for the frontend
+      if (vertex.P.googleClientSecretEncrypted) {
         try {
-          vertex.P.googleClientSecret = Buffer.from(
-            vertex.P.googleClientSecret,
-            "base64",
-          ).toString("utf-8");
+          vertex.P.googleClientSecret = decryptClientSecret(vertex.P.googleClientSecretEncrypted);
+          // Remove the encrypted version from the response
+          delete vertex.P.googleClientSecretEncrypted;
         } catch (e) {
-          // Keep as is if decryption fails
+          console.error("Failed to decrypt client secret:", e);
+          // Set to empty string if decryption fails
+          vertex.P.googleClientSecret = "";
+          delete vertex.P.googleClientSecretEncrypted;
         }
       }
 
@@ -59,11 +62,17 @@ export async function saveOAuthSettings(settings: {
   try {
     const { googleClientId, googleClientSecret, googleEnabled } = settings;
 
-    // Encrypt the client secret if provided
+    // Encrypt the client secret if provided using proper AES-256-GCM encryption
     let encryptedSecret = googleClientSecret;
     if (googleClientSecret && googleClientSecret.trim() !== "") {
-      // Simple encryption - in production, use proper encryption
-      encryptedSecret = Buffer.from(googleClientSecret).toString("base64");
+      try {
+        encryptedSecret = encryptClientSecret(googleClientSecret);
+      } catch (error) {
+        console.error("Failed to encrypt client secret:", error);
+        return {
+          error: "Failed to encrypt client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured.",
+        };
+      }
     }
 
     // Check if OAuthSettings vertex exists
@@ -76,14 +85,15 @@ export async function saveOAuthSettings(settings: {
       const updateQuery = `
         MATCH (o:OAuthSettings)
         SET o.googleClientId = $googleClientId,
-            o.googleClientSecret = $googleClientSecret,
-            o.googleEnabled = $googleEnabled
+            o.googleClientSecretEncrypted = $googleClientSecretEncrypted,
+            o.googleEnabled = $googleEnabled,
+            o.updatedAt = datetime()
         RETURN o
       `;
 
       await dbSession.run(updateQuery, {
         googleClientId: googleClientId || "",
-        googleClientSecret: encryptedSecret || "",
+        googleClientSecretEncrypted: encryptedSecret || "",
         googleEnabled: googleEnabled,
       });
     } else {
@@ -91,15 +101,17 @@ export async function saveOAuthSettings(settings: {
       const createQuery = `
         CREATE (o:OAuthSettings {
           googleClientId: $googleClientId,
-          googleClientSecret: $googleClientSecret,
-          googleEnabled: $googleEnabled
+          googleClientSecretEncrypted: $googleClientSecretEncrypted,
+          googleEnabled: $googleEnabled,
+          createdAt: datetime(),
+          updatedAt: datetime()
         })
         RETURN o
       `;
 
       await dbSession.run(createQuery, {
         googleClientId: googleClientId || "",
-        googleClientSecret: encryptedSecret || "",
+        googleClientSecretEncrypted: encryptedSecret || "",
         googleEnabled: googleEnabled,
       });
     }

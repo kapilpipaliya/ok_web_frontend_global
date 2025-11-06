@@ -1,0 +1,161 @@
+{
+  vertexes: [
+    {
+      id: "queue_helpers_function",
+      L: "Function",
+      P: {
+        key: "queueHelpers",
+        description: "Common helper functions for creating and managing BullMQ queues",
+        body: '''
+try {
+  const { Queue } = args.bullmq;
+
+  // Get standard Redis connection configuration
+  const getRedisConnection = () => {
+    return args.bullmq.redisConnection || {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      maxRetriesPerRequest: null
+    };
+  };
+
+  // Queue names constants
+  const QUEUE_NAMES = {
+    CHANNEL: 'processChannelQueue',
+    PLAYLIST: 'processPlaylistQueue'
+  };
+
+  // Default job options
+  const DEFAULT_JOB_OPTIONS = {
+    channel: {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+      removeOnComplete: 100,
+      removeOnFail: false  // Dead Letter Queue
+    },
+    playlist: {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+      removeOnComplete: 100,
+      removeOnFail: false  // Dead Letter Queue
+    }
+  };
+
+  // Create channel queue
+  const createChannelQueue = (args) => {
+    const connection = getRedisConnection();
+    return new Queue(QUEUE_NAMES.CHANNEL, { connection });
+  };
+
+  // Create playlist queue
+  const createPlaylistQueue = (args) => {
+    const connection = getRedisConnection();
+    return new Queue(QUEUE_NAMES.PLAYLIST, { connection });
+  };
+
+  // Generate unique job ID
+  const createJobId = (type, userUuid, resourceId) => {
+    return `${type}-${userUuid}-${resourceId}`;
+  };
+
+  // Remove existing job with state filtering
+  const removeExistingJob = async (queue, jobId, skipStates = ['active']) => {
+    try {
+      const existingJob = await queue.getJob(jobId);
+
+      if (!existingJob) {
+        return { removed: false, state: null };
+      }
+
+      const state = await existingJob.getState();
+
+      // Check if we should skip this job based on its state
+      if (skipStates.includes(state)) {
+        console.log(`[Queue Helper] Job ${jobId} is in ${state} state, skipping removal`);
+        return { removed: false, state };
+      }
+
+      // Remove the job
+      await existingJob.remove();
+      console.log(`[Queue Helper] Removed job ${jobId} (state: ${state})`);
+      return { removed: true, state };
+    } catch (err) {
+      console.log(`[Queue Helper] Error checking job ${jobId}:`, err.message);
+      return { removed: false, state: null, error: err.message };
+    }
+  };
+
+  // Add channel job with smart defaults
+  const addChannelJob = async (queue, data, options = {}) => {
+    // Auto-generate jobId if not provided
+    const jobId = options.jobId || createJobId('channel', data.userUuid, data.channelId);
+
+    // Merge user options with defaults
+    const jobOptions = {
+      ...DEFAULT_JOB_OPTIONS.channel,
+      ...options,
+      jobId  // Ensure jobId is included
+    };
+
+    // Add job to queue
+    const job = await queue.add('processChannel', data, jobOptions);
+    return job;
+  };
+
+  // Add playlist job with smart defaults
+  const addPlaylistJob = async (queue, data, options = {}) => {
+    // Auto-generate jobId if not provided
+    const jobId = options.jobId || createJobId('playlist', data.userUuid, data.playlistId);
+
+    // Merge user options with defaults
+    const jobOptions = {
+      ...DEFAULT_JOB_OPTIONS.playlist,
+      ...options,
+      jobId  // Ensure jobId is included
+    };
+
+    // Add job to queue
+    const job = await queue.add('processPlaylist', data, jobOptions);
+    return job;
+  };
+
+  // Return all helper functions
+  return {
+    success: true,
+    data: {
+      // Queue creation
+      createChannelQueue,
+      createPlaylistQueue,
+
+      // Job management
+      addChannelJob,
+      addPlaylistJob,
+      removeExistingJob,
+
+      // Utilities
+      createJobId,
+      getRedisConnection,
+
+      // Constants
+      QUEUE_NAMES,
+      DEFAULT_JOB_OPTIONS
+    }
+  };
+
+} catch (error) {
+  console.error("Error in queueHelpers:", error);
+  return {
+    success: false,
+    message: "Failed to initialize queue helpers",
+    error: {
+      type: error.name || "QueueHelperError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -38,6 +38,213 @@ return {
       }
     },
     {
+      id: "quota_warning_banner",
+      L: "Attr",
+      P: {
+        displayOrder: 0.6,
+        componentName: "Html",
+        props: '''
+const isApproaching = args.fns.isApproachingQuotaLimit?.();
+const isAtLimit = args.fns.isAtQuotaLimit?.();
+const showBanner = isApproaching || isAtLimit;
+
+return {
+  as: "div",
+  hide: !showBanner
+};
+''',
+        css: '''
+const isAtLimit = args.fns.isAtQuotaLimit?.();
+
+return `._id {
+  background: ${isAtLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  color: ${isAtLimit ? args.theme.var.color.error_text : args.theme.var.color.warning_text};
+  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${isAtLimit ? args.theme.var.color.error_dark_100 : args.theme.var.color.warning_dark_100};
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_warning_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_warning_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isAtLimit = args.fns.isAtQuotaLimit?.();
+
+return {
+  as: "icon",
+  icon: isAtLimit ? "carbon:warning-filled" : "carbon:warning-alt",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_warning_text_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_warning_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isAtLimit = args.fns.isAtQuotaLimit?.();
+const percentage = args.fns.getQuotaUsagePercentage?.();
+
+return {
+  as: "strong",
+  text: isAtLimit
+    ? `YouTube API Quota Limit Reached (${percentage}%)`
+    : `YouTube API Quota Warning (${percentage}%)`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 600;
+  display: block;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_warning_message",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isAtLimit = args.fns.isAtQuotaLimit?.();
+const resetTime = args.fns.getQuotaResetTime?.();
+const usage = args.fns.quotaUsage?.();
+const usedQuota = usage?.totalUnitsUsed || 0;
+const dailyLimit = usage?.dailyLimit || 10000;
+
+return {
+  as: "span",
+  text: isAtLimit
+    ? `You've reached 95% of your daily YouTube API quota (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units). Adding channels and playlists is temporarily disabled. Resets in ${resetTime}.`
+    : `You've used ${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units of your daily YouTube API quota. Resets in ${resetTime}.`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  opacity: 0.95;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_warning_dismiss",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        fns: '''
+const [isDismissed, setIsDismissed] = args.createSignal(false);
+
+return {
+  isDismissed,
+  dismissBanner: () => setIsDismissed(true)
+};
+''',
+        props: '''
+const isDismissed = args.fns.isDismissed?.();
+
+return {
+  as: "button",
+  text: "Dismiss",
+  onClick: args.fns.dismissBanner,
+  hide: isDismissed
+};
+''',
+        css: '''
+const isAtLimit = args.fns.isAtQuotaLimit?.();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isAtLimit ? args.theme.var.color.error_dark_100 : args.theme.var.color.warning_dark_100};
+  color: ${isAtLimit ? args.theme.var.color.error_dark_100_text : args.theme.var.color.warning_dark_100_text};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: ${isAtLimit ? args.theme.var.color.error_dark_200 : args.theme.var.color.warning_dark_200};
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}`;
+'''
+      }
+    },
+    {
       id: "layout_wrapper",
       L: "Attr",
       P: {
@@ -56,6 +263,10 @@ const checkAdminRole = () => {
 
 // Impersonation state management
 const [impersonatedUser, setImpersonatedUser] = args.createSignal(null);
+
+// Quota usage state management
+const [quotaUsage, setQuotaUsage] = args.createSignal(null);
+const [quotaLoading, setQuotaLoading] = args.createSignal(false);
 
 // Load impersonation state from sessionStorage (client-side only)
 // This is called from onMount to avoid SSR/hydration mismatch
@@ -109,6 +320,72 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
       ...(impersonatedUserUuid ? { impersonatedUserUuid } : {})
     }
   });
+};
+
+// Fetch quota usage from server
+const fetchQuotaUsage = async () => {
+  setQuotaLoading(true);
+  try {
+    const result = await executeYTOFunction('getAPIUsageToday', {});
+    if (result?.result) {
+      setQuotaUsage(result.result);
+    }
+  } catch (error) {
+    console.error('Error fetching quota usage:', error);
+  } finally {
+    setQuotaLoading(false);
+  }
+};
+
+// Check if approaching quota limit (80%)
+const isApproachingQuotaLimit = () => {
+  const usage = quotaUsage();
+  if (!usage) return false;
+
+  const usedQuota = usage.totalUnitsUsed || 0;
+  const dailyLimit = usage.dailyLimit || 10000;
+  const percentage = (usedQuota / dailyLimit) * 100;
+
+  return percentage >= 80;
+};
+
+// Check if at quota limit (95%) - should disable actions
+const isAtQuotaLimit = () => {
+  const usage = quotaUsage();
+  if (!usage) return false;
+
+  const usedQuota = usage.totalUnitsUsed || 0;
+  const dailyLimit = usage.dailyLimit || 10000;
+  const percentage = (usedQuota / dailyLimit) * 100;
+
+  return percentage >= 95;
+};
+
+// Get quota reset time (midnight UTC)
+const getQuotaResetTime = () => {
+  const now = new Date();
+  const midnight = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1, // Next day
+    0, 0, 0, 0 // Midnight
+  ));
+
+  const diff = midnight - now;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  return `${hours}h ${minutes}m`;
+};
+
+// Get quota usage percentage
+const getQuotaUsagePercentage = () => {
+  const usage = quotaUsage();
+  if (!usage) return 0;
+
+  const usedQuota = usage.totalUnitsUsed || 0;
+  const dailyLimit = usage.dailyLimit || 10000;
+  return Math.round((usedQuota / dailyLimit) * 100);
 };
 
 // Video player state management
@@ -511,6 +788,98 @@ const filteredMobileNavigationItems = mobileNavigationItemsData.filter(item => {
 // Create signal for mobile navigation items
 const [mobileNavigationItems, setMobileNavigationItems] = args.createSignal(filteredMobileNavigationItems);
 
+// Status messages from constants
+const STATUS_CONSTANTS = {
+  "statuses": {
+    "queued": {
+      "label": "Queued",
+      "message": "Waiting in queue",
+      "color": "blue",
+      "icon": "carbon:time",
+      "canCancel": true,
+      "canRetry": false
+    },
+    "processing": {
+      "label": "Processing",
+      "message": "Fetching data from YouTube",
+      "color": "yellow",
+      "icon": "carbon:in-progress",
+      "canCancel": true,
+      "canRetry": false
+    },
+    "pending_quota": {
+      "label": "Pending Quota",
+      "message": "Waiting for quota reset (midnight UTC)",
+      "color": "orange",
+      "icon": "carbon:pause",
+      "canCancel": true,
+      "canRetry": true
+    },
+    "paused": {
+      "label": "Paused",
+      "message": "Paused by user",
+      "color": "gray",
+      "icon": "carbon:pause",
+      "canCancel": true,
+      "canRetry": true
+    },
+    "completed": {
+      "label": "Completed",
+      "message": "All data fetched successfully",
+      "color": "green",
+      "icon": "carbon:checkmark-filled",
+      "canCancel": false,
+      "canRetry": true
+    },
+    "completed_with_errors": {
+      "label": "Completed with Errors",
+      "message": "Completed with some failures",
+      "color": "yellow",
+      "icon": "carbon:warning-filled",
+      "canCancel": false,
+      "canRetry": true
+    },
+    "failed": {
+      "label": "Failed",
+      "message": "Processing failed",
+      "color": "red",
+      "icon": "carbon:error-filled",
+      "canCancel": false,
+      "canRetry": true
+    }
+  },
+  "priorities": {
+    "high": {
+      "label": "High Priority",
+      "color": "red",
+      "icon": "carbon:arrow-up",
+      "order": 1
+    },
+    "normal": {
+      "label": "Normal Priority",
+      "color": "blue",
+      "icon": "carbon:minus",
+      "order": 2
+    },
+    "low": {
+      "label": "Low Priority",
+      "color": "gray",
+      "icon": "carbon:arrow-down",
+      "order": 3
+    }
+  }
+};
+
+// Get status info
+const getStatusInfo = (status) => {
+  return STATUS_CONSTANTS.statuses[status] || null;
+};
+
+// Get priority info
+const getPriorityInfo = (priority) => {
+  return STATUS_CONSTANTS.priorities[priority] || null;
+};
+
 return {
   checkAdminRole,
   impersonatedUser,
@@ -518,6 +887,12 @@ return {
   getImpersonatedUserUuid,
   executeYTOFunction,
   loadImpersonationState,
+  quotaUsage,
+  fetchQuotaUsage,
+  isApproachingQuotaLimit,
+  isAtQuotaLimit,
+  getQuotaResetTime,
+  getQuotaUsagePercentage,
   navigationSections,
   setNavigationSections,
   mobileNavigationItems,
@@ -545,7 +920,9 @@ return {
   playlistModalVideo,
   openAddToPlaylistModal,
   closeAddToPlaylistModal,
-  addVideoToPlaylists
+  addVideoToPlaylists,
+  getStatusInfo,
+  getPriorityInfo
 };
 ''',
         props: '''
@@ -553,6 +930,17 @@ return {
   as: "div",
   onMount: () => {
     args.fns.loadImpersonationState?.();
+    args.fns.fetchQuotaUsage?.();
+
+    // Refresh quota usage every 5 minutes
+    const quotaInterval = setInterval(() => {
+      args.fns.fetchQuotaUsage?.();
+    }, 5 * 60 * 1000);
+
+    // Cleanup on unmount
+    return () => {
+      clearInterval(quotaInterval);
+    };
   }
 };
 '''
@@ -1274,6 +1662,13 @@ return {
     { id: "e0", T: "Attr", S: "layout_root", E: "favicon_link" },
     { id: "e0a", T: "Attr", S: "layout_root", E: "layout_wrapper" },
     { id: "e0b", T: "Attr", S: "layout_wrapper", E: "impersonation_banner" },
+    { id: "e0c", T: "Attr", S: "layout_wrapper", E: "quota_warning_banner" },
+    { id: "e0c1", T: "Attr", S: "quota_warning_banner", E: "quota_warning_content" },
+    { id: "e0c2", T: "Attr", S: "quota_warning_content", E: "quota_warning_icon" },
+    { id: "e0c3", T: "Attr", S: "quota_warning_content", E: "quota_warning_text_container" },
+    { id: "e0c4", T: "Attr", S: "quota_warning_text_container", E: "quota_warning_title" },
+    { id: "e0c5", T: "Attr", S: "quota_warning_text_container", E: "quota_warning_message" },
+    { id: "e0c6", T: "Attr", S: "quota_warning_banner", E: "quota_warning_dismiss" },
     { id: "e1", T: "Attr", S: "layout_wrapper", E: "layout_container" },
     { id: "e2", T: "Attr", S: "layout_container", E: "main_content" },
     { id: "e3", T: "Attr", S: "main_content", E: "slot_main" },

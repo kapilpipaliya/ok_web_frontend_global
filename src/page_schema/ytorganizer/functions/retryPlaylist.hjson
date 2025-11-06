@@ -92,33 +92,45 @@ try {
   `, { userUuid: user.P.uuid, playlistId });
 
   // Re-add playlist to processing queue
-  const { Queue } = args.bullmq;
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 
-  const connection = args.bullmq.redisConnection || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null
-  };
+  try {
+    // Get priority and convert to job priority number
+    const priority = playlistSetting.P.priority || 'normal';
+    const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
-  const playlistQueue = new Queue('processPlaylistQueue', { connection });
+    // Generate unique job ID
+    const jobId = helpers.result.data.createJobId('playlist', user.P.uuid, playlistId);
 
-  await playlistQueue.add('processPlaylist', {
-    playlistId,
-    userId: user.id,
-    userUuid: user.P.uuid,
-    customName: playlistSetting.P.customName || null,
-    channelId: channelId
-  }, {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 5000
-    },
-    removeOnComplete: 100,
-    removeOnFail: false  // Keep failed jobs in dead letter queue
-  });
+    // Remove existing job with this ID if it exists (but not if it's active)
+    const { removed, state } = await helpers.result.data.removeExistingJob(playlistQueue, jobId, ['active']);
 
-  await playlistQueue.close();
+    if (state === 'active') {
+      return {
+        success: false,
+        message: `Playlist "${playlist.P.title}" is already being processed. Please wait for it to complete.`,
+        error: {
+          type: "AlreadyActive",
+          details: "Cannot retry a playlist that is currently being processed"
+        }
+      };
+    }
+
+    // Add job to queue
+    await helpers.result.data.addPlaylistJob(playlistQueue, {
+      playlistId,
+      userId: user.id,
+      userUuid: user.P.uuid,
+      customName: playlistSetting.P.customName || null,
+      channelId: channelId,
+      priority
+    }, {
+      priority: jobPriority  // Override default priority
+    });
+  } finally {
+    await playlistQueue.close();
+  }
 
   return {
     success: true,

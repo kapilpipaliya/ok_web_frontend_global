@@ -1,0 +1,58 @@
+{
+  vertexes: [
+    {
+      id: "get_worker_queues_function",
+      L: "Function",
+      P: {
+        key: "getWorkerQueues",
+        description: "Fetches list of unique worker queue names from logs",
+        body: '''
+// Fetch unique worker queue names from WorkerLog nodes
+
+try {
+  const session = args.session;
+
+  // Get distinct worker names from logs
+  const result = await session.run(`
+    MATCH (log:WorkerLog)
+    RETURN DISTINCT log.workerName as workerName
+    ORDER BY workerName
+  `);
+
+  const workers = result.records.map(record => {
+    const workerName = record.get('workerName');
+
+    // Create friendly labels for known workers
+    let label = workerName;
+    if (workerName === 'processChannelQueue') {
+      label = 'Channel Queue';
+    } else if (workerName === 'processPlaylistQueue') {
+      label = 'Playlist Queue';
+    }
+
+    return {
+      value: workerName,
+      label: label
+    };
+  });
+
+  // Add "All Workers" option at the beginning
+  return [
+    { value: 'all', label: 'All Workers' },
+    ...workers
+  ];
+} catch (error) {
+  console.error('Error fetching worker queues:', error);
+  // Return default options if query fails
+  return [
+    { value: 'all', label: 'All Workers' },
+    { value: 'processChannelQueue', label: 'Channel Queue' },
+    { value: 'processPlaylistQueue', label: 'Playlist Queue' }
+  ];
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

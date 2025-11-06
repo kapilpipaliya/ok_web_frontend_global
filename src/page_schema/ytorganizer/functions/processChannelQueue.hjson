@@ -9,27 +9,117 @@
         body: '''
 // This is a background worker function that processes channels
 if (args.contextData.action === 'start') {
-  console.log('Starting channel processing worker');
-
-  const { Worker } = args.bullmq;
-
-  // Get Redis connection from bullmq config
-  const connection = args.bullmq.redisConnection || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null
+  // Helper function to log messages to database
+  const logMessage = async (level, message, metadata = {}) => {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: 'logWorkerMessage',
+        contextData: {
+          workerName: 'processChannelQueue',
+          level,
+          message,
+          metadata
+        }
+      });
+    } catch (error) {
+      // Silent failure - don't break worker if logging fails
+    }
   };
+
+  await logMessage('info', 'Starting channel processing worker');
+
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+
+  // Queue all channels that are marked as 'queued' but not in BullMQ queue
+  await logMessage('info', 'Checking for queued channels to add to queue');
+
+  try {
+    const channelQueue = helpers.result.data.createChannelQueue(args);
+
+    // Get all channels with status 'queued'
+    const queuedChannels = await args.session.run(`
+      MATCH (u:User)-[:UserChannelSetting]->(cs:ChannelSetting)
+            -[:ChannelSettingChannel]->(c:Channel)
+      WHERE cs.status = 'queued'
+      RETURN u.uuid as userUuid, u.id as userId, c.youtubeId as channelId, cs.priority as priority
+    `);
+
+    let addedCount = 0;
+
+    for (const record of queuedChannels.records) {
+      const userUuid = record.get('userUuid');
+      const userId = record.get('userId');
+      const channelId = record.get('channelId');
+      const priority = record.get('priority') || 'normal';
+
+      // Generate unique job ID
+      const jobId = helpers.result.data.createJobId('channel', userUuid, channelId);
+
+      // Check if job already exists in waiting state
+      const existingJob = await channelQueue.getJob(jobId);
+      const jobState = existingJob ? await existingJob.getState() : null;
+
+      if (!existingJob || jobState !== 'waiting') {
+        // Job doesn't exist or is not waiting, add it
+        const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
+
+        await helpers.result.data.addChannelJob(channelQueue, {
+          channelId,
+          userId,
+          userUuid,
+          priority
+        }, {
+          priority: jobPriority
+        });
+
+        addedCount++;
+      }
+    }
+
+    await channelQueue.close();
+    await logMessage('info', `Added ${addedCount} queued channels to queue`, { addedCount });
+  } catch (error) {
+    await logMessage('error', 'Error queuing channels on startup', {
+      error: error.message,
+      stack: error.stack
+    });
+  }
 
   // Create worker for channel processing queue
   const worker = new Worker('processChannelQueue', async (job) => {
-    const { channelId, userId, userUuid, customName } = job.data;
+    const { channelId, userId, userUuid, customName, priority = 'normal' } = job.data;
 
-    console.log(`Processing channel ${channelId} for user ${userId}`);
+    await logMessage('info', 'Processing channel', { channelId, userId, priority });
 
     // Get a new database session for this job
     const { dbSession: session } = await args.getSession();
 
     try {
+      // QUOTA CHECK: Verify user has enough quota before processing
+      const quotaStatus = await args.isApproachingQuotaLimit(userUuid, session, 0.95);
+      if (quotaStatus.percentUsed >= 95) {
+        await logMessage('warn', 'User quota nearly exhausted, skipping channel', {
+          channelId,
+          userUuid,
+          quotaUsed: quotaStatus.percentUsed,
+          remaining: quotaStatus.remainingQuota
+        });
+
+        // Mark channel as pending_quota instead of failed
+        await session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+          SET cs.status = 'pending_quota',
+              cs.error = 'Daily API quota nearly exhausted. Will resume tomorrow.',
+              cs.updatedAt = datetime()
+        `, { userUuid, channelId });
+
+        await session.close();
+        return; // Exit without throwing - job completes but channel waits
+      }
+
       // Update status to processing
       await session.run(`
         MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
@@ -40,21 +130,28 @@ if (args.contextData.action === 'start') {
         RETURN cs
       `, { userUuid, channelId });
 
-      // Get active API key from database
-      const apiKeyResult = await args.executeNamedServerFunction({
-        functionName: "getActiveYouTubeAPIKey",
-        contextData: {}
-      });
-
-      if (!apiKeyResult?.result?.success || !apiKeyResult?.result?.data) {
-        throw new Error(apiKeyResult?.result?.message || "Failed to get YouTube API key");
+      // Get authenticated YouTube client for this user's OAuth
+      let youtube;
+      try {
+        youtube = await args.getYouTubeClient(userUuid, session);
+      } catch (error) {
+        // Handle OAuth errors - mark channel as failed
+        await session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+          SET cs.status = 'failed',
+              cs.error = $error,
+              cs.priority = null,
+              cs.updatedAt = datetime()
+        `, {
+          userUuid,
+          channelId,
+          error: error.message.includes('No YouTube authorization') || error.message.includes('revoked')
+            ? 'YouTube authorization expired or revoked. Please reconnect your YouTube account in settings.'
+            : error.message
+        });
+        throw error;
       }
-
-      const apiKeyData = apiKeyResult.result.data;
-
-      // Fetch channel playlists from YouTube API
-      const { google } = await import('googleapis');
-      const youtube = google.youtube({ version: 'v3', auth: apiKeyData.apiKey });
 
       // Get channel uploads playlist and all playlists
       const channelResponse = await youtube.channels.list({
@@ -62,11 +159,8 @@ if (args.contextData.action === 'start') {
         id: [channelId]
       });
 
-      // Track API usage for channels.list call
-      await args.executeNamedServerFunction({
-        functionName: "trackYouTubeAPIUsage",
-        contextData: { keyId: apiKeyData.keyId, cost: 3 }
-      });
+      // Log API usage: channels.list operation (1 unit)
+      await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
 
       if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
         throw new Error('Channel not found');
@@ -86,11 +180,8 @@ if (args.contextData.action === 'start') {
           pageToken: nextPageToken
         });
 
-        // Track API usage for playlists.list call
-        await args.executeNamedServerFunction({
-          functionName: "trackYouTubeAPIUsage",
-          contextData: { keyId: apiKeyData.keyId, cost: 3 }
-        });
+        // Log API usage: playlists.list operation (1 unit per page)
+        await args.logAPIUsage(userUuid, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
 
         if (playlistsResponse.data.items) {
           allPlaylists = allPlaylists.concat(playlistsResponse.data.items);
@@ -124,11 +215,11 @@ if (args.contextData.action === 'start') {
       `, { userUuid, channelId, totalPlaylists });
 
       // Create a queue for playlist processing
-      const { Queue } = args.bullmq;
-      const playlistQueue = new Queue('processPlaylistQueue', { connection });
+      const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 
-      // Process each playlist by adding to queue
-      for (const playlist of allPlaylists) {
+      try {
+        // Process each playlist by adding to queue
+        for (const playlist of allPlaylists) {
         if (!playlist.id) continue;
 
         // Save playlist metadata first
@@ -163,6 +254,7 @@ if (args.contextData.action === 'start') {
         `, { channelId, playlistId: playlist.id });
 
         // Create user playlist setting and mark as queued
+        // Inherit priority from parent channel
         const playlistSettingKey = `playlist_setting_${userId}_${playlist.id}`;
         await session.run(`
           MATCH (u:User {uuid: $userUuid})
@@ -179,41 +271,52 @@ if (args.contextData.action === 'start') {
             ps.sortBy = 'index',
             ps.showThumbnails = true,
             ps.viewMode = 'list',
+            ps.priority = $priority,
             ps.queuedAt = datetime(),
             ps.updatedAt = datetime()
         `, {
           userUuid,
           playlistId: playlist.id,
-          playlistSettingKey
+          playlistSettingKey,
+          priority
         });
 
-        // Add playlist to processing queue
-        await playlistQueue.add('processPlaylist', {
-          playlistId: playlist.id,
-          userId: userId,
-          userUuid: userUuid,
-          customName: null,
-          channelId: channelId
-        }, {
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 5000
-          },
-          removeOnComplete: 100,
-          removeOnFail: 50
-        });
+          // Add playlist to processing queue with inherited priority
+          const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
-        console.log(`Queued playlist ${playlist.id} (${playlist.snippet?.title}) for processing`);
+          await helpers.result.data.addPlaylistJob(playlistQueue, {
+            playlistId: playlist.id,
+            userId: userId,
+            userUuid: userUuid,
+            customName: null,
+            channelId: channelId,
+            priority: priority
+          }, {
+            priority: jobPriority  // Override default priority
+          });
+
+          await logMessage('info', 'Queued playlist for processing', {
+            playlistId: playlist.id,
+            playlistTitle: playlist.snippet?.title,
+            priority: priority
+          });
+        }
+      } finally {
+        // Close playlist queue connection
+        await playlistQueue.close();
       }
 
-      // Close playlist queue connection
-      await playlistQueue.close();
-
-      console.log(`Channel ${channelId} processing completed: queued ${totalPlaylists} playlists for processing`);
+      await logMessage('info', 'Channel processing completed', {
+        channelId,
+        totalPlaylists
+      });
 
     } catch (error) {
-      console.error(`Error processing channel ${channelId}:`, error);
+      await logMessage('error', 'Error processing channel', {
+        channelId,
+        error: error.message,
+        stack: error.stack
+      });
 
       // CRITICAL: Mark channel as failed to prevent it from being stuck in 'processing' state forever
       // This handles cases where:
@@ -227,6 +330,7 @@ if (args.contextData.action === 'start') {
               -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
         SET cs.status = 'failed',
             cs.error = $error,
+            cs.priority = null,
             cs.progress = 0,
             cs.updatedAt = datetime()
       `, { userUuid, channelId, error: error.message });
@@ -246,18 +350,22 @@ if (args.contextData.action === 'start') {
     concurrency: 2
   });
 
-  worker.on('completed', (job) => {
-    console.log(`Channel processing job ${job.id} completed`);
+  worker.on('completed', async (job) => {
+    await logMessage('info', 'Channel processing job completed', { jobId: job.id });
   });
 
-  worker.on('failed', (job, err) => {
-    console.error(`Channel processing job ${job?.id} failed:`, err);
+  worker.on('failed', async (job, err) => {
+    await logMessage('error', 'Channel processing job failed', {
+      jobId: job?.id,
+      error: err.message,
+      stack: err.stack
+    });
   });
 
   // Return stop function for graceful shutdown
   return {
     stop: async () => {
-      console.log('Stopping channel processing worker');
+      await logMessage('info', 'Stopping channel processing worker');
       await worker.close();
     }
   };

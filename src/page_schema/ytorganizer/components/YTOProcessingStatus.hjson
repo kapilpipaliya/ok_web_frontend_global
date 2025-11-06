@@ -14,7 +14,7 @@
         key: "status",
         type: "string",
         defValue: "queued",
-        description: "Processing status: queued, processing, completed, failed"
+        description: "Processing status: queued, processing, pending_quota, paused, completed, completed_with_errors, failed"
       }
     },
     {
@@ -36,12 +36,39 @@
       }
     },
     {
+      id: "variant_status_pending_quota",
+      L: "ComponentVariantOption",
+      P: {
+        key: "pending_quota",
+        value: "pending_quota",
+        description: "Waiting for quota reset"
+      }
+    },
+    {
+      id: "variant_status_paused",
+      L: "ComponentVariantOption",
+      P: {
+        key: "paused",
+        value: "paused",
+        description: "Paused by user"
+      }
+    },
+    {
       id: "variant_status_completed",
       L: "ComponentVariantOption",
       P: {
         key: "completed",
         value: "completed",
         description: "Processing completed successfully"
+      }
+    },
+    {
+      id: "variant_status_completed_with_errors",
+      L: "ComponentVariantOption",
+      P: {
+        key: "completed_with_errors",
+        value: "completed_with_errors",
+        description: "Completed with some errors"
       }
     },
     {
@@ -115,18 +142,38 @@ if (!status) {
   return { hide: true };
 }
 
+// Hide if status is "completed" (only show non-completed statuses)
+if (status === "completed") {
+  return { hide: true };
+}
+
 return {
   as: "div"
 };
 ''',
         css: '''
+const status = args.contextData.props?.status;
+const statusInfo = args.fns.getStatusInfo?.(status);
+
+// Map color names to theme colors
+const colorMap = {
+  blue: args.theme.var.color.info,
+  yellow: args.theme.var.color.warning,
+  orange: args.theme.var.color.warning,
+  gray: args.theme.var.color.muted,
+  green: args.theme.var.color.success,
+  red: args.theme.var.color.error
+};
+
+const borderColor = statusInfo?.color ? colorMap[statusInfo.color] : args.theme.var.color.info;
+
 return `._id {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   background: ${args.theme.var.color.background_light_100};
-  border-left: 3px solid ${args.theme.var.color.info};
+  border-left: 3px solid ${borderColor};
   border-radius: 0.5rem;
   margin-top: 0.5rem;
 }`;
@@ -142,27 +189,22 @@ return `._id {
         props: '''
 const status = args.contextData.props?.status || 'queued';
 
-// Map status to icon and color with sensible defaults
-let icon = 'carbon:time';
-let color = args.theme.var.color.info;
+// Get status info from constants
+const statusInfo = args.fns.getStatusInfo?.(status);
 
-if (status === 'processing') {
-  icon = 'carbon:in-progress';
-  color = args.theme.var.color.primary;
-} else if (status === 'completed') {
-  icon = 'carbon:checkmark';
-  color = args.theme.var.color.success;
-} else if (status === 'failed') {
-  icon = 'carbon:warning';
-  color = args.theme.var.color.error;
-} else if (status === 'queued') {
-  icon = 'carbon:time';
-  color = args.theme.var.color.info;
-} else {
-  // Unknown status - use question mark
-  icon = 'carbon:help';
-  color = args.theme.var.color.muted;
-}
+// Map color names to theme colors
+const colorMap = {
+  blue: args.theme.var.color.info,
+  yellow: args.theme.var.color.warning,
+  orange: args.theme.var.color.warning,
+  gray: args.theme.var.color.muted,
+  green: args.theme.var.color.success,
+  red: args.theme.var.color.error
+};
+
+// Use icon and color from status info, fallback to defaults
+const icon = statusInfo?.icon || 'carbon:help';
+const color = statusInfo?.color ? colorMap[statusInfo.color] : args.theme.var.color.muted;
 
 return {
   as: "icon",
@@ -206,22 +248,25 @@ const type = args.contextData.props?.type || 'channel';
 const progress = Math.max(0, Math.min(100, args.contextData.props?.progress || 0));
 const details = args.contextData.props?.details || '';
 
-// Build status text based on status
+// Get status info from constants
+const statusInfo = args.fns.getStatusInfo?.(status);
+
+// Build status text based on status info
 let statusText = '';
-if (status === 'queued') {
-  statusText = `Queued for processing...`;
-} else if (status === 'processing') {
-  statusText = `Processing ${type}... ${progress}%`;
+
+if (statusInfo) {
+  // Use message from status constants
+  statusText = statusInfo.message;
+
+  // Add progress percentage for processing status
+  if (status === 'processing' && progress > 0) {
+    statusText = `${statusInfo.label} ${type}... ${progress}%`;
+  }
+
+  // Add details if available
   if (details) {
     statusText += ` (${details})`;
   }
-} else if (status === 'completed') {
-  statusText = `Processing completed`;
-  if (details) {
-    statusText += ` - ${details}`;
-  }
-} else if (status === 'failed') {
-  statusText = `Processing failed`;
 } else {
   // Fallback for unknown status
   statusText = `Status: ${status}`;
@@ -251,9 +296,12 @@ return `._id {
         props: '''
 const status = args.contextData.props?.status || 'queued';
 
+// Only show progress bar for queued and processing statuses
+const showProgressBar = status === 'queued' || status === 'processing';
+
 return {
   as: "div",
-  hide: status === 'completed' || status === 'failed'
+  hide: !showProgressBar
 };
 ''',
         css: '''
@@ -300,7 +348,10 @@ return `._id {
     { id: "e1", T: "ComponentVariant", S: "yto_processing_status_component", E: "variant_status" },
     { id: "e2", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_queued" },
     { id: "e3", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_processing" },
+    { id: "e3a", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_pending_quota" },
+    { id: "e3b", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_paused" },
     { id: "e4", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_completed" },
+    { id: "e4a", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_completed_with_errors" },
     { id: "e5", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_failed" },
     { id: "e6", T: "ComponentVariant", S: "yto_processing_status_component", E: "variant_progress" },
     { id: "e7", T: "ComponentVariant", S: "yto_processing_status_component", E: "variant_type" },

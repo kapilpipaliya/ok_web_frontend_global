@@ -96,32 +96,44 @@ try {
   `, { userUuid: user.P.uuid, channelId });
 
   // Re-add channel to processing queue
-  const { Queue } = args.bullmq;
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const channelQueue = helpers.result.data.createChannelQueue(args);
 
-  const connection = args.bullmq.redisConnection || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null
-  };
+  try {
+    // Get priority and convert to job priority number
+    const priority = channelSetting.P.priority || 'normal';
+    const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
-  const channelQueue = new Queue('processChannelQueue', { connection });
+    // Generate unique job ID
+    const jobId = helpers.result.data.createJobId('channel', user.P.uuid, channelId);
 
-  await channelQueue.add('processChannel', {
-    channelId,
-    userId: user.id,
-    userUuid: user.P.uuid,
-    customName: channelSetting.P.customName || null
-  }, {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 5000
-    },
-    removeOnComplete: 100,
-    removeOnFail: false  // Keep failed jobs in dead letter queue
-  });
+    // Remove existing job with this ID if it exists (but not if it's active)
+    const { removed, state } = await helpers.result.data.removeExistingJob(channelQueue, jobId, ['active']);
 
-  await channelQueue.close();
+    if (state === 'active') {
+      return {
+        success: false,
+        message: `Channel "${channel.P.title}" is already being processed. Please wait for it to complete.`,
+        error: {
+          type: "AlreadyActive",
+          details: "Cannot retry a channel that is currently being processed"
+        }
+      };
+    }
+
+    // Add job to queue
+    await helpers.result.data.addChannelJob(channelQueue, {
+      channelId,
+      userId: user.id,
+      userUuid: user.P.uuid,
+      customName: channelSetting.P.customName || null,
+      priority
+    }, {
+      priority: jobPriority  // Override default priority
+    });
+  } finally {
+    await channelQueue.close();
+  }
 
   return {
     success: true,

@@ -21,18 +21,11 @@
  */
 
 try {
-  const { Queue } = args.bullmq;
-
-  // Get Redis connection configuration
-  const connection = args.bullmq.redisConnection || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null
-  };
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 
   // Connect to both worker queues
-  const channelQueue = new Queue('processChannelQueue', { connection });
-  const playlistQueue = new Queue('processPlaylistQueue', { connection });
+  const channelQueue = helpers.result.data.createChannelQueue(args);
+  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 
   // Get job counts for both queues
   // This includes: waiting, active, completed, failed, delayed, and paused jobs

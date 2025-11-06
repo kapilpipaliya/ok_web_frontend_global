@@ -5,71 +5,100 @@
       L: "Function",
       P: {
         key: "saveChannel",
-        description: "Fetches basic channel metadata and queues background processing for playlists and videos",
+        description: "Fetches basic channel metadata using per-user OAuth and queues background processing for playlists and videos",
         body: '''
 /**
  * Extract channel ID or identifier from various YouTube URL formats
  * Supports: /channel/ID, /@handle, /c/custom, /user/username
+ * Returns: { type: 'handle' | 'channelId' | 'username' | 'custom', value: string }
  */
 const extractChannelId = (url) => {
   if (!url) return null;
 
-  // Handle different YouTube channel URL formats
-  const patterns = [
-    /youtube\.com\/channel\/([a-zA-Z0-9_-]+)/,  // Channel ID format: /channel/UCxxx
-    /youtube\.com\/@([a-zA-Z0-9_-]+)/,          // Handle format: /@channelname
-    /youtube\.com\/c\/([a-zA-Z0-9_-]+)/,        // Custom URL format: /c/customname
-    /youtube\.com\/user\/([a-zA-Z0-9_-]+)/      // Legacy user format: /user/username
-  ];
+  try {
+    // Parse URL using built-in URL class for better reliability
+    const urlObj = new URL(url);
 
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
+    // Check if it's a YouTube domain
+    if (!urlObj.hostname.includes('youtube.com')) {
+      return null;
+    }
+
+    const pathname = urlObj.pathname;
+    const parts = pathname.split('/').filter(Boolean); // Remove empty strings
+
+    if (parts.length === 0) return null;
+
+    // Handle format: /@channelname
+    if (parts[0].startsWith('@')) {
+      return { type: 'handle', value: parts[0].substring(1) };
+    }
+
+    // Need at least 2 parts for other formats: /type/value
+    if (parts.length < 2) return null;
+
+    // Channel ID format: /channel/UCxxx
+    if (parts[0] === 'channel') {
+      return { type: 'channelId', value: parts[1] };
+    }
+
+    // Legacy user format: /user/username
+    if (parts[0] === 'user') {
+      return { type: 'username', value: parts[1] };
+    }
+
+    // Custom URL format: /c/customname
+    if (parts[0] === 'c') {
+      return { type: 'custom', value: parts[1] };
+    }
+
+    return null;
+  } catch (error) {
+    // Invalid URL format
+    return null;
   }
-
-  return null;
 };
 
 /**
- * Fetch ONLY basic channel metadata (no playlists or videos)
- * Full processing will be done in background worker
+ * Fetch ONLY basic channel metadata using per-user OAuth
+ * Each user uses their own YouTube account with their own API quota
  */
-const fetchChannelMetadata = async (channelIdentifier, apiKeyData) => {
-  // Dynamic import of googleapis library
-  const { google } = await import('googleapis');
+const fetchChannelMetadata = async (channelInfo, youtube, userUuid, session) => {
+  let channelResponse;
 
-  // Initialize YouTube API client with authentication from database
-  const youtube = google.youtube({
-    version: 'v3',
-    auth: apiKeyData.apiKey
-  });
-
-  let channelId;
-
-  // Resolve channel identifier to actual channel ID
-  if (channelIdentifier.startsWith('@') || !channelIdentifier.startsWith('UC')) {
-    // Search for channel by handle or custom URL
-    const searchResponse = await youtube.search.list({
-      part: ['snippet'],
-      q: channelIdentifier.startsWith('@') ? channelIdentifier : `${channelIdentifier}`,
-      type: ['channel'],
-      maxResults: 1
+  // Resolve channel identifier to actual channel ID using efficient API calls
+  if (channelInfo.type === 'handle') {
+    // Use forHandle parameter (1 unit) for modern YouTube handles (@channelname)
+    channelResponse = await youtube.channels.list({
+      part: ['snippet', 'contentDetails', 'statistics', 'brandingSettings'],
+      forHandle: channelInfo.value
     });
 
-    if (!searchResponse.data.items || searchResponse.data.items.length === 0) {
-      throw new Error('Channel not found');
-    }
+    // Log API usage: channels.list with forHandle (1 unit)
+    await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+  } else if (channelInfo.type === 'channelId') {
+    // Direct channel ID lookup (/channel/UCxxx)
+    channelResponse = await youtube.channels.list({
+      part: ['snippet', 'contentDetails', 'statistics', 'brandingSettings'],
+      id: [channelInfo.value]
+    });
 
-    channelId = searchResponse.data.items[0].snippet.channelId;
-  } else {
-    channelId = channelIdentifier;
+    // Log API usage: channels.list operation (1 unit)
+    await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+  } else if (channelInfo.type === 'username') {
+    // Legacy username format (/user/username)
+    channelResponse = await youtube.channels.list({
+      part: ['snippet', 'contentDetails', 'statistics', 'brandingSettings'],
+      forUsername: channelInfo.value
+    });
+
+    // Log API usage: channels.list with forUsername (1 unit)
+    await args.logAPIUsage(userUuid, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+  } else if (channelInfo.type === 'custom') {
+    // Custom URL format (/c/customname) - unfortunately no direct API for this
+    // This format is deprecated by YouTube, suggest user to use @handle instead
+    throw new Error('Custom URL format (/c/) is not supported. Please use the @handle URL format instead (e.g., youtube.com/@channelname)');
   }
-
-  // Fetch ONLY channel details (metadata only, no playlists/videos)
-  const channelResponse = await youtube.channels.list({
-    part: ['snippet', 'contentDetails', 'statistics', 'brandingSettings'],
-    id: [channelId]
-  });
 
   if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
     throw new Error('Channel not found or is private/deleted');
@@ -78,7 +107,7 @@ const fetchChannelMetadata = async (channelIdentifier, apiKeyData) => {
   const channel = channelResponse.data.items[0];
 
   return {
-    id: channelId,
+    id: channel.id,
     snippet: channel.snippet,
     statistics: channel.statistics,
     contentDetails: channel.contentDetails,
@@ -88,11 +117,15 @@ const fetchChannelMetadata = async (channelIdentifier, apiKeyData) => {
 
 try {
   // Extract input parameters from the request
-  const { url, name, refresh = false } = args.contextData;
+  const { url, name, refresh = false, priority = 'normal' } = args.contextData;
 
   if (!url) {
     throw new Error("Channel URL is required");
   }
+
+  // Validate priority value
+  const validPriorities = ['high', 'normal', 'low'];
+  const channelPriority = validPriorities.includes(priority) ? priority : 'normal';
 
   // Get current authenticated user from session
   const user = await args.getUserFromSession();
@@ -101,25 +134,22 @@ try {
   }
 
   // Extract channel identifier from the provided URL
-  const channelIdentifier = extractChannelId(url);
-  if (!channelIdentifier) {
+  const channelInfo = extractChannelId(url);
+  if (!channelInfo) {
     throw new Error("Invalid YouTube channel URL. Please provide a valid channel URL.");
   }
 
   // DUPLICATE JOB PREVENTION: Check if this channel is already queued or processing
-  // Prevents multiple concurrent jobs for the same channel which would waste API quota
-  // and potentially cause data inconsistencies
-  // REFRESH MODE: If refresh=true, skip this check to allow re-processing completed channels
-  if (!refresh) {
+  // For handles and usernames, we can't check by ID yet, so we'll check after fetching
+  if (!refresh && channelInfo.type === 'channelId') {
     const existingChannelResult = await args.session.run(`
-      MATCH (c:Channel)
-      WHERE c.youtubeId = $channelIdentifier OR c.customUrl = $channelIdentifier
+      MATCH (c:Channel {youtubeId: $channelId})
       WITH c
       MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
             -[:ChannelSettingChannel]->(c)
       WHERE cs.status IN ['queued', 'processing']
       RETURN c.youtubeId as channelId, cs.status as status, c.title as title
-    `, { userUuid: user.P.uuid, channelIdentifier });
+    `, { userUuid: user.P.uuid, channelId: channelInfo.value });
 
     if (existingChannelResult.records.length > 0) {
       const record = existingChannelResult.records[0];
@@ -138,26 +168,30 @@ try {
     }
   }
 
-  // Get active API key from database
-  const apiKeyResult = await args.executeNamedServerFunction({
-    functionName: "getActiveYouTubeAPIKey",
-    contextData: {}
-  });
-
-  if (!apiKeyResult?.result?.success || !apiKeyResult?.result?.data) {
-    throw new Error(apiKeyResult?.result?.message || "Failed to get YouTube API key");
+  // Get authenticated YouTube client for this user
+  let youtube;
+  try {
+    youtube = await args.getYouTubeClient(user.P.uuid, args.session, args.request);
+  } catch (error) {
+    // Check if this is an OAuth authorization error
+    if (error.message.includes('No YouTube authorization') ||
+        error.message.includes('revoked') ||
+        error.message.includes('reconnect')) {
+      return {
+        success: false,
+        message: "YouTube account not connected. Please connect your YouTube account in settings to add channels.",
+        error: {
+          type: "AuthorizationRequired",
+          details: error.message,
+          action: "connect_youtube"
+        }
+      };
+    }
+    throw error;
   }
 
-  const apiKeyData = apiKeyResult.result.data;
-
-  // Fetch ONLY basic channel metadata (fast operation)
-  const channelData = await fetchChannelMetadata(channelIdentifier, apiKeyData);
-
-  // Track API usage (channel search + channel details = 2 calls, each costs ~1-3 quota units)
-  await args.executeNamedServerFunction({
-    functionName: "trackYouTubeAPIUsage",
-    contextData: { keyId: apiKeyData.keyId, cost: 5 }
-  });
+  // Fetch ONLY basic channel metadata using user's OAuth
+  const channelData = await fetchChannelMetadata(channelInfo, youtube, user.P.uuid, args.session);
 
   // STEP 1: Create or update the main Channel vertex with basic metadata
   const channelKey = `channel_${channelData.id}`;
@@ -214,7 +248,7 @@ try {
       cs.customName = $customName,
       cs.notifications = true,
       cs.autoDownload = false,
-      cs.priority = 'normal',
+      cs.priority = $priority,
       cs.status = 'queued',
       cs.progress = 0,
       cs.totalPlaylists = 0,
@@ -231,42 +265,32 @@ try {
     userUuid: user.P.uuid,
     channelId: channelData.id,
     channelSettingKey,
-    customName: name || null
+    customName: name || null,
+    priority: channelPriority
   });
 
   // STEP 3: Add to background processing queue using BullMQ
-  const { Queue } = args.bullmq;
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const channelQueue = helpers.result.data.createChannelQueue(args);
 
-  // Get Redis connection
-  const connection = args.bullmq.redisConnection || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null
-  };
+  try {
+    // Map priority string to BullMQ priority number (lower = higher priority)
+    const jobPriority = channelPriority === 'high' ? 1 : channelPriority === 'low' ? 3 : 2;
 
-  const channelQueue = new Queue('processChannelQueue', { connection });
-
-  // DEAD LETTER QUEUE CONFIGURATION:
-  // Failed jobs are kept (removeOnFail: false) so admins can inspect errors
-  // After 3 retry attempts, the job stays in the failed set for manual review
-  // This helps debug YouTube API issues, quota problems, and other failures
-  await channelQueue.add('processChannel', {
-    channelId: channelData.id,
-    userId: user.id,
-    userUuid: user.P.uuid,
-    customName: name || null
-  }, {
-    attempts: 3,                           // Retry 3 times before giving up
-    backoff: {
-      type: 'exponential',                 // Exponential backoff: 5s, 10s, 20s
-      delay: 5000
-    },
-    removeOnComplete: 100,                 // Keep last 100 completed jobs for audit
-    removeOnFail: false                    // KEEP failed jobs for inspection (Dead Letter Queue)
-  });
-
-  // Close queue connection
-  await channelQueue.close();
+    // Queue channel for processing with user's OAuth token
+    await helpers.result.data.addChannelJob(channelQueue, {
+      channelId: channelData.id,
+      userId: user.id,
+      userUuid: user.P.uuid,
+      customName: name || null,
+      priority: channelPriority
+    }, {
+      priority: jobPriority  // Override default priority
+    });
+  } finally {
+    // Close queue connection
+    await channelQueue.close();
+  }
 
   return {
     success: true,
@@ -283,14 +307,15 @@ try {
       videoCount: channelData.statistics?.videoCount,
       userId: user.id,
       userSpecific: true,
-      isRefresh: refresh
+      isRefresh: refresh,
+      usesOAuth: true
     }
   };
 
 } catch (error) {
   console.error("Error saving channel:", error);
 
-  // Handle specific YouTube API errors
+  // Handle specific YouTube API and OAuth errors
   let userMessage = "Failed to save channel. Please try again.";
 
   if (error.message.includes("Channel not found")) {
@@ -298,15 +323,19 @@ try {
   } else if (error.message.includes("Invalid YouTube channel URL")) {
     userMessage = "Invalid channel URL. Please provide a valid YouTube channel URL.";
   } else if (error.message.includes("quota")) {
-    userMessage = "YouTube API quota exceeded. Please try again later.";
-  } else if (error.message.includes("API key")) {
-    userMessage = "YouTube API configuration error. Please contact support.";
+    userMessage = "YouTube API quota exceeded. This resets daily. Please try again tomorrow.";
+  } else if (error.message.includes("revoked") || error.message.includes("reconnect")) {
+    userMessage = "Your YouTube authorization has expired. Please reconnect your YouTube account in settings.";
+  } else if (error.message.includes("No YouTube authorization")) {
+    userMessage = "YouTube account not connected. Please connect your YouTube account in settings.";
   } else if (error.message.includes("private")) {
     userMessage = "This channel is private and cannot be accessed.";
   } else if (error.code === 404) {
     userMessage = "Channel not found or has been deleted.";
   } else if (error.code === 403) {
-    userMessage = "Access denied. The channel may be private or restricted.";
+    userMessage = "Access denied. The channel may be private or you may not have permission to access it.";
+  } else if (error.code === 401) {
+    userMessage = "Authentication failed. Please reconnect your YouTube account in settings.";
   }
 
   return {

@@ -1,0 +1,68 @@
+{
+  vertexes: [
+    {
+      id: "log_worker_message_function",
+      L: "Function",
+      P: {
+        key: "logWorkerMessage",
+        description: "Logs worker processing messages to the database for debugging",
+        body: '''
+// Log worker messages to database
+// contextData: { workerName, level, message, metadata }
+
+const { workerName, level = 'info', message, metadata = {} } = args.contextData;
+
+if (!workerName || !message) {
+  return {
+    success: false,
+    error: 'workerName and message are required'
+  };
+}
+
+try {
+  const session = args.session;
+
+  // Create a WorkerLog node
+  await session.run(`
+    CREATE (log:WorkerLog {
+      key: $key,
+      workerName: $workerName,
+      level: $level,
+      message: $message,
+      metadata: $metadata,
+      createdAt: datetime()
+    })
+  `, {
+    key: `worker_log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    workerName,
+    level,
+    message,
+    metadata: JSON.stringify(metadata)
+  });
+
+  // Clean up old logs (keep only last 1000 logs per worker)
+  await session.run(`
+    MATCH (log:WorkerLog {workerName: $workerName})
+    WITH log
+    ORDER BY log.createdAt DESC
+    SKIP 1000
+    DETACH DELETE log
+  `, { workerName });
+
+  return {
+    success: true
+  };
+} catch (error) {
+  // Fallback to console if database logging fails
+  console.error(`Failed to log worker message: ${error.message}`);
+  return {
+    success: false,
+    error: error.message
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

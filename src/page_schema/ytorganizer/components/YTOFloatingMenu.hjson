@@ -83,7 +83,7 @@ const setupFloatingUI = async () => {
   const placement = args.contextData.props?.placement || "bottom-end";
 
   try {
-    const { computePosition, flip, shift, offset, autoUpdate } = await import("https://cdn.skypack.dev/@floating-ui/dom");
+    const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
 
     // Function to update position
     const updatePosition = async () => {

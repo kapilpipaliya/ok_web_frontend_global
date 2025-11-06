@@ -1,5 +1,6 @@
 import { fromBase64, generateSalt, hash, toBase64, verify } from "@razr/crypto";
 
+// https://jsr.io/@razr/crypto
 export async function hashPassword(password: string) {
   const salt = generateSalt(); // Generates a secure random salt as Uint8Array
   const hashedPassword = await hash(password, salt);

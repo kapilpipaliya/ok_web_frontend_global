@@ -56,6 +56,7 @@ if (args.contextData.action === 'start') {
           AND datetime(cs.updatedAt) < datetime($cutoffTime)
         SET cs.status = 'failed',
             cs.error = $errorMessage,
+            cs.priority = null,
             cs.updatedAt = datetime()
         WITH cs, u
         MATCH (cs)-[:ChannelSettingChannel]->(c:Channel)
@@ -84,6 +85,7 @@ if (args.contextData.action === 'start') {
           AND datetime(ps.updatedAt) < datetime($cutoffTime)
         SET ps.status = 'failed',
             ps.error = $errorMessage,
+            ps.priority = null,
             ps.updatedAt = datetime()
         WITH ps, u
         MATCH (ps)-[:PlaylistSettingPlaylist]->(p:Playlist)

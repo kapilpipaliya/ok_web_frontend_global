@@ -9,4 +9,5 @@ export interface EvalExpressionContext {
   relationships?: { [key: string]: Edge };
   tx?: Transaction;
   vertexes?: Vertex[];
+  request?: Request;
 }

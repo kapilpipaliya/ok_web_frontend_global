@@ -54,6 +54,14 @@ return {
                 pathCheck: (pathname) => pathname === "/yto/admin/worker-health"
               },
               {
+                id: "worker_logs",
+                href: "/yto/admin/worker-logs",
+                label: "Worker Logs",
+                icon: "carbon:document-tasks",
+                title: "View background worker processing logs",
+                pathCheck: (pathname) => pathname === "/yto/admin/worker-logs"
+              },
+              {
                 id: "user_management",
                 href: "/yto/admin/users",
                 label: "Manage Users",

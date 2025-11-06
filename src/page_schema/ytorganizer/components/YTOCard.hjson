@@ -233,55 +233,82 @@ return `._id {
         displayOrder: 2.5,
         componentName: "Html",
         props: '''
-const processingStatus = args.contextData.props?.processingStatus;
+const itemSettings = args.contextData.props?.itemSettings;
+const itemType = args.contextData.props?.itemType;
 
-// Hide if no processing status
-if (!processingStatus) {
+// Get status from itemSettings
+const status = itemSettings?.P?.status;
+
+// Hide for videos (they don't have processing status)
+if (itemType === "video") {
   return { hide: true };
 }
 
-const status = processingStatus.status;
-
-// Only show if status is queued or processing
-if (!status || (status !== 'queued' && status !== 'processing')) {
+// Hide if no status
+if (!status) {
   return { hide: true };
 }
 
-let colorVar = '';
-if (status === 'queued') {
-  colorVar = args.theme.var.color.info;
-} else if (status === 'processing') {
-  colorVar = args.theme.var.color.primary;
+// Hide if status is "completed" (only show non-completed statuses)
+if (status === "completed") {
+  return { hide: true };
 }
+
+// Get status info from constants
+const statusInfo = args.fns.getStatusInfo?.(status);
+
+// Only show if we have valid status info
+if (!statusInfo) {
+  return { hide: true };
+}
+
+// Map color names to theme colors
+const colorMap = {
+  blue: args.theme.var.color.info,
+  yellow: args.theme.var.color.warning,
+  orange: args.theme.var.color.warning,
+  gray: args.theme.var.color.muted,
+  green: args.theme.var.color.success,
+  red: args.theme.var.color.error
+};
+
+const borderColor = colorMap[statusInfo.color] || args.theme.var.color.info;
 
 return {
   as: "div",
   "data-status": status,
-  "data-color": colorVar
+  "data-color": statusInfo.color
 };
 ''',
         css: '''
+const itemSettings = args.contextData.props?.itemSettings;
+const status = itemSettings?.P?.status;
+const statusInfo = args.fns.getStatusInfo?.(status);
+
+// Map color names to theme colors
+const colorMap = {
+  blue: args.theme.var.color.info,
+  yellow: args.theme.var.color.warning,
+  orange: args.theme.var.color.warning,
+  gray: args.theme.var.color.muted,
+  green: args.theme.var.color.success,
+  red: args.theme.var.color.error
+};
+
+const borderColor = colorMap[statusInfo?.color] || args.theme.var.color.info;
+
 return `._id {
   display: flex;
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.5rem;
   background: ${args.theme.var.color.background_light_100};
-  border-left: 3px solid;
+  border-left: 3px solid ${borderColor};
   border-radius: 0.25rem;
   font-size: 0.75rem;
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
-}
-
-._id[data-status="queued"] {
-  border-left-color: ${args.theme.var.color.info};
-  color: ${args.theme.var.color.info_dark_200};
-}
-
-._id[data-status="processing"] {
-  border-left-color: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_dark_200};
+  color: ${args.theme.var.color.text};
 }`;
 '''
       }
@@ -293,16 +320,14 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const processingStatus = args.contextData.props?.processingStatus;
+const itemSettings = args.contextData.props?.itemSettings;
+const status = itemSettings?.P?.status;
 
-// Get status safely
-const status = processingStatus?.status;
+// Get status info from constants
+const statusInfo = args.fns.getStatusInfo?.(status);
 
-// Default to time icon if no specific status
-let iconName = 'carbon:time';
-if (status === 'processing') {
-  iconName = 'carbon:in-progress';
-}
+// Use icon from status info, fallback to time icon
+const iconName = statusInfo?.icon || 'carbon:time';
 
 return {
   as: "icon",
@@ -325,24 +350,35 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const processingStatus = args.contextData.props?.processingStatus;
+const itemSettings = args.contextData.props?.itemSettings;
 
-// Safely extract all needed data
-const status = processingStatus?.status || '';
-const progress = processingStatus?.progress || 0;
-const details = processingStatus?.details || '';
+// Get status and progress from itemSettings
+const status = itemSettings?.P?.status || '';
+const progress = itemSettings?.P?.progress || 0;
+const processedCount = itemSettings?.P?.processedPlaylists || itemSettings?.P?.processedVideos || 0;
+const totalCount = itemSettings?.P?.totalPlaylists || itemSettings?.P?.totalVideos || 0;
+
+// Get status info from constants
+const statusInfo = args.fns.getStatusInfo?.(status);
 
 let statusText = '';
 
-if (status === 'queued') {
-  statusText = 'Queued';
-} else if (status === 'processing') {
-  statusText = `Processing... ${progress}%`;
+if (statusInfo) {
+  // Use label from status info
+  statusText = statusInfo.label;
 
-  // Add formatted details if available
-  if (details) {
-    statusText += ` (${details})`;
+  // Add progress percentage for processing status
+  if (status === 'processing' && progress > 0) {
+    statusText += ` ${progress}%`;
   }
+
+  // Add processed/total counts if available
+  if (status === 'processing' && totalCount > 0) {
+    statusText += ` (${processedCount}/${totalCount})`;
+  }
+} else {
+  // Fallback to basic status display
+  statusText = status || 'Unknown';
 }
 
 return {

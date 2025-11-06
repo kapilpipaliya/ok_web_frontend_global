@@ -19,6 +19,7 @@ const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 const [isProcessing, setIsProcessing] = args.createSignal(false);
 const [url, setUrl] = args.createSignal("");
 const [customName, setCustomName] = args.createSignal("");
+const [priority, setPriority] = args.createSignal("normal");
 const [formError, setFormError] = args.createSignal(null);
 
 // Initialize form data
@@ -40,6 +41,7 @@ const initializeFormData = () => {
   } else {
     setUrl("");
     setCustomName("");
+    setPriority("normal");
   }
   setIsSubmitting(false);
   setIsProcessing(false);
@@ -111,7 +113,8 @@ const handleSave = async () => {
         functionName,
         contextData: {
           url: urlValue,
-          name: customName().trim() || null
+          name: customName().trim() || null,
+          priority: priority()
         }
       });
     }
@@ -156,6 +159,8 @@ return {
   setUrl,
   customName,
   setCustomName,
+  priority,
+  setPriority,
   formError,
   setFormError,
   handleSave,
@@ -866,10 +871,127 @@ return {
       }
     },
     {
-      id: "time_warning",
+      id: "priority_field",
       L: "Attr",
       P: {
         displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const editMode = args.contextData.props?.editMode || false;
+
+return {
+  as: "div",
+  hide: editMode  // Hide priority field in edit mode
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_label_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Priority"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_help_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const contentType = args.contextData.props?.contentType || "channels";
+const itemType = contentType === "playlists" ? "playlist" : "channel";
+
+return {
+  as: "p",
+  text: `Higher priority ${itemType}s are processed first. Priority is automatically removed once processing completes.`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOTomSelect",
+        props: '''
+return {
+  value: args.fns.priority(),
+  options: [
+    { value: "high", label: "High Priority" },
+    { value: "normal", label: "Normal Priority" },
+    { value: "low", label: "Low Priority" }
+  ],
+  valueKey: "value",
+  labelKey: "label",
+  singularName: "priority",
+  pluralName: "priorities",
+  placeholder: "Select priority...",
+  search: false,
+  onChange: (value) => {
+    args.fns.setPriority(value);
+  },
+  disabled: args.fns.isSubmitting()
+};
+'''
+      }
+    },
+    {
+      id: "time_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
         componentName: "Html",
         props: '''
 const editMode = args.contextData.props?.editMode || false;
@@ -1042,6 +1164,11 @@ return {
     { id: "e12", T: "Attr", S: "form_element", E: "name_field" },
     { id: "e13", T: "Attr", S: "name_field", E: "name_label" },
     { id: "e14", T: "Attr", S: "name_field", E: "name_input" },
+    { id: "e14_priority", T: "Attr", S: "form_element", E: "priority_field" },
+    { id: "e14_priority_label", T: "Attr", S: "priority_field", E: "priority_label" },
+    { id: "e14_priority_label_text", T: "Attr", S: "priority_label", E: "priority_label_text" },
+    { id: "e14_priority_help_text", T: "Attr", S: "priority_label", E: "priority_help_text" },
+    { id: "e14_priority_select", T: "Attr", S: "priority_field", E: "priority_select" },
     { id: "e14a", T: "Attr", S: "form_element", E: "time_warning" },
     { id: "e14b", T: "Attr", S: "time_warning", E: "warning_icon" },
     { id: "e14c", T: "Attr", S: "time_warning", E: "warning_text" },

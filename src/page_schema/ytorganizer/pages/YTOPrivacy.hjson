@@ -574,13 +574,15 @@ return {
   as: "div",
   innerHTML: `
     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.1 YouTube Data We Access</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you connect your YouTube account through Google OAuth, we access and temporarily store the following YouTube data via YouTube API Services:</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you connect your YouTube account through <strong>per-user Google OAuth 2.0</strong>, we access and temporarily store the following YouTube data via YouTube API Services:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong>Channel Information:</strong> Channel name, description, thumbnail, subscriber count, video count, upload dates</li>
       <li style="margin-bottom: 0.5rem;"><strong>Playlist Information:</strong> Playlist titles, descriptions, thumbnails, video counts, privacy status</li>
       <li style="margin-bottom: 0.5rem;"><strong>Video Metadata:</strong> Video titles, descriptions, thumbnails, channel information, publication dates</li>
       <li style="margin-bottom: 0.5rem;"><strong>Public Statistics:</strong> View counts, like counts, and other publicly available metrics</li>
+      <li style="margin-bottom: 0.5rem;"><strong>OAuth Tokens:</strong> We securely store your encrypted Google OAuth access and refresh tokens to maintain your YouTube connection. Tokens are encrypted using AES-256-GCM encryption and stored securely in our database.</li>
     </ul>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.info};"><strong>Per-User OAuth:</strong> Each user connects their own YouTube account and has their own 10,000 units/day YouTube API quota. Your OAuth connection is independent and private to your account only.</p>
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding: 1rem; background: ${args.theme.var.color.warning_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.warning};"><strong>Important:</strong> We only access publicly available YouTube data. We do <strong>not</strong> access your private videos, watch history, or any data you have not explicitly made public on YouTube. We never download or cache actual video files.</p>
 
     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.2 Account Information</h3>
@@ -753,7 +755,14 @@ return {
       <li style="margin-bottom: 0.5rem;"><strong>Encryption in Transit:</strong> All data transmission uses HTTPS/TLS encryption</li>
       <li style="margin-bottom: 0.5rem;"><strong>Encryption at Rest:</strong> Sensitive data is encrypted in our Neo4j database</li>
       <li style="margin-bottom: 0.5rem;"><strong>Password Security:</strong> Passwords are hashed using bcrypt with salt</li>
-      <li style="margin-bottom: 0.5rem;"><strong>OAuth 2.0:</strong> YouTube access uses secure Google OAuth 2.0 authentication</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Per-User OAuth 2.0:</strong> Each user connects their own YouTube account using secure Google OAuth 2.0 authentication. This means:
+        <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+          <li style="margin-bottom: 0.5rem;">Each user has their own 10,000 units/day YouTube API quota (not shared)</li>
+          <li style="margin-bottom: 0.5rem;">OAuth access and refresh tokens are encrypted using AES-256-GCM encryption before storage</li>
+          <li style="margin-bottom: 0.5rem;">Tokens are automatically refreshed when they expire</li>
+          <li style="margin-bottom: 0.5rem;">We detect when users revoke access through Google settings and stop accessing their data immediately</li>
+        </ul>
+      </li>
       <li style="margin-bottom: 0.5rem;"><strong>Access Control:</strong> Strict role-based access control limits who can access your data</li>
       <li style="margin-bottom: 0.5rem;"><strong>Regular Audits:</strong> We conduct regular security audits and updates</li>
       <li style="margin-bottom: 0.5rem;"><strong>Secure Infrastructure:</strong> Data is stored on secure servers with firewall protection and intrusion detection</li>
@@ -919,6 +928,7 @@ return {
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">To exercise any of these rights, you can:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Use the settings and data management tools in your account dashboard</li>
+      <li style="margin-bottom: 0.5rem;"><strong>Disconnect YouTube:</strong> Visit <a href="/settings" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Settings → YouTube Connection</a> to disconnect your YouTube account. This will delete your OAuth tokens and stop all access to your YouTube data.</li>
       <li style="margin-bottom: 0.5rem;">Contact us at <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></li>
       <li style="margin-bottom: 0.5rem;">Submit a data request through our support system</li>
     </ul>
@@ -1406,10 +1416,42 @@ return `._id {
       }
     },
     {
-      id: "privacy_footer_link_contact",
+      id: "privacy_footer_link_terms",
       L: "Attr",
       P: {
         displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Terms of Service",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/terms');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: underline;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_footer_link_contact",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {
@@ -1430,6 +1472,17 @@ return `._id {
 ._id:hover {
   color: ${args.theme.var.color.primary};
 }`;
+'''
+      }
+    },
+    {
+      id: "privacy_footer_youtube_attribution",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "YTOYouTubeAttribution",
+        props: '''
+return {};
 '''
       }
     }
@@ -1518,6 +1571,8 @@ return `._id {
     { id: "e_container_copyright", T: "Attr", S: "privacy_footer_container", E: "privacy_footer_copyright" },
     { id: "e_container_links", T: "Attr", S: "privacy_footer_container", E: "privacy_footer_links" },
     { id: "e_links_home", T: "Attr", S: "privacy_footer_links", E: "privacy_footer_link_home" },
-    { id: "e_links_contact", T: "Attr", S: "privacy_footer_links", E: "privacy_footer_link_contact" }
+    { id: "e_links_terms", T: "Attr", S: "privacy_footer_links", E: "privacy_footer_link_terms" },
+    { id: "e_links_contact", T: "Attr", S: "privacy_footer_links", E: "privacy_footer_link_contact" },
+    { id: "e_container_youtube", T: "Attr", S: "privacy_footer_container", E: "privacy_footer_youtube_attribution" }
   ]
 }

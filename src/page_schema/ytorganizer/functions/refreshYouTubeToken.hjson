@@ -1,0 +1,234 @@
+{
+  vertexes: [
+    {
+      id: "refresh_youtube_token_function",
+      L: "Function",
+      P: {
+        key: "refreshYouTubeToken",
+        description: "Refreshes YouTube OAuth access token for a user using their refresh token",
+        body: '''
+/**
+ * Refresh YouTube OAuth Token
+ *
+ * This function refreshes a user's YouTube OAuth access token using their refresh token.
+ * Called by background workers and manual trigger functions.
+ *
+ * @param args.contextData.userUuid - User's UUID
+ * @returns { success: boolean, message: string, data?: object, error?: object }
+ */
+
+try {
+  const userUuid = args.contextData.userUuid;
+
+  if (!userUuid) {
+    return {
+      success: false,
+      message: 'User UUID is required',
+      error: {
+        type: 'ValidationError',
+        details: 'userUuid parameter is missing'
+      }
+    };
+  }
+
+  console.log(`[Token Refresh] Refreshing token for user ${userUuid}`);
+
+  // Import YouTube OAuth utilities
+  const { google } = await import('googleapis');
+  const neo4j = await import('neo4j-driver');
+
+  // Get user's current token from database
+  const tokenResult = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
+    WHERE token.isRevoked = false
+    RETURN token.accessTokenEncrypted as accessTokenEncrypted,
+           token.refreshTokenEncrypted as refreshTokenEncrypted,
+           token.expiresAt as expiresAt
+  `, { userUuid });
+
+  if (tokenResult.records.length === 0) {
+    console.warn(`[Token Refresh] No YouTube token found for user ${userUuid}`);
+    return {
+      success: false,
+      message: 'No YouTube authorization found for this user',
+      error: {
+        type: 'TokenNotFound',
+        details: 'User has not connected their YouTube account'
+      }
+    };
+  }
+
+  const record = tokenResult.records[0];
+  const accessTokenEncrypted = record.get('accessTokenEncrypted');
+  const refreshTokenEncrypted = record.get('refreshTokenEncrypted');
+  const expiresAt = record.get('expiresAt');
+
+  // Check if refresh token exists
+  if (!refreshTokenEncrypted) {
+    console.error(`[Token Refresh] No refresh token available for user ${userUuid}`);
+    return {
+      success: false,
+      message: 'No refresh token available',
+      error: {
+        type: 'NoRefreshToken',
+        details: 'User needs to reconnect their YouTube account to get a new refresh token'
+      }
+    };
+  }
+
+  // Decrypt refresh token
+  const refreshToken = args.decryptToken(refreshTokenEncrypted);
+
+  // Get OAuth configuration from database
+  const configResult = await args.session.run(`
+    MATCH (s:OAuthSettings)
+    WHERE s.googleEnabled = true
+    RETURN s.googleClientId as clientId,
+           s.googleClientSecretEncrypted as clientSecretEncrypted
+    LIMIT 1
+  `);
+
+  if (configResult.records.length === 0) {
+    console.error('[Token Refresh] OAuth configuration not found');
+    return {
+      success: false,
+      message: 'OAuth configuration not found',
+      error: {
+        type: 'ConfigurationError',
+        details: 'YouTube OAuth is not configured in admin settings'
+      }
+    };
+  }
+
+  const configRecord = configResult.records[0];
+  const clientId = configRecord.get('clientId');
+  const clientSecretEncrypted = configRecord.get('clientSecretEncrypted');
+
+  if (!clientId || !clientSecretEncrypted) {
+    console.error('[Token Refresh] Incomplete OAuth configuration');
+    return {
+      success: false,
+      message: 'Incomplete OAuth configuration',
+      error: {
+        type: 'ConfigurationError',
+        details: 'Client ID or Client Secret is missing'
+      }
+    };
+  }
+
+  // Decrypt client secret
+  const clientSecret = args.decryptClientSecret(clientSecretEncrypted);
+
+  // Get redirect URI (works with or without request)
+  const redirectUri = args.getRedirectUriFromRequest(args.request);
+
+  // Create OAuth2 client
+  const oauth2Client = new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    redirectUri
+  );
+
+  // Set refresh token
+  oauth2Client.setCredentials({
+    refresh_token: refreshToken
+  });
+
+  try {
+    // Refresh the access token
+    console.log(`[Token Refresh] Requesting new access token for user ${userUuid}`);
+    const { credentials } = await oauth2Client.refreshAccessToken();
+
+    if (!credentials.access_token) {
+      throw new Error('No access token received during refresh');
+    }
+
+    // Encrypt new access token
+    const newAccessTokenEncrypted = args.encryptToken(credentials.access_token);
+
+    // Calculate expiry time
+    const expiryTime = credentials.expiry_date || Date.now() + 3600 * 1000;
+
+    // Update token in database
+    await args.session.run(`
+      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
+      SET token.accessTokenEncrypted = $accessToken,
+          token.expiresAt = datetime({epochMillis: $expiresAt}),
+          token.lastRefreshed = datetime()
+    `, {
+      userUuid,
+      accessToken: newAccessTokenEncrypted,
+      expiresAt: neo4j.default.int(expiryTime)
+    });
+
+    console.log(`[Token Refresh] Successfully refreshed token for user ${userUuid}`);
+
+    return {
+      success: true,
+      message: 'Token refreshed successfully',
+      data: {
+        expiresAt: new Date(expiryTime).toISOString(),
+        refreshedAt: new Date().toISOString()
+      }
+    };
+
+  } catch (refreshError) {
+    // Handle refresh errors - token might be revoked
+    const errorMessage = refreshError.message || 'Unknown error';
+    console.error(`[Token Refresh] Failed to refresh token for user ${userUuid}:`, refreshError);
+
+    // Check if token was revoked
+    if (
+      refreshError.code === 400 ||
+      errorMessage.includes('invalid_grant') ||
+      errorMessage.includes('Token has been expired or revoked')
+    ) {
+      // Mark token as revoked in database
+      await args.session.run(`
+        MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
+        SET token.isRevoked = true,
+            token.revokedAt = datetime()
+      `, { userUuid });
+
+      console.warn(`[Token Refresh] Token revoked for user ${userUuid}`);
+
+      return {
+        success: false,
+        message: 'YouTube authorization has been revoked',
+        error: {
+          type: 'TokenRevoked',
+          details: 'User needs to reconnect their YouTube account'
+        }
+      };
+    }
+
+    // Other refresh errors
+    return {
+      success: false,
+      message: 'Failed to refresh token',
+      error: {
+        type: 'RefreshError',
+        details: errorMessage
+      }
+    };
+  }
+
+} catch (error) {
+  console.error('[Token Refresh] Unexpected error:', error);
+
+  return {
+    success: false,
+    message: 'Error refreshing YouTube token',
+    error: {
+      type: error.name || 'TokenRefreshError',
+      details: error.message,
+      stack: error.stack
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

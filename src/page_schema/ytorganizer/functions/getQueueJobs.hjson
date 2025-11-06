@@ -27,12 +27,9 @@ if (!queueName || !jobState) {
 }
 
 // Get the queue
+const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 const { Queue } = args.bullmq;
-const connection = args.bullmq.redisConnection || {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  maxRetriesPerRequest: null
-};
+const connection = helpers.result.data.getRedisConnection();
 
 const queue = new Queue(queueName, { connection });
 

@@ -1,0 +1,152 @@
+{
+  vertexes: [
+    {
+      id: "youtube_attribution_component",
+      L: "Component",
+      P: {
+        key: "YTOYouTubeAttribution",
+        description: "YouTube API Services attribution component for branding compliance"
+      }
+    },
+    {
+      id: "youtube_attribution_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 640px) {
+  ._id {
+    flex-direction: column;
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "youtube_attribution_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Powered by"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "youtube_attribution_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "https://www.youtube.com",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "youtube_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "svg",
+  width: 90,
+  height: 20,
+  viewBox: "0 0 90 20",
+  fill: "none",
+  xmlns: "http://www.w3.org/2000/svg",
+  innerHTML: `
+    <g clip-path="url(#clip0)">
+      <path d="M27.9727 3.12324C27.6435 1.89323 26.6768 0.926623 25.4468 0.597366C23.2197 0 14.285 0 14.285 0C14.285 0 5.35042 0 3.12323 0.597366C1.89323 0.926623 0.926623 1.89323 0.597366 3.12324C0 5.35042 0 10 0 10C0 10 0 14.6496 0.597366 16.8768C0.926623 18.1068 1.89323 19.0734 3.12323 19.4026C5.35042 20 14.285 20 14.285 20C14.285 20 23.2197 20 25.4468 19.4026C26.6768 19.0734 27.6435 18.1068 27.9727 16.8768C28.5701 14.6496 28.5701 10 28.5701 10C28.5701 10 28.5677 5.35042 27.9727 3.12324Z" fill="#FF0000"/>
+      <path d="M11.4253 14.2854L18.8477 10.0004L11.4253 5.71533V14.2854Z" fill="white"/>
+    </g>
+    <text x="32" y="15" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#282828">YouTube</text>
+    <defs>
+      <clipPath id="clip0">
+        <rect width="28.5701" height="20" fill="white"/>
+      </clipPath>
+    </defs>
+  `
+};
+'''
+      }
+    },
+    {
+      id: "youtube_api_text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "API Services"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "youtube_attribution_component", E: "youtube_attribution_root" },
+    { id: "e2", T: "Attr", S: "youtube_attribution_root", E: "youtube_attribution_text" },
+    { id: "e3", T: "Attr", S: "youtube_attribution_root", E: "youtube_attribution_link" },
+    { id: "e4", T: "Attr", S: "youtube_attribution_link", E: "youtube_logo" },
+    { id: "e5", T: "Attr", S: "youtube_attribution_root", E: "youtube_api_text" }
+  ]
+}

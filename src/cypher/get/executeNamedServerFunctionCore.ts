@@ -15,6 +15,27 @@ import { setImpersonation } from "~/cypher/mutate/admin/setImpersonation";
 import { clearImpersonation } from "~/cypher/mutate/admin/clearImpersonation";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import * as neo4jDriver from "neo4j-driver";
+import {
+  getYouTubeClient,
+  getValidYouTubeToken,
+  hasYouTubeConnection,
+  getYouTubeConnectionStatus,
+  disconnectYouTube,
+  getRedirectUriFromRequest,
+} from "~/lib/youtube/youtubeOAuth";
+import {
+  logAPIUsage,
+  getTodayAPIUsage,
+  getAPIUsageHistory,
+  isApproachingQuotaLimit,
+  YOUTUBE_API_COSTS,
+  calculateOperationCost,
+} from "~/lib/youtube/apiUsageTracking";
+import {
+  encryptToken,
+  decryptToken,
+  decryptClientSecret,
+} from "~/lib/auth/tokenEncryption";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -116,10 +137,29 @@ export async function executeNamedServerFunctionCore(
       },
       functionName: request.functionName,
       bullmq,
+      request: context.request,
       // Admin/impersonation helper functions (platform-level)
       getEffectiveUser,
       setImpersonation,
       clearImpersonation,
+      // YouTube OAuth helper functions
+      getYouTubeClient,
+      getValidYouTubeToken,
+      hasYouTubeConnection,
+      getYouTubeConnectionStatus,
+      disconnectYouTube,
+      getRedirectUriFromRequest,
+      // YouTube API usage tracking functions
+      logAPIUsage,
+      getTodayAPIUsage,
+      getAPIUsageHistory,
+      isApproachingQuotaLimit,
+      YOUTUBE_API_COSTS,
+      calculateOperationCost,
+      // Token encryption/decryption functions
+      encryptToken,
+      decryptToken,
+      decryptClientSecret,
     };
 
     // Execute the function

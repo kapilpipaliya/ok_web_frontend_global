@@ -1,0 +1,243 @@
+{
+  vertexes: [
+    {
+      id: "background_refresh_tokens_worker",
+      L: "Function",
+      P: {
+        key: "backgroundRefreshTokens",
+        description: "Background worker that automatically refreshes YouTube OAuth tokens that are about to expire",
+        body: '''
+// This is a background worker function that runs on a schedule
+if (args.contextData.action === 'start') {
+  // Helper function to log messages to database
+  const logMessage = async (level, message, metadata = {}) => {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: 'logWorkerMessage',
+        contextData: {
+          workerName: 'backgroundRefreshTokens',
+          level,
+          message,
+          metadata
+        }
+      });
+    } catch (error) {
+      // Silent failure - don't break worker if logging fails
+    }
+  };
+
+  await logMessage('info', 'Starting background token refresh worker (runs every 6 hours)');
+
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const { Worker, Queue } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+
+  // Create a queue for the scheduled token refresh jobs
+  const tokenRefreshQueue = new Queue('backgroundRefreshTokens', { connection });
+
+  // Add a repeatable job that runs every 6 hours
+  // Cron pattern: "0 */6 * * *" = At minute 0 past every 6th hour
+  await tokenRefreshQueue.add(
+    'token-refresh',
+    {
+      scheduledRun: true,
+      description: 'Automated token refresh check'
+    },
+    {
+      repeat: {
+        pattern: '0 */6 * * *', // Every 6 hours
+        tz: 'UTC'
+      },
+      jobId: 'token-refresh-repeatable' // Prevent duplicates
+    }
+  );
+
+  await logMessage('info', 'Scheduled repeatable job for every 6 hours', {
+    cronPattern: '0 */6 * * *',
+    timezone: 'UTC'
+  });
+
+  // Create worker to process the scheduled token refresh jobs
+  const worker = new Worker('backgroundRefreshTokens', async (job) => {
+    await logMessage('info', 'Starting scheduled token refresh check', {
+      jobId: job.id,
+      scheduledTime: new Date().toISOString()
+    });
+
+    try {
+      // Get all users with YouTube OAuth tokens
+      const usersResult = await args.session.run(`
+        MATCH (u:User)-[r:UserYouTubeToken]->(token:YouTubeToken)
+        WHERE token.accessTokenEncrypted IS NOT NULL
+          AND token.isRevoked = false
+        RETURN u.uuid as userUuid,
+               u.email as userEmail,
+               token.expiresAt as expiresAt,
+               token.refreshTokenEncrypted as refreshTokenEncrypted
+      `);
+
+      if (usersResult.records.length === 0) {
+        await logMessage('info', 'No users with YouTube tokens found');
+        return {
+          success: true,
+          message: 'No tokens to refresh',
+          data: {
+            totalUsers: 0,
+            tokensRefreshed: 0,
+            tokensFailed: 0
+          }
+        };
+      }
+
+      await logMessage('info', `Found ${usersResult.records.length} users with YouTube tokens`);
+
+      let tokensRefreshed = 0;
+      let tokensFailed = 0;
+      const errors = [];
+
+      for (const record of usersResult.records) {
+        const userUuid = record.get('userUuid');
+        const userEmail = record.get('userEmail');
+        const expiresAt = record.get('expiresAt');
+        const refreshTokenEncrypted = record.get('refreshTokenEncrypted');
+
+        // Check if token needs refresh (expires in less than 1 hour or already expired)
+        const expiryTime = expiresAt ? new Date(expiresAt).getTime() : 0;
+        const now = Date.now();
+        const oneHourFromNow = now + (60 * 60 * 1000);
+
+        if (expiryTime > oneHourFromNow) {
+          // Token is still valid for more than 1 hour, skip
+          await logMessage('debug', `Token still valid for user ${userEmail}`, {
+            userUuid,
+            expiresIn: Math.round((expiryTime - now) / (60 * 1000)) + ' minutes'
+          });
+          continue;
+        }
+
+        if (!refreshTokenEncrypted) {
+          await logMessage('warn', `No refresh token available for user ${userEmail}`, { userUuid });
+          tokensFailed++;
+          errors.push({
+            userUuid,
+            userEmail,
+            error: 'No refresh token available'
+          });
+          continue;
+        }
+
+        // Refresh the token
+        try {
+          await logMessage('info', `Refreshing token for user ${userEmail}`, { userUuid });
+
+          // Call the refresh token function
+          const refreshResult = await args.executeNamedServerFunction({
+            functionName: 'refreshYouTubeToken',
+            contextData: {
+              userUuid: userUuid
+            }
+          });
+
+          if (refreshResult.result?.success) {
+            tokensRefreshed++;
+            await logMessage('info', `Successfully refreshed token for user ${userEmail}`, { userUuid });
+          } else {
+            tokensFailed++;
+            const errorMsg = refreshResult.result?.error || refreshResult.result?.message || 'Unknown error';
+            errors.push({
+              userUuid,
+              userEmail,
+              error: errorMsg
+            });
+            await logMessage('error', `Failed to refresh token for user ${userEmail}`, {
+              userUuid,
+              error: errorMsg
+            });
+          }
+        } catch (error) {
+          tokensFailed++;
+          errors.push({
+            userUuid,
+            userEmail,
+            error: error.message
+          });
+          await logMessage('error', `Error refreshing token for user ${userEmail}`, {
+            userUuid,
+            error: error.message,
+            stack: error.stack
+          });
+        }
+      }
+
+      await logMessage('info', 'Completed scheduled token refresh', {
+        totalUsers: usersResult.records.length,
+        tokensRefreshed,
+        tokensFailed
+      });
+
+      return {
+        success: true,
+        message: `Refreshed ${tokensRefreshed} token(s), ${tokensFailed} failed`,
+        data: {
+          totalUsers: usersResult.records.length,
+          tokensRefreshed,
+          tokensFailed,
+          errors: errors.length > 0 ? errors : undefined,
+          refreshedAt: new Date().toISOString()
+        }
+      };
+
+    } catch (error) {
+      await logMessage('error', 'Error during scheduled token refresh', {
+        error: error.message,
+        stack: error.stack
+      });
+      throw error;
+    }
+  }, {
+    connection,
+    concurrency: 1 // Only run one refresh job at a time
+  });
+
+  worker.on('completed', async (job, result) => {
+    await logMessage('info', 'Scheduled token refresh job completed', {
+      jobId: job.id,
+      tokensRefreshed: result?.data?.tokensRefreshed,
+      tokensFailed: result?.data?.tokensFailed
+    });
+  });
+
+  worker.on('failed', async (job, err) => {
+    await logMessage('error', 'Scheduled token refresh job failed', {
+      jobId: job?.id,
+      error: err.message,
+      stack: err.stack
+    });
+  });
+
+  // Return stop function for graceful shutdown
+  return {
+    stop: async () => {
+      await logMessage('info', 'Stopping background token refresh worker');
+
+      // Remove the repeatable job
+      try {
+        await tokenRefreshQueue.removeRepeatableByKey('backgroundRefreshTokens:token-refresh-repeatable::0 */6 * * *:UTC');
+        await logMessage('info', 'Removed repeatable job');
+      } catch (error) {
+        console.error('Error removing repeatable job:', error);
+      }
+
+      // Close the worker and queue
+      await worker.close();
+      await tokenRefreshQueue.close();
+      await logMessage('info', 'Stopped background token refresh worker');
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -1,0 +1,52 @@
+{
+  vertexes: [
+    {
+      id: "clear_worker_logs_function",
+      L: "Function",
+      P: {
+        key: "clearWorkerLogs",
+        description: "Clears all worker logs from the database",
+        body: '''
+// Clear all worker logs
+
+try {
+  const session = args.session;
+
+  // Count and delete all WorkerLog nodes
+  const result = await session.run(`
+    MATCH (log:WorkerLog)
+    WITH count(log) as total
+    MATCH (log2:WorkerLog)
+    DETACH DELETE log2
+    RETURN total as deletedCount
+  `);
+
+  let deletedCount = 0;
+  if (result.records.length > 0) {
+    const countValue = result.records[0].get('deletedCount');
+    // Handle Neo4j Integer object or regular number
+    if (countValue !== null && countValue !== undefined) {
+      deletedCount = typeof countValue.toNumber === 'function'
+        ? countValue.toNumber()
+        : parseInt(countValue, 10) || 0;
+    }
+  }
+
+  return {
+    success: true,
+    message: `Deleted ${deletedCount} log entries`,
+    deletedCount
+  };
+} catch (error) {
+  console.error('Error clearing worker logs:', error);
+  return {
+    success: false,
+    error: error.message
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

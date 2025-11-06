@@ -154,6 +154,16 @@ return {
       enabled: true
     },
     {
+      title: "Worker Logs",
+      description: "View background worker processing logs for debugging. Filter logs by worker type and log level, and monitor processing activity.",
+      icon: "carbon:document-tasks",
+      iconBg: "info_light_100",
+      hoverBorder: "info",
+      link: "/yto/admin/worker-logs",
+      linkText: "View Logs",
+      enabled: true
+    },
+    {
       title: "User Management",
       description: "View and manage all user accounts. Access user details, permissions, and account settings.",
       icon: "carbon:user-multiple",

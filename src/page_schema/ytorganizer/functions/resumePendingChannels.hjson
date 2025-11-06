@@ -1,0 +1,169 @@
+{
+  vertexes: [
+    {
+      id: "resume_pending_channels_function",
+      L: "Function",
+      P: {
+        key: "resumePendingChannels",
+        description: "Resume all paused/pending_quota channels and playlists for a user",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  // Get all paused/pending_quota channels
+  const channelsResult = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          -[:ChannelSettingChannel]->(c:Channel)
+    WHERE cs.status IN ['paused', 'pending_quota']
+    RETURN c.youtubeId as channelId, cs.priority as priority, cs.key as settingKey
+  `, { userUuid: user.P.uuid });
+
+  // Get all paused/pending_quota playlists
+  const playlistsResult = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          -[:PlaylistSettingPlaylist]->(p:Playlist)
+    WHERE ps.status IN ['paused', 'pending_quota']
+    RETURN p.youtubeId as playlistId, ps.priority as priority, ps.key as settingKey
+  `, { userUuid: user.P.uuid });
+
+  let channelsResumed = 0;
+  let playlistsResumed = 0;
+
+  // Resume channels
+  if (channelsResult.records.length > 0) {
+    const channelQueue = helpers.result.data.createChannelQueue(args);
+
+    try {
+      for (const record of channelsResult.records) {
+        const channelId = record.get('channelId');
+        const priority = record.get('priority') || 'normal';
+        const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
+
+        // Generate unique job ID
+        const jobId = helpers.result.data.createJobId('channel', user.P.uuid, channelId);
+
+        // Remove existing job with this ID if it exists (but not if it's active)
+        const { removed, state } = await helpers.result.data.removeExistingJob(channelQueue, jobId, ['active']);
+
+        if (state === 'active') {
+          console.log(`[Resume] Job ${jobId} is currently active, skipping re-queue`);
+          continue;  // Skip to next channel - don't re-queue active jobs
+        }
+
+        if (removed) {
+          console.log(`[Resume] Removed old job ${jobId} (state: ${state}) before re-queuing`);
+        }
+
+        // Re-queue the channel
+        await helpers.result.data.addChannelJob(channelQueue, {
+          channelId,
+          userId: user.id,
+          userUuid: user.P.uuid,
+          priority
+        }, {
+          priority: jobPriority  // Override default priority
+        });
+
+        // Update status to queued
+        await args.session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+          SET cs.status = 'queued',
+              cs.error = null,
+              cs.pausedAt = null,
+              cs.queuedAt = datetime(),
+              cs.updatedAt = datetime()
+        `, { userUuid: user.P.uuid, channelId });
+
+        channelsResumed++;
+      }
+    } finally {
+      await channelQueue.close();
+    }
+  }
+
+  // Resume playlists
+  if (playlistsResult.records.length > 0) {
+    const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+
+    try {
+      for (const record of playlistsResult.records) {
+        const playlistId = record.get('playlistId');
+        const priority = record.get('priority') || 'normal';
+        const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
+
+        // Generate unique job ID
+        const jobId = helpers.result.data.createJobId('playlist', user.P.uuid, playlistId);
+
+        // Remove existing job with this ID if it exists (but not if it's active)
+        const { removed, state } = await helpers.result.data.removeExistingJob(playlistQueue, jobId, ['active']);
+
+        if (state === 'active') {
+          console.log(`[Resume] Job ${jobId} is currently active, skipping re-queue`);
+          continue;  // Skip to next playlist - don't re-queue active jobs
+        }
+
+        if (removed) {
+          console.log(`[Resume] Removed old job ${jobId} (state: ${state}) before re-queuing`);
+        }
+
+        // Re-queue the playlist
+        await helpers.result.data.addPlaylistJob(playlistQueue, {
+          playlistId,
+          userId: user.id,
+          userUuid: user.P.uuid,
+          priority
+        }, {
+          priority: jobPriority  // Override default priority
+        });
+
+        // Update status to queued
+        await args.session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          SET ps.status = 'queued',
+              ps.error = null,
+              ps.pausedAt = null,
+              ps.queuedAt = datetime(),
+              ps.updatedAt = datetime()
+        `, { userUuid: user.P.uuid, playlistId });
+
+        playlistsResumed++;
+      }
+    } finally {
+      await playlistQueue.close();
+    }
+  }
+
+  return {
+    success: true,
+    message: `Resumed ${channelsResumed} channels and ${playlistsResumed} playlists`,
+    data: {
+      channelsResumed,
+      playlistsResumed
+    }
+  };
+
+} catch (error) {
+  console.error("Error resuming channels:", error);
+  return {
+    success: false,
+    message: "Failed to resume channels",
+    error: {
+      type: error.name || "ResumeError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

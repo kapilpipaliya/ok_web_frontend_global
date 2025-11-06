@@ -11,6 +11,7 @@ import {
   batch,
   untrack,
 } from "solid-js";
+import * as floatingUI from "@floating-ui/dom";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { SetStoreFunction } from "solid-js/store";
@@ -266,5 +267,6 @@ export function createFunctionArgumentBase(
     },
     executeServerFunction,
     executeNamedServerFunction,
+    floatingUI,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

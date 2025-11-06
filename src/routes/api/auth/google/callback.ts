@@ -5,7 +5,7 @@ import { v7 as uuidv7 } from "uuid";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { APIError } from "~/lib/api/server/apiErrorHandler";
 import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
@@ -201,20 +201,16 @@ export async function GET({ request }: APIEvent) {
     // Create session
     await updateSession(user);
 
-    // Get redirect URL from settings
+    // Fetch the configured redirect URL from general settings
     const generalSettings = await getGeneralSettings(dbSession);
     const configuredRedirectUrl = generalSettings?.P?.redirectUrlAfterSignin;
 
-    const redirectUrl = updateRedirectUrl(
-      user,
-      subDomain!,
-      configuredRedirectUrl,
-    );
+    updateRedirectUrl(user, subDomain!, configuredRedirectUrl);
 
     // Redirect to the application
     return new Response(null, {
       headers: {
-        Location: redirectUrl || "/",
+        Location: user.P.redirectUrl || "/",
       },
       status: 302,
     });

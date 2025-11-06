@@ -1,0 +1,80 @@
+{
+  vertexes: [
+    {
+      id: "get_api_usage_stats_function",
+      L: "Function",
+      P: {
+        key: "getAPIUsageStats",
+        description: "Get YouTube API quota usage statistics for the current user",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    return {
+      success: false,
+      message: "User session not found. Please log in and try again."
+    };
+  }
+
+  // Import API usage tracking functions
+  const { getTodayAPIUsage, getAPIUsageHistory } = await import('~/lib/youtube/apiUsageTracking');
+
+  // Get today's usage
+  const todayUsage = await getTodayAPIUsage(user.P.uuid, args.session);
+
+  // Get last 7 days history
+  const history = await getAPIUsageHistory(user.P.uuid, 7, args.session);
+
+  // Determine status color based on quota usage
+  let status = 'good';  // green
+  let statusMessage = 'Your API usage is within normal limits';
+
+  if (todayUsage.quotaPercentUsed >= 90) {
+    status = 'critical';  // red
+    statusMessage = 'You are approaching your daily quota limit! (10,000 units/day)';
+  } else if (todayUsage.quotaPercentUsed >= 70) {
+    status = 'warning';  // yellow
+    statusMessage = 'You are using a significant portion of your daily quota';
+  }
+
+  return {
+    success: true,
+    data: {
+      today: {
+        totalCost: todayUsage.totalCost,
+        callCount: todayUsage.callCount,
+        operations: todayUsage.operations,
+        remainingQuota: todayUsage.remainingQuota,
+        quotaPercentUsed: Math.round(todayUsage.quotaPercentUsed * 10) / 10, // Round to 1 decimal
+        dailyLimit: 10000
+      },
+      history: history.map(day => ({
+        date: day.date,
+        totalCost: day.totalCost,
+        callCount: day.callCount,
+        percentUsed: Math.round((day.totalCost / 10000) * 1000) / 10 // Round to 1 decimal
+      })),
+      status,
+      statusMessage
+    }
+  };
+
+} catch (error) {
+  console.error("Error getting API usage stats:", error);
+
+  return {
+    success: false,
+    message: "Failed to retrieve API usage statistics",
+    error: {
+      type: error.name || "Error",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

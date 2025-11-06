@@ -1,0 +1,70 @@
+{
+  vertexes: [
+    {
+      id: "manual_retry_pending_quota_function",
+      L: "Function",
+      P: {
+        key: "manualRetryPendingQuota",
+        description: "Manually trigger retry of all pending_quota jobs (for testing/immediate use)",
+        body: '''
+/**
+ * Manual Trigger for Pending Quota Retry
+ *
+ * This function allows you to manually trigger the retry of pending_quota jobs
+ * without waiting for the midnight scheduled run.
+ *
+ * Use this when:
+ * - You need to immediately retry pending_quota jobs
+ * - Testing the background worker functionality
+ * - Quota has been manually reset or increased
+ */
+
+try {
+  console.log('[Manual Retry] Starting manual retry of pending_quota jobs');
+
+  // Call the retry function
+  const result = await args.executeNamedServerFunction({
+    functionName: 'retryPendingQuotaJobs',
+    contextData: {}
+  });
+
+  if (result.result?.success) {
+    console.log('[Manual Retry] Successfully completed', {
+      channelsRetried: result.result.data?.channelsRetried,
+      playlistsRetried: result.result.data?.playlistsRetried
+    });
+
+    return {
+      success: true,
+      message: `Successfully retried ${result.result.data?.channelsRetried || 0} channels and ${result.result.data?.playlistsRetried || 0} playlists`,
+      data: result.result.data
+    };
+  } else {
+    console.error('[Manual Retry] Failed', result.result?.error || result.error);
+
+    return {
+      success: false,
+      message: 'Failed to retry pending quota jobs',
+      error: result.result?.error || result.error
+    };
+  }
+
+} catch (error) {
+  console.error('[Manual Retry] Error:', error);
+
+  return {
+    success: false,
+    message: 'Error triggering manual retry',
+    error: {
+      type: error.name || 'ManualRetryError',
+      details: error.message,
+      stack: error.stack
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

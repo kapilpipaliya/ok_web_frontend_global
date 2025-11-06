@@ -5,48 +5,46 @@
       L: "Function",
       P: {
         key: "savePlaylist",
-        description: "Fetches basic playlist metadata and queues background processing for videos",
+        description: "Fetches basic playlist metadata using per-user OAuth and queues background processing for videos",
         body: '''
 /**
  * Extract playlist ID from various YouTube URL formats
- * Supports: ?list=ID, &list=ID, playlist?list=ID
+ * Playlist ID is always in the 'list' query parameter
  */
 const extractPlaylistId = (url) => {
   if (!url) return null;
 
-  // Handle different YouTube playlist URL formats
-  const patterns = [
-    /[?&]list=([a-zA-Z0-9_-]+)/,        // ?list=ID or &list=ID
-    /playlist\?list=([a-zA-Z0-9_-]+)/,  // Direct playlist URL: /playlist?list=ID
-  ];
+  try {
+    // Parse URL using built-in URL class
+    const urlObj = new URL(url);
 
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
+    // Check if it's a YouTube domain
+    if (!urlObj.hostname.includes('youtube.com')) {
+      return null;
+    }
+
+    // Get the 'list' query parameter
+    const playlistId = urlObj.searchParams.get('list');
+    return playlistId;
+  } catch (error) {
+    // Invalid URL format
+    return null;
   }
-
-  return null;
 };
 
 /**
- * Fetch ONLY basic playlist metadata (no videos)
+ * Fetch ONLY basic playlist metadata using per-user OAuth (no videos)
  * Full processing will be done in background worker
  */
-const fetchPlaylistMetadata = async (playlistId, apiKeyData) => {
-  // Dynamic import of googleapis library
-  const { google } = await import('googleapis');
-
-  // Initialize YouTube API client with authentication from database
-  const youtube = google.youtube({
-    version: 'v3',
-    auth: apiKeyData.apiKey
-  });
-
+const fetchPlaylistMetadata = async (playlistId, youtube, userUuid, session) => {
   // Fetch ONLY playlist details (metadata only, no videos)
   const playlistResponse = await youtube.playlists.list({
     part: ['snippet', 'contentDetails', 'status'],
     id: [playlistId]
   });
+
+  // Log API usage: playlists.list operation (1 unit)
+  await args.logAPIUsage(userUuid, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
 
   if (!playlistResponse.data.items || playlistResponse.data.items.length === 0) {
     throw new Error('Playlist not found or is private/deleted');
@@ -64,11 +62,15 @@ const fetchPlaylistMetadata = async (playlistId, apiKeyData) => {
 
 try {
   // Extract input parameters from the request
-  const { url, name, channelId, refresh = false } = args.contextData;
+  const { url, name, channelId, refresh = false, priority = 'normal' } = args.contextData;
 
   if (!url) {
     throw new Error("Playlist URL is required");
   }
+
+  // Validate priority value
+  const validPriorities = ['high', 'normal', 'low'];
+  const playlistPriority = validPriorities.includes(priority) ? priority : 'normal';
 
   // Get current authenticated user from session
   const user = await args.getUserFromSession();
@@ -111,26 +113,30 @@ try {
     }
   }
 
-  // Get active API key from database
-  const apiKeyResult = await args.executeNamedServerFunction({
-    functionName: "getActiveYouTubeAPIKey",
-    contextData: {}
-  });
-
-  if (!apiKeyResult?.result?.success || !apiKeyResult?.result?.data) {
-    throw new Error(apiKeyResult?.result?.message || "Failed to get YouTube API key");
+  // Get authenticated YouTube client for this user
+  let youtube;
+  try {
+    youtube = await args.getYouTubeClient(user.P.uuid, args.session, args.request);
+  } catch (error) {
+    // Check if this is an OAuth authorization error
+    if (error.message.includes('No YouTube authorization') ||
+        error.message.includes('revoked') ||
+        error.message.includes('reconnect')) {
+      return {
+        success: false,
+        message: "YouTube account not connected. Please connect your YouTube account in settings to add playlists.",
+        error: {
+          type: "AuthorizationRequired",
+          details: error.message,
+          action: "connect_youtube"
+        }
+      };
+    }
+    throw error;
   }
 
-  const apiKeyData = apiKeyResult.result.data;
-
-  // Fetch ONLY basic playlist metadata (fast operation)
-  const playlistData = await fetchPlaylistMetadata(playlistId, apiKeyData);
-
-  // Track API usage (playlist details = 1 call, costs ~1 quota unit)
-  await args.executeNamedServerFunction({
-    functionName: "trackYouTubeAPIUsage",
-    contextData: { keyId: apiKeyData.keyId, cost: 1 }
-  });
+  // Fetch ONLY basic playlist metadata using user's OAuth (fast operation)
+  const playlistData = await fetchPlaylistMetadata(playlistId, youtube, user.P.uuid, args.session);
 
   // STEP 1: Create or update the main Playlist vertex with basic metadata
   const playlistKey = `playlist_${playlistId}`;
@@ -184,6 +190,7 @@ try {
       ps.sortBy = 'index',
       ps.showThumbnails = true,
       ps.viewMode = 'list',
+      ps.priority = $priority,
       ps.status = 'queued',
       ps.progress = 0,
       ps.totalVideos = 0,
@@ -199,7 +206,8 @@ try {
     userUuid: user.P.uuid,
     playlistId,
     playlistSettingKey,
-    customName: name || null
+    customName: name || null,
+    priority: playlistPriority
   });
 
   // If playlist is part of a channel, create relationship
@@ -213,39 +221,31 @@ try {
   }
 
   // STEP 3: Add to background processing queue using BullMQ
-  const { Queue } = args.bullmq;
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 
-  // Get Redis connection
-  const connection = args.bullmq.redisConnection || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null
-  };
+  try {
+    // Map priority string to BullMQ priority number (lower = higher priority)
+    const jobPriority = playlistPriority === 'high' ? 1 : playlistPriority === 'low' ? 3 : 2;
 
-  const playlistQueue = new Queue('processPlaylistQueue', { connection });
-
-  // DEAD LETTER QUEUE CONFIGURATION:
-  // Failed jobs are kept (removeOnFail: false) so admins can inspect errors
-  // After 3 retry attempts, the job stays in the failed set for manual review
-  // This helps debug YouTube API issues, quota problems, and other failures
-  await playlistQueue.add('processPlaylist', {
-    playlistId,
-    userId: user.id,
-    userUuid: user.P.uuid,
-    customName: name || null,
-    channelId: channelId || null
-  }, {
-    attempts: 3,                           // Retry 3 times before giving up
-    backoff: {
-      type: 'exponential',                 // Exponential backoff: 5s, 10s, 20s
-      delay: 5000
-    },
-    removeOnComplete: 100,                 // Keep last 100 completed jobs for audit
-    removeOnFail: false                    // KEEP failed jobs for inspection (Dead Letter Queue)
-  });
-
-  // Close queue connection
-  await playlistQueue.close();
+    // DEAD LETTER QUEUE CONFIGURATION:
+    // Failed jobs are kept (removeOnFail: false) so admins can inspect errors
+    // After 3 retry attempts, the job stays in the failed set for manual review
+    // This helps debug YouTube API issues, quota problems, and other failures
+    await helpers.result.data.addPlaylistJob(playlistQueue, {
+      playlistId,
+      userId: user.id,
+      userUuid: user.P.uuid,
+      customName: name || null,
+      channelId: channelId || null,
+      priority: playlistPriority
+    }, {
+      priority: jobPriority  // Override default priority
+    });
+  } finally {
+    // Close queue connection
+    await playlistQueue.close();
+  }
 
   return {
     success: true,
@@ -262,14 +262,15 @@ try {
       channelTitle: playlistData.snippet.channelTitle,
       userId: user.id,
       userSpecific: true,
-      isRefresh: refresh
+      isRefresh: refresh,
+      usesOAuth: true
     }
   };
 
 } catch (error) {
   console.error("Error saving playlist:", error);
 
-  // Handle specific YouTube API errors
+  // Handle specific YouTube API and OAuth errors
   let userMessage = "Failed to save playlist. Please try again.";
 
   if (error.message.includes("Playlist not found")) {
@@ -277,15 +278,19 @@ try {
   } else if (error.message.includes("Invalid YouTube playlist URL")) {
     userMessage = "Invalid playlist URL. Please provide a valid YouTube playlist URL.";
   } else if (error.message.includes("quota")) {
-    userMessage = "YouTube API quota exceeded. Please try again later.";
-  } else if (error.message.includes("API key")) {
-    userMessage = "YouTube API configuration error. Please contact support.";
+    userMessage = "YouTube API quota exceeded. This resets daily. Please try again tomorrow.";
+  } else if (error.message.includes("revoked") || error.message.includes("reconnect")) {
+    userMessage = "Your YouTube authorization has expired. Please reconnect your YouTube account in settings.";
+  } else if (error.message.includes("No YouTube authorization")) {
+    userMessage = "YouTube account not connected. Please connect your YouTube account in settings.";
   } else if (error.message.includes("private")) {
     userMessage = "This playlist is private and cannot be accessed.";
   } else if (error.code === 404) {
     userMessage = "Playlist not found or has been deleted.";
   } else if (error.code === 403) {
-    userMessage = "Access denied. The playlist may be private or restricted.";
+    userMessage = "Access denied. The playlist may be private or you may not have permission to access it.";
+  } else if (error.code === 401) {
+    userMessage = "Authentication failed. Please reconnect your YouTube account in settings.";
   }
 
   return {

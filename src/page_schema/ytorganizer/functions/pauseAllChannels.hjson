@@ -1,0 +1,130 @@
+{
+  vertexes: [
+    {
+      id: "pause_all_channels_function",
+      L: "Function",
+      P: {
+        key: "pauseAllChannels",
+        description: "Pause all queued/processing channels/playlists for a user",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  // Get all channels that will be paused (need IDs before updating status)
+  const channelsToDelete = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          -[:ChannelSettingChannel]->(c:Channel)
+    WHERE cs.status IN ['queued', 'processing']
+    RETURN c.youtubeId as channelId
+  `, { userUuid: user.P.uuid });
+
+  // Get all playlists that will be paused
+  const playlistsToDelete = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          -[:PlaylistSettingPlaylist]->(p:Playlist)
+    WHERE ps.status IN ['queued', 'processing']
+    RETURN p.youtubeId as playlistId
+  `, { userUuid: user.P.uuid });
+
+  const channelIds = channelsToDelete.records.map(r => r.get('channelId'));
+  const playlistIds = playlistsToDelete.records.map(r => r.get('playlistId'));
+
+  let jobsRemoved = 0;
+
+  // Remove channel jobs from BullMQ queue
+  if (channelIds.length > 0) {
+    const channelQueue = helpers.result.data.createChannelQueue(args);
+
+    try {
+      // Get all waiting and delayed jobs
+      const waitingJobs = await channelQueue.getJobs(['waiting', 'delayed']);
+
+      // Filter and remove jobs that match this user's channels
+      for (const job of waitingJobs) {
+        if (job.data.userUuid === user.P.uuid && channelIds.includes(job.data.channelId)) {
+          await job.remove();
+          jobsRemoved++;
+        }
+      }
+    } finally {
+      await channelQueue.close();
+    }
+  }
+
+  // Remove playlist jobs from BullMQ queue
+  if (playlistIds.length > 0) {
+    const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+
+    try{
+      // Get all waiting and delayed jobs
+      const waitingJobs = await playlistQueue.getJobs(['waiting', 'delayed']);
+
+      // Filter and remove jobs that match this user's playlists
+      for (const job of waitingJobs) {
+        if (job.data.userUuid === user.P.uuid && playlistIds.includes(job.data.playlistId)) {
+          await job.remove();
+          jobsRemoved++;
+        }
+      }
+    } finally {
+      await playlistQueue.close();
+    }
+  }
+
+  // Now update database status to paused
+  const result = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    WHERE cs.status IN ['queued', 'processing']
+    SET cs.status = 'paused',
+        cs.pausedAt = datetime(),
+        cs.updatedAt = datetime()
+    RETURN count(cs) as pausedCount
+  `, { userUuid: user.P.uuid });
+
+  const playlistResult = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    WHERE ps.status IN ['queued', 'processing']
+    SET ps.status = 'paused',
+        ps.pausedAt = datetime(),
+        ps.updatedAt = datetime()
+    RETURN count(ps) as pausedCount
+  `, { userUuid: user.P.uuid });
+
+  const channelsPaused = result.records[0]?.get('pausedCount') || 0;
+  const playlistsPaused = playlistResult.records[0]?.get('pausedCount') || 0;
+
+  console.log(`[Pause All] Paused ${channelsPaused} channels and ${playlistsPaused} playlists, removed ${jobsRemoved} jobs from queue`);
+
+  return {
+    success: true,
+    message: `Paused ${channelsPaused} channels and ${playlistsPaused} playlists`,
+    data: {
+      channelsPaused,
+      playlistsPaused,
+      jobsRemoved
+    }
+  };
+
+} catch (error) {
+  console.error("Error pausing channels:", error);
+  return {
+    success: false,
+    message: "Failed to pause channels",
+    error: {
+      type: error.name || "PauseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
