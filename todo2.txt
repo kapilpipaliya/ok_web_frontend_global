@@ -401,3 +401,7 @@ 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
 
 Google Terms:
 https://developers.google.com/youtube/terms/api-services-terms-of-service
+
+Flush ALL Redis data (complete clean)
+redis-cli FLUSHALL
+

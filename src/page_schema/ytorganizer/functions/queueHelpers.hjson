@@ -54,8 +54,8 @@ try {
   };
 
   // Generate unique job ID
-  const createJobId = (type, userUuid, resourceId) => {
-    return `${type}-${userUuid}-${resourceId}`;
+  const createJobId = (type, ownershipId, resourceId) => {
+    return `${type}-${ownershipId}-${resourceId}`;
   };
 
   // Remove existing job with state filtering
@@ -88,7 +88,14 @@ try {
   // Add channel job with smart defaults
   const addChannelJob = async (queue, data, options = {}) => {
     // Auto-generate jobId if not provided
-    const jobId = options.jobId || createJobId('channel', data.userUuid, data.channelId);
+    const jobId = options.jobId || createJobId('channel', data.ownershipId, data.channelId);
+
+    // Remove existing job if it exists (except active jobs)
+    const { removed, state } = await removeExistingJob(queue, jobId, ['active']);
+
+    if (state === 'active') {
+      throw new Error(`Cannot add job: Channel job ${jobId} is already active`);
+    }
 
     // Merge user options with defaults
     const jobOptions = {
@@ -105,7 +112,14 @@ try {
   // Add playlist job with smart defaults
   const addPlaylistJob = async (queue, data, options = {}) => {
     // Auto-generate jobId if not provided
-    const jobId = options.jobId || createJobId('playlist', data.userUuid, data.playlistId);
+    const jobId = options.jobId || createJobId('playlist', data.ownershipId, data.playlistId);
+
+    // Remove existing job if it exists (except active jobs)
+    const { removed, state } = await removeExistingJob(queue, jobId, ['active']);
+
+    if (state === 'active') {
+      throw new Error(`Cannot add job: Playlist job ${jobId} is already active`);
+    }
 
     // Merge user options with defaults
     const jobOptions = {

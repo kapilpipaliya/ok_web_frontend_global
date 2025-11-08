@@ -64,9 +64,12 @@ if (args.contextData.action === 'start') {
       scheduledTime: new Date().toISOString()
     });
 
+    // Create a new session for this job execution
+    const session = await args.getSession();
+
     try {
       // Get all users with YouTube OAuth tokens
-      const usersResult = await args.session.run(`
+      const usersResult = await session.run(`
         MATCH (u:User)-[r:UserYouTubeToken]->(token:YouTubeToken)
         WHERE token.accessTokenEncrypted IS NOT NULL
           AND token.isRevoked = false
@@ -193,6 +196,9 @@ if (args.contextData.action === 'start') {
         stack: error.stack
       });
       throw error;
+    } finally {
+      // Always close the session
+      await session.close();
     }
   }, {
     connection,

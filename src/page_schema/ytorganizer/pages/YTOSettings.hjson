@@ -56,139 +56,6 @@ const submitFeedback = async (data) => {
   }
 };
 
-// YouTube OAuth connection state
-const [youtubeStatus, setYoutubeStatus] = args.createSignal(null);
-const [isLoadingStatus, setIsLoadingStatus] = args.createSignal(true);
-const [isConnecting, setIsConnecting] = args.createSignal(false);
-const [isDisconnecting, setIsDisconnecting] = args.createSignal(false);
-
-// Load YouTube connection status
-const loadYoutubeStatus = async () => {
-  setIsLoadingStatus(true);
-  try {
-    const response = await fetch("/api/auth/youtube/status");
-    const result = await response.json();
-
-    if (result.success) {
-      setYoutubeStatus(result.data);
-    } else {
-      setYoutubeStatus(null);
-    }
-  } catch (error) {
-    console.error("Error loading YouTube status:", error);
-    setYoutubeStatus(null);
-  } finally {
-    setIsLoadingStatus(false);
-  }
-};
-
-// Connect YouTube account
-const connectYouTube = async () => {
-  setIsConnecting(true);
-  try {
-    window.location.href = "/api/auth/youtube/connect";
-  } catch (error) {
-    console.error("Error connecting YouTube:", error);
-    showMessage('error', "Failed to connect YouTube account");
-    setIsConnecting(false);
-  }
-};
-
-// Disconnect YouTube account
-const disconnectYouTube = async () => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
-  if (!rbConfirm) {
-    showMessage('error', "Confirmation dialog not available");
-    return;
-  }
-
-  const confirmed = await rbConfirm({
-    title: "Disconnect YouTube Account",
-    message: "Are you sure you want to disconnect your YouTube account? You won't be able to add channels or playlists until you reconnect.",
-    confirmText: "Disconnect",
-    cancelText: "Cancel",
-    variant: "danger"
-  });
-
-  if (!confirmed) return;
-
-  setIsDisconnecting(true);
-  try {
-    const response = await fetch("/api/auth/youtube/disconnect", {
-      method: "POST"
-    });
-    const result = await response.json();
-
-    if (result.success) {
-      showMessage('success', result.message || "YouTube account disconnected successfully");
-      await loadYoutubeStatus();
-    } else {
-      showMessage('error', result.error || "Failed to disconnect YouTube account");
-    }
-  } catch (error) {
-    console.error("Error disconnecting YouTube:", error);
-    showMessage('error', "An error occurred while disconnecting");
-  } finally {
-    setIsDisconnecting(false);
-  }
-};
-
-// API Usage tracking state
-const [apiUsage, setApiUsage] = args.createSignal(null);
-const [isLoadingUsage, setIsLoadingUsage] = args.createSignal(false);
-
-// Load API usage statistics
-const loadAPIUsage = async () => {
-  const status = youtubeStatus();
-  if (!status?.connected) return; // Only load if connected
-
-  setIsLoadingUsage(true);
-  try {
-    const response = await fetch("/api/youtube/usage");
-    const result = await response.json();
-
-    if (result.success) {
-      setApiUsage(result.data);
-    }
-  } catch (error) {
-    console.error("Error loading API usage:", error);
-  } finally {
-    setIsLoadingUsage(false);
-  }
-};
-
-// Initialize YouTube status on mount
-const initializeYouTubeStatus = () => {
-  loadYoutubeStatus();
-};
-
-// Handle OAuth callback messages from URL params
-const handleOAuthCallback = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const success = urlParams.get('success');
-  const error = urlParams.get('error');
-
-  if (success) {
-    showMessage('success', decodeURIComponent(success));
-    // Remove query params from URL
-    window.history.replaceState({}, '', window.location.pathname);
-    // Reload status
-    loadYoutubeStatus();
-  } else if (error) {
-    showMessage('error', decodeURIComponent(error));
-    // Remove query params from URL
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-};
-
-// Load API usage when YouTube is connected
-args.createEffect(() => {
-  const status = youtubeStatus();
-  if (status?.connected) {
-    loadAPIUsage();
-  }
-});
-
 // Queue Management state
 const [isPausing, setIsPausing] = args.createSignal(false);
 const [isResuming, setIsResuming] = args.createSignal(false);
@@ -240,18 +107,6 @@ return {
   openFeedbackModal,
   closeFeedbackModal,
   submitFeedback,
-  youtubeStatus,
-  isLoadingStatus,
-  isConnecting,
-  isDisconnecting,
-  connectYouTube,
-  disconnectYouTube,
-  loadYoutubeStatus,
-  apiUsage,
-  isLoadingUsage,
-  loadAPIUsage,
-  initializeYouTubeStatus,
-  handleOAuthCallback,
   isPausing,
   isResuming,
   pauseAllChannels,
@@ -260,14 +115,7 @@ return {
 ''',
         props: '''
 return {
-  isNoPermissionCheck: true,
-  onMount: () => {
-    // Initialize YouTube connection status
-    args.fns.initializeYouTubeStatus();
-
-    // Handle OAuth callback messages
-    args.fns.handleOAuthCallback();
-  }
+  isNoPermissionCheck: true
 };
 '''
       }
@@ -1004,7 +852,7 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "YouTube Connection"
+  text: "YouTube Accounts"
 };
 ''',
         css: '''
@@ -1022,551 +870,41 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return `._id {
-  background: ${isConnected ? args.theme.var.color.success_light_50 : args.theme.var.color.background_dark_50};
-  border: 2px solid ${isConnected ? args.theme.var.color.success : args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-}`;
-'''
+        componentName: "YTOSimpleCard"
       }
     },
     {
-      id: "youtube_status_header",
+      id: "youtube_accounts_message",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-@media (max-width: 640px) {
-  ._id {
-    flex-direction: column;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_status_info",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "youtube_status_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isLoading = args.fns.isLoadingStatus?.();
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-let statusText = "Not Connected";
-let statusIcon = "❌";
-
-if (isLoading) {
-  statusText = "Checking connection...";
-  statusIcon = "⏳";
-} else if (isConnected) {
-  statusText = "Connected";
-  statusIcon = "✅";
-}
-
-return {
-  as: "div",
-  text: `${statusIcon} ${statusText}`
-};
-''',
-        css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return `._id {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: ${isConnected ? args.theme.var.color.success_light_50_text : args.theme.var.color.text};
-  margin-bottom: 0.25rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_status_description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const isLoading = args.fns.isLoadingStatus?.();
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-let description = "Connect your YouTube account to add channels and playlists";
-
-if (isLoading) {
-  description = "Please wait...";
-} else if (isConnected) {
-  description = "Your YouTube account is connected and ready to use";
-}
-
 return {
   as: "p",
-  text: description
+  text: "Manage all your YouTube account connections from the dedicated Accounts page."
 };
 ''',
         css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
 return `._id {
-  font-size: 0.875rem;
-  color: ${isConnected ? args.theme.var.color.success_light_50_text : args.theme.var.color.muted};
-  margin: 0;
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
 }`;
 '''
       }
     },
     {
-      id: "youtube_status_buttons",
+      id: "youtube_accounts_button",
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_connect_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
         componentName: "YTOButton",
         props: '''
-const isLoading = args.fns.isLoadingStatus?.();
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-const isConnecting = args.fns.isConnecting?.();
-
 return {
-  text: isConnecting ? "Connecting..." : "Connect YouTube Account",
+  text: "Manage YouTube Accounts",
   variant: "primary",
-  onClick: args.fns.connectYouTube,
-  disabled: isLoading || isConnecting,
-  hide: isConnected
-};
-'''
-      }
-    },
-    {
-      id: "youtube_disconnect_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "YTOButton",
-        props: '''
-const isLoading = args.fns.isLoadingStatus?.();
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-const isDisconnecting = args.fns.isDisconnecting?.();
-
-return {
-  text: isDisconnecting ? "Disconnecting..." : "Disconnect",
-  variant: "danger",
-  onClick: args.fns.disconnectYouTube,
-  disabled: isLoading || isDisconnecting,
-  hide: !isConnected
-};
-'''
-      }
-    },
-    {
-      id: "youtube_connection_details",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return {
-  as: "div",
-  hide: !isConnected
-};
-''',
-        css: '''
-return `._id {
-  border-top: 1px solid ${args.theme.var.color.success_light_200};
-  padding-top: 1rem;
-  margin-top: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_details_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_detail_scope",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const status = args.fns.youtubeStatus?.();
-
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "youtube_detail_scope_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Access Level"
-};
-''',
-        css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return `._id {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: ${isConnected ? args.theme.var.color.success_light_50_text : args.theme.var.color.muted};
-  opacity: 0.7;
-  margin-bottom: 0.25rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_detail_scope_value",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Read-Only"
-};
-''',
-        css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${isConnected ? args.theme.var.color.success_light_50_text : args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_detail_last_sync",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const status = args.fns.youtubeStatus?.();
-
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "youtube_detail_last_sync_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Last Refreshed"
-};
-''',
-        css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return `._id {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: ${isConnected ? args.theme.var.color.success_light_50_text : args.theme.var.color.muted};
-  opacity: 0.7;
-  margin-bottom: 0.25rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_detail_last_sync_value",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const status = args.fns.youtubeStatus?.();
-const lastRefreshed = status?.lastRefreshed;
-
-let displayText = "Never";
-if (lastRefreshed) {
-  try {
-    const date = new Date(lastRefreshed);
-    const now = new Date();
-    const diff = now - date;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) {
-      displayText = `${days} day${days > 1 ? 's' : ''} ago`;
-    } else if (hours > 0) {
-      displayText = `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    } else if (minutes > 0) {
-      displayText = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    } else {
-      displayText = "Just now";
-    }
-  } catch (e) {
-    displayText = "Unknown";
-  }
-}
-
-return {
-  as: "div",
-  text: displayText
-};
-''',
-        css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${isConnected ? args.theme.var.color.success_light_50_text : args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_connection_help",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return {
-  as: "p",
-  text: "💡 Your YouTube connection uses OAuth 2.0 for secure access. Each user gets their own 10,000 units/day API quota.",
-  hide: isConnected
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-  margin: 1rem 0 0 0;
-  padding: 1rem;
-  background: ${args.theme.var.color.background_light_100};
-  border-radius: 0.5rem;
-  border-left: 3px solid ${args.theme.var.color.primary};
-  line-height: 1.5;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_api_usage_section",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-const apiUsage = args.fns.apiUsage?.();
-const isLoading = args.fns.isLoadingUsage?.();
-
-return {
-  as: "div",
-  hide: !isConnected
-};
-''',
-        css: '''
-return `._id {
-  border-top: 1px solid ${args.theme.var.color.success_light_200};
-  padding-top: 1rem;
-  margin-top: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_api_usage_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h3",
-  text: "Daily API Quota Usage"
-};
-''',
-        css: '''
-const status = args.fns.youtubeStatus?.();
-const isConnected = status?.connected;
-
-return `._id {
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${isConnected ? args.theme.var.color.success_light_50_text : args.theme.var.color.muted};
-  margin: 0 0 0.75rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "youtube_api_usage_content",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const apiUsage = args.fns.apiUsage?.();
-const isLoading = args.fns.isLoadingUsage?.();
-
-if (isLoading || !apiUsage) {
-  return {
-    as: "p",
-    text: "Loading usage statistics..."
-  };
-}
-
-const youtubeStatus = args.fns.youtubeStatus?.();
-const isConnected = youtubeStatus?.connected;
-const status = apiUsage.status || 'good';
-const today = apiUsage.today || {};
-const quotaPercent = today.quotaPercentUsed || 0;
-
-// Base text color based on connection status
-const baseTextColor = isConnected ? "${args.theme.var.color.success_light_50_text}" : "${args.theme.var.color.muted}";
-
-// Determine color based on status
-let statusTextColor = "${args.theme.var.color.success_text}";
-let statusBarColor = "${args.theme.var.color.success}";
-
-if (status === 'critical') {
-  statusTextColor = "${args.theme.var.color.error_text}";
-  statusBarColor = "${args.theme.var.color.error}";
-} else if (status === 'warning') {
-  statusTextColor = "${args.theme.var.color.warning_text}";
-  statusBarColor = "${args.theme.var.color.warning}";
-}
-
-return {
-  as: "div",
-  innerHTML: `
-    <div style="margin-bottom: 0.75rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <span style="font-size: 0.875rem; font-weight: 500; color: ${baseTextColor};">
-          ${today.totalCost || 0} / ${today.dailyLimit || 10000} units used
-        </span>
-        <span style="font-size: 0.875rem; font-weight: 600; color: ${statusTextColor};">
-          ${quotaPercent}%
-        </span>
-      </div>
-      <div style="width: 100%; height: 8px; background: ${args.theme.var.color.background_light_200}; border-radius: 4px; overflow: hidden;">
-        <div style="width: ${Math.min(quotaPercent, 100)}%; height: 100%; background: ${statusBarColor}; transition: width 0.3s ease;"></div>
-      </div>
-    </div>
-    <div style="font-size: 0.75rem; color: ${baseTextColor}; margin-top: 0.5rem;">
-      <strong>${today.callCount || 0}</strong> API calls today •
-      <strong>${today.remainingQuota || 10000}</strong> units remaining
-    </div>
-  `
-};
+  onClick: () => args.navigate("/accounts")};
 '''
       }
     },
@@ -2188,25 +1526,8 @@ return {
     { id: "e22a", T: "Attr", S: "settings_container", E: "youtube_connection_section" },
     { id: "e22b", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_title" },
     { id: "e22c", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_card" },
-    { id: "e22d", T: "Attr", S: "youtube_connection_card", E: "youtube_status_header" },
-    { id: "e22e", T: "Attr", S: "youtube_status_header", E: "youtube_status_info" },
-    { id: "e22f", T: "Attr", S: "youtube_status_info", E: "youtube_status_label" },
-    { id: "e22g", T: "Attr", S: "youtube_status_info", E: "youtube_status_description" },
-    { id: "e22h", T: "Attr", S: "youtube_status_header", E: "youtube_status_buttons" },
-    { id: "e22i", T: "Attr", S: "youtube_status_buttons", E: "youtube_connect_button" },
-    { id: "e22j", T: "Attr", S: "youtube_status_buttons", E: "youtube_disconnect_button" },
-    { id: "e22k", T: "Attr", S: "youtube_connection_card", E: "youtube_connection_details" },
-    { id: "e22l", T: "Attr", S: "youtube_connection_details", E: "youtube_details_grid" },
-    { id: "e22m", T: "Attr", S: "youtube_details_grid", E: "youtube_detail_scope" },
-    { id: "e22n", T: "Attr", S: "youtube_detail_scope", E: "youtube_detail_scope_label" },
-    { id: "e22o", T: "Attr", S: "youtube_detail_scope", E: "youtube_detail_scope_value" },
-    { id: "e22p", T: "Attr", S: "youtube_details_grid", E: "youtube_detail_last_sync" },
-    { id: "e22q", T: "Attr", S: "youtube_detail_last_sync", E: "youtube_detail_last_sync_label" },
-    { id: "e22r", T: "Attr", S: "youtube_detail_last_sync", E: "youtube_detail_last_sync_value" },
-    { id: "e22s", T: "Attr", S: "youtube_connection_card", E: "youtube_connection_help" },
-    { id: "e22t", T: "Attr", S: "youtube_connection_card", E: "youtube_api_usage_section" },
-    { id: "e22u", T: "Attr", S: "youtube_api_usage_section", E: "youtube_api_usage_title" },
-    { id: "e22v", T: "Attr", S: "youtube_api_usage_section", E: "youtube_api_usage_content" },
+    { id: "e22c1", T: "Attr", S: "youtube_connection_card", E: "youtube_accounts_message" },
+    { id: "e22c2", T: "Attr", S: "youtube_connection_card", E: "youtube_accounts_button" },
     { id: "e22w", T: "Attr", S: "settings_container", E: "queue_management_section" },
     { id: "e22x", T: "Attr", S: "queue_management_section", E: "queue_management_title" },
     { id: "e22y", T: "Attr", S: "queue_management_section", E: "queue_management_card" },

@@ -44,8 +44,8 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
     id: [playlistId]
   });
 
-  // Log API usage: playlists.list operation (1 unit) - per ownership quota
-  await args.logAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
+  // Log API usage: playlists.list operation (1 unit) - shared quota
+  await args.logSharedAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
 
   if (!playlistResponse.data.items || playlistResponse.data.items.length === 0) {
     throw new Error('Playlist not found or is private/deleted');
@@ -288,9 +288,17 @@ try {
   console.error("Error saving playlist:", error);
 
   // Handle specific YouTube API and OAuth errors
-  let userMessage = "Failed to save playlist. Please try again.";
+  let userMessage = "Failed to save playlist. Please try again. " + error.message;
 
-  if (error.message.includes("Playlist not found")) {
+  if (error.message.includes("YouTube Ownership ID is required")) {
+    userMessage = "Please select a YouTube account first. Go to Account Management to connect your YouTube account.";
+  } else if (error.message.includes("Invalid YouTube ownership")) {
+    userMessage = "The selected YouTube account is invalid or no longer exists. Please select a different account.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in again.";
+  } else if (error.message.includes("Playlist URL is required")) {
+    userMessage = "Please provide a playlist URL.";
+  } else if (error.message.includes("Playlist not found")) {
     userMessage = "Playlist not found. Please check the URL and make sure the playlist is public.";
   } else if (error.message.includes("Invalid YouTube playlist URL")) {
     userMessage = "Invalid playlist URL. Please provide a valid YouTube playlist URL.";

@@ -10,22 +10,28 @@
 try {
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 
-  // Get all ownerships with pending_quota channels
+  // Get all ownerships with pending_quota channels, sorted by ownership priority (higher = more important)
+  // This ensures higher-priority ownerships get their quota allocation first after midnight reset
   const channelsResult = await args.session.run(`
     MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
           -[:ChannelSettingChannel]->(c:Channel)
     WHERE cs.status = 'pending_quota'
-    RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId, cs.priority as priority
+    RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId,
+           cs.priority as priority, COALESCE(o.priority, 0) as ownershipPriority
+    ORDER BY ownershipPriority DESC, cs.priority DESC
   `);
 
-  // Get all ownerships with pending_quota playlists
+  // Get all ownerships with pending_quota playlists, sorted by ownership priority (higher = more important)
+  // This ensures higher-priority ownerships get their quota allocation first after midnight reset
   const playlistsResult = await args.session.run(`
     MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
           -[:PlaylistSettingPlaylist]->(p:Playlist)
     WHERE ps.status = 'pending_quota'
-    RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, p.youtubeId as playlistId, ps.priority as priority
+    RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, p.youtubeId as playlistId,
+           ps.priority as priority, COALESCE(o.priority, 0) as ownershipPriority
+    ORDER BY ownershipPriority DESC, ps.priority DESC
   `);
 
   let channelsRetried = 0;

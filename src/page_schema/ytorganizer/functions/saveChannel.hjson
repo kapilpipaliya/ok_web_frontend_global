@@ -74,8 +74,8 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
       forHandle: channelInfo.value
     });
 
-    // Log API usage: channels.list with forHandle (1 unit) - per ownership quota
-    await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    // Log API usage: channels.list with forHandle (1 unit) - shared quota
+    await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'channelId') {
     // Direct channel ID lookup (/channel/UCxxx)
     channelResponse = await youtube.channels.list({
@@ -83,8 +83,8 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
       id: [channelInfo.value]
     });
 
-    // Log API usage: channels.list operation (1 unit) - per ownership quota
-    await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    // Log API usage: channels.list operation (1 unit) - shared quota
+    await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'username') {
     // Legacy username format (/user/username)
     channelResponse = await youtube.channels.list({
@@ -92,8 +92,8 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
       forUsername: channelInfo.value
     });
 
-    // Log API usage: channels.list with forUsername (1 unit) - per ownership quota
-    await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+    // Log API usage: channels.list with forUsername (1 unit) - shared quota
+    await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'custom') {
     // Custom URL format (/c/customname) - unfortunately no direct API for this
     // This format is deprecated by YouTube, suggest user to use @handle instead
@@ -334,10 +334,20 @@ try {
   // Handle specific YouTube API and OAuth errors
   let userMessage = "Failed to save channel. Please try again.";
 
-  if (error.message.includes("Channel not found")) {
+  if (error.message.includes("YouTube Ownership ID is required")) {
+    userMessage = "Please select a YouTube account first. Go to Account Management to connect your YouTube account.";
+  } else if (error.message.includes("Invalid YouTube ownership")) {
+    userMessage = "The selected YouTube account is invalid or no longer exists. Please select a different account.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in again.";
+  } else if (error.message.includes("Channel URL is required")) {
+    userMessage = "Please provide a channel URL.";
+  } else if (error.message.includes("Channel not found")) {
     userMessage = "Channel not found. Please check the URL and make sure the channel exists.";
   } else if (error.message.includes("Invalid YouTube channel URL")) {
     userMessage = "Invalid channel URL. Please provide a valid YouTube channel URL.";
+  } else if (error.message.includes("Custom URL format")) {
+    userMessage = error.message; // Use the detailed message about /c/ format
   } else if (error.message.includes("quota")) {
     userMessage = "YouTube API quota exceeded. This resets daily. Please try again tomorrow.";
   } else if (error.message.includes("revoked") || error.message.includes("reconnect")) {

@@ -9,7 +9,7 @@ YouTube Organizer is a comprehensive page schema implementation that provides:
 - **Channel Management**: Add, organize, and browse YouTube channels
 - **Playlist Management**: Create and manage custom playlists
 - **Video Organization**: View videos from channels and playlists
-- **Multi-Ownership Support**: Connect multiple YouTube accounts per user, each with independent 10,000 units/day quota
+- **Multi-Ownership Support**: Connect multiple YouTube accounts per user with shared 10,000 units/day quota across all users
 - **OAuth 2.0 Authentication**: Secure per-account YouTube API access with encrypted token storage
 - **API Usage Monitoring**: Real-time tracking of YouTube API quota consumption with visual indicators
 - **Mobile-First Design**: Optimized for mobile devices with touch-friendly interfaces
@@ -20,7 +20,7 @@ YouTube Organizer is a comprehensive page schema implementation that provides:
 
 ## Graph Schema
 
-The system uses a multi-ownership architecture where each user can connect multiple YouTube accounts. Each YouTube account (ownership) has its own OAuth token, API quota, and content settings:
+The system uses a multi-ownership architecture where each user can connect multiple YouTube accounts. Each YouTube account (ownership) has its own OAuth token and content settings. All users share a single 10,000 units/day API quota pool at the Google Cloud Project level:
 
 ```
 (User)-[:UserYouTubeOwnership]->(YouTubeOwnership)
@@ -28,7 +28,8 @@ The system uses a multi-ownership architecture where each user can connect multi
 (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
 (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
-(YouTubeOwnership)-[:YouTubeOwnershipAPIUsage]->(YouTubeAPIUsage {date, totalCost, callCount, operations})
+(OAuthSettings)-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
+(OAuthSettings)-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
 (User)-[:UserFeedback]->(Feedback)
 (Channel)-[:ChannelPlaylist]->(Playlist)
@@ -37,20 +38,22 @@ The system uses a multi-ownership architecture where each user can connect multi
 
 **Key Architecture Principles:**
 - **Multi-Ownership**: Users can connect multiple YouTube accounts, each represented by a YouTubeOwnership node
-- **Independent Quotas**: Each ownership has its own 10,000 units/day API quota tracked separately
+- **Shared Quota**: All users share a single 10,000 units/day API quota pool at the Google Cloud Project level
+- **Priority-Based Allocation**: Quota reservations support priority levels for fair resource distribution
 - **Separate Settings**: Each ownership maintains its own channel, playlist, and video preferences
 - **Ownership Switching**: Users can switch between connected accounts via dropdown selector
 - **Videos via Playlists**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
 
 ### OAuth 2.0 Authentication & Multi-Ownership
 
-The system supports connecting multiple YouTube accounts per user, with each account (ownership) having independent OAuth tokens and API quotas:
+The system supports connecting multiple YouTube accounts per user, with each account (ownership) having independent OAuth tokens. All users share a single 10,000 units/day API quota pool:
 
 **Multi-Ownership Features:**
 - Users can connect multiple YouTube/Google accounts to a single application account
 - Each connected account is represented by a YouTubeOwnership node
 - Each ownership has its own OAuth 2.0 tokens stored securely
-- Each ownership has an independent 10,000 units/day API quota
+- All ownerships share a 10,000 units/day API quota pool at the Google Cloud Project level
+- Usage tracking per ownership for visibility and accountability
 - Users can switch between connected accounts via a dropdown selector in the navigation
 - Content (channels, playlists, videos) is associated with the specific ownership that added it
 
@@ -140,12 +143,28 @@ The system supports connecting multiple YouTube accounts per user, with each acc
   - `expiresAt`: Token expiration timestamp
   - `scope`: OAuth scope (youtube.readonly)
   - `createdAt`, `updatedAt`: Timestamps
-- **YouTubeAPIUsage**: Daily API usage tracking per user
-  - `key`: Unique identifier (`api_usage_${userId}_${date}`)
+- **SharedAPIUsage**: Daily shared quota tracking across all users (NEW in v3.1)
+  - `key`: Unique identifier (`shared_api_usage_${date}`)
   - `date`: Usage date (YYYY-MM-DD format)
-  - `totalCost`: Total API units consumed
-  - `callCount`: Number of API calls made
-  - `operations`: JSON object tracking operation counts (e.g., {"channels.list": 5, "playlists.list": 10})
+  - `totalCost`: Total API units consumed across all users
+  - `callCount`: Number of API calls made across all users
+  - `operations`: JSON object tracking operation counts across all users
+  - `effectiveRemaining`: Available quota after active reservations
+  - `activeReservations`: Count of active quota reservations
+  - `createdAt`, `updatedAt`: Timestamps
+- **OwnershipAPIUsage**: Daily API usage tracking per ownership (NEW in v3.1)
+  - `key`: Unique identifier (`ownership_api_usage_${ownershipId}_${date}`)
+  - `ownershipId`: YouTube ownership identifier
+  - `date`: Usage date (YYYY-MM-DD format)
+  - `totalCost`: Total API units consumed by this ownership
+  - `callCount`: Number of API calls made by this ownership
+  - `operations`: JSON object tracking operation counts for this ownership
+  - `createdAt`, `updatedAt`: Timestamps
+- **OAuthSettings**: Global OAuth configuration (singleton node)
+  - `key`: "oauth_settings" (single instance)
+  - `quotaLimit`: Daily quota limit (10,000 units)
+  - `quotaResetTime`: Time when quota resets (midnight Pacific Time)
+  - `alertThresholds`: JSON array of alert thresholds (e.g., [80, 95, 100])
   - `createdAt`, `updatedAt`: Timestamps
 
 ## Architecture
@@ -214,6 +233,7 @@ All components follow the YTO prefix naming convention:
 
 #### Layout Components
 - **YTOLayout**: Main layout with bottom navigation and multi-ownership state management
+- **YTOAdminLayout**: Admin section layout with navigation sidebar
 - **YTOTabBar**: Tab navigation for channel/playlist detail views
 
 #### UI Components
@@ -223,6 +243,7 @@ All components follow the YTO prefix naming convention:
 - **YTOChannelCard**: Channel display card with thumbnail and info
 - **YTOPlaylistCard**: Playlist display card with thumbnail and info
 - **YTOVideoCard**: Video display card with thumbnail and metadata
+- **YTOCard**: Display Youtube Item
 - **YTOYouTubeAttribution**: YouTube branding compliance component with clickable logo
 - **YTOButton**: Reusable button component with variants (primary, secondary, danger)
 - **YTOPageTitle**: Consistent page title component
@@ -237,6 +258,8 @@ All components follow the YTO prefix naming convention:
 - **YTOSettings**: User settings including YouTube connection, theme, and data management
 - **YTOPrivacy**: Privacy policy page with YouTube API Services disclosures
 - **YTOTerms**: Terms of Service page with comprehensive legal information
+- **YTOAdminHome**: Admin dashboard with quick links to admin features
+- **YTOQuotaMonitor**: Admin page for monitoring shared API quota (real-time usage, breakdown by ownership, alerts)
 
 ### API Functions
 
@@ -251,8 +274,9 @@ The system uses per-ownership OAuth 2.0 authentication for secure YouTube API ac
 4. System receives authorization code and exchanges for tokens
 5. System creates a YouTubeOwnership node with channel info from the connected account
 6. Tokens are encrypted and stored in `(YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken)` relationship
-7. Each ownership maintains independent tokens and quotas
-8. Users can connect multiple accounts and switch between them
+7. Each ownership maintains independent OAuth tokens
+8. All ownerships share the same 10,000 units/day API quota pool
+9. Users can connect multiple accounts and switch between them
 
 **OAuth Endpoints:**
 - `/api/auth/youtube/connect` - Initiates OAuth flow for new account connection
@@ -270,7 +294,7 @@ The system uses per-ownership OAuth 2.0 authentication for secure YouTube API ac
 
 #### API Usage Monitoring
 
-The system tracks YouTube API quota consumption per ownership (connected YouTube account) with independent 10,000 units/day limits:
+The system tracks YouTube API quota consumption with a shared 10,000 units/day limit across all users at the Google Cloud Project level:
 
 **Quota Costs:**
 - `search.list`: 100 units (expensive!)
@@ -279,26 +303,43 @@ The system tracks YouTube API quota consumption per ownership (connected YouTube
 - `playlistItems.list`: 1 unit
 - `videos.list`: 1 unit
 
-**Usage Tracking:**
-- **Per-Ownership Quotas**: Each connected YouTube account has its own independent 10,000 units/day quota
-- Automatic logging of all API calls with operation type and cost per ownership
-- Daily quota tracking stored in Neo4j: `(YouTubeOwnership)-[:YouTubeOwnershipAPIUsage]->(YouTubeAPIUsage)`
-- Visual quota display in navigation showing currently selected ownership's usage with color-coded status:
-  - **Good** (green): 0-69% used
-  - **Warning** (yellow): 70-89% used
-  - **Critical** (red): 90-100% used
-- Real-time progress display showing which account's quota is being displayed
-- Quota updates automatically when switching between connected accounts
-- Automatic cleanup of records older than 30 days
+**Shared Quota Architecture:**
+- **Single Quota Pool**: All users share 10,000 units/day at the Google Cloud Project level
+- **Priority-Based Reservations**: Operations can reserve quota with priority levels (1-10, default: 5)
+- **Per-Ownership Tracking**: Individual usage tracked by ownership for visibility and accountability
+- **Automatic Logging**: All API calls logged with operation type, cost, and ownership
+- **Quota Reservations**: Reserve quota before operations to prevent race conditions
+- **Expiry Management**: Reservations auto-expire after 5 minutes, quota auto-released
+- Daily quota tracking stored in Neo4j: `(OAuthSettings)-[:SharedAPIUsage]->(SharedAPIUsage)` (global) and `(OAuthSettings)-[:OwnershipAPIUsage]->(OwnershipAPIUsage)` (per ownership)
 
-**API Usage Functions:**
-- `logAPIUsage(ownershipId, operation, cost, session)` - Log an API call for specific ownership
-- `getTodayAPIUsage(ownershipId, session)` - Get today's usage statistics for ownership
-- `getAPIUsageHistory(ownershipId, days, session)` - Get historical usage data for ownership
-- `isApproachingQuotaLimit(ownershipId, session, threshold)` - Check if ownership approaching limit
+**Visual Indicators:**
+- Color-coded status in admin quota monitor:
+  - **Good** (green): 0-79% used
+  - **Warning** (yellow): 80-94% used
+  - **Critical** (red): 95-100% used
+- Real-time progress bar showing shared quota consumption
+- Usage breakdown by ownership showing top consumers
+- Quota reset countdown timer (resets at midnight Pacific Time)
+- Active reservations display
+
+**Shared Quota Functions:**
+- `logSharedAPIUsage(session, operation, cost, ownershipId)` - Log API call to shared quota pool
+- `getTodaySharedAPIUsage(session)` - Get today's shared quota statistics across all users
+- `getSharedAPIUsageByOwnership(session)` - Get usage breakdown by ownership
+- `reserveQuota(session, cost, priority, ownershipId)` - Reserve quota before API call
+- `releaseQuota(session, reservationId)` - Release unused reserved quota
+- `cleanupExpiredReservations(session)` - Cleanup expired quota reservations
+- `DAILY_QUOTA_LIMIT` - Constant: 10,000 units/day
+- `RESERVATION_EXPIRY_MS` - Constant: 5 minutes (300,000ms)
 
 **API Endpoints:**
-- `/api/youtube/usage?ownershipId=xyz` - Get specific ownership's API usage statistics
+- `/api/youtube/usage` - Get shared API usage statistics across all users
+
+**Admin Monitoring:**
+- **YTOQuotaMonitor**: Admin page at `/yto/admin/quota-monitor` for real-time monitoring
+- **Background Workers**: BullMQ worker monitors quota levels every 5 minutes
+- **Email Alerts**: Automatic alerts at 80%, 95%, and 100% thresholds
+- **Usage Analytics**: Historical trends and per-ownership breakdowns
 
 #### YouTube Data Integration
 
@@ -511,12 +552,14 @@ Users can set their preferred language through LanguageSetting vertex:
 /src/page_schema/ytorganizer/
 ├── components/
 │   ├── YTOLayout.hjson              # Main layout with multi-ownership state management
+│   ├── YTOAdminLayout.hjson         # Admin section layout with navigation
 │   ├── YTOFloatingButton.hjson      # Basic floating action button
 │   ├── YTOAddChannelButton.hjson    # Channel add button with modal
 │   ├── YTOAddPlaylistButton.hjson   # Playlist add button with modal
 │   ├── YTOChannelCard.hjson         # Channel display card
 │   ├── YTOPlaylistCard.hjson        # Playlist display card
 │   ├── YTOVideoCard.hjson           # Video display card
+│   ├── YTOCard.hjson                # Generic card component with header/footer slots
 │   ├── YTOTabBar.hjson              # Tab navigation component
 │   ├── YTOYouTubeAttribution.hjson  # YouTube branding compliance
 │   ├── YTOButton.hjson              # Reusable button component
@@ -532,6 +575,8 @@ Users can set their preferred language through LanguageSetting vertex:
 │   ├── YTOPrivacy.hjson             # Privacy policy page
 │   ├── YTOTerms.hjson               # Terms of Service page
 │   ├── YTOOnboarding.hjson          # New user onboarding flow
+│   ├── YTOAdminHome.hjson           # Admin: Dashboard with quick links
+│   ├── YTOQuotaMonitor.hjson        # Admin: Shared quota monitoring (NEW v3.1)
 │   ├── YTOWorkerHealth.hjson        # Admin: Queue/worker health monitoring
 │   ├── YTOWorkerLogs.hjson          # Admin: Worker logs viewer
 │   ├── YTOAdminUsers.hjson          # Admin: User management
@@ -541,16 +586,18 @@ Users can set their preferred language through LanguageSetting vertex:
 ├── functions/
 │   ├── savePlaylist.hjson           # Save YouTube playlist (updated for ownership)
 │   ├── saveChannel.hjson            # Save YouTube channel (updated for ownership)
-│   ├── getAPIUsageStats.hjson       # Get ownership's API usage statistics
+│   ├── getSharedQuotaStatus.hjson   # Get comprehensive shared quota status (NEW v3.1)
+│   ├── monitorQuotaLevels.hjson     # Background worker: Monitor quota levels (NEW v3.1)
+│   ├── sendQuotaAlertEmail.hjson    # Send quota threshold alert emails (NEW v3.1)
 │   ├── getChannelsWithVideoCount.hjson  # Get channels with video counts
 │   ├── getPlaylistsWithVideoCount.hjson # Get playlists with video counts
-│   ├── getYouTubeOwnerships.hjson   # Get all connected YouTube accounts (NEW v3.0)
-│   ├── updateOwnershipLastSelected.hjson # Track ownership selection (NEW v3.0)
-│   ├── autoFetchOwnershipChannels.hjson  # Auto-fetch channels for ownership (NEW v3.0)
+│   ├── getYouTubeOwnerships.hjson   # Get all connected YouTube accounts
+│   ├── updateOwnershipLastSelected.hjson # Track ownership selection
+│   ├── autoFetchOwnershipChannels.hjson  # Auto-fetch channels for ownership
 │   ├── clearAllUserData.hjson       # Clear all ownership's YTO data
 │   ├── deleteAccount.hjson          # Delete user account
 │   ├── saveFeedback.hjson           # Save user feedback
-│   └── ... (69+ total functions)    # All updated for multi-ownership
+│   └── ... (72+ total functions)    # All updated for shared quota architecture
 └── docs/
     └── README.md                    # This documentation
 
@@ -1379,17 +1426,29 @@ This documentation serves as the foundation for implementing the YouTube Organiz
 
 ## Recent Updates
 
-### Version 3.0 - Multi-Ownership Support (Current)
+### Version 3.1 - Shared Quota Architecture (Current)
+- ✅ **Shared Quota Pool**: Changed from per-ownership to shared 10,000 units/day across all users
+- ✅ **Priority-Based Reservations**: Quota reservation system with priority levels (1-10)
+- ✅ **Real-Time Quota Monitoring**: Admin dashboard for monitoring shared quota consumption
+- ✅ **Per-Ownership Tracking**: Individual usage tracked by ownership for accountability
+- ✅ **Background Monitoring**: BullMQ worker monitors quota levels every 5 minutes
+- ✅ **Email Alerts**: Automatic alerts at 80%, 95%, and 100% quota thresholds
+- ✅ **YTOQuotaMonitor Page**: Admin page at `/yto/admin/quota-monitor` with live stats
+- ✅ **Updated API Functions**: Migrated from per-user to shared quota functions
+- ✅ **Quota Reservation System**: Reserve/release quota to prevent race conditions
+- ✅ **Usage Breakdown**: View quota consumption by ownership in admin panel
+- ✅ **Auto-Expiry**: Reservations auto-expire after 5 minutes with quota auto-release
+- ✅ **Shared Functions in Args**: Added to executeNamedServerFunctionCore args object
+
+### Version 3.0 - Multi-Ownership Support
 - ✅ **Multi-Account Support**: Users can connect multiple YouTube accounts to one application account
 - ✅ **YouTubeOwnership Node**: New graph structure for managing multiple accounts per user
-- ✅ **Independent Quotas**: Each connected account has its own 10,000 units/day API quota
 - ✅ **Ownership Selector**: Dropdown UI to switch between connected YouTube accounts
 - ✅ **Centralized Architecture**: YTOLayout manages ownership state globally
 - ✅ **executeYTOFunction Wrapper**: Automatically injects ownershipId into all server function calls
 - ✅ **Updated All Server Functions**: Refactored 69+ backend functions for ownership-based relationships
 - ✅ **Per-Ownership Settings**: Each account maintains separate channel, playlist, and video preferences
 - ✅ **Session Persistence**: Selected ownership persists across page reloads
-- ✅ **Quota Display**: Shows which account's quota is currently displayed with auto-refresh on switch
 - ✅ **Zero Page Updates**: All frontend pages automatically compatible through wrapper architecture
 - ✅ **Graph Schema Migration**: From User→Settings to User→YouTubeOwnership→Settings relationships
 - ✅ **Token Isolation**: Each ownership has independent OAuth tokens

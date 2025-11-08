@@ -46,6 +46,14 @@ return {
               //   pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/"
               // },
               {
+                id: "quota_monitor",
+                href: "/yto/admin/quota-monitor",
+                label: "Quota Monitor",
+                icon: "carbon:analytics",
+                title: "Monitor shared YouTube API quota usage",
+                pathCheck: (pathname) => pathname === "/yto/admin/quota-monitor"
+              },
+              {
                 id: "worker_health",
                 href: "/yto/admin/worker-health",
                 label: "Worker Health",

@@ -1,0 +1,115 @@
+{
+  vertexes: [
+    {
+      id: "get_shared_quota_status_function"
+      L: "Function"
+      P: {
+        key: "getSharedQuotaStatus"
+        description: "Get current shared YouTube API quota status for all ownerships (10k units/day shared across entire Google Cloud Project)"
+        body: '''
+try {
+  // Get overall shared quota status
+  const usage = await args.getTodaySharedAPIUsage(args.session);
+
+  // Get breakdown by ownership (for analytics/admin view)
+  const breakdown = await args.getSharedAPIUsageByOwnership(args.session);
+
+  // Calculate quota status indicators
+  const percentUsed = usage.quotaPercentUsed;
+  const isNearLimit = percentUsed >= 80;  // Warning at 80%
+  const isAtLimit = percentUsed >= 95;    // Critical at 95%
+  const isCritical = usage.effectiveRemaining < 100;  // Very critical if < 100 units left
+
+  // Status level for UI
+  let status = 'healthy';
+  if (isCritical) {
+    status = 'critical';
+  } else if (isAtLimit) {
+    status = 'danger';
+  } else if (isNearLimit) {
+    status = 'warning';
+  }
+
+  // Calculate estimated reset time (midnight UTC)
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  tomorrow.setUTCHours(0, 0, 0, 0);
+  const resetInMs = tomorrow.getTime() - now.getTime();
+  const resetInHours = Math.floor(resetInMs / (1000 * 60 * 60));
+  const resetInMinutes = Math.floor((resetInMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  return {
+    success: true,
+    data: {
+      // Overall quota status
+      quota: {
+        limit: args.DAILY_QUOTA_LIMIT,
+        used: usage.totalCost,
+        remaining: usage.remainingQuota,
+        effectiveRemaining: usage.effectiveRemaining,
+        activeReservations: usage.activeReservations,
+        percentUsed: Math.round(percentUsed * 10) / 10,  // Round to 1 decimal
+      },
+
+      // Status indicators
+      status: {
+        level: status,
+        isNearLimit,
+        isAtLimit,
+        isCritical,
+        message: isCritical
+          ? 'Critical: Less than 100 units remaining'
+          : isAtLimit
+            ? 'Quota nearly exhausted (>95%)'
+            : isNearLimit
+              ? 'Approaching quota limit (>80%)'
+              : 'Quota healthy',
+      },
+
+      // Reset information
+      reset: {
+        time: tomorrow.toISOString(),
+        inHours: resetInHours,
+        inMinutes: resetInMinutes,
+        description: `Resets in ${resetInHours}h ${resetInMinutes}m at midnight UTC`,
+      },
+
+      // Usage statistics
+      stats: {
+        totalCalls: usage.callCount,
+        operations: usage.operations,
+        averageCostPerCall: usage.callCount > 0
+          ? Math.round((usage.totalCost / usage.callCount) * 100) / 100
+          : 0,
+      },
+
+      // Breakdown by ownership (for admin/analytics)
+      breakdown: breakdown.map(item => ({
+        ownershipId: item.ownershipId,
+        channelName: item.channelName,
+        customName: item.customName,
+        used: item.totalCost,
+        calls: item.callCount,
+        percentOfTotal: Math.round(item.percentOfTotal * 10) / 10,
+      })),
+    },
+  };
+
+} catch (error) {
+  console.error("Error getting shared quota status:", error);
+  return {
+    success: false,
+    message: "Failed to get quota status",
+    error: {
+      type: error.name || "QuotaStatusError",
+      details: error.message,
+    },
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,120 @@
+{
+  vertexes: [
+    {
+      id: "monitor_quota_levels_function"
+      L: "Function"
+      P: {
+        key: "monitorQuotaLevels"
+        description: "Background worker that monitors shared quota levels and sends email alerts when thresholds are reached"
+        body: '''
+// This background worker checks quota levels every 5 minutes and sends alerts
+if (args.contextData.action === 'start') {
+  console.log('[Quota Monitor] Starting quota level monitoring worker');
+
+  const { Worker } = args.bullmq;
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const connection = helpers.result.data.getRedisConnection();
+
+  // Create a dedicated queue for quota monitoring
+  const { Queue } = args.bullmq;
+  const quotaMonitorQueue = new Queue('quotaMonitor', { connection });
+
+  // Schedule quota check every 5 minutes
+  await quotaMonitorQueue.add(
+    'check-quota-levels',
+    {
+      description: 'Periodic quota level check'
+    },
+    {
+      repeat: {
+        pattern: '*/5 * * * *',  // Every 5 minutes
+        tz: 'UTC'
+      },
+      jobId: 'quota-monitor-repeatable'
+    }
+  );
+
+  // Create worker to process quota checks
+  const worker = new Worker('quotaMonitor', async (job) => {
+    console.log('[Quota Monitor] Checking quota levels...');
+
+    try {
+      // Get a new database session for this job
+      const { dbSession: session } = await args.getSession();
+
+      try {
+        // Get current quota status
+        const usage = await args.getTodaySharedAPIUsage(session);
+        const percentUsed = usage.quotaPercentUsed;
+
+        console.log(`[Quota Monitor] Current usage: ${percentUsed}% (${usage.totalCost}/${usage.remainingQuota + usage.totalCost} units)`);
+
+        // Determine if we should send an alert
+        let alertLevel = null;
+
+        if (percentUsed >= 100) {
+          alertLevel = 'exhausted';
+        } else if (percentUsed >= 95) {
+          alertLevel = 'critical';
+        } else if (percentUsed >= 80) {
+          alertLevel = 'warning';
+        }
+
+        if (alertLevel) {
+          console.log(`[Quota Monitor] Alert level ${alertLevel} detected, sending email...`);
+
+          // Send alert email
+          const alertResult = await args.executeNamedServerFunction({
+            functionName: 'sendQuotaAlertEmail',
+            contextData: { level: alertLevel }
+          });
+
+          if (alertResult.result?.alreadySent) {
+            console.log(`[Quota Monitor] Alert for ${alertLevel} already sent today`);
+          } else if (alertResult.result?.success) {
+            console.log(`[Quota Monitor] Successfully sent ${alertLevel} alert to ${alertResult.result.data?.emailsQueued} admin(s)`);
+          } else {
+            console.error(`[Quota Monitor] Failed to send alert:`, alertResult.result?.message);
+          }
+        } else {
+          console.log(`[Quota Monitor] Quota levels healthy, no alerts needed`);
+        }
+
+      } finally {
+        await session.close();
+      }
+
+    } catch (error) {
+      console.error('[Quota Monitor] Error checking quota levels:', error);
+      throw error;
+    }
+  }, {
+    connection,
+    concurrency: 1  // Only one quota check at a time
+  });
+
+  worker.on('completed', (job) => {
+    console.log(`[Quota Monitor] Check completed: ${job.id}`);
+  });
+
+  worker.on('failed', (job, err) => {
+    console.error(`[Quota Monitor] Check failed: ${job?.id}`, err);
+  });
+
+  console.log('[Quota Monitor] Worker started successfully');
+
+  // Return stop function for graceful shutdown
+  return {
+    stop: async () => {
+      console.log('[Quota Monitor] Stopping quota monitoring worker');
+      await worker.close();
+      await quotaMonitorQueue.close();
+    }
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

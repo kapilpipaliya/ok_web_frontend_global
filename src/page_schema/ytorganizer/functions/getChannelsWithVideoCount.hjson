@@ -26,7 +26,7 @@
  * - skip: number (optional) - Number of results to skip (for pagination)
  *
  * Returns:
- * - Array of {channel: Vertex, channelSetting: Vertex, ownership: Vertex} with userVideoCount in channelSetting.P
+ * - Array of {channel: Vertex, channelSetting: Vertex} with userVideoCount in channelSetting.P
  */
 try {
   const {
@@ -103,9 +103,9 @@ try {
     OPTIONAL MATCH (uploadsPlaylist)-[:PlaylistVideo]->(v:Video)
     OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
 
-    WITH c, cs, o, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+    WITH c, cs, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
 
-    RETURN c, cs, o, videoCount
+    RETURN c, cs, videoCount
     ORDER BY ${orderByClause}
     ${skipClause}
     ${limitClause}
@@ -132,8 +132,7 @@ try {
 
     return {
       channel: args.convertNodeToJson(record.get('c')),
-      channelSetting: channelSetting,
-      ownership: args.convertNodeToJson(record.get('o'))  // Include ownership context
+      channelSetting: channelSetting
     };
   });
 

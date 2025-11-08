@@ -25,17 +25,38 @@ try {
   const { channelId, ownershipId } = args.contextData;
 
   if (!channelId) {
-    throw new Error("Channel ID is required");
+    return {
+      success: false,
+      message: "Channel ID is required",
+      error: {
+        type: "ValidationError",
+        details: "Missing channelId parameter"
+      }
+    };
   }
 
   if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+    return {
+      success: false,
+      message: "YouTube account is required. Please ensure you have a connected YouTube account.",
+      error: {
+        type: "ValidationError",
+        details: "Missing ownershipId parameter. The channel must be associated with a YouTube ownership."
+      }
+    };
   }
 
   // Get current authenticated user
   const user = await args.getUserFromSession();
   if (!user) {
-    throw new Error("User session not found. Please log in and try again.");
+    return {
+      success: false,
+      message: "User session not found. Please log in and try again.",
+      error: {
+        type: "AuthenticationError",
+        details: "No active user session"
+      }
+    };
   }
 
   // Verify ownership belongs to user
@@ -45,7 +66,14 @@ try {
   `, { userUuid: user.P.uuid, ownershipId });
 
   if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+    return {
+      success: false,
+      message: "Invalid YouTube account. This account doesn't belong to you or no longer exists.",
+      error: {
+        type: "AuthorizationError",
+        details: "YouTube ownership not found or doesn't belong to current user"
+      }
+    };
   }
 
   // Check if channel exists and get its current status
@@ -164,12 +192,27 @@ try {
 
 } catch (error) {
   console.error("Error retrying channel:", error);
+
+  // Provide user-friendly error messages based on error type
+  let userMessage = "Failed to retry channel processing. Please try again.";
+
+  if (error.message.includes("quota")) {
+    userMessage = "Cannot retry: API quota has been exhausted. Please try again tomorrow.";
+  } else if (error.message.includes("authorization") || error.message.includes("OAuth")) {
+    userMessage = "Cannot retry: YouTube authorization expired. Please reconnect your YouTube account.";
+  } else if (error.message.includes("network") || error.message.includes("ECONNREFUSED")) {
+    userMessage = "Network error. Please check your connection and try again.";
+  } else if (error.message.includes("Redis") || error.message.includes("queue")) {
+    userMessage = "Queue service unavailable. Please try again in a moment.";
+  }
+
   return {
     success: false,
-    message: "Failed to retry channel processing",
+    message: userMessage,
     error: {
-      type: "RetryChannelError",
-      details: error.message
+      type: error.name || "RetryChannelError",
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }
   };
 }

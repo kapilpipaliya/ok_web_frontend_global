@@ -57,52 +57,50 @@ try {
   let removedFromContext = false;
 
   if (contextType === "playlist") {
-    // Remove video from playlist
-    const removeFromPlaylistQuery = `
-      MATCH (p:Playlist {youtubeId: $playlistId})-[r:PlaylistVideo]->(v:Video {youtubeId: $videoId})
-      DELETE r
-      RETURN count(r) as removedRelations
+    // Step 1: Delete the ownership's VideoSetting
+    const deleteVideoSettingQuery = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video {youtubeId: $videoId})
+      DETACH DELETE vs
+      RETURN count(vs) as deletedSettings
     `;
 
-    const removeResult = await args.session.run(removeFromPlaylistQuery, {
-      playlistId: contextId,
+    const deleteSettingResult = await args.session.run(deleteVideoSettingQuery, {
+      ownershipId,
       videoId: videoId
     });
 
-    const removedRelationsRaw = removeResult.records[0]?.get('removedRelations');
-    const removedCount = removedRelationsRaw ? (typeof removedRelationsRaw.toNumber === 'function' ? removedRelationsRaw.toNumber() : Number(removedRelationsRaw)) : 0;
-    removedFromContext = removedCount > 0;
+    const deletedSettingsRaw = deleteSettingResult.records[0]?.get('deletedSettings');
+    const deletedSettingsCount = deletedSettingsRaw ? (typeof deletedSettingsRaw.toNumber === 'function' ? deletedSettingsRaw.toNumber() : Number(deletedSettingsRaw)) : 0;
+    removedFromContext = deletedSettingsCount > 0;
 
-    // Check if video should be deleted (not in other playlists)
-    const checkVideoQuery = `
+    // Step 2: Check if video should be completely deleted (no other ownerships reference it)
+    const checkAndDeleteVideoQuery = `
       MATCH (v:Video {youtubeId: $videoId})
 
-      // Check if in other playlists
-      OPTIONAL MATCH (otherP:Playlist)-[:PlaylistVideo]->(v)
-      WHERE otherP.youtubeId <> $playlistId
-
-      // Check if other ownerships have this video
+      // Check if any other ownership has a VideoSetting pointing to this video
       OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(otherVS:VideoSetting)-[:VideoSettingVideo]->(v)
-      WHERE otherO.key <> $ownershipId
 
-      WITH v, otherP, otherO
-      // Delete video if not in other playlists and no other ownerships
-      WHERE otherP IS NULL AND otherO IS NULL
+      WITH v, count(otherO) as otherOwnershipCount
+      WHERE otherOwnershipCount = 0
 
-      OPTIONAL MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-      DETACH DELETE vs, v
+      // No other ownership references this video, safe to delete
+      // First remove the Playlist-[:PlaylistVideo]->Video relationship
+      OPTIONAL MATCH (p:Playlist)-[r:PlaylistVideo]->(v)
+      DELETE r
+
+      // Then delete the video node
+      WITH v
+      DETACH DELETE v
       RETURN count(v) as deletedVideos
     `;
 
-    const deleteResult = await args.session.run(checkVideoQuery, {
-      ownershipId,
-      videoId: videoId,
-      playlistId: contextId
+    const deleteVideoResult = await args.session.run(checkAndDeleteVideoQuery, {
+      videoId: videoId
     });
 
-    const deletedVideosRaw = deleteResult.records[0]?.get('deletedVideos');
-    const deletedCount = deletedVideosRaw ? (typeof deletedVideosRaw.toNumber === 'function' ? deletedVideosRaw.toNumber() : Number(deletedVideosRaw)) : 0;
-    deletedVideo = deletedCount > 0;
+    const deletedVideosRaw = deleteVideoResult.records[0]?.get('deletedVideos');
+    const deletedVideosCount = deletedVideosRaw ? (typeof deletedVideosRaw.toNumber === 'function' ? deletedVideosRaw.toNumber() : Number(deletedVideosRaw)) : 0;
+    deletedVideo = deletedVideosCount > 0;
   }
 
   if (!removedFromContext && !deletedVideo) {

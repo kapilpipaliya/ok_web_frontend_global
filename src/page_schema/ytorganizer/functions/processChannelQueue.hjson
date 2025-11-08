@@ -99,29 +99,58 @@ if (args.contextData.action === 'start') {
     // Get a new database session for this job
     const { dbSession: session } = await args.getSession();
 
+    // Get ownership priority for quota allocation
+    const ownershipResult = await session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      RETURN COALESCE(o.priority, 0) as priority
+    `, { ownershipId });
+    const ownershipPriority = ownershipResult.records[0]?.get('priority') || 0;
+
+    // Reserve quota for processing (estimate: ~10 units for channel + playlists)
+    // Actual usage will be logged as operations complete
+    let reservationId = null;
     try {
-      // QUOTA CHECK: Verify ownership has enough quota before processing (10k units/day per ownership)
-      const quotaStatus = await args.isApproachingQuotaLimit(ownershipId, session, 0.95);
-      if (quotaStatus.percentUsed >= 95) {
-        await logMessage('warn', 'Ownership quota nearly exhausted, skipping channel', {
+      reservationId = await args.reserveQuota(
+        ownershipId,
+        10,  // Estimated quota needed
+        ownershipPriority,
+        `process_channel_${channelId}`,
+        session
+      );
+
+      await logMessage('info', 'Reserved quota for channel processing', {
+        channelId,
+        ownershipId,
+        reservationId,
+        estimatedCost: 10
+      });
+    } catch (error) {
+      // QuotaExhaustedError - mark channel as pending_quota
+      if (error.name === 'QuotaExhaustedError') {
+        await logMessage('warn', 'Shared quota exhausted, queueing channel for tomorrow', {
           channelId,
           ownershipId,
-          quotaUsed: quotaStatus.percentUsed,
-          remaining: quotaStatus.remainingQuota
+          remainingQuota: error.remainingQuota
         });
 
-        // Mark channel as pending_quota instead of failed
+        // Mark channel as pending_quota
         await session.run(`
           MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
           SET cs.status = 'pending_quota',
-              cs.error = 'Daily API quota nearly exhausted. Will resume tomorrow.',
+              cs.error = 'Daily API quota exhausted. Will resume tomorrow.',
               cs.updatedAt = datetime()
         `, { ownershipId, channelId });
 
         await session.close();
-        return; // Exit without throwing - job completes but channel waits
+        return; // Exit without throwing - job completes but channel waits for quota reset
       }
+
+      // Other errors
+      throw error;
+    }
+
+    try {
 
       // Update status to processing
       await session.run(`
@@ -162,8 +191,8 @@ if (args.contextData.action === 'start') {
         id: [channelId]
       });
 
-      // Log API usage: channels.list operation (1 unit) - per ownership quota
-      await args.logAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
+      // Log API usage: channels.list operation (1 unit) - shared quota
+      await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
 
       if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
         throw new Error('Channel not found');
@@ -183,8 +212,8 @@ if (args.contextData.action === 'start') {
           pageToken: nextPageToken
         });
 
-        // Log API usage: playlists.list operation (1 unit per page) - per ownership quota
-        await args.logAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
+        // Log API usage: playlists.list operation (1 unit per page) - shared quota
+        await args.logSharedAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
 
         if (playlistsResponse.data.items) {
           allPlaylists = allPlaylists.concat(playlistsResponse.data.items);
@@ -341,6 +370,17 @@ if (args.contextData.action === 'start') {
 
       throw error;
     } finally {
+      // Release quota reservation
+      if (reservationId) {
+        try {
+          await args.releaseQuota(reservationId, session);
+          await logMessage('info', 'Released quota reservation', { reservationId, channelId });
+        } catch (error) {
+          // Log but don't throw - session cleanup is more important
+          console.error('Error releasing quota reservation:', error);
+        }
+      }
+
       // Always close the session
       await session.close();
     }

@@ -119,9 +119,11 @@ const type = args.contextData.props?.type || "button";
 const disabled = args.contextData.props?.disabled || args.contextData.props?.loading || false;
 const onClick = args.contextData.props?.onClick || (() => {});
 const loading = args.contextData.props?.loading || false;
+const className = args.contextData.props?.class
 
 return {
   as: "button",
+  class: className,
   text: text,
   type: type,
   disabled: disabled,

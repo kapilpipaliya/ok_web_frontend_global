@@ -175,16 +175,15 @@ return `._id {
 const isAtLimit = args.fns.isAtQuotaLimit?.();
 const resetTime = args.fns.getQuotaResetTime?.();
 const usage = args.fns.quotaUsage?.();
-const usedQuota = usage?.totalUnitsUsed || 0;
-const dailyLimit = usage?.dailyLimit || 10000;
-const selectedOwnership = args.fns.selectedOwnership?.();
-const ownershipName = selectedOwnership?.P?.customName || selectedOwnership?.P?.channelName || "Current account";
+const usedQuota = usage?.quota?.used || 0;
+const dailyLimit = usage?.quota?.limit || 10000;
+const remaining = usage?.quota?.effectiveRemaining || 0;
 
 return {
   as: "span",
   text: isAtLimit
-    ? `You've reached 95% of your daily YouTube API quota for ${ownershipName} (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units). Adding channels and playlists is temporarily disabled. Resets in ${resetTime}.`
-    : `You've used ${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units of your daily YouTube API quota for ${ownershipName}. Resets in ${resetTime}.`
+    ? `Shared YouTube API quota nearly exhausted (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units, ${remaining} remaining). All users share this 10k daily quota. Adding channels and playlists is temporarily disabled. Resets in ${resetTime}.`
+    : `Approaching shared YouTube API quota limit (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units used). All users share this 10k daily quota. Resets in ${resetTime}.`
 };
 ''',
         css: '''
@@ -316,24 +315,30 @@ const getImpersonatedUserUuid = () => {
   return impersonated?.P?.uuid || null;
 };
 
-// Fetch all YouTube ownerships for the user
+// Fetch all YouTube ownerships for the user (including disconnected)
 const fetchOwnerships = async () => {
   setOwnershipsLoading(true);
   try {
     const result = await args.executeNamedServerFunction({
-      functionName: "getYouTubeOwnerships",
+      functionName: "getAllYouTubeOwnerships",
       contextData: {}
     });
 
     if (result?.result?.success && result?.result?.data) {
-      const ownershipsList = result.result.data;
+      // Extract ownership objects and connection status
+      const ownershipsData = result.result.data;
+      const ownershipsList = ownershipsData.map(item => ({
+        ...item.ownership,
+        _isConnected: item.isConnected // Store connection status
+      }));
       setOwnerships(ownershipsList);
 
-      // If no ownership is selected and we have ownerships, select the first one
-      // (either primary or first in list)
+      // If no ownership is selected and we have ownerships, select the first connected one
+      // or first in list if no connected ownerships
       if (!selectedOwnership() && ownershipsList.length > 0) {
-        const primaryOwnership = ownershipsList.find(o => o.P.isPrimary);
-        const defaultOwnership = primaryOwnership || ownershipsList[0];
+        const connectedOwnerships = ownershipsList.filter(o => o._isConnected);
+        const primaryOwnership = connectedOwnerships.find(o => o.P.isPrimary);
+        const defaultOwnership = primaryOwnership || connectedOwnerships[0] || ownershipsList[0];
         await selectOwnership(defaultOwnership);
       } else if (selectedOwnership()) {
         // If an ownership is already selected (from sessionStorage),
@@ -342,9 +347,10 @@ const fetchOwnerships = async () => {
         const stillExists = ownershipsList.find(o => o.P.key === currentOwnershipId);
 
         if (!stillExists && ownershipsList.length > 0) {
-          // Selected ownership no longer exists, select first available
-          const primaryOwnership = ownershipsList.find(o => o.P.isPrimary);
-          const defaultOwnership = primaryOwnership || ownershipsList[0];
+          // Selected ownership no longer exists, select first available connected ownership
+          const connectedOwnerships = ownershipsList.filter(o => o._isConnected);
+          const primaryOwnership = connectedOwnerships.find(o => o.P.isPrimary);
+          const defaultOwnership = primaryOwnership || connectedOwnerships[0] || ownershipsList[0];
           await selectOwnership(defaultOwnership);
         }
       }
@@ -420,16 +426,16 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
   });
 };
 
-// Fetch quota usage from server
+// Fetch shared quota usage from server (10k units/day shared across all ownerships)
 const fetchQuotaUsage = async () => {
   setQuotaLoading(true);
   try {
-    const result = await executeYTOFunction('getAPIUsageToday', {});
-    if (result?.result) {
-      setQuotaUsage(result.result);
+    const result = await executeYTOFunction('getSharedQuotaStatus', {});
+    if (result?.result?.data) {
+      setQuotaUsage(result.result.data);
     }
   } catch (error) {
-    console.error('Error fetching quota usage:', error);
+    console.error('Error fetching shared quota status:', error);
   } finally {
     setQuotaLoading(false);
   }
@@ -438,52 +444,42 @@ const fetchQuotaUsage = async () => {
 // Check if approaching quota limit (80%)
 const isApproachingQuotaLimit = () => {
   const usage = quotaUsage();
-  if (!usage) return false;
-
-  const usedQuota = usage.totalUnitsUsed || 0;
-  const dailyLimit = usage.dailyLimit || 10000;
-  const percentage = (usedQuota / dailyLimit) * 100;
-
-  return percentage >= 80;
+  if (!usage || !usage.status) return false;
+  return usage.status.isNearLimit;
 };
 
 // Check if at quota limit (95%) - should disable actions
 const isAtQuotaLimit = () => {
   const usage = quotaUsage();
-  if (!usage) return false;
-
-  const usedQuota = usage.totalUnitsUsed || 0;
-  const dailyLimit = usage.dailyLimit || 10000;
-  const percentage = (usedQuota / dailyLimit) * 100;
-
-  return percentage >= 95;
+  if (!usage || !usage.status) return false;
+  return usage.status.isAtLimit || usage.status.isCritical;
 };
 
 // Get quota reset time (midnight UTC)
 const getQuotaResetTime = () => {
-  const now = new Date();
-  const midnight = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate() + 1, // Next day
-    0, 0, 0, 0 // Midnight
-  ));
-
-  const diff = midnight - now;
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-  return `${hours}h ${minutes}m`;
+  const usage = quotaUsage();
+  if (!usage || !usage.reset) {
+    // Fallback calculation
+    const now = new Date();
+    const midnight = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 1, // Next day
+      0, 0, 0, 0 // Midnight
+    ));
+    const diff = midnight - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
+  }
+  return `${usage.reset.inHours}h ${usage.reset.inMinutes}m`;
 };
 
 // Get quota usage percentage
 const getQuotaUsagePercentage = () => {
   const usage = quotaUsage();
-  if (!usage) return 0;
-
-  const usedQuota = usage.totalUnitsUsed || 0;
-  const dailyLimit = usage.dailyLimit || 10000;
-  return Math.round((usedQuota / dailyLimit) * 100);
+  if (!usage || !usage.quota) return 0;
+  return Math.round(usage.quota.percentUsed);
 };
 
 // Video player state management
@@ -763,6 +759,14 @@ const navigationSectionsData = [
     hasBorder: true,
     items: [
       {
+        id: "accounts",
+        href: "/accounts",
+        label: "Accounts",
+        icon: "mdi:account-multiple",
+        title: "Manage your YouTube accounts",
+        pathCheck: (pathname) => pathname.startsWith("/accounts")
+      },
+      {
         id: "settings",
         href: "/settings",
         label: "Settings",
@@ -851,6 +855,14 @@ const mobileNavigationItemsData = [
     icon: "carbon:favorite",
     title: "View your favourite videos, channels and playlists",
     pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "favourites"
+  },
+  {
+    id: "accounts",
+    href: "/accounts",
+    label: "Accounts",
+    icon: "mdi:account-multiple",
+    title: "Manage your YouTube accounts",
+    pathCheck: (pathname) => pathname.startsWith("/accounts")
   },
   {
     id: "settings",
@@ -1344,10 +1356,17 @@ const selectedOwnership = args.fns.selectedOwnership?.();
 const selectedOwnershipId = selectedOwnership?.P?.key;
 
 // Transform ownerships into options format for TomSelect
-const ownershipOptions = ownerships.map(ownership => ({
-  value: ownership.P.key,
-  label: ownership.P.customName || ownership.P.channelName || ownership.P.key
-}));
+// Add status indicator for disconnected accounts
+const ownershipOptions = ownerships.map(ownership => {
+  const name = ownership.P.customName || ownership.P.channelName || ownership.P.key;
+  const isConnected = ownership._isConnected;
+  const label = isConnected ? name : `${name} (Disconnected)`;
+
+  return {
+    value: ownership.P.key,
+    label: label
+  };
+});
 
 return {
   value: selectedOwnershipId || "",
@@ -1357,6 +1376,12 @@ return {
   onChange: async (ownershipId) => {
     const ownership = ownerships.find(o => o.P.key === ownershipId);
     if (ownership) {
+      // Check if account is disconnected
+      if (!ownership._isConnected) {
+        args.showWarningToast("This account is disconnected. Please reconnect it from Account Settings.");
+        return;
+      }
+
       await args.fns.selectOwnership?.(ownership);
       // Reload page to refresh all data with new ownership
       window.location.reload();

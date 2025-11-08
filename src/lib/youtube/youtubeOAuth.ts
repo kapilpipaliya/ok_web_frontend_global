@@ -16,9 +16,11 @@ import neo4j from 'neo4j-driver';
 import { encryptToken, decryptToken } from '~/lib/auth/tokenEncryption';
 import { randomUUID } from 'crypto';
 import { convertNodeToJson } from '~/cypher/conversion/convertNodeToJson';
+import {logSharedAPIUsage, YOUTUBE_API_COSTS} from "~/lib/youtube/apiUsageTracking";
 
 const YOUTUBE_SCOPES = [
-  'https://www.googleapis.com/auth/youtube.readonly',
+  'https://www.googleapis.com/auth/youtube.readonly', // readonly YouTube access
+  'https://www.googleapis.com/auth/youtube', // full YouTube access
 ];
 
 /**
@@ -179,6 +181,9 @@ export async function handleYouTubeCallback(
       maxResults: 1,
     });
 
+    // Log API usage for shared quota tracking (1 unit for channels.list)
+    await logSharedAPIUsage(ownershipId, 'channels.list', YOUTUBE_API_COSTS['channels.list'], session);
+
     const primaryChannel = channelsResponse.data.items?.[0];
     if (!primaryChannel || !primaryChannel.id) {
       throw new Error('Unable to fetch your YouTube channel information');
@@ -187,92 +192,146 @@ export async function handleYouTubeCallback(
     const channelName = primaryChannel.snippet?.title || 'Unknown Channel';
     const channelId = primaryChannel.id;
 
-    // Check if this channel is already connected
-    const existingCheck = await session.run(
-      `
-      MATCH (u:User {uuid: $userId})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-      WHERE o.channelId = $channelId
-      RETURN count(o) > 0 as exists
-    `,
-      { userId, channelId }
-    );
-
-    if (existingCheck.records[0]?.get('exists')) {
-      throw new Error(
-        `This YouTube channel "${channelName}" is already connected to your account`
-      );
-    }
-
     // Encrypt tokens before storage
     const encryptedAccessToken = encryptToken(tokens.access_token);
     const encryptedRefreshToken = encryptToken(tokens.refresh_token);
 
-    // Check if this is the first ownership (will be primary)
-    const ownershipsCheck = await session.run(
+    // Check if there's an existing ownership for this channel (active or disconnected)
+    const existingCheck = await session.run(
       `
       MATCH (u:User {uuid: $userId})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-      RETURN count(o) as count
+            -[:YouTubeOwnershipToken]->(token:YouTubeToken)
+      WHERE o.channelId = $channelId
+      RETURN o, token, token.isRevoked as isRevoked
+      LIMIT 1
     `,
-      { userId }
+      { userId, channelId }
     );
 
-    const count = ownershipsCheck.records[0]?.get('count');
-    const isPrimary = (neo4j.isInt(count) ? count.toNumber() : Number(count)) === 0;
+    let ownership: any = null;
+    let ownershipIdToUse = ownershipId;
+    let isUpdate = false;
+    let wasRevoked = false;
 
-    // Create ownership structure in database
-    const createResult = await session.run(
-      `
-      MATCH (u:User {uuid: $userId})
-      CREATE (ownership:YouTubeOwnership {
-        key: $ownershipId,
-        channelName: $channelName,
-        customName: $customName,
-        channelId: $channelId,
-        isPrimary: $isPrimary,
-        lastSelected: datetime(),
-        createdAt: datetime(),
-        updatedAt: datetime()
-      })
-      CREATE (u)-[:UserYouTubeOwnership]->(ownership)
+    if (existingCheck.records.length > 0) {
+      // Update existing ownership with new token (whether active or disconnected)
+      const existingOwnership = existingCheck.records[0].get('o');
+      ownershipIdToUse = existingOwnership.properties.key;
+      isUpdate = true;
+      wasRevoked = existingCheck.records[0].get('isRevoked');
 
-      CREATE (token:YouTubeToken {
-        accessTokenEncrypted: $accessToken,
-        refreshTokenEncrypted: $refreshToken,
-        expiresAt: datetime({epochMillis: $expiresAt}),
-        scope: $scope,
-        issuedAt: datetime(),
-        lastRefreshed: datetime(),
-        isRevoked: false
-      })
-      CREATE (ownership)-[:YouTubeOwnershipToken]->(token)
+      const updateResult = await session.run(
+        `
+        MATCH (ownership:YouTubeOwnership {key: $ownershipId})
+              -[r:YouTubeOwnershipToken]->(oldToken:YouTubeToken)
 
-      RETURN ownership
-    `,
-      {
-        userId,
-        ownershipId,
-        channelName,
-        customName: customName || null,
-        channelId,
-        isPrimary,
-        accessToken: encryptedAccessToken,
-        refreshToken: encryptedRefreshToken,
-        expiresAt: neo4j.int(tokens.expiry_date || Date.now() + 3600 * 1000),
-        scope: YOUTUBE_SCOPES.join(' '),
-      }
-    );
+        // Update ownership
+        SET ownership.channelName = $channelName,
+            ownership.customName = COALESCE($customName, ownership.customName),
+            ownership.lastSelected = datetime(),
+            ownership.updatedAt = datetime()
 
-    const ownershipNode = createResult.records[0]?.get('ownership');
-    const ownership = ownershipNode ? convertNodeToJson(ownershipNode) : null;
+        // Delete old token relationship and node
+        DELETE r
+        DELETE oldToken
+
+        // Create new token
+        CREATE (newToken:YouTubeToken {
+          accessTokenEncrypted: $accessToken,
+          refreshTokenEncrypted: $refreshToken,
+          expiresAt: datetime({epochMillis: $expiresAt}),
+          scope: $scope,
+          issuedAt: datetime(),
+          lastRefreshed: datetime(),
+          isRevoked: false
+        })
+        CREATE (ownership)-[:YouTubeOwnershipToken]->(newToken)
+
+        RETURN ownership
+      `,
+        {
+          ownershipId: ownershipIdToUse,
+          channelName,
+          customName: customName || null,
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
+          expiresAt: neo4j.int(tokens.expiry_date || Date.now() + 3600 * 1000),
+          scope: YOUTUBE_SCOPES.join(' '),
+        }
+      );
+
+      const ownershipNode = updateResult.records[0]?.get('ownership');
+      ownership = ownershipNode ? convertNodeToJson(ownershipNode) : null;
+    } else {
+      // Create new ownership
+      // Check if this is the first ownership (will be primary)
+      const ownershipsCheck = await session.run(
+        `
+        MATCH (u:User {uuid: $userId})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+        RETURN count(o) as count
+      `,
+        { userId }
+      );
+
+      const count = ownershipsCheck.records[0]?.get('count');
+      const isPrimary = (neo4j.isInt(count) ? count.toNumber() : Number(count)) === 0;
+
+      const createResult = await session.run(
+        `
+        MATCH (u:User {uuid: $userId})
+        CREATE (ownership:YouTubeOwnership {
+          key: $ownershipId,
+          channelName: $channelName,
+          customName: $customName,
+          channelId: $channelId,
+          isPrimary: $isPrimary,
+          lastSelected: datetime(),
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        CREATE (u)-[:UserYouTubeOwnership]->(ownership)
+
+        CREATE (token:YouTubeToken {
+          accessTokenEncrypted: $accessToken,
+          refreshTokenEncrypted: $refreshToken,
+          expiresAt: datetime({epochMillis: $expiresAt}),
+          scope: $scope,
+          issuedAt: datetime(),
+          lastRefreshed: datetime(),
+          isRevoked: false
+        })
+        CREATE (ownership)-[:YouTubeOwnershipToken]->(token)
+
+        RETURN ownership
+      `,
+        {
+          userId,
+          ownershipId,
+          channelName,
+          customName: customName || null,
+          channelId,
+          isPrimary,
+          accessToken: encryptedAccessToken,
+          refreshToken: encryptedRefreshToken,
+          expiresAt: neo4j.int(tokens.expiry_date || Date.now() + 3600 * 1000),
+          scope: YOUTUBE_SCOPES.join(' '),
+        }
+      );
+
+      const ownershipNode = createResult.records[0]?.get('ownership');
+      ownership = ownershipNode ? convertNodeToJson(ownershipNode) : null;
+    }
 
     return {
       success: true,
+      isUpdate,
+      wasRevoked,
       ownership: {
-        id: ownershipId,
+        id: ownershipIdToUse,
         channelName,
         customName,
         channelId,
-        isPrimary,
+        isPrimary: ownership?.P?.isPrimary,
       },
     };
   } catch (error) {

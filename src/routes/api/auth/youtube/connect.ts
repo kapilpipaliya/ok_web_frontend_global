@@ -26,7 +26,7 @@ export async function GET(event: APIEvent) {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: '/auth/signin?redirect=/settings',
+          Location: '/auth/signin?redirect=/accounts',
         },
       });
     }
@@ -53,7 +53,7 @@ export async function GET(event: APIEvent) {
   } catch (error) {
     console.error('Error initiating YouTube OAuth:', error);
 
-    // Redirect to settings with error
+    // Redirect to accounts page with error
     const errorMessage = encodeURIComponent(
       error instanceof Error
         ? error.message
@@ -63,7 +63,7 @@ export async function GET(event: APIEvent) {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: `/settings?error=${errorMessage}`,
+        Location: `/accounts?error=${errorMessage}`,
       },
     });
   } finally {

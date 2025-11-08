@@ -210,7 +210,9 @@ async function setupBrowserAndPage(
   token?: string,
 ): Promise<BrowserSetup> {
   const browser = await chromium.launch();
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true, // Allow self-signed certificates in development
+  });
   const page = await context.newPage();
 
   const searchParams = new URLSearchParams(queryParams);
@@ -234,7 +236,7 @@ async function setupBrowserAndPage(
         ? ""
         : "admin.";
   const isDevEnvironment = isDev || isDomainLocalhost;
-  const protocol = isDevEnvironment ? "http" : "https";
+  const protocol = isDevEnvironment ? "https" : "https";
   const baseUrl = `${protocol}://${subDomainPart}${process.env.DOMAIN}${isDevEnvironment ? domainPort : ""}`;
   const queryString = searchParams.toString();
 

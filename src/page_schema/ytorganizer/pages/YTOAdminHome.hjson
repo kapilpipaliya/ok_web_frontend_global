@@ -144,11 +144,21 @@ return {
   loop: true,
   data: [
     {
+      title: "Quota Monitor",
+      description: "Monitor shared YouTube API quota usage across all users. View real-time quota status, usage breakdown by ownership, and quota reset countdown.",
+      icon: "carbon:analytics",
+      iconBg: "primary_light_100",
+      hoverBorder: "primary",
+      link: "/yto/admin/quota-monitor",
+      linkText: "View Monitor",
+      enabled: true
+    },
+    {
       title: "Worker Health",
       description: "Monitor background workers, queue status, and job processing health. View real-time metrics for channel and playlist processing.",
       icon: "carbon:dashboard",
       iconBg: "success_light_100",
-      hoverBorder: "primary",
+      hoverBorder: "success",
       link: "/yto/admin/worker-health",
       linkText: "View Dashboard",
       enabled: true

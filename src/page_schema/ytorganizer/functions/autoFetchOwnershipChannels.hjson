@@ -5,7 +5,7 @@
       L: "Function"
       P: {
         key: "autoFetchOwnershipChannels"
-        description: "Auto-fetch all channels owned by a YouTube ownership and save them to database"
+        description: "Auto-fetch only the one YouTube channel linked to a YouTube ownership and save them to database"
         body: '''
 // Get ownershipId from context
 const { ownershipId } = args.contextData;
@@ -18,7 +18,8 @@ try {
   // Get authenticated YouTube client for this ownership
   const youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
 
-  // Fetch all channels owned by this YouTube account
+  // Fetch channels owned by this YouTube account
+  // Note: mine=true Returns only the one YouTube channel linked to the current OAuth token
   const channelsResponse = await youtube.channels.list({
     part: ['snippet', 'contentDetails', 'statistics'],
     mine: true,
@@ -35,8 +36,8 @@ try {
     };
   }
 
-  // Log API usage - channels.list costs 1 unit per call
-  await args.logAPIUsage(
+  // Log API usage - channels.list costs 1 unit per call (shared quota)
+  await args.logSharedAPIUsage(
     ownershipId,
     'channels.list',
     args.calculateOperationCost('channels.list'),

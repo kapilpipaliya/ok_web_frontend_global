@@ -53,7 +53,7 @@ YouTube Organizer uses Neo4j graph database with the following schema:
 
 **Video Relationships:**
 ```
-(User)-[:UserVideoSettings]->(VideoSettings)-[:VideoSettingsVideo]->(Video)
+(User)-[:UserVideoSetting]->(VideoSettings)-[:VideoSettingsVideo]->(Video)
 ```
 
 **Feedback Relationships:**

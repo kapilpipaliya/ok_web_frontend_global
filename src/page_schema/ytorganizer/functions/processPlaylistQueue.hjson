@@ -102,15 +102,38 @@ if (args.contextData.action === 'start') {
     // Get a new database session for this job
     const { dbSession: session } = await args.getSession();
 
+    // Get ownership priority for quota allocation
+    const ownershipResult = await session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      RETURN COALESCE(o.priority, 0) as priority
+    `, { ownershipId });
+    const ownershipPriority = ownershipResult.records[0]?.get('priority') || 0;
+
+    // Reserve quota for processing (estimate: ~50 units for large playlist with pagination)
+    // Actual usage will be logged as operations complete
+    let reservationId = null;
     try {
-      // QUOTA CHECK: Verify ownership has enough quota before processing (10k units/day per ownership)
-      const quotaStatus = await args.isApproachingQuotaLimit(ownershipId, session, 0.95);
-      if (quotaStatus.percentUsed >= 95) {
-        await logMessage('warn', 'Ownership quota nearly exhausted, skipping playlist', {
+      reservationId = await args.reserveQuota(
+        ownershipId,
+        50,  // Estimated quota needed
+        ownershipPriority,
+        `process_playlist_${playlistId}`,
+        session
+      );
+
+      await logMessage('info', 'Reserved quota for playlist processing', {
+        playlistId,
+        ownershipId,
+        reservationId,
+        estimatedCost: 50
+      });
+    } catch (error) {
+      // QuotaExhaustedError - mark playlist as pending_quota
+      if (error.name === 'QuotaExhaustedError') {
+        await logMessage('warn', 'Shared quota exhausted, queueing playlist for tomorrow', {
           playlistId,
           ownershipId,
-          quotaUsed: quotaStatus.percentUsed,
-          remaining: quotaStatus.remainingQuota
+          remainingQuota: error.remainingQuota
         });
 
         // Mark playlist as pending_quota
@@ -118,13 +141,19 @@ if (args.contextData.action === 'start') {
           MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
                 -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
           SET ps.status = 'pending_quota',
-              ps.error = 'Daily API quota nearly exhausted. Will resume tomorrow.',
+              ps.error = 'Daily API quota exhausted. Will resume tomorrow.',
               ps.updatedAt = datetime()
         `, { ownershipId, playlistId });
 
         await session.close();
-        return; // Exit without throwing
+        return; // Exit without throwing - job completes but playlist waits for quota reset
       }
+
+      // Other errors
+      throw error;
+    }
+
+    try {
 
       // Update status to processing
       await session.run(`
@@ -171,8 +200,8 @@ if (args.contextData.action === 'start') {
           pageToken: nextPageToken
         });
 
-        // Log API usage: playlistItems.list operation (1 unit per page) - per ownership quota
-        await args.logAPIUsage(ownershipId, 'playlistItems.list', args.YOUTUBE_API_COSTS['playlistItems.list'], session);
+        // Log API usage: playlistItems.list operation (1 unit per page) - shared quota
+        await args.logSharedAPIUsage(ownershipId, 'playlistItems.list', args.YOUTUBE_API_COSTS['playlistItems.list'], session);
 
         if (itemsResponse.data.items) {
           allVideos = allVideos.concat(itemsResponse.data.items);
@@ -481,6 +510,17 @@ if (args.contextData.action === 'start') {
 
       throw error;
     } finally {
+      // Release quota reservation
+      if (reservationId) {
+        try {
+          await args.releaseQuota(reservationId, session);
+          await logMessage('info', 'Released quota reservation', { reservationId, playlistId });
+        } catch (error) {
+          // Log but don't throw - session cleanup is more important
+          console.error('Error releasing quota reservation:', error);
+        }
+      }
+
       // Always close the session
       await session.close();
     }

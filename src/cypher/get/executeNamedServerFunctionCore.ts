@@ -4,6 +4,7 @@ import type { Edge } from "~/lib/graph/type/edge";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Session } from "neo4j-driver";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { getDriver } from "~/cypher/core/driver";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import {
   convertNodeToJson,
@@ -24,12 +25,18 @@ import {
   getRedirectUriFromRequest,
 } from "~/lib/youtube/youtubeOAuth";
 import {
-  logAPIUsage,
-  getTodayAPIUsage,
-  getAPIUsageHistory,
-  isApproachingQuotaLimit,
   YOUTUBE_API_COSTS,
   calculateOperationCost,
+  // Shared quota functions
+  logSharedAPIUsage,
+  getTodaySharedAPIUsage,
+  getSharedAPIUsageByOwnership,
+  reserveQuota,
+  releaseQuota,
+  cleanupExpiredReservations,
+  // tryBumpLowerPriorityReservations,
+  DAILY_QUOTA_LIMIT,
+  RESERVATION_EXPIRY_MS,
 } from "~/lib/youtube/apiUsageTracking";
 import {
   encryptToken,
@@ -73,6 +80,7 @@ export async function executeNamedServerFunctionCore(
   // Session lifecycle tracking
   let dbSession: Session | undefined;
   let sessionCreatedLocally = false;
+  let subDomain: string | undefined;
 
   try {
     // IMPORTANT: Session creation is inside try-catch
@@ -81,12 +89,16 @@ export async function executeNamedServerFunctionCore(
     if (context.dbSession) {
       // Reuse existing session from context
       dbSession = context.dbSession;
+      subDomain = context.subDomain;
     } else {
       // Create new session
       // If getDBSessionForSubdomain() fails (e.g., Neo4j down), error is caught below
-      ({ dbSession } = await getDBSessionForSubdomain());
+      const sessionData = await getDBSessionForSubdomain();
+      dbSession = sessionData.dbSession;
+      subDomain = sessionData.subDomain;
       sessionCreatedLocally = true;
       context.dbSession = dbSession;
+      context.subDomain = subDomain;
     }
     // Query to find the Function vertex with the given key
     const query = `
@@ -122,7 +134,11 @@ export async function executeNamedServerFunctionCore(
     // Prepare the args object that will be available in the function
     const args = {
       session: dbSession,
-      getSession: getDBSessionForSubdomain,
+      getSession: async () => {
+        return (await getDriver()).session({
+          database: subDomain,
+        });
+      },
       context: context,
       contextData: request.contextData || {},
       vertexes: context.vertexes || [],
@@ -138,6 +154,8 @@ export async function executeNamedServerFunctionCore(
       functionName: request.functionName,
       bullmq,
       request: context.request,
+      subDomain: subDomain,
+      // driver: (await getDriver()),
       // Admin/impersonation helper functions (platform-level)
       getEffectiveUser,
       setImpersonation,
@@ -149,13 +167,19 @@ export async function executeNamedServerFunctionCore(
       getYouTubeConnectionStatus,
       disconnectYouTube,
       getRedirectUriFromRequest,
-      // YouTube API usage tracking functions
-      logAPIUsage,
-      getTodayAPIUsage,
-      getAPIUsageHistory,
-      isApproachingQuotaLimit,
+      // YouTube API costs and utilities
       YOUTUBE_API_COSTS,
       calculateOperationCost,
+      // Shared quota tracking functions
+      logSharedAPIUsage,
+      getTodaySharedAPIUsage,
+      getSharedAPIUsageByOwnership,
+      reserveQuota,
+      releaseQuota,
+      cleanupExpiredReservations,
+      // tryBumpLowerPriorityReservations,
+      DAILY_QUOTA_LIMIT,
+      RESERVATION_EXPIRY_MS,
       // Token encryption/decryption functions
       encryptToken,
       decryptToken,

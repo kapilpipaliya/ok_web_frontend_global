@@ -27,7 +27,7 @@ export async function GET(event: APIEvent) {
         status: 302,
         headers: {
           Location:
-            '/settings?error=' +
+            '/accounts?error=' +
             encodeURIComponent(
               'Authorization was cancelled. You need to authorize access to use YouTube features.'
             ),
@@ -41,7 +41,7 @@ export async function GET(event: APIEvent) {
         status: 302,
         headers: {
           Location:
-            '/settings?error=' +
+            '/accounts?error=' +
             encodeURIComponent('Invalid OAuth callback: missing parameters'),
         },
       });
@@ -60,7 +60,7 @@ export async function GET(event: APIEvent) {
         status: 302,
         headers: {
           Location:
-            '/settings?error=' +
+            '/accounts?error=' +
             encodeURIComponent('Invalid OAuth state parameter'),
         },
       });
@@ -79,40 +79,54 @@ export async function GET(event: APIEvent) {
         status: 302,
         headers: {
           Location:
-            '/settings?error=' +
+            '/accounts?error=' +
             encodeURIComponent(result.error || 'Failed to connect YouTube'),
         },
       });
     }
 
     // Trigger auto-fetch of all channels for this ownership
-    // This happens in the background - user doesn't wait for it
     const ownershipId = result.ownership?.id || stateData.ownershipId;
     const channelName = result.ownership?.channelName || 'YouTube account';
 
-    // Fetch channels in the background (non-blocking)
-    executeNamedServerFunction('autoFetchOwnershipChannels', { ownershipId }, {
-      request: event.request,
-      dbSession
-    }).then(fetchResult => {
+    // Fetch channels in the background
+    try {
+      const fetchResult = await executeNamedServerFunction(
+        {
+          functionName: 'autoFetchOwnershipChannels',
+          contextData: { ownershipId }
+        },
+        {
+          request: event.request,
+          dbSession
+        }
+      );
+
       if (fetchResult.result?.success) {
         console.log(`Auto-fetched ${fetchResult.result.channelCount} channels for ${channelName}`);
       } else {
         console.error(`Failed to auto-fetch channels for ${channelName}:`, fetchResult.result?.error);
       }
-    }).catch(error => {
+    } catch (error) {
       console.error(`Error during auto-fetch for ${channelName}:`, error);
-    });
+    }
 
-    // Success! Redirect to settings page
+    // Determine success message based on whether it's an update or new connection
+    let successMessage: string;
+    if (result.isUpdate && result.wasRevoked) {
+      successMessage = `${channelName} reconnected successfully!`;
+    } else if (result.isUpdate) {
+      successMessage = `${channelName} token updated successfully!`;
+    } else {
+      successMessage = `${channelName} connected successfully!`;
+    }
+
+    // Success! Redirect to accounts page
     return new Response(null, {
       status: 302,
       headers: {
         Location:
-            '/settings?success=' +
-          encodeURIComponent(
-            `${channelName} connected successfully! Fetching your channels...`
-          ),
+            '/accounts?success=' + encodeURIComponent(successMessage),
       },
     });
   } catch (error) {
@@ -122,7 +136,7 @@ export async function GET(event: APIEvent) {
       status: 302,
       headers: {
         Location:
-          '/settings?error=' +
+          '/accounts?error=' +
           encodeURIComponent(
             error instanceof Error
               ? error.message

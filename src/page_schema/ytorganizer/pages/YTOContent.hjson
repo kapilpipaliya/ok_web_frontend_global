@@ -1381,7 +1381,7 @@ const updateLocalItemSettings = (updatedData) => {
   }
 };
 
-// Polling state for processing status
+// Polling state for all items (to track processing status and other metadata)
 const [processingStatuses, setProcessingStatuses] = args.createSignal({
   channels: {},
   playlists: {}
@@ -1389,57 +1389,53 @@ const [processingStatuses, setProcessingStatuses] = args.createSignal({
 const [pollingInterval, setPollingInterval] = args.createSignal(null);
 const [isPolling, setIsPolling] = args.createSignal(false);
 
-// Helper function to collect visible IDs from channel/playlist arrays (only those with processing status)
+// Helper function to collect visible IDs from channel/playlist arrays (all items)
 const collectVisibleIds = (channelsArray, playlistsArray, channelIds, playlistIds) => {
-  // Collect channel IDs with processing status
+  // Collect all channel IDs
   if (channelsArray) {
     channelsArray.forEach(item => {
       const channelId = item.channel?.P?.youtubeId;
-      const status = item.channelSetting?.P?.status;
-      if (channelId && status && (status === 'queued' || status === 'processing') && !channelIds.includes(channelId)) {
+      if (channelId && !channelIds.includes(channelId)) {
         channelIds.push(channelId);
       }
     });
   }
 
-  // Collect playlist IDs with processing status
+  // Collect all playlist IDs
   if (playlistsArray) {
     playlistsArray.forEach(item => {
       const playlistId = item.playlist?.P?.youtubeId;
-      const status = item.playlistSetting?.P?.status;
-      if (playlistId && status && (status === 'queued' || status === 'processing') && !playlistIds.includes(playlistId)) {
+      if (playlistId && !playlistIds.includes(playlistId)) {
         playlistIds.push(playlistId);
       }
     });
   }
 };
 
-// Helper function to extract processing items from arrays
+// Helper function to extract all items from arrays
 const extractProcessingItems = (channelsArray, playlistsArray, channelsMap, playlistsMap) => {
-  // Extract from channels
+  // Extract all channels
   if (channelsArray) {
     channelsArray.forEach(item => {
       const channelId = item.channel?.P?.youtubeId;
-      const status = item.channelSetting?.P?.status;
-      if (channelId && status && (status === 'queued' || status === 'processing')) {
+      if (channelId) {
         channelsMap[channelId] = item;
       }
     });
   }
 
-  // Extract from playlists
+  // Extract all playlists
   if (playlistsArray) {
     playlistsArray.forEach(item => {
       const playlistId = item.playlist?.P?.youtubeId;
-      const status = item.playlistSetting?.P?.status;
-      if (playlistId && status && (status === 'queued' || status === 'processing')) {
+      if (playlistId) {
         playlistsMap[playlistId] = item;
       }
     });
   }
 };
 
-// Reactive effect to automatically update processing status when data changes
+// Reactive effect to automatically update all visible items when data changes
 args.createEffect(
   args.on(
     [items, detailData, searchResults, favouritesData, isListView, isDetailView, isSearchView, isFavouritesView],
@@ -1463,20 +1459,18 @@ args.createEffect(
         const detail = detailData();
         if (detail) {
           if (contentType === "channels") {
-            // Check channel itself
+            // Include channel itself
             const channelId = detail.channel?.channel?.P?.youtubeId;
-            const channelStatus = detail.channel?.channelSetting?.P?.status;
-            if (channelId && channelStatus && (channelStatus === 'queued' || channelStatus === 'processing')) {
+            if (channelId) {
               channelsMap[channelId] = detail.channel;
             }
 
-            // Check playlists in channel
+            // Include playlists in channel
             extractProcessingItems(null, detail.playlists, channelsMap, playlistsMap);
           } else if (contentType === "playlists") {
-            // Check playlist itself
+            // Include playlist itself
             const playlistId = detail.playlist?.playlist?.P?.youtubeId;
-            const playlistStatus = detail.playlist?.playlistSetting?.P?.status;
-            if (playlistId && playlistStatus && (playlistStatus === 'queued' || playlistStatus === 'processing')) {
+            if (playlistId) {
               playlistsMap[playlistId] = detail.playlist;
             }
           }
@@ -1499,7 +1493,7 @@ args.createEffect(
         }
       }
 
-      // Automatically update processingStatuses whenever data changes
+      // Automatically update all visible items whenever data changes
       setProcessingStatuses({
         channels: channelsMap,
         playlists: playlistsMap
@@ -1529,20 +1523,18 @@ const collectVisibleIdsFromData = () => {
     const detail = detailData();
     if (detail) {
       if (contentType === "channels") {
-        // Collect channel ID itself if processing
+        // Collect channel ID itself
         const channelId = detail.channel?.channel?.P?.youtubeId;
-        const channelStatus = detail.channel?.channelSetting?.P?.status;
-        if (channelId && channelStatus && (channelStatus === 'queued' || channelStatus === 'processing') && !channelIds.includes(channelId)) {
+        if (channelId && !channelIds.includes(channelId)) {
           channelIds.push(channelId);
         }
 
         // Collect playlists in channel
         collectVisibleIds(null, detail.playlists, channelIds, playlistIds);
       } else if (contentType === "playlists") {
-        // Collect playlist ID itself if processing
+        // Collect playlist ID itself
         const playlistId = detail.playlist?.playlist?.P?.youtubeId;
-        const playlistStatus = detail.playlist?.playlistSetting?.P?.status;
-        if (playlistId && playlistStatus && (playlistStatus === 'queued' || playlistStatus === 'processing') && !playlistIds.includes(playlistId)) {
+        if (playlistId && !playlistIds.includes(playlistId)) {
           playlistIds.push(playlistId);
         }
       }
@@ -1658,15 +1650,38 @@ const stopPolling = () => {
 args.createEffect(
   args.on([processingStatuses, pollingInterval], () => {
     const statuses = processingStatuses();
-    const hasProcessing = Object.keys(statuses.channels).length > 0 ||
-                          Object.keys(statuses.playlists).length > 0;
 
-    // Start polling if there's processing
-    if (hasProcessing && !pollingInterval()) {
+    // Check if any items are actually being processed (queued or processing status)
+    let hasActiveProcessing = false;
+
+    // Check channels
+    for (const channelId in statuses.channels) {
+      const item = statuses.channels[channelId];
+      const status = item.channelSetting?.P?.status;
+      if (status === 'queued' || status === 'processing') {
+        hasActiveProcessing = true;
+        break;
+      }
+    }
+
+    // Check playlists if no active channel processing found
+    if (!hasActiveProcessing) {
+      for (const playlistId in statuses.playlists) {
+        const item = statuses.playlists[playlistId];
+        const status = item.playlistSetting?.P?.status;
+        if (status === 'queued' || status === 'processing') {
+          hasActiveProcessing = true;
+          break;
+        }
+      }
+    }
+
+    // Start polling if there's active processing
+    if (hasActiveProcessing && !pollingInterval()) {
       args.untrack(() => startPolling());
     }
-    // Stop polling if there's no processing
-    else if (!hasProcessing && pollingInterval()) {
+    // Stop polling if there's no active processing
+    else if (!hasActiveProcessing && pollingInterval()) {
       args.untrack(() => stopPolling());
     }
   })
@@ -1967,7 +1982,8 @@ return {
   status: settings.P.status,
   progress: settings.P.progress || 0,
   type: contentType === "playlists" ? "playlist" : "channel",
-  details
+  details,
+  error: settings.P.error || ''
 };
 '''
       }
