@@ -1,6 +1,6 @@
 # YouTube OAuth Setup Guide
 
-This guide walks you through setting up per-user YouTube OAuth authentication for YouTube Organizer.
+This guide walks you through setting up per-user YouTube OAuth authentication for YSaar.
 
 ## Overview
 
@@ -48,7 +48,7 @@ TOKEN_ENCRYPTION_KEY=your_generated_64_character_hex_key_here
 1. Go to **"APIs & Services"** → **"OAuth consent screen"**
 2. Choose **"External"** (for public apps) or **"Internal"** (for G Suite only)
 3. Fill in application information:
-   - **App name:** YouTube Organizer (or your app name)
+   - **App name:** YSaar
    - **User support email:** Your email
    - **App logo:** Upload your logo (optional)
    - **App domain:**
@@ -78,7 +78,7 @@ If your app is in "Testing" mode:
 1. Go to **"APIs & Services"** → **"Credentials"**
 2. Click **"Create Credentials"** → **"OAuth client ID"**
 3. Application type: **"Web application"**
-4. Name: `YouTube Organizer OAuth Client`
+4. Name: `YSaar OAuth Client`
 5. **Authorized JavaScript origins:**
    ```
    http://localhost:3000
@@ -157,7 +157,7 @@ The system will automatically create the necessary relationships, but here's the
 
 ### 5.2 Test Adding a Channel
 
-1. Navigate to YouTube Organizer section
+1. Navigate to YSaar section
 2. Click **"Add Channel"**
 3. Enter a YouTube channel URL
 4. Channel should be added successfully using your OAuth token!

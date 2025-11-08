@@ -36,7 +36,7 @@ if (args.contextData.action === 'start') {
   let cleanupInterval = null;
 
   const runCleanup = async () => {
-    const { dbSession: session } = await args.getSession();
+    const session = await args.getSession();
 
     try {
       console.log('[Stale Job Cleanup] Running cleanup check...');

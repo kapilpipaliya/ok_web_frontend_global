@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "deleteChannel",
-        description: "Deletes a channel from a specific ownership, along with its playlists and videos that are only in this channel for this ownership. Supports multi-ownership model.",
+        description: "Deletes channels (array, 'all', or 'allInContext') from a specific ownership by calling deletePlaylist for all playlists, then cleaning up orphan channel nodes. For channels, 'allInContext' behaves like 'all' (deletes all channels for the ownership). Supports multi-ownership model, batch processing, and special keywords.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -14,10 +14,10 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Extract parameters
-  const { item, itemType, ownershipId } = args.contextData;
+  // Extract parameters - accepts array of items, 'all', or 'allInContext'
+  const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
 
-  if (!item || itemType !== "channel") {
+  if (itemType !== "channel") {
     throw new Error("Invalid channel data");
   }
 
@@ -25,143 +25,165 @@ try {
     throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
-  const channelId = item.P?.youtubeId;
-  if (!channelId) {
-    throw new Error("Channel ID not found");
+  // Verify ownership belongs to user (skip if called internally)
+  if (!skipOwnershipCheck) {
+    const ownershipCheck = await args.session.run(`
+      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+      RETURN o
+    `, { userUuid: user.P.uuid, ownershipId });
+
+    if (ownershipCheck.records.length === 0) {
+      throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+    }
   }
 
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
+  // Handle contextItems array
+  const contextItemArray = contextItems || [];
 
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  // Prepare parameters for queries
+  let channelIds = null;
+
+  // Handle 'all', 'allInContext', or array of items
+  // Note: For channels, 'allInContext' behaves like 'all' since channels are top-level under ownership
+  if (items === 'all' || items === 'allInContext') {
+    // Will use subquery for all channels in ownership
+    channelIds = null;
+  } else {
+    // Extract channel IDs from array
+    if (!items || items.length === 0) {
+      throw new Error("No channels provided to delete");
+    }
+    channelIds = items.map(c => c.P?.youtubeId).filter(id => id);
+    if (channelIds.length === 0) {
+      throw new Error("No valid channel IDs found");
+    }
   }
 
-  // Step 1: Get all playlists in this channel for this ownership
-  const getPlaylistsQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-    RETURN p.youtubeId as playlistId
-  `;
+  // Step 1: Delete all playlists in these channels using deletePlaylist function
+  // This will cascade delete videos and clean up orphans
+  let deletedPlaylists = 0;
+  let deletedVideos = 0;
 
-  const playlistsResult = await args.session.run(getPlaylistsQuery, {
-    ownershipId,
-    channelId: channelId
-  });
+  // Determine which mode to use for deletePlaylist
+  let playlistDeleteMode;
+  let channelContextItems = [];
 
-  const playlistIds = playlistsResult.records.map(record => record.get('playlistId'));
+  if (items === 'all' || items === 'allInContext') {
+    // For 'all' modes, tell deletePlaylist to delete all playlists
+    playlistDeleteMode = 'all';
+    channelContextItems = [];
+  } else {
+    // For array mode, use 'allInContext' and pass minimal channel objects
+    playlistDeleteMode = 'allInContext';
+    channelContextItems = channelIds.map(id => ({ P: { youtubeId: id } }));
+  }
 
-  // Step 2: Delete videos that are only in this channel's playlists for this ownership
-  // Only delete videos that don't exist in other playlists or other ownerships
-  if (playlistIds.length > 0) {
-    const deleteVideosQuery = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
-      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-      WHERE p.youtubeId IN $playlistIds
-      MATCH (p)-[:PlaylistVideo]->(v:Video)
-      OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSettings]->(vs:VideoSettings)-[:VideoSettingsVideo]->(v)
-
-      // Check if video exists in other playlists not in deletion list
-      OPTIONAL MATCH (otherP:Playlist)-[:PlaylistVideo]->(v)
-      WHERE NOT otherP.youtubeId IN $playlistIds
-
-      // Check if other ownerships have this video
-      OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipVideoSettings]->(otherVS:VideoSettings)-[:VideoSettingsVideo]->(v)
-      WHERE otherO.key <> $ownershipId
-
-      WITH v, vs, otherP, otherO
-      WHERE otherP IS NULL AND otherO IS NULL
-
-      // Delete video settings and video node only if no other ownerships
-      DETACH DELETE vs, v
-      RETURN count(v) as deletedVideos
-    `;
-
-    await args.session.run(deleteVideosQuery, {
-      ownershipId,
-      playlistIds: playlistIds
+  try {
+    const deleteResult = await args.executeNamedServerFunction({
+      functionName: 'deletePlaylist',
+      contextData: {
+        items: playlistDeleteMode,
+        itemType: 'playlist',
+        contextItems: channelContextItems,  // Pass minimal channel objects for context
+        ownershipId: ownershipId,
+        skipOwnershipCheck: true  // Already checked in parent
+      }
     });
+
+    if (deleteResult?.result?.success) {
+      const resultData = deleteResult.result.data;
+      deletedPlaylists = resultData?.deletedPlaylists || 0;
+      deletedVideos = resultData?.deletedVideos || 0;
+    }
+  } catch (playlistError) {
+    console.error(`Failed to delete playlists from channels:`, playlistError);
+    // Continue with channel deletion even if playlist deletion fails
   }
 
-  // Step 3: Delete all playlists in this channel for this ownership
-  if (playlistIds.length > 0) {
-    const deletePlaylistsQuery = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
-      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-      WHERE p.youtubeId IN $playlistIds
+  // Step 2: Delete this ownership's ChannelSettings
+  let queryParams = { ownershipId };
+  let channelFilter = '';
 
-      // Check if other ownerships have this playlist before deletion
-      OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(otherPS:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-      WHERE otherO.key <> $ownershipId
-
-      WITH ps, p, otherO
-
-      // Delete this ownership's playlist settings
-      DETACH DELETE ps
-
-      WITH p, otherO
-      WHERE otherO IS NULL
-
-      // Delete playlist node only if no other ownerships
-      DETACH DELETE p
-
-      RETURN count(p) as deletedPlaylists
-    `;
-
-    await args.session.run(deletePlaylistsQuery, {
-      ownershipId,
-      playlistIds: playlistIds
-    });
+  if (items !== 'all' && items !== 'allInContext') {
+    queryParams.channelIds = channelIds;
+    channelFilter = 'WHERE c.youtubeId IN $channelIds';
   }
 
-  // Step 4: Delete the channel settings and check if channel should be deleted
-  const deleteChannelQuery = `
+  const deleteChannelSettingsQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-
-    // Get channel title before any deletion and check if other ownerships have this channel
-    WITH c, cs, c.title as channelTitle
-
-    // Check if other ownerships have this channel before deletion
-    OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(otherCS:ChannelSetting)-[:ChannelSettingChannel]->(c)
-    WHERE otherO.key <> $ownershipId
-
-    WITH cs, c, channelTitle, otherO
-
-    // Delete this ownership's channel settings
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+    ${channelFilter}
     DETACH DELETE cs
-
-    WITH c, channelTitle, otherO
-    WHERE otherO IS NULL
-
-    // Delete channel node only if no other ownerships
-    DETACH DELETE c
-
-    RETURN channelTitle
+    RETURN count(cs) as deletedChannelSettings
   `;
 
-  const channelResult = await args.session.run(deleteChannelQuery, {
-    ownershipId,
-    channelId: channelId
-  });
+  const channelSettingResult = await args.session.run(deleteChannelSettingsQuery, queryParams);
 
-  if (channelResult.records.length === 0) {
-    throw new Error("Channel not found or already deleted");
+  const deletedCSRaw = channelSettingResult.records[0]?.get('deletedChannelSettings');
+  const deletedChannelSettings = deletedCSRaw ? (typeof deletedCSRaw.toNumber === 'function' ? deletedCSRaw.toNumber() : Number(deletedCSRaw)) : 0;
+
+  if (deletedChannelSettings === 0) {
+    throw new Error("Channels not found or already deleted");
   }
 
-  const channelTitle = item.P?.title || "Channel";
+  // Step 3: Delete orphan Channel nodes (no ownership references them)
+  let channelMatchPattern = '';
+
+  if (items === 'all' || items === 'allInContext') {
+    channelMatchPattern = 'MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)\n    WITH DISTINCT c';
+  } else {
+    channelMatchPattern = 'MATCH (c:Channel)\n    WHERE c.youtubeId IN $channelIds';
+  }
+
+  const deleteOrphanChannelsQuery = `
+    ${channelMatchPattern}
+
+    // Check if any ownership has a ChannelSetting for this channel
+    OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(anyCS:ChannelSetting)-[:ChannelSettingChannel]->(c)
+
+    WITH c, count(anyO) as ownershipCount
+    WHERE ownershipCount = 0
+
+    // No ownership references this channel, safe to delete
+    // Channel-[:ChannelPlaylist]->Playlist relationships will be deleted by DETACH DELETE
+    DETACH DELETE c
+    RETURN count(c) as deletedChannels
+  `;
+
+  const channelResult = await args.session.run(deleteOrphanChannelsQuery, queryParams);
+
+  const deletedCRaw = channelResult.records[0]?.get('deletedChannels');
+  const deletedChannels = deletedCRaw ? (typeof deletedCRaw.toNumber === 'function' ? deletedCRaw.toNumber() : Number(deletedCRaw)) : 0;
+
+  let message;
+  const isAll = items === 'all';
+  const isAllInContext = items === 'allInContext';
+  const totalProcessed = deletedChannelSettings + deletedChannels;
+
+  if (isAll || isAllInContext) {
+    // For channels, both 'all' and 'allInContext' have the same behavior
+    message = `Successfully processed all channels${totalProcessed > 0 ? ` (${totalProcessed} channel(s))` : ''}${deletedChannels > 0 ? `, deleted ${deletedChannels} orphan channel(s)` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
+  } else if (items.length === 1) {
+    const channelTitle = items[0].P?.title || "Channel";
+    message = `Successfully deleted channel "${channelTitle}"${deletedPlaylists > 0 ? ` and ${deletedPlaylists} playlist(s)` : ''}${deletedVideos > 0 ? ` and ${deletedVideos} video(s)` : ''}`;
+  } else {
+    message = `Successfully processed ${items.length} channel(s)${deletedChannels > 0 ? `, deleted ${deletedChannels} orphan channel(s)` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
+  }
+
+  // Calculate total channels processed
+  const totalChannels = isAll || isAllInContext ? totalProcessed : (items ? items.length : 0);
 
   return {
     success: true,
     data: {
-      channelId: channelId,
-      deletedPlaylists: playlistIds.length
+      channelIds: channelIds,
+      deletedChannels: deletedChannels,
+      deletedPlaylists: deletedPlaylists,
+      deletedVideos: deletedVideos,
+      totalChannels: totalChannels,
+      totalPlaylistsInChannels: deletedPlaylists
     },
-    message: `Successfully deleted channel "${channelTitle}" and ${playlistIds.length} playlist(s)`
+    message: message
   };
 
 } catch (error) {

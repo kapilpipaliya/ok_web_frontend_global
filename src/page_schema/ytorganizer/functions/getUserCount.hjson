@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "getUserCount",
-        description: "Gets the total count of users using YouTube Organizer",
+        description: "Gets the total count of users using YSaar",
         body: '''
 try {
   // Query to count unique users who have YouTube ownerships (connected accounts)

@@ -99,9 +99,8 @@ try {
     WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
 
-    // Count videos in this playlist that the ownership has access to
-    OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
-    OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    // CORRECTED SCHEMA: Count videos through PlaylistSetting->Video
+    OPTIONAL MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
 
     WITH p, ps, c, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
 

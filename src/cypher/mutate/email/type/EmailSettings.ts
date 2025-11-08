@@ -1,9 +1,11 @@
 export interface EmailSettings {
-  active?: string; // 'smtp', 'sendgrid', etc. Empty means not configured
+  active?: string; // 'smtp', 'sendgrid', 'resend', etc. Empty means not configured
   fromEmail?: string;
   secure?: boolean;
-  // SendGrid settings (can be extended)
+  // SendGrid settings
   sendGridApiKey?: string;
+  // Resend settings
+  resendApiKey?: string;
   // SMTP settings
   smtpHost?: string;
   smtpPassword?: string;

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The YouTube Organizer now uses **BullMQ** with Redis for robust, scalable background job processing. This ensures reliable handling of channels and playlists, even with thousands of videos.
+The YSaar now uses **BullMQ** with Redis for robust, scalable background job processing. This ensures reliable handling of channels and playlists, even with thousands of videos.
 
 ## Quick Start
 

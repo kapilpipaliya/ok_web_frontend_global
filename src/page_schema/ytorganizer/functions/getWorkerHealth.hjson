@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "getWorkerHealth",
-        description: "Get health status and job counts for YouTube Organizer workers",
+        description: "Get health status and job counts for YSaar workers",
         body: '''
 /**
  * Worker Health Check

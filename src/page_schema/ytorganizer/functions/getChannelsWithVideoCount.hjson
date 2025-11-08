@@ -98,10 +98,10 @@ try {
     MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
     WHERE 1=1 ${channelIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
 
-    // Find the uploads playlist for this channel and count ownership's videos in it
+    // CORRECTED SCHEMA: Find uploads playlist and count videos through PlaylistSetting->Video
     OPTIONAL MATCH (uploadsPlaylist:Playlist {youtubeId: c.uploadsPlaylistId})
-    OPTIONAL MATCH (uploadsPlaylist)-[:PlaylistVideo]->(v:Video)
-    OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    OPTIONAL MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(uploadsPS:PlaylistSetting)-[:PlaylistSettingPlaylist]->(uploadsPlaylist)
+    OPTIONAL MATCH (uploadsPS)-[:PlaylistSettingVideo]->(v:Video)
 
     WITH c, cs, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
 

@@ -176,7 +176,7 @@ return {
         props: '''
 return {
   as: "p",
-  text: "Manage your YouTube Organizer preferences and data"
+  text: "Manage your YSaar preferences and data. Need to connect a YouTube account? Go to Accounts in the navigation."
 };
 ''',
         css: '''
@@ -1320,7 +1320,7 @@ return {
         props: '''
 return {
   as: "p",
-  text: "Permanently delete all your YouTube Organizer data including channels, playlists, and settings. This action cannot be undone."
+  text: "Permanently delete all your YSaar data including channels, playlists, and settings. This action cannot be undone."
 };
 ''',
         css: '''
@@ -1351,7 +1351,7 @@ return {
 
     const confirmed = await rbConfirm({
       title: "Clear All Data",
-      message: "Are you sure you want to delete all your YouTube Organizer data including channels, playlists, videos, notes, and favorites? This action cannot be undone!",
+      message: "Are you sure you want to delete all your YSaar data including channels, playlists, videos, notes, and favorites? This action cannot be undone!",
       confirmText: "Delete All Data",
       cancelText: "Cancel",
       variant: "danger"
@@ -1405,7 +1405,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Delete your entire account and all associated data permanently. This will also clear all your YouTube Organizer data and cannot be undone."
+  text: "Delete your entire account and all associated data permanently. This will also clear all your YSaar data and cannot be undone."
 };
 ''',
         css: '''

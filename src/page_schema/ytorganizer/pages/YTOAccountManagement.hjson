@@ -255,7 +255,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Manage your connected YouTube channels. If you have multiple brand accounts under one Google account, connect each channel separately to access all of them."
+  text: "Connect at least one YouTube channel to get started. If you have multiple brand accounts under one Google account, connect each channel separately to access all of them."
 };
 '''
         css: '''

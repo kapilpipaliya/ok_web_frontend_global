@@ -1,14 +1,14 @@
-# YouTube Organizer (YTO)
+# YSaar (YTO)
 
 A YouTube channel and playlist management system built using the Rulebook pattern with a modern, accessible UI.
 
 ## Overview
 
-YouTube Organizer uses the Rulebook component pattern with a graph-based page schema system. All pages, components, and themes follow the Rulebook conventions with YTO prefix for namespacing.
+YSaar uses the Rulebook component pattern with a graph-based page schema system. All pages, components, and themes follow the Rulebook conventions with YTO prefix for namespacing.
 
 ## Graph Schema
 
-YouTube Organizer uses Neo4j graph database with the following schema:
+YSaar uses Neo4j graph database with the following schema:
 
 ### Core Vertices
 
@@ -92,7 +92,7 @@ Example:
 
 ## Components
 
-YouTube Organizer includes 13 components with YTO prefix:
+YSaar includes 13 components with YTO prefix:
 
 ### Form Components
 - **YTOButton** - Styled button with variants (primary, secondary, success, danger)

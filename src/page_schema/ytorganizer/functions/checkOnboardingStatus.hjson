@@ -33,6 +33,27 @@ try {
 
   // If marking as complete
   if (markComplete && !isOnboarded) {
+    // Validate that user has at least one connected YouTube account
+    const ownershipsResult = await args.session.run(`
+      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+      RETURN COUNT(o) as ownershipCount
+    `, { userUuid: user.P.uuid });
+
+    const ownershipCountValue = ownershipsResult.records[0]?.get('ownershipCount');
+    const ownershipCount = ownershipCountValue?.toNumber ? ownershipCountValue.toNumber() : Number(ownershipCountValue) || 0;
+
+    if (ownershipCount === 0) {
+      return {
+        success: false,
+        error: "Please connect at least one YouTube account before completing onboarding. Click 'Go to Accounts' above to connect your account.",
+        data: {
+          isOnboarded: false,
+          userId: user.id,
+          ownershipCount: 0
+        }
+      };
+    }
+
     await args.session.run(`
       MATCH (u:User {uuid: $userUuid})
       SET u.ytoOnboardingComplete = true,

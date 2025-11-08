@@ -100,7 +100,7 @@ if (args.contextData.action === 'start') {
     await logMessage('info', 'Processing playlist', { playlistId, userId, ownershipId });
 
     // Get a new database session for this job
-    const { dbSession: session } = await args.getSession();
+    const session = await args.getSession();
 
     // Get ownership priority for quota allocation
     const ownershipResult = await session.run(`
@@ -254,32 +254,47 @@ if (args.contextData.action === 'start') {
           channelTitle: video.snippet?.channelTitle || ''
         });
 
-        // Create playlist-video relationship
-        await session.run(`
-          MATCH (p:Playlist {youtubeId: $playlistId})
-          MATCH (v:Video {youtubeId: $videoId})
-          MERGE (p)-[:PlaylistVideo]->(v)
-        `, { playlistId, videoId });
+        // CORRECTED SCHEMA:
+        // 1. Create ownership-level VideoSetting (global settings: watched, notes, favourites)
+        // 2. Create PlaylistSetting->Video relationship (per-ownership playlist membership)
 
-        // Create ownership video setting
         const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;
+
+        // Step 1: Create/update ownership-level VideoSetting
         await session.run(`
           MATCH (o:YouTubeOwnership {key: $ownershipId})
           MATCH (v:Video {youtubeId: $videoId})
           MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
           ON CREATE SET
             vs.key = $videoSettingKey,
-            vs.createdAt = datetime()
-          SET
+            vs.createdAt = datetime(),
             vs.watched = false,
-            vs.notes = null,
-            vs.customPosition = $position,
-            vs.playlistIndex = $position,
+            vs.note = null,
+            vs.isFavourite = false
+          SET
             vs.updatedAt = datetime()
         `, {
           ownershipId,
           videoId,
-          videoSettingKey,
+          videoSettingKey
+        });
+
+        // Step 2: Create PlaylistSetting->Video relationship (playlist membership)
+        await session.run(`
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
+                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          MATCH (v:Video {youtubeId: $videoId})
+          MERGE (ps)-[r:PlaylistSettingVideo]->(v)
+          ON CREATE SET
+            r.createdAt = datetime(),
+            r.position = $position,
+            r.playlistIndex = $position
+          SET
+            r.updatedAt = datetime()
+        `, {
+          ownershipId,
+          playlistId,
+          videoId,
           position: video.snippet?.position || 0
         });
 

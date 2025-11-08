@@ -1,8 +1,8 @@
-# YouTube Organizer - Batch Operations & Multi-Channel Management
+# YSaar - Batch Operations & Multi-Channel Management
 
 ## Overview
 
-The YouTube Organizer now supports advanced batch operations for managing multiple channels efficiently, with quota-aware processing and priority scheduling.
+The YSaar now supports advanced batch operations for managing multiple channels efficiently, with quota-aware processing and priority scheduling.
 
 ## New Features
 

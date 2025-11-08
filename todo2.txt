@@ -405,3 +405,5 @@ https://developers.google.com/youtube/terms/api-services-terms-of-service
 Flush ALL Redis data (complete clean)
 redis-cli FLUSHALL
 
+  reesend api key:
+  re_cHB3wryZ_9aGvavTVXqbMYVAndzQvcxNY

@@ -37,6 +37,7 @@ import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
+import {getGlobalSettingVertex} from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -254,6 +255,9 @@ export function createFunctionArgumentBase(
     resetTheme: hooks.themeToggle.resetTheme,
     currentMode: hooks.themeToggle.currentMode,
     // User settings getter and setter
+    get globalSetting() {
+      return getGlobalSettingVertex(hooks.graph);
+    },
     get userSetting() {
       const userSettingId = getGlobalStore(hooks.graph).P.userSettingId;
       return userSettingId ? hooks.graph.vertexes[userSettingId]?.P : undefined;

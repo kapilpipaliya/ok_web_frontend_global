@@ -69,7 +69,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
 }\`;`,
                 componentName: "Html",
                 displayOrder: 1,
-                text: "© 2024 Your Company. All rights reserved.",
+                text: `© 2025 \${args.globalSetting?.P.appName}. All rights reserved.`,
               },
             ],
             css: `return \`._id {

@@ -37,6 +37,10 @@ return {
         fns: '''
 const [loading, setLoading] = args.createSignal(false);
 
+const navigateToAccounts = () => {
+  args.navigate('/accounts');
+};
+
 const completeOnboarding = async () => {
   setLoading(true);
   try {
@@ -48,13 +52,14 @@ const completeOnboarding = async () => {
     const result = response.result;
 
     if (result.success) {
-      args.showSuccessToast("Welcome to YouTube Organizer!");
+      args.showSuccessToast("Welcome to YSaar!");
       // Navigate to home after a short delay
       setTimeout(() => {
         args.navigate('/home');
       }, 500);
     } else {
-      args.showErrorToast("Failed to complete onboarding");
+      // Show specific error message from validation
+      args.showErrorToast(result.error || "Failed to complete onboarding");
     }
   } catch (error) {
     args.showErrorToast("An error occurred");
@@ -66,7 +71,8 @@ const completeOnboarding = async () => {
 
 return {
   loading,
-  completeOnboarding
+  completeOnboarding,
+  navigateToAccounts
 };
 '''
         props: '''
@@ -150,7 +156,7 @@ return `._id {
         props: '''
 return {
   as: "h1",
-  text: "Welcome to YouTube Organizer"
+  text: "Welcome to YSaar"
 };
 '''
         css: '''
@@ -479,7 +485,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Add your first YouTube channel or playlist in just a few easy steps."
+  text: "Connect your YouTube account to start organizing your favorite channels and playlists."
 };
 '''
         css: '''
@@ -510,19 +516,27 @@ return `._id {
 const steps = [
   {
     number: 1,
-    title: "Go to Channels or Playlists"
+    icon: "mdi:youtube",
+    title: "Connect Your YouTube Account",
+    description: "Click 'Go to Accounts' below to connect your YouTube account via OAuth"
   },
   {
     number: 2,
-    title: "Tap Add Button"
+    icon: "carbon:application",
+    title: "Add Channels",
+    description: "Add your favorite YouTube channels to track their content"
   },
   {
     number: 3,
-    title: "Paste YouTube Link"
+    icon: "carbon:playlist",
+    title: "Organize Playlists",
+    description: "Create and manage playlists with your favorite videos"
   },
   {
     number: 4,
-    title: "Organize & Track"
+    icon: "carbon:analytics",
+    title: "Track & Enjoy",
+    description: "Keep everything organized in one convenient place"
   }
 ];
 
@@ -584,23 +598,18 @@ return `._id {
         props: '''
 const step = args.contextData.step;
 return {
-  as: "div",
-  text: step.number.toString()
+  as: "icon",
+  icon: step.icon,
+  width: 40,
+  height: 40
 };
 '''
         css: '''
+const step = args.contextData.step;
+const iconColor = step.number === 1 ? "primary" : step.number === 2 ? "info" : step.number === 3 ? "success" : "text";
 return `._id {
-  width: 2rem;
-  height: 2rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color[iconColor]};
+  margin-bottom: 0.75rem;
 }`;
 '''
       }
@@ -621,13 +630,80 @@ return {
         css: '''
 return `._id {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
 
   @media (max-width: 768px) {
     font-size: 0.9375rem;
   }
 }`;
+'''
+      }
+    }
+    {
+      id: "30"
+      L: "Attr"
+      P: {
+        displayOrder: 3
+        componentName: "Html"
+        props: '''
+const step = args.contextData.step;
+return {
+  as: "p",
+  text: step.description
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.75;
+  line-height: 1.5;
+
+  @media (max-width: 768px) {
+    font-size: 0.8125rem;
+  }
+}`;
+'''
+      }
+    }
+    // Go to Accounts button wrapper
+    {
+      id: "59"
+      L: "Attr"
+      P: {
+        displayOrder: 4
+        componentName: "Html"
+        props: '''
+return {
+  as: "div"
+};
+'''
+        css: '''
+return `._id {
+  max-width: 400px;
+  margin: 0 auto;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    }
+    // Go to Accounts button
+    {
+      id: "60"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "YTOButton"
+        props: '''
+return {
+  text: "Go to Accounts",
+  variant: "primary",
+  fullWidth: true,
+  icon: "mdi:youtube",
+  onClick: args.fns.navigateToAccounts
+};
 '''
       }
     }
@@ -693,7 +769,10 @@ return {
     { id: "e26", T: "Attr", S: "26", E: "27" }
     { id: "e27", T: "Attr", S: "27", E: "28" }
     { id: "e28", T: "Attr", S: "27", E: "29" }
-    { id: "e56", T: "Attr", S: "3", E: "57" }
-    { id: "e57", T: "Attr", S: "57", E: "58" }
+    { id: "e29", T: "Attr", S: "27", E: "30" }
+    { id: "e55", T: "Attr", S: "3", E: "59" }
+    { id: "e56", T: "Attr", S: "59", E: "60" }
+    { id: "e57", T: "Attr", S: "3", E: "57" }
+    { id: "e58", T: "Attr", S: "57", E: "58" }
   ]
 }

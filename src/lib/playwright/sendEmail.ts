@@ -2,6 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import juice from "juice";
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
@@ -62,8 +63,25 @@ export async function sendEmailDirect(options: EmailOptions) {
   const dbSettings = await getEmailSettings(subDomain);
   let emailInfo;
   try {
-    if (dbSettings?.P.active && dbSettings.P.active !== "smtp") {
-      // Use email service provider if active
+    if (dbSettings?.P.active === "resend") {
+      // Use official Resend SDK for Resend provider
+      const resend = new Resend(dbSettings.P.resendApiKey);
+
+      const { data, error } = await resend.emails.send({
+        from: dbSettings.P.fromEmail,
+        to: [to],
+        subject,
+        html: processedContent,
+      });
+
+      if (error) {
+        console.error("Resend API error:", error);
+        throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
+      }
+
+      emailInfo = { messageId: data?.id };
+    } else if (dbSettings?.P.active && dbSettings.P.active !== "smtp") {
+      // Use email service provider for other providers (SendGrid, etc.)
       const emailService = useEmail(dbSettings);
       emailInfo = await emailService.send({
         // Not supported yet
@@ -71,7 +89,7 @@ export async function sendEmailDirect(options: EmailOptions) {
         //   filename: attachmentName,
         //   path: attachmentPath,
         // }] : undefined,
-        from: dbSettings.P.from,
+        from: dbSettings.P.fromEmail || process.env.SMTP_FROM,
         html: processedContent,
         subject,
         to,
@@ -181,7 +199,7 @@ function getEnvEmailSettings(): null | Vertex {
     OUT: {},
     P: {
       active: "smtp",
-      from: process.env.SMTP_FROM,
+      fromEmail: process.env.SMTP_FROM,
       secure: process.env.SMTP_SECURE === "true",
       smtpHost: process.env.SMTP_HOST,
       smtpPassword: process.env.SMTP_PASS,
@@ -275,7 +293,7 @@ async function saveEmailToDatabase(
         attachmentName: attachmentName || null,
         attachmentPath: attachmentPath || null,
         content,
-        from: dbSettings?.P.from || process.env.SMTP_FROM || null,
+        from: dbSettings?.P.fromEmail || dbSettings?.P.from || process.env.SMTP_FROM || null,
         messageId:
           emailInfo && "messageId" in emailInfo ? emailInfo.messageId : null,
         status: emailInfo ? "sent" : "failed",

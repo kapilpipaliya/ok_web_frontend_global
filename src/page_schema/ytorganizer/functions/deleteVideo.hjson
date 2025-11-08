@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "deleteVideo",
-        description: "Deletes a video from a playlist, and removes the video node if not referenced elsewhere",
+        description: "Deletes videos (array, 'all', or 'allInContext') from specific playlists by removing PlaylistSetting->VideoSetting relationships, then cleaning up orphan VideoSettings and Videos. 'allInContext' deletes all videos in the context playlists. With the new schema, videos are owned by playlists, not ownerships.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -14,115 +14,210 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Extract parameters
-  const { video, contextType, contextItem, ownershipId } = args.contextData;
-
-  if (!video) {
-    throw new Error("Video data is required");
-  }
+  // Extract parameters - accepts array of videos, 'all', or 'allInContext'
+  const { videos, contextType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
 
   if (!ownershipId) {
     throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
-  if (!contextType || contextType !== "playlist") {
-    throw new Error("Invalid context type. Must be 'playlist'");
+  // Verify ownership belongs to user (skip if called internally)
+  if (!skipOwnershipCheck) {
+    const ownershipCheck = await args.session.run(`
+      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+      RETURN o
+    `, { userUuid: user.P.uuid, ownershipId });
+
+    if (ownershipCheck.records.length === 0) {
+      throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+    }
   }
 
-  if (!contextItem) {
-    throw new Error("Playlist is required");
+  // Handle contextItems array
+  const contextItemArray = contextItems || [];
+
+  // Prepare parameters for queries
+  let videoIds = null;
+  let playlistIds = null;
+
+  if (videos === 'all') {
+    // Delete ALL videos from ALL playlists for this ownership
+    videoIds = null;
+    playlistIds = null;
+  } else if (videos === 'allInContext') {
+    // Delete all videos in specific playlists
+    if (contextItemArray.length === 0) {
+      throw new Error("Context playlists are required when using 'allInContext'");
+    }
+    playlistIds = contextItemArray.map(item => item.P?.youtubeId).filter(id => id);
+    if (playlistIds.length === 0) {
+      throw new Error("No valid context playlist IDs found");
+    }
+    videoIds = null;
+  } else {
+    // Delete specific videos from specific playlists
+    if (!videos || videos.length === 0) {
+      throw new Error("No videos provided to delete");
+    }
+    videoIds = videos.map(v => v.P?.youtubeId).filter(id => id);
+    if (videoIds.length === 0) {
+      throw new Error("No valid video IDs found");
+    }
+
+    // When deleting specific videos, we need playlist context
+    if (contextItemArray.length === 0) {
+      throw new Error("Playlist context is required when deleting specific videos");
+    }
+    playlistIds = contextItemArray.map(item => item.P?.youtubeId).filter(id => id);
+    if (playlistIds.length === 0) {
+      throw new Error("No valid context playlist IDs found");
+    }
   }
 
-  const videoId = video.P?.youtubeId;
-  if (!videoId) {
-    throw new Error("Video ID not found");
+  // CORRECTED SCHEMA - Step 1: Delete PlaylistSetting->Video relationships
+  let queryParams = { ownershipId };
+  let relationshipFilter = '';
+
+  if (videos === 'all') {
+    // Delete all video relationships from all playlists for this ownership
+    relationshipFilter = '';
+  } else if (videos === 'allInContext') {
+    // Delete all video relationships from specific playlists
+    queryParams.playlistIds = playlistIds;
+    relationshipFilter = 'WHERE p.youtubeId IN $playlistIds';
+  } else {
+    // Delete specific videos from specific playlists
+    queryParams.playlistIds = playlistIds;
+    queryParams.videoIds = videoIds;
+    relationshipFilter = 'WHERE p.youtubeId IN $playlistIds AND v.youtubeId IN $videoIds';
   }
 
-  const contextId = contextItem.P?.youtubeId;
-  if (!contextId) {
-    throw new Error("Context ID not found");
-  }
+  const deleteRelationshipsQuery = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
+          -[:PlaylistSettingPlaylist]->(p:Playlist)
+    MATCH (ps)-[r:PlaylistSettingVideo]->(v:Video)
+    ${relationshipFilter}
+    DELETE r
+    RETURN count(r) as deletedRelationships
+  `;
 
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
+  const relResult = await args.session.run(deleteRelationshipsQuery, queryParams);
+  const deletedRelRaw = relResult.records[0]?.get('deletedRelationships');
+  const deletedRelationships = deletedRelRaw ? (typeof deletedRelRaw.toNumber === 'function' ? deletedRelRaw.toNumber() : Number(deletedRelRaw)) : 0;
 
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-  }
-
-  let deletedVideo = false;
-  let removedFromContext = false;
-
-  if (contextType === "playlist") {
-    // Step 1: Delete the ownership's VideoSetting
-    const deleteVideoSettingQuery = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video {youtubeId: $videoId})
-      DETACH DELETE vs
-      RETURN count(vs) as deletedSettings
+  // CORRECTED SCHEMA - Step 2: Delete orphan Videos (not referenced by any PlaylistSetting)
+  let videoFilter = '';
+  if (videos === 'all') {
+    // Check all videos
+    videoFilter = 'MATCH (v:Video)';
+  } else if (videos === 'allInContext') {
+    // Check videos that were in the context playlists
+    videoFilter = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(tempPS:PlaylistSetting)
+            -[:PlaylistSettingPlaylist]->(tempP:Playlist)
+      WHERE tempP.youtubeId IN $playlistIds
+      MATCH (tempPS)-[:PlaylistSettingVideo]->(tempV:Video)
+      WITH DISTINCT tempV.youtubeId as videoId
+      MATCH (v:Video {youtubeId: videoId})
     `;
+  } else {
+    // Check specific videos
+    videoFilter = 'MATCH (v:Video) WHERE v.youtubeId IN $videoIds';
+  }
 
-    const deleteSettingResult = await args.session.run(deleteVideoSettingQuery, {
-      ownershipId,
-      videoId: videoId
-    });
+  const deleteOrphanVideosQuery = `
+    ${videoFilter}
 
-    const deletedSettingsRaw = deleteSettingResult.records[0]?.get('deletedSettings');
-    const deletedSettingsCount = deletedSettingsRaw ? (typeof deletedSettingsRaw.toNumber === 'function' ? deletedSettingsRaw.toNumber() : Number(deletedSettingsRaw)) : 0;
-    removedFromContext = deletedSettingsCount > 0;
+    // Check if any PlaylistSetting still references this Video
+    OPTIONAL MATCH (anyPS:PlaylistSetting)-[:PlaylistSettingVideo]->(v)
 
-    // Step 2: Check if video should be completely deleted (no other ownerships reference it)
-    const checkAndDeleteVideoQuery = `
-      MATCH (v:Video {youtubeId: $videoId})
+    WITH v, count(anyPS) as psCount
+    WHERE psCount = 0
 
-      // Check if any other ownership has a VideoSetting pointing to this video
-      OPTIONAL MATCH (otherO:YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(otherVS:VideoSetting)-[:VideoSettingVideo]->(v)
+    // No PlaylistSetting references this Video, safe to delete
+    DETACH DELETE v
+    RETURN count(v) as deletedVideos
+  `;
 
-      WITH v, count(otherO) as otherOwnershipCount
-      WHERE otherOwnershipCount = 0
+  const vResult = await args.session.run(deleteOrphanVideosQuery, queryParams);
+  const deletedVRaw = vResult.records[0]?.get('deletedVideos');
+  const deletedVideos = deletedVRaw ? (typeof deletedVRaw.toNumber === 'function' ? deletedVRaw.toNumber() : Number(deletedVRaw)) : 0;
 
-      // No other ownership references this video, safe to delete
-      // First remove the Playlist-[:PlaylistVideo]->Video relationship
-      OPTIONAL MATCH (p:Playlist)-[r:PlaylistVideo]->(v)
-      DELETE r
-
-      // Then delete the video node
-      WITH v
-      DETACH DELETE v
-      RETURN count(v) as deletedVideos
+  // CORRECTED SCHEMA - Step 3: Delete orphan VideoSettings (not referenced by any Video)
+  // This happens when a video is deleted from all playlists
+  let videoSettingFilter = '';
+  if (videos === 'all' || videos === 'allInContext') {
+    // Check VideoSettings for this ownership
+    videoSettingFilter = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
     `;
-
-    const deleteVideoResult = await args.session.run(checkAndDeleteVideoQuery, {
-      videoId: videoId
-    });
-
-    const deletedVideosRaw = deleteVideoResult.records[0]?.get('deletedVideos');
-    const deletedVideosCount = deletedVideosRaw ? (typeof deletedVideosRaw.toNumber === 'function' ? deletedVideosRaw.toNumber() : Number(deletedVideosRaw)) : 0;
-    deletedVideo = deletedVideosCount > 0;
+  } else {
+    // Check VideoSettings for specific videos
+    videoSettingFilter = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+      WHERE v.youtubeId IN $videoIds
+    `;
   }
 
-  if (!removedFromContext && !deletedVideo) {
-    throw new Error("Video not found in the specified context");
+  const deleteOrphanVideoSettingsQuery = `
+    ${videoSettingFilter}
+
+    // Check if the video still exists
+    WITH vs, v
+    WHERE NOT EXISTS((v)<-[:PlaylistSettingVideo]-(:PlaylistSetting))
+
+    // Video has no playlist references, delete its settings
+    DETACH DELETE vs
+    RETURN count(vs) as deletedVideoSettings
+  `;
+
+  const vsResult = await args.session.run(deleteOrphanVideoSettingsQuery, queryParams);
+  const deletedVSRaw = vsResult.records[0]?.get('deletedVideoSettings');
+  const deletedVideoSettings = deletedVSRaw ? (typeof deletedVSRaw.toNumber === 'function' ? deletedVSRaw.toNumber() : Number(deletedVSRaw)) : 0;
+
+  // Generate context name for message
+  let contextName = contextType || "playlists";
+  if (contextItemArray.length === 1) {
+    contextName = contextItemArray[0].P?.title || contextType || "playlist";
+  } else if (contextItemArray.length > 1) {
+    contextName = `${contextItemArray.length} playlists`;
   }
 
-  const videoTitle = video.P?.title || "Video";
-  const contextName = contextItem.P?.title || contextType;
+  let message;
+  const isAll = videos === 'all';
+  const isAllInContext = videos === 'allInContext';
+  const totalProcessed = deletedRelationships + deletedVideos + deletedVideoSettings;
 
-  let message = `Successfully removed "${videoTitle}" from ${contextName}`;
-  if (deletedVideo) {
-    message = `Successfully deleted "${videoTitle}"`;
+  if (isAll) {
+    message = `Successfully removed all videos from all playlists${totalProcessed > 0 ? ` (${deletedRelationships} removed)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSettings > 0 ? `, deleted ${deletedVideoSettings} orphan setting(s)` : ''}`;
+  } else if (isAllInContext) {
+    message = `Successfully removed all videos from ${contextName}${totalProcessed > 0 ? ` (${deletedRelationships} removed)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSettings > 0 ? `, deleted ${deletedVideoSettings} orphan setting(s)` : ''}`;
+  } else if (videos.length === 1) {
+    const videoTitle = videos[0].P?.title || "Video";
+    message = `Successfully removed "${videoTitle}" from ${contextName}${deletedVideos > 0 ? ` (permanently deleted)` : ''}`;
+  } else {
+    message = `Successfully removed ${videos.length} video(s) from ${contextName}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSettings > 0 ? `, deleted ${deletedVideoSettings} orphan setting(s)` : ''}`;
   }
+
+  // Generate contextIds array for return data
+  const returnContextIds = contextItemArray.length > 0
+    ? contextItemArray.map(item => item.P?.youtubeId).filter(id => id)
+    : [];
+
+  // Calculate total videos processed
+  const totalVideos = isAll || isAllInContext ? deletedRelationships : (videos ? videos.length : 0);
 
   return {
     success: true,
     data: {
-      videoId: videoId,
+      videoIds: videoIds,
       contextType: contextType,
-      contextId: contextId,
-      removedFromContext: removedFromContext,
-      deletedVideo: deletedVideo
+      contextIds: returnContextIds,
+      deletedRelationships: deletedRelationships,
+      deletedVideoSettings: deletedVideoSettings,
+      deletedVideos: deletedVideos,
+      totalVideos: totalVideos,
+      totalContextItems: contextItemArray.length
     },
     message: message
   };

@@ -97,7 +97,7 @@ if (args.contextData.action === 'start') {
     await logMessage('info', 'Processing channel', { channelId, userId, ownershipId, priority });
 
     // Get a new database session for this job
-    const { dbSession: session } = await args.getSession();
+    const session = await args.getSession();
 
     // Get ownership priority for quota allocation
     const ownershipResult = await session.run(`

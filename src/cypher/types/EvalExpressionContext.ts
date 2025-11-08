@@ -5,6 +5,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 
 export interface EvalExpressionContext {
   dbSession?: Session;
+  subDomain?: string;
   nodes?: { [key: string]: Vertex };
   relationships?: { [key: string]: Edge };
   tx?: Transaction;

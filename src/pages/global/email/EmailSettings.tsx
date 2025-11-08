@@ -33,6 +33,7 @@ interface EmailSettingsData {
   smtpUsername?: string;
   smtpPassword?: string;
   sendGridApiKey?: string;
+  resendApiKey?: string;
   fromEmail?: string;
   secure?: boolean;
   [key: string]: unknown;
@@ -98,6 +99,12 @@ const validateFormData = (data: EmailSettingsData) => {
     if (sendGridApiKeyError) {
       errors.sendGridApiKey = sendGridApiKeyError;
     }
+  } else if (provider === "resend") {
+    // Resend validation
+    const resendApiKeyError = validateRequired(data.resendApiKey);
+    if (resendApiKeyError) {
+      errors.resendApiKey = resendApiKeyError;
+    }
   }
 
   // From email is required for all providers if a provider is selected
@@ -143,7 +150,7 @@ export function EmailSettings() {
                   { id: "", label: "Not Configured" },
                   { id: "smtp", label: "SMTP" },
                   { id: "sendgrid", label: "SendGrid" },
-                  // Add other providers as needed
+                  { id: "resend", label: "Resend" },
                 ],
                 placeholder: "Select Email Provider",
               },
@@ -306,6 +313,37 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "sendGridApiKey",
+            "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
+          ),
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Resend API Key",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "SystemTextInput",
+                key: "resendApiKey",
+                placeholder: "Enter Resend API key (re_...)",
+                type: "password",
+                validate: (value: string, data: Record<string, unknown>) =>
+                  data.P && (data.P as EmailSettingsData).active === "resend"
+                    ? validateRequired(value)
+                    : undefined,
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+            props: (options: EmailSettingsFunctionArgumentType) => ({
+              hide: () => options.data?.P.active !== "resend",
+            }),
+          },
+          getErrorSchema(
+            "resendApiKey",
             "return `._id {color: ${args.theme.var.color.error}; margin-top: -20px;}`;",
           ),
           {

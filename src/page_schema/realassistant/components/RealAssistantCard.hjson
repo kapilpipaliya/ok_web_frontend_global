@@ -98,7 +98,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Slot",
-        name: "children"
+        slot: "children"
       }
     }
   ],

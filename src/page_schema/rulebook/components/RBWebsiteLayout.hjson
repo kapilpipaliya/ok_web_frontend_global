@@ -369,11 +369,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Slot",
-        props: '''
-return {
-  name: "children"
-};
-'''
+        slot: "children"
       }
     },
     {

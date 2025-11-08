@@ -729,7 +729,11 @@ const deleteItem = async (item) => {
   if (confirmed) {
     try {
       const functionName = itemType === "channel" ? "deleteChannel" : "deletePlaylist";
-      const result = await args.fns.executeYTOFunction(functionName, { item: data, itemType });
+      const result = await args.fns.executeYTOFunction(functionName, {
+        items: [data],
+        itemType,
+        contextItems: []
+      });
 
       if (result?.result?.success) {
         args.showSuccessToast(result.result.message);
@@ -787,9 +791,9 @@ const deleteVideo = async (videoData) => {
   if (confirmed) {
     try {
       const result = await args.fns.executeYTOFunction("deleteVideo", {
-        video,
+        videos: [video],
         contextType: currentContext,
-        contextItem: contextItem
+        contextItems: [contextItem]
       });
 
       if (result?.result?.success) {

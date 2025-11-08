@@ -115,11 +115,11 @@ try {
 
       const videoId = video.P.youtubeId;
 
-      // Check if video is already in this ownership's playlist
+      // CORRECTED SCHEMA: Check if video is already in this ownership's playlist
       const existingVideoQuery = `
         MATCH (o:YouTubeOwnership {key: $ownershipId})
         MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-        MATCH (p)-[:PlaylistVideo]->(v:Video {youtubeId: $videoId})
+        MATCH (ps)-[:PlaylistSettingVideo]->(v:Video {youtubeId: $videoId})
         RETURN v
       `;
 
@@ -134,11 +134,11 @@ try {
         continue;
       }
 
-      // Get current video count for position
+      // CORRECTED SCHEMA: Get current video count for position
       const countQuery = `
         MATCH (o:YouTubeOwnership {key: $ownershipId})
         MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-        MATCH (p)-[:PlaylistVideo]->(v:Video)
+        MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
         RETURN COUNT(v) as videoCount
       `;
 
@@ -150,22 +150,14 @@ try {
       const currentCount = videoCountValue.low || videoCountValue || 0;
       const newPosition = currentCount + results.length;
 
-      // Add video to playlist - clean edge with no properties (validate ownership owns playlist)
-      const addVideoQuery = `
-        MATCH (o:YouTubeOwnership {key: $ownershipId})
-        MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-        MATCH (v:Video {youtubeId: $videoId})
-        MERGE (p)-[:PlaylistVideo]->(v)
-      `;
+      // CORRECTED SCHEMA:
+      // 1. Create ownership-level VideoSetting (global settings)
+      // 2. Create PlaylistSetting->Video relationship (playlist membership)
 
-      await args.session.run(addVideoQuery, {
-        ownershipId,
-        playlistId: playlistId,
-        videoId: videoId
-      });
+      const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;
 
-      // Create/update YouTubeOwnershipVideoSetting (no position - it's in PlaylistSetting.customOrder)
-      const videoSettingQuery = `
+      // Step 1: Create/update ownership-level VideoSetting
+      await args.session.run(`
         MATCH (o:YouTubeOwnership {key: $ownershipId})
         MATCH (v:Video {youtubeId: $videoId})
         MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
@@ -177,13 +169,29 @@ try {
           vs.isFavourite = false
         SET
           vs.updatedAt = datetime()
-        RETURN vs
-      `;
-
-      await args.session.run(videoSettingQuery, {
+      `, {
         ownershipId,
         videoId: videoId,
-        videoSettingKey: `video_setting_${ownershipId}_${videoId}`
+        videoSettingKey
+      });
+
+      // Step 2: Create PlaylistSetting->Video relationship
+      await args.session.run(`
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
+              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (v:Video {youtubeId: $videoId})
+        MERGE (ps)-[r:PlaylistSettingVideo]->(v)
+        ON CREATE SET
+          r.createdAt = datetime(),
+          r.position = $position,
+          r.playlistIndex = $position
+        SET
+          r.updatedAt = datetime()
+      `, {
+        ownershipId,
+        playlistId: playlistId,
+        videoId: videoId,
+        position: newPosition
       });
 
       results.push({

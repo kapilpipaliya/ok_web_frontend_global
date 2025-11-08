@@ -290,7 +290,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "We'd love to hear your thoughts, suggestions, or issues you've encountered. Your feedback helps us improve YouTube Organizer."
+  text: "We'd love to hear your thoughts, suggestions, or issues you've encountered. Your feedback helps us improve YSaar."
 };
 ''',
         css: '''

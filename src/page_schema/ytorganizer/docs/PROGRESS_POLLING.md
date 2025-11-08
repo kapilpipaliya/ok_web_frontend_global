@@ -1,8 +1,8 @@
-# Progress Polling Guide for YouTube Organizer
+# Progress Polling Guide for YSaar
 
 ## Overview
 
-The YouTube Organizer uses background workers to process channels and playlists. Since processing can take several minutes to hours (depending on channel size), real-time progress updates require polling.
+The YSaar uses background workers to process channels and playlists. Since processing can take several minutes to hours (depending on channel size), real-time progress updates require polling.
 
 ## Recommended Polling Strategy
 

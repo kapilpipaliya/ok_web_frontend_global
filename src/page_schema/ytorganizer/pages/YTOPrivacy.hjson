@@ -6,8 +6,8 @@
       P: {
         key: "YTOPrivacy",
         url: "/privacy",
-        title: "Privacy Policy - YouTube Organizer",
-        description: "Privacy policy for YouTube Organizer - Learn how we handle your YouTube data in compliance with Google's API Services requirements",
+        title: "Privacy Policy - YSaar",
+        description: "Privacy policy for YSaar - Learn how we handle your YouTube data in compliance with Google's API Services requirements",
         fns: '''
 return {
   enabled: true
@@ -440,7 +440,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "YouTube Organizer (\"we\", \"our\", or \"us\") is committed to protecting your privacy and ensuring transparency in how we handle your data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service, which integrates with YouTube API Services."
+  text: "YSaar (\"we\", \"our\", or \"us\") is committed to protecting your privacy and ensuring transparency in how we handle your data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service, which integrates with YouTube API Services."
 };
 ''',
         css: '''
@@ -508,13 +508,13 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; font-size: 1.05rem;">YouTube Organizer uses <strong>YouTube API Services</strong> to access and organize your YouTube content. By using our service, you agree to be bound by:</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; font-size: 1.05rem;">YSaar uses <strong>YouTube API Services</strong> to access and organize your YouTube content. By using our service, you agree to be bound by:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a></strong></li>
       <li style="margin-bottom: 0.5rem;"><strong><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a></strong></li>
       <li style="margin-bottom: 0.5rem;"><strong><a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube API Services Developer Policies</a></strong></li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; font-size: 1.05rem;"><strong>You can revoke YouTube Organizer's access to your data at any time</strong> via the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google security settings page</a>.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; font-size: 1.05rem;"><strong>You can revoke YSaar's access to your data at any time</strong> via the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google security settings page</a>.</p>
   `
 };
 '''
@@ -586,7 +586,7 @@ return {
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding: 1rem; background: ${args.theme.var.color.warning_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.warning};"><strong>Important:</strong> We only access publicly available YouTube data. We do <strong>not</strong> access your private videos, watch history, or any data you have not explicitly made public on YouTube. We never download or cache actual video files.</p>
 
     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.2 Account Information</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you create an account with YouTube Organizer, we collect:</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you create an account with YSaar, we collect:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Email address (for authentication and notifications)</li>
       <li style="margin-bottom: 0.5rem;">Username (for your account identification)</li>
@@ -663,7 +663,7 @@ return {
   innerHTML: `
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We use the collected information <strong>solely</strong> for the following legitimate purposes:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.75rem;"><strong>Service Provision:</strong> To provide, operate, and maintain the YouTube Organizer service, including displaying and organizing your YouTube channels, playlists, and videos</li>
+      <li style="margin-bottom: 0.75rem;"><strong>Service Provision:</strong> To provide, operate, and maintain the YSaar service, including displaying and organizing your YouTube channels, playlists, and videos</li>
       <li style="margin-bottom: 0.75rem;"><strong>Data Synchronization:</strong> To periodically refresh your YouTube data (channels, playlists, video metadata) to keep your collection up-to-date</li>
       <li style="margin-bottom: 0.75rem;"><strong>Organization Features:</strong> To enable you to add custom names, tags, notes, and organize your YouTube content according to your preferences</li>
       <li style="margin-bottom: 0.75rem;"><strong>Account Management:</strong> To create and manage your account, authenticate your identity, and provide customer support</li>
@@ -671,7 +671,7 @@ return {
       <li style="margin-bottom: 0.75rem;"><strong>Communication:</strong> To send you service-related notifications, updates about new features, and respond to your inquiries</li>
       <li style="margin-bottom: 0.75rem;"><strong>Security:</strong> To detect, prevent, and address technical issues, fraud, abuse, and unauthorized access</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; padding: 1rem; background: ${args.theme.var.color.success_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.success};"><strong>We do NOT:</strong> Use your YouTube data for advertising, sell your data to third parties, train AI models on your content, or use your data for any purpose other than providing you with the YouTube Organizer service.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; padding: 1rem; background: ${args.theme.var.color.success_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.success};"><strong>We do NOT:</strong> Use your YouTube data for advertising, sell your data to third parties, train AI models on your content, or use your data for any purpose other than providing you with the YSaar service.</p>
   `
 };
 '''
@@ -826,7 +826,7 @@ return {
   as: "div",
   innerHTML: `
     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">4.1 YouTube API Services</h3>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem;">YouTube Organizer uses <strong>YouTube API Services</strong> provided by Google LLC. When you connect your YouTube account:</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem;">YSaar uses <strong>YouTube API Services</strong> provided by Google LLC. When you connect your YouTube account:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Your authentication is handled directly by Google through OAuth 2.0</li>
       <li style="margin-bottom: 0.5rem;">We access your YouTube data only through official Google APIs</li>
@@ -915,7 +915,7 @@ return {
       <li style="margin-bottom: 1rem;"><strong>Access:</strong> Request a copy of all personal data we hold about you in a portable format (JSON or CSV)</li>
       <li style="margin-bottom: 1rem;"><strong>Correction:</strong> Update or correct any inaccurate information in your account settings at any time</li>
       <li style="margin-bottom: 1rem;"><strong>Deletion:</strong> Request deletion of your account and all associated data. We will permanently delete your data within 7 calendar days (YouTube data) or 30 days (account data)</li>
-      <li style="margin-bottom: 1rem;"><strong>YouTube Access Revocation:</strong> Revoke YouTube Organizer's access to your YouTube data at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google's security settings page</a>. We will delete all YouTube data within 30 days of revocation.</li>
+      <li style="margin-bottom: 1rem;"><strong>YouTube Access Revocation:</strong> Revoke YSaar's access to your YouTube data at any time through <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google's security settings page</a>. We will delete all YouTube data within 30 days of revocation.</li>
       <li style="margin-bottom: 1rem;"><strong>Data Portability:</strong> Export your custom notes, tags, and organization preferences to take them to another service</li>
       <li style="margin-bottom: 1rem;"><strong>Objection:</strong> Object to processing of your personal data for specific purposes</li>
       <li style="margin-bottom: 1rem;"><strong>Restriction:</strong> Request that we limit how we use your data while maintaining your account</li>
@@ -994,12 +994,12 @@ return {
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>Our service is not intended for children under 13 years of age.</strong></p>
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We comply with the Children's Online Privacy Protection Act (COPPA) and do not knowingly collect personal information from children under 13. If you are under 13, please do not:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;">Create an account on YouTube Organizer</li>
+      <li style="margin-bottom: 0.5rem;">Create an account on YSaar</li>
       <li style="margin-bottom: 0.5rem;">Use our service or provide any personal information</li>
       <li style="margin-bottom: 0.5rem;">Connect your YouTube account to our platform</li>
     </ul>
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>If you are a parent or guardian</strong> and believe your child under 13 has provided us with personal information, please contact us immediately at <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a>. We will promptly delete such information from our servers.</p>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text};">YouTube Organizer takes child safety seriously and is committed to protecting children's privacy online in accordance with COPPA and international regulations.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text};">YSaar takes child safety seriously and is committed to protecting children's privacy online in accordance with COPPA and international regulations.</p>
   `
 };
 '''
@@ -1058,7 +1058,7 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YouTube Organizer may store and process your data in various locations to provide our service globally. If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, please be aware that:</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">YSaar may store and process your data in various locations to provide our service globally. If you are located in the European Economic Area (EEA), United Kingdom, or Switzerland, please be aware that:</p>
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Your data may be transferred to and processed in countries outside the EEA</li>
       <li style="margin-bottom: 0.5rem;">We ensure appropriate safeguards are in place for international transfers, including standard contractual clauses</li>
@@ -1347,7 +1347,7 @@ return `._id {
 const year = new Date().getFullYear();
 return {
   as: "p",
-  text: `© ${year} YouTube Organizer by Ysaar. All rights reserved.`
+  text: `© ${year} YSaar. All rights reserved.`
 };
 ''',
         css: '''

@@ -1,10 +1,10 @@
-# YouTube Organizer (YTO)
+# YSaar (YTO)
 
 A mobile-first YouTube channel and playlist management system built with accessibility in mind. This system allows users to organize their favorite YouTube channels and playlists with an intuitive interface optimized for mobile usage and screen readers.
 
 ## Overview
 
-YouTube Organizer is a comprehensive page schema implementation that provides:
+YSaar is a comprehensive page schema implementation that provides:
 
 - **Channel Management**: Add, organize, and browse YouTube channels
 - **Playlist Management**: Create and manage custom playlists
@@ -28,12 +28,15 @@ The system uses a multi-ownership architecture where each user can connect multi
 (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
 (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
+
 (OAuthSettings)-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
 (OAuthSettings)-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
+
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
 (User)-[:UserFeedback]->(Feedback)
+
 (Channel)-[:ChannelPlaylist]->(Playlist)
-(Playlist)-[:PlaylistVideo]->(Video)
+(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)
 ```
 
 **Key Architecture Principles:**
@@ -43,6 +46,8 @@ The system uses a multi-ownership architecture where each user can connect multi
 - **Separate Settings**: Each ownership maintains its own channel, playlist, and video preferences
 - **Ownership Switching**: Users can switch between connected accounts via dropdown selector
 - **Videos via Playlists**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
+- **Per-Ownership Playlist Membership**: Video membership in playlists is managed through `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)` relationships, allowing independent playlist management per ownership
+- **Global Video Settings**: VideoSettings (watched, notes, favourites) are stored at the ownership level via `(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)`, applying globally across all playlists for that ownership
 
 ### OAuth 2.0 Authentication & Multi-Ownership
 
@@ -123,13 +128,12 @@ The system supports connecting multiple YouTube accounts per user, with each acc
   - `channelTitle`, `channelId`: Channel information
   - `publishedAt`, `createdAt`, `updatedAt`: Timestamps
   - `updatedCount`: Number of times video data was refreshed
-- **VideoSetting**: User-specific video preferences
-  - `key`: Unique identifier (`video_setting_${userId}_${videoId}`)
-  - `watched`: Boolean indicating if user has watched the video
-  - `note`: User's personal notes about the video
-  - `isFavourite`: Boolean indicating if video is marked as favorite
-  - `customPosition`: User-defined position in custom ordering
-  - `addedToPlaylistAt`: When user added this video from a playlist
+- **VideoSetting**: Ownership-specific video preferences (global across all playlists)
+  - `key`: Unique identifier (`video_setting_${ownershipId}_${videoId}`)
+  - `watched`: Boolean indicating if user has watched the video (applies to all playlists)
+  - `note`: User's personal notes about the video (applies to all playlists)
+  - `isFavourite`: Boolean indicating if video is marked as favorite (applies to all playlists)
+  - `customName`: Custom name for the video (applies to all playlists)
   - `createdAt`, `updatedAt`: Timestamps
 - **Feedback**: User feedback submissions
   - `feedback`: Feedback text (max 1000 characters)
@@ -655,11 +659,11 @@ Users can set their preferred language through LanguageSetting vertex:
 3. Use tabs in detail views to switch between content types
 4. Swipe or tap for navigation within lists
 
-### Custom Video Ordering
-1. In playlist view, drag and drop videos to reorder
-2. Custom order is saved to PlaylistSetting vertex
-3. Switch between sort modes: 'custom', 'date', 'title', 'index' (original YouTube order)
-4. Custom order persists across sessions for each user
+### Video Management
+1. **Playlist Membership**: Videos can be added/removed from individual playlists independently via `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)` relationships
+2. **Global Settings**: Marking a video as watched, adding notes, or favoriting applies to all playlists where the video appears (stored in ownership-level VideoSetting)
+3. **Custom Video Ordering**: In playlist view, drag and drop videos to reorder. Custom order is saved to PlaylistSetting vertex
+4. **Sort Modes**: Switch between 'custom', 'date', 'title', 'index' (original YouTube order). Custom order persists across sessions for each ownership
 
 ## Component Architecture
 
@@ -1131,26 +1135,32 @@ try {
       channelId: video.snippet.channelId
     });
 
-    // Create Playlist -> Video relationship (no properties on edge)
+    // Create ownership-level VideoSetting (global settings: watched, notes, favourites)
     await args.session.run(\`
-      MATCH (p:Playlist {youtubeId: $playlistId})
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
       MATCH (v:Video {youtubeId: $videoId})
-      MERGE (p)-[:PlaylistVideo]->(v)
-    \`, { playlistId, videoId: video.contentDetails.videoId });
-
-    // Create user-specific VideoSetting
-    await args.session.run(\`
-      MATCH (u:User) WHERE elementId(u) = $userId
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-      ON CREATE SET vs.key = $videoSettingKey, vs.createdAt = datetime()
-      SET vs.watched = false, vs.notes = null,
-          vs.customPosition = $position, vs.playlistIndex = $position,
-          vs.addedToPlaylistAt = datetime(), vs.updatedAt = datetime()
+      MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+      ON CREATE SET vs.key = $videoSettingKey, vs.createdAt = datetime(),
+          vs.watched = false, vs.note = null, vs.isFavourite = false
+      SET vs.updatedAt = datetime()
     \`, {
-      userId: user.id,
+      ownershipId,
       videoId: video.contentDetails.videoId,
-      videoSettingKey: \`video_setting_\${user.id}_\${video.contentDetails.videoId}\`,
+      videoSettingKey: \`video_setting_\${ownershipId}_\${video.contentDetails.videoId}\`
+    });
+
+    // Create PlaylistSetting -> Video relationship (playlist membership with position)
+    await args.session.run(\`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      MATCH (v:Video {youtubeId: $videoId})
+      MERGE (ps)-[r:PlaylistSettingVideo]->(v)
+      ON CREATE SET r.createdAt = datetime(), r.position = $position, r.playlistIndex = $position
+      SET r.updatedAt = datetime()
+    \`, {
+      ownershipId,
+      playlistId,
+      videoId: video.contentDetails.videoId,
       position: video.snippet.position
     });
   }
@@ -1193,11 +1203,12 @@ try {
 
 **Key Database Structure Features:**
 - **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
-- **Proper Relationships**: Follows (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
-- **Video Settings**: Creates (User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
-- **Clean Edges**: No data stored on relationships, all settings in dedicated vertices
-- **User Privacy**: Each user has independent playlist and video settings
+- **Proper Relationships**: Follows (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+- **Global Video Settings**: Creates (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video) for ownership-wide preferences
+- **Playlist Membership**: Uses (PlaylistSetting)-[:PlaylistSettingVideo]->(Video) relationships with position stored on edge
+- **Per-Ownership Privacy**: Each ownership has independent playlist and video settings
 - **Data Separation**: Global YouTube data separate from user preferences
+- **Flexible Deletion**: Videos can be removed from individual playlists without affecting other playlists or global settings
 
 **Component Integration:**
 ```javascript
@@ -1422,11 +1433,22 @@ npm install googleapis
 - GDPR compliance features
 - Data export/portability tools
 
-This documentation serves as the foundation for implementing the YouTube Organizer system and should be referenced for all development decisions and future enhancements.
+This documentation serves as the foundation for implementing the YSaar system and should be referenced for all development decisions and future enhancements.
 
 ## Recent Updates
 
-### Version 3.1 - Shared Quota Architecture (Current)
+### Version 3.2 - Corrected Schema Architecture (Current)
+- ✅ **Per-Ownership Playlist Membership**: Changed from global `(Playlist)-[:PlaylistVideo]->(Video)` to per-ownership `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)`
+- ✅ **Global Video Settings**: VideoSettings remain at ownership level for global properties (watched, notes, favourites)
+- ✅ **Independent Playlist Management**: Videos can be removed from individual playlists without affecting other playlists
+- ✅ **Position on Relationship**: Video position/playlistIndex stored on `PlaylistSettingVideo` relationship edge
+- ✅ **Simplified Frontend**: No `playlistId` required for video settings operations (notes, favourites, watched status)
+- ✅ **Updated Delete Operations**: Enhanced deleteVideo, deletePlaylist functions with proper orphan cleanup
+- ✅ **Updated Query Functions**: Modified getVideosWithDetails, getChannelsWithVideoCount, getPlaylistsWithVideoCount for new schema
+- ✅ **Updated Helper Functions**: Modified addVideoToPlaylist, saveNote, toggleFavourite, updateVideoSettings
+- ✅ **Better UX**: Marking video as "watched" or adding notes applies globally across all playlists
+
+### Version 3.1 - Shared Quota Architecture
 - ✅ **Shared Quota Pool**: Changed from per-ownership to shared 10,000 units/day across all users
 - ✅ **Priority-Based Reservations**: Quota reservation system with priority levels (1-10)
 - ✅ **Real-Time Quota Monitoring**: Admin dashboard for monitoring shared quota consumption

@@ -60,6 +60,7 @@
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
+    "resend": "^6.4.2",
     "shieldwall": "^0.4.0",
     "solid-focus-trap": "^0.1.9",
     "solid-hot-toast": "^2.4.5",

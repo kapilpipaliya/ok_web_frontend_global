@@ -53,11 +53,6 @@ try {
     throw new Error("User UUID is required");
   }
 
-  // Build playlist match clause if filtering by playlist
-  const playlistMatch = playlistId
-    ? 'MATCH (p:Playlist {youtubeId: $playlistId})-[:PlaylistVideo]->(v)'
-    : '';
-
   // Build WHERE clause for video IDs if provided
   const videoIdFilter = videoIds.length > 0
     ? 'AND v.youtubeId IN $videoIds'
@@ -104,25 +99,33 @@ try {
     ? 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})'
     : 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)';
 
-  // Build playlist matching clause for includePlaylist (different from filtering)
-  const playlistInfoClause = includePlaylist && !playlistId ? `
-    OPTIONAL MATCH (p:Playlist)-[:PlaylistVideo]->(v)
-    OPTIONAL MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-    WITH v, vs, COLLECT(DISTINCT {playlist: p, playlistSetting: ps}) as playlists
+  // CORRECTED SCHEMA:
+  // 1. Match PlaylistSetting->Video for playlist membership
+  // 2. Join with ownership VideoSettings for watched/notes/favourites
+  const playlistMatchClause = playlistId
+    ? 'MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})'
+    : 'MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)';
+
+  // Build playlist info collection clause for includePlaylist
+  const playlistInfoClause = includePlaylist ? `
+    WITH v, vs, p, ps
   ` : '';
 
-  const playlistReturn = includePlaylist && !playlistId ? ', playlists[0] as firstPlaylist' : '';
+  const playlistReturn = includePlaylist ? ', p as parentPlaylist, ps as parentPlaylistSetting' : '';
 
   // Build SKIP and LIMIT clauses
   const skipClause = skip > 0 ? `SKIP ${skip}` : '';
   const limitClause = limit ? `LIMIT ${limit}` : '';
 
-  // Cypher query to fetch videos with details
+  // Cypher query to fetch videos with details (CORRECTED SCHEMA)
+  // 1. PlaylistSetting->Video for playlist membership
+  // 2. YouTubeOwnership->VideoSetting->Video for global settings
   const query = `
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
-    ${playlistMatch}
-    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    ${playlistMatchClause}
+    MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
+    OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
     WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     ${playlistInfoClause}
     RETURN v, vs${playlistReturn}
@@ -150,13 +153,12 @@ try {
 
     // Add playlist information if requested
     if (includePlaylist) {
-      const firstPlaylist = record.get('firstPlaylist');
-      if (firstPlaylist && firstPlaylist.playlist) {
+      const parentPlaylist = record.get('parentPlaylist');
+      const parentPlaylistSetting = record.get('parentPlaylistSetting');
+      if (parentPlaylist && parentPlaylistSetting) {
         videoData.parentPlaylist = {
-          playlist: args.convertNodeToJson(firstPlaylist.playlist),
-          playlistSetting: firstPlaylist.playlistSetting
-            ? args.convertNodeToJson(firstPlaylist.playlistSetting)
-            : null
+          playlist: args.convertNodeToJson(parentPlaylist),
+          playlistSetting: args.convertNodeToJson(parentPlaylistSetting)
         };
       } else {
         videoData.parentPlaylist = null;

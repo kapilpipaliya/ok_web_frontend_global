@@ -231,7 +231,6 @@ return `._id {
 const noPadding = args.contextData.props?.noPadding || false;
 
 return {
-  name: "children"
 };
 '''
         css: '''
