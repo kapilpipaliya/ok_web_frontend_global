@@ -3,6 +3,7 @@ import { google } from "googleapis";
 
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { decryptClientSecret } from "~/lib/auth/tokenEncryption";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -21,14 +22,17 @@ export async function GET({ request }: APIEvent) {
 
     // Decrypt the client secret
     let clientSecret = "";
-    if (oauthSettings.googleClientSecret) {
+    if (oauthSettings.googleClientSecretEncrypted) {
       try {
-        clientSecret = Buffer.from(
-          oauthSettings.googleClientSecret,
-          "base64",
-        ).toString("utf-8");
+        clientSecret = decryptClientSecret(
+          oauthSettings.googleClientSecretEncrypted,
+        );
       } catch (e) {
-        clientSecret = oauthSettings.googleClientSecret;
+        console.error("Failed to decrypt Google client secret:", e);
+        throw new APIError(
+          "Failed to decrypt Google OAuth credentials",
+          500,
+        );
       }
     }
 

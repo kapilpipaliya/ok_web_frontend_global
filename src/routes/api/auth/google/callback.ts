@@ -6,6 +6,7 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
+import { decryptClientSecret } from "~/lib/auth/tokenEncryption";
 import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
@@ -50,14 +51,17 @@ export async function GET({ request }: APIEvent) {
 
     // Decrypt the client secret
     let clientSecret = "";
-    if (oauthSettings.googleClientSecret) {
+    if (oauthSettings.googleClientSecretEncrypted) {
       try {
-        clientSecret = Buffer.from(
-          oauthSettings.googleClientSecret,
-          "base64",
-        ).toString("utf-8");
+        clientSecret = decryptClientSecret(
+          oauthSettings.googleClientSecretEncrypted,
+        );
       } catch (e) {
-        clientSecret = oauthSettings.googleClientSecret;
+        console.error("Failed to decrypt Google client secret:", e);
+        throw new APIError(
+          "Failed to decrypt Google OAuth credentials",
+          500,
+        );
       }
     }
 
