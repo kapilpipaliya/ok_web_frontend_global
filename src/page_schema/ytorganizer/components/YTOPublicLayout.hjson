@@ -136,34 +136,6 @@ return `._id {
       }
     },
     {
-      id: "header_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: "Ysaar"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: ${args.theme.var.color.primary};
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: 1.25rem;
-  }
-}`;
-'''
-      }
-    },
-    {
       id: "header_nav",
       L: "Attr",
       P: {
@@ -604,7 +576,6 @@ return {};
     { id: "e3", T: "Attr", S: "header", E: "header_content" },
     { id: "e4", T: "Attr", S: "header_content", E: "header_logo_wrapper" },
     { id: "e5", T: "Attr", S: "header_logo_wrapper", E: "header_logo" },
-    { id: "e6", T: "Attr", S: "header_logo_wrapper", E: "header_title" },
     { id: "e7", T: "Attr", S: "header_content", E: "header_nav" },
     { id: "e8", T: "Attr", S: "header_nav", E: "nav_pricing_link" },
     { id: "e9", T: "Attr", S: "header_nav", E: "nav_signin_link" },

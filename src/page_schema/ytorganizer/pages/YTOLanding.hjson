@@ -130,8 +130,8 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    width: 60px;
-    height: 60px;
+    width: 150px;
+    height: 150px;
   }
 }`;
 '''
@@ -922,6 +922,12 @@ return `._id {
   font-weight: 700;
   margin: 0;
   color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    text-align: center;
+  }
 }`;
 '''
       }
@@ -943,6 +949,12 @@ return `._id {
   align-items: baseline;
   gap: 0.25rem;
   margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    justify-content: center;
+  }
 }`;
 '''
       }
@@ -1057,7 +1069,15 @@ return {
 ''',
         css: '''
 return `._id {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    align-items: center;
+  }
 }`;
 '''
       }
