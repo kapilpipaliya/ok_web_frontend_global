@@ -157,7 +157,7 @@ try {
     `, {
       userUuid,
       accessToken: newAccessTokenEncrypted,
-      expiresAt: neo4jDriver.int(expiryTime)
+      expiresAt: args.neo4jDriver.int(expiryTime)
     });
 
     console.log(`[Token Refresh] Successfully refreshed token for user ${userUuid}`);

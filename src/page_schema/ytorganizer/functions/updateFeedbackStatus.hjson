@@ -1,0 +1,57 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "updateFeedbackStatus",
+        description: "Updates the status of a feedback submission",
+        body: '''
+const { feedbackId, status } = args.contextData;
+
+// Validate inputs
+if (!feedbackId) {
+  throw new Error("Feedback ID is required");
+}
+
+if (!status) {
+  throw new Error("Status is required");
+}
+
+// Validate status value
+const validStatuses = ['pending', 'reviewed', 'resolved'];
+if (!validStatuses.includes(status)) {
+  throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+}
+
+// Update feedback status
+const query = `
+  MATCH (f:Feedback)
+  WHERE elementId(f) = $feedbackId AND f.deletedAt IS NULL
+  SET f.status = $status,
+      f.updatedAt = datetime()
+  RETURN f
+`;
+
+const result = await args.session.run(query, {
+  feedbackId,
+  status
+});
+
+if (result.records.length === 0) {
+  throw new Error("Feedback not found");
+}
+
+const feedbackNode = result.records[0].get('f');
+
+return {
+  success: true,
+  message: `Feedback status updated to ${status}`,
+  data: args.convertNodeToJson(feedbackNode)
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

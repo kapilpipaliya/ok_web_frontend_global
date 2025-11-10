@@ -99,33 +99,41 @@ try {
     ? 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})'
     : 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)';
 
-  // CORRECTED SCHEMA:
-  // 1. Match PlaylistSetting->Video for playlist membership
-  // 2. Join with ownership VideoSettings for watched/notes/favourites
-  const playlistMatchClause = playlistId
-    ? 'MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})'
-    : 'MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)';
+  // Build video matching clause based on whether playlistId is provided
+  // When playlistId is provided: Match through PlaylistSetting->Video (videos in that playlist)
+  // When playlistId is null: Match through VideoSetting->Video (all videos for this ownership)
+  let videoMatchClause;
+
+  if (playlistId) {
+    // Match videos through playlist
+    videoMatchClause = `
+      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
+      OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    `;
+  } else {
+    // Match videos through VideoSettings (only videos belonging to this ownership)
+    videoMatchClause = `
+      MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+    `;
+  }
 
   // Build playlist info collection clause for includePlaylist
-  const playlistInfoClause = includePlaylist ? `
+  const playlistInfoClause = includePlaylist && playlistId ? `
     WITH v, vs, p, ps
   ` : '';
 
-  const playlistReturn = includePlaylist ? ', p as parentPlaylist, ps as parentPlaylistSetting' : '';
+  const playlistReturn = includePlaylist && playlistId ? ', p as parentPlaylist, ps as parentPlaylistSetting' : '';
 
   // Build SKIP and LIMIT clauses
   const skipClause = skip > 0 ? `SKIP ${skip}` : '';
   const limitClause = limit ? `LIMIT ${limit}` : '';
 
-  // Cypher query to fetch videos with details (CORRECTED SCHEMA)
-  // 1. PlaylistSetting->Video for playlist membership
-  // 2. YouTubeOwnership->VideoSetting->Video for global settings
+  // Cypher query to fetch videos with details
   const query = `
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
-    ${playlistMatchClause}
-    MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
-    OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    ${videoMatchClause}
     WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     ${playlistInfoClause}
     RETURN v, vs${playlistReturn}

@@ -8,8 +8,8 @@
         description: "Fetches a single playlist's videos for the current user",
         body: '''
 try {
-  // Extract playlist ID and ownership from request parameters
-  const { playlistId, ownershipId } = args.contextData;
+  // Extract playlist ID, ownership, and sort from request parameters
+  const { playlistId, ownershipId, sortBy = "position_asc" } = args.contextData;
 
   if (!playlistId) {
     throw new Error("Playlist ID is required");
@@ -20,6 +20,18 @@ try {
   if (!user) {
     throw new Error("User session not found. Please log in and try again.");
   }
+
+  // Parse sortBy parameter using shared utility
+  const parseSortResult = await args.executeNamedServerFunction({
+    functionName: "parseSortByUtil",
+    contextData: { sortBy, contentType: "videos" }
+  });
+
+  if (!parseSortResult.result) {
+    throw new Error("Failed to parse sort parameters");
+  }
+
+  const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
 
   // Verify user has access to this playlist and get video count using helper function
   const playlistResult = await args.executeNamedServerFunction({
@@ -48,9 +60,9 @@ try {
       userUuid: user.P.uuid,
       ownershipId,  // Filter by ownership
       playlistId: playlistId,
-      orderBy: 'vs.playlistIndex',
-      orderDirection: 'ASC',
-      secondaryOrderBy: 'v.publishedAt'
+      orderBy,
+      orderDirection,
+      secondaryOrderBy
     }
   });
 

@@ -28,9 +28,22 @@ if (args.contextData.action === 'start') {
 
   await logMessage('info', 'Starting background token refresh worker (runs every 6 hours)');
 
+  // Initialize queue helpers and Redis connection
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  if (!helpers.result?.success) {
+    await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
+    throw new Error('Queue helpers initialization failed');
+  }
+
   const { Worker, Queue } = args.bullmq;
   const connection = helpers.result.data.getRedisConnection();
+
+  // Validate Redis connection config
+  if (!connection || !connection.host) {
+    await logMessage('error', 'Invalid Redis connection configuration', { connection });
+    throw new Error('Invalid Redis connection configuration');
+  }
 
   // Create a queue for the scheduled token refresh jobs
   const tokenRefreshQueue = new Queue('backgroundRefreshTokens', { connection });
@@ -57,8 +70,15 @@ if (args.contextData.action === 'start') {
     timezone: 'UTC'
   });
 
-  // Create worker to process the scheduled token refresh jobs
-  const worker = new Worker('backgroundRefreshTokens', async (job) => {
+  // Small delay to ensure queue is fully initialized
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Create worker to process the scheduled token refresh jobs with error handling
+  let worker;
+  try {
+    await logMessage('info', 'Creating BullMQ Worker for token refresh');
+
+    worker = new Worker('backgroundRefreshTokens', async (job) => {
     await logMessage('info', 'Starting scheduled token refresh check', {
       jobId: job.id,
       scheduledTime: new Date().toISOString()
@@ -205,41 +225,83 @@ if (args.contextData.action === 'start') {
     concurrency: 1 // Only run one refresh job at a time
   });
 
-  worker.on('completed', async (job, result) => {
-    await logMessage('info', 'Scheduled token refresh job completed', {
-      jobId: job.id,
-      tokensRefreshed: result?.data?.tokensRefreshed,
-      tokensFailed: result?.data?.tokensFailed
+    // Event handlers for job lifecycle
+    worker.on('completed', async (job, result) => {
+      await logMessage('info', 'Scheduled token refresh job completed', {
+        jobId: job.id,
+        tokensRefreshed: result?.data?.tokensRefreshed,
+        tokensFailed: result?.data?.tokensFailed
+      });
     });
-  });
 
-  worker.on('failed', async (job, err) => {
-    await logMessage('error', 'Scheduled token refresh job failed', {
-      jobId: job?.id,
-      error: err.message,
-      stack: err.stack
+    worker.on('failed', async (job, err) => {
+      await logMessage('error', 'Scheduled token refresh job failed', {
+        jobId: job?.id,
+        error: err.message,
+        stack: err.stack
+      });
     });
-  });
 
-  // Return stop function for graceful shutdown
-  return {
-    stop: async () => {
-      await logMessage('info', 'Stopping background token refresh worker');
+    // Event handler for worker errors (including connection errors)
+    worker.on('error', async (err) => {
+      await logMessage('error', 'Worker error occurred', {
+        error: err.message,
+        stack: err.stack,
+        code: err.code
+      });
+    });
 
-      // Remove the repeatable job
-      try {
-        await tokenRefreshQueue.removeRepeatableByKey('backgroundRefreshTokens:token-refresh-repeatable::0 */6 * * *:UTC');
-        await logMessage('info', 'Removed repeatable job');
-      } catch (error) {
-        console.error('Error removing repeatable job:', error);
+    await logMessage('info', 'Token refresh worker created successfully', {
+      concurrency: 1
+    });
+
+    // Return stop function for graceful shutdown
+    return {
+      stop: async () => {
+        await logMessage('info', 'Stopping background token refresh worker');
+
+        // Remove the repeatable job
+        try {
+          await tokenRefreshQueue.removeRepeatableByKey('backgroundRefreshTokens:token-refresh-repeatable::0 */6 * * *:UTC');
+          await logMessage('info', 'Removed repeatable job');
+        } catch (error) {
+          console.error('Error removing repeatable job:', error);
+        }
+
+        // Close the worker and queue
+        if (worker) {
+          await worker.close();
+        }
+        await tokenRefreshQueue.close();
+        await logMessage('info', 'Stopped background token refresh worker');
       }
+    };
 
-      // Close the worker and queue
-      await worker.close();
-      await tokenRefreshQueue.close();
-      await logMessage('info', 'Stopped background token refresh worker');
+  } catch (error) {
+    await logMessage('error', 'Failed to create token refresh worker', {
+      error: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+
+    // If worker was partially created, try to close it
+    if (worker) {
+      try {
+        await worker.close();
+      } catch (closeError) {
+        console.error('Error closing worker:', closeError);
+      }
     }
-  };
+
+    // Close the queue
+    try {
+      await tokenRefreshQueue.close();
+    } catch (closeError) {
+      console.error('Error closing queue:', closeError);
+    }
+
+    throw error;
+  }
 }
 '''
       }

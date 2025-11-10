@@ -57,6 +57,7 @@
     "prettier": "^3.6.2",
     "property-information": "^7.1.0",
     "rambda": "^10.3.3",
+    "razorpay": "^2.9.6",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",

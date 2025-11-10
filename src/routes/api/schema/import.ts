@@ -48,11 +48,11 @@ type GraphType = ReturnType<typeof createAppState>[0];
 type SetGraphType = ReturnType<typeof createAppState>[1];
 
 async function findExistingVertex(
-  session: Session,
+  sessionOrTx: Session | Transaction,
   label: "Component" | "Page" | "Theme" | "Function",
   key: string,
 ): Promise<string | null> {
-  const result = await session.run(
+  const result = await sessionOrTx.run(
     `
       MATCH (v:${label} {key: $key})
       RETURN elementId(v) as id
@@ -84,7 +84,7 @@ async function validateUserAndPermissions(
 }
 
 async function deleteExistingItems(
-  dbSession: Session,
+  sessionOrTx: Session | Transaction,
   websiteSchemas: WebsiteSchemas,
   user: Vertex,
 ): Promise<string[]> {
@@ -94,14 +94,14 @@ async function deleteExistingItems(
   if (websiteSchemas.components) {
     for (const componentKey of Object.keys(websiteSchemas.components)) {
       const existingComponentId = await findExistingVertex(
-        dbSession,
+        sessionOrTx,
         "Component",
         componentKey,
       );
 
       if (existingComponentId) {
         console.log(`Deleting existing component: ${componentKey}`);
-        await deleteVertex(dbSession, existingComponentId, user);
+        await deleteVertex(sessionOrTx, existingComponentId, user);
         deletedItems.push(`Component: ${componentKey}`);
       }
     }
@@ -111,14 +111,14 @@ async function deleteExistingItems(
   if (websiteSchemas.pages) {
     for (const pageKey of Object.keys(websiteSchemas.pages)) {
       const existingPageId = await findExistingVertex(
-        dbSession,
+        sessionOrTx,
         "Page",
         pageKey,
       );
 
       if (existingPageId) {
         console.log(`Deleting existing page: ${pageKey}`);
-        await deleteVertex(dbSession, existingPageId, user);
+        await deleteVertex(sessionOrTx, existingPageId, user);
         deletedItems.push(`Page: ${pageKey}`);
       }
     }
@@ -128,14 +128,14 @@ async function deleteExistingItems(
   if (websiteSchemas.themes) {
     for (const themeKey of Object.keys(websiteSchemas.themes)) {
       const existingThemeId = await findExistingVertex(
-        dbSession,
+        sessionOrTx,
         "Theme",
         themeKey,
       );
 
       if (existingThemeId) {
         console.log(`Deleting existing theme: ${themeKey}`);
-        await deleteVertex(dbSession, existingThemeId, user);
+        await deleteVertex(sessionOrTx, existingThemeId, user);
         deletedItems.push(`Theme: ${themeKey}`);
       }
     }
@@ -145,14 +145,14 @@ async function deleteExistingItems(
   if (websiteSchemas.functions) {
     for (const functionKey of Object.keys(websiteSchemas.functions)) {
       const existingFunctionId = await findExistingVertex(
-        dbSession,
+        sessionOrTx,
         "Function",
         functionKey,
       );
 
       if (existingFunctionId) {
         console.log(`Deleting existing function: ${functionKey}`);
-        await deleteVertex(dbSession, existingFunctionId, user);
+        await deleteVertex(sessionOrTx, existingFunctionId, user);
         deletedItems.push(`Function: ${functionKey}`);
       }
     }
@@ -548,19 +548,15 @@ export async function GET({ request }: APIEvent) {
       throw new APIError(`No schemas found for website: ${websiteName}`, 404);
     }
 
-    // Delete existing items
-    const deletedItems = await deleteExistingItems(
-      dbSession,
-      websiteSchemas,
-      user,
-    );
-
-    // Create a new graph state for import
-    const [graph, setGraph] = createAppState();
-
-    // Start transaction for import
+    // Start transaction for entire operation (delete + import)
     const tx = dbSession.beginTransaction();
     try {
+      // Delete existing items within the transaction
+      const deletedItems = await deleteExistingItems(tx, websiteSchemas, user);
+
+      // Create a new graph state for import
+      const [graph, setGraph] = createAppState();
+
       // Import all schemas
       const stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
 

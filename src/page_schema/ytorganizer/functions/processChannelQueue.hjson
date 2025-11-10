@@ -28,9 +28,22 @@ if (args.contextData.action === 'start') {
 
   await logMessage('info', 'Starting channel processing worker');
 
+  // Initialize queue helpers and Redis connection
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  if (!helpers.result?.success) {
+    await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
+    throw new Error('Queue helpers initialization failed');
+  }
+
   const { Worker } = args.bullmq;
   const connection = helpers.result.data.getRedisConnection();
+
+  // Validate Redis connection config
+  if (!connection || !connection.host) {
+    await logMessage('error', 'Invalid Redis connection configuration', { connection });
+    throw new Error('Invalid Redis connection configuration');
+  }
 
   // Queue all channels that are marked as 'queued' but not in BullMQ queue
   await logMessage('info', 'Checking for queued channels to add to queue');
@@ -44,10 +57,14 @@ if (args.contextData.action === 'start') {
       MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
             -[:ChannelSettingChannel]->(c:Channel)
       WHERE cs.status = 'queued'
-      RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId, cs.priority as priority
+      RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId, cs.priority as priority, cs.queuedAt as queuedAt
+      ORDER BY cs.priority DESC, cs.queuedAt ASC
     `);
 
     let addedCount = 0;
+    let skippedCount = 0;
+
+    await logMessage('info', `Found ${queuedChannels.records.length} channels with status='queued' in database`);
 
     for (const record of queuedChannels.records) {
       const userUuid = record.get('userUuid');
@@ -78,11 +95,29 @@ if (args.contextData.action === 'start') {
         });
 
         addedCount++;
+        await logMessage('info', `Added channel to queue`, {
+          channelId,
+          ownershipId,
+          priority,
+          jobId
+        });
+      } else {
+        skippedCount++;
+        await logMessage('info', `Skipped channel - already in queue`, {
+          channelId,
+          ownershipId,
+          jobState,
+          jobId
+        });
       }
     }
 
     await channelQueue.close();
-    await logMessage('info', `Added ${addedCount} queued channels to queue`, { addedCount });
+    await logMessage('info', `Queue initialization complete`, {
+      totalFound: queuedChannels.records.length,
+      addedCount,
+      skippedCount
+    });
   } catch (error) {
     await logMessage('error', 'Error queuing channels on startup', {
       error: error.message,
@@ -90,8 +125,15 @@ if (args.contextData.action === 'start') {
     });
   }
 
-  // Create worker for channel processing queue
-  const worker = new Worker('processChannelQueue', async (job) => {
+  // Small delay to ensure queue connection is fully closed before creating worker
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Create worker for channel processing queue with error handling
+  let worker;
+  try {
+    await logMessage('info', 'Creating BullMQ Worker for channel processing');
+
+    worker = new Worker('processChannelQueue', async (job) => {
     const { channelId, userId, userUuid, ownershipId, customName, priority = 'normal' } = job.data;
 
     await logMessage('info', 'Processing channel', { channelId, userId, ownershipId, priority });
@@ -187,7 +229,7 @@ if (args.contextData.action === 'start') {
 
       // Get channel uploads playlist and all playlists
       const channelResponse = await youtube.channels.list({
-        part: ['contentDetails'],
+        part: ['contentDetails', 'snippet'],
         id: [channelId]
       });
 
@@ -224,11 +266,13 @@ if (args.contextData.action === 'start') {
 
       // Add uploads playlist if exists
       if (uploadsPlaylistId) {
+        const channelData = channelResponse.data.items[0];
         const uploadsPlaylist = {
           id: uploadsPlaylistId,
           snippet: {
             title: 'All Uploads',
-            description: 'All videos uploaded by this channel'
+            description: 'All videos uploaded by this channel',
+            thumbnails: channelData.snippet?.thumbnails || {}
           }
         };
         allPlaylists.unshift(uploadsPlaylist);
@@ -263,7 +307,11 @@ if (args.contextData.action === 'start') {
           SET
             p.title = $title,
             p.description = $description,
-            p.thumbnail = $thumbnail,
+            p.thumbnailDefault = $thumbnailDefault,
+            p.thumbnailMedium = $thumbnailMedium,
+            p.thumbnailHigh = $thumbnailHigh,
+            p.thumbnailStandard = $thumbnailStandard,
+            p.thumbnailMaxres = $thumbnailMaxres,
             p.channelId = $channelId,
             p.itemCount = $itemCount,
             p.updatedAt = datetime()
@@ -272,8 +320,11 @@ if (args.contextData.action === 'start') {
           key: `playlist_${playlist.id}`,
           title: playlist.snippet?.title || '',
           description: playlist.snippet?.description || '',
-          thumbnail: playlist.snippet?.thumbnails?.high?.url ||
-                     playlist.snippet?.thumbnails?.medium?.url || '',
+          thumbnailDefault: playlist.snippet?.thumbnails?.default?.url || null,
+          thumbnailMedium: playlist.snippet?.thumbnails?.medium?.url || null,
+          thumbnailHigh: playlist.snippet?.thumbnails?.high?.url || null,
+          thumbnailStandard: playlist.snippet?.thumbnails?.standard?.url || null,
+          thumbnailMaxres: playlist.snippet?.thumbnails?.maxres?.url || null,
           channelId,
           itemCount: playlist.contentDetails?.itemCount || 0
         });
@@ -406,6 +457,19 @@ if (args.contextData.action === 'start') {
     });
   });
 
+  // Event handler for worker errors (including connection errors)
+  worker.on('error', async (err) => {
+    await logMessage('error', 'Worker error occurred', {
+      error: err.message,
+      stack: err.stack,
+      code: err.code
+    });
+  });
+
+  await logMessage('info', 'Channel processing worker created successfully', {
+    concurrency: 2
+  });
+
   // Return stop function for graceful shutdown
   return {
     stop: async () => {
@@ -413,6 +477,25 @@ if (args.contextData.action === 'start') {
       await worker.close();
     }
   };
+
+} catch (error) {
+  await logMessage('error', 'Failed to create channel processing worker', {
+    error: error.message,
+    stack: error.stack,
+    code: error.code
+  });
+
+  // If worker was partially created, try to close it
+  if (worker) {
+    try {
+      await worker.close();
+    } catch (closeError) {
+      console.error('Error closing worker:', closeError);
+    }
+  }
+
+  throw error;
+}
 }
 '''
       }

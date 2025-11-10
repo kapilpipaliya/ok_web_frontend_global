@@ -1,0 +1,158 @@
+{
+  vertexes: [
+    {
+      id: "parse_sort_by_util_function",
+      L: "Function",
+      P: {
+        key: "parseSortByUtil",
+        description: "Shared utility function to parse sortBy parameter into database orderBy and orderDirection. Eliminates duplicate parsing logic across multiple backend functions.",
+        body: '''
+/**
+ * Parse SortBy Utility
+ *
+ * Converts frontend sortBy format ("field_direction") to database ordering parameters.
+ *
+ * Parameters (via args.contextData):
+ * - sortBy: string (required) - Sort format: "field_direction" (e.g., "title_asc", "created_desc", "relevance")
+ * - contentType: string (required) - Content type: "channels", "playlists", "videos", "favourites"
+ *
+ * Returns:
+ * {
+ *   orderBy: string - Database field name (e.g., "c.title", "ps.createdAt")
+ *   orderDirection: string - "ASC" or "DESC"
+ *   secondaryOrderBy: string | null - Optional secondary sort field
+ * }
+ *
+ * Supported sortBy values:
+ * - Channels: "title_asc", "title_desc", "created_asc", "created_desc", "videos_asc", "videos_desc"
+ * - Playlists: "title_asc", "title_desc", "created_asc", "created_desc", "videos_asc", "videos_desc", "position_asc"
+ * - Videos: "position_asc", "title_asc", "title_desc", "published_asc", "published_desc", "duration_asc", "duration_desc"
+ * - Favourites: "favourited_asc", "favourited_desc", "title_asc", "title_desc", "created_asc", "created_desc"
+ * - Special: "relevance" - Uses default sorting for the content type
+ */
+
+const { sortBy, contentType } = args.contextData;
+
+if (!sortBy) {
+  throw new Error("sortBy parameter is required");
+}
+
+if (!contentType) {
+  throw new Error("contentType parameter is required (channels, playlists, videos, favourites)");
+}
+
+/**
+ * Parse sortBy format: "field_direction"
+ * Example: "title_asc" -> field="title", direction="ASC"
+ */
+function parseSortByFormat(sortBy) {
+  const parts = sortBy.split('_');
+  const direction = parts[parts.length - 1].toUpperCase(); // Last part is direction
+  const field = parts.slice(0, -1).join('_'); // Everything before is the field
+
+  const validDirection = (direction === 'ASC' || direction === 'DESC') ? direction : 'ASC';
+
+  return { field, direction: validDirection };
+}
+
+/**
+ * Get field mapping for content type with secondary sort support
+ * Each field can map to either a string (simple) or object with primary/secondary
+ */
+function getFieldMapping(contentType) {
+  const mappings = {
+    channels: {
+      title: { primary: 'c.title', secondary: null },
+      created: { primary: 'cs.createdAt', secondary: 'c.title ASC' },
+      videos: { primary: 'videoCount', secondary: 'c.title ASC' },
+      favourited: { primary: 'cs.favouritedAt', secondary: 'c.title ASC' }
+    },
+    playlists: {
+      title: { primary: 'p.title', secondary: null },
+      created: { primary: 'ps.createdAt', secondary: 'p.title ASC' },
+      videos: { primary: 'videoCount', secondary: 'p.title ASC' },
+      position: { primary: 'p.publishedAt', secondary: 'p.title ASC' },
+      favourited: { primary: 'ps.favouritedAt', secondary: 'p.title ASC' }
+    },
+    videos: {
+      position: { primary: 'COALESCE(vs.playlistIndex, 999999)', secondary: 'v.publishedAt DESC' },
+      title: { primary: 'v.title', secondary: null },
+      published: { primary: 'v.publishedAt', secondary: 'v.title ASC' },
+      duration: { primary: 'v.duration', secondary: 'v.title ASC' },
+      favourited: { primary: 'vs.favouritedAt', secondary: 'v.title ASC' }
+    },
+    favourites: {
+      favourited: null,  // Will be set based on content type later
+      title: null,
+      created: null
+    }
+  };
+
+  return mappings[contentType] || {};
+}
+
+/**
+ * Get default ordering for "relevance" or fallback
+ */
+function getDefaultOrdering(contentType) {
+  const defaults = {
+    channels: { orderBy: 'cs.createdAt', orderDirection: 'DESC', secondaryOrderBy: null },
+    playlists: { orderBy: 'ps.createdAt', orderDirection: 'DESC', secondaryOrderBy: null },
+    videos: { orderBy: 'COALESCE(vs.playlistIndex, 999999)', orderDirection: 'ASC', secondaryOrderBy: 'v.publishedAt DESC' },
+    favourites: { orderBy: 'cs.favouritedAt', orderDirection: 'DESC', secondaryOrderBy: null }
+  };
+
+  return defaults[contentType] || { orderBy: 'createdAt', orderDirection: 'DESC', secondaryOrderBy: null };
+}
+
+/**
+ * Main parsing logic
+ */
+
+// Handle special case: "relevance"
+if (sortBy === "relevance") {
+  return getDefaultOrdering(contentType);
+}
+
+// Parse the sortBy format
+const { field, direction } = parseSortByFormat(sortBy);
+
+// Get field mapping for this content type
+const fieldMap = getFieldMapping(contentType);
+
+// Special handling for favourites (uses underlying content type fields)
+if (contentType === "favourites") {
+  // For favourites, map fields based on the actual field name
+  const favouriteFieldMap = {
+    favourited: { primary: 'cs.favouritedAt', secondary: 'c.title ASC' },
+    title: { primary: 'c.title', secondary: null },
+    created: { primary: 'cs.createdAt', secondary: 'c.title ASC' }
+  };
+
+  const fieldMapping = favouriteFieldMap[field] || favouriteFieldMap.title;
+
+  return {
+    orderBy: fieldMapping.primary,
+    orderDirection: direction,
+    secondaryOrderBy: fieldMapping.secondary
+  };
+}
+
+// Map field to database field with secondary sort support
+const fieldMapping = fieldMap[field] || Object.values(fieldMap)[0] || { primary: 'createdAt', secondary: null };
+
+// Extract primary orderBy and secondary
+const orderBy = fieldMapping.primary;
+const secondaryOrderBy = fieldMapping.secondary;
+
+return {
+  orderBy,
+  orderDirection: direction,
+  secondaryOrderBy
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

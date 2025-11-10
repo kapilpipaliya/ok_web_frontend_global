@@ -54,6 +54,14 @@ return {
                 pathCheck: (pathname) => pathname === "/yto/admin/quota-monitor"
               },
               {
+                id: "queue_management",
+                href: "/yto/admin/queue-management",
+                label: "Queue Management",
+                icon: "carbon:task-settings",
+                title: "Control processing queue operations",
+                pathCheck: (pathname) => pathname === "/yto/admin/queue-management"
+              },
+              {
                 id: "worker_health",
                 href: "/yto/admin/worker-health",
                 label: "Worker Health",
@@ -76,6 +84,14 @@ return {
                 icon: "carbon:user-multiple",
                 title: "View and manage all users",
                 pathCheck: (pathname) => pathname === "/yto/admin/users"
+              },
+              {
+                id: "user_feedback",
+                href: "/yto/admin/feedback",
+                label: "User Feedback",
+                icon: "carbon:chat",
+                title: "View and manage user feedback submissions",
+                pathCheck: (pathname) => pathname === "/yto/admin/feedback"
               },
               {
                 id: "api_keys",

@@ -1,0 +1,127 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "verifyPaymentSignature",
+        description: "Verify Razorpay payment signature and activate subscription",
+        body: '''
+try {
+  // Get authenticated user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in.");
+  }
+
+  const { orderId, paymentId, signature } = args.contextData;
+
+  if (!orderId || !paymentId || !signature) {
+    throw new Error("Order ID, payment ID, and signature are required");
+  }
+
+  // Fetch Razorpay settings
+  const settingsResult = await args.session.run(
+    "MATCH (s:RazorpaySettings) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
+  );
+
+  if (settingsResult.records.length === 0) {
+    throw new Error("Payment system is not configured");
+  }
+
+  const settingsNode = settingsResult.records[0].get("s");
+  const settingsVertex = args.convertNodeToJson(settingsNode);
+  const keySecret = Buffer.from(settingsVertex.P.razorpayKeySecret, "base64").toString("utf-8");
+
+  // Verify signature using Razorpay's algorithm
+  const crypto = require("crypto");
+  const generatedSignature = crypto
+    .createHmac("sha256", keySecret)
+    .update(orderId + "|" + paymentId)
+    .digest("hex");
+
+  if (generatedSignature !== signature) {
+    throw new Error("Invalid payment signature. Payment verification failed.");
+  }
+
+  // Find the pending subscription
+  const subscriptionResult = await args.session.run(
+    `MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription {razorpayOrderId: $orderId, status: 'pending'})
+     RETURN s`,
+    {
+      userId: user.P.uuid,
+      orderId: orderId
+    }
+  );
+
+  if (subscriptionResult.records.length === 0) {
+    throw new Error("No pending subscription found for this order");
+  }
+
+  const subscriptionNode = subscriptionResult.records[0].get("s");
+  const subscriptionVertex = args.convertNodeToJson(subscriptionNode);
+
+  // Update subscription status to active
+  const updateSubscriptionQuery = `
+    MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription {razorpayOrderId: $orderId})
+    SET s.razorpayPaymentId = $paymentId,
+        s.razorpaySignature = $signature,
+        s.status = 'active',
+        s.updatedAt = datetime()
+    RETURN s
+  `;
+
+  await args.session.run(updateSubscriptionQuery, {
+    userId: user.P.uuid,
+    orderId: orderId,
+    paymentId: paymentId,
+    signature: signature
+  });
+
+  // Update user's current plan and quota
+  const updateUserQuery = `
+    MATCH (u:User {uuid: $userId})
+    SET u.currentPlan = $plan,
+        u.videoQuotaLimit = $videoQuota,
+        u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0),
+        u.subscriptionStatus = 'active',
+        u.subscriptionExpiryDate = datetime($expiryDate)
+    RETURN u
+  `;
+
+  await args.session.run(updateUserQuery, {
+    userId: user.P.uuid,
+    plan: subscriptionVertex.P.plan,
+    videoQuota: subscriptionVertex.P.videoQuota,
+    expiryDate: subscriptionVertex.P.expiryDate
+  });
+
+  return {
+    success: true,
+    message: "Payment verified successfully! Your subscription is now active.",
+    data: {
+      plan: subscriptionVertex.P.plan,
+      billingCycle: subscriptionVertex.P.billingCycle,
+      videoQuota: subscriptionVertex.P.videoQuota,
+      expiryDate: subscriptionVertex.P.expiryDate,
+      status: 'active'
+    }
+  };
+
+} catch (error) {
+  console.error("Error verifying payment:", error);
+  return {
+    success: false,
+    message: error.message || "Failed to verify payment",
+    error: {
+      type: error.name,
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

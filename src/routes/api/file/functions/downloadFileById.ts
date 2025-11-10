@@ -33,12 +33,12 @@ export async function downloadFileById(
     const { filePath, originalFileName, mimeType } = metadata.P;
     const fileData = await fs.readFile(filePath);
 
-    // Ensure the filename is safe for headers
-    const safeFileName = encodeURIComponent(originalFileName);
+    // Ensure the filename is safe for headers using RFC 5987 encoding
+    const encodedFileName = encodeURIComponent(originalFileName);
 
     return new Response(fileData, {
       headers: {
-        "Content-Disposition": `attachment; filename="${safeFileName}"`,
+        "Content-Disposition": `attachment; filename*=UTF-8''${encodedFileName}`,
         "Content-Type": mimeType,
       },
       status: 200,

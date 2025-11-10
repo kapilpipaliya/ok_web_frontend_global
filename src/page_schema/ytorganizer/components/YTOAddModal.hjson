@@ -106,11 +106,18 @@ const handleSave = async () => {
     } else {
       // Add mode: create new
       const functionName = contentType === "playlists" ? "savePlaylist" : "saveChannel";
-      result = await args.fns.executeYTOFunction(functionName, {
+      const params = {
         url: urlValue,
         name: customName().trim() || null,
         priority: priority()
-      });
+      };
+
+      // If adding a playlist and channelId is provided, link it to the channel
+      if (contentType === "playlists" && args.contextData.props?.channelId) {
+        params.channelId = args.contextData.props.channelId;
+      }
+
+      result = await args.fns.executeYTOFunction(functionName, params);
     }
 
     if (result?.error) {

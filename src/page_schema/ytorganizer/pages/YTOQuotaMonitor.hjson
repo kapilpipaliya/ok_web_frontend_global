@@ -1,0 +1,1130 @@
+{
+  vertexes: [
+    {
+      id: "page_root"
+      L: "Page"
+      P: {
+        key: "YTOQuotaMonitor"
+        url: "/yto/admin/quota-monitor"
+        title: "YouTube API Quota Monitor"
+        description: "Monitor shared YouTube API quota usage across all users and ownerships"
+        signinRequired: true,
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout"
+      L: "PageLayout"
+      P: {
+        componentName: "YTOLayout"
+        displayOrder: 1
+        description: "YTO layout with navigation"
+      }
+    },
+    {
+      id: "admin_layout"
+      L: "PageLayout"
+      P: {
+        componentName: "YTOAdminLayout"
+        displayOrder: 2
+        description: "Admin layout wrapper"
+      }
+    },
+    {
+      id: "main_container"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        fns: '''
+const [quotaData, setQuotaData] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(true);
+
+// Auto-refresh interval state
+let refreshInterval = null;
+
+const fetchQuotaData = async () => {
+  setLoading(true);
+  try {
+    const result = await args.fns.executeYTOFunction("getSharedQuotaStatus", {});
+
+    if (result.error) {
+      args.showErrorToast(result.error);
+      return;
+    }
+
+    const serverResult = result.result;
+    if (serverResult?.data) {
+      setQuotaData(serverResult.data);
+    }
+  } catch (error) {
+    console.error('Error fetching quota data:', error);
+    args.showErrorToast('Failed to load quota data');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const startAutoRefresh = () => {
+  // Clear existing interval if any
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
+  // Start auto-refresh every 30 seconds
+  refreshInterval = setInterval(fetchQuotaData, 30000);
+};
+
+const stopAutoRefresh = () => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+    refreshInterval = null;
+  }
+};
+
+return {
+  quotaData,
+  loading,
+  fetchQuotaData,
+  startAutoRefresh,
+  stopAutoRefresh
+};
+'''
+        props: '''
+const fetchQuotaData = args.fns.fetchQuotaData;
+const startAutoRefresh = args.fns.startAutoRefresh;
+const stopAutoRefresh = args.fns.stopAutoRefresh;
+
+return {
+  as: "div",
+  onMount: () => {
+    fetchQuotaData();
+    startAutoRefresh();
+  },
+  onCleanup: () => {
+    stopAutoRefresh();
+  }
+};
+'''
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return {
+  as: "h1",
+  text: "YouTube API Quota Monitor"
+};
+'''
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_subtitle"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return {
+  as: "p",
+  text: "Shared quota across all users: 10,000 units per day (resets at midnight UTC)"
+};
+'''
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0.5rem 0 3rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_cards_grid"
+      L: "Attr"
+      P: {
+        displayOrder: 3
+        componentName: "Html"
+        props: '''
+return {
+  as: "div"
+};
+'''
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_usage_card"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "YTOSimpleCard"
+        props: '''
+const data = args.fns.quotaData?.();
+const status = data?.status;
+
+let variant = 'default';
+if (status?.level === 'critical' || status?.level === 'danger') {
+  variant = 'error';
+} else if (status?.level === 'warning') {
+  variant = 'warning';
+}
+
+return {
+  title: "Quota Usage",
+  icon: "carbon:analytics",
+  variant: variant
+};
+'''
+      }
+    },
+    {
+      id: "quota_usage_wrapper"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const loading = args.fns.loading?.();
+
+if (loading) {
+  return { as: "div", text: "Loading..." };
+}
+
+return { as: "div" };
+'''
+      }
+    },
+    {
+      id: "quota_usage_numbers"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const quota = data?.quota;
+const status = data?.status;
+
+if (!data || !quota) {
+  return { as: "div", text: "No data available" };
+}
+
+const color = status?.level === 'critical' || status?.level === 'danger'
+  ? args.theme.var.color.error
+  : status?.level === 'warning'
+    ? args.theme.var.color.warning
+    : args.theme.var.color.success;
+
+return {
+  as: "div",
+  text: `${quota.used.toLocaleString()} / ${quota.limit.toLocaleString()}`
+};
+'''
+        css: '''
+const data = args.fns.quotaData?.();
+const status = data?.status;
+
+const color = status?.level === 'critical' || status?.level === 'danger'
+  ? args.theme.var.color.error
+  : status?.level === 'warning'
+    ? args.theme.var.color.warning
+    : args.theme.var.color.success;
+
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${color};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_percentage"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const quota = data?.quota;
+
+return {
+  as: "div",
+  text: `${quota?.percentUsed || 0}% used`
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_outer"
+      L: "Attr"
+      P: {
+        displayOrder: 3
+        componentName: "Html"
+        props: '''
+return { as: "div" };
+'''
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_inner"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return { as: "div" };
+'''
+        css: '''
+const data = args.fns.quotaData?.();
+const quota = data?.quota;
+const status = data?.status;
+
+const color = status?.level === 'critical' || status?.level === 'danger'
+  ? args.theme.var.color.error
+  : status?.level === 'warning'
+    ? args.theme.var.color.warning
+    : args.theme.var.color.success;
+
+const width = Math.min(100, quota?.percentUsed || 0);
+
+return `._id {
+  background: ${color};
+  height: 100%;
+  width: ${width}%;
+  transition: width 0.3s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_status_section"
+      L: "Attr"
+      P: {
+        displayOrder: 4
+        componentName: "Html"
+        props: '''
+return { as: "div" };
+'''
+        css: '''
+return `._id {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${args.theme.var.color.background_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "status_message"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const status = data?.status;
+
+return {
+  as: "div",
+  text: `Status: ${status?.message || 'Loading...'}`
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "effective_remaining"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const quota = data?.quota;
+
+return {
+  as: "div",
+  text: `Effective remaining: ${quota?.effectiveRemaining?.toLocaleString() || 0} units (${quota?.activeReservations || 0} reserved)`
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_reset_card"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "YTOSimpleCard"
+        props: '''
+return {
+  title: "Quota Reset",
+  icon: "carbon:time"
+};
+'''
+      }
+    },
+    {
+      id: "reset_content_wrapper"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const loading = args.fns.loading?.();
+const data = args.fns.quotaData?.();
+
+if (loading || !data?.reset) {
+  return { as: "div", text: loading ? "Loading..." : "No data available" };
+}
+
+return { as: "div" };
+'''
+      }
+    },
+    {
+      id: "reset_time_display"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const reset = data?.reset;
+
+return {
+  as: "div",
+  text: `${reset?.inHours || 0}h ${reset?.inMinutes || 0}m`
+};
+'''
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "reset_label"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return {
+  as: "div",
+  text: "Resets at midnight UTC"
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "reset_timestamp"
+      L: "Attr"
+      P: {
+        displayOrder: 3
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const reset = data?.reset;
+
+const timestamp = reset?.time ? new Date(reset.time).toLocaleString() : '';
+
+return {
+  as: "div",
+  text: timestamp
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_stats_card"
+      L: "Attr"
+      P: {
+        displayOrder: 3
+        componentName: "YTOSimpleCard"
+        props: '''
+return {
+  title: "Usage Statistics",
+  icon: "carbon:chart-line"
+};
+'''
+      }
+    },
+    {
+      id: "stats_content_wrapper"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const loading = args.fns.loading?.();
+const data = args.fns.quotaData?.();
+
+if (loading || !data?.stats) {
+  return { as: "div", text: loading ? "Loading..." : "No data available" };
+}
+
+return { as: "div" };
+'''
+        css: '''
+return `._id {
+  display: grid;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "total_calls_section"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    {
+      id: "total_calls_number"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const stats = data?.stats;
+
+return {
+  as: "div",
+  text: stats?.totalCalls?.toLocaleString() || '0'
+};
+'''
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "total_calls_label"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return {
+  as: "div",
+  text: "Total API Calls"
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "avg_cost_section"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    {
+      id: "avg_cost_number"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+const stats = data?.stats;
+
+return {
+  as: "div",
+  text: String(stats?.averageCostPerCall || '0')
+};
+'''
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "avg_cost_label"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return {
+  as: "div",
+  text: "Avg Units Per Call"
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "breakdown_section"
+      L: "Attr"
+      P: {
+        displayOrder: 4
+        componentName: "YTOSimpleCard"
+        props: '''
+return {
+  title: "Usage Breakdown by Ownership",
+  icon: "carbon:tree-view"
+};
+'''
+      }
+    },
+    {
+      id: "breakdown_table_wrapper"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const loading = args.fns.loading?.();
+
+if (loading) {
+  return { as: "div", text: "Loading..." };
+}
+
+return { as: "div" };
+'''
+        css: '''
+const loading = args.fns.loading?.();
+
+if (loading) {
+  return `._id {
+    color: ${args.theme.var.color.muted};
+    padding: 1rem 0;
+  }`;
+}
+
+return `._id {
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "breakdown_table"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return { as: "table" };
+'''
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+}`;
+'''
+      }
+    },
+    {
+      id: "table_head"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return { as: "thead" };
+'''
+      }
+    },
+    {
+      id: "header_row"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return { as: "tr" };
+'''
+        css: '''
+return `._id {
+  border-bottom: 2px solid ${args.theme.var.color.background_light_400};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_ownership"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return {
+  as: "th",
+  text: "Ownership"
+};
+'''
+        css: '''
+return `._id {
+  padding: 0.75rem 0;
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_units"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return {
+  as: "th",
+  text: "Units Used"
+};
+'''
+        css: '''
+return `._id {
+  padding: 0.75rem 0;
+  text-align: right;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_percent"
+      L: "Attr"
+      P: {
+        displayOrder: 3
+        componentName: "Html"
+        props: '''
+return {
+  as: "th",
+  text: "% of Total"
+};
+'''
+        css: '''
+return `._id {
+  padding: 0.75rem 0;
+  text-align: right;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "table_body"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return { as: "tbody" };
+'''
+      }
+    },
+    {
+      id: "empty_state_row"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const data = args.fns.quotaData?.();
+
+// Only show when there's no breakdown data
+if (data?.breakdown && data.breakdown.length > 0) {
+  return { hide: true };
+}
+
+return { as: "tr" };
+'''
+      }
+    },
+    {
+      id: "empty_state_cell"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return {
+  as: "td",
+  colspan: "3",
+  text: "No usage data available for today"
+};
+'''
+        css: '''
+return `._id {
+  padding: 1.5rem 0;
+  text-align: center;
+  color: ${args.theme.var.color.muted};
+  font-style: italic;
+}`;
+'''
+      }
+    },
+    {
+      id: "data_rows_wrapper"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        contextName: "breakdownItem"
+        props: '''
+const data = args.fns.quotaData?.();
+
+// Only loop when there's data
+if (!data?.breakdown || data.breakdown.length === 0) {
+  return { hide: true };
+}
+
+return {
+  data: data.breakdown,
+  loop: true
+};
+'''
+      }
+    },
+    {
+      id: "data_row"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return { as: "tr" };
+'''
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.background_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "cell_ownership"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+return { as: "td" };
+'''
+        css: '''
+return `._id {
+  padding: 0.75rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_name"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const item = args.contextData.breakdownItem;
+
+return {
+  as: "div",
+  text: item.customName || item.channelName || item.ownershipId
+};
+'''
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_channel"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+const item = args.contextData.breakdownItem;
+
+if (!item.customName || !item.channelName) {
+  return { hide: true };
+}
+
+return {
+  as: "div",
+  text: item.channelName
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "cell_units"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+return { as: "td" };
+'''
+        css: '''
+return `._id {
+  padding: 0.75rem 0;
+  text-align: right;
+}`;
+'''
+      }
+    },
+    {
+      id: "units_number"
+      L: "Attr"
+      P: {
+        displayOrder: 1
+        componentName: "Html"
+        props: '''
+const item = args.contextData.breakdownItem;
+
+return {
+  as: "div",
+  text: item.used.toLocaleString()
+};
+'''
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "units_calls"
+      L: "Attr"
+      P: {
+        displayOrder: 2
+        componentName: "Html"
+        props: '''
+const item = args.contextData.breakdownItem;
+
+return {
+  as: "div",
+  text: `${item.calls} calls`
+};
+'''
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "cell_percent"
+      L: "Attr"
+      P: {
+        displayOrder: 3
+        componentName: "Html"
+        props: '''
+const item = args.contextData.breakdownItem;
+
+return {
+  as: "td",
+  text: `${item.percentOfTotal}%`
+};
+'''
+        css: '''
+return `._id {
+  padding: 0.75rem 0;
+  text-align: right;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e_layout", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
+    { id: "e1", T: "Attr", S: "page_root", E: "main_container" },
+    { id: "e2", T: "Attr", S: "main_container", E: "page_title" },
+    { id: "e3", T: "Attr", S: "main_container", E: "page_subtitle" },
+    { id: "e4", T: "Attr", S: "main_container", E: "quota_cards_grid" },
+
+    { id: "e5", T: "Attr", S: "quota_cards_grid", E: "quota_usage_card" },
+    { id: "e6", T: "Attr", S: "quota_usage_card", E: "quota_usage_wrapper" },
+    { id: "e7", T: "Attr", S: "quota_usage_wrapper", E: "quota_usage_numbers" },
+    { id: "e8", T: "Attr", S: "quota_usage_wrapper", E: "quota_percentage" },
+    { id: "e9", T: "Attr", S: "quota_usage_wrapper", E: "progress_bar_outer" },
+    { id: "e10", T: "Attr", S: "progress_bar_outer", E: "progress_bar_inner" },
+    { id: "e11", T: "Attr", S: "quota_usage_wrapper", E: "quota_status_section" },
+    { id: "e12", T: "Attr", S: "quota_status_section", E: "status_message" },
+    { id: "e13", T: "Attr", S: "quota_status_section", E: "effective_remaining" },
+
+    { id: "e14", T: "Attr", S: "quota_cards_grid", E: "quota_reset_card" },
+    { id: "e15", T: "Attr", S: "quota_reset_card", E: "reset_content_wrapper" },
+    { id: "e16", T: "Attr", S: "reset_content_wrapper", E: "reset_time_display" },
+    { id: "e17", T: "Attr", S: "reset_content_wrapper", E: "reset_label" },
+    { id: "e18", T: "Attr", S: "reset_content_wrapper", E: "reset_timestamp" },
+
+    { id: "e19", T: "Attr", S: "quota_cards_grid", E: "quota_stats_card" },
+    { id: "e20", T: "Attr", S: "quota_stats_card", E: "stats_content_wrapper" },
+    { id: "e21", T: "Attr", S: "stats_content_wrapper", E: "total_calls_section" },
+    { id: "e22", T: "Attr", S: "total_calls_section", E: "total_calls_number" },
+    { id: "e23", T: "Attr", S: "total_calls_section", E: "total_calls_label" },
+    { id: "e24", T: "Attr", S: "stats_content_wrapper", E: "avg_cost_section" },
+    { id: "e25", T: "Attr", S: "avg_cost_section", E: "avg_cost_number" },
+    { id: "e26", T: "Attr", S: "avg_cost_section", E: "avg_cost_label" },
+
+    { id: "e27", T: "Attr", S: "main_container", E: "breakdown_section" },
+    { id: "e28", T: "Attr", S: "breakdown_section", E: "breakdown_table_wrapper" },
+    { id: "e29", T: "Attr", S: "breakdown_table_wrapper", E: "breakdown_table" },
+    { id: "e30", T: "Attr", S: "breakdown_table", E: "table_head" },
+    { id: "e31", T: "Attr", S: "table_head", E: "header_row" },
+    { id: "e32", T: "Attr", S: "header_row", E: "header_ownership" },
+    { id: "e33", T: "Attr", S: "header_row", E: "header_units" },
+    { id: "e34", T: "Attr", S: "header_row", E: "header_percent" },
+    { id: "e35", T: "Attr", S: "breakdown_table", E: "table_body" },
+    { id: "e35a", T: "Attr", S: "table_body", E: "empty_state_row" },
+    { id: "e35b", T: "Attr", S: "empty_state_row", E: "empty_state_cell" },
+    { id: "e35c", T: "Attr", S: "table_body", E: "data_rows_wrapper" },
+    { id: "e36", T: "Attr", S: "data_rows_wrapper", E: "data_row" },
+    { id: "e37", T: "Attr", S: "data_row", E: "cell_ownership" },
+    { id: "e38", T: "Attr", S: "cell_ownership", E: "ownership_name" },
+    { id: "e39", T: "Attr", S: "cell_ownership", E: "ownership_channel" },
+    { id: "e40", T: "Attr", S: "data_row", E: "cell_units" },
+    { id: "e41", T: "Attr", S: "cell_units", E: "units_number" },
+    { id: "e42", T: "Attr", S: "cell_units", E: "units_calls" },
+    { id: "e43", T: "Attr", S: "data_row", E: "cell_percent" }
+  ]
+}

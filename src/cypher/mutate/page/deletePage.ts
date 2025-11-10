@@ -1,4 +1,4 @@
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
@@ -12,11 +12,15 @@ export type DeletableVertexType =
   | "Theme";
 
 export async function deleteVertex(
-  dbSession: Session,
+  sessionOrTx: Session | Transaction,
   vertexId: string,
   user: Vertex,
 ) {
-  const tx = dbSession.beginTransaction();
+  // Check if we received a Session or Transaction
+  const isSession = "beginTransaction" in sessionOrTx;
+  const tx = isSession
+    ? (sessionOrTx as Session).beginTransaction()
+    : (sessionOrTx as Transaction);
 
   try {
     // Check if vertex exists and get its labels
@@ -294,8 +298,10 @@ export async function deleteVertex(
       description,
     );
 
-    // Commit the transaction
-    await tx.commit();
+    // Only commit if we created the transaction
+    if (isSession) {
+      await tx.commit();
+    }
 
     console.log(
       `Deleted ${vertexType}: ${deletedVertexCount} vertices, ${deletedEdgeCount} edges`,
@@ -312,7 +318,10 @@ export async function deleteVertex(
       },
     };
   } catch (error) {
-    await tx.rollback();
+    // Only rollback if we created the transaction
+    if (isSession) {
+      await tx.rollback();
+    }
     throw error;
   }
 }

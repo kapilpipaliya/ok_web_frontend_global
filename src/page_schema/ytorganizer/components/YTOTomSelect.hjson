@@ -161,6 +161,24 @@
       }
     },
     {
+      id: "variant_plugins",
+      L: "ComponentVariant",
+      P: {
+        key: "plugins",
+        type: "array",
+        defValue: []
+      }
+    },
+    {
+      id: "variant_max_items",
+      L: "ComponentVariant",
+      P: {
+        key: "maxItems",
+        type: "number",
+        defValue: null
+      }
+    },
+    {
       id: "select_container",
       L: "Attr",
       P: {
@@ -465,6 +483,8 @@ const initializeTomSelect = () => {
   const multiple = props.multiple || false;
   const value = props.value || "";
   const onChange = props.onChange;
+  const plugins = props.plugins || [];
+  const maxItems = props.maxItems !== null && props.maxItems !== undefined ? props.maxItems : (multiple ? null : 1);
 
   if (!window.TomSelect) {
     console.error('TomSelect not loaded');
@@ -488,14 +508,14 @@ const initializeTomSelect = () => {
   // Initialize TomSelect
   try {
     tomSelectInstance = new window.TomSelect(selectRef(), {
-      plugins: [],
+      plugins: plugins,
       placeholder: placeholder,
       searchField: search ? ['text', 'value'] : [],
       allowEmptyOption: !required,
       closeAfterSelect: !multiple,
       hideSelected: multiple,
       create: false,
-      maxItems: multiple ? null : 1,
+      maxItems: maxItems,
       render: {
         option: function(data, escape) {
           const description = data.description;
@@ -523,6 +543,36 @@ const initializeTomSelect = () => {
 
     // Set initial value if provided
     setTomSelectValue(value);
+
+    // Add mobile click-outside-to-close functionality
+    // This allows users to close the dropdown by clicking the backdrop on mobile
+    if (tomSelectInstance) {
+      const isMobile = () => window.innerWidth <= 768;
+
+      // Use setTimeout to ensure dropdown is rendered before adding listener
+      setTimeout(() => {
+        const dropdown = tomSelectInstance.dropdown;
+        if (dropdown && isMobile()) {
+          const handleBackdropClick = (e) => {
+            // Only handle on mobile
+            if (!isMobile()) return;
+
+            // Only close if clicking directly on the backdrop (not on any children)
+            // This ensures clicking on options or dropdown content doesn't close the dropdown
+            if (e.target === dropdown) {
+              // Use blur() to trigger TomSelect's natural blur handling
+              tomSelectInstance.blur();
+            }
+          };
+
+          // Add click listener to dropdown backdrop
+          dropdown.addEventListener('click', handleBackdropClick);
+
+          // Store reference for cleanup
+          tomSelectInstance._backdropClickHandler = handleBackdropClick;
+        }
+      }, 0);
+    }
 
   } catch (err) {
     console.error('Error initializing TomSelect:', err);
@@ -692,6 +742,12 @@ const setTomSelectValue = (value) => {
 const cleanupTomSelect = () => {
   try {
     if (tomSelectInstance) {
+      // Remove backdrop click handler if it exists
+      if (tomSelectInstance._backdropClickHandler && tomSelectInstance.dropdown) {
+        tomSelectInstance.dropdown.removeEventListener('click', tomSelectInstance._backdropClickHandler);
+        delete tomSelectInstance._backdropClickHandler;
+      }
+
       tomSelectInstance.destroy();
       tomSelectInstance = null;
     }
@@ -742,6 +798,7 @@ const disabled = args.contextData.props?.disabled || false;
 const required = args.contextData.props?.required || false;
 const search = args.contextData.props?.search !== false;
 const multiple = args.contextData.props?.multiple || false;
+const className = args.contextData.props?.class;
 
 // Return element props with onMount and onCleanup
 return {
@@ -751,6 +808,7 @@ return {
   disabled: disabled,
   required: required,
   multiple: multiple,
+  class: className,
   onMount: () => {
 
     // Check if TomSelect is already loaded
@@ -779,8 +837,10 @@ return {
 };
 ''',
         css: '''
+const hasCustomClass = args.contextData.props?.class;
+
 return `._id {
-  width: 100%;
+  ${!hasCustomClass ? 'width: 100%;' : ''}
   position: relative;
   display: flex;
   align-items: center;
@@ -1005,6 +1065,8 @@ return `._id {
     { id: "e15", T: "ComponentVariant", S: "component_root", E: "variant_label_key" },
     { id: "e16", T: "ComponentVariant", S: "component_root", E: "variant_data_key" },
     { id: "e17", T: "ComponentVariant", S: "component_root", E: "variant_function_context" },
-    { id: "e18", T: "Attr", S: "component_root", E: "select_container" }
+    { id: "e18", T: "ComponentVariant", S: "component_root", E: "variant_plugins" },
+    { id: "e19", T: "ComponentVariant", S: "component_root", E: "variant_max_items" },
+    { id: "e20", T: "Attr", S: "component_root", E: "select_container" }
   ]
 }

@@ -18,14 +18,29 @@ try {
   const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
   // Optional ownership filter from context
-  const { ownershipId = null } = args.contextData;
+  const { ownershipId = null, sortBy = "title_asc" } = args.contextData;
+
+  // Parse sortBy parameter using shared utility
+  const parseSortResult = await args.executeNamedServerFunction({
+    functionName: "parseSortByUtil",
+    contextData: { sortBy, contentType: "playlists" }
+  });
+
+  if (!parseSortResult.result) {
+    throw new Error("Failed to parse sort parameters");
+  }
+
+  const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
 
   // Use helper function to fetch playlists with video counts
   const result = await args.executeNamedServerFunction({
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
-      ownershipId  // Optional: filter by specific ownership
+      ownershipId,  // Optional: filter by specific ownership
+      orderBy,
+      orderDirection,
+      secondaryOrderBy  // Pass secondary sort for multi-field sorting
     }
   });
 

@@ -5,6 +5,7 @@ import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
 import { OAuthSettings } from "~/pages/global/oauth/OAuthSettings";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
+import { RazorpaySettings } from "~/pages/global/razorpay/RazorpaySettings";
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
 import { StripeSettings } from "~/pages/global/stripe/StripeSettings";
 import { SupportTickets } from "~/pages/global/support/SupportTickets";
@@ -48,6 +49,13 @@ export default function AdminGlobalSettings() {
       icon: "ph:credit-card",
       id: "stripe",
       label: "Stripe Settings",
+    },
+    {
+      component: RazorpaySettings,
+      group: "Payments",
+      icon: "ph:currency-dollar",
+      id: "razorpay",
+      label: "Razorpay Settings",
     },
     {
       component: ThemeSettings,

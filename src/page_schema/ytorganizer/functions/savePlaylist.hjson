@@ -83,7 +83,7 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Verify ownership belongs to user
+  // Verify ownership belongs to user and get channel ID
   const ownershipCheck = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     RETURN o
@@ -93,10 +93,30 @@ try {
     throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
   }
 
+  const ownershipNode = ownershipCheck.records[0].get('o');
+  const ownership = args.convertNodeToJson(ownershipNode);
+  const ownershipChannelId = ownership.P.channelId;
+
+  if (!ownershipChannelId) {
+    throw new Error("YouTube ownership does not have a channel ID. Please reconnect your YouTube account.");
+  }
+
   // Extract playlist ID from the provided URL
-  const playlistId = extractPlaylistId(url);
+  let playlistId = extractPlaylistId(url);
   if (!playlistId) {
     throw new Error("Invalid YouTube playlist URL. Please provide a valid playlist URL.");
+  }
+
+  // SPECIAL PLAYLIST HANDLING:
+  // Some playlists (LL=Liked, WL=Watch Later, UU=Uploads, FL=Favorites, HL=History)
+  // have 2-character IDs that are user-specific or channel-specific.
+  // We need to make them unique per channel by appending the channelId from YouTubeOwnership
+  const isSpecialPlaylist = playlistId.length === 2 && /^(LL|WL|UU|FL|HL)$/.test(playlistId);
+  let originalPlaylistId = playlistId; // Store the original ID for API calls
+
+  if (isSpecialPlaylist) {
+    // Append channel ID from ownership to make it unique
+    playlistId = `${playlistId}_${ownershipChannelId}`;
   }
 
   // DUPLICATE JOB PREVENTION: Check if this playlist is already queued or processing for this ownership
@@ -151,7 +171,30 @@ try {
   }
 
   // Fetch ONLY basic playlist metadata using ownership's OAuth (fast operation)
-  const playlistData = await fetchPlaylistMetadata(playlistId, youtube, ownershipId, args.session);
+  // Use originalPlaylistId for API calls (special playlists use 2-char IDs in API)
+  const playlistData = await fetchPlaylistMetadata(
+    isSpecialPlaylist ? originalPlaylistId : playlistId,
+    youtube,
+    ownershipId,
+    args.session
+  );
+
+  // VALIDATE: If channelId is provided, ensure playlist belongs to that channel
+  if (channelId) {
+    const playlistChannelId = playlistData.snippet.channelId;
+    if (playlistChannelId !== channelId) {
+      return {
+        success: false,
+        message: `This playlist belongs to a different channel. The playlist "${playlistData.snippet.title}" is from channel "${playlistData.snippet.channelTitle}", not from the channel you selected.`,
+        error: {
+          type: "ChannelMismatch",
+          details: "The playlist does not belong to the specified channel",
+          expectedChannelId: channelId,
+          actualChannelId: playlistChannelId
+        }
+      };
+    }
+  }
 
   // STEP 1: Create or update the main Playlist vertex with basic metadata
   const playlistKey = `playlist_${playlistId}`;
@@ -170,6 +213,7 @@ try {
       p.channelId = $channelId,
       p.privacyStatus = $privacyStatus,
       p.itemCount = $itemCount,
+      p.originalPlaylistId = $originalPlaylistId,
       p.publishedAt = datetime($publishedAt),
       p.updatedAt = datetime()
     RETURN p
@@ -187,6 +231,7 @@ try {
     channelId: playlistData.snippet.channelId,
     privacyStatus: playlistData.status?.privacyStatus || "unknown",
     itemCount: playlistData.contentDetails?.itemCount || 0,
+    originalPlaylistId: isSpecialPlaylist ? originalPlaylistId : null,
     publishedAt: playlistData.snippet.publishedAt
   });
 
@@ -214,10 +259,10 @@ try {
       ps.queuedAt = datetime(),
       ps.lastUpdated = datetime(),
       ps.updatedAt = datetime()
-    RETURN ps
+    RETURN ps, p
   `;
 
-  await args.session.run(mergePlaylistSettingQuery, {
+  const playlistSettingResult = await args.session.run(mergePlaylistSettingQuery, {
     ownershipId,
     playlistId,
     playlistSettingKey,
@@ -225,7 +270,14 @@ try {
     priority: playlistPriority
   });
 
-  // If playlist is part of a channel, create relationship
+  // Extract the PlaylistSetting and Playlist vertices from the result
+  const playlistSettingNode = playlistSettingResult.records[0].get('ps');
+  const playlistNode = playlistSettingResult.records[0].get('p');
+  const playlistSetting = args.convertNodeToJson(playlistSettingNode);
+  const playlist = args.convertNodeToJson(playlistNode);
+
+  // If playlist is part of a channel, create the relationship
+  // (Validation already done earlier before any database operations)
   if (channelId) {
     const channelPlaylistQuery = `
       MATCH (c:Channel {youtubeId: $channelId})
@@ -269,18 +321,8 @@ try {
       ? `Playlist "${playlistData.snippet.title}" has been queued for refresh. All videos will be re-fetched from YouTube.`
       : `Playlist "${playlistData.snippet.title}" has been queued for processing. This may take a few minutes.`,
     data: {
-      playlistId,
-      title: playlistData.snippet.title,
-      customName: name,
-      status: 'queued',
-      progress: 0,
-      totalVideos: playlistData.contentDetails?.itemCount || 0,
-      channelTitle: playlistData.snippet.channelTitle,
-      userId: user.id,
-      ownershipId: ownershipId,  // Ownership context for multi-account support
-      userSpecific: true,
-      isRefresh: refresh,
-      usesOAuth: true
+      playlist: playlist,  // Playlist vertex
+      playlistSetting: playlistSetting  // PlaylistSetting vertex
     }
   };
 

@@ -1,0 +1,617 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "YTOPublicLayout",
+        description: "Common layout for public YTO pages (landing, privacy, terms)"
+      }
+    },
+    // Root container
+    {
+      id: "layout_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    // Header Section
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.75rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "header_logo_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: () => args.navigate('/')
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "header_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Ysaar Logo"
+};
+''',
+        css: '''
+return `._id {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 32px;
+    height: 32px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Ysaar"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: ${args.theme.var.color.primary};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header_nav",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_pricing_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Pricing",
+  href: "#pricing",
+  onClick: (e) => {
+    e.preventDefault();
+    // Only scroll if on landing page
+    if (args.location.pathname === '/') {
+      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      args.navigate('/#pricing');
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_signin_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Sign In",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/auth/signin');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_get_started_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Get Started",
+  onClick: () => args.navigate('/auth/signup')
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    // Main content slot
+    {
+      id: "main_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "content_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        props: '''
+return {
+  name: "children"
+};
+'''
+      }
+    },
+    // Footer Section
+    {
+      id: "footer_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border-top: 1px solid ${args.theme.var.color.border};
+  padding: 3rem 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 2rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_logo_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Ysaar Logo"
+};
+''',
+        css: '''
+return `._id {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "© 2025 Ysaar. All rights reserved."
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_links",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_privacy_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Privacy Policy",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/privacy');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_terms_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Terms of Service",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/terms');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_contact_link",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Contact",
+  href: "mailto:support@ysaar.com"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_youtube_attribution",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "YTOYouTubeAttribution",
+        props: '''
+return {};
+'''
+      }
+    }
+  ],
+  edges: [
+    // Component to root
+    { id: "e1", T: "Attr", S: "component_root", E: "layout_root" },
+
+    // Root to header
+    { id: "e2", T: "Attr", S: "layout_root", E: "header" },
+    { id: "e3", T: "Attr", S: "header", E: "header_content" },
+    { id: "e4", T: "Attr", S: "header_content", E: "header_logo_wrapper" },
+    { id: "e5", T: "Attr", S: "header_logo_wrapper", E: "header_logo" },
+    { id: "e6", T: "Attr", S: "header_logo_wrapper", E: "header_title" },
+    { id: "e7", T: "Attr", S: "header_content", E: "header_nav" },
+    { id: "e8", T: "Attr", S: "header_nav", E: "nav_pricing_link" },
+    { id: "e9", T: "Attr", S: "header_nav", E: "nav_signin_link" },
+    { id: "e10", T: "Attr", S: "header_nav", E: "nav_get_started_button" },
+
+    // Root to main content
+    { id: "e11", T: "Attr", S: "layout_root", E: "main_content" },
+    { id: "e12", T: "Attr", S: "main_content", E: "content_slot" },
+
+    // Root to footer
+    { id: "e13", T: "Attr", S: "layout_root", E: "footer_section" },
+    { id: "e14", T: "Attr", S: "footer_section", E: "footer_container" },
+    { id: "e15", T: "Attr", S: "footer_container", E: "footer_logo_section" },
+    { id: "e16", T: "Attr", S: "footer_logo_section", E: "footer_logo" },
+    { id: "e17", T: "Attr", S: "footer_logo_section", E: "footer_text" },
+    { id: "e18", T: "Attr", S: "footer_container", E: "footer_links" },
+    { id: "e19", T: "Attr", S: "footer_links", E: "footer_privacy_link" },
+    { id: "e20", T: "Attr", S: "footer_links", E: "footer_terms_link" },
+    { id: "e21", T: "Attr", S: "footer_links", E: "footer_contact_link" },
+    { id: "e22", T: "Attr", S: "footer_container", E: "footer_youtube_attribution" }
+  ]
+}

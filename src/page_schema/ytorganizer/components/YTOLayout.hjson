@@ -274,6 +274,9 @@ const [ownershipsLoading, setOwnershipsLoading] = args.createSignal(false);
 const [quotaUsage, setQuotaUsage] = args.createSignal(null);
 const [quotaLoading, setQuotaLoading] = args.createSignal(false);
 
+// Card field settings state management
+const [cardFieldSettings, setCardFieldSettings] = args.createSignal();
+
 // Load impersonation state from sessionStorage (client-side only)
 // This is called from onMount to avoid SSR/hydration mismatch
 const loadImpersonationState = () => {
@@ -480,6 +483,63 @@ const getQuotaUsagePercentage = () => {
   const usage = quotaUsage();
   if (!usage || !usage.quota) return 0;
   return Math.round(usage.quota.percentUsed);
+};
+
+// Load card field settings from user settings
+const loadCardFieldSettings = async () => {
+  try {
+    const result = await executeYTOFunction('getYTOUserSettings', {});
+    if (result?.result?.success && result?.result?.data?.settings) {
+      const settings = result.result.data.settings;
+      if (settings.P.cardFieldSettings) {
+        const parsed = typeof settings.P.cardFieldSettings === 'string'
+          ? JSON.parse(settings.P.cardFieldSettings)
+          : settings.P.cardFieldSettings;
+        setCardFieldSettings(parsed);
+      }
+    }
+  } catch (error) {
+    console.error('Error loading card field settings:', error);
+    // Keep default settings on error
+  }
+};
+
+// Save card field settings to user settings
+const saveCardFieldSettings = async (newSettings) => {
+  try {
+    // Validate structure
+    if (!newSettings || typeof newSettings !== 'object') {
+      throw new Error('Invalid card field settings');
+    }
+
+    // Ensure all required keys exist
+    const validated = {
+      video: Array.isArray(newSettings.video) ? newSettings.video : cardFieldSettings().video,
+      playlist: Array.isArray(newSettings.playlist) ? newSettings.playlist : cardFieldSettings().playlist,
+      channel: Array.isArray(newSettings.channel) ? newSettings.channel : cardFieldSettings().channel
+    };
+
+    // Update local state
+    setCardFieldSettings(validated);
+
+    // Save to backend
+    const result = await executeYTOFunction('saveYTOUserSettings', {
+      settings: {
+        cardFieldSettings: validated
+      }
+    });
+
+    if (result?.result?.success) {
+      args.showSuccessToast('Card field settings saved successfully');
+      return true;
+    } else {
+      throw new Error('Failed to save settings');
+    }
+  } catch (error) {
+    console.error('Error saving card field settings:', error);
+    args.showErrorToast('Failed to save card field settings');
+    return false;
+  }
 };
 
 // Video player state management
@@ -758,14 +818,14 @@ const navigationSectionsData = [
     title: null, // No title for other section
     hasBorder: true,
     items: [
-      {
-        id: "accounts",
-        href: "/accounts",
-        label: "Accounts",
-        icon: "mdi:account-multiple",
-        title: "Manage your YouTube accounts",
-        pathCheck: (pathname) => pathname.startsWith("/accounts")
-      },
+      // {
+      //   id: "accounts",
+      //   href: "/accounts",
+      //   label: "Accounts",
+      //   icon: "mdi:account-multiple",
+      //   title: "Manage your YouTube accounts",
+      //   pathCheck: (pathname) => pathname.startsWith("/accounts")
+      // },
       {
         id: "settings",
         href: "/settings",
@@ -856,14 +916,14 @@ const mobileNavigationItemsData = [
     title: "View your favourite videos, channels and playlists",
     pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "favourites"
   },
-  {
-    id: "accounts",
-    href: "/accounts",
-    label: "Accounts",
-    icon: "mdi:account-multiple",
-    title: "Manage your YouTube accounts",
-    pathCheck: (pathname) => pathname.startsWith("/accounts")
-  },
+  // {
+  //   id: "accounts",
+  //   href: "/accounts",
+  //   label: "Accounts",
+  //   icon: "mdi:account-multiple",
+  //   title: "Manage your YouTube accounts",
+  //   pathCheck: (pathname) => pathname.startsWith("/accounts")
+  // },
   {
     id: "settings",
     href: "/settings",
@@ -874,11 +934,11 @@ const mobileNavigationItemsData = [
   },
   {
     id: "admin_dashboard",
-    href: "/admin_home",
+    href: "/yto/admin",
     label: "Admin",
     icon: "carbon:dashboard-reference",
     title: "Admin dashboard home",
-    pathCheck: (pathname) => pathname === "/admin_home" || pathname === "/admin_home/",
+    pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/",
     // Only show for admin users
     showIf: checkAdminRole
   },
@@ -1007,6 +1067,9 @@ return {
   isAtQuotaLimit,
   getQuotaResetTime,
   getQuotaUsagePercentage,
+  cardFieldSettings,
+  loadCardFieldSettings,
+  saveCardFieldSettings,
   navigationSections,
   setNavigationSections,
   mobileNavigationItems,
@@ -1052,6 +1115,9 @@ return {
 
     // Fetch quota usage for selected ownership
     args.fns.fetchQuotaUsage?.();
+
+    // Load card field settings from user settings
+    args.fns.loadCardFieldSettings?.();
 
     // Refresh quota usage every 5 minutes
     const quotaInterval = setInterval(() => {
@@ -1327,7 +1393,7 @@ return `._id {
         props: '''
 return {
   as: "label",
-  text: "YouTube Account",
+  text: "Youtube Account",
   for: "ownership-selector"
 };
 ''',

@@ -97,8 +97,10 @@
         displayOrder: 1
         componentName: "Html"
         props: '''
+const className = args.contextData.props?.class;
 return {
-  as: "div"
+  as: "div",
+  class: className
 };
 '''
         css: '''
@@ -124,7 +126,6 @@ return `._id {
   border: 1px solid ${borderColor};
   border-radius: ${args.theme.var.borderRadius.lg};
   ${noPadding ? '' : `padding: ${args.theme.var.spacing.lg};`}
-  overflow: hidden;
   transition: box-shadow ${args.theme.var.animation.normal} ease;
 
   &:hover {

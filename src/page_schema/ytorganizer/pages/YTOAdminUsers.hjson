@@ -214,7 +214,13 @@ const handleFilterChange = (status) => {
 
 // Delete user handler
 const handleDeleteUser = async (userId, username) => {
-  const confirmed = await args.rbConfirm({
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  if (!rbConfirm) {
+    args.showErrorToast("Confirmation dialog not available");
+    return;
+  }
+
+  const confirmed = await rbConfirm({
     title: "Delete User",
     message: `Are you sure you want to permanently delete user "${username}"? This will remove all their data including channels, playlists, and videos.`,
     confirmText: "Delete User",

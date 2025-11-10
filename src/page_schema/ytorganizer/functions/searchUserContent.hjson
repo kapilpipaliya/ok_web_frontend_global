@@ -9,7 +9,7 @@
         body: '''
 try {
   // Extract search parameters from request
-  const { query, type, isRegex = false, ownershipId } = args.contextData;
+  const { query, type, isRegex = false, ownershipId, sortBy = "relevance" } = args.contextData;
 
   if (!query || query.trim().length === 0) {
     return {
@@ -33,6 +33,20 @@ try {
   // Get effective user (handles admin impersonation)
   const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
+  // Helper function to parse sortBy using shared utility
+  const parseSortBy = async (sortBy, contentType) => {
+    const parseSortResult = await args.executeNamedServerFunction({
+      functionName: "parseSortByUtil",
+      contextData: { sortBy, contentType }
+    });
+
+    if (!parseSortResult.result) {
+      throw new Error("Failed to parse sort parameters");
+    }
+
+    return parseSortResult.result;
+  };
+
   // Prepare search pattern for case-insensitive matching
   const trimmedQuery = query.trim();
   let searchPattern;
@@ -54,6 +68,8 @@ try {
 
   // SEARCH CHANNELS
   if (!type || type === 'all' || type === 'channels') {
+    const { orderBy, orderDirection, secondaryOrderBy } = await parseSortBy(sortBy, "channels");
+
     // Use helper function with custom filter for regex search
     const channelsResult = await args.executeNamedServerFunction({
       functionName: "getChannelsWithVideoCount",
@@ -62,8 +78,9 @@ try {
         ownershipId,  // Filter by ownership if provided
         customFilter: 'c.title =~ $pattern OR c.description =~ $pattern OR cs.customName =~ $pattern',
         customFilterParams: { pattern: searchPattern },
-        orderBy: 'cs.createdAt',
-        orderDirection: 'DESC'
+        orderBy,
+        orderDirection,
+        secondaryOrderBy  // Pass secondary sort
       }
     });
 
@@ -76,6 +93,8 @@ try {
 
   // SEARCH PLAYLISTS
   if (!type || type === 'all' || type === 'playlists') {
+    const { orderBy, orderDirection, secondaryOrderBy } = await parseSortBy(sortBy, "playlists");
+
     // Use helper function with custom filter for regex search
     const playlistsResult = await args.executeNamedServerFunction({
       functionName: "getPlaylistsWithVideoCount",
@@ -84,8 +103,9 @@ try {
         ownershipId,  // Filter by ownership if provided
         customFilter: 'p.title =~ $pattern OR p.description =~ $pattern OR ps.customName =~ $pattern',
         customFilterParams: { pattern: searchPattern },
-        orderBy: 'ps.createdAt',
-        orderDirection: 'DESC'
+        orderBy,
+        orderDirection,
+        secondaryOrderBy  // Pass secondary sort
       }
     });
 
@@ -98,6 +118,8 @@ try {
 
   // SEARCH VIDEOS
   if (!type || type === 'all' || type === 'videos') {
+    const { orderBy, orderDirection, secondaryOrderBy } = await parseSortBy(sortBy, "videos");
+
     // Use helper function with custom filter for regex search
     const videosResult = await args.executeNamedServerFunction({
       functionName: "getVideosWithDetails",
@@ -107,8 +129,9 @@ try {
         customFilter: 'v.title =~ $pattern OR v.description =~ $pattern OR v.channelTitle =~ $pattern OR vs.notes =~ $pattern',
         customFilterParams: { pattern: searchPattern },
         includePlaylist: true,
-        orderBy: 'vs.updatedAt',
-        orderDirection: 'DESC'
+        orderBy,
+        orderDirection,
+        secondaryOrderBy  // Pass secondary sort
       }
     });
 

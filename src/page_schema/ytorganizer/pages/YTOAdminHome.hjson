@@ -154,6 +154,16 @@ return {
       enabled: true
     },
     {
+      title: "Queue Management",
+      description: "Control processing queue operations for all channels and playlists. Pause all processing when approaching quota limits or resume paused items.",
+      icon: "carbon:task-settings",
+      iconBg: "warning_light_100",
+      hoverBorder: "warning",
+      link: "/yto/admin/queue-management",
+      linkText: "Manage Queue",
+      enabled: true
+    },
+    {
       title: "Worker Health",
       description: "Monitor background workers, queue status, and job processing health. View real-time metrics for channel and playlist processing.",
       icon: "carbon:dashboard",
@@ -191,6 +201,16 @@ return {
       hoverBorder: "warning",
       link: "/yto/admin/api-keys",
       linkText: "Manage API Keys",
+      enabled: true
+    },
+    {
+      title: "User Feedback",
+      description: "View and manage user feedback submissions. Review bug reports, feature requests, and improvement suggestions from users.",
+      icon: "carbon:chat",
+      iconBg: "success_light_100",
+      hoverBorder: "success",
+      link: "/yto/admin/feedback",
+      linkText: "View Feedback",
       enabled: true
     },
     {

@@ -56,48 +56,6 @@ const submitFeedback = async (data) => {
   }
 };
 
-// Queue Management state
-const [isPausing, setIsPausing] = args.createSignal(false);
-const [isResuming, setIsResuming] = args.createSignal(false);
-
-// Pause all channels and playlists
-const pauseAllChannels = async () => {
-  setIsPausing(true);
-  try {
-    const result = await args.fns.executeYTOFunction("pauseAllChannels", {});
-
-    if (result?.result?.success) {
-      showMessage('success', result.result.message || "All processing paused successfully");
-    } else {
-      showMessage('error', result?.result?.message || "Failed to pause processing");
-    }
-  } catch (error) {
-    console.error("Error pausing channels:", error);
-    showMessage('error', "An error occurred while pausing");
-  } finally {
-    setIsPausing(false);
-  }
-};
-
-// Resume all pending channels and playlists
-const resumePendingChannels = async () => {
-  setIsResuming(true);
-  try {
-    const result = await args.fns.executeYTOFunction("resumePendingChannels", {});
-
-    if (result?.result?.success) {
-      showMessage('success', result.result.message || "All items resumed successfully");
-    } else {
-      showMessage('error', result?.result?.message || "Failed to resume processing");
-    }
-  } catch (error) {
-    console.error("Error resuming channels:", error);
-    showMessage('error', "An error occurred while resuming");
-  } finally {
-    setIsResuming(false);
-  }
-};
-
 return {
   enabled: true,
   messageState,
@@ -106,11 +64,7 @@ return {
   isFeedbackModalOpen,
   openFeedbackModal,
   closeFeedbackModal,
-  submitFeedback,
-  isPausing,
-  isResuming,
-  pauseAllChannels,
-  resumePendingChannels
+  submitFeedback
 };
 ''',
         props: '''
@@ -398,266 +352,10 @@ return {
       }
     },
     {
-      id: "navigation_section",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 2rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "navigation_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h2",
-  text: "Navigation"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 1rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "navigation_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "nav_card_channels",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => args.navigate("/content?type=channels")
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-  font-family: inherit;
-
-  &:hover {
-    background: ${args.theme.var.color.background_dark_100};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "nav_channels_icon_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 40px;
-  height: 40px;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_light_100_text};
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "nav_channels_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:youtube",
-  width: 24,
-  height: 24
-};
-'''
-      }
-    },
-    {
-      id: "nav_channels_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Channels"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "nav_card_playlists",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => args.navigate("/content?type=playlists")
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-  font-family: inherit;
-
-  &:hover {
-    background: ${args.theme.var.color.background_dark_100};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "nav_playlists_icon_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 40px;
-  height: 40px;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_light_100_text};
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "nav_playlists_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:playlist-play",
-  width: 24,
-  height: 24
-};
-'''
-      }
-    },
-    {
-      id: "nav_playlists_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Playlists"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
       id: "appearance_section",
       L: "Attr",
       P: {
-        displayOrder: 4,
+        displayOrder: 4.6,
         componentName: "Html",
         props: '''
 return {
@@ -844,37 +542,251 @@ return `._id {
       }
     },
     {
-      id: "youtube_connection_title",
+      id: "youtube_connection_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOSimpleCard",
+        css: '''
+return `._id {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    display: block;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "selector_description",
+      L: "Attr",
+      P: {
+        displayOrder: 0.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Switch between your connected YouTube accounts. This will update all content across the app."
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_label",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
-  as: "h2",
-  text: "YouTube Accounts"
+  as: "label",
+  text: "Switch Account",
+  for: "ownership-selector"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 1rem 0;
+  display: block;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.sm};
 }`;
 '''
       }
     },
     {
-      id: "youtube_connection_card",
+      id: "ownership_selector",
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "YTOSimpleCard"
+        componentName: "YTOTomSelect",
+        props: '''
+const ownerships = args.fns.ownerships?.() || [];
+const selectedOwnership = args.fns.selectedOwnership?.();
+const selectedOwnershipId = selectedOwnership?.P?.key;
+
+// Transform ownerships into options format for TomSelect
+// Add status indicator for disconnected accounts
+const ownershipOptions = ownerships.map(ownership => {
+  const name = ownership.P.customName || ownership.P.channelName || ownership.P.key;
+  const isConnected = ownership._isConnected;
+  const label = isConnected ? name : `${name} (Disconnected)`;
+
+  return {
+    value: ownership.P.key,
+    label: label
+  };
+});
+
+return {
+  value: selectedOwnershipId || "",
+  options: ownershipOptions,
+  placeholder: "Select YouTube Account...",
+  search: true,
+  onChange: async (ownershipId) => {
+    const ownership = ownerships.find(o => o.P.key === ownershipId);
+    if (ownership) {
+      // Check if account is disconnected
+      if (!ownership._isConnected) {
+        args.showWarningToast("This account is disconnected. Please reconnect it from Account Settings.");
+        return;
+      }
+
+      await args.fns.selectOwnership?.(ownership);
+      // Reload page to refresh all data with new ownership
+      window.location.reload();
+    }
+  }
+};
+'''
       }
     },
     {
-      id: "youtube_accounts_message",
+      id: "ownership_selector_help",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const ownerships = args.fns.ownerships?.() || [];
+const hasAccounts = ownerships.length > 0;
+
+return {
+  as: "div",
+  hide: hasAccounts
+};
+''',
+        css: '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info};
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:info",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  flex-shrink: 0;
+  margin-top: 2px;
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.info_light_100_text};
+  line-height: 1.5;
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_text_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "No YouTube accounts connected. "
+};
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Go to Accounts to connect",
+  href: "/accounts",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/accounts');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "account_management_card",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "YTOSimpleCard",
+        css: '''
+return `._id {
+  margin-top: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "account_management_message",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -895,7 +807,7 @@ return `._id {
       }
     },
     {
-      id: "youtube_accounts_button",
+      id: "account_management_button",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -904,12 +816,13 @@ return `._id {
 return {
   text: "Manage YouTube Accounts",
   variant: "primary",
-  onClick: () => args.navigate("/accounts")};
+  onClick: () => args.navigate("/accounts")
+};
 '''
       }
     },
     {
-      id: "queue_management_section",
+      id: "card_display_section",
       L: "Attr",
       P: {
         displayOrder: 4.7,
@@ -927,7 +840,7 @@ return `._id {
       }
     },
     {
-      id: "queue_management_title",
+      id: "card_display_title",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -935,7 +848,7 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "Processing Queue Controls"
+  text: "Card Display"
 };
 ''',
         css: '''
@@ -949,7 +862,7 @@ return `._id {
       }
     },
     {
-      id: "queue_management_card",
+      id: "card_display_card",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -965,134 +878,115 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.75rem;
   padding: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "queue_management_description",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Manage all channel and playlist processing operations. Pause all active processing when approaching API quota limits, or resume items that are paused or waiting for quota reset."
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.9375rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 1.25rem 0;
-  line-height: 1.6;
-}`;
-'''
-      }
-    },
-    {
-      id: "queue_management_buttons",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
 @media (max-width: 640px) {
   ._id {
     flex-direction: column;
+    align-items: flex-start;
   }
 }`;
 '''
       }
     },
     {
-      id: "pause_all_button",
+      id: "card_display_text_wrapper",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "YTOButton",
-        props: '''
-const isPausing = args.fns.isPausing?.();
-
-return {
-  text: isPausing ? "Pausing..." : "⏸️ Pause All Processing",
-  variant: "secondary",
-  onClick: args.fns.pauseAllChannels,
-  disabled: isPausing
-};
-'''
-      }
-    },
-    {
-      id: "resume_all_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "YTOButton",
-        props: '''
-const isResuming = args.fns.isResuming?.();
-
-return {
-  text: isResuming ? "Resuming..." : "▶️ Resume All",
-  variant: "primary",
-  onClick: args.fns.resumePendingChannels,
-  disabled: isResuming
-};
-'''
-      }
-    },
-    {
-      id: "queue_management_help",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {
   as: "div"
 };
-''',
-        css: '''
-return `._id {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: ${args.theme.var.color.info_light_50};
-  border-left: 3px solid ${args.theme.var.color.info};
-  border-radius: 0.5rem;
-}`;
 '''
       }
     },
     {
-      id: "queue_management_help_text",
+      id: "card_display_label",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
+  as: "label",
+  text: "Configure Card Fields"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  display: block;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_display_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
   as: "p",
-  text: "💡 Tip: Items with status 'pending_quota' will automatically retry at midnight UTC when your daily quota resets. You can also manually resume them using the 'Resume All' button."
+  text: "Customize which additional fields appear on video, playlist, and channel cards. You can select up to 5 fields for each card type and reorder them as needed."
 };
 ''',
         css: '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.info_light_50_text};
+  color: ${args.theme.var.color.text_light_200};
   margin: 0;
-  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_display_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/settings/card-fields",
+  text: "Configure Fields",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate("/settings/card-fields");
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.625rem 1.25rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 0.5rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-block;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
 }`;
 '''
       }
@@ -1129,9 +1023,9 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.primary};
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -1150,21 +1044,14 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary_light_50};
-  border: 2px solid ${args.theme.var.color.primary_light_200};
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info};
   border-radius: 0.75rem;
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
-}
-
-._id:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {
@@ -1203,11 +1090,11 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: ${args.theme.var.color.primary_light_50_text};
+  color: ${args.theme.var.color.info_light_100_text};
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
       }
@@ -1226,8 +1113,8 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 0.9375rem;
-  color: ${args.theme.var.color.primary_light_50_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.info_light_100_text};
   margin: 0;
   line-height: 1.5;
 }`;
@@ -1505,17 +1392,6 @@ return {
     { id: "e4d", T: "Attr", S: "message_banner", E: "message_text" },
     { id: "e4e", T: "Attr", S: "message_banner", E: "message_close_button" },
     { id: "e4f", T: "Attr", S: "message_close_button", E: "message_close_icon" },
-    { id: "e5", T: "Attr", S: "settings_container", E: "navigation_section" },
-    { id: "e6", T: "Attr", S: "navigation_section", E: "navigation_title" },
-    { id: "e7", T: "Attr", S: "navigation_section", E: "navigation_grid" },
-    { id: "e8", T: "Attr", S: "navigation_grid", E: "nav_card_channels" },
-    { id: "e9", T: "Attr", S: "nav_card_channels", E: "nav_channels_icon_wrapper" },
-    { id: "e10", T: "Attr", S: "nav_channels_icon_wrapper", E: "nav_channels_icon" },
-    { id: "e11", T: "Attr", S: "nav_card_channels", E: "nav_channels_text" },
-    { id: "e12", T: "Attr", S: "navigation_grid", E: "nav_card_playlists" },
-    { id: "e13", T: "Attr", S: "nav_card_playlists", E: "nav_playlists_icon_wrapper" },
-    { id: "e14", T: "Attr", S: "nav_playlists_icon_wrapper", E: "nav_playlists_icon" },
-    { id: "e15", T: "Attr", S: "nav_card_playlists", E: "nav_playlists_text" },
     { id: "e16", T: "Attr", S: "settings_container", E: "appearance_section" },
     { id: "e17", T: "Attr", S: "appearance_section", E: "appearance_title" },
     { id: "e18", T: "Attr", S: "appearance_section", E: "theme_preference" },
@@ -1524,19 +1400,25 @@ return {
     { id: "e21", T: "Attr", S: "theme_label_wrapper", E: "theme_description" },
     { id: "e22", T: "Attr", S: "theme_preference", E: "theme_toggle_button" },
     { id: "e22a", T: "Attr", S: "settings_container", E: "youtube_connection_section" },
-    { id: "e22b", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_title" },
     { id: "e22c", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_card" },
-    { id: "e22c1", T: "Attr", S: "youtube_connection_card", E: "youtube_accounts_message" },
-    { id: "e22c2", T: "Attr", S: "youtube_connection_card", E: "youtube_accounts_button" },
-    { id: "e22w", T: "Attr", S: "settings_container", E: "queue_management_section" },
-    { id: "e22x", T: "Attr", S: "queue_management_section", E: "queue_management_title" },
-    { id: "e22y", T: "Attr", S: "queue_management_section", E: "queue_management_card" },
-    { id: "e22z", T: "Attr", S: "queue_management_card", E: "queue_management_description" },
-    { id: "e22aa", T: "Attr", S: "queue_management_card", E: "queue_management_buttons" },
-    { id: "e22ab", T: "Attr", S: "queue_management_buttons", E: "pause_all_button" },
-    { id: "e22ac", T: "Attr", S: "queue_management_buttons", E: "resume_all_button" },
-    { id: "e22ad", T: "Attr", S: "queue_management_card", E: "queue_management_help" },
-    { id: "e22ae", T: "Attr", S: "queue_management_help", E: "queue_management_help_text" },
+    { id: "e22c0", T: "Attr", S: "youtube_connection_card", E: "selector_description" },
+    { id: "e22c1", T: "Attr", S: "youtube_connection_card", E: "ownership_selector_label" },
+    { id: "e22c2", T: "Attr", S: "youtube_connection_card", E: "ownership_selector" },
+    { id: "e22c3", T: "Attr", S: "youtube_connection_card", E: "ownership_selector_help" },
+    { id: "e22c4", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_icon" },
+    { id: "e22c5", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_text" },
+    { id: "e22c6", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_text_content" },
+    { id: "e22c7", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_link" },
+    { id: "e22d", T: "Attr", S: "youtube_connection_section", E: "account_management_card" },
+    { id: "e22d1", T: "Attr", S: "account_management_card", E: "account_management_message" },
+    { id: "e22d2", T: "Attr", S: "account_management_card", E: "account_management_button" },
+    { id: "e22e", T: "Attr", S: "settings_container", E: "card_display_section" },
+    { id: "e22f", T: "Attr", S: "card_display_section", E: "card_display_title" },
+    { id: "e22g", T: "Attr", S: "card_display_section", E: "card_display_card" },
+    { id: "e22h", T: "Attr", S: "card_display_card", E: "card_display_text_wrapper" },
+    { id: "e22i", T: "Attr", S: "card_display_text_wrapper", E: "card_display_label" },
+    { id: "e22j", T: "Attr", S: "card_display_text_wrapper", E: "card_display_description" },
+    { id: "e22k", T: "Attr", S: "card_display_card", E: "card_display_button" },
     { id: "e23", T: "Attr", S: "settings_container", E: "feedback_section" },
     { id: "e24", T: "Attr", S: "feedback_section", E: "feedback_title" },
     { id: "e25", T: "Attr", S: "feedback_section", E: "feedback_card" },

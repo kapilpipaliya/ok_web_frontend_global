@@ -22,6 +22,7 @@
  *   Allowed values: 'cs.createdAt', 'cs.updatedAt', 'cs.favouritedAt', 'c.title',
  *                   'c.publishedAt', 'c.videoCount', 'c.subscriberCount', 'c.viewCount', 'videoCount'
  * - orderDirection: string (optional) - Order direction 'ASC' or 'DESC' (default: 'DESC')
+ * - secondaryOrderBy: string (optional) - Secondary sort field (e.g., 'c.title ASC')
  * - limit: number (optional) - Maximum number of results to return
  * - skip: number (optional) - Number of results to skip (for pagination)
  *
@@ -39,6 +40,7 @@ try {
     customFilterParams = {},
     orderBy = 'cs.createdAt',
     orderDirection = 'DESC',
+    secondaryOrderBy = null,  // Optional: secondary sort
     limit = null,
     skip = 0
   } = args.contextData;
@@ -65,7 +67,7 @@ try {
   // Build custom filter clause if provided
   const customFilterClause = customFilter ? `AND (${customFilter})` : '';
 
-  // Validate and build ORDER BY clause
+  // Validate and build ORDER BY clause with secondary sort support
   // Allowed fields for ordering
   const allowedOrderFields = [
     'cs.createdAt', 'cs.updatedAt', 'cs.favouritedAt',
@@ -79,6 +81,11 @@ try {
     const direction = (orderDirection || 'DESC').toUpperCase();
     if (direction === 'ASC' || direction === 'DESC') {
       orderByClause = `${orderBy} ${direction}`;
+
+      // Add secondary sort if provided
+      if (secondaryOrderBy) {
+        orderByClause += `, ${secondaryOrderBy}`;
+      }
     }
   }
 

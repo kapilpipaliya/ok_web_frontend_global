@@ -336,9 +336,6 @@ The system tracks YouTube API quota consumption with a shared 10,000 units/day l
 - `DAILY_QUOTA_LIMIT` - Constant: 10,000 units/day
 - `RESERVATION_EXPIRY_MS` - Constant: 5 minutes (300,000ms)
 
-**API Endpoints:**
-- `/api/youtube/usage` - Get shared API usage statistics across all users
-
 **Admin Monitoring:**
 - **YTOQuotaMonitor**: Admin page at `/yto/admin/quota-monitor` for real-time monitoring
 - **Background Workers**: BullMQ worker monitors quota levels every 5 minutes

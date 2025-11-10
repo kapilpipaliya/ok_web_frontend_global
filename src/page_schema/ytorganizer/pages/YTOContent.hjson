@@ -61,6 +61,330 @@ const [searchInput, setSearchInput] = args.createSignal(searchQuery);
 // State for favourites view
 const [favouritesData, setFavouritesData] = args.createSignal(null);
 
+// State for user settings
+const [userSettings, setUserSettings] = args.createSignal(null);
+const [settingsLoaded, setSettingsLoaded] = args.createSignal(false);
+
+// Sort state for different views - split into field + direction for better UX
+// List view (channels/playlists)
+const [listSortField, setListSortField] = args.createSignal("title");
+const [listSortDirection, setListSortDirection] = args.createSignal("asc");
+
+// Detail view (playlists for channels / videos for playlists)
+const [detailSortField, setDetailSortField] = args.createSignal("position");
+const [detailSortDirection, setDetailSortDirection] = args.createSignal("asc");
+
+// Search view
+const [searchSortField, setSearchSortField] = args.createSignal("relevance");
+const [searchSortDirection, setSearchSortDirection] = args.createSignal("asc");
+
+// Favourites view
+const [favouritesSortField, setFavouritesSortField] = args.createSignal("favourited");
+const [favouritesSortDirection, setFavouritesSortDirection] = args.createSignal("desc");
+
+// Computed values for backward compatibility and backend calls
+const listSortBy = args.createMemo(() =>
+  listSortField() === "relevance" ? "relevance" : `${listSortField()}_${listSortDirection()}`
+);
+const detailSortBy = args.createMemo(() =>
+  detailSortField() === "relevance" ? "relevance" : `${detailSortField()}_${detailSortDirection()}`
+);
+const searchSortBy = args.createMemo(() =>
+  searchSortField() === "relevance" ? "relevance" : `${searchSortField()}_${searchSortDirection()}`
+);
+const favouritesSortBy = args.createMemo(() =>
+  favouritesSortField() === "relevance" ? "relevance" : `${favouritesSortField()}_${favouritesSortDirection()}`
+);
+
+// Initialize sort from URL if present (highest priority)
+const initializeSortFromURL = () => {
+  const urlSort = args.searchParams?.sort;
+  if (!urlSort) return false;
+
+  // Handle "relevance" special case
+  if (urlSort === "relevance") {
+    if (isSearchView()) {
+      setSearchSortField("relevance");
+      setSearchSortDirection("asc");
+    }
+    return true;
+  }
+
+  // Validate sort format (field_direction)
+  const sortPattern = /^([a-z_]+)_(asc|desc)$/;
+  const match = urlSort.match(sortPattern);
+
+  if (!match) {
+    console.warn('Invalid sort parameter in URL:', urlSort);
+    return false;
+  }
+
+  const [, field, direction] = match;
+
+  // Apply to current view
+  if (isFavouritesView()) {
+    setFavouritesSortField(field);
+    setFavouritesSortDirection(direction);
+  } else if (isSearchView()) {
+    setSearchSortField(field);
+    setSearchSortDirection(direction);
+  } else if (isDetailView()) {
+    setDetailSortField(field);
+    setDetailSortDirection(direction);
+  } else {
+    setListSortField(field);
+    setListSortDirection(direction);
+  }
+
+  return true;
+};
+
+// Update URL when sort changes
+const updateURLSort = (sortValue) => {
+  if (!sortValue) return;
+
+  const currentPath = window.location.pathname;
+  const currentSearch = new URLSearchParams(window.location.search);
+
+  currentSearch.set('sort', sortValue);
+
+  const newURL = `${currentPath}?${currentSearch.toString()}`;
+  window.history.replaceState({}, '', newURL);
+};
+
+// Clear sort from URL
+const clearURLSort = () => {
+  const currentPath = window.location.pathname;
+  const currentSearch = new URLSearchParams(window.location.search);
+
+  currentSearch.delete('sort');
+
+  const newURL = currentSearch.toString()
+    ? `${currentPath}?${currentSearch.toString()}`
+    : currentPath;
+
+  window.history.replaceState({}, '', newURL);
+};
+
+// Helper to split "field_direction" format into field + direction
+const splitSortValue = (sortValue) => {
+  if (!sortValue || sortValue === "relevance") {
+    return { field: "relevance", direction: "asc" };
+  }
+
+  const match = sortValue.match(/^([a-z_]+)_(asc|desc)$/);
+  if (!match) {
+    return { field: "title", direction: "asc" }; // fallback
+  }
+
+  return { field: match[1], direction: match[2] };
+};
+
+// Function to load user settings
+const loadUserSettings = async () => {
+  try {
+    const result = await args.fns.executeYTOFunction("getYTOUserSettings", {});
+
+    if (result?.result?.success && result?.result?.data?.settings) {
+      const settingsVertex = result.result.data.settings;
+      setUserSettings(settingsVertex);
+
+      // Update sort signals from saved settings (access via .P property)
+      if (settingsVertex.P?.sortPreferences) {
+        const prefs = typeof settingsVertex.P.sortPreferences === 'string'
+          ? JSON.parse(settingsVertex.P.sortPreferences)
+          : settingsVertex.P.sortPreferences;
+
+        // Set initial sort values from preferences (split into field + direction)
+        if (prefs.channels) {
+          const { field, direction } = splitSortValue(prefs.channels);
+          setListSortField(field);
+          setListSortDirection(direction);
+        }
+        if (prefs.videos) {
+          const { field, direction } = splitSortValue(prefs.videos);
+          setDetailSortField(field);
+          setDetailSortDirection(direction);
+        }
+        if (prefs.favourites) {
+          const { field, direction } = splitSortValue(prefs.favourites);
+          setFavouritesSortField(field);
+          setFavouritesSortDirection(direction);
+        }
+      }
+
+      setSettingsLoaded(true);
+    }
+  } catch (error) {
+    console.error("Error loading user settings:", error);
+    setSettingsLoaded(true);  // Mark as loaded even on error to prevent blocking
+  }
+};
+
+// Clear URL sort param when view changes
+args.createEffect(() => {
+  // Track view state
+  const detailView = isDetailView();
+  const searchView = isSearchView();
+  const favourites = isFavouritesView();
+
+  // Clear URL on view change (not on initial mount)
+  if (settingsLoaded()) {
+    clearURLSort();
+  }
+});
+
+// Save user settings when sort preferences change
+const debouncedSaveSettings = args.debounce(async () => {
+  try {
+    const currentSettingsVertex = userSettings() || { P: {} };
+
+    const sortPreferences = {
+      channels: listSortBy(),
+      playlists: listSortBy(),  // Playlists use the same sort as channels in list view
+      videos: detailSortBy(),
+      favourites: favouritesSortBy()
+    };
+
+    const updatedSettingsProps = {
+      ...currentSettingsVertex.P,
+      sortPreferences: JSON.stringify(sortPreferences)
+    };
+
+    await args.fns.executeYTOFunction("saveYTOUserSettings", {
+      settings: updatedSettingsProps
+    });
+
+    // Update local vertex with new properties
+    setUserSettings({
+      ...currentSettingsVertex,
+      P: updatedSettingsProps
+    });
+  } catch (error) {
+    console.error("Error saving user settings:", error);
+  }
+}, 1000);  // Debounce for 1 second to avoid excessive saves
+
+// Watch sort changes and save settings
+args.createEffect(
+  args.on(
+    () => [listSortBy(), detailSortBy(), favouritesSortBy(), settingsLoaded()],
+    () => {
+      // Only save if settings have been loaded (avoid saving defaults before load)
+      if (settingsLoaded()) {
+        debouncedSaveSettings();
+      }
+    }
+  )
+);
+
+// Sort options for different content types (field only, direction handled by toggle)
+const channelSortOptions = [
+  { value: "title", text: "Title" },
+  { value: "created", text: "Created Date" },
+  { value: "videos", text: "Video Count" }
+];
+
+const playlistSortOptions = [
+  { value: "title", text: "Title" },
+  { value: "created", text: "Created Date" },
+  { value: "videos", text: "Video Count" },
+  { value: "position", text: "Playlist Order" }
+];
+
+const videoSortOptions = [
+  { value: "position", text: "Playlist Order" },
+  { value: "title", text: "Title" },
+  { value: "published", text: "Published Date" },
+  { value: "duration", text: "Duration" }
+];
+
+const favouritesSortOptions = [
+  { value: "favourited", text: "Favourited Date" },
+  { value: "title", text: "Title" },
+  { value: "created", text: "Created Date" }
+];
+
+// Get current sort options based on view and content type
+const getCurrentSortOptions = args.createMemo(() => {
+  if (isFavouritesView()) {
+    return favouritesSortOptions;
+  }
+  if (isDetailView()) {
+    return contentType === "channels" ? playlistSortOptions : videoSortOptions;
+  }
+  if (isSearchView()) {
+    return [
+      { value: "relevance", text: "Default" },
+      { value: "title", text: "Title" },
+      { value: "created", text: "Created Date" }
+    ];
+  }
+  return contentType === "playlists" ? playlistSortOptions : channelSortOptions;
+});
+
+// Get current sort value based on view
+const getCurrentSortValue = args.createMemo(() => {
+  if (isFavouritesView()) return favouritesSortBy();
+  if (isDetailView()) return detailSortBy();
+  if (isSearchView()) return searchSortBy();
+  return listSortBy();
+});
+
+// Set current sort value based on view
+const setCurrentSortValue = (value) => {
+  const { field, direction } = splitSortValue(value);
+
+  if (isFavouritesView()) {
+    setFavouritesSortField(field);
+    setFavouritesSortDirection(direction);
+  } else if (isDetailView()) {
+    setDetailSortField(field);
+    setDetailSortDirection(direction);
+  } else if (isSearchView()) {
+    setSearchSortField(field);
+    setSearchSortDirection(direction);
+  } else {
+    setListSortField(field);
+    setListSortDirection(direction);
+  }
+
+  // Update URL with new sort value
+  updateURLSort(value);
+};
+
+// Get current sort field based on view
+const getCurrentSortField = args.createMemo(() => {
+  if (isFavouritesView()) return favouritesSortField();
+  if (isDetailView()) return detailSortField();
+  if (isSearchView()) return searchSortField();
+  return listSortField();
+});
+
+// Get current sort direction based on view
+const getCurrentSortDirection = args.createMemo(() => {
+  if (isFavouritesView()) return favouritesSortDirection();
+  if (isDetailView()) return detailSortDirection();
+  if (isSearchView()) return searchSortDirection();
+  return listSortDirection();
+});
+
+// Handle field change (keeps direction the same)
+const handleSortFieldChange = (newField) => {
+  const currentDirection = getCurrentSortDirection();
+  const newSortValue = newField === "relevance" ? "relevance" : `${newField}_${currentDirection}`;
+  setCurrentSortValue(newSortValue);
+};
+
+// Handle direction toggle (keeps field the same)
+const handleSortDirectionToggle = () => {
+  const currentField = getCurrentSortField();
+  const currentDirection = getCurrentSortDirection();
+  const newDirection = currentDirection === "asc" ? "desc" : "asc";
+  const newSortValue = `${currentField}_${newDirection}`;
+  setCurrentSortValue(newSortValue);
+};
+
 // Note modal state
 const [isNoteModalOpen, setIsNoteModalOpen] = args.createSignal(false);
 const [noteModalData, setNoteModalData] = args.createStore({ item: null, itemType: null, existingNote: "" });
@@ -443,7 +767,9 @@ const loadListData = async () => {
   setLoading(true);
   try {
     const functionName = contentType === "playlists" ? "getUserPlaylists" : "getUserChannels";
-    const result = await args.fns.executeYTOFunction(functionName, {});
+    const result = await args.fns.executeYTOFunction(functionName, {
+      sortBy: listSortBy()
+    });
 
     if (result?.error) {
       console.error("Error loading data:", result.error);
@@ -479,7 +805,8 @@ const loadDetailData = async () => {
   try {
     const functionName = contentType === "playlists" ? "getPlaylistVideos" : "getChannelContents";
     const result = await args.fns.executeYTOFunction(functionName, {
-      [contentType === "playlists" ? "playlistId" : "channelId"]: detailId
+      [contentType === "playlists" ? "playlistId" : "channelId"]: detailId,
+      sortBy: detailSortBy()
     });
 
     if (result?.error) {
@@ -519,7 +846,8 @@ const loadSearchData = async (query) => {
   try {
     const result = await args.fns.executeYTOFunction("searchUserContent", {
       query: query.trim(),
-      type: "all"
+      type: "all",
+      sortBy: searchSortBy()
     });
 
     if (result?.error) {
@@ -551,7 +879,9 @@ const loadSearchData = async (query) => {
 const loadFavouritesData = async () => {
   setLoading(true);
   try {
-    const result = await args.fns.executeYTOFunction("getUserFavourites", {});
+    const result = await args.fns.executeYTOFunction("getUserFavourites", {
+      sortBy: favouritesSortBy()
+    });
 
     if (result?.error) {
       console.error("Error loading favourites:", result.error);
@@ -629,6 +959,52 @@ args.createEffect(
   )
 );
 
+// Watch for sort changes and reload data
+args.createEffect(
+  args.on(
+    () => listSortBy(),
+    () => {
+      if (isListView()) {
+        args.untrack(() => loadListData());
+      }
+    }
+  )
+);
+
+args.createEffect(
+  args.on(
+    () => detailSortBy(),
+    () => {
+      if (isDetailView()) {
+        args.untrack(() => loadDetailData());
+      }
+    }
+  )
+);
+
+args.createEffect(
+  args.on(
+    () => searchSortBy(),
+    () => {
+      if (isSearchView()) {
+        const currentSearchQuery = args.searchParams?.q;
+        args.untrack(() => loadSearchData(currentSearchQuery));
+      }
+    }
+  )
+);
+
+args.createEffect(
+  args.on(
+    () => favouritesSortBy(),
+    () => {
+      if (isFavouritesView()) {
+        args.untrack(() => loadFavouritesData());
+      }
+    }
+  )
+);
+
 // Handle search form submission
 const handleSearch = async (e) => {
   if (e) e.preventDefault();
@@ -699,8 +1075,11 @@ const openCustomNameModal = (item, itemType, itemSettings) => {
 };
 
 const deleteItem = async (item) => {
-  const data = contentType === "playlists" ? item.playlist : item.channel;
-  const itemType = contentType === "playlists" ? "playlist" : "channel";
+  // Determine item type based on what exists in the item object
+  // This is important because we can delete playlists from a channel detail view
+  const isPlaylist = !!item.playlist;
+  const data = isPlaylist ? item.playlist : item.channel;
+  const itemType = isPlaylist ? "playlist" : "channel";
   const title = data?.P?.title || "this item";
 
   const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
@@ -1794,6 +2173,8 @@ return {
   deleteVideo,
   isModalOpen,
   modalData,
+  setModalData,
+  setIsModalOpen,
   openModal,
   closeModal,
   handleModalSave,
@@ -1838,13 +2219,52 @@ return {
   processingStatuses,
   getChannelProcessingStatus,
   getPlaylistProcessingStatus,
-  formatProcessingStatus
+  formatProcessingStatus,
+  getCurrentSortOptions,
+  getCurrentSortValue,
+  setCurrentSortValue,
+  getCurrentSortField,
+  getCurrentSortDirection,
+  handleSortFieldChange,
+  handleSortDirectionToggle,
+  listSortBy,
+  detailSortBy,
+  searchSortBy,
+  favouritesSortBy,
+  listSortField,
+  listSortDirection,
+  setListSortField,
+  setListSortDirection,
+  detailSortField,
+  detailSortDirection,
+  setDetailSortField,
+  setDetailSortDirection,
+  searchSortField,
+  searchSortDirection,
+  setSearchSortField,
+  setSearchSortDirection,
+  favouritesSortField,
+  favouritesSortDirection,
+  setFavouritesSortField,
+  setFavouritesSortDirection,
+  loadUserSettings,
+  initializeSortFromURL,
+  updateURLSort,
+  clearURLSort,
+  splitSortValue
 };
 ''',
         props: '''
 return {
   as: "div",
   onMount: () => {
+    // Initialize sort from URL (highest priority)
+    const hasURLSort = args.fns.initializeSortFromURL();
+
+    // Load user settings (will be overridden by URL if present)
+    args.fns.loadUserSettings();
+
+    // Add resize listener
     window.addEventListener('resize', args.fns.handleResize);
   },
   onCleanup: () => {
@@ -1926,10 +2346,16 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 2rem;
+  font-size: ${args.theme.var.fontSize.title};
   font-weight: 700;
   color: ${args.theme.var.color.text};
   margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.xl};
+  }
 }`;
 '''
       }
@@ -2021,10 +2447,42 @@ return `._id {
       }
     },
     {
-      id: "page_description",
+      id: "description_sort_wrapper",
       L: "Attr",
       P: {
         displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: args.fns.loading()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0 0 ${args.theme.var.spacing.md} 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_description",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 const contentType = args.searchParams?.type || "channels";
@@ -2054,15 +2512,21 @@ if (args.fns.isSearchView()) {
 
 return {
   as: "p",
-  text: description,
-  hide: args.fns.loading()
+  text: description
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1rem;
+  font-size: ${args.theme.var.fontSize.md};
   color: ${args.theme.var.color.muted};
-  margin: 0 0 1.5rem 0;
+  margin: 0;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
 }`;
 '''
       }
@@ -2223,10 +2687,44 @@ return {
       }
     },
     {
-      id: "add_videos_button",
+      id: "add_playlist_button",
       L: "Attr",
       P: {
         displayOrder: 2,
+        componentName: "YTOButton",
+        props: '''
+const contentType = args.searchParams?.type || "channels";
+
+return {
+  text: "Add Playlist",
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: () => {
+    const data = args.fns.detailData();
+    const channel = data?.channel?.channel;
+
+    if (!channel) {
+      args.showErrorToast("Channel data not loaded");
+      return;
+    }
+
+    args.fns.setModalData({
+      editMode: false,
+      contentType: "playlists",
+      channelId: channel.P.youtubeId
+    });
+    args.fns.setIsModalOpen(true);
+  },
+  hide: contentType !== "channels"
+};
+'''
+      }
+    },
+    {
+      id: "add_videos_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
         componentName: "YTOButton",
         props: '''
 const contentType = args.searchParams?.type || "channels";
@@ -2362,8 +2860,14 @@ return {
         css: '''
 return `._id {
   color: ${args.theme.var.color.muted};
-  font-size: 1rem;
+  font-size: ${args.theme.var.fontSize.md};
   margin: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
 }`;
 '''
       }
@@ -2775,9 +3279,10 @@ const isOpen = args.fns.isModalOpen();
 
 return {
   isOpen: isOpen,
-  contentType,
+  contentType: modalData.contentType || contentType,
   editMode: modalData.editMode,
   itemData: modalData.itemData,
+  channelId: modalData.channelId,
   onClose: args.fns.closeModal,
   onSave: args.fns.handleModalSave
 };
@@ -2820,6 +3325,44 @@ return {
 };
 '''
       }
+    },
+    {
+      id: "sort_split_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOSplitButton",
+        props: '''
+// Get sort field, direction, and options from fns
+const currentField = args.fns.getCurrentSortField();
+const currentDirection = args.fns.getCurrentSortDirection();
+const options = args.fns.getCurrentSortOptions();
+
+return {
+  field: currentField,
+  direction: currentDirection,
+  options: options,
+  onFieldChange: (newField) => {
+    args.fns.handleSortFieldChange(newField);
+  },
+  onDirectionToggle: () => {
+    args.fns.handleSortDirectionToggle();
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: auto;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
+}`;
+'''
+      }
     }
   ],
   edges: [
@@ -2827,15 +3370,18 @@ return {
     { id: "e2", T: "Attr", S: "page_root", E: "page_root_container" },
     { id: "e3", T: "Attr", S: "page_root_container", E: "header_section" },
     { id: "e4", T: "Attr", S: "header_section", E: "page_title" },
-    { id: "e5", T: "Attr", S: "header_section", E: "page_description" },
+    { id: "e5", T: "Attr", S: "header_section", E: "description_sort_wrapper" },
     { id: "e5a", T: "Attr", S: "header_section", E: "processing_status" },
+    { id: "e5b", T: "Attr", S: "description_sort_wrapper", E: "page_description" },
+    { id: "e5c", T: "Attr", S: "description_sort_wrapper", E: "sort_split_button" },
     { id: "e6", T: "Attr", S: "header_section", E: "search_container" },
     { id: "e7", T: "Attr", S: "search_container", E: "search_input_wrapper" },
     { id: "e7a", T: "Attr", S: "search_input_wrapper", E: "search_input" },
     { id: "e7b", T: "Attr", S: "search_container", E: "add_button" },
     { id: "e7c", T: "Attr", S: "search_container", E: "detail_actions_container" },
     { id: "e7d", T: "Attr", S: "detail_actions_container", E: "sync_button" },
-    { id: "e7e", T: "Attr", S: "detail_actions_container", E: "add_videos_button" },
+    { id: "e7e", T: "Attr", S: "detail_actions_container", E: "add_playlist_button" },
+    { id: "e7f", T: "Attr", S: "detail_actions_container", E: "add_videos_button" },
     { id: "e8", T: "Attr", S: "page_root_container", E: "main_content_container" },
     { id: "e9", T: "Attr", S: "main_content_container", E: "loading_state" },
     { id: "e10", T: "Attr", S: "loading_state", E: "loading_spinner" },

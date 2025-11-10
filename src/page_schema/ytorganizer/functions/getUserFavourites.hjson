@@ -14,17 +14,33 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  const { ownershipId } = args.contextData;
+  const { ownershipId, sortBy = "favourited_desc" } = args.contextData;
+
+  // Helper function to parse sortBy using shared utility
+  const parseSortBy = async (sortBy, contentType) => {
+    const parseSortResult = await args.executeNamedServerFunction({
+      functionName: "parseSortByUtil",
+      contextData: { sortBy, contentType }
+    });
+
+    if (!parseSortResult.result) {
+      throw new Error("Failed to parse sort parameters");
+    }
+
+    return parseSortResult.result;
+  };
 
   // Fetch favourite channels using helper function
+  const channelSort = await parseSortBy(sortBy, "channels");
   const channelsResult = await args.executeNamedServerFunction({
     functionName: "getChannelsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
       ownershipId,  // Filter by ownership if provided
       isFavouriteOnly: true,
-      orderBy: 'cs.favouritedAt',
-      orderDirection: 'DESC'
+      orderBy: channelSort.orderBy,
+      orderDirection: channelSort.orderDirection,
+      secondaryOrderBy: channelSort.secondaryOrderBy  // Pass secondary sort
     }
   });
 
@@ -33,14 +49,16 @@ try {
     : [];
 
   // Fetch favourite playlists using helper function
+  const playlistSort = await parseSortBy(sortBy, "playlists");
   const playlistsResult = await args.executeNamedServerFunction({
     functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
       ownershipId,  // Filter by ownership if provided
       isFavouriteOnly: true,
-      orderBy: 'ps.favouritedAt',
-      orderDirection: 'DESC'
+      orderBy: playlistSort.orderBy,
+      orderDirection: playlistSort.orderDirection,
+      secondaryOrderBy: playlistSort.secondaryOrderBy  // Pass secondary sort
     }
   });
 
@@ -49,14 +67,16 @@ try {
     : [];
 
   // Fetch favourite videos using helper function
+  const videoSort = await parseSortBy(sortBy, "videos");
   const videosResult = await args.executeNamedServerFunction({
     functionName: "getVideosWithDetails",
     contextData: {
       userUuid: user.P.uuid,
       ownershipId,  // Filter by ownership if provided
       isFavouriteOnly: true,
-      orderBy: 'vs.favouritedAt',
-      orderDirection: 'DESC'
+      orderBy: videoSort.orderBy,
+      orderDirection: videoSort.orderDirection,
+      secondaryOrderBy: videoSort.secondaryOrderBy  // Pass secondary sort
     }
   });
 

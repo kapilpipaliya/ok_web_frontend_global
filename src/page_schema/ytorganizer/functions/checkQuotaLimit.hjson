@@ -1,0 +1,106 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "checkQuotaLimit",
+        description: "Check if user can add more videos based on their subscription plan quota",
+        body: '''
+try {
+  // Get authenticated user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in.");
+  }
+
+  const { videosToAdd = 1 } = args.contextData;
+
+  // Fetch user's quota information
+  const userResult = await args.session.run(
+    `MATCH (u:User {uuid: $userId})
+     RETURN u`,
+    { userId: user.P.uuid }
+  );
+
+  if (userResult.records.length === 0) {
+    throw new Error("User not found");
+  }
+
+  const userNode = userResult.records[0].get("u");
+  const userVertex = args.convertNodeToJson(userNode);
+
+  const currentPlan = userVertex.P.currentPlan || "free";
+  const videoQuotaLimit = userVertex.P.videoQuotaLimit || 10000;
+  const videoQuotaUsed = userVertex.P.videoQuotaUsed || 0;
+
+  const videoQuotaRemaining = videoQuotaLimit - videoQuotaUsed;
+  const newTotalUsed = videoQuotaUsed + videosToAdd;
+
+  // For soft limit: always allow, but notify if over limit
+  const isWithinLimit = newTotalUsed <= videoQuotaLimit;
+  const wouldExceedLimit = newTotalUsed > videoQuotaLimit;
+
+  // Calculate how many videos they can add before hitting limit
+  const videosUntilLimit = Math.max(0, videoQuotaLimit - videoQuotaUsed);
+
+  // Determine what plan they should upgrade to
+  let suggestedPlan = null;
+
+  if (wouldExceedLimit) {
+    if (currentPlan === 'free' || currentPlan === 'basic') {
+      suggestedPlan = 'pro';
+    } else if (currentPlan === 'pro') {
+      suggestedPlan = 'unlimited';
+    }
+  }
+
+  // Calculate quota percentage
+  const quotaPercentage = videoQuotaLimit > 0
+    ? Math.round((newTotalUsed / videoQuotaLimit) * 100)
+    : 0;
+
+  return {
+    success: true,
+    data: {
+      allowed: true, // Soft limit: always allowed, just show warning
+      isWithinLimit: isWithinLimit,
+      wouldExceedLimit: wouldExceedLimit,
+      currentPlan: currentPlan,
+      videoQuotaLimit: videoQuotaLimit,
+      videoQuotaUsed: videoQuotaUsed,
+      videoQuotaRemaining: videoQuotaRemaining,
+      videosToAdd: videosToAdd,
+      newTotalUsed: newTotalUsed,
+      videosUntilLimit: videosUntilLimit,
+      quotaPercentage: quotaPercentage,
+      suggestedPlan: suggestedPlan,
+      shouldShowUpgradePrompt: wouldExceedLimit,
+      upgradeMessage: wouldExceedLimit
+        ? `You've reached your ${currentPlan} plan limit of ${videoQuotaLimit.toLocaleString()} videos. Upgrade to ${suggestedPlan || 'a higher'} plan to add more videos.`
+        : null
+    }
+  };
+
+} catch (error) {
+  console.error("Error checking quota limit:", error);
+  return {
+    success: false,
+    message: "Failed to check quota limit",
+    error: {
+      type: error.name,
+      details: error.message
+    },
+    data: {
+      allowed: true, // Fail open to not block users
+      isWithinLimit: true,
+      wouldExceedLimit: false
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

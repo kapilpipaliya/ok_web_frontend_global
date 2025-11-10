@@ -1,0 +1,622 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "YTOQueueManagement",
+        url: "/yto/admin/queue-management",
+        signinRequired: true,
+        description: "Manage processing queue operations for channels and playlists",
+        fns: '''
+// Message state for displaying success/error messages in UI
+const [messageState, setMessageState] = args.createStore({
+  type: null, // 'success' or 'error'
+  text: '',
+  visible: false
+});
+
+const showMessage = (type, text) => {
+  setMessageState({ type, text, visible: true });
+  // Auto-hide after 15 seconds
+  setTimeout(() => {
+    setMessageState('visible', false);
+  }, 15000);
+};
+
+const hideMessage = () => {
+  setMessageState('visible', false);
+};
+
+// Queue Management state
+const [isPausing, setIsPausing] = args.createSignal(false);
+const [isResuming, setIsResuming] = args.createSignal(false);
+
+// Pause all channels and playlists
+const pauseAllChannels = async () => {
+  setIsPausing(true);
+  try {
+    const result = await args.fns.executeYTOFunction("pauseAllChannels", {});
+
+    if (result?.result?.success) {
+      showMessage('success', result.result.message || "All processing paused successfully");
+    } else {
+      showMessage('error', result?.result?.message || "Failed to pause processing");
+    }
+  } catch (error) {
+    console.error("Error pausing channels:", error);
+    showMessage('error', "An error occurred while pausing");
+  } finally {
+    setIsPausing(false);
+  }
+};
+
+// Resume all pending channels and playlists
+const resumePendingChannels = async () => {
+  setIsResuming(true);
+  try {
+    const result = await args.fns.executeYTOFunction("resumePendingChannels", {});
+
+    if (result?.result?.success) {
+      showMessage('success', result.result.message || "All items resumed successfully");
+    } else {
+      showMessage('error', result?.result?.message || "Failed to resume processing");
+    }
+  } catch (error) {
+    console.error("Error resuming channels:", error);
+    showMessage('error', "An error occurred while resuming");
+  } finally {
+    setIsResuming(false);
+  }
+};
+
+return {
+  enabled: true,
+  messageState,
+  showMessage,
+  hideMessage,
+  isPausing,
+  isResuming,
+  pauseAllChannels,
+  resumePendingChannels
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1,
+        description: "YTO layout with navigation"
+      }
+    },
+    {
+      id: "admin_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOAdminLayout",
+        displayOrder: 2,
+        description: "Admin layout wrapper"
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        description: "Main container for queue management page",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Queue Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Control processing operations for all channels and playlists"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "message_banner",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const messageState = args.fns.messageState;
+
+return {
+  as: "div",
+  hide: !messageState?.visible
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+const isError = messageState?.type === 'error';
+
+let bgColor = args.theme.var.color.background_light_100;
+let borderColor = args.theme.var.color.border;
+let textColor = args.theme.var.color.text;
+
+if (isSuccess) {
+  bgColor = args.theme.var.color.success_light_50;
+  borderColor = args.theme.var.color.success;
+  textColor = args.theme.var.color.success_light_50_text;
+} else if (isError) {
+  bgColor = args.theme.var.color.error_light_50;
+  borderColor = args.theme.var.color.error;
+  textColor = args.theme.var.color.error_light_50_text;
+}
+
+return `._id {
+  background: ${bgColor};
+  border: 2px solid ${borderColor};
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "message_icon_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+let iconColor = args.theme.var.color.success;
+
+if (!isSuccess) {
+  iconColor = args.theme.var.color.error;
+}
+
+return `._id {
+  color: ${iconColor};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "message_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+return {
+  as: "icon",
+  icon: isSuccess ? "mdi:check-circle" : "mdi:alert-circle",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "message_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const messageState = args.fns.messageState;
+
+return {
+  as: "p",
+  text: messageState?.text || ""
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+let textColor = args.theme.var.color.success_light_50_text;
+
+if (!isSuccess) {
+  textColor = args.theme.var.color.error_light_50_text;
+}
+
+return `._id {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: ${textColor};
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "message_close_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.fns.hideMessage()
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+let iconColor = args.theme.var.color.success_light_50_text;
+let hoverBg = args.theme.var.color.success_light_100;
+
+if (!isSuccess) {
+  iconColor = args.theme.var.color.error_light_50_text;
+  hoverBg = args.theme.var.color.error_light_100;
+}
+
+return `._id {
+  background: transparent;
+  border: none;
+  color: ${iconColor};
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-family: inherit;
+
+  &:hover {
+    background: ${hoverBg};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "message_close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:close",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "queue_management_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_management_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Processing Queue Controls"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_management_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_management_description",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Manage all channel and playlist processing operations. Pause all active processing when approaching API quota limits, or resume items that are paused or waiting for quota reset."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.9375rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1.25rem 0;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_management_buttons",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  ._id {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pause_all_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOButton",
+        props: '''
+const isPausing = args.fns.isPausing?.();
+
+return {
+  text: isPausing ? "Pausing..." : "⏸️ Pause All Processing",
+  variant: "secondary",
+  onClick: args.fns.pauseAllChannels,
+  disabled: isPausing
+};
+'''
+      }
+    },
+    {
+      id: "resume_all_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOButton",
+        props: '''
+const isResuming = args.fns.isResuming?.();
+
+return {
+  text: isResuming ? "Resuming..." : "▶️ Resume All",
+  variant: "primary",
+  onClick: args.fns.resumePendingChannels,
+  disabled: isResuming
+};
+'''
+      }
+    },
+    {
+      id: "queue_management_help",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: ${args.theme.var.color.info_light_50};
+  border-left: 3px solid ${args.theme.var.color.info};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_management_help_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "💡 Tip: Items with status 'pending_quota' will automatically retry at midnight UTC when your daily quota resets. You can also manually resume them using the 'Resume All' button."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.info_light_50_text};
+  margin: 0;
+  line-height: 1.5;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e_layout", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
+    { id: "e1", T: "Attr", S: "page_root", E: "container" },
+    { id: "e2", T: "Attr", S: "container", E: "page_header" },
+    { id: "e3", T: "Attr", S: "page_header", E: "page_title" },
+    { id: "e4", T: "Attr", S: "page_header", E: "page_subtitle" },
+    { id: "e5", T: "Attr", S: "container", E: "message_banner" },
+    { id: "e6", T: "Attr", S: "message_banner", E: "message_icon_wrapper" },
+    { id: "e7", T: "Attr", S: "message_icon_wrapper", E: "message_icon" },
+    { id: "e8", T: "Attr", S: "message_banner", E: "message_text" },
+    { id: "e9", T: "Attr", S: "message_banner", E: "message_close_button" },
+    { id: "e10", T: "Attr", S: "message_close_button", E: "message_close_icon" },
+    { id: "e11", T: "Attr", S: "container", E: "queue_management_section" },
+    { id: "e12", T: "Attr", S: "queue_management_section", E: "queue_management_title" },
+    { id: "e13", T: "Attr", S: "queue_management_section", E: "queue_management_card" },
+    { id: "e14", T: "Attr", S: "queue_management_card", E: "queue_management_description" },
+    { id: "e15", T: "Attr", S: "queue_management_card", E: "queue_management_buttons" },
+    { id: "e16", T: "Attr", S: "queue_management_buttons", E: "pause_all_button" },
+    { id: "e17", T: "Attr", S: "queue_management_buttons", E: "resume_all_button" },
+    { id: "e18", T: "Attr", S: "queue_management_card", E: "queue_management_help" },
+    { id: "e19", T: "Attr", S: "queue_management_help", E: "queue_management_help_text" }
+  ]
+}

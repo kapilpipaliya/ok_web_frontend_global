@@ -1,0 +1,105 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getAllFeedbacks",
+        description: "Fetches all user feedback submissions with user information",
+        body: '''
+// Extract parameters with defaults
+const {
+  searchQuery = '',
+  filterStatus = 'all',
+  filterType = 'all',
+  sortBy = 'createdAt',
+  sortOrder = 'desc',
+  limit = 20,
+  offset = 0
+} = args.contextData;
+
+// Build WHERE conditions
+const whereConditions = ['f.deletedAt IS NULL'];
+
+// Filter by status
+if (filterStatus && filterStatus !== 'all') {
+  whereConditions.push('f.status = $filterStatus');
+}
+
+// Filter by category/type
+if (filterType && filterType !== 'all') {
+  whereConditions.push('f.category = $filterType');
+}
+
+// Search in username, email, and feedback text
+if (searchQuery && searchQuery.trim() !== '') {
+  whereConditions.push('(toLower(user.username) CONTAINS toLower($searchQuery) OR toLower(user.email) CONTAINS toLower($searchQuery) OR toLower(f.feedback) CONTAINS toLower($searchQuery))');
+}
+
+const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+// Build ORDER BY clause
+const validSortFields = ['createdAt', 'status', 'category'];
+const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+const sortDirection = sortOrder === 'asc' ? 'ASC' : 'DESC';
+const orderByClause = `ORDER BY f.${sortField} ${sortDirection}`;
+
+// Count query
+const countQuery = `
+  MATCH (user:User)-[:UserFeedback]->(f:Feedback)
+  ${whereClause}
+  RETURN count(f) as total
+`;
+
+// Data query
+const dataQuery = `
+  MATCH (user:User)-[:UserFeedback]->(f:Feedback)
+  ${whereClause}
+  RETURN f, user
+  ${orderByClause}
+  SKIP $offset
+  LIMIT $limit
+`;
+
+// Query parameters
+const params = {
+  filterStatus,
+  filterType,
+  searchQuery: searchQuery.trim(),
+  offset: args.neo4jDriver.int(offset),
+  limit: args.neo4jDriver.int(limit)
+};
+
+// Execute count query
+const countResult = await args.session.run(countQuery, params);
+const totalValue = countResult.records[0]?.get('total');
+// Handle Neo4j Integer type conversion
+const totalCount = args.neo4jConvert.toNumber(totalValue);
+
+// Execute data query
+const dataResult = await args.session.run(dataQuery, params);
+
+// Convert Neo4j records to feedback objects with user info
+const feedbacks = dataResult.records.map(record => {
+  const feedbackNode = record.get('f');
+  const userNode = record.get('user');
+
+  return {
+    feedback: args.convertNodeToJson(feedbackNode),
+    user: args.convertNodeToJson(userNode)
+  };
+});
+
+return {
+  success: true,
+  data: {
+    feedbacks,
+    totalCount
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

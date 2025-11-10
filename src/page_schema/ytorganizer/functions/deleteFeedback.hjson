@@ -1,0 +1,43 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "deleteFeedback",
+        description: "Soft deletes a feedback submission by setting deletedAt timestamp",
+        body: '''
+const { feedbackId } = args.contextData;
+
+// Validate input
+if (!feedbackId) {
+  throw new Error("Feedback ID is required");
+}
+
+// Soft delete the feedback by setting deletedAt
+const query = `
+  MATCH (f:Feedback)
+  WHERE elementId(f) = $feedbackId AND f.deletedAt IS NULL
+  SET f.deletedAt = datetime(),
+      f.updatedAt = datetime()
+  RETURN f
+`;
+
+const result = await args.session.run(query, {
+  feedbackId
+});
+
+if (result.records.length === 0) {
+  throw new Error("Feedback not found or already deleted");
+}
+
+return {
+  success: true,
+  message: "Feedback deleted successfully"
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

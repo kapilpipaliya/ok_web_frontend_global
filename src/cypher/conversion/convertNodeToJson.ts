@@ -7,6 +7,12 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 
 // typed-neo4j/src/convert.ts
 export const neo4jConvert = {
+  /** Convert Neo4j Integer to number */
+  toNumber: (val: any) => {
+    if (typeof val === 'number') return val;
+    if (val && typeof val.toNumber === 'function') return val.toNumber();
+    return val;
+  },
   /** Convert Neo4j types to JS types */
   // need to handle all types as server cant send class to client and gives error
   js: (value: any): any => {
@@ -24,6 +30,16 @@ export const neo4jConvert = {
     }
     if (value instanceof types.LocalTime) {
       return value.toString();
+    }
+    if (value instanceof types.Duration) {
+      // Convert Neo4j Duration to plain object
+      // Duration has: months, days, seconds, nanoseconds (may be Integer or number)
+      return {
+        months: neo4jConvert.toNumber(value.months),
+        days: neo4jConvert.toNumber(value.days),
+        seconds: neo4jConvert.toNumber(value.seconds),
+        nanoseconds: neo4jConvert.toNumber(value.nanoseconds)
+      };
     }
     if (value instanceof types.Integer) {
       //return value.toBigInt();
@@ -52,6 +68,15 @@ export const neo4jConvert = {
     }
     if (value instanceof BigInt) {
       return types.Integer.fromString(value.toString());
+    }
+    // Convert duration object back to Neo4j Duration
+    if (typeof value === "object" && value !== null && "months" in value && "days" in value && "seconds" in value && "nanoseconds" in value) {
+      return new types.Duration(
+        types.Integer.fromNumber(value.months),
+        types.Integer.fromNumber(value.days),
+        types.Integer.fromNumber(value.seconds),
+        types.Integer.fromNumber(value.nanoseconds)
+      );
     }
     if (Array.isArray(value)) {
       return value.slice().map(neo4jConvert.neo4j);

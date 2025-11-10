@@ -28,9 +28,22 @@ if (args.contextData.action === 'start') {
 
   await logMessage('info', 'Starting playlist processing worker');
 
+  // Initialize queue helpers and Redis connection
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  if (!helpers.result?.success) {
+    await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
+    throw new Error('Queue helpers initialization failed');
+  }
+
   const { Worker } = args.bullmq;
   const connection = helpers.result.data.getRedisConnection();
+
+  // Validate Redis connection config
+  if (!connection || !connection.host) {
+    await logMessage('error', 'Invalid Redis connection configuration', { connection });
+    throw new Error('Invalid Redis connection configuration');
+  }
 
   // Queue all playlists that are marked as 'queued' but not in BullMQ queue
   await logMessage('info', 'Checking for queued playlists to add to queue');
@@ -39,16 +52,23 @@ if (args.contextData.action === 'start') {
     const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 
     // Get all playlists with status 'queued' through ownership
+    // This query finds playlists that are queued but may not be in the BullMQ queue
+    // (e.g., if worker crashed or application restarted)
     const queuedPlaylists = await args.session.run(`
       MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
       MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
             -[:PlaylistSettingPlaylist]->(p:Playlist)
       WHERE ps.status = 'queued'
       RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, p.youtubeId as playlistId,
-             ps.priority as priority, p.channelId as channelId
+             ps.priority as priority, p.channelId as channelId,
+             ps.queuedAt as queuedAt
+      ORDER BY ps.priority DESC, ps.queuedAt ASC
     `);
 
     let addedCount = 0;
+    let skippedCount = 0;
+
+    await logMessage('info', `Found ${queuedPlaylists.records.length} playlists with status='queued' in database`);
 
     for (const record of queuedPlaylists.records) {
       const userUuid = record.get('userUuid');
@@ -81,11 +101,29 @@ if (args.contextData.action === 'start') {
         });
 
         addedCount++;
+        await logMessage('info', `Added playlist to queue`, {
+          playlistId,
+          ownershipId,
+          priority,
+          jobId
+        });
+      } else {
+        skippedCount++;
+        await logMessage('info', `Skipped playlist - already in queue`, {
+          playlistId,
+          ownershipId,
+          jobState,
+          jobId
+        });
       }
     }
 
     await playlistQueue.close();
-    await logMessage('info', `Added ${addedCount} queued playlists to queue`, { addedCount });
+    await logMessage('info', `Queue initialization complete`, {
+      totalFound: queuedPlaylists.records.length,
+      addedCount,
+      skippedCount
+    });
   } catch (error) {
     await logMessage('error', 'Error queuing playlists on startup', {
       error: error.message,
@@ -93,14 +131,34 @@ if (args.contextData.action === 'start') {
     });
   }
 
-  // Create worker for playlist processing queue
-  const worker = new Worker('processPlaylistQueue', async (job) => {
+  // Small delay to ensure queue connection is fully closed before creating worker
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Create worker for playlist processing queue with error handling
+  let worker;
+  try {
+    await logMessage('info', 'Creating BullMQ Worker for playlist processing');
+
+    worker = new Worker('processPlaylistQueue', async (job) => {
     const { playlistId, userId, userUuid, ownershipId, customName, channelId } = job.data;
 
     await logMessage('info', 'Processing playlist', { playlistId, userId, ownershipId });
 
     // Get a new database session for this job
     const session = await args.getSession();
+
+    // Check if this is a special playlist (LL, WL, UU, FL, HL)
+    // Special playlists have their channel ID appended to make them unique
+    // We need to extract the original 2-char ID for YouTube API calls
+    const playlistResult = await session.run(`
+      MATCH (p:Playlist {youtubeId: $playlistId})
+      RETURN p.originalPlaylistId as originalId
+    `, { playlistId });
+
+    const originalPlaylistId = playlistResult.records[0]?.get('originalId');
+
+    // Use originalPlaylistId for API calls if this is a special playlist
+    const apiPlaylistId = originalPlaylistId || playlistId;
 
     // Get ownership priority for quota allocation
     const ownershipResult = await session.run(`
@@ -195,7 +253,7 @@ if (args.contextData.action === 'start') {
       do {
         const itemsResponse = await youtube.playlistItems.list({
           part: ['snippet', 'contentDetails'],
-          playlistId: playlistId,
+          playlistId: apiPlaylistId,  // Use original ID for API calls
           maxResults: 50,
           pageToken: nextPageToken
         });
@@ -209,6 +267,37 @@ if (args.contextData.action === 'start') {
 
         nextPageToken = itemsResponse.data.nextPageToken;
       } while (nextPageToken);
+
+      // Fetch complete video details in batches (50 videos per batch)
+      // This provides publishedAt, duration, viewCount, likeCount, commentCount
+      const videoIds = allVideos.map(v => v.contentDetails?.videoId).filter(Boolean);
+      const videoDetailsMap = new Map();
+
+      console.log(`[Playlist ${playlistId}] Fetching details for ${videoIds.length} videos in batches of 50...`);
+
+      for (let i = 0; i < videoIds.length; i += 50) {
+        const batch = videoIds.slice(i, i + 50);
+
+        try {
+          const videosResponse = await youtube.videos.list({
+            part: ['snippet', 'contentDetails', 'statistics'],
+            id: batch
+          });
+
+          // Log API usage: videos.list operation (1 unit per batch) - shared quota
+          await args.logSharedAPIUsage(ownershipId, 'videos.list', args.YOUTUBE_API_COSTS['videos.list'], session);
+
+          console.log(`[Playlist ${playlistId}] Fetched batch ${Math.floor(i/50) + 1}: ${videosResponse.data.items?.length || 0} videos`);
+
+          // Map video details by ID for quick lookup
+          for (const videoDetail of videosResponse.data.items || []) {
+            videoDetailsMap.set(videoDetail.id, videoDetail);
+          }
+        } catch (error) {
+          console.error(`[Playlist ${playlistId}] Error fetching video details batch ${Math.floor(i/50) + 1}:`, error.message);
+          // Continue processing even if one batch fails
+        }
+      }
 
       const totalVideos = allVideos.length;
 
@@ -230,7 +319,43 @@ if (args.contextData.action === 'start') {
 
         const videoId = video.contentDetails.videoId;
 
-        // Save video
+        // Get complete video details from the fetched map
+        const videoDetails = videoDetailsMap.get(videoId);
+
+        // Extract ALL fields from video details API response
+        // SNIPPET fields
+        const publishedAt = videoDetails?.snippet?.publishedAt || null;
+        const categoryId = videoDetails?.snippet?.categoryId || null;
+        const defaultLanguage = videoDetails?.snippet?.defaultLanguage || null;
+        const defaultAudioLanguage = videoDetails?.snippet?.defaultAudioLanguage || null;
+        const liveBroadcastContent = videoDetails?.snippet?.liveBroadcastContent || null;
+        const tags = videoDetails?.snippet?.tags ? JSON.stringify(videoDetails.snippet.tags) : null;
+        const localizedTitle = videoDetails?.snippet?.localized?.title || null;
+        const localizedDescription = videoDetails?.snippet?.localized?.description || null;
+
+        // THUMBNAILS - store all available sizes
+        const thumbnailDefault = videoDetails?.snippet?.thumbnails?.default?.url || null;
+        const thumbnailMedium = videoDetails?.snippet?.thumbnails?.medium?.url || null;
+        const thumbnailHigh = videoDetails?.snippet?.thumbnails?.high?.url || null;
+        const thumbnailStandard = videoDetails?.snippet?.thumbnails?.standard?.url || null;
+        const thumbnailMaxres = videoDetails?.snippet?.thumbnails?.maxres?.url || null;
+
+        // CONTENT DETAILS fields
+        const duration = videoDetails?.contentDetails?.duration || null;
+        const dimension = videoDetails?.contentDetails?.dimension || null;
+        const definition = videoDetails?.contentDetails?.definition || null;
+        const caption = videoDetails?.contentDetails?.caption === 'true' || videoDetails?.contentDetails?.caption === true;
+        const licensedContent = videoDetails?.contentDetails?.licensedContent || false;
+        const projection = videoDetails?.contentDetails?.projection || null;
+        const hasCustomThumbnail = videoDetails?.contentDetails?.hasCustomThumbnail || false;
+
+        // STATISTICS fields
+        const viewCount = videoDetails?.statistics?.viewCount ? parseInt(videoDetails.statistics.viewCount) : 0;
+        const likeCount = videoDetails?.statistics?.likeCount ? parseInt(videoDetails.statistics.likeCount) : 0;
+        const favoriteCount = videoDetails?.statistics?.favoriteCount ? parseInt(videoDetails.statistics.favoriteCount) : 0;
+        const commentCount = videoDetails?.statistics?.commentCount ? parseInt(videoDetails.statistics.commentCount) : 0;
+
+        // Save video with ALL available details from YouTube API
         await session.run(`
           MERGE (v:Video {youtubeId: $videoId})
           ON CREATE SET
@@ -239,19 +364,64 @@ if (args.contextData.action === 'start') {
           SET
             v.title = $title,
             v.description = $description,
-            v.thumbnail = $thumbnail,
             v.channelId = $channelId,
             v.channelTitle = $channelTitle,
+            v.publishedAt = CASE WHEN $publishedAt IS NOT NULL THEN datetime($publishedAt) ELSE null END,
+            v.categoryId = $categoryId,
+            v.defaultLanguage = $defaultLanguage,
+            v.defaultAudioLanguage = $defaultAudioLanguage,
+            v.liveBroadcastContent = $liveBroadcastContent,
+            v.tags = $tags,
+            v.localizedTitle = $localizedTitle,
+            v.localizedDescription = $localizedDescription,
+            v.thumbnailDefault = $thumbnailDefault,
+            v.thumbnailMedium = $thumbnailMedium,
+            v.thumbnailHigh = $thumbnailHigh,
+            v.thumbnailStandard = $thumbnailStandard,
+            v.thumbnailMaxres = $thumbnailMaxres,
+            v.duration = CASE WHEN $duration IS NOT NULL THEN duration($duration) ELSE null END,
+            v.dimension = $dimension,
+            v.definition = $definition,
+            v.caption = $caption,
+            v.licensedContent = $licensedContent,
+            v.projection = $projection,
+            v.hasCustomThumbnail = $hasCustomThumbnail,
+            v.viewCount = $viewCount,
+            v.likeCount = $likeCount,
+            v.favoriteCount = $favoriteCount,
+            v.commentCount = $commentCount,
             v.updatedAt = datetime()
         `, {
           videoId,
           key: `video_${videoId}`,
           title: video.snippet?.title || '',
           description: video.snippet?.description || '',
-          thumbnail: video.snippet?.thumbnails?.high?.url ||
-                     video.snippet?.thumbnails?.medium?.url || '',
           channelId: video.snippet?.channelId || channelId || '',
-          channelTitle: video.snippet?.channelTitle || ''
+          channelTitle: video.snippet?.channelTitle || '',
+          publishedAt,
+          categoryId,
+          defaultLanguage,
+          defaultAudioLanguage,
+          liveBroadcastContent,
+          tags,
+          localizedTitle,
+          localizedDescription,
+          thumbnailDefault,
+          thumbnailMedium,
+          thumbnailHigh,
+          thumbnailStandard,
+          thumbnailMaxres,
+          duration,
+          dimension,
+          definition,
+          caption,
+          licensedContent,
+          projection,
+          hasCustomThumbnail,
+          viewCount,
+          likeCount,
+          favoriteCount,
+          commentCount
         });
 
         // CORRECTED SCHEMA:
@@ -314,9 +484,7 @@ if (args.contextData.action === 'start') {
         }
       }
 
-      // Update customOrder with all video IDs
-      const videoIds = allVideos.map(v => v.contentDetails?.videoId).filter(Boolean);
-
+      // Update customOrder with all video IDs (use videoIds already declared above)
       // Mark as completed and remove priority (no longer needed)
       await session.run(`
         MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
@@ -550,25 +718,60 @@ if (args.contextData.action === 'start') {
     concurrency: 5
   });
 
-  worker.on('completed', async (job) => {
-    await logMessage('info', 'Playlist processing job completed', { jobId: job.id });
-  });
-
-  worker.on('failed', async (job, err) => {
-    await logMessage('error', 'Playlist processing job failed', {
-      jobId: job?.id,
-      error: err.message,
-      stack: err.stack
+    // Event handlers for job lifecycle
+    worker.on('completed', async (job) => {
+      await logMessage('info', 'Playlist processing job completed', { jobId: job.id });
     });
-  });
 
-  // Return stop function for graceful shutdown
-  return {
-    stop: async () => {
-      await logMessage('info', 'Stopping playlist processing worker');
-      await worker.close();
+    worker.on('failed', async (job, err) => {
+      await logMessage('error', 'Playlist processing job failed', {
+        jobId: job?.id,
+        error: err.message,
+        stack: err.stack
+      });
+    });
+
+    // Event handler for worker errors (including connection errors)
+    worker.on('error', async (err) => {
+      await logMessage('error', 'Worker error occurred', {
+        error: err.message,
+        stack: err.stack,
+        code: err.code
+      });
+    });
+
+    await logMessage('info', 'Playlist processing worker created successfully', {
+      concurrency: 5
+    });
+
+    // Return stop function for graceful shutdown
+    return {
+      stop: async () => {
+        await logMessage('info', 'Stopping playlist processing worker');
+        if (worker) {
+          await worker.close();
+        }
+      }
+    };
+
+  } catch (error) {
+    await logMessage('error', 'Failed to create playlist processing worker', {
+      error: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+
+    // If worker was partially created, try to close it
+    if (worker) {
+      try {
+        await worker.close();
+      } catch (closeError) {
+        console.error('Error closing worker:', closeError);
+      }
     }
-  };
+
+    throw error;
+  }
 }
 '''
       }

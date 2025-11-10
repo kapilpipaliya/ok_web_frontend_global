@@ -25,7 +25,24 @@
 
 // This is a background worker function that cleans up stale jobs
 if (args.contextData.action === 'start') {
-  console.log('[Stale Job Cleanup] Starting stale job cleanup worker');
+  // Helper function to log messages to database
+  const logMessage = async (level, message, metadata = {}) => {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: 'logWorkerMessage',
+        contextData: {
+          workerName: 'processStaleJobCleanup',
+          level,
+          message,
+          metadata
+        }
+      });
+    } catch (error) {
+      // Silent failure - don't break worker if logging fails
+    }
+  };
+
+  await logMessage('info', 'Starting stale job cleanup worker');
 
   // CONFIGURATION:
   // - Check interval: Run cleanup every 15 minutes
@@ -39,7 +56,7 @@ if (args.contextData.action === 'start') {
     const session = await args.getSession();
 
     try {
-      console.log('[Stale Job Cleanup] Running cleanup check...');
+      await logMessage('info', 'Running cleanup check');
 
       // Calculate the cutoff time (2 hours ago)
       const cutoffTime = new Date();
@@ -72,7 +89,10 @@ if (args.contextData.action === 'start') {
 
       if (staleChannelCount > 0) {
         const titles = staleChannelsResult.records[0].get('titles');
-        console.log(`[Stale Job Cleanup] Marked ${staleChannelCount} stale channels as failed:`, titles);
+        await logMessage('warn', `Marked ${staleChannelCount} stale channels as failed`, {
+          count: staleChannelCount,
+          titles
+        });
       }
 
       // Find stale playlist jobs
@@ -101,7 +121,10 @@ if (args.contextData.action === 'start') {
 
       if (stalePlaylistCount > 0) {
         const titles = stalePlaylistsResult.records[0].get('titles');
-        console.log(`[Stale Job Cleanup] Marked ${stalePlaylistCount} stale playlists as failed:`, titles);
+        await logMessage('warn', `Marked ${stalePlaylistCount} stale playlists as failed`, {
+          count: stalePlaylistCount,
+          titles
+        });
       }
 
       // If any stale jobs were found, update parent channel progress
@@ -127,13 +150,19 @@ if (args.contextData.action === 'start') {
       }
 
       if (staleChannelCount === 0 && stalePlaylistCount === 0) {
-        console.log('[Stale Job Cleanup] No stale jobs found');
+        await logMessage('info', 'No stale jobs found');
       } else {
-        console.log(`[Stale Job Cleanup] Cleanup complete: ${staleChannelCount} channels, ${stalePlaylistCount} playlists marked as failed`);
+        await logMessage('info', 'Cleanup complete', {
+          staleChannels: staleChannelCount,
+          stalePlaylists: stalePlaylistCount
+        });
       }
 
     } catch (error) {
-      console.error('[Stale Job Cleanup] Error during cleanup:', error);
+      await logMessage('error', 'Error during cleanup', {
+        error: error.message,
+        stack: error.stack
+      });
     } finally {
       await session.close();
     }
@@ -145,12 +174,15 @@ if (args.contextData.action === 'start') {
   // Schedule periodic cleanup
   cleanupInterval = setInterval(runCleanup, CHECK_INTERVAL_MS);
 
-  console.log(`[Stale Job Cleanup] Worker started. Will check for stale jobs every ${CHECK_INTERVAL_MS / 60000} minutes`);
+  await logMessage('info', 'Worker started successfully', {
+    checkIntervalMinutes: CHECK_INTERVAL_MS / 60000,
+    staleTimeoutHours: STALE_TIMEOUT_HOURS
+  });
 
   // Return stop function for graceful shutdown
   return {
     stop: async () => {
-      console.log('[Stale Job Cleanup] Stopping stale job cleanup worker');
+      await logMessage('info', 'Stopping stale job cleanup worker');
       if (cleanupInterval) {
         clearInterval(cleanupInterval);
         cleanupInterval = null;

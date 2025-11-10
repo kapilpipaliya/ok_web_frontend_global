@@ -28,9 +28,22 @@ if (args.contextData.action === 'start') {
 
   await logMessage('info', 'Starting background retry pending quota worker (scheduled for midnight UTC)');
 
+  // Initialize queue helpers and Redis connection
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  if (!helpers.result?.success) {
+    await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
+    throw new Error('Queue helpers initialization failed');
+  }
+
   const { Worker, Queue } = args.bullmq;
   const connection = helpers.result.data.getRedisConnection();
+
+  // Validate Redis connection config
+  if (!connection || !connection.host) {
+    await logMessage('error', 'Invalid Redis connection configuration', { connection });
+    throw new Error('Invalid Redis connection configuration');
+  }
 
   // Create a queue for the scheduled retry jobs
   const retryQueue = new Queue('backgroundRetryPendingQuota', { connection });
@@ -57,8 +70,15 @@ if (args.contextData.action === 'start') {
     timezone: 'UTC'
   });
 
-  // Create worker to process the scheduled retry jobs
-  const worker = new Worker('backgroundRetryPendingQuota', async (job) => {
+  // Small delay to ensure queue is fully initialized
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Create worker to process the scheduled retry jobs with error handling
+  let worker;
+  try {
+    await logMessage('info', 'Creating BullMQ Worker for quota retry');
+
+    worker = new Worker('backgroundRetryPendingQuota', async (job) => {
     await logMessage('info', 'Starting scheduled retry of pending_quota jobs', {
       jobId: job.id,
       scheduledTime: new Date().toISOString()
@@ -96,41 +116,83 @@ if (args.contextData.action === 'start') {
     concurrency: 1 // Only run one retry job at a time
   });
 
-  worker.on('completed', async (job, result) => {
-    await logMessage('info', 'Scheduled retry job completed', {
-      jobId: job.id,
-      channelsRetried: result?.data?.channelsRetried,
-      playlistsRetried: result?.data?.playlistsRetried
+    // Event handlers for job lifecycle
+    worker.on('completed', async (job, result) => {
+      await logMessage('info', 'Scheduled retry job completed', {
+        jobId: job.id,
+        channelsRetried: result?.data?.channelsRetried,
+        playlistsRetried: result?.data?.playlistsRetried
+      });
     });
-  });
 
-  worker.on('failed', async (job, err) => {
-    await logMessage('error', 'Scheduled retry job failed', {
-      jobId: job?.id,
-      error: err.message,
-      stack: err.stack
+    worker.on('failed', async (job, err) => {
+      await logMessage('error', 'Scheduled retry job failed', {
+        jobId: job?.id,
+        error: err.message,
+        stack: err.stack
+      });
     });
-  });
 
-  // Return stop function for graceful shutdown
-  return {
-    stop: async () => {
-      await logMessage('info', 'Stopping background retry pending quota worker');
+    // Event handler for worker errors (including connection errors)
+    worker.on('error', async (err) => {
+      await logMessage('error', 'Worker error occurred', {
+        error: err.message,
+        stack: err.stack,
+        code: err.code
+      });
+    });
 
-      // Remove the repeatable job
-      try {
-        await retryQueue.removeRepeatableByKey('backgroundRetryPendingQuota:midnight-quota-retry-repeatable::0 0 * * *:UTC');
-        await logMessage('info', 'Removed repeatable job');
-      } catch (error) {
-        console.error('Error removing repeatable job:', error);
+    await logMessage('info', 'Quota retry worker created successfully', {
+      concurrency: 1
+    });
+
+    // Return stop function for graceful shutdown
+    return {
+      stop: async () => {
+        await logMessage('info', 'Stopping background retry pending quota worker');
+
+        // Remove the repeatable job
+        try {
+          await retryQueue.removeRepeatableByKey('backgroundRetryPendingQuota:midnight-quota-retry-repeatable::0 0 * * *:UTC');
+          await logMessage('info', 'Removed repeatable job');
+        } catch (error) {
+          console.error('Error removing repeatable job:', error);
+        }
+
+        // Close the worker and queue
+        if (worker) {
+          await worker.close();
+        }
+        await retryQueue.close();
+        await logMessage('info', 'Stopped background retry pending quota worker');
       }
+    };
 
-      // Close the worker and queue
-      await worker.close();
-      await retryQueue.close();
-      await logMessage('info', 'Stopped background retry pending quota worker');
+  } catch (error) {
+    await logMessage('error', 'Failed to create quota retry worker', {
+      error: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+
+    // If worker was partially created, try to close it
+    if (worker) {
+      try {
+        await worker.close();
+      } catch (closeError) {
+        console.error('Error closing worker:', closeError);
+      }
     }
-  };
+
+    // Close the queue
+    try {
+      await retryQueue.close();
+    } catch (closeError) {
+      console.error('Error closing queue:', closeError);
+    }
+
+    throw error;
+  }
 }
 '''
       }
