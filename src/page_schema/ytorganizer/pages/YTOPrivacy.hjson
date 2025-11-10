@@ -208,7 +208,7 @@ return `._id {
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: ${args.theme.var.color.info};
+  color: ${args.theme.var.color.info_text};
 }`;
 '''
       }
@@ -223,13 +223,13 @@ return `._id {
 return {
   as: "div",
   innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; font-size: 1.05rem;">YSaar uses <strong>YouTube API Services</strong> to access and organize your YouTube content. By using our service, you agree to be bound by:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding-left: 1.5rem;">
+    <p style="line-height: 1.7; color: ${args.theme.var.color.primary_text}; margin-bottom: 1rem; font-size: 1.05rem;">YSaar uses <strong>YouTube API Services</strong> to access and organize your YouTube content. By using our service, you agree to be bound by:</p>
+    <ul style="line-height: 1.7; color: ${args.theme.var.color.primary_text}; margin-bottom: 1rem; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;"><strong><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube Terms of Service</a></strong></li>
       <li style="margin-bottom: 0.5rem;"><strong><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Google Privacy Policy</a></strong></li>
       <li style="margin-bottom: 0.5rem;"><strong><a href="https://developers.google.com/youtube/terms/developer-policies" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">YouTube API Services Developer Policies</a></strong></li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; font-size: 1.05rem;"><strong>You can revoke YSaar's access to your data at any time</strong> via the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google security settings page</a>.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.primary_text}; font-size: 1.05rem;"><strong>You can revoke YSaar's access to your data at any time</strong> via the <a href="https://security.google.com/settings/security/permissions" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline; font-weight: 600;">Google security settings page</a>.</p>
   `
 };
 '''
@@ -297,8 +297,8 @@ return {
       <li style="margin-bottom: 0.5rem;"><strong>Public Statistics:</strong> View counts, like counts, and other publicly available metrics</li>
       <li style="margin-bottom: 0.5rem;"><strong>OAuth Tokens:</strong> We securely store your encrypted Google OAuth access and refresh tokens to maintain your YouTube connection. Tokens are encrypted using AES-256-GCM encryption and stored securely in our database.</li>
     </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.info};"><strong>Per-User OAuth:</strong> Each user connects their own YouTube account and has their own 10,000 units/day YouTube API quota. Your OAuth connection is independent and private to your account only.</p>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding: 1rem; background: ${args.theme.var.color.warning_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.warning};"><strong>Important:</strong> We only access publicly available YouTube data. We do <strong>not</strong> access your private videos, watch history, or any data you have not explicitly made public on YouTube. We never download or cache actual video files.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.info_light_100_text}; margin-bottom: 1rem; padding: 1rem; background: ${args.theme.var.color.info_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.info};"><strong>Per-User OAuth:</strong> Each user connects their own YouTube account with their personal API quota. Your OAuth connection is independent and private to your account only.</p>
+    <p style="line-height: 1.7; color: ${args.theme.var.color.warning_light_100_text}; margin-bottom: 1.5rem; padding: 1rem; background: ${args.theme.var.color.warning_light_100}; border-radius: 0.375rem; border-left: 3px solid ${args.theme.var.color.warning};"><strong>Important:</strong> We only access publicly available YouTube data. We do <strong>not</strong> access your private videos, watch history, or any data you have not explicitly made public on YouTube. We never download or cache actual video files.</p>
 
     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: ${args.theme.var.color.text};">1.2 Account Information</h3>
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">When you create an account with YSaar, we collect:</p>
@@ -472,7 +472,7 @@ return {
       <li style="margin-bottom: 0.5rem;"><strong>Password Security:</strong> Passwords are hashed using bcrypt with salt</li>
       <li style="margin-bottom: 0.5rem;"><strong>Per-User OAuth 2.0:</strong> Each user connects their own YouTube account using secure Google OAuth 2.0 authentication. This means:
         <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
-          <li style="margin-bottom: 0.5rem;">Each user has their own 10,000 units/day YouTube API quota (not shared)</li>
+          <li style="margin-bottom: 0.5rem;">Each user has their own personal YouTube API quota (not shared)</li>
           <li style="margin-bottom: 0.5rem;">OAuth access and refresh tokens are encrypted using AES-256-GCM encryption before storage</li>
           <li style="margin-bottom: 0.5rem;">Tokens are automatically refreshed when they expire</li>
           <li style="margin-bottom: 0.5rem;">We detect when users revoke access through Google settings and stop accessing their data immediately</li>
@@ -644,7 +644,7 @@ return {
     <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; padding-left: 1.5rem;">
       <li style="margin-bottom: 0.5rem;">Use the settings and data management tools in your account dashboard</li>
       <li style="margin-bottom: 0.5rem;"><strong>Disconnect YouTube:</strong> Visit <a href="/settings" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">Settings → YouTube Connection</a> to disconnect your YouTube account. This will delete your OAuth tokens and stop all access to your YouTube data.</li>
-      <li style="margin-bottom: 0.5rem;">Contact us at <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></li>
+      <li style="margin-bottom: 0.5rem;">Contact us at <a href="mailto:support@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></li>
       <li style="margin-bottom: 0.5rem;">Submit a data request through our support system</li>
     </ul>
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-top: 1rem;">We will respond to your request within 30 days and may verify your identity before processing sensitive requests.</p>
@@ -653,7 +653,7 @@ return {
 '''
       }
     },
-    // Section 6: Children's Privacy (COPPA Compliance)
+    // Section 6: International Data Transfers
     {
       id: "privacy_section_6",
       L: "Attr",
@@ -681,7 +681,7 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "6. Children's Privacy (COPPA Compliance)"
+  text: "6. International Data Transfers and EU User Rights"
 };
 ''',
         css: '''
@@ -698,73 +698,6 @@ return `._id {
     },
     {
       id: "privacy_section_6_content",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  innerHTML: `
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>Our service is not intended for children under 13 years of age.</strong></p>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">We comply with the Children's Online Privacy Protection Act (COPPA) and do not knowingly collect personal information from children under 13. If you are under 13, please do not:</p>
-    <ul style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.5rem;">Create an account on YSaar</li>
-      <li style="margin-bottom: 0.5rem;">Use our service or provide any personal information</li>
-      <li style="margin-bottom: 0.5rem;">Connect your YouTube account to our platform</li>
-    </ul>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;"><strong>If you are a parent or guardian</strong> and believe your child under 13 has provided us with personal information, please contact us immediately at <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a>. We will promptly delete such information from our servers.</p>
-    <p style="line-height: 1.7; color: ${args.theme.var.color.text};">YSaar takes child safety seriously and is committed to protecting children's privacy online in accordance with COPPA and international regulations.</p>
-  `
-};
-'''
-      }
-    },
-    // Section 7: International Data Transfers
-    {
-      id: "privacy_section_7",
-      L: "Attr",
-      P: {
-        displayOrder: 11,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 2.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "privacy_section_7_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h2",
-  text: "7. International Data Transfers and EU User Rights"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
-  padding-bottom: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "privacy_section_7_content",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -793,7 +726,70 @@ return {
 '''
       }
     },
-    // Section 8: Changes to Privacy Policy
+    // Section 7: Changes to Privacy Policy
+    {
+      id: "privacy_section_7",
+      L: "Attr",
+      P: {
+        displayOrder: 11,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_section_7_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "7. Changes to This Privacy Policy"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+  padding-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_section_7_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. When we make significant changes, we will notify you by email (if you have provided an email address) and/or by posting a prominent notice on our service at least 30 days before the changes take effect. We encourage you to review this Privacy Policy periodically. The \"Last updated\" date at the top of this page indicates when the policy was last revised. Your continued use of our service after any modifications indicates your acceptance of the updated Privacy Policy. If you do not agree to the changes, you should discontinue use of the service and may request deletion of your account."
+};
+''',
+        css: '''
+return `._id {
+  line-height: 1.7;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    // Section 8: Contact Information
     {
       id: "privacy_section_8",
       L: "Attr",
@@ -821,7 +817,7 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "8. Changes to This Privacy Policy"
+  text: "8. Contact Us"
 };
 ''',
         css: '''
@@ -844,74 +840,11 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "p",
-  text: "We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. When we make significant changes, we will notify you by email (if you have provided an email address) and/or by posting a prominent notice on our service at least 30 days before the changes take effect. We encourage you to review this Privacy Policy periodically. The \"Last updated\" date at the top of this page indicates when the policy was last revised. Your continued use of our service after any modifications indicates your acceptance of the updated Privacy Policy. If you do not agree to the changes, you should discontinue use of the service and may request deletion of your account."
-};
-''',
-        css: '''
-return `._id {
-  line-height: 1.7;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    // Section 9: Contact Information
-    {
-      id: "privacy_section_9",
-      L: "Attr",
-      P: {
-        displayOrder: 13,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 2.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "privacy_section_9_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h2",
-  text: "9. Contact Us"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.border};
-  padding-bottom: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "privacy_section_9_content",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
   as: "div",
   innerHTML: `
     <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 1rem;">If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
     <div style="padding: 1.5rem; background: ${args.theme.var.color.background_light_100}; border-radius: 0.5rem; margin-top: 1rem;">
-      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 0.75rem;"><strong>Email:</strong> <a href="mailto:privacy@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></p>
+      <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 0.75rem;"><strong>Email:</strong> <a href="mailto:support@ysaar.com" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">privacy@ysaar.com</a></p>
       <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin-bottom: 0.75rem;"><strong>Website:</strong> <a href="https://ysaar.com" target="_blank" rel="noopener noreferrer" style="color: ${args.theme.var.color.primary}; text-decoration: underline;">ysaar.com</a></p>
       <p style="line-height: 1.7; color: ${args.theme.var.color.text}; margin: 0;"><strong>Support:</strong> Available through your account dashboard</p>
     </div>
@@ -923,10 +856,10 @@ return {
     },
     // Important Links Section
     {
-      id: "privacy_section_10",
+      id: "privacy_section_9",
       L: "Attr",
       P: {
-        displayOrder: 14,
+        displayOrder: 13,
         componentName: "Html",
         props: '''
 return {
@@ -945,7 +878,7 @@ return `._id {
       }
     },
     {
-      id: "privacy_section_10_title",
+      id: "privacy_section_9_title",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -967,7 +900,7 @@ return `._id {
       }
     },
     {
-      id: "privacy_section_10_content",
+      id: "privacy_section_9_content",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -1060,11 +993,6 @@ return {
     // Section 9
     { id: "e_main_section9", T: "Attr", S: "privacy_main", E: "privacy_section_9" },
     { id: "e_section9_title", T: "Attr", S: "privacy_section_9", E: "privacy_section_9_title" },
-    { id: "e_section9_content", T: "Attr", S: "privacy_section_9", E: "privacy_section_9_content" },
-
-    // Section 10
-    { id: "e_main_section10", T: "Attr", S: "privacy_main", E: "privacy_section_10" },
-    { id: "e_section10_title", T: "Attr", S: "privacy_section_10", E: "privacy_section_10_title" },
-    { id: "e_section10_content", T: "Attr", S: "privacy_section_10", E: "privacy_section_10_content" }
+    { id: "e_section9_content", T: "Attr", S: "privacy_section_9", E: "privacy_section_9_content" }
   ]
 }

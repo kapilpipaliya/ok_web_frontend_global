@@ -113,23 +113,25 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "icon",
-  icon: "carbon:play",
+  as: "img",
+  src: "https://ytorganizer.localhost.com:3001/api/file/download/big_logo_white.png",
+  alt: "YT Organizer Logo",
   width: 80,
   height: 80
 };
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary_text};
-  margin-bottom: 2rem;
+  display: block;
+  margin: 0 auto 2rem auto;
   opacity: 0.9;
+  object-fit: contain;
 }
 
 @media (max-width: 768px) {
   ._id {
-    width: 60px !important;
-    height: 60px !important;
+    width: 60px;
+    height: 60px;
   }
 }`;
 '''

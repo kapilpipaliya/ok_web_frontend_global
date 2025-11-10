@@ -91,8 +91,25 @@ export const processStyle = (
 
     const evaluatedStyle = cssFunction(functionArgs);
 
+    // Handle string result
     if (typeof evaluatedStyle === "string") {
       return evaluatedStyle.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
+    }
+
+    // Handle array result (when function body returns an array)
+    if (Array.isArray(evaluatedStyle)) {
+      // Array items are already evaluated CSS strings, just need ID replacement
+      let result = "";
+      for (let i = 0; i < evaluatedStyle.length; i++) {
+        const item = evaluatedStyle[i];
+        if (typeof item === "string") {
+          const processed = item.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
+          if (processed) {
+            result += (result ? "\n" : "") + processed;
+          }
+        }
+      }
+      return result;
     }
 
     return "";

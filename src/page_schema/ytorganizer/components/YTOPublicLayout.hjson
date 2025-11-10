@@ -581,6 +581,18 @@ return `._id {
 return {};
 '''
       }
+    },
+    // Cookie Consent Banner
+    {
+      id: "cookie_banner",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "YTOCookieBanner",
+        props: '''
+return {};
+'''
+      }
     }
   ],
   edges: [
@@ -612,6 +624,9 @@ return {};
     { id: "e19", T: "Attr", S: "footer_links", E: "footer_privacy_link" },
     { id: "e20", T: "Attr", S: "footer_links", E: "footer_terms_link" },
     { id: "e21", T: "Attr", S: "footer_links", E: "footer_contact_link" },
-    { id: "e22", T: "Attr", S: "footer_container", E: "footer_youtube_attribution" }
+    { id: "e22", T: "Attr", S: "footer_container", E: "footer_youtube_attribution" },
+
+    // Root to cookie banner
+    { id: "e23", T: "Attr", S: "layout_root", E: "cookie_banner" }
   ]
 }

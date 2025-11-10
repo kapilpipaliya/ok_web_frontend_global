@@ -15,7 +15,7 @@ export function createMergedClasses(
     styleId: string;
     cssStyle: () => string | undefined;
   },
-) {
+): () => Record<string, string> {
   return createMemo(() => {
     const metaPropsKeys = Object.keys(props.meta.P);
     const dynamicPropsValue = options.dynamicProps();
