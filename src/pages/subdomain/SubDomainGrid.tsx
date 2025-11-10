@@ -128,7 +128,6 @@ export const SubDomainGrid = () => {
       editSchema={editSchema}
       formSchema={SubDomain}
       getTableData={getTableData}
-      hideDeleteAction={true}
       hideEditJsonAction={true}
       initializeGridStoreParent={(gridStore_) => {
         gridStore = gridStore_;

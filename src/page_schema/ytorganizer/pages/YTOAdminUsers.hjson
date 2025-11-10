@@ -151,9 +151,7 @@ const startImpersonation = async (userUuid) => {
   if (serverResult?.success) {
     const impersonatedUser = serverResult.data.impersonatedUser;
 
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('yto_impersonatedUser', JSON.stringify(impersonatedUser));
-    }
+    sessionStorage.setItem('yto_impersonatedUser', JSON.stringify(impersonatedUser));
 
     setStore('impersonatedUserUuid', userUuid);
     args.showSuccessToast("Now viewing as user");

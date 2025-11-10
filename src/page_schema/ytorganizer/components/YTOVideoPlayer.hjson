@@ -8,6 +8,19 @@
       }
     },
     {
+      id: "portal_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "portal"
+};
+'''
+      }
+    },
+    {
       id: "video_player_container",
       L: "Attr",
       P: {
@@ -16,6 +29,19 @@
         fns: '''
 // State to track if resize is active
 const [isResizing, setIsResizing] = args.createSignal(false);
+
+// Get responsive values based on screen size
+const getResponsiveValues = () => {
+  const isMobile = window.innerWidth < 768;
+  return {
+    isMobile,
+    minWidth: isMobile ? 280 : 480,
+    minHeight: isMobile ? 158 : 270, // 16:9 aspect ratio
+    maxWidth: isMobile ? window.innerWidth - 16 : window.innerWidth,
+    defaultX: isMobile ? 8 : null,
+    defaultY: isMobile ? 80 : null
+  };
+};
 
 // Common resize handler factory
 // Accepts direction: 'n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'
@@ -58,13 +84,8 @@ const createResizeHandler = (direction) => {
       let newX = playerPosition.x;
       let newY = playerPosition.y;
 
-      // Determine minimum size based on screen size
-      const isMobile = window.innerWidth < 768;
-      const minWidth = isMobile ? 280 : 480;
-      const minHeight = isMobile ? 158 : 270; // 16:9 aspect ratio
-
-      // Calculate maximum width (available viewport width with padding)
-      const maxWidth = isMobile ? window.innerWidth - 16 : window.innerWidth;
+      // Get responsive values
+      const { minWidth, minHeight, maxWidth } = getResponsiveValues();
 
       // Calculate new dimensions based on resize direction
       if (resizeWidth === 'add') {
@@ -105,7 +126,8 @@ const createResizeHandler = (direction) => {
 
 return {
   createResizeHandler,
-  isResizing
+  isResizing,
+  getResponsiveValues
 };
 ''',
         props: '''
@@ -114,10 +136,8 @@ const currentState = getPlayerState?.() || "closed";
 const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
 const playerSize = args.contextData.props?.playerSize || { width: 480, height: 270 };
 
-// Calculate default position (bottom right) if not set
-const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-const defaultX = isMobile ? 8 : null;
-const defaultY = isMobile ? 80 : null;
+// Get responsive values from fns
+const { isMobile, defaultX, defaultY } = args.fns.getResponsiveValues();
 const x = playerPosition.x !== null ? playerPosition.x : defaultX;
 const y = playerPosition.y !== null ? playerPosition.y : defaultY;
 
@@ -720,24 +740,61 @@ return {
         displayOrder: 2,
         componentName: "Html",
         fns: '''
-// Initialize YouTube iframe API
-if (typeof window !== 'undefined' && !window.YT) {
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  const firstScriptTag = document.getElementsByTagName('script')[0];
-  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-}
-
 // Create reactive store for player state
 const [playerState, setPlayerState] = args.createStore({
   player: null,
-  isPlayerReady: false
+  isPlayerReady: false,
+  apiLoaded: false,
+  isLoading: false
+});
+
+// Initialize YouTube iframe API (only when needed)
+const initYouTubeAPI = () => {
+  if (playerState.apiLoaded || window.YT) {
+    if (!playerState.apiLoaded) {
+      setPlayerState('apiLoaded', true);
+      setPlayerState('isLoading', false);
+    }
+    return;
+  }
+
+  setPlayerState('isLoading', true);
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  tag.onload = () => {
+    setPlayerState('apiLoaded', true);
+    setPlayerState('isLoading', false);
+  };
+  tag.onerror = () => {
+    setPlayerState('isLoading', false);
+    console.error('Failed to load YouTube API');
+  };
+  const firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+};
+
+// Watch player state and load API only when player is opened
+args.createEffect(() => {
+  const getPlayerState = args.contextData.props?.playerState;
+  const currentState = getPlayerState?.();
+
+  // Only load API when player is actually opened (not closed)
+  if (currentState !== "closed" && !playerState.apiLoaded && !playerState.isLoading) {
+    args.runWithOwner(() => {
+      initYouTubeAPI();
+    });
+  }
 });
 
 return {
   playerState,
   setPlayer: (p) => setPlayerState('player', p),
-  setPlayerReady: (ready) => setPlayerState('isPlayerReady', ready)
+  setPlayerReady: (ready) => {
+    setPlayerState('isPlayerReady', ready);
+    if (ready) {
+      setPlayerState('isLoading', false);
+    }
+  }
 };
 ''',
         props: '''
@@ -796,53 +853,68 @@ return {
   onMount: () => {
     if (args.fns.playerState.player) return;
 
+    // Set loading state when starting player initialization
+    args.fns.setPlayerReady(false);
+
     // Wait for YT API to be ready
     const initPlayer = () => {
-      if (!window.YT || !window.YT.Player) {
+      if (!args.fns.playerState.apiLoaded || !window.YT || !window.YT.Player) {
         setTimeout(initPlayer, 100);
         return;
       }
 
-      // Create YouTube player
-      // YouTube TOS: https://developers.google.com/youtube/terms/required-minimum-functionality
-      // Required Minimum Functionality:
-      // 1. Player controls must be visible and functional (play, pause, volume, seek)
-      // 2. Fullscreen button must be available
-      // 3. YouTube branding must be visible (logo/watermark)
-      // 4. Link to watch on YouTube must be provided
-      // 5. Related videos should be shown (rel parameter)
-      const ytPlayer = new window.YT.Player("youtube-player", {
-        height: '100%',
-        width: '100%',
-        videoId: youtubeId || '',
-        playerVars: {
-          autoplay: 1,
-          controls: 1,  // YouTube TOS Required: Player controls (play, pause, volume, seek) must be visible
-          enablejsapi: 1,
-          origin: window.location.origin,
-          modestbranding: 1,  // YouTube TOS Required: Minimize branding but keep YouTube logo/watermark visible
-          fs: 1,  // YouTube TOS Required: Enable fullscreen button
-          // rel: 1  // YouTube TOS Required: Show related videos at video end
-          rel: 0  // VIOLATION: Disabled to prevent showing other channels' videos (keep this until YouTube enforces)
-        },
-        events: {
-          onReady: (event) => {
-            args.fns.setPlayerReady(true);
-            args.fns.setPlayer(ytPlayer);
+      try {
+        // Create YouTube player
+        // YouTube TOS: https://developers.google.com/youtube/terms/required-minimum-functionality
+        // Required Minimum Functionality:
+        // 1. Player controls must be visible and functional (play, pause, volume, seek)
+        // 2. Fullscreen button must be available
+        // 3. YouTube branding must be visible (logo/watermark)
+        // 4. Link to watch on YouTube must be provided
+        // 5. Related videos should be shown (rel parameter)
+        const ytPlayer = new window.YT.Player("youtube-player", {
+          height: '100%',
+          width: '100%',
+          videoId: youtubeId || '',
+          playerVars: {
+            autoplay: 1,
+            controls: 1,  // YouTube TOS Required: Player controls (play, pause, volume, seek) must be visible
+            enablejsapi: 1,
+            origin: window.location.origin,
+            modestbranding: 1,  // YouTube TOS Required: Minimize branding but keep YouTube logo/watermark visible
+            fs: 1,  // YouTube TOS Required: Enable fullscreen button
+            // rel: 1  // YouTube TOS Required: Show related videos at video end
+            rel: 0  // VIOLATION: Disabled to prevent showing other channels' videos (keep this until YouTube enforces)
           },
-          onStateChange: (event) => {
-            // YouTube player states: 0=ended
-            if (event.data === 0) {
-              const getPlayerState = args.contextData.props?.playerState;
-              const playNext = args.contextData.props?.playNext;
-              const currentState = getPlayerState?.();
-              if (currentState === "minimized" || currentState === "maximized") {
-                playNext?.();
+          events: {
+            onReady: (event) => {
+              args.fns.setPlayerReady(true);
+              args.fns.setPlayer(ytPlayer);
+            },
+            onStateChange: (event) => {
+              // YouTube player states: 0=ended
+              if (event.data === 0) {
+                const getPlayerState = args.contextData.props?.playerState;
+                const playNext = args.contextData.props?.playNext;
+                const currentState = getPlayerState?.();
+                if (currentState === "minimized" || currentState === "maximized") {
+                  playNext?.();
+                }
               }
+            },
+            onError: (event) => {
+              console.error('YouTube player error:', event.data);
+              // when I get error: Video unavailable
+              // This video contains content from..., who has blocked it on copyright grounds
+              // setPlayerReady(false) keeps it showing loading spinner:
+              // args.fns.setPlayerReady(false);
             }
           }
-        }
-      });
+        });
+      } catch (error) {
+        console.error('Failed to initialize YouTube player:', error);
+        args.fns.setPlayerReady(false);
+      }
     };
 
     initPlayer();
@@ -1155,6 +1227,66 @@ return `._id {
       }
     },
     {
+      id: "loading_indicator",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isLoading = args.fns.playerState.isLoading;
+const isPlayerReady = args.fns.playerState.isPlayerReady;
+
+return {
+  as: "div",
+  hide: () => !isLoading && isPlayerReady
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background_dark_900};
+  z-index: 10;
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return [
+  `@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }`,
+  `._id {
+    width: 40px;
+    height: 40px;
+    border: 4px solid ${args.theme.var.color.background_dark_700};
+    border-top: 4px solid ${args.theme.var.color.primary};
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }`
+];
+'''
+      }
+    },
+    {
       id: "resize_overlay",
       L: "Attr",
       P: {
@@ -1184,7 +1316,8 @@ return `._id {
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "video_player_container" },
+    { id: "e0", T: "Attr", S: "component_root", E: "portal_wrapper" },
+    { id: "e1", T: "Attr", S: "portal_wrapper", E: "video_player_container" },
     { id: "e2", T: "Attr", S: "video_player_container", E: "player_header" },
     { id: "e3", T: "Attr", S: "player_header", E: "player_title_container" },
     { id: "e3a", T: "Attr", S: "player_title_container", E: "youtube_logo" },
@@ -1203,6 +1336,8 @@ return `._id {
     { id: "e10", T: "Attr", S: "player_close_button", E: "player_close_icon" },
     { id: "e11", T: "Attr", S: "video_player_container", E: "player_video_container" },
     { id: "e12", T: "Attr", S: "player_video_container", E: "player_iframe" },
+    { id: "e12a", T: "Attr", S: "player_video_container", E: "loading_indicator" },
+    { id: "e12b", T: "Attr", S: "loading_indicator", E: "loading_spinner" },
     { id: "e13", T: "Attr", S: "video_player_container", E: "resize_handle_se" },
     { id: "e14", T: "Attr", S: "video_player_container", E: "resize_handle_e" },
     { id: "e15", T: "Attr", S: "video_player_container", E: "resize_handle_s" },

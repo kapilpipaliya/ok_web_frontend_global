@@ -23,7 +23,7 @@ return {
   showBanner,
   checkAndUpdateBanner: () => {
     // Only check localStorage once on client-side
-    if (!checkedLocalStorage && typeof window !== 'undefined') {
+    if (!checkedLocalStorage) {
       const hasAccepted = localStorage.getItem('cookie_consent_accepted') === 'true';
       if (hasAccepted) {
         setShowBanner(false);
@@ -32,9 +32,7 @@ return {
     }
   },
   acceptCookies: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('cookie_consent_accepted', 'true');
-    }
+    localStorage.setItem('cookie_consent_accepted', 'true');
     setShowBanner(false);
   }
 };

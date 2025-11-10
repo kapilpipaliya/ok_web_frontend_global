@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "deletePlaylist",
-        description: "Deletes playlists (array, 'all', or 'allInContext') from a specific ownership by calling deleteVideo for all videos, then cleaning up orphan playlist nodes. 'allInContext' deletes all playlists in the context channels. Supports multi-ownership model, batch processing, and special keywords.",
+        description: "Deletes playlists (array, 'all', or 'allInContext') from a specific ownership. Prevents deletion of playlists with active jobs to avoid orphaned video jobs. Removes pending BullMQ jobs, calls deleteVideo for all videos, then cleans up orphan playlist nodes. 'allInContext' deletes all playlists in the context channels. Supports multi-ownership model, batch processing, and special keywords.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -67,7 +67,115 @@ try {
     }
   }
 
-  // Step 1: Delete all videos in these playlists using deleteVideo function with 'allInContext'
+  // Step 1: Check for active playlist jobs in BullMQ queue
+  // Prevent deletion if any playlist is actively being processed
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  if (!helpers.result?.success) {
+    throw new Error('Failed to initialize queue helpers');
+  }
+
+  const { QUEUE_NAMES, createJobId } = helpers.result.data;
+  const { Queue } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  const playlistQueue = new Queue(QUEUE_NAMES.PLAYLIST, { connection });
+
+  try {
+    // Get playlist IDs to check (either specific IDs, all in context channels, or all for ownership)
+    let playlistIdsToCheck = playlistIds;
+
+    if (items === 'all') {
+      // Get all playlist IDs for this ownership
+      const allPlaylistsResult = await args.session.run(`
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
+              -[:PlaylistSettingPlaylist]->(p:Playlist)
+        RETURN p.youtubeId as playlistId
+      `, { ownershipId });
+
+      playlistIdsToCheck = allPlaylistsResult.records.map(r => r.get('playlistId'));
+    } else if (items === 'allInContext') {
+      // Get all playlist IDs in the context channels
+      const contextPlaylistsResult = await args.session.run(`
+        MATCH (c:Channel)-[:ChannelPlaylist]->(p:Playlist)
+        WHERE c.youtubeId IN $channelIds
+        RETURN DISTINCT p.youtubeId as playlistId
+      `, { channelIds });
+
+      playlistIdsToCheck = contextPlaylistsResult.records.map(r => r.get('playlistId'));
+    }
+
+    // Check if any of these playlists have active jobs
+    const activeJobs = [];
+    const jobsToRemove = [];
+
+    for (const playlistId of playlistIdsToCheck) {
+      const jobId = createJobId('playlist', ownershipId, playlistId);
+      const job = await playlistQueue.getJob(jobId);
+
+      if (job) {
+        const state = await job.getState();
+
+        if (state === 'active') {
+          // Get playlist title for better error message
+          const playlistResult = await args.session.run(`
+            MATCH (p:Playlist {youtubeId: $playlistId})
+            RETURN p.title as title
+          `, { playlistId });
+
+          const title = playlistResult.records[0]?.get('title') || playlistId;
+          activeJobs.push({ playlistId, title, jobId });
+        } else if (['waiting', 'delayed', 'failed'].includes(state)) {
+          // Track jobs that can be removed
+          jobsToRemove.push({ jobId, playlistId, state });
+        }
+      }
+    }
+
+    // If any active jobs exist, prevent deletion
+    if (activeJobs.length > 0) {
+      await playlistQueue.close();
+
+      const playlistList = activeJobs.map(j => `"${j.title}"`).join(', ');
+      const message = activeJobs.length === 1
+        ? `Cannot delete playlist ${playlistList} because it is currently being processed. This will spawn many video jobs that cannot be properly linked to the parent playlist. Please wait for processing to complete or pause the playlist first.`
+        : `Cannot delete ${activeJobs.length} playlist(s) (${playlistList}) because they are currently being processed. This will spawn many video jobs that cannot be properly linked to the parent playlists. Please wait for processing to complete or pause the playlists first.`;
+
+      return {
+        success: false,
+        message: message,
+        error: {
+          type: "ActiveJobsError",
+          details: "Cannot delete playlists with active jobs",
+          activeJobs: activeJobs.map(j => ({ playlistId: j.playlistId, title: j.title }))
+        }
+      };
+    }
+
+    // Step 2: Remove pending/waiting jobs from the queue
+    let removedJobsCount = 0;
+    for (const jobInfo of jobsToRemove) {
+      try {
+        const job = await playlistQueue.getJob(jobInfo.jobId);
+        if (job) {
+          await job.remove();
+          removedJobsCount++;
+          console.log(`[deletePlaylist] Removed ${jobInfo.state} job for playlist ${jobInfo.playlistId}`);
+        }
+      } catch (error) {
+        console.error(`[deletePlaylist] Error removing job ${jobInfo.jobId}:`, error.message);
+        // Continue with deletion even if job removal fails
+      }
+    }
+
+    if (removedJobsCount > 0) {
+      console.log(`[deletePlaylist] Removed ${removedJobsCount} pending job(s) from queue`);
+    }
+
+  } finally {
+    // Always close the queue connection
+    await playlistQueue.close();
+  }
+
+  // Step 3: Delete all videos in these playlists using deleteVideo function with 'allInContext'
   let deletedVideos = 0;
 
   // Create minimal playlist objects for contextItems (only need youtubeId)
@@ -100,7 +208,7 @@ try {
     // Continue with playlist deletion even if video deletion fails
   }
 
-  // Step 2: Delete this ownership's PlaylistSettings
+  // Step 4: Delete this ownership's PlaylistSettings
   let queryParams = { ownershipId };
   let playlistFilter = '';
 
@@ -129,7 +237,7 @@ try {
     throw new Error("Playlists not found or already deleted");
   }
 
-  // Step 3: Delete orphan Playlist nodes (no ownership references them)
+  // Step 5: Delete orphan Playlist nodes (no ownership references them)
   let playlistMatchPattern = '';
 
   if (items === 'all') {

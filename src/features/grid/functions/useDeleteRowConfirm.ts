@@ -38,9 +38,23 @@ export function useDeleteRowConfirm(
     }
     if (deleteEndpoint) {
       try {
+        // For subdomains, use 'key' property from the vertex instead of 'id'
+        let deletePayload: { id?: string; key?: string };
+
+        if (gridState.tableId === "subdomains") {
+          const subdomain = graph.vertexes[gridState.deleteRowId];
+          if (!subdomain?.P?.key) {
+            showErrorToast("Subdomain key not found");
+            return;
+          }
+          deletePayload = { key: subdomain.P.key };
+        } else {
+          deletePayload = { id: gridState.deleteRowId };
+        }
+
         const result = await postAPI(
           deleteEndpoint,
-          { id: gridState.deleteRowId },
+          deletePayload,
           "DELETE",
         );
 
@@ -100,6 +114,8 @@ function getDeleteEndpoint(tableId: string) {
       return API.permission.deletePermissionUrl;
     case "Role":
       return API.role.deleteRoleUrl;
+    case "subdomains":
+      return API.subdomain.deleteUrl;
     case "Support":
       return API.support.deleteTicketUrl;
     case "User":

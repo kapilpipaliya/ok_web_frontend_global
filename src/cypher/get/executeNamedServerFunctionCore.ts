@@ -131,6 +131,33 @@ export async function executeNamedServerFunctionCore(
     ).constructor;
     const serverFunction = new AsyncFunction("args", functionBody);
 
+    // Create a context-aware executeNamedServerFunction that preserves session/subdomain
+    const contextAwareExecuteNamedServerFunction = async (
+      req: NamedServerFunctionRequest,
+      ctx?: EvalExpressionContext & { [key: `$${string}`]: any },
+    ) => {
+      // Create a new session for each nested function call
+      const nestedSession = (await getDriver()).session({
+        database: subDomain,
+      });
+
+      try {
+        // If no context provided, create one with the new session
+        const executionContext = ctx || {
+          dbSession: nestedSession,
+          subDomain: subDomain,
+          nodes: {}, // context.nodes || {},
+          relationships: {}, // context.relationships || {},
+          vertexes: {} as unknown as any, // context.vertexes,
+        };
+
+        return await executeNamedServerFunctionCore(req, executionContext);
+      } finally {
+        // Always close the session we created
+        await nestedSession.close();
+      }
+    };
+
     // Prepare the args object that will be available in the function
     const args = {
       session: dbSession,
@@ -142,7 +169,7 @@ export async function executeNamedServerFunctionCore(
       context: context,
       contextData: request.contextData || {},
       vertexes: context.vertexes || [],
-      executeNamedServerFunction,
+      executeNamedServerFunction: contextAwareExecuteNamedServerFunction,
       getUserFromSession,
       convertNodeToJson,
       neo4jDriver,

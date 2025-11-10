@@ -280,14 +280,12 @@ const [cardFieldSettings, setCardFieldSettings] = args.createSignal();
 // Load impersonation state from sessionStorage (client-side only)
 // This is called from onMount to avoid SSR/hydration mismatch
 const loadImpersonationState = () => {
-  if (typeof window !== 'undefined') {
-    const storedImpersonation = sessionStorage.getItem('yto_impersonatedUser');
-    if (storedImpersonation) {
-      try {
-        setImpersonatedUser(JSON.parse(storedImpersonation));
-      } catch (e) {
-        // Ignore parsing errors
-      }
+  const storedImpersonation = sessionStorage.getItem('yto_impersonatedUser');
+  if (storedImpersonation) {
+    try {
+      setImpersonatedUser(JSON.parse(storedImpersonation));
+    } catch (e) {
+      // Ignore parsing errors
     }
   }
 };
@@ -303,9 +301,7 @@ const exitImpersonation = async () => {
   });
 
   setImpersonatedUser(null);
-  if (typeof window !== 'undefined') {
-    sessionStorage.removeItem('yto_impersonatedUser');
-  }
+  sessionStorage.removeItem('yto_impersonatedUser');
   args.showSuccessToast("Stopped viewing as user");
 
   // Reload current page to refresh data
@@ -373,9 +369,7 @@ const selectOwnership = async (ownership) => {
   setSelectedOwnership(ownership);
 
   // Save to sessionStorage
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem('yto_selectedOwnership', JSON.stringify(ownership));
-  }
+  sessionStorage.setItem('yto_selectedOwnership', JSON.stringify(ownership));
 
   // Update lastSelected on server
   try {
@@ -393,15 +387,13 @@ const selectOwnership = async (ownership) => {
 
 // Load ownership state from sessionStorage
 const loadOwnershipState = () => {
-  if (typeof window !== 'undefined') {
-    const storedOwnership = sessionStorage.getItem('yto_selectedOwnership');
-    if (storedOwnership) {
-      try {
-        const ownership = JSON.parse(storedOwnership);
-        setSelectedOwnership(ownership);
-      } catch (e) {
-        // Ignore parsing errors
-      }
+  const storedOwnership = sessionStorage.getItem('yto_selectedOwnership');
+  if (storedOwnership) {
+    try {
+      const ownership = JSON.parse(storedOwnership);
+      setSelectedOwnership(ownership);
+    } catch (e) {
+      // Ignore parsing errors
     }
   }
 };

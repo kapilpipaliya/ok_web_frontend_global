@@ -57,11 +57,18 @@ export async function initializeWorkersIfNeeded() {
 
       console.log("[Server] ✓ Redis is running");
 
-      // Initialize workers
-      console.log("[Server] Initializing workers...");
-      const { initWorkersCore } = await import("./queue/initWorkersCore");
+      // Initialize platform workers
+      console.log("[Server] Initializing platform workers...");
+      const { initWorkersCore, initAllSubdomainWorkers } = await import(
+        "./queue/initWorkersCore"
+      );
       await initWorkersCore();
-      console.log("[Server] ✓ Workers initialized successfully");
+      console.log("[Server] ✓ Platform workers initialized successfully");
+
+      // Initialize subdomain workers for all subdomains
+      console.log("[Server] Initializing subdomain workers...");
+      await initAllSubdomainWorkers();
+      console.log("[Server] ✓ All workers initialized successfully");
     } catch (error) {
       console.error("[Server] Failed to initialize workers:", error);
       // Don't throw - let the app continue even if worker init fails

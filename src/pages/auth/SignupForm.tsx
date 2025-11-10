@@ -392,8 +392,7 @@ export function SignupForm() {
                         props: () => ({
                           onClick: () => {
                             navigate(
-                              getGlobalSettingVertex(graph[0])?.P
-                                .privacyPageUrl || "/terms",
+                              "/terms",
                             );
                           },
                         }),

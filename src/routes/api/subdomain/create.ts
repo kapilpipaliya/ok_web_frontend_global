@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
@@ -12,6 +12,12 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { getWebsiteSchemasSync } from "~/page_schema/loader";
+import { createAppState } from "~/createAppState";
+import { getDriver } from "~/cypher/core/driver";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { initSubdomainWorkersForSubdomain } from "~/server/queue/initWorkersCore";
+import { importSchemas } from "~/lib/schema/importSchemas";
 
 // Reserved subdomain keys that cannot be used
 const RESERVED_SUBDOMAINS = new Set([
@@ -118,6 +124,21 @@ export async function POST({ request }: APIEvent) {
       subDomain: key,
     });
 
+    // Automatically import schemas for the new subdomain
+    await importSchemasForSubdomain(key, user);
+
+    // Start all workers for the subdomain
+    try {
+      await initSubdomainWorkersForSubdomain(key);
+      console.log(`[Subdomain Create] Workers initialized for subdomain: ${key}`);
+    } catch (error) {
+      console.error(
+        `[Subdomain Create] Failed to initialize workers for subdomain: ${key}`,
+        error,
+      );
+      // Don't throw - worker initialization failure shouldn't block subdomain creation
+    }
+
     return {
       graph: {
         edges: {},
@@ -204,5 +225,107 @@ async function validateKeyAndDomain(
     if (existingDomain.records.length > 0) {
       throw new APIError("Domain name is already taken", 400);
     }
+  }
+}
+
+async function importSchemasForSubdomain(
+  subdomainKey: string,
+  user: Vertex,
+): Promise<void> {
+  console.log(
+    `[Subdomain Create] Starting schema import for subdomain: ${subdomainKey}`,
+  );
+
+  // Load schemas for the subdomain
+  const websiteSchemas = getWebsiteSchemasSync(subdomainKey);
+
+  // If no schemas found, try loading from default website
+  if (
+    !websiteSchemas.components &&
+    !websiteSchemas.pages &&
+    !websiteSchemas.themes &&
+    !websiteSchemas.functions
+  ) {
+    console.log(
+      `[Subdomain Create] No schemas found for ${subdomainKey}, trying default...`,
+    );
+    const defaultSchemas = getWebsiteSchemasSync("default");
+
+    if (
+      !defaultSchemas.components &&
+      !defaultSchemas.pages &&
+      !defaultSchemas.themes &&
+      !defaultSchemas.functions
+    ) {
+      console.log(
+        `[Subdomain Create] No schemas found for ${subdomainKey} or default, skipping import`,
+      );
+      return;
+    }
+
+    // Use default schemas
+    return await importSchemasToDatabase(
+      subdomainKey,
+      defaultSchemas,
+      user,
+      "default",
+    );
+  }
+
+  // Import subdomain-specific schemas
+  await importSchemasToDatabase(
+    subdomainKey,
+    websiteSchemas,
+    user,
+    subdomainKey,
+  );
+}
+
+async function importSchemasToDatabase(
+  subdomainKey: string,
+  websiteSchemas: ReturnType<typeof getWebsiteSchemasSync>,
+  user: Vertex,
+  websiteName: string,
+): Promise<void> {
+  const driver = await getDriver();
+  const dbSession = driver.session({ database: subdomainKey });
+
+  try {
+    const tx = dbSession.beginTransaction();
+
+    try {
+      // Create a new graph state for import
+      const [graph, setGraph] = createAppState();
+
+      // Import all schemas using shared library function
+      const stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
+
+      // Log the import activity
+      let activityMessage = `Imported ${stats.importedItems.length} schemas from website: ${websiteName}. Total vertices: ${stats.totalVertices}, Total edges: ${stats.totalEdges}`;
+      if (stats.activatedTheme) {
+        activityMessage += `. Activated theme: ${stats.activatedTheme}`;
+      }
+      await createActivityLog(
+        tx,
+        "schema_import",
+        "Schema",
+        websiteName,
+        user.P.email,
+        activityMessage,
+      );
+
+      await tx.commit();
+
+      console.log(
+        `[Subdomain Create] Successfully imported ${stats.importedItems.length} schemas for subdomain: ${subdomainKey}`,
+      );
+    } catch (error) {
+      await tx.rollback();
+      throw error;
+    } finally {
+      await tx.close();
+    }
+  } finally {
+    await dbSession.close();
   }
 }

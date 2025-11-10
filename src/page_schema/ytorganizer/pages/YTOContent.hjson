@@ -392,7 +392,7 @@ const [noteModalData, setNoteModalData] = args.createStore({ item: null, itemTyp
 // Virtualization constants
 const overscan = 5;
 const [scrollTop, setScrollTop] = args.createSignal(0);
-const [windowWidth, setWindowWidth] = args.createSignal(typeof window !== 'undefined' ? window.innerWidth : 768);
+const [windowWidth, setWindowWidth] = args.createSignal(768); // Default to mobile width, updated in onMount
 
 // Virtualization state for detail view items (playlists for channels, videos for playlists)
 const [detailScrollTop, setDetailScrollTop] = args.createSignal(0);
@@ -2264,7 +2264,8 @@ return {
     // Load user settings (will be overridden by URL if present)
     args.fns.loadUserSettings();
 
-    // Add resize listener
+    // Initialize window width and add resize listener
+    args.fns.handleResize();
     window.addEventListener('resize', args.fns.handleResize);
   },
   onCleanup: () => {
