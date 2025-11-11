@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
+import { logger } from "~/lib/logger";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -61,9 +62,11 @@ export async function POST({ request }: APIEvent) {
         if (paymentEntity) {
           const orderId = paymentEntity.order_id;
           const paymentId = paymentEntity.id;
+          const amount = paymentEntity.amount;
+          const currency = paymentEntity.currency;
 
           // Update subscription status
-          await dbSession.run(
+          const result = await dbSession.run(
             `MATCH (s:UserSubscription {razorpayOrderId: $orderId, status: 'pending'})
              SET s.razorpayPaymentId = $paymentId,
                  s.status = 'active',
@@ -75,7 +78,17 @@ export async function POST({ request }: APIEvent) {
             },
           );
 
-          console.log(`Payment captured for order ${orderId}`);
+          const subscription = result.records.length > 0 ? convertNodeToJson(result.records[0].get("s")) : null;
+
+          // Log payment success
+          logger.logPayment({
+            orderId,
+            paymentId,
+            amount: amount ? amount / 100 : undefined, // Razorpay stores amount in paise
+            currency,
+            status: "captured",
+            userId: subscription?.P?.userId,
+          });
         }
         break;
       }
@@ -86,9 +99,12 @@ export async function POST({ request }: APIEvent) {
 
         if (paymentEntity) {
           const orderId = paymentEntity.order_id;
+          const paymentId = paymentEntity.id;
+          const amount = paymentEntity.amount;
+          const currency = paymentEntity.currency;
 
           // Update subscription status to failed
-          await dbSession.run(
+          const result = await dbSession.run(
             `MATCH (s:UserSubscription {razorpayOrderId: $orderId, status: 'pending'})
              SET s.status = 'failed',
                  s.updatedAt = datetime()
@@ -98,14 +114,31 @@ export async function POST({ request }: APIEvent) {
             },
           );
 
-          console.log(`Payment failed for order ${orderId}`);
+          const subscription = result.records.length > 0 ? convertNodeToJson(result.records[0].get("s")) : null;
+
+          // Log payment failure
+          logger.logPayment({
+            orderId,
+            paymentId,
+            amount: amount ? amount / 100 : undefined,
+            currency,
+            status: "failed",
+            userId: subscription?.P?.userId,
+          });
         }
         break;
       }
 
       case "subscription.charged": {
         // Subscription renewed (for recurring subscriptions)
-        console.log("Subscription charged event received");
+        const subscriptionEntity = payload.subscription?.entity;
+
+        if (subscriptionEntity) {
+          logger.logPayment({
+            orderId: subscriptionEntity.id,
+            status: "subscription_charged",
+          });
+        }
         break;
       }
 
@@ -117,7 +150,7 @@ export async function POST({ request }: APIEvent) {
           const subscriptionId = subscriptionEntity.id;
 
           // Update subscription status to cancelled
-          await dbSession.run(
+          const result = await dbSession.run(
             `MATCH (s:UserSubscription {razorpaySubscriptionId: $subscriptionId})
              SET s.status = 'cancelled',
                  s.updatedAt = datetime()
@@ -127,13 +160,25 @@ export async function POST({ request }: APIEvent) {
             },
           );
 
-          console.log(`Subscription ${subscriptionId} cancelled`);
+          const subscription = result.records.length > 0 ? convertNodeToJson(result.records[0].get("s")) : null;
+
+          logger.logPayment({
+            orderId: subscriptionId,
+            status: "subscription_cancelled",
+            userId: subscription?.P?.userId,
+          });
         }
         break;
       }
 
       default:
-        console.log(`Unhandled webhook event: ${eventType}`);
+        logger.warn(
+          {
+            type: "payment_webhook",
+            eventType,
+          },
+          `Unhandled webhook event: ${eventType}`,
+        );
     }
 
     // Return success response
@@ -143,7 +188,13 @@ export async function POST({ request }: APIEvent) {
       timestamp: new Date().getTime(),
     };
   } catch (error) {
-    console.error("Webhook processing error:", error);
+    logger.error(
+      {
+        type: "payment_webhook_error",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      "Webhook processing error",
+    );
     return handleAPIError(error);
   } finally {
     await dbSession.close();

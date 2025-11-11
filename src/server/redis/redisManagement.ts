@@ -649,6 +649,8 @@ export async function emptyQueue(queueName: string) {
  * Queue names are derived from function names in the subdomain database
  */
 export async function deleteAllQueuesForSubdomain(subdomain: string) {
+  "use server";
+
   const connection = getRedisConnection();
   const redis = new Redis(connection);
 
@@ -720,5 +722,151 @@ export async function deleteAllQueuesForSubdomain(subdomain: string) {
       success: false,
       error: error.message,
     };
+  }
+}
+
+/**
+ * Get backup status and recent backup history
+ */
+export async function getBackupStatus() {
+  "use server";
+
+  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+
+  try {
+    if (subDomain !== "admin") {
+      return {
+        success: false,
+        error: "This function is only accessible from the admin subdomain",
+      };
+    }
+
+    const connection = getRedisConnection();
+    const queue = new Queue("backgroundBackupDatabase", { connection });
+
+    // Get backup job stats
+    const [waiting, active, completed, failed] = await Promise.all([
+      queue.getWaitingCount(),
+      queue.getActiveCount(),
+      queue.getCompletedCount(),
+      queue.getFailedCount(),
+    ]);
+
+    // Get recent completed backups
+    const recentCompleted = await queue.getCompleted(0, 5);
+    const recentFailed = await queue.getFailed(0, 5);
+
+    // Get last successful backup
+    const lastSuccessful =
+      recentCompleted.length > 0
+        ? {
+            id: recentCompleted[0].id,
+            timestamp: recentCompleted[0].finishedOn,
+            duration:
+              recentCompleted[0].finishedOn && recentCompleted[0].processedOn
+                ? recentCompleted[0].finishedOn - recentCompleted[0].processedOn
+                : null,
+            data: recentCompleted[0].returnvalue,
+          }
+        : null;
+
+    // Get last failed backup
+    const lastFailed =
+      recentFailed.length > 0
+        ? {
+            id: recentFailed[0].id,
+            timestamp: recentFailed[0].finishedOn || recentFailed[0].processedOn,
+            error: recentFailed[0].failedReason,
+          }
+        : null;
+
+    // Check if backup is enabled
+    const backupEnabled = process.env.BACKUP_ENABLED === "true";
+
+    await queue.close();
+
+    return {
+      success: true,
+      data: {
+        enabled: backupEnabled,
+        schedule: process.env.BACKUP_SCHEDULE || "0 2 * * *",
+        storageType: process.env.BACKUP_STORAGE_TYPE || "s3",
+        stats: {
+          waiting,
+          active,
+          completed,
+          failed,
+          total: waiting + active + completed + failed,
+        },
+        lastSuccessful,
+        lastFailed,
+        recentBackups: recentCompleted.map((job) => ({
+          id: job.id,
+          timestamp: job.finishedOn,
+          duration:
+            job.finishedOn && job.processedOn ? job.finishedOn - job.processedOn : null,
+          success: !job.failedReason,
+        })),
+      },
+    };
+  } catch (error: any) {
+    console.error("[Redis] Error getting backup status:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  } finally {
+    await dbSession.close();
+  }
+}
+
+/**
+ * Trigger a manual backup
+ */
+export async function triggerManualBackup() {
+  "use server";
+
+  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+
+  try {
+    if (subDomain !== "admin") {
+      return {
+        success: false,
+        error: "This function is only accessible from the admin subdomain",
+      };
+    }
+
+    // Check if backup is enabled
+    if (process.env.BACKUP_ENABLED !== "true") {
+      return {
+        success: false,
+        error: "Backup system is not enabled. Set BACKUP_ENABLED=true in .env",
+      };
+    }
+
+    const connection = getRedisConnection();
+    const queue = new Queue("backgroundBackupDatabase", { connection });
+
+    // Add manual backup job
+    const job = await queue.add("manual-backup", {
+      trigger: "manual",
+      triggeredAt: new Date().toISOString(),
+    });
+
+    await queue.close();
+
+    return {
+      success: true,
+      message: "Manual backup triggered successfully",
+      jobId: job.id,
+    };
+  } catch (error: any) {
+    console.error("[Redis] Error triggering manual backup:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  } finally {
+    await dbSession.close();
   }
 }

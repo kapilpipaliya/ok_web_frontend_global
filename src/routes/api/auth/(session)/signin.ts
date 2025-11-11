@@ -12,6 +12,7 @@ import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGenera
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { logger } from "~/lib/logger";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
@@ -28,6 +29,14 @@ export async function POST({ request }: APIEvent) {
     }
 
     const user = await authenticateUser(email, password, subDomain, dbSession);
+
+    // Log successful authentication
+    logger.logAuth({
+      action: "signin",
+      success: true,
+      userId: user.P.uuid,
+      email: user.P.email,
+    });
 
     // TODO: need signIn autdit log form in UI too.
     await createActivityLog(
@@ -60,6 +69,16 @@ export async function POST({ request }: APIEvent) {
       result: user,
     };
   } catch (error) {
+    // Log failed authentication attempt
+    const { email } = await request.json().catch(() => ({ email: "unknown" }));
+
+    logger.logAuth({
+      action: "signin",
+      success: false,
+      email,
+      reason: error instanceof APIError ? error.message : "Unknown error",
+    });
+
     return handleAPIError(error);
   } finally {
     await dbSession.close();

@@ -9,6 +9,7 @@
 
 import crypto from 'crypto';
 
+// we can use: https://github.com/brielov/razr/blob/master/packages/crypto/cipher.ts
 const ALGORITHM = 'aes-256-gcm';
 
 /**

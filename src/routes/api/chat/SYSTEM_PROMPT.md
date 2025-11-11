@@ -92,6 +92,80 @@ The user vertex contains all user properties including:
 - `args.user?.P?.uuid` - User's unique identifier
 - `args.user?.id` - Vertex ID in the graph
 
+#### Browser-Specific Code and Lifecycle Methods
+
+**IMPORTANT: Never use `typeof window !== 'undefined'` checks in component code.**
+
+When you need to access browser-only APIs (window, document, localStorage, sessionStorage, etc.), use the `onMount` lifecycle callback instead:
+
+**Bad Pattern (DO NOT USE):**
+```javascript
+// ❌ WRONG - Don't use typeof window checks
+fns: '''
+if (typeof window !== 'undefined' && !window.YT) {
+  const script = document.createElement('script');
+  script.src = 'https://example.com/api.js';
+  document.head.appendChild(script);
+}
+
+const [width, setWidth] = args.createSignal(
+  typeof window !== 'undefined' ? window.innerWidth : 768
+);
+'''
+```
+
+**Good Pattern (CORRECT):**
+```javascript
+// ✅ CORRECT - Use onMount for browser APIs
+fns: '''
+const [width, setWidth] = args.createSignal(768); // Default value
+
+const initializeAPI = () => {
+  if (window.YT) return;
+  const script = document.createElement('script');
+  script.src = 'https://example.com/api.js';
+  document.head.appendChild(script);
+};
+
+const updateWidth = () => {
+  setWidth(window.innerWidth);
+};
+
+return {
+  initializeAPI,
+  updateWidth
+};
+''',
+props: '''
+return {
+  as: "div",
+  onMount: () => {
+    // Browser APIs are safe to use here
+    args.fns.initializeAPI();
+    args.fns.updateWidth();
+    window.addEventListener('resize', args.fns.updateWidth);
+  },
+  onCleanup: () => {
+    window.removeEventListener('resize', args.fns.updateWidth);
+  }
+};
+'''
+```
+
+**Why use onMount instead of typeof window:**
+1. `onMount` only runs in the browser, never during SSR
+2. `typeof window` checks are verbose and unnecessary in component lifecycle
+3. Functions called from `onMount`, user events, or `createEffect` are always in browser context
+4. Cleaner, more maintainable code
+
+**Common Use Cases:**
+- Loading external scripts (YouTube API, Google Maps, etc.)
+- Accessing localStorage/sessionStorage
+- Setting up window event listeners
+- Getting window dimensions
+- Accessing DOM elements
+- Initializing browser-only libraries
+
 ```typescript
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;

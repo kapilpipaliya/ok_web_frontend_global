@@ -1,0 +1,375 @@
+{
+  vertexes: [
+    {
+      id: "background_backup_database_worker",
+      L: "Function",
+      P: {
+        key: "backgroundBackupDatabase",
+        description: "Background worker that automatically backs up all Neo4j databases daily and uploads to cloud storage",
+        body: '''
+// This is a background worker function that runs on a schedule
+if (args.contextData.action === 'start') {
+  // Helper function to log messages to database
+  const logMessage = async (level, message, metadata = {}) => {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: 'logWorkerMessage',
+        contextData: {
+          workerName: 'backgroundBackupDatabase',
+          level,
+          message,
+          metadata
+        }
+      });
+    } catch (error) {
+      // Silent failure - don't break worker if logging fails
+      console.error('Logging failed:', error);
+    }
+  };
+
+  await logMessage('info', 'Starting background database backup worker');
+
+  // Initialize queue helpers and Redis connection
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+  if (!helpers.result?.success) {
+    await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
+    throw new Error('Queue helpers initialization failed');
+  }
+
+  const { Worker, Queue } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+
+  // Validate Redis connection config
+  if (!connection || !connection.host) {
+    await logMessage('error', 'Invalid Redis connection configuration', { connection });
+    throw new Error('Invalid Redis connection configuration');
+  }
+
+  // Create a queue for the scheduled backup jobs
+  const backupQueue = new Queue('backgroundBackupDatabase', { connection });
+
+  // Get backup schedule from environment (default: daily at 2 AM UTC)
+  const backupSchedule = process.env.BACKUP_SCHEDULE || '0 2 * * *';
+  const backupEnabled = process.env.BACKUP_ENABLED !== 'false';
+
+  if (!backupEnabled) {
+    await logMessage('warn', 'Backup system is disabled via BACKUP_ENABLED env var');
+    return {
+      stop: async () => {
+        await backupQueue.close();
+      }
+    };
+  }
+
+  // Add a repeatable job for scheduled backups
+  await backupQueue.add(
+    'scheduled-backup',
+    {
+      scheduledRun: true,
+      description: 'Automated database backup',
+      timestamp: new Date().toISOString()
+    },
+    {
+      repeat: {
+        pattern: backupSchedule,
+        tz: 'UTC'
+      },
+      jobId: 'backup-repeatable' // Prevent duplicates
+    }
+  );
+
+  await logMessage('info', 'Scheduled repeatable backup job', {
+    cronPattern: backupSchedule,
+    timezone: 'UTC',
+    enabled: backupEnabled
+  });
+
+  // Small delay to ensure queue is fully initialized
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // Create worker to process the scheduled backup jobs
+  let worker;
+  try {
+    await logMessage('info', 'Creating BullMQ Worker for database backups');
+
+    worker = new Worker('backgroundBackupDatabase', async (job) => {
+      await logMessage('info', 'Starting scheduled database backup', {
+        jobId: job.id,
+        scheduledTime: new Date().toISOString()
+      });
+
+      // Create a new session for this job execution
+      const adminSession = await args.getSession();
+
+      const startTime = Date.now();
+      let totalDatabases = 0;
+      let successfulBackups = 0;
+      let failedBackups = 0;
+      const errors = [];
+      const backupResults = [];
+
+      try {
+        // Get list of all Neo4j databases (subdomains + admin)
+        await logMessage('info', 'Fetching list of databases to backup');
+
+        const databasesResult = await adminSession.run(`
+          MATCH (s:SubDomain)
+          WHERE s.status = 'active'
+          RETURN s.key as databaseName
+          ORDER BY s.key
+        `);
+
+        // Add admin database to the list
+        const databases = ['admin', ...databasesResult.records.map(r => r.get('databaseName'))];
+        totalDatabases = databases.length;
+
+        await logMessage('info', `Found ${totalDatabases} databases to backup`, { databases });
+
+        // Process each database backup
+        for (const databaseName of databases) {
+          try {
+            await logMessage('info', `Starting backup for database: ${databaseName}`);
+
+            // Call backup utilities to create and upload backup
+            const backupResult = await args.createDatabaseBackup({
+              databaseName,
+              backupType: 'daily',
+              jobId: job.id
+            });
+
+            if (backupResult.success) {
+              successfulBackups++;
+              backupResults.push({
+                database: databaseName,
+                success: true,
+                size: backupResult.data?.size,
+                filename: backupResult.data?.filename,
+                uploadedAt: backupResult.data?.uploadedAt
+              });
+              await logMessage('info', `Successfully backed up database: ${databaseName}`, {
+                size: backupResult.data?.size,
+                filename: backupResult.data?.filename
+              });
+            } else {
+              failedBackups++;
+              const errorMsg = backupResult.error || 'Unknown error';
+              errors.push({
+                database: databaseName,
+                error: errorMsg
+              });
+              backupResults.push({
+                database: databaseName,
+                success: false,
+                error: errorMsg
+              });
+              await logMessage('error', `Failed to backup database: ${databaseName}`, {
+                error: errorMsg
+              });
+            }
+          } catch (error) {
+            failedBackups++;
+            errors.push({
+              database: databaseName,
+              error: error.message
+            });
+            backupResults.push({
+              database: databaseName,
+              success: false,
+              error: error.message
+            });
+            await logMessage('error', `Error backing up database: ${databaseName}`, {
+              error: error.message,
+              stack: error.stack
+            });
+          }
+        }
+
+        // Apply retention policy to clean up old backups
+        try {
+          await logMessage('info', 'Applying backup retention policy');
+          const retentionResult = await args.executeNamedServerFunction({
+            functionName: 'applyBackupRetentionPolicy',
+            contextData: {
+              jobId: job.id
+            }
+          });
+
+          if (retentionResult.result?.success) {
+            await logMessage('info', 'Successfully applied retention policy', {
+              deletedCount: retentionResult.result.data?.deletedCount
+            });
+          }
+        } catch (error) {
+          await logMessage('warn', 'Failed to apply retention policy', {
+            error: error.message
+          });
+          // Don't fail the backup job if retention cleanup fails
+        }
+
+        const duration = Date.now() - startTime;
+
+        // Send alert email if there were failures and alerts are enabled
+        const alertOnFailure = process.env.BACKUP_ALERT_ON_FAILURE !== 'false';
+        const alertOnSuccess = process.env.BACKUP_ALERT_ON_SUCCESS === 'true';
+
+        if ((failedBackups > 0 && alertOnFailure) || (failedBackups === 0 && alertOnSuccess)) {
+          try {
+            await args.executeNamedServerFunction({
+              functionName: 'sendBackupAlertEmail',
+              contextData: {
+                totalDatabases,
+                successfulBackups,
+                failedBackups,
+                errors,
+                backupResults,
+                duration
+              }
+            });
+          } catch (error) {
+            await logMessage('warn', 'Failed to send alert email', {
+              error: error.message
+            });
+          }
+        }
+
+        await logMessage('info', 'Completed scheduled database backup', {
+          totalDatabases,
+          successfulBackups,
+          failedBackups,
+          duration: `${Math.round(duration / 1000)}s`
+        });
+
+        return {
+          success: true,
+          message: `Backed up ${successfulBackups}/${totalDatabases} database(s)`,
+          data: {
+            totalDatabases,
+            successfulBackups,
+            failedBackups,
+            duration,
+            backupResults,
+            errors: errors.length > 0 ? errors : undefined,
+            completedAt: new Date().toISOString()
+          }
+        };
+
+      } catch (error) {
+        await logMessage('error', 'Error during scheduled backup', {
+          error: error.message,
+          stack: error.stack
+        });
+        throw error;
+      } finally {
+        // Always close the session
+        await adminSession.close();
+      }
+    }, {
+      connection,
+      concurrency: 1, // Only run one backup job at a time
+      limiter: {
+        max: 1,
+        duration: 60000 // Max 1 job per minute
+      }
+    });
+
+    // Event handlers for job lifecycle
+    worker.on('completed', async (job, result) => {
+      await logMessage('info', 'Scheduled backup job completed', {
+        jobId: job.id,
+        successfulBackups: result?.data?.successfulBackups,
+        failedBackups: result?.data?.failedBackups,
+        duration: result?.data?.duration
+      });
+    });
+
+    worker.on('failed', async (job, err) => {
+      await logMessage('error', 'Scheduled backup job failed', {
+        jobId: job?.id,
+        error: err.message,
+        stack: err.stack
+      });
+
+      // Send alert email on job failure
+      try {
+        await args.executeNamedServerFunction({
+          functionName: 'sendBackupAlertEmail',
+          contextData: {
+            jobFailed: true,
+            error: err.message,
+            jobId: job?.id
+          }
+        });
+      } catch (emailError) {
+        console.error('Failed to send job failure alert:', emailError);
+      }
+    });
+
+    // Event handler for worker errors
+    worker.on('error', async (err) => {
+      await logMessage('error', 'Worker error occurred', {
+        error: err.message,
+        stack: err.stack,
+        code: err.code
+      });
+    });
+
+    await logMessage('info', 'Database backup worker created successfully', {
+      concurrency: 1,
+      schedule: backupSchedule
+    });
+
+    // Return stop function for graceful shutdown
+    return {
+      stop: async () => {
+        await logMessage('info', 'Stopping background database backup worker');
+
+        // Remove the repeatable job
+        try {
+          await backupQueue.removeRepeatableByKey(`backgroundBackupDatabase:scheduled-backup::${backupSchedule}:UTC`);
+          await logMessage('info', 'Removed repeatable backup job');
+        } catch (error) {
+          console.error('Error removing repeatable job:', error);
+        }
+
+        // Close the worker and queue
+        if (worker) {
+          await worker.close();
+        }
+        await backupQueue.close();
+        await logMessage('info', 'Stopped background database backup worker');
+      }
+    };
+
+  } catch (error) {
+    await logMessage('error', 'Failed to create database backup worker', {
+      error: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+
+    // If worker was partially created, try to close it
+    if (worker) {
+      try {
+        await worker.close();
+      } catch (closeError) {
+        console.error('Error closing worker:', closeError);
+      }
+    }
+
+    // Close the queue
+    try {
+      await backupQueue.close();
+    } catch (closeError) {
+      console.error('Error closing queue:', closeError);
+    }
+
+    throw error;
+  }
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

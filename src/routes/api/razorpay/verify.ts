@@ -5,6 +5,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
+import { logger } from "~/lib/logger";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -51,6 +52,13 @@ export async function POST({ request }: APIEvent) {
       .digest("hex");
 
     if (generatedSignature !== signature) {
+      logger.logPayment({
+        orderId,
+        paymentId,
+        status: "verification_failed",
+        userId: user.P.uuid,
+      });
+
       throw new APIError(
         "Invalid payment signature. Payment verification failed.",
         400,
@@ -112,6 +120,16 @@ export async function POST({ request }: APIEvent) {
       expiryDate: subscription.P.expiryDate,
     });
 
+    // Log successful payment verification
+    logger.logPayment({
+      orderId,
+      paymentId,
+      amount: subscription.P.amount / 100, // Convert cents to dollars
+      currency: subscription.P.currency,
+      status: "verified_and_activated",
+      userId: user.P.uuid,
+    });
+
     return {
       result: {
         plan: subscription.P.plan,
@@ -124,6 +142,15 @@ export async function POST({ request }: APIEvent) {
       timestamp: new Date().getTime(),
     };
   } catch (error) {
+    logger.error(
+      {
+        type: "payment_verification_error",
+        userId: user?.P?.uuid,
+        orderId: body?.orderId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      "Payment verification failed",
+    );
     return handleAPIError(error);
   } finally {
     await dbSession.close();

@@ -9,6 +9,7 @@ import { Worker, type Job } from "bullmq";
 import { redisConnection } from "../redisConfig";
 import { sendEmailDirect } from "~/lib/playwright/sendEmail";
 import type { EmailJobData } from "../emailQueue";
+import { logger } from "~/lib/logger";
 
 /**
  * Email worker state stored globally to share across module instances
@@ -31,9 +32,15 @@ if (!global.__emailWorkerStartPromise) {
  * Process a single email job
  */
 async function processEmailJob(job: Job<EmailJobData>) {
-  console.log(
-    `[EmailWorker] Processing email job ${job.id} for ${job.data.to}`,
-  );
+  const startTime = Date.now();
+
+  logger.logJob({
+    jobId: job.id?.toString(),
+    jobName: "email",
+    queueName: "email",
+    attemptsMade: job.attemptsMade,
+    status: "started",
+  });
 
   try {
     // Send the email using the direct send function (bypasses queue)
@@ -46,13 +53,31 @@ async function processEmailJob(job: Job<EmailJobData>) {
       attachmentPath: job.data.attachmentPath,
     });
 
-    console.log(`[EmailWorker] Successfully sent email to ${job.data.to}`);
+    const duration = Date.now() - startTime;
+
+    logger.logJob({
+      jobId: job.id?.toString(),
+      jobName: "email",
+      queueName: "email",
+      attemptsMade: job.attemptsMade,
+      duration,
+      status: "completed",
+    });
+
     return { success: true, messageId: result?.messageId };
   } catch (error) {
-    console.error(
-      `[EmailWorker] Failed to send email to ${job.data.to}:`,
-      error,
-    );
+    const duration = Date.now() - startTime;
+
+    logger.logJob({
+      jobId: job.id?.toString(),
+      jobName: "email",
+      queueName: "email",
+      attemptsMade: job.attemptsMade,
+      duration,
+      status: "failed",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+
     throw error; // Let BullMQ handle retries
   }
 }
@@ -70,7 +95,7 @@ export async function startEmailWorker() {
 
   // Create the start promise
   global.__emailWorkerStartPromise = (async () => {
-    console.log("[EmailWorker] Starting email worker...");
+    logger.info("Starting email worker...");
 
     const newWorker = new Worker<EmailJobData>("email", processEmailJob, {
       connection: redisConnection,
@@ -83,25 +108,57 @@ export async function startEmailWorker() {
 
     // Worker event listeners
     newWorker.on("completed", (job) => {
-      console.log(`[EmailWorker] Job ${job.id} completed successfully`);
+      logger.debug(
+        {
+          type: "worker_event",
+          event: "completed",
+          jobId: job.id?.toString(),
+          queueName: "email",
+        },
+        `Email worker job ${job.id} completed`,
+      );
     });
 
     newWorker.on("failed", (job, err) => {
-      console.error(`[EmailWorker] Job ${job?.id} failed:`, err.message);
+      logger.error(
+        {
+          type: "worker_event",
+          event: "failed",
+          jobId: job?.id?.toString(),
+          queueName: "email",
+          error: err.message,
+        },
+        `Email worker job ${job?.id} failed`,
+      );
     });
 
     newWorker.on("error", (err) => {
-      console.error("[EmailWorker] Worker error:", err);
+      logger.error(
+        {
+          type: "worker_error",
+          queueName: "email",
+          error: err instanceof Error ? err.message : "Unknown error",
+        },
+        "Email worker error",
+      );
     });
 
     newWorker.on("stalled", (jobId) => {
-      console.warn(`[EmailWorker] Job ${jobId} stalled`);
+      logger.warn(
+        {
+          type: "worker_event",
+          event: "stalled",
+          jobId,
+          queueName: "email",
+        },
+        `Email worker job ${jobId} stalled`,
+      );
     });
 
     // Assign to global variable
     global.__emailWorker = newWorker;
 
-    console.log("[EmailWorker] Email worker started successfully");
+    logger.info("Email worker started successfully");
 
     return newWorker;
   })();
@@ -114,15 +171,15 @@ export async function startEmailWorker() {
  */
 export async function stopEmailWorker() {
   if (!global.__emailWorker) {
-    console.log("[EmailWorker] Worker not running");
+    logger.debug("Email worker not running");
     return;
   }
 
-  console.log("[EmailWorker] Stopping email worker...");
+  logger.info("Stopping email worker...");
   await global.__emailWorker.close();
   global.__emailWorker = undefined;
   global.__emailWorkerStartPromise = undefined; // Reset promise so worker can be restarted
-  console.log("[EmailWorker] Email worker stopped");
+  logger.info("Email worker stopped");
 }
 
 /**
@@ -144,7 +201,7 @@ export async function pauseEmailWorker() {
     throw new Error("Worker not running");
   }
   await global.__emailWorker.pause();
-  console.log("[EmailWorker] Worker paused");
+  logger.info("Email worker paused");
 }
 
 /**
@@ -155,5 +212,5 @@ export async function resumeEmailWorker() {
     throw new Error("Worker not running");
   }
   await global.__emailWorker.resume();
-  console.log("[EmailWorker] Worker resumed");
+  logger.info("Email worker resumed");
 }

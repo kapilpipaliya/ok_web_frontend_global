@@ -1,6 +1,7 @@
 import { auth, driver as createDriver, type Driver } from "neo4j-driver";
 
 import { boltPort } from "./boltConstant";
+import { logger } from "~/lib/logger";
 
 /**
  * Global driver state management
@@ -23,7 +24,7 @@ declare global {
 
 // Initialize global driver state if not exists
 if (!global.__neo4jDriverState) {
-  console.log("[Neo4j Driver] Initializing global driver state");
+  logger.debug("Initializing Neo4j global driver state");
   global.__neo4jDriverState = {
     driverInstance: null,
     driverPromise: null,
@@ -68,7 +69,11 @@ export async function getDriver(): Promise<Driver> {
     const username = process.env.NEO4J_USERNAME || "neo4j";
     const password = process.env.NEO4J_PASSWORD || "";
 
-    console.log("[Neo4j Driver] Creating new driver connection pool...");
+    logger.logDatabase({
+      operation: "driver_init",
+      database: `bolt://localhost:${boltPort}`,
+    });
+
     // Create driver with optimized connection pool settings
     const driver = createDriver(
       `bolt://localhost:${boltPort}`,
@@ -108,7 +113,7 @@ export async function getDriver(): Promise<Driver> {
       },
     );
 
-    console.log("[Neo4j Driver] Connection pool created successfully");
+    logger.info("Neo4j connection pool created successfully");
     driverState.driverInstance = driver;
     driverState.driverPromise = null; // Clear promise after successful creation
     driverState.driverWasClosed = false; // Reset flag
@@ -137,13 +142,17 @@ export async function getDriver(): Promise<Driver> {
  */
 export async function closeDriver() {
   if (driverState.driverInstance) {
-    console.log("[Neo4j Driver] Closing connection pool...");
+    logger.logDatabase({
+      operation: "driver_close",
+    });
+
     await driverState.driverInstance.close();
     driverState.driverInstance = null;
     driverState.driverPromise = null; // Clear promise as well
     driverState.driverWasClosed = true; // Mark driver as closed
-    console.log("[Neo4j Driver] Connection pool closed successfully");
+
+    logger.info("Neo4j connection pool closed successfully");
   } else {
-    console.log("[Neo4j Driver] No active driver instance to close");
+    logger.debug("No active Neo4j driver instance to close");
   }
 }

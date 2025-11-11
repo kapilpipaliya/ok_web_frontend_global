@@ -4,6 +4,8 @@
  * This module initializes workers when the server starts.
  * It checks Redis availability first and only starts workers if Redis is running.
  */
+import {checkRedisConnection} from "~/server/queue/checkRedis";
+import {initAllSubdomainWorkers, initWorkersCore} from "~/server/queue/initWorkersCore";
 
 // Use global shared state to prevent duplicate initialization across module instances
 // (Vinxi dev mode creates multiple module instances in separate contexts)
@@ -32,7 +34,6 @@ export async function initializeWorkersIfNeeded() {
     try {
       // First, check if Redis is running
       console.log("[Server] Checking if Redis is running...");
-      const { checkRedisConnection } = await import("./queue/checkRedis");
       const redisCheck = await checkRedisConnection();
 
       if (!redisCheck.connected) {
@@ -59,9 +60,6 @@ export async function initializeWorkersIfNeeded() {
 
       // Initialize platform workers
       console.log("[Server] Initializing platform workers...");
-      const { initWorkersCore, initAllSubdomainWorkers } = await import(
-        "./queue/initWorkersCore"
-      );
       await initWorkersCore();
       console.log("[Server] ✓ Platform workers initialized successfully");
 

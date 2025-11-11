@@ -14,7 +14,6 @@ import * as bullmq from "bullmq";
 import { getEffectiveUser } from "~/cypher/get/admin/getEffectiveUser";
 import { setImpersonation } from "~/cypher/mutate/admin/setImpersonation";
 import { clearImpersonation } from "~/cypher/mutate/admin/clearImpersonation";
-import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import * as neo4jDriver from "neo4j-driver";
 import {
   getYouTubeClient,
@@ -43,6 +42,9 @@ import {
   decryptToken,
   decryptClientSecret, encryptClientSecret,
 } from "~/lib/auth/tokenEncryption";
+import {sendEmail} from "~/lib/playwright/sendEmail";
+import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
+import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -211,7 +213,12 @@ export async function executeNamedServerFunctionCore(
       encryptToken,
       decryptToken,
       decryptClientSecret,
-      encryptClientSecret
+      encryptClientSecret,
+      sendEmail,
+      // Backup/restore functions
+      createDatabaseBackup,
+      restoreFromBackup,
+      getDriver
     };
 
     // Execute the function

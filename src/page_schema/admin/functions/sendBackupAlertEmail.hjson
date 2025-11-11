@@ -1,0 +1,203 @@
+{
+  vertexes: [
+    {
+      id: "backup_utilities_send_alert",
+      L: "Function",
+      P: {
+        key: "sendBackupAlertEmail",
+        description: "Sends email alert about backup job completion or failure",
+        body: '''
+const {
+  totalDatabases,
+  successfulBackups,
+  failedBackups,
+  errors = [],
+  backupResults = [],
+  duration,
+  jobFailed,
+  error,
+  jobId
+} = args.contextData;
+
+const alertEmail = process.env.BACKUP_ALERT_EMAIL || process.env.ADMIN_EMAIL;
+
+if (!alertEmail) {
+  console.log('[Backup Alert] No alert email configured, skipping alert');
+  return {
+    success: true,
+    message: 'Alert email not configured'
+  };
+}
+
+try {
+  // Determine email subject and status
+  let subject, status, statusColor;
+
+  if (jobFailed) {
+    subject = '🚨 Database Backup Job Failed';
+    status = 'FAILED';
+    statusColor = '#dc2626'; // red-600
+  } else if (failedBackups > 0) {
+    subject = '⚠️ Database Backup Completed with Errors';
+    status = 'PARTIAL';
+    statusColor = '#f59e0b'; // amber-500
+  } else {
+    subject = '✅ Database Backup Completed Successfully';
+    status = 'SUCCESS';
+    statusColor = '#16a34a'; // green-600
+  }
+
+  // Build email body
+  let emailBody = `
+    <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: ${statusColor}; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">${subject}</h1>
+      </div>
+
+      <div style="background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+  `;
+
+  if (jobFailed) {
+    emailBody += `
+        <p style="margin: 0 0 16px 0; color: #374151;">
+          The scheduled database backup job failed to execute.
+        </p>
+
+        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 16px;">
+          <h3 style="margin: 0 0 8px 0; color: #111827; font-size: 16px;">Error Details</h3>
+          <p style="margin: 0; color: #dc2626; font-family: monospace; font-size: 14px;">${error || 'Unknown error'}</p>
+          ${jobId ? `<p style="margin: 8px 0 0 0; color: #6b7280; font-size: 12px;">Job ID: ${jobId}</p>` : ''}
+        </div>
+    `;
+  } else {
+    emailBody += `
+        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 16px;">
+          <h3 style="margin: 0 0 12px 0; color: #111827; font-size: 16px;">Backup Summary</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Total Databases:</td>
+              <td style="padding: 8px 0; color: #111827; font-weight: 600; text-align: right;">${totalDatabases}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Successful Backups:</td>
+              <td style="padding: 8px 0; color: #16a34a; font-weight: 600; text-align: right;">${successfulBackups}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Failed Backups:</td>
+              <td style="padding: 8px 0; color: #dc2626; font-weight: 600; text-align: right;">${failedBackups}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6b7280;">Duration:</td>
+              <td style="padding: 8px 0; color: #111827; font-weight: 600; text-align: right;">${Math.round(duration / 1000)}s</td>
+            </tr>
+          </table>
+        </div>
+    `;
+
+    // Add backup results
+    if (backupResults.length > 0) {
+      emailBody += `
+        <div style="background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e7eb; margin-bottom: 16px;">
+          <h3 style="margin: 0 0 12px 0; color: #111827; font-size: 16px;">Backup Details</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 2px solid #e5e7eb;">
+                <th style="padding: 8px; text-align: left; color: #6b7280; font-size: 12px; font-weight: 600;">DATABASE</th>
+                <th style="padding: 8px; text-align: left; color: #6b7280; font-size: 12px; font-weight: 600;">STATUS</th>
+                <th style="padding: 8px; text-align: right; color: #6b7280; font-size: 12px; font-weight: 600;">SIZE</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      for (const result of backupResults) {
+        const statusIcon = result.success ? '✅' : '❌';
+        const sizeText = result.size || '—';
+        emailBody += `
+              <tr style="border-bottom: 1px solid #f3f4f6;">
+                <td style="padding: 8px; color: #111827; font-size: 14px;">${result.database}</td>
+                <td style="padding: 8px; color: ${result.success ? '#16a34a' : '#dc2626'}; font-size: 14px;">${statusIcon} ${result.success ? 'Success' : 'Failed'}</td>
+                <td style="padding: 8px; color: #6b7280; font-size: 14px; text-align: right;">${sizeText}</td>
+              </tr>
+        `;
+      }
+
+      emailBody += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // Add error details if any
+    if (errors.length > 0) {
+      emailBody += `
+        <div style="background: #fef2f2; padding: 16px; border-radius: 6px; border: 1px solid #fecaca; margin-bottom: 16px;">
+          <h3 style="margin: 0 0 12px 0; color: #991b1b; font-size: 16px;">Errors</h3>
+      `;
+
+      for (const err of errors) {
+        emailBody += `
+          <div style="margin-bottom: 8px;">
+            <p style="margin: 0; color: #111827; font-weight: 600;">${err.database}</p>
+            <p style="margin: 4px 0 0 0; color: #dc2626; font-size: 14px; font-family: monospace;">${err.error}</p>
+          </div>
+        `;
+      }
+
+      emailBody += `
+        </div>
+      `;
+    }
+  }
+
+  emailBody += `
+        <p style="margin: 0; color: #6b7280; font-size: 12px; text-align: center;">
+          Backup completed at ${new Date().toLocaleString('en-US', { timeZone: 'UTC' })} UTC
+        </p>
+      </div>
+    </div>
+  `;
+
+  // Send email using the application's email system
+  try {
+    await args.sendEmail({
+      to: alertEmail,
+      subject,
+      content: emailBody,
+      subDomain: args.subDomain
+    });
+
+    console.log('[Backup Alert] Alert email sent successfully');
+
+    return {
+      success: true,
+      message: 'Alert email sent successfully',
+      data: {
+        sentTo: alertEmail,
+        subject,
+        status
+      }
+    };
+  } catch (emailSendError) {
+    console.error('[Backup Alert] Failed to send email:', emailSendError);
+    return {
+      success: false,
+      error: 'Failed to send alert email: ' + (emailSendError.message || 'Unknown error')
+    };
+  }
+
+} catch (error) {
+  console.error('[Backup Alert] Error sending alert email:', error);
+
+  return {
+    success: false,
+    error: error.message
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

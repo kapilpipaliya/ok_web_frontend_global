@@ -1,0 +1,144 @@
+{
+  vertexes: [
+    {
+      id: "backup_utilities_apply_retention",
+      L: "Function",
+      P: {
+        key: "applyBackupRetentionPolicy",
+        description: "Applies retention policy to delete old backups based on configured rules",
+        body: '''
+const { jobId } = args.contextData;
+
+// Get retention policy from environment variables
+const retentionDaily = parseInt(process.env.BACKUP_RETENTION_DAILY || '7');
+const retentionWeekly = parseInt(process.env.BACKUP_RETENTION_WEEKLY || '4');
+const retentionMonthly = parseInt(process.env.BACKUP_RETENTION_MONTHLY || '12');
+
+console.log(`[Retention] Applying backup retention policy`, {
+  daily: retentionDaily,
+  weekly: retentionWeekly,
+  monthly: retentionMonthly
+});
+
+try {
+  // Get list of all backups from cloud storage
+  const listResult = await args.listCloudBackups();
+
+  if (!listResult.success) {
+    throw new Error(`Failed to list backups: ${listResult.error || 'Unknown error'}`);
+  }
+
+  const allBackups = listResult.data?.backups || [];
+  console.log(`[Retention] Found ${allBackups.length} total backups`);
+
+  if (allBackups.length === 0) {
+    return {
+      success: true,
+      message: 'No backups to clean up',
+      data: {
+        deletedCount: 0
+      }
+    };
+  }
+
+  // Group backups by database
+  const backupsByDatabase = {};
+  for (const backup of allBackups) {
+    const dbName = backup.databaseName || 'unknown';
+    if (!backupsByDatabase[dbName]) {
+      backupsByDatabase[dbName] = [];
+    }
+    backupsByDatabase[dbName].push(backup);
+  }
+
+  // Process each database's backups
+  let totalDeleted = 0;
+  const deletedBackups = [];
+
+  for (const [databaseName, backups] of Object.entries(backupsByDatabase)) {
+    console.log(`[Retention] Processing ${backups.length} backups for database: ${databaseName}`);
+
+    // Sort backups by date (newest first)
+    const sortedBackups = backups.sort((a, b) =>
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    // Separate backups by type
+    const dailyBackups = sortedBackups.filter(b => b.backupType === 'daily');
+    const weeklyBackups = sortedBackups.filter(b => b.backupType === 'weekly');
+    const monthlyBackups = sortedBackups.filter(b => b.backupType === 'monthly');
+
+    // Mark backups for deletion based on retention policy
+    const toDelete = [];
+
+    // Delete old daily backups (keep last N)
+    if (dailyBackups.length > retentionDaily) {
+      toDelete.push(...dailyBackups.slice(retentionDaily));
+    }
+
+    // Delete old weekly backups (keep last N)
+    if (weeklyBackups.length > retentionWeekly) {
+      toDelete.push(...weeklyBackups.slice(retentionWeekly));
+    }
+
+    // Delete old monthly backups (keep last N)
+    if (monthlyBackups.length > retentionMonthly) {
+      toDelete.push(...monthlyBackups.slice(retentionMonthly));
+    }
+
+    // Delete the marked backups
+    for (const backup of toDelete) {
+      try {
+        const deleteResult = await args.deleteCloudBackup({
+          filename: backup.filename,
+          databaseName: backup.databaseName
+        });
+
+        if (deleteResult.success) {
+          totalDeleted++;
+          deletedBackups.push({
+            database: databaseName,
+            filename: backup.filename,
+            type: backup.backupType,
+            timestamp: backup.timestamp
+          });
+          console.log(`[Retention] Deleted old backup: ${backup.filename}`);
+        } else {
+          console.error(`[Retention] Failed to delete backup: ${backup.filename}`, deleteResult.error);
+        }
+      } catch (error) {
+        console.error(`[Retention] Error deleting backup: ${backup.filename}`, error);
+      }
+    }
+  }
+
+  console.log(`[Retention] Retention policy complete. Deleted ${totalDeleted} old backups`);
+
+  return {
+    success: true,
+    message: `Deleted ${totalDeleted} old backup(s)`,
+    data: {
+      deletedCount: totalDeleted,
+      deletedBackups,
+      appliedAt: new Date().toISOString()
+    }
+  };
+
+} catch (error) {
+  console.error(`[Retention] Error applying retention policy:`, error);
+
+  return {
+    success: false,
+    error: error.message,
+    data: {
+      deletedCount: 0,
+      failedAt: new Date().toISOString()
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

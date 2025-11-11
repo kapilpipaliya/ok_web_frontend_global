@@ -1,6 +1,9 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
+import fs from "node:fs";
+import path from "node:path";
+
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
@@ -8,6 +11,7 @@ import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { getBaseDir } from "~/lib/files/getBaseDir";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { stopWorkersForSubdomain } from "~/server/queue/initWorkersCore";
 import { deleteAllQueuesForSubdomain } from "~/server/redis/redisManagement";
@@ -72,13 +76,27 @@ export async function DELETE({ request }: APIEvent) {
       // Continue with deletion even if Redis cleanup fails
     }
 
-    // Step 3: Drop the Neo4j database for this subdomain
+    // Step 3: Delete the subdomain directory and all files
+    console.log(`[Subdomain Delete] Deleting directory for subdomain: ${key}`);
+    const deleteResult = await deleteSubdomainDirectory(key);
+    if (deleteResult.success) {
+      console.log(
+        `[Subdomain Delete] Deleted directory for subdomain: ${key}`,
+      );
+    } else {
+      console.error(
+        `[Subdomain Delete] Error deleting directory: ${deleteResult.error}`,
+      );
+      // Continue with deletion even if directory cleanup fails
+    }
+
+    // Step 4: Drop the Neo4j database for this subdomain
     await dropDatabase(key);
 
-    // Step 4: Delete the edge between Account and SubDomain
+    // Step 5: Delete the edge between Account and SubDomain
     await removeAccountSubdomainRelation(dbSession, account.properties.id, key);
 
-    // Step 5: Remove the SubDomain vertex
+    // Step 6: Remove the SubDomain vertex
     await removeSubdomainNode(dbSession, key);
 
     await createActivityLog(
@@ -87,7 +105,7 @@ export async function DELETE({ request }: APIEvent) {
       "SubDomain",
       subdomain.elementId,
       user.P.email,
-      `Deleted subdomain ${key} and dropped database`,
+      `Deleted subdomain ${key}, dropped database, and removed all files`,
     );
 
     return {
@@ -158,4 +176,29 @@ async function dropDatabase(subDomainKey: string) {
 
   // Wait a moment for the database to be dropped
   await new Promise((resolve) => setTimeout(resolve, 1000));
+}
+
+async function deleteSubdomainDirectory(
+  subDomainKey: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const baseDir = getBaseDir();
+    const subdomainDir = path.join(baseDir, subDomainKey);
+
+    // Check if directory exists
+    if (!fs.existsSync(subdomainDir)) {
+      return { success: true }; // Directory doesn't exist, nothing to delete
+    }
+
+    // Delete directory recursively
+    fs.rmSync(subdomainDir, { recursive: true, force: true });
+
+    return { success: true };
+  } catch (error) {
+    console.error(`Error deleting subdomain directory: ${error}`);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 }

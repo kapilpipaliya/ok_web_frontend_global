@@ -2,6 +2,7 @@ import { SettingsLayout } from "~/components/styled/SettingsLayout";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { AdminWorkerManagement } from "~/pages/global/worker/AdminWorkerManagement";
 import { RedisManagement } from "~/pages/global/redis/RedisManagement";
+import { BackupManagement } from "~/pages/global/backup/BackupManagement";
 
 export default function SystemGlobalSettings() {
   const menuItems = [
@@ -22,6 +23,12 @@ export default function SystemGlobalSettings() {
       icon: "ph:database",
       id: "redis",
       label: "Redis Management",
+    },
+    {
+      component: BackupManagement,
+      icon: "ph:floppy-disk",
+      id: "backup",
+      label: "Backup Management",
     },
   ];
 

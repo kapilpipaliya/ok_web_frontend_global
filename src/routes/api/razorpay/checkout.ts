@@ -5,6 +5,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
+import { logger } from "~/lib/logger";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -153,6 +154,15 @@ export async function POST({ request }: APIEvent) {
       expiryDate: expiryDate.toISOString(),
     });
 
+    // Log order creation
+    logger.logPayment({
+      orderId: razorpayOrder.id,
+      amount: amount / 100, // Convert cents to dollars
+      currency: "USD",
+      status: "order_created",
+      userId: user.P.uuid,
+    });
+
     return {
       result: {
         orderId: razorpayOrder.id,
@@ -167,6 +177,14 @@ export async function POST({ request }: APIEvent) {
       timestamp: new Date().getTime(),
     };
   } catch (error) {
+    logger.error(
+      {
+        type: "payment_order_error",
+        userId: user?.P?.uuid,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      "Failed to create payment order",
+    );
     return handleAPIError(error);
   } finally {
     await dbSession.close();

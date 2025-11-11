@@ -5,6 +5,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { logout } from "~/server/auth/session/logout";
+import { logger } from "~/lib/logger";
 
 export async function POST({ request }: APIEvent) {
   try {
@@ -16,6 +17,14 @@ export async function POST({ request }: APIEvent) {
       const { dbSession } = await getDBSessionForSubdomain(request);
 
       try {
+        // Log logout event
+        logger.logAuth({
+          action: "logout",
+          success: true,
+          userId: user.P.uuid,
+          email: user.P.email,
+        });
+
         await createActivityLog(
           dbSession,
           "logout",
