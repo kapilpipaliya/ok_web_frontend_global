@@ -1,0 +1,157 @@
+{
+  vertexes: [
+    {
+      id: "initial_seed_function",
+      L: "Function",
+      P: {
+        key: "initialSeed",
+        description: "Seeds initial data for general settings, email settings, and OAuth settings",
+        body: '''
+// This function initializes the database with default settings
+// It should only be run once during initial setup
+
+try {
+  const results = {
+    generalSettings: null,
+    emailSettings: null,
+    oauthSettings: null
+  };
+
+  // 1. Create/Update General Settings
+  const generalSettingsData = {
+    appName: "YSaar",
+    redirectUrlAfterSignin: "/home"
+  };
+
+  const checkGeneral = await args.session.run(
+    "MATCH (s:GlobalSetting) RETURN s"
+  );
+
+  if (checkGeneral.records.length > 0) {
+    // Update existing
+    const updateGeneral = await args.session.run(
+      `MATCH (s:GlobalSetting)
+       SET s += $settings,
+           s.updatedAt = datetime()
+       RETURN s`,
+      { settings: generalSettingsData }
+    );
+    results.generalSettings = updateGeneral.records[0]?.get("s").properties;
+  } else {
+    // Create new
+    const createGeneral = await args.session.run(
+      `CREATE (s:GlobalSetting {
+        key: $key,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      })
+      SET s += $settings
+      RETURN s`,
+      { key: "Default", settings: generalSettingsData }
+    );
+    results.generalSettings = createGeneral.records[0]?.get("s").properties;
+  }
+
+  // 2. Create/Update Email Settings
+  const emailSettingsData = {
+    active: "resend",
+    resendApiKey: "re_cHB3wryZ_9aGvavTVXqbMYVAndzQvcxNY",
+    fromEmail: "noreplay@updates.ysaar.com"
+  };
+
+  const checkEmail = await args.session.run(
+    "MATCH (s:EmailSetting) RETURN s"
+  );
+
+  if (checkEmail.records.length > 0) {
+    // Update existing
+    const updateEmail = await args.session.run(
+      `MATCH (s:EmailSetting)
+       SET s += $settings,
+           s.updatedAt = datetime()
+       RETURN s`,
+      { settings: emailSettingsData }
+    );
+    results.emailSettings = updateEmail.records[0]?.get("s").properties;
+  } else {
+    // Create new
+    const createEmail = await args.session.run(
+      `CREATE (s:EmailSetting {
+        key: $key,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      })
+      SET s += $settings
+      RETURN s`,
+      { key: "Default", settings: emailSettingsData }
+    );
+    results.emailSettings = createEmail.records[0]?.get("s").properties;
+  }
+
+  // 3. Create/Update OAuth Settings
+  const googleClientSecret = "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";
+  let encryptedSecret = "";
+
+  try {
+    encryptedSecret = args.encryptClientSecret(googleClientSecret);
+  } catch (error) {
+    console.error("Failed to encrypt client secret:", error);
+    throw new Error("Failed to encrypt OAuth client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured.");
+  }
+
+  const oauthSettingsData = {
+    googleEnabled: true,
+    googleClientId: "39168961833-tu9lboivh4c7580q1paj70ccd0hlg1fb.apps.googleusercontent.com",
+    googleClientSecretEncrypted: encryptedSecret
+  };
+
+  const checkOAuth = await args.session.run(
+    "MATCH (o:OAuthSettings) RETURN o"
+  );
+
+  if (checkOAuth.records.length > 0) {
+    // Update existing
+    const updateOAuth = await args.session.run(
+      `MATCH (o:OAuthSettings)
+       SET o.googleClientId = $googleClientId,
+           o.googleClientSecretEncrypted = $googleClientSecretEncrypted,
+           o.googleEnabled = $googleEnabled,
+           o.updatedAt = datetime()
+       RETURN o`,
+      oauthSettingsData
+    );
+    results.oauthSettings = updateOAuth.records[0]?.get("o").properties;
+  } else {
+    // Create new
+    const createOAuth = await args.session.run(
+      `CREATE (o:OAuthSettings {
+        googleClientId: $googleClientId,
+        googleClientSecretEncrypted: $googleClientSecretEncrypted,
+        googleEnabled: $googleEnabled,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      })
+      RETURN o`,
+      oauthSettingsData
+    );
+    results.oauthSettings = createOAuth.records[0]?.get("o").properties;
+  }
+
+  return {
+    success: true,
+    message: "Initial seed completed successfully",
+    data: results
+  };
+} catch (error) {
+  console.error("Initial seed error:", error);
+  return {
+    success: false,
+    error: error.message || "Failed to seed initial data"
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

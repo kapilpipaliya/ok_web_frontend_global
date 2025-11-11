@@ -115,9 +115,7 @@ return `._id {
 return {
   as: "img",
   src: "https://ytorganizer.localhost.com:3001/api/file/download/big_logo_white.png",
-  alt: "YT Organizer Logo",
-  width: 80,
-  height: 80
+  alt: "YT Organizer Logo"
 };
 ''',
         css: '''
@@ -126,13 +124,6 @@ return `._id {
   margin: 0 auto 2rem auto;
   opacity: 0.9;
   object-fit: contain;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    width: 150px;
-    height: 150px;
-  }
 }`;
 '''
       }

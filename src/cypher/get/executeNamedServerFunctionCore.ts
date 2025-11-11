@@ -41,7 +41,7 @@ import {
 import {
   encryptToken,
   decryptToken,
-  decryptClientSecret,
+  decryptClientSecret, encryptClientSecret,
 } from "~/lib/auth/tokenEncryption";
 
 export interface NamedServerFunctionRequest {
@@ -211,6 +211,7 @@ export async function executeNamedServerFunctionCore(
       encryptToken,
       decryptToken,
       decryptClientSecret,
+      encryptClientSecret
     };
 
     // Execute the function

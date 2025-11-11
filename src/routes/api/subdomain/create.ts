@@ -18,6 +18,7 @@ import { getDriver } from "~/cypher/core/driver";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { initSubdomainWorkersForSubdomain } from "~/server/queue/initWorkersCore";
 import { importSchemas } from "~/lib/schema/importSchemas";
+import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
 
 // Reserved subdomain keys that cannot be used
 const RESERVED_SUBDOMAINS = new Set([
@@ -127,6 +128,17 @@ export async function POST({ request }: APIEvent) {
     // Automatically import schemas for the new subdomain
     await importSchemasForSubdomain(key, user);
 
+    // Run initial seed function if it exists
+    try {
+      await runSeedFunction(key, user);
+    } catch (error) {
+      console.error(
+        `[Subdomain Create] Failed to run seed function for subdomain: ${key}`,
+        error,
+      );
+      // Don't throw - seed function failure shouldn't block subdomain creation
+    }
+
     // Start all workers for the subdomain
     try {
       await initSubdomainWorkersForSubdomain(key);
@@ -225,6 +237,84 @@ async function validateKeyAndDomain(
     if (existingDomain.records.length > 0) {
       throw new APIError("Domain name is already taken", 400);
     }
+  }
+}
+
+async function runSeedFunction(
+  subdomainKey: string,
+  user: Vertex,
+): Promise<void> {
+  console.log(
+    `[Subdomain Create] Checking for seed function in subdomain: ${subdomainKey}`,
+  );
+
+  const driver = await getDriver();
+  const dbSession = driver.session({ database: subdomainKey });
+
+  try {
+    // Check if a seed function exists
+    const query = `
+      MATCH (f:Function)
+      WHERE f.key STARTS WITH 'seed' OR f.key = 'initialSeed'
+      RETURN f.key as functionKey
+      ORDER BY f.key
+      LIMIT 1
+    `;
+
+    const result = await dbSession.run(query);
+
+    if (result.records.length === 0) {
+      console.log(
+        `[Subdomain Create] No seed function found for subdomain: ${subdomainKey}`,
+      );
+      return;
+    }
+
+    const seedFunctionKey = result.records[0].get("functionKey");
+    console.log(
+      `[Subdomain Create] Found seed function: ${seedFunctionKey}, executing...`,
+    );
+
+    // Execute the seed function
+    const seedResult = await executeNamedServerFunctionCore(
+      {
+        functionName: seedFunctionKey,
+        contextData: {
+          subdomainKey,
+          user: {
+            id: user.id,
+            email: user.P.email,
+            uuid: user.P.uuid,
+          },
+        },
+      },
+      {
+        dbSession: dbSession,
+        subDomain: subdomainKey,
+        nodes: {},
+        relationships: {},
+        vertexes: undefined as any,
+      },
+    );
+
+    if (seedResult.error) {
+      console.error(
+        `[Subdomain Create] Seed function failed: ${seedResult.error}`,
+      );
+      // Don't throw - seed function failure shouldn't block subdomain creation
+    } else {
+      console.log(
+        `[Subdomain Create] Seed function executed successfully for subdomain: ${subdomainKey}`,
+      );
+    }
+  } catch (error) {
+    console.error(
+      `[Subdomain Create] Error running seed function for subdomain: ${subdomainKey}`,
+      error,
+    );
+    // Don't throw - seed function failure shouldn't block subdomain creation
+  } finally {
+    await dbSession.close();
   }
 }
 

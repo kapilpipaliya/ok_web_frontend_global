@@ -1,6 +1,7 @@
 import type { MultiPartData } from "h3";
 import type { Session, Transaction } from "neo4j-driver";
 
+import fs from "node:fs";
 import path from "node:path";
 
 import { processResult } from "~/cypher/conversion/processResult";
@@ -31,10 +32,33 @@ export async function uploadFiles(
       if (!filename) {
         return null;
       }
-      const { ext, name } = path.parse(filename);
-      const timestamp = currentDate.replace(/[:.]/g, "-"); // Replace colons and dots with dashes for filename
-      const newFilename = `${name}_${timestamp}${ext}`;
-      const filePath = saveFileToDisk(userDir, newFilename, data);
+
+      // Use original filename without timestamp
+      const newFilename = filename;
+      const filePath = path.join(userDir, newFilename);
+
+      // Check if file already exists on disk
+      if (fs.existsSync(filePath)) {
+        throw new Error(`File with name "${filename}" already exists`);
+      }
+
+      // Check if file with same name exists in database
+      const checkQuery = `
+        MATCH (f:File {fileName: $fileName})
+        RETURN f
+        LIMIT 1
+      `;
+      const checkResult = await neo4jSession.run(checkQuery, {
+        fileName: newFilename,
+      });
+
+      if (checkResult.records.length > 0) {
+        throw new Error(`File with name "${filename}" already exists in database`);
+      }
+
+      // Save file to disk
+      saveFileToDisk(userDir, newFilename, data);
+
       const fileSize = data.length;
       const mimeType = type;
       const checksum = calculateChecksum(data);
