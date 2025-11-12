@@ -715,7 +715,7 @@ if (args.contextData.action === 'start') {
     // This significantly speeds up channel processing
     // Monitor YouTube API quota usage and adjust if hitting limits
     // Reduce to 2-3 if experiencing API rate limit errors
-    concurrency: 5
+    concurrency: 2
   });
 
     // Event handlers for job lifecycle

@@ -39,3 +39,4 @@ beep
 
 /temp
 **/.claude/settings.local.json
+logs/
