@@ -9,8 +9,8 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 export const neo4jConvert = {
   /** Convert Neo4j Integer to number */
   toNumber: (val: any) => {
-    if (typeof val === 'number') return val;
-    if (val && typeof val.toNumber === 'function') return val.toNumber();
+    if (typeof val === "number") return val;
+    if (val && typeof val.toNumber === "function") return val.toNumber();
     return val;
   },
   /** Convert Neo4j types to JS types */
@@ -38,7 +38,7 @@ export const neo4jConvert = {
         months: neo4jConvert.toNumber(value.months),
         days: neo4jConvert.toNumber(value.days),
         seconds: neo4jConvert.toNumber(value.seconds),
-        nanoseconds: neo4jConvert.toNumber(value.nanoseconds)
+        nanoseconds: neo4jConvert.toNumber(value.nanoseconds),
       };
     }
     if (value instanceof types.Integer) {
@@ -70,12 +70,19 @@ export const neo4jConvert = {
       return types.Integer.fromString(value.toString());
     }
     // Convert duration object back to Neo4j Duration
-    if (typeof value === "object" && value !== null && "months" in value && "days" in value && "seconds" in value && "nanoseconds" in value) {
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      "months" in value &&
+      "days" in value &&
+      "seconds" in value &&
+      "nanoseconds" in value
+    ) {
       return new types.Duration(
         types.Integer.fromNumber(value.months),
         types.Integer.fromNumber(value.days),
         types.Integer.fromNumber(value.seconds),
-        types.Integer.fromNumber(value.nanoseconds)
+        types.Integer.fromNumber(value.nanoseconds),
       );
     }
     if (Array.isArray(value)) {

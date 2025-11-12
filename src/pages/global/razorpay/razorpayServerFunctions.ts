@@ -86,8 +86,9 @@ export async function saveRazorpaySettings(settings: {
     // Encrypt the webhook secret if provided
     let encryptedWebhookSecret = razorpayWebhookSecret;
     if (razorpayWebhookSecret && razorpayWebhookSecret.trim() !== "") {
-      encryptedWebhookSecret =
-        Buffer.from(razorpayWebhookSecret).toString("base64");
+      encryptedWebhookSecret = Buffer.from(razorpayWebhookSecret).toString(
+        "base64",
+      );
     }
 
     // Check if RazorpaySettings vertex exists

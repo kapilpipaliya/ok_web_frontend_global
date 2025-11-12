@@ -29,7 +29,9 @@ export function DialogWithButtons(
   return (
     <CustomModal
       customTitle={<span>{props.title}</span>}
-      dialogCss={"return `._id {min-width: 20%; border-radius: 10px; padding: 0;}`;"}
+      dialogCss={
+        "return `._id {min-width: 20%; border-radius: 10px; padding: 0;}`;"
+      }
       footer={() => (
         <As as="div" css={[SETTINGS_CONSTANTS.MODAL.FOOTER.CSS]}>
           <Show when={props.hasPermission ?? true}>

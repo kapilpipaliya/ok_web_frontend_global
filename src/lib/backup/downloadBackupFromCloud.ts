@@ -3,11 +3,11 @@
  * Downloads a backup file from AWS S3 or Google Cloud Storage to local filesystem
  */
 
-import fs from 'fs';
-import path from 'path';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { Storage } from '@google-cloud/storage';
-import { buildBackupPath } from './backupPathHelpers';
+import fs from "fs";
+import path from "path";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { Storage } from "@google-cloud/storage";
+import { buildBackupPath } from "./backupPathHelpers";
 
 export interface DownloadBackupOptions {
   filename: string;
@@ -34,20 +34,22 @@ export interface DownloadResult {
  * Download a backup file from cloud storage to local filesystem
  */
 export async function downloadBackupFromCloud(
-  options: DownloadBackupOptions
+  options: DownloadBackupOptions,
 ): Promise<DownloadResult> {
   const { filename, databaseName, localPath } = options;
 
   if (!filename || !localPath) {
     return {
       success: false,
-      error: 'filename and localPath are required',
+      error: "filename and localPath are required",
     };
   }
 
-  const storageType = process.env.BACKUP_STORAGE_TYPE || 's3';
+  const storageType = process.env.BACKUP_STORAGE_TYPE || "s3";
 
-  console.log(`[Storage] Downloading ${filename} from ${storageType.toUpperCase()}`);
+  console.log(
+    `[Storage] Downloading ${filename} from ${storageType.toUpperCase()}`,
+  );
 
   try {
     // Ensure local directory exists
@@ -56,26 +58,28 @@ export async function downloadBackupFromCloud(
       fs.mkdirSync(localDir, { recursive: true });
     }
 
-    if (storageType === 's3') {
+    if (storageType === "s3") {
       // AWS S3 Download using v3 SDK
       const s3Client = new S3Client({
         credentials: {
           accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
           secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
         },
-        region: process.env.AWS_S3_REGION || 'us-east-1',
+        region: process.env.AWS_S3_REGION || "us-east-1",
       });
 
       const bucket = process.env.AWS_S3_BUCKET;
 
       if (!bucket) {
-        throw new Error('AWS_S3_BUCKET environment variable is not set');
+        throw new Error("AWS_S3_BUCKET environment variable is not set");
       }
 
       // Create S3 key with domain-specific folder structure
       const s3Key = buildBackupPath(filename, databaseName);
 
-      console.log(`[S3] Downloading from s3://${bucket}/${s3Key} to ${localPath}`);
+      console.log(
+        `[S3] Downloading from s3://${bucket}/${s3Key} to ${localPath}`,
+      );
 
       // Download from S3
       const getCommand = new GetObjectCommand({
@@ -97,27 +101,29 @@ export async function downloadBackupFromCloud(
 
       const fileSize = fs.statSync(localPath).size;
 
-      console.log(`[S3] Download complete: ${(fileSize / (1024 * 1024)).toFixed(2)} MB`);
+      console.log(
+        `[S3] Download complete: ${(fileSize / (1024 * 1024)).toFixed(2)} MB`,
+      );
 
       return {
         success: true,
-        message: 'Backup downloaded from S3 successfully',
+        message: "Backup downloaded from S3 successfully",
         data: {
           localPath,
           size: fileSize,
-          sizeFormatted: (fileSize / (1024 * 1024)).toFixed(2) + ' MB',
-          storageType: 's3',
+          sizeFormatted: (fileSize / (1024 * 1024)).toFixed(2) + " MB",
+          storageType: "s3",
           downloadedAt: new Date().toISOString(),
         },
       };
-    } else if (storageType === 'gcs') {
+    } else if (storageType === "gcs") {
       // Google Cloud Storage Download
       const projectId = process.env.GCS_PROJECT_ID;
       const bucketName = process.env.GCS_BUCKET;
       const keyFilePath = process.env.GCS_KEYFILE_PATH;
 
       if (!bucketName) {
-        throw new Error('GCS_BUCKET environment variable is not set');
+        throw new Error("GCS_BUCKET environment variable is not set");
       }
 
       // Initialize GCS
@@ -132,7 +138,9 @@ export async function downloadBackupFromCloud(
       // Create GCS object name with domain-specific folder structure
       const objectName = buildBackupPath(filename, databaseName);
 
-      console.log(`[GCS] Downloading from gs://${bucketName}/${objectName} to ${localPath}`);
+      console.log(
+        `[GCS] Downloading from gs://${bucketName}/${objectName} to ${localPath}`,
+      );
 
       // Download from GCS
       await bucket.file(objectName).download({
@@ -141,16 +149,18 @@ export async function downloadBackupFromCloud(
 
       const fileSize = fs.statSync(localPath).size;
 
-      console.log(`[GCS] Download complete: ${(fileSize / (1024 * 1024)).toFixed(2)} MB`);
+      console.log(
+        `[GCS] Download complete: ${(fileSize / (1024 * 1024)).toFixed(2)} MB`,
+      );
 
       return {
         success: true,
-        message: 'Backup downloaded from GCS successfully',
+        message: "Backup downloaded from GCS successfully",
         data: {
           localPath,
           size: fileSize,
-          sizeFormatted: (fileSize / (1024 * 1024)).toFixed(2) + ' MB',
-          storageType: 'gcs',
+          sizeFormatted: (fileSize / (1024 * 1024)).toFixed(2) + " MB",
+          storageType: "gcs",
           downloadedAt: new Date().toISOString(),
         },
       };

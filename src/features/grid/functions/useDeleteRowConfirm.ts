@@ -52,11 +52,7 @@ export function useDeleteRowConfirm(
           deletePayload = { id: gridState.deleteRowId };
         }
 
-        const result = await postAPI(
-          deleteEndpoint,
-          deletePayload,
-          "DELETE",
-        );
+        const result = await postAPI(deleteEndpoint, deletePayload, "DELETE");
 
         if (result.success) {
           if (result.graph) {

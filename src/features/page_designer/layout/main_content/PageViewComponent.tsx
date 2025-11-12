@@ -152,9 +152,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                   return (
                     <As
                       as="div"
-                      css={
-                        isActive() ? "" : "return `._id {display: none;}`;"
-                      }
+                      css={isActive() ? "" : "return `._id {display: none;}`;"}
                       ref={viewRef}
                     >
                       <PageTabBar

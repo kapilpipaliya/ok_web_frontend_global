@@ -447,8 +447,10 @@ export function SignInForm() {
                 ],
                 componentName: "Html",
                 props: (options: SignInFormFunctionArgumentType) => {
-                  const isFormEmpty =
-                    !(options.data?.P?.email?.trim() &&options.data?.P?.password?.trim());
+                  const isFormEmpty = !(
+                    options.data?.P?.email?.trim() &&
+                    options.data?.P?.password?.trim()
+                  );
                   const isLoading =
                     options.contextData.submitState[0]?.isLoading;
 

@@ -6,10 +6,10 @@
  * and triggers auto-fetch of all channels owned by the YouTube account.
  */
 
-import { handleYouTubeCallback } from '~/lib/youtube/youtubeOAuth';
-import { getDBSessionForSubdomain } from '~/cypher/session/getSessionForSubdomain';
-import { executeNamedServerFunction } from '~/cypher/get/executeNamedServerFunction';
-import type {APIEvent} from "@solidjs/start/server";
+import { handleYouTubeCallback } from "~/lib/youtube/youtubeOAuth";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
+import type { APIEvent } from "@solidjs/start/server";
 
 export async function GET(event: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(event.request);
@@ -17,19 +17,19 @@ export async function GET(event: APIEvent) {
   try {
     // Get query parameters
     const url = new URL(event.request.url);
-    const code = url.searchParams.get('code');
-    const state = url.searchParams.get('state');
-    const error = url.searchParams.get('error');
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
+    const error = url.searchParams.get("error");
 
     // Handle user denial
-    if (error === 'access_denied') {
+    if (error === "access_denied") {
       return new Response(null, {
         status: 302,
         headers: {
           Location:
-            '/accounts?error=' +
+            "/accounts?error=" +
             encodeURIComponent(
-              'Authorization was cancelled. You need to authorize access to use YouTube features.'
+              "Authorization was cancelled. You need to authorize access to use YouTube features.",
             ),
         },
       });
@@ -41,27 +41,31 @@ export async function GET(event: APIEvent) {
         status: 302,
         headers: {
           Location:
-            '/accounts?error=' +
-            encodeURIComponent('Invalid OAuth callback: missing parameters'),
+            "/accounts?error=" +
+            encodeURIComponent("Invalid OAuth callback: missing parameters"),
         },
       });
     }
 
     // Parse state (now contains userId, ownershipId, customName)
-    let stateData: { userId: string; ownershipId: string; customName?: string | null };
+    let stateData: {
+      userId: string;
+      ownershipId: string;
+      customName?: string | null;
+    };
     try {
       stateData = JSON.parse(state);
       if (!stateData.userId || !stateData.ownershipId) {
-        throw new Error('Invalid state structure');
+        throw new Error("Invalid state structure");
       }
     } catch (parseError) {
-      console.error('Failed to parse OAuth state:', parseError);
+      console.error("Failed to parse OAuth state:", parseError);
       return new Response(null, {
         status: 302,
         headers: {
           Location:
-            '/accounts?error=' +
-            encodeURIComponent('Invalid OAuth state parameter'),
+            "/accounts?error=" +
+            encodeURIComponent("Invalid OAuth state parameter"),
         },
       });
     }
@@ -71,7 +75,7 @@ export async function GET(event: APIEvent) {
       code,
       stateData,
       dbSession,
-      event.request
+      event.request,
     );
 
     if (!result.success) {
@@ -79,33 +83,38 @@ export async function GET(event: APIEvent) {
         status: 302,
         headers: {
           Location:
-            '/accounts?error=' +
-            encodeURIComponent(result.error || 'Failed to connect YouTube'),
+            "/accounts?error=" +
+            encodeURIComponent(result.error || "Failed to connect YouTube"),
         },
       });
     }
 
     // Trigger auto-fetch of all channels for this ownership
     const ownershipId = result.ownership?.id || stateData.ownershipId;
-    const channelName = result.ownership?.channelName || 'YouTube account';
+    const channelName = result.ownership?.channelName || "YouTube account";
 
     // Fetch channels in the background
     try {
       const fetchResult = await executeNamedServerFunction(
         {
-          functionName: 'autoFetchOwnershipChannels',
-          contextData: { ownershipId }
+          functionName: "autoFetchOwnershipChannels",
+          contextData: { ownershipId },
         },
         {
           request: event.request,
-          dbSession
-        }
+          dbSession,
+        },
       );
 
       if (fetchResult.result?.success) {
-        console.log(`Auto-fetched ${fetchResult.result.channelCount} channels for ${channelName}`);
+        console.log(
+          `Auto-fetched ${fetchResult.result.channelCount} channels for ${channelName}`,
+        );
       } else {
-        console.error(`Failed to auto-fetch channels for ${channelName}:`, fetchResult.result?.error);
+        console.error(
+          `Failed to auto-fetch channels for ${channelName}:`,
+          fetchResult.result?.error,
+        );
       }
     } catch (error) {
       console.error(`Error during auto-fetch for ${channelName}:`, error);
@@ -125,22 +134,21 @@ export async function GET(event: APIEvent) {
     return new Response(null, {
       status: 302,
       headers: {
-        Location:
-            '/accounts?success=' + encodeURIComponent(successMessage),
+        Location: "/accounts?success=" + encodeURIComponent(successMessage),
       },
     });
   } catch (error) {
-    console.error('YouTube OAuth callback error:', error);
+    console.error("YouTube OAuth callback error:", error);
 
     return new Response(null, {
       status: 302,
       headers: {
         Location:
-          '/accounts?error=' +
+          "/accounts?error=" +
           encodeURIComponent(
             error instanceof Error
               ? error.message
-              : 'Failed to complete YouTube authorization'
+              : "Failed to complete YouTube authorization",
           ),
       },
     });

@@ -4,8 +4,11 @@
  * This module initializes workers when the server starts.
  * It checks Redis availability first and only starts workers if Redis is running.
  */
-import {checkRedisConnection} from "~/server/queue/checkRedis";
-import {initAllSubdomainWorkers, initWorkersCore} from "~/server/queue/initWorkersCore";
+import { checkRedisConnection } from "~/server/queue/checkRedis";
+import {
+  initAllSubdomainWorkers,
+  initWorkersCore,
+} from "~/server/queue/initWorkersCore";
 
 // Use global shared state to prevent duplicate initialization across module instances
 // (Vinxi dev mode creates multiple module instances in separate contexts)

@@ -7,10 +7,10 @@
  * IMPORTANT: Never store tokens in plain text!
  */
 
-import crypto from 'crypto';
+import crypto from "crypto";
 
 // we can use: https://github.com/brielov/razr/blob/master/packages/crypto/cipher.ts
-const ALGORITHM = 'aes-256-gcm';
+const ALGORITHM = "aes-256-gcm";
 
 /**
  * Get encryption key from environment variables
@@ -20,16 +20,20 @@ function getEncryptionKey(): Buffer {
   const key = process.env.TOKEN_ENCRYPTION_KEY;
 
   if (!key) {
-    console.error('❌ TOKEN_ENCRYPTION_KEY not set in environment variables!');
-    console.error('Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
-    throw new Error('TOKEN_ENCRYPTION_KEY environment variable is required');
+    console.error("❌ TOKEN_ENCRYPTION_KEY not set in environment variables!");
+    console.error(
+      "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    );
+    throw new Error("TOKEN_ENCRYPTION_KEY environment variable is required");
   }
 
   if (key.length !== 64) {
-    throw new Error('TOKEN_ENCRYPTION_KEY must be 32 bytes (64 hex characters)');
+    throw new Error(
+      "TOKEN_ENCRYPTION_KEY must be 32 bytes (64 hex characters)",
+    );
   }
 
-  return Buffer.from(key, 'hex');
+  return Buffer.from(key, "hex");
 }
 
 /**
@@ -39,20 +43,20 @@ function getEncryptionKey(): Buffer {
  */
 export function encryptToken(token: string): string {
   if (!token) {
-    throw new Error('Token cannot be empty');
+    throw new Error("Token cannot be empty");
   }
 
   const key = getEncryptionKey();
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
 
-  let encrypted = cipher.update(token, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
+  let encrypted = cipher.update(token, "utf8", "hex");
+  encrypted += cipher.final("hex");
 
   const authTag = cipher.getAuthTag();
 
   // Return IV + authTag + encrypted data (separated by colons)
-  return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+  return iv.toString("hex") + ":" + authTag.toString("hex") + ":" + encrypted;
 }
 
 /**
@@ -62,25 +66,25 @@ export function encryptToken(token: string): string {
  */
 export function decryptToken(encryptedToken: string): string {
   if (!encryptedToken) {
-    throw new Error('Encrypted token cannot be empty');
+    throw new Error("Encrypted token cannot be empty");
   }
 
-  const parts = encryptedToken.split(':');
+  const parts = encryptedToken.split(":");
 
   if (parts.length !== 3) {
-    throw new Error('Invalid encrypted token format');
+    throw new Error("Invalid encrypted token format");
   }
 
-  const iv = Buffer.from(parts[0], 'hex');
-  const authTag = Buffer.from(parts[1], 'hex');
+  const iv = Buffer.from(parts[0], "hex");
+  const authTag = Buffer.from(parts[1], "hex");
   const encrypted = parts[2];
 
   const key = getEncryptionKey();
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
   decipher.setAuthTag(authTag);
 
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
+  let decrypted = decipher.update(encrypted, "hex", "utf8");
+  decrypted += decipher.final("utf8");
 
   return decrypted;
 }

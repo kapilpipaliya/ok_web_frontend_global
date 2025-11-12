@@ -123,7 +123,9 @@ export const SortableRow = (
   border: none;
 }\`;`}
                 icon={expanded() ? "ph:caret-right" : "ph:caret-down"}
-                iconCss={"return `._id {transition: transform 2s ease-in-out}`;"}
+                iconCss={
+                  "return `._id {transition: transform 2s ease-in-out}`;"
+                }
                 onClick={toggleExpanded}
                 size={20}
               />

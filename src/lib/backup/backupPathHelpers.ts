@@ -11,8 +11,11 @@
  * @param databaseName - Optional database name for subfolder
  * @returns Full cloud storage path
  */
-export function buildBackupPath(filename: string, databaseName?: string): string {
-  const domain = process.env.DOMAIN || 'default';
+export function buildBackupPath(
+  filename: string,
+  databaseName?: string,
+): string {
+  const domain = process.env.DOMAIN || "default";
 
   if (databaseName) {
     return `backup/${domain}/${databaseName}/${filename}`;
@@ -28,7 +31,7 @@ export function buildBackupPath(filename: string, databaseName?: string): string
  * @returns Prefix for listing files in the domain folder
  */
 export function buildBackupPrefix(): string {
-  const domain = process.env.DOMAIN || 'default';
+  const domain = process.env.DOMAIN || "default";
   return `backup/${domain}/`;
 }
 
@@ -38,5 +41,5 @@ export function buildBackupPrefix(): string {
  * @returns Current domain or 'default'
  */
 export function getDomain(): string {
-  return process.env.DOMAIN || 'default';
+  return process.env.DOMAIN || "default";
 }

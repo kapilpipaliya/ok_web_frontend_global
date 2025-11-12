@@ -190,7 +190,9 @@ export function HighlightSetValueContent(
               background-color: transparent;
               border: none;
             }\`;`}
-            iconCss={"return `._id {color:${args.theme.var.color.error}; cursor:pointer;}`;"}
+            iconCss={
+              "return `._id {color:${args.theme.var.color.error}; cursor:pointer;}`;"
+            }
             onClick={() => props.onChange(props.meta, null)}
             size={24}
           />

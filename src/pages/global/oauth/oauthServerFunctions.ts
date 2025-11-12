@@ -3,7 +3,10 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import { encryptClientSecret, decryptClientSecret } from "~/lib/auth/tokenEncryption";
+import {
+  encryptClientSecret,
+  decryptClientSecret,
+} from "~/lib/auth/tokenEncryption";
 
 export async function getOAuthSettings(): Promise<ServerResult> {
   "use server";
@@ -23,7 +26,9 @@ export async function getOAuthSettings(): Promise<ServerResult> {
       // Decrypt the client secret and rename to googleClientSecret for the frontend
       if (vertex.P.googleClientSecretEncrypted) {
         try {
-          vertex.P.googleClientSecret = decryptClientSecret(vertex.P.googleClientSecretEncrypted);
+          vertex.P.googleClientSecret = decryptClientSecret(
+            vertex.P.googleClientSecretEncrypted,
+          );
           // Remove the encrypted version from the response
           delete vertex.P.googleClientSecretEncrypted;
         } catch (e) {
@@ -70,7 +75,8 @@ export async function saveOAuthSettings(settings: {
       } catch (error) {
         console.error("Failed to encrypt client secret:", error);
         return {
-          error: "Failed to encrypt client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured.",
+          error:
+            "Failed to encrypt client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured.",
         };
       }
     }

@@ -145,8 +145,8 @@ export function getSchemasForSubdomain(
     // Return all schemas - need to load them all
     return loadAllWebsiteSchemasSync();
   }
-    // Return only specific website schemas
-    return getWebsiteSchemasSync(websiteName);
+  // Return only specific website schemas
+  return getWebsiteSchemasSync(websiteName);
 }
 
 // Load all website schemas synchronously (used when we need all schemas)

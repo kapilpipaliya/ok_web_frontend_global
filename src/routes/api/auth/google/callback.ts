@@ -58,10 +58,7 @@ export async function GET({ request }: APIEvent) {
         );
       } catch (e) {
         console.error("Failed to decrypt Google client secret:", e);
-        throw new APIError(
-          "Failed to decrypt Google OAuth credentials",
-          500,
-        );
+        throw new APIError("Failed to decrypt Google OAuth credentials", 500);
       }
     }
 

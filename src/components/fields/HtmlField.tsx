@@ -297,7 +297,7 @@ export function HtmlField(
           }
         }
 
-        if ((!(local.expression || local.serverFunction)) || local.data) {
+        if (!(local.expression || local.serverFunction) || local.data) {
           // Return empty result when no fetch is needed
           return {
             success: true,
@@ -350,7 +350,7 @@ export function HtmlField(
 
         // If no expression, server function, or async data, return empty
         if (
-          !((local.expression ||local.serverFunction ) ||isAsyncDataFunction())
+          !(local.expression || local.serverFunction || isAsyncDataFunction())
         ) {
           return { options: [], error: null };
         }

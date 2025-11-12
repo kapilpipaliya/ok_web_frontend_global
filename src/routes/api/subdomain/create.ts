@@ -142,7 +142,9 @@ export async function POST({ request }: APIEvent) {
     // Start all workers for the subdomain
     try {
       await initSubdomainWorkersForSubdomain(key);
-      console.log(`[Subdomain Create] Workers initialized for subdomain: ${key}`);
+      console.log(
+        `[Subdomain Create] Workers initialized for subdomain: ${key}`,
+      );
     } catch (error) {
       console.error(
         `[Subdomain Create] Failed to initialize workers for subdomain: ${key}`,

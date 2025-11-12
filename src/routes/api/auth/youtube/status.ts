@@ -5,10 +5,10 @@
  * Each ownership represents a connected YouTube account with its own token and quota.
  */
 
-import { getYouTubeConnectionStatus } from '~/lib/youtube/youtubeOAuth';
-import { getUserFromSession } from '~/server/auth/session/getUserFromSession';
-import { getDBSessionForSubdomain } from '~/cypher/session/getSessionForSubdomain';
-import type {APIEvent} from "@solidjs/start/server";
+import { getYouTubeConnectionStatus } from "~/lib/youtube/youtubeOAuth";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import type { APIEvent } from "@solidjs/start/server";
 
 export async function GET(event: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(event.request);
@@ -21,12 +21,12 @@ export async function GET(event: APIEvent) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Not authenticated',
+          error: "Not authenticated",
         }),
         {
           status: 401,
-          headers: { 'Content-Type': 'application/json' },
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -40,11 +40,11 @@ export async function GET(event: APIEvent) {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   } catch (error) {
-    console.error('Error getting YouTube status:', error);
+    console.error("Error getting YouTube status:", error);
 
     return new Response(
       JSON.stringify({
@@ -52,12 +52,12 @@ export async function GET(event: APIEvent) {
         error:
           error instanceof Error
             ? error.message
-            : 'Failed to get YouTube status',
+            : "Failed to get YouTube status",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   } finally {
     await dbSession.close();

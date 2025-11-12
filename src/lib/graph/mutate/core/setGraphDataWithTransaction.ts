@@ -24,7 +24,7 @@ export function setGraphDataWithTransaction(
   options: UpdateOptions = {},
 ): { error: boolean | string; txnDetailIndex?: number } {
   let error: boolean | string = false;
-  let txnDetailIndex: number | undefined ;
+  let txnDetailIndex: number | undefined;
 
   batch(() => {
     for (const vertexId in args.vertexes) {
@@ -160,7 +160,7 @@ function handleDeletionsWithTransaction(
   options: UpdateOptions = {},
 ): { error: boolean | string; txnDetailIndex?: number } {
   let error: boolean | string = false;
-  let txnDetailIndex: number | undefined ;
+  let txnDetailIndex: number | undefined;
 
   for (const edgeId of deletedEdges || []) {
     const result = deleteEdge(txnId, edgeId, graph, setGraph, options);

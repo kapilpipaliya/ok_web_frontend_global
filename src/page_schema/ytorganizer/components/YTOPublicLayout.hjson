@@ -115,20 +115,18 @@ return `._id {
         props: '''
 return {
   as: "img",
-  src: "/api/file/downloadCompanySquareLogo",
+  src: "/api/file/downloadCompanyRectangularLogo",
   alt: "Ysaar Logo"
 };
 ''',
         css: '''
 return `._id {
-  width: 40px;
-  height: 40px;
+  height: 60px;
   object-fit: contain;
 }
 
 @media (max-width: 768px) {
   ._id {
-    width: 32px;
     height: 32px;
   }
 }`;

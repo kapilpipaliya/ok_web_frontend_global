@@ -63,7 +63,9 @@ export async function DELETE({ request }: APIEvent) {
     await stopWorkersForSubdomain(key);
 
     // Step 2: Delete all Redis queues for this subdomain
-    console.log(`[Subdomain Delete] Deleting Redis queues for subdomain: ${key}`);
+    console.log(
+      `[Subdomain Delete] Deleting Redis queues for subdomain: ${key}`,
+    );
     const redisResult = await deleteAllQueuesForSubdomain(key);
     if (redisResult.success) {
       console.log(
@@ -80,9 +82,7 @@ export async function DELETE({ request }: APIEvent) {
     console.log(`[Subdomain Delete] Deleting directory for subdomain: ${key}`);
     const deleteResult = await deleteSubdomainDirectory(key);
     if (deleteResult.success) {
-      console.log(
-        `[Subdomain Delete] Deleted directory for subdomain: ${key}`,
-      );
+      console.log(`[Subdomain Delete] Deleted directory for subdomain: ${key}`);
     } else {
       console.error(
         `[Subdomain Delete] Error deleting directory: ${deleteResult.error}`,

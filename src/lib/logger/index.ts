@@ -65,7 +65,8 @@ export interface DatabaseContext {
 
 // Environment detection
 const isDevelopment = process.env.NODE_ENV !== "production";
-const logLevel = (process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info")) as LogLevel;
+const logLevel = (process.env.LOG_LEVEL ||
+  (isDevelopment ? "debug" : "info")) as LogLevel;
 const enableLogRotation = process.env.LOG_ROTATION_ENABLED !== "false";
 
 // Create logs directory if it doesn't exist

@@ -10,23 +10,29 @@
  * - Ownership relationships: User -[UserYouTubeOwnership]-> YouTubeOwnership -[YouTubeOwnershipToken]-> YouTubeToken
  */
 
-import { google } from 'googleapis';
-import type { Session } from 'neo4j-driver';
-import neo4j from 'neo4j-driver';
-import { encryptToken, decryptToken } from '~/lib/auth/tokenEncryption';
-import { randomUUID } from 'crypto';
-import { convertNodeToJson } from '~/cypher/conversion/convertNodeToJson';
-import {logSharedAPIUsage, YOUTUBE_API_COSTS} from "~/lib/youtube/apiUsageTracking";
+import { google } from "googleapis";
+import type { Session } from "neo4j-driver";
+import neo4j from "neo4j-driver";
+import { encryptToken, decryptToken } from "~/lib/auth/tokenEncryption";
+import { randomUUID } from "crypto";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import {
+  logSharedAPIUsage,
+  YOUTUBE_API_COSTS,
+} from "~/lib/youtube/apiUsageTracking";
 
 const YOUTUBE_SCOPES = [
-  'https://www.googleapis.com/auth/youtube.readonly', // readonly YouTube access
-  'https://www.googleapis.com/auth/youtube', // full YouTube access
+  "https://www.googleapis.com/auth/youtube.readonly", // readonly YouTube access
+  "https://www.googleapis.com/auth/youtube", // full YouTube access
 ];
 
 /**
  * Get OAuth2 client configuration from database
  */
-async function getOAuthConfig(session: Session, redirectUri: string): Promise<{
+async function getOAuthConfig(
+  session: Session,
+  redirectUri: string,
+): Promise<{
   clientId: string;
   clientSecret: string;
   redirectUri: string;
@@ -41,22 +47,22 @@ async function getOAuthConfig(session: Session, redirectUri: string): Promise<{
 
   if (result.records.length === 0) {
     throw new Error(
-      'YouTube OAuth is not configured. Please configure OAuth settings in admin panel.'
+      "YouTube OAuth is not configured. Please configure OAuth settings in admin panel.",
     );
   }
 
   const record = result.records[0];
-  const clientId = record.get('clientId');
-  const clientSecretEncrypted = record.get('clientSecretEncrypted');
+  const clientId = record.get("clientId");
+  const clientSecretEncrypted = record.get("clientSecretEncrypted");
 
   if (!clientId || !clientSecretEncrypted) {
     throw new Error(
-      'Incomplete OAuth configuration. Please check admin settings.'
+      "Incomplete OAuth configuration. Please check admin settings.",
     );
   }
 
   // Decrypt client secret
-  const { decryptClientSecret } = await import('~/lib/auth/tokenEncryption');
+  const { decryptClientSecret } = await import("~/lib/auth/tokenEncryption");
   const clientSecret = decryptClientSecret(clientSecretEncrypted);
 
   return {
@@ -75,14 +81,14 @@ export function getRedirectUriFromRequest(request?: Request): string {
   if (!request) {
     return process.env.APP_URL
       ? `${process.env.APP_URL}/api/auth/youtube/callback`
-      : 'https://localhost:3000/api/auth/youtube/callback';
+      : "https://localhost:3000/api/auth/youtube/callback";
   }
 
   const url = new URL(request.url);
 
   // Use HTTPS by default
   // Only use HTTP for plain 'localhost' (without domain)
-  const protocol = url.hostname === 'localhost' ? url.protocol : 'https:';
+  const protocol = url.hostname === "localhost" ? url.protocol : "https:";
 
   // Construct the redirect URI
   return `${protocol}//${url.host}/api/auth/youtube/callback`;
@@ -101,7 +107,7 @@ export async function getYouTubeAuthUrl(
   userId: string,
   session: Session,
   request: Request,
-  customName?: string
+  customName?: string,
 ): Promise<string> {
   const redirectUri = getRedirectUriFromRequest(request);
   const config = await getOAuthConfig(session, redirectUri);
@@ -109,7 +115,7 @@ export async function getYouTubeAuthUrl(
   const oauth2Client = new google.auth.OAuth2(
     config.clientId,
     config.clientSecret,
-    config.redirectUri
+    config.redirectUri,
   );
 
   // Generate unique ownership ID
@@ -123,10 +129,10 @@ export async function getYouTubeAuthUrl(
   });
 
   const authUrl = oauth2Client.generateAuthUrl({
-    access_type: 'offline', // Required to get refresh token
+    access_type: "offline", // Required to get refresh token
     scope: YOUTUBE_SCOPES,
     state, // Pass user ID, ownership ID, and custom name
-    prompt: 'consent', // Force consent to always get refresh token
+    prompt: "consent", // Force consent to always get refresh token
     include_granted_scopes: false, // Only request YouTube scopes
   });
 
@@ -141,9 +147,13 @@ export async function getYouTubeAuthUrl(
  */
 export async function handleYouTubeCallback(
   code: string,
-  stateData: { userId: string; ownershipId: string; customName?: string | null },
+  stateData: {
+    userId: string;
+    ownershipId: string;
+    customName?: string | null;
+  },
   session: Session,
-  request: Request
+  request: Request,
 ): Promise<{ success: boolean; error?: string; ownership?: any }> {
   try {
     const { userId, ownershipId, customName } = stateData;
@@ -154,42 +164,47 @@ export async function handleYouTubeCallback(
     const oauth2Client = new google.auth.OAuth2(
       config.clientId,
       config.clientSecret,
-      config.redirectUri
+      config.redirectUri,
     );
 
     // Exchange authorization code for tokens
     const { tokens } = await oauth2Client.getToken(code);
 
     if (!tokens.access_token) {
-      throw new Error('No access token received from Google');
+      throw new Error("No access token received from Google");
     }
 
     if (!tokens.refresh_token) {
       throw new Error(
-        'No refresh token received. User may have already authorized this app.'
+        "No refresh token received. User may have already authorized this app.",
       );
     }
 
     // Get primary YouTube channel info for this token
     oauth2Client.setCredentials({ access_token: tokens.access_token });
-    const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
+    const youtube = google.youtube({ version: "v3", auth: oauth2Client });
 
     // Fetch user's YouTube channels to get primary channel info
     const channelsResponse = await youtube.channels.list({
-      part: ['snippet'],
+      part: ["snippet"],
       mine: true,
       maxResults: 1,
     });
 
     // Log API usage for shared quota tracking (1 unit for channels.list)
-    await logSharedAPIUsage(ownershipId, 'channels.list', YOUTUBE_API_COSTS['channels.list'], session);
+    await logSharedAPIUsage(
+      ownershipId,
+      "channels.list",
+      YOUTUBE_API_COSTS["channels.list"],
+      session,
+    );
 
     const primaryChannel = channelsResponse.data.items?.[0];
     if (!primaryChannel || !primaryChannel.id) {
-      throw new Error('Unable to fetch your YouTube channel information');
+      throw new Error("Unable to fetch your YouTube channel information");
     }
 
-    const channelName = primaryChannel.snippet?.title || 'Unknown Channel';
+    const channelName = primaryChannel.snippet?.title || "Unknown Channel";
     const channelId = primaryChannel.id;
 
     // Encrypt tokens before storage
@@ -205,7 +220,7 @@ export async function handleYouTubeCallback(
       RETURN o, token, token.isRevoked as isRevoked
       LIMIT 1
     `,
-      { userId, channelId }
+      { userId, channelId },
     );
 
     let ownership: any = null;
@@ -215,10 +230,10 @@ export async function handleYouTubeCallback(
 
     if (existingCheck.records.length > 0) {
       // Update existing ownership with new token (whether active or disconnected)
-      const existingOwnership = existingCheck.records[0].get('o');
+      const existingOwnership = existingCheck.records[0].get("o");
       ownershipIdToUse = existingOwnership.properties.key;
       isUpdate = true;
-      wasRevoked = existingCheck.records[0].get('isRevoked');
+      wasRevoked = existingCheck.records[0].get("isRevoked");
 
       const updateResult = await session.run(
         `
@@ -256,11 +271,11 @@ export async function handleYouTubeCallback(
           accessToken: encryptedAccessToken,
           refreshToken: encryptedRefreshToken,
           expiresAt: neo4j.int(tokens.expiry_date || Date.now() + 3600 * 1000),
-          scope: YOUTUBE_SCOPES.join(' '),
-        }
+          scope: YOUTUBE_SCOPES.join(" "),
+        },
       );
 
-      const ownershipNode = updateResult.records[0]?.get('ownership');
+      const ownershipNode = updateResult.records[0]?.get("ownership");
       ownership = ownershipNode ? convertNodeToJson(ownershipNode) : null;
     } else {
       // Create new ownership
@@ -270,11 +285,12 @@ export async function handleYouTubeCallback(
         MATCH (u:User {uuid: $userId})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
         RETURN count(o) as count
       `,
-        { userId }
+        { userId },
       );
 
-      const count = ownershipsCheck.records[0]?.get('count');
-      const isPrimary = (neo4j.isInt(count) ? count.toNumber() : Number(count)) === 0;
+      const count = ownershipsCheck.records[0]?.get("count");
+      const isPrimary =
+        (neo4j.isInt(count) ? count.toNumber() : Number(count)) === 0;
 
       const createResult = await session.run(
         `
@@ -314,11 +330,11 @@ export async function handleYouTubeCallback(
           accessToken: encryptedAccessToken,
           refreshToken: encryptedRefreshToken,
           expiresAt: neo4j.int(tokens.expiry_date || Date.now() + 3600 * 1000),
-          scope: YOUTUBE_SCOPES.join(' '),
-        }
+          scope: YOUTUBE_SCOPES.join(" "),
+        },
       );
 
-      const ownershipNode = createResult.records[0]?.get('ownership');
+      const ownershipNode = createResult.records[0]?.get("ownership");
       ownership = ownershipNode ? convertNodeToJson(ownershipNode) : null;
     }
 
@@ -335,10 +351,10 @@ export async function handleYouTubeCallback(
       },
     };
   } catch (error) {
-    console.error('YouTube OAuth callback error:', error);
+    console.error("YouTube OAuth callback error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -354,7 +370,7 @@ export async function handleYouTubeCallback(
 export async function getValidYouTubeToken(
   ownershipId: string,
   session: Session,
-  request?: Request
+  request?: Request,
 ): Promise<string> {
   // Fetch encrypted tokens from database via ownership
   const result = await session.run(
@@ -363,24 +379,24 @@ export async function getValidYouTubeToken(
     WHERE token.isRevoked = false
     RETURN token, ownership.channelName as channelName
   `,
-    { ownershipId }
+    { ownershipId },
   );
 
   if (result.records.length === 0) {
     throw new Error(
-      'No YouTube authorization found for this channel. Please reconnect in settings.'
+      "No YouTube authorization found for this channel. Please reconnect in settings.",
     );
   }
 
   const record = result.records[0];
-  const tokenNode = record.get('token');
+  const tokenNode = record.get("token");
   const token = convertNodeToJson(tokenNode);
-  const channelName = record.get('channelName');
+  const channelName = record.get("channelName");
 
   // Check if token is revoked
   if (token.P.isRevoked) {
     throw new Error(
-      `YouTube access for "${channelName}" has been revoked. Please reconnect your account.`
+      `YouTube access for "${channelName}" has been revoked. Please reconnect your account.`,
     );
   }
 
@@ -396,7 +412,7 @@ export async function getValidYouTubeToken(
   if (now.getTime() >= expiresAt.getTime() - bufferTime) {
     // Token expired or about to expire - refresh it
     console.log(
-      `YouTube access token for "${channelName}" expired, refreshing...`
+      `YouTube access token for "${channelName}" expired, refreshing...`,
     );
 
     const redirectUri = getRedirectUriFromRequest(request);
@@ -405,7 +421,7 @@ export async function getValidYouTubeToken(
     const oauth2Client = new google.auth.OAuth2(
       config.clientId,
       config.clientSecret,
-      config.redirectUri
+      config.redirectUri,
     );
 
     oauth2Client.setCredentials({
@@ -417,7 +433,7 @@ export async function getValidYouTubeToken(
       const { credentials } = await oauth2Client.refreshAccessToken();
 
       if (!credentials.access_token) {
-        throw new Error('No access token received during refresh');
+        throw new Error("No access token received during refresh");
       }
 
       // Encrypt new access token
@@ -434,8 +450,10 @@ export async function getValidYouTubeToken(
         {
           ownershipId,
           accessToken: newEncryptedAccessToken,
-          expiresAt: neo4j.int(credentials.expiry_date || Date.now() + 3600 * 1000),
-        }
+          expiresAt: neo4j.int(
+            credentials.expiry_date || Date.now() + 3600 * 1000,
+          ),
+        },
       );
 
       return credentials.access_token;
@@ -443,8 +461,8 @@ export async function getValidYouTubeToken(
       // Refresh failed - token likely revoked
       if (
         error.code === 400 ||
-        error.message?.includes('invalid_grant') ||
-        error.message?.includes('Token has been expired or revoked')
+        error.message?.includes("invalid_grant") ||
+        error.message?.includes("Token has been expired or revoked")
       ) {
         // Mark as revoked
         await session.run(
@@ -453,11 +471,11 @@ export async function getValidYouTubeToken(
           SET token.isRevoked = true,
               token.revokedAt = datetime()
         `,
-          { ownershipId }
+          { ownershipId },
         );
 
         throw new Error(
-          `YouTube authorization for "${channelName}" has been revoked. Please reconnect in settings.`
+          `YouTube authorization for "${channelName}" has been revoked. Please reconnect in settings.`,
         );
       }
       throw error;
@@ -479,7 +497,7 @@ export async function getValidYouTubeToken(
 export async function getYouTubeClient(
   ownershipId: string,
   session: Session,
-  request?: Request
+  request?: Request,
 ) {
   const accessToken = await getValidYouTubeToken(ownershipId, session, request);
 
@@ -491,7 +509,7 @@ export async function getYouTubeClient(
 
   // Return authenticated YouTube client
   return google.youtube({
-    version: 'v3',
+    version: "v3",
     auth: client,
   });
 }
@@ -501,7 +519,7 @@ export async function getYouTubeClient(
  */
 export async function hasYouTubeConnection(
   userId: string,
-  session: Session
+  session: Session,
 ): Promise<boolean> {
   const result = await session.run(
     `
@@ -510,10 +528,10 @@ export async function hasYouTubeConnection(
     WHERE token.isRevoked = false
     RETURN count(o) > 0 as hasConnection
   `,
-    { userId }
+    { userId },
   );
 
-  return result.records[0]?.get('hasConnection') || false;
+  return result.records[0]?.get("hasConnection") || false;
 }
 
 /**
@@ -525,7 +543,7 @@ export async function hasYouTubeConnection(
  */
 export async function disconnectYouTube(
   ownershipId: string,
-  session: Session
+  session: Session,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Mark token as revoked for this ownership
@@ -536,7 +554,7 @@ export async function disconnectYouTube(
       SET token.isRevoked = true,
           token.revokedAt = datetime()
     `,
-      { ownershipId }
+      { ownershipId },
     );
 
     // TODO: Schedule YouTube data deletion within 30 days per policy
@@ -544,10 +562,10 @@ export async function disconnectYouTube(
 
     return { success: true };
   } catch (error) {
-    console.error('Error disconnecting YouTube ownership:', error);
+    console.error("Error disconnecting YouTube ownership:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -558,7 +576,7 @@ export async function disconnectYouTube(
  */
 export async function getYouTubeConnectionStatus(
   userId: string,
-  session: Session
+  session: Session,
 ): Promise<{
   connected: boolean;
   ownerships: Array<{
@@ -585,7 +603,7 @@ export async function getYouTubeConnectionStatus(
            token.scope as scope
     ORDER BY o.isPrimary DESC, o.lastSelected DESC
   `,
-    { userId }
+    { userId },
   );
 
   if (result.records.length === 0) {
@@ -593,15 +611,15 @@ export async function getYouTubeConnectionStatus(
   }
 
   const ownerships = result.records.map((record) => ({
-    ownershipId: record.get('ownershipId'),
-    channelName: record.get('channelName'),
-    customName: record.get('customName'),
-    channelId: record.get('channelId'),
-    isPrimary: record.get('isPrimary'),
-    lastRefreshed: record.get('lastRefreshed')
-      ? new Date(record.get('lastRefreshed'))
+    ownershipId: record.get("ownershipId"),
+    channelName: record.get("channelName"),
+    customName: record.get("customName"),
+    channelId: record.get("channelId"),
+    isPrimary: record.get("isPrimary"),
+    lastRefreshed: record.get("lastRefreshed")
+      ? new Date(record.get("lastRefreshed"))
       : undefined,
-    scope: record.get('scope'),
+    scope: record.get("scope"),
   }));
 
   return {

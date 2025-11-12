@@ -60,9 +60,7 @@ export async function executeServerFunction(
   try {
     // Create the function from the provided body string
     // The function has access to args object with session, context, and contextData
-    const AsyncFunction = Object.getPrototypeOf(
-      async () => {},
-    ).constructor;
+    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
     const serverFunction = new AsyncFunction("args", request.functionBody);
 
     // Prepare the args object that will be available in the function

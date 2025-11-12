@@ -11,7 +11,7 @@
  * - Usage breakdown by ownership for analytics
  */
 
-import type { Session } from 'neo4j-driver';
+import type { Session } from "neo4j-driver";
 
 /**
  * YouTube API quota costs for different operations
@@ -19,14 +19,14 @@ import type { Session } from 'neo4j-driver';
  */
 export const YOUTUBE_API_COSTS = {
   // Read operations
-  'channels.list': 1,
-  'playlists.list': 1,
-  'playlistItems.list': 1,
-  'videos.list': 1,
-  'search.list': 100,  // Search is expensive!
+  "channels.list": 1,
+  "playlists.list": 1,
+  "playlistItems.list": 1,
+  "videos.list": 1,
+  "search.list": 100, // Search is expensive!
 
   // Default for unknown operations
-  'default': 1,
+  default: 1,
 } as const;
 
 /**
@@ -42,9 +42,13 @@ export const RESERVATION_EXPIRY_MS = 5 * 60 * 1000;
 /**
  * Calculate the cost of a YouTube API operation
  */
-export function calculateOperationCost(operation: string, additionalCost: number = 0): number {
-  const baseCost = YOUTUBE_API_COSTS[operation as keyof typeof YOUTUBE_API_COSTS]
-    || YOUTUBE_API_COSTS.default;
+export function calculateOperationCost(
+  operation: string,
+  additionalCost: number = 0,
+): number {
+  const baseCost =
+    YOUTUBE_API_COSTS[operation as keyof typeof YOUTUBE_API_COSTS] ||
+    YOUTUBE_API_COSTS.default;
   return baseCost + additionalCost;
 }
 
@@ -60,16 +64,17 @@ export async function logSharedAPIUsage(
   ownershipId: string,
   operation: string,
   cost: number,
-  session: Session
+  session: Session,
 ): Promise<void> {
   try {
     // Get today's date at midnight (UTC) for grouping daily usage
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    const dateKey = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    const dateKey = today.toISOString().split("T")[0]; // YYYY-MM-DD
 
     // Track at OAuthSettings level (shared quota)
-    await session.run(`
+    await session.run(
+      `
       MATCH (settings:OAuthSettings)
       WHERE settings.googleEnabled = true
       WITH settings LIMIT 1
@@ -114,15 +119,17 @@ export async function logSharedAPIUsage(
         ownershipUsage.lastUpdated = datetime()
 
       RETURN usage
-    `, {
-      dateKey,
-      cost,
-      operation,
-      ownershipId
-    });
+    `,
+      {
+        dateKey,
+        cost,
+        operation,
+        ownershipId,
+      },
+    );
   } catch (error) {
     // Log error but don't throw - API tracking shouldn't break the main flow
-    console.error('Error logging shared API usage:', error);
+    console.error("Error logging shared API usage:", error);
   }
 }
 
@@ -131,9 +138,7 @@ export async function logSharedAPIUsage(
  *
  * @param session - Neo4j session
  */
-export async function getTodaySharedAPIUsage(
-  session: Session
-): Promise<{
+export async function getTodaySharedAPIUsage(session: Session): Promise<{
   totalCost: number;
   callCount: number;
   operations: Record<string, number>;
@@ -144,9 +149,10 @@ export async function getTodaySharedAPIUsage(
 }> {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
-  const dateKey = today.toISOString().split('T')[0];
+  const dateKey = today.toISOString().split("T")[0];
 
-  const result = await session.run(`
+  const result = await session.run(
+    `
     MATCH (settings:OAuthSettings)
     WHERE settings.googleEnabled = true
     WITH settings LIMIT 1
@@ -162,7 +168,9 @@ export async function getTodaySharedAPIUsage(
            COALESCE(usage.callCount, 0) as callCount,
            COLLECT(DISTINCT {operation: op.operation, count: op.count}) as operations,
            COALESCE(SUM(res.reservedAmount), 0) as activeReservations
-  `, { dateKey });
+  `,
+    { dateKey },
+  );
 
   if (result.records.length === 0) {
     return {
@@ -172,15 +180,15 @@ export async function getTodaySharedAPIUsage(
       remainingQuota: DAILY_QUOTA_LIMIT,
       quotaPercentUsed: 0,
       activeReservations: 0,
-      effectiveRemaining: DAILY_QUOTA_LIMIT
+      effectiveRemaining: DAILY_QUOTA_LIMIT,
     };
   }
 
   const record = result.records[0];
-  const totalCost = record.get('totalCost') || 0;
-  const callCount = record.get('callCount') || 0;
-  const operationsList = record.get('operations') || [];
-  const activeReservations = record.get('activeReservations') || 0;
+  const totalCost = record.get("totalCost") || 0;
+  const callCount = record.get("callCount") || 0;
+  const operationsList = record.get("operations") || [];
+  const activeReservations = record.get("activeReservations") || 0;
 
   // Convert operations list to map
   const operations: Record<string, number> = {};
@@ -201,7 +209,7 @@ export async function getTodaySharedAPIUsage(
     remainingQuota,
     quotaPercentUsed,
     activeReservations,
-    effectiveRemaining
+    effectiveRemaining,
   };
 }
 
@@ -213,20 +221,23 @@ export async function getTodaySharedAPIUsage(
  */
 export async function getSharedAPIUsageByOwnership(
   session: Session,
-  dateKey?: string
-): Promise<Array<{
-  ownershipId: string;
-  channelName: string | null;
-  customName: string | null;
-  totalCost: number;
-  callCount: number;
-  percentOfTotal: number;
-}>> {
+  dateKey?: string,
+): Promise<
+  Array<{
+    ownershipId: string;
+    channelName: string | null;
+    customName: string | null;
+    totalCost: number;
+    callCount: number;
+    percentOfTotal: number;
+  }>
+> {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
-  const targetDate = dateKey || today.toISOString().split('T')[0];
+  const targetDate = dateKey || today.toISOString().split("T")[0];
 
-  const result = await session.run(`
+  const result = await session.run(
+    `
     MATCH (settings:OAuthSettings)-[:OAuthSettingsAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
     MATCH (usage)-[:YouTubeAPIUsageByOwnership]->(ownershipUsage:YouTubeOwnershipUsage)
     MATCH (o:YouTubeOwnership {key: ownershipUsage.ownershipId})
@@ -238,20 +249,22 @@ export async function getSharedAPIUsageByOwnership(
            ownershipUsage.callCount as callCount,
            usage.totalCost as grandTotal
     ORDER BY ownershipUsage.totalCost DESC
-  `, { dateKey: targetDate });
+  `,
+    { dateKey: targetDate },
+  );
 
-  return result.records.map(record => {
-    const totalCost = record.get('totalCost') || 0;
-    const grandTotal = record.get('grandTotal') || 1; // Avoid division by zero
+  return result.records.map((record) => {
+    const totalCost = record.get("totalCost") || 0;
+    const grandTotal = record.get("grandTotal") || 1; // Avoid division by zero
     const percentOfTotal = (totalCost / grandTotal) * 100;
 
     return {
-      ownershipId: record.get('ownershipId'),
-      channelName: record.get('channelName'),
-      customName: record.get('customName'),
+      ownershipId: record.get("ownershipId"),
+      channelName: record.get("channelName"),
+      customName: record.get("customName"),
       totalCost,
-      callCount: record.get('callCount') || 0,
-      percentOfTotal
+      callCount: record.get("callCount") || 0,
+      percentOfTotal,
     };
   });
 }
@@ -272,7 +285,7 @@ export async function reserveQuota(
   estimatedCost: number,
   priority: number,
   operation: string,
-  session: Session
+  session: Session,
 ): Promise<string> {
   // Clean up expired reservations first
   await cleanupExpiredReservations(session);
@@ -286,19 +299,19 @@ export async function reserveQuota(
       const bumped = await tryBumpLowerPriorityReservations(
         estimatedCost,
         priority,
-        session
+        session,
       );
 
       if (bumped < estimatedCost) {
         throw new QuotaExhaustedError(
           `Insufficient quota available. Need ${estimatedCost}, have ${usage.effectiveRemaining + bumped}`,
-          usage.effectiveRemaining + bumped
+          usage.effectiveRemaining + bumped,
         );
       }
     } else {
       throw new QuotaExhaustedError(
         `Insufficient quota available. Need ${estimatedCost}, have ${usage.effectiveRemaining}`,
-        usage.effectiveRemaining
+        usage.effectiveRemaining,
       );
     }
   }
@@ -307,7 +320,8 @@ export async function reserveQuota(
   const reservationId = `res_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const expiresAt = new Date(Date.now() + RESERVATION_EXPIRY_MS);
 
-  await session.run(`
+  await session.run(
+    `
     MATCH (settings:OAuthSettings)
     WHERE settings.googleEnabled = true
     WITH settings LIMIT 1
@@ -324,14 +338,16 @@ export async function reserveQuota(
     CREATE (settings)-[:OAuthSettingsQuotaReservation]->(res)
 
     RETURN res.id as id
-  `, {
-    reservationId,
-    ownershipId,
-    estimatedCost,
-    priority,
-    operation,
-    expiresAt: expiresAt.toISOString()
-  });
+  `,
+    {
+      reservationId,
+      ownershipId,
+      estimatedCost,
+      priority,
+      operation,
+      expiresAt: expiresAt.toISOString(),
+    },
+  );
 
   return reservationId;
 }
@@ -344,12 +360,15 @@ export async function reserveQuota(
  */
 export async function releaseQuota(
   reservationId: string,
-  session: Session
+  session: Session,
 ): Promise<void> {
-  await session.run(`
+  await session.run(
+    `
     MATCH (res:QuotaReservation {id: $reservationId})
     DETACH DELETE res
-  `, { reservationId });
+  `,
+    { reservationId },
+  );
 }
 
 /**
@@ -363,15 +382,18 @@ export async function releaseQuota(
 async function tryBumpLowerPriorityReservations(
   needed: number,
   myPriority: number,
-  session: Session
+  session: Session,
 ): Promise<number> {
   // Find lower priority reservations
-  const result = await session.run(`
+  const result = await session.run(
+    `
     MATCH (settings:OAuthSettings)-[:OAuthSettingsQuotaReservation]->(res:QuotaReservation)
     WHERE res.priority < $myPriority AND res.expiresAt > datetime()
     RETURN res.id as id, res.reservedAmount as amount, res.ownershipId as ownershipId
     ORDER BY res.priority ASC, res.createdAt ASC
-  `, { myPriority });
+  `,
+    { myPriority },
+  );
 
   let freed = 0;
   const bumpedIds: string[] = [];
@@ -379,8 +401,8 @@ async function tryBumpLowerPriorityReservations(
   for (const record of result.records) {
     if (freed >= needed) break;
 
-    const id = record.get('id');
-    const amount = record.get('amount') || 0;
+    const id = record.get("id");
+    const amount = record.get("amount") || 0;
 
     bumpedIds.push(id);
     freed += amount;
@@ -388,11 +410,14 @@ async function tryBumpLowerPriorityReservations(
 
   // Delete the bumped reservations
   if (bumpedIds.length > 0) {
-    await session.run(`
+    await session.run(
+      `
       MATCH (res:QuotaReservation)
       WHERE res.id IN $ids
       DETACH DELETE res
-    `, { ids: bumpedIds });
+    `,
+      { ids: bumpedIds },
+    );
   }
 
   return freed;
@@ -403,7 +428,9 @@ async function tryBumpLowerPriorityReservations(
  *
  * @param session - Neo4j session
  */
-export async function cleanupExpiredReservations(session: Session): Promise<number> {
+export async function cleanupExpiredReservations(
+  session: Session,
+): Promise<number> {
   const result = await session.run(`
     MATCH (res:QuotaReservation)
     WHERE res.expiresAt <= datetime()
@@ -411,7 +438,7 @@ export async function cleanupExpiredReservations(session: Session): Promise<numb
     RETURN count(res) as deletedCount
   `);
 
-  return result.records[0]?.get('deletedCount') || 0;
+  return result.records[0]?.get("deletedCount") || 0;
 }
 
 /**
@@ -422,14 +449,17 @@ export async function cleanupExpiredReservations(session: Session): Promise<numb
  */
 export async function getSharedAPIUsageHistory(
   days: number,
-  session: Session
-): Promise<Array<{
-  date: string;
-  totalCost: number;
-  callCount: number;
-  operations: Record<string, number>;
-}>> {
-  const result = await session.run(`
+  session: Session,
+): Promise<
+  Array<{
+    date: string;
+    totalCost: number;
+    callCount: number;
+    operations: Record<string, number>;
+  }>
+> {
+  const result = await session.run(
+    `
     MATCH (settings:OAuthSettings)-[:OAuthSettingsAPIUsage]->(usage:YouTubeAPIUsage)
     WHERE usage.createdAt >= datetime() - duration({days: $days})
     OPTIONAL MATCH (usage)-[:YouTubeAPIUsageOperation]->(op:YouTubeOperationUsage)
@@ -438,10 +468,12 @@ export async function getSharedAPIUsageHistory(
            usage.callCount as callCount,
            COLLECT({operation: op.operation, count: op.count}) as operations
     ORDER BY usage.date DESC
-  `, { days });
+  `,
+    { days },
+  );
 
-  return result.records.map(record => {
-    const operationsList = record.get('operations') || [];
+  return result.records.map((record) => {
+    const operationsList = record.get("operations") || [];
     const operations: Record<string, number> = {};
     for (const op of operationsList) {
       if (op.operation) {
@@ -450,10 +482,10 @@ export async function getSharedAPIUsageHistory(
     }
 
     return {
-      date: record.get('date'),
-      totalCost: record.get('totalCost') || 0,
-      callCount: record.get('callCount') || 0,
-      operations
+      date: record.get("date"),
+      totalCost: record.get("totalCost") || 0,
+      callCount: record.get("callCount") || 0,
+      operations,
     };
   });
 }
@@ -466,7 +498,7 @@ export async function getSharedAPIUsageHistory(
  */
 export async function isApproachingQuotaLimit(
   session: Session,
-  threshold: number = 0.8  // 80% threshold
+  threshold: number = 0.8, // 80% threshold
 ): Promise<{
   isApproaching: boolean;
   percentUsed: number;
@@ -474,13 +506,13 @@ export async function isApproachingQuotaLimit(
   effectiveRemaining: number;
 }> {
   const usage = await getTodaySharedAPIUsage(session);
-  const isApproaching = usage.quotaPercentUsed >= (threshold * 100);
+  const isApproaching = usage.quotaPercentUsed >= threshold * 100;
 
   return {
     isApproaching,
     percentUsed: usage.quotaPercentUsed,
     remainingQuota: usage.remainingQuota,
-    effectiveRemaining: usage.effectiveRemaining
+    effectiveRemaining: usage.effectiveRemaining,
   };
 }
 
@@ -495,7 +527,7 @@ export async function cleanupOldAPIUsage(session: Session): Promise<number> {
     RETURN count(usage) as deletedCount
   `);
 
-  return result.records[0]?.get('deletedCount') || 0;
+  return result.records[0]?.get("deletedCount") || 0;
 }
 
 /**
@@ -506,7 +538,7 @@ export class QuotaExhaustedError extends Error {
 
   constructor(message: string, remainingQuota: number) {
     super(message);
-    this.name = 'QuotaExhaustedError';
+    this.name = "QuotaExhaustedError";
     this.remainingQuota = remainingQuota;
   }
 }

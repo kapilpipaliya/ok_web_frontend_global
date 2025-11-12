@@ -53,7 +53,9 @@ export async function uploadFiles(
       });
 
       if (checkResult.records.length > 0) {
-        throw new Error(`File with name "${filename}" already exists in database`);
+        throw new Error(
+          `File with name "${filename}" already exists in database`,
+        );
       }
 
       // Save file to disk

@@ -33,179 +33,179 @@ export async function createYTOIndices(
         description: "Index for user UUID lookups",
       },
 
-    // 2. YouTube entity lookups by youtubeId
-    {
-      name: "idx_channel_youtube_id",
-      label: "Channel",
-      property: "youtubeId",
-      description: "Index for channel YouTube ID lookups",
-    },
-    {
-      name: "idx_playlist_youtube_id",
-      label: "Playlist",
-      property: "youtubeId",
-      description: "Index for playlist YouTube ID lookups",
-    },
-    {
-      name: "idx_video_youtube_id",
-      label: "Video",
-      property: "youtubeId",
-      description: "Index for video YouTube ID lookups",
-    },
+      // 2. YouTube entity lookups by youtubeId
+      {
+        name: "idx_channel_youtube_id",
+        label: "Channel",
+        property: "youtubeId",
+        description: "Index for channel YouTube ID lookups",
+      },
+      {
+        name: "idx_playlist_youtube_id",
+        label: "Playlist",
+        property: "youtubeId",
+        description: "Index for playlist YouTube ID lookups",
+      },
+      {
+        name: "idx_video_youtube_id",
+        label: "Video",
+        property: "youtubeId",
+        description: "Index for video YouTube ID lookups",
+      },
 
-    // 3. User settings lookups
-    {
-      name: "idx_channel_setting_user_uuid",
-      label: "ChannelSetting",
-      property: "userUuid",
-      description: "Index for user's channel settings",
-    },
-    {
-      name: "idx_playlist_setting_user_uuid",
-      label: "PlaylistSetting",
-      property: "userUuid",
-      description: "Index for user's playlist settings",
-    },
-    {
-      name: "idx_video_setting_user_uuid",
-      label: "VideoSetting",
-      property: "userUuid",
-      description: "Index for user's video settings",
-    },
+      // 3. User settings lookups
+      {
+        name: "idx_channel_setting_user_uuid",
+        label: "ChannelSetting",
+        property: "userUuid",
+        description: "Index for user's channel settings",
+      },
+      {
+        name: "idx_playlist_setting_user_uuid",
+        label: "PlaylistSetting",
+        property: "userUuid",
+        description: "Index for user's playlist settings",
+      },
+      {
+        name: "idx_video_setting_user_uuid",
+        label: "VideoSetting",
+        property: "userUuid",
+        description: "Index for user's video settings",
+      },
 
-    // 4. Sorting fields on settings (for efficient ORDER BY)
-    {
-      name: "idx_channel_setting_created_at",
-      label: "ChannelSetting",
-      property: "createdAt",
-      description: "Index for sorting channels by creation date",
-    },
-    {
-      name: "idx_channel_setting_favourited_at",
-      label: "ChannelSetting",
-      property: "favouritedAt",
-      description: "Index for sorting favourited channels",
-    },
-    {
-      name: "idx_playlist_setting_created_at",
-      label: "PlaylistSetting",
-      property: "createdAt",
-      description: "Index for sorting playlists by creation date",
-    },
-    {
-      name: "idx_playlist_setting_favourited_at",
-      label: "PlaylistSetting",
-      property: "favouritedAt",
-      description: "Index for sorting favourited playlists",
-    },
-    {
-      name: "idx_video_setting_created_at",
-      label: "VideoSetting",
-      property: "createdAt",
-      description: "Index for sorting videos by creation date",
-    },
-    {
-      name: "idx_video_setting_favourited_at",
-      label: "VideoSetting",
-      property: "favouritedAt",
-      description: "Index for sorting favourited videos",
-    },
+      // 4. Sorting fields on settings (for efficient ORDER BY)
+      {
+        name: "idx_channel_setting_created_at",
+        label: "ChannelSetting",
+        property: "createdAt",
+        description: "Index for sorting channels by creation date",
+      },
+      {
+        name: "idx_channel_setting_favourited_at",
+        label: "ChannelSetting",
+        property: "favouritedAt",
+        description: "Index for sorting favourited channels",
+      },
+      {
+        name: "idx_playlist_setting_created_at",
+        label: "PlaylistSetting",
+        property: "createdAt",
+        description: "Index for sorting playlists by creation date",
+      },
+      {
+        name: "idx_playlist_setting_favourited_at",
+        label: "PlaylistSetting",
+        property: "favouritedAt",
+        description: "Index for sorting favourited playlists",
+      },
+      {
+        name: "idx_video_setting_created_at",
+        label: "VideoSetting",
+        property: "createdAt",
+        description: "Index for sorting videos by creation date",
+      },
+      {
+        name: "idx_video_setting_favourited_at",
+        label: "VideoSetting",
+        property: "favouritedAt",
+        description: "Index for sorting favourited videos",
+      },
 
-    // 5. Video entity sorting fields
-    {
-      name: "idx_video_published_at",
-      label: "Video",
-      property: "publishedAt",
-      description: "Index for sorting videos by publish date",
-    },
-    {
-      name: "idx_video_duration",
-      label: "Video",
-      property: "duration",
-      description: "Index for sorting videos by duration",
-    },
+      // 5. Video entity sorting fields
+      {
+        name: "idx_video_published_at",
+        label: "Video",
+        property: "publishedAt",
+        description: "Index for sorting videos by publish date",
+      },
+      {
+        name: "idx_video_duration",
+        label: "Video",
+        property: "duration",
+        description: "Index for sorting videos by duration",
+      },
 
-    // 6. Video playlist index for ordering
-    {
-      name: "idx_video_setting_playlist_index",
-      label: "VideoSetting",
-      property: "playlistIndex",
-      description: "Index for sorting videos by playlist position",
-    },
+      // 6. Video playlist index for ordering
+      {
+        name: "idx_video_setting_playlist_index",
+        label: "VideoSetting",
+        property: "playlistIndex",
+        description: "Index for sorting videos by playlist position",
+      },
 
-    // 7. YouTube ownership tracking
-    {
-      name: "idx_youtube_ownership_user_uuid",
-      label: "YouTubeOwnership",
-      property: "userUuid",
-      description: "Index for user's YouTube account ownerships",
-    },
-    {
-      name: "idx_youtube_ownership_account_email",
-      label: "YouTubeOwnership",
-      property: "accountEmail",
-      description: "Index for YouTube account email lookups",
-    },
+      // 7. YouTube ownership tracking
+      {
+        name: "idx_youtube_ownership_user_uuid",
+        label: "YouTubeOwnership",
+        property: "userUuid",
+        description: "Index for user's YouTube account ownerships",
+      },
+      {
+        name: "idx_youtube_ownership_account_email",
+        label: "YouTubeOwnership",
+        property: "accountEmail",
+        description: "Index for YouTube account email lookups",
+      },
 
-    // 8. Playlist entity sorting fields
-    {
-      name: "idx_playlist_published_at",
-      label: "Playlist",
-      property: "publishedAt",
-      description: "Index for sorting playlists by publish date",
-    },
+      // 8. Playlist entity sorting fields
+      {
+        name: "idx_playlist_published_at",
+        label: "Playlist",
+        property: "publishedAt",
+        description: "Index for sorting playlists by publish date",
+      },
 
-    // 9. Title sorting fields
-    {
-      name: "idx_channel_title",
-      label: "Channel",
-      property: "title",
-      description: "Index for sorting channels by title",
-    },
-    {
-      name: "idx_playlist_title",
-      label: "Playlist",
-      property: "title",
-      description: "Index for sorting playlists by title",
-    },
-    {
-      name: "idx_video_title",
-      label: "Video",
-      property: "title",
-      description: "Index for sorting videos by title",
-    },
+      // 9. Title sorting fields
+      {
+        name: "idx_channel_title",
+        label: "Channel",
+        property: "title",
+        description: "Index for sorting channels by title",
+      },
+      {
+        name: "idx_playlist_title",
+        label: "Playlist",
+        property: "title",
+        description: "Index for sorting playlists by title",
+      },
+      {
+        name: "idx_video_title",
+        label: "Video",
+        property: "title",
+        description: "Index for sorting videos by title",
+      },
 
-    // 10. Video filtering and searching fields
-    {
-      name: "idx_video_category_id",
-      label: "Video",
-      property: "categoryId",
-      description: "Index for filtering videos by YouTube category",
-    },
-    {
-      name: "idx_video_definition",
-      label: "Video",
-      property: "definition",
-      description: "Index for filtering videos by quality (hd/sd)",
-    },
-    {
-      name: "idx_video_caption",
-      label: "Video",
-      property: "caption",
-      description: "Index for filtering videos with captions",
-    },
-    {
-      name: "idx_video_dimension",
-      label: "Video",
-      property: "dimension",
-      description: "Index for filtering 2D vs 3D videos",
-    },
-    {
-      name: "idx_video_live_broadcast_content",
-      label: "Video",
-      property: "liveBroadcastContent",
-      description: "Index for filtering live/upcoming/none videos",
-    },
+      // 10. Video filtering and searching fields
+      {
+        name: "idx_video_category_id",
+        label: "Video",
+        property: "categoryId",
+        description: "Index for filtering videos by YouTube category",
+      },
+      {
+        name: "idx_video_definition",
+        label: "Video",
+        property: "definition",
+        description: "Index for filtering videos by quality (hd/sd)",
+      },
+      {
+        name: "idx_video_caption",
+        label: "Video",
+        property: "caption",
+        description: "Index for filtering videos with captions",
+      },
+      {
+        name: "idx_video_dimension",
+        label: "Video",
+        property: "dimension",
+        description: "Index for filtering 2D vs 3D videos",
+      },
+      {
+        name: "idx_video_live_broadcast_content",
+        label: "Video",
+        property: "liveBroadcastContent",
+        description: "Index for filtering live/upcoming/none videos",
+      },
     ];
 
     console.log(
@@ -231,7 +231,10 @@ export async function createYTOIndices(
         );
         successCount++;
       } catch (error) {
-        if (error instanceof Error && error.message.includes("already exists")) {
+        if (
+          error instanceof Error &&
+          error.message.includes("already exists")
+        ) {
           console.log(`[YTO Indices] ○ Index already exists: ${index.name}`);
           skipCount++;
         } else {

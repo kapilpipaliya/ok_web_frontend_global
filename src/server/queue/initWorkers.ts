@@ -323,7 +323,10 @@ export async function getAllSubdomainWorkerStatus() {
       data: subdomainWorkerStatus,
     };
   } catch (error: any) {
-    console.error("[Workers] Error getting all subdomain worker status:", error);
+    console.error(
+      "[Workers] Error getting all subdomain worker status:",
+      error,
+    );
     return {
       success: false,
       error: error.message,
@@ -397,15 +400,18 @@ export async function startWorkerForSubdomain(
       });
 
       try {
-        const workerResult = await executeNamedServerFunction({
-          functionName: workerKey,
-          contextData: {
-            action: "start",
+        const workerResult = await executeNamedServerFunction(
+          {
+            functionName: workerKey,
+            contextData: {
+              action: "start",
+            },
           },
-        }, {
-          dbSession: targetDbSession,
-          subDomain: targetSubdomain,
-        });
+          {
+            dbSession: targetDbSession,
+            subDomain: targetSubdomain,
+          },
+        );
 
         if (workerResult.error) {
           console.error(
@@ -555,11 +561,16 @@ export async function stopAllSubdomainWorkersUI() {
     }
 
     // Stop all workers across all subdomains
-    for (const [subdomainKey, subdomainWorkers] of workerState.activeWorkers.entries()) {
+    for (const [
+      subdomainKey,
+      subdomainWorkers,
+    ] of workerState.activeWorkers.entries()) {
       // Skip platform workers
       if (subdomainKey === "platform") continue;
 
-      console.log(`[Workers] Stopping all workers for subdomain: ${subdomainKey}`);
+      console.log(
+        `[Workers] Stopping all workers for subdomain: ${subdomainKey}`,
+      );
       for (const [workerName, worker] of subdomainWorkers.entries()) {
         try {
           console.log(

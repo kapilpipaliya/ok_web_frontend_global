@@ -391,9 +391,7 @@ export function SignupForm() {
 }\`;`,
                         props: () => ({
                           onClick: () => {
-                            navigate(
-                              "/terms",
-                            );
+                            navigate("/terms");
                           },
                         }),
                         text: "Terms of Service",

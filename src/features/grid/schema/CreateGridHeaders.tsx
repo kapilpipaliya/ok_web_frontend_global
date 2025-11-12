@@ -533,7 +533,8 @@ function InlineEditButton(props: {
         <CustomModal
           open={() => showEditModal()}
           setOpen={(open) => {
-            if (open) setShowEditModal(true); else handleClose();
+            if (open) setShowEditModal(true);
+            else handleClose();
           }}
           title={`Edit ${props.tableId}`}
           containerCss={`return \`._id {

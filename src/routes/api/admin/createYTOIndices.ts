@@ -21,10 +21,10 @@
 
 import { APIEvent } from "@solidjs/start/server";
 import { createYTOIndices } from "~/cypher/mutate/createYTOIndices";
-import {getUserFromSession} from "~/server/auth/session/getUserFromSession";
-import {checkRole} from "~/cypher/permissions/isPermission";
-import {SYSTEM_ROLES} from "~/cypher/permissions/type/types";
-import {getDBSessionForSubdomain} from "~/cypher/session/getSessionForSubdomain";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { checkRole } from "~/cypher/permissions/isPermission";
+import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 
 export async function POST(event: APIEvent) {
   try {
@@ -47,7 +47,6 @@ export async function POST(event: APIEvent) {
 
     const isAdmin = await checkRole(SYSTEM_ROLES.ADMIN, dbSession, user);
 
-
     if (!isAdmin) {
       return new Response(
         JSON.stringify({
@@ -68,7 +67,8 @@ export async function POST(event: APIEvent) {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "YTO indices created successfully. Check server logs for details.",
+        message:
+          "YTO indices created successfully. Check server logs for details.",
       }),
       {
         status: 200,

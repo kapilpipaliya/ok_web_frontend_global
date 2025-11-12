@@ -76,7 +76,9 @@ export async function sendEmailDirect(options: EmailOptions) {
 
       if (error) {
         console.error("Resend API error:", error);
-        throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
+        throw new Error(
+          `Resend API error: ${error.message || JSON.stringify(error)}`,
+        );
       }
 
       emailInfo = { messageId: data?.id };
@@ -293,7 +295,11 @@ async function saveEmailToDatabase(
         attachmentName: attachmentName || null,
         attachmentPath: attachmentPath || null,
         content,
-        from: dbSettings?.P.fromEmail || dbSettings?.P.from || process.env.SMTP_FROM || null,
+        from:
+          dbSettings?.P.fromEmail ||
+          dbSettings?.P.from ||
+          process.env.SMTP_FROM ||
+          null,
         messageId:
           emailInfo && "messageId" in emailInfo ? emailInfo.messageId : null,
         status: emailInfo ? "sent" : "failed",

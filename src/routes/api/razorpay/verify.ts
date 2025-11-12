@@ -4,7 +4,7 @@ import crypto from "crypto";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
-import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { logger } from "~/lib/logger";
 
 export async function POST({ request }: APIEvent) {
@@ -76,10 +76,7 @@ export async function POST({ request }: APIEvent) {
     );
 
     if (subscriptionResult.records.length === 0) {
-      throw new APIError(
-        "No pending subscription found for this order",
-        404,
-      );
+      throw new APIError("No pending subscription found for this order", 404);
     }
 
     const subscriptionNode = subscriptionResult.records[0].get("s");
@@ -138,7 +135,8 @@ export async function POST({ request }: APIEvent) {
         expiryDate: subscription.P.expiryDate,
         status: "active",
       },
-      message: "Payment verified successfully! Your subscription is now active.",
+      message:
+        "Payment verified successfully! Your subscription is now active.",
       timestamp: new Date().getTime(),
     };
   } catch (error) {

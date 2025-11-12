@@ -559,3 +559,11 @@ https://merchant.razorpay.com/policy/RdV79YatVmuWqr/contact_us
 
 Google Cloud Console
 https://console.cloud.google.com/
+
+
+  30. Add Integration with Monitoring Tools
+
+  - Prometheus metrics endpoint
+  - Grafana dashboard template
+  - DataDog integration
+  - CloudWatch alarms

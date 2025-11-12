@@ -14,8 +14,7 @@ import {
   buildSuccessResponse,
   createSchemaImportActivityLog,
 } from "~/lib/schema/importSchemas";
-import type {Session, Transaction} from "neo4j-driver";
-
+import type { Session, Transaction } from "neo4j-driver";
 
 async function validateUserAndPermissions(
   request: Request,
@@ -48,7 +47,12 @@ export async function GET({ request }: APIEvent) {
     const websiteSchemas = getWebsiteSchemasSync(websiteName);
 
     if (
-      !(((websiteSchemas.components ||websiteSchemas.pages ) ||websiteSchemas.themes ) ||websiteSchemas.functions)
+      !(
+        websiteSchemas.components ||
+        websiteSchemas.pages ||
+        websiteSchemas.themes ||
+        websiteSchemas.functions
+      )
     ) {
       throw new APIError(`No schemas found for website: ${websiteName}`, 404);
     }

@@ -37,9 +37,8 @@ import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
-import {getGlobalSettingVertex} from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
+import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { debounce } from "@solid-primitives/scheduled";
-
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -274,6 +273,6 @@ export function createFunctionArgumentBase(
     executeServerFunction,
     executeNamedServerFunction,
     floatingUI,
-    debounce
+    debounce,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

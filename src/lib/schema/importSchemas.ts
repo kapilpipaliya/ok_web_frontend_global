@@ -14,7 +14,7 @@ import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { createAppState } from "~/createAppState";
 import type { WebsiteSchemas } from "~/page_schema/loader";
-import {MutationArgs} from "~/cypher/types/MutationArgs";
+import { MutationArgs } from "~/cypher/types/MutationArgs";
 
 type GraphType = ReturnType<typeof createAppState>[0];
 type SetGraphType = ReturnType<typeof createAppState>[1];

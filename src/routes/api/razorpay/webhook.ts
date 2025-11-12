@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
-import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { logger } from "~/lib/logger";
 
 export async function POST({ request }: APIEvent) {
@@ -78,7 +78,10 @@ export async function POST({ request }: APIEvent) {
             },
           );
 
-          const subscription = result.records.length > 0 ? convertNodeToJson(result.records[0].get("s")) : null;
+          const subscription =
+            result.records.length > 0
+              ? convertNodeToJson(result.records[0].get("s"))
+              : null;
 
           // Log payment success
           logger.logPayment({
@@ -114,7 +117,10 @@ export async function POST({ request }: APIEvent) {
             },
           );
 
-          const subscription = result.records.length > 0 ? convertNodeToJson(result.records[0].get("s")) : null;
+          const subscription =
+            result.records.length > 0
+              ? convertNodeToJson(result.records[0].get("s"))
+              : null;
 
           // Log payment failure
           logger.logPayment({
@@ -160,7 +166,10 @@ export async function POST({ request }: APIEvent) {
             },
           );
 
-          const subscription = result.records.length > 0 ? convertNodeToJson(result.records[0].get("s")) : null;
+          const subscription =
+            result.records.length > 0
+              ? convertNodeToJson(result.records[0].get("s"))
+              : null;
 
           logger.logPayment({
             orderId: subscriptionId,

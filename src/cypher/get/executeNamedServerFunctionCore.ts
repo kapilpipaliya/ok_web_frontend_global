@@ -40,9 +40,10 @@ import {
 import {
   encryptToken,
   decryptToken,
-  decryptClientSecret, encryptClientSecret,
+  decryptClientSecret,
+  encryptClientSecret,
 } from "~/lib/auth/tokenEncryption";
-import {sendEmail} from "~/lib/playwright/sendEmail";
+import { sendEmail } from "~/lib/playwright/sendEmail";
 import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
 import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
 
@@ -128,9 +129,7 @@ export async function executeNamedServerFunctionCore(
     }
 
     // Create the async function from the body stored in the database
-    const AsyncFunction = Object.getPrototypeOf(
-      async () => {},
-    ).constructor;
+    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
     const serverFunction = new AsyncFunction("args", functionBody);
 
     // Create a context-aware executeNamedServerFunction that preserves session/subdomain
@@ -218,7 +217,7 @@ export async function executeNamedServerFunctionCore(
       // Backup/restore functions
       createDatabaseBackup,
       restoreFromBackup,
-      getDriver
+      getDriver,
     };
 
     // Execute the function

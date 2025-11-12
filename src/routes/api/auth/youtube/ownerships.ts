@@ -5,9 +5,9 @@
  * Used for populating ownership selectors and displaying connected accounts.
  */
 
-import { getUserFromSession } from '~/server/auth/session/getUserFromSession';
-import { getDBSessionForSubdomain } from '~/cypher/session/getSessionForSubdomain';
-import type {APIEvent} from "@solidjs/start/server";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import type { APIEvent } from "@solidjs/start/server";
 
 export async function GET(event: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(event.request);
@@ -20,12 +20,12 @@ export async function GET(event: APIEvent) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Not authenticated',
+          error: "Not authenticated",
         }),
         {
           status: 401,
-          headers: { 'Content-Type': 'application/json' },
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -44,17 +44,17 @@ export async function GET(event: APIEvent) {
              o.createdAt as createdAt
       ORDER BY o.isPrimary DESC, o.lastSelected DESC
       `,
-      { userId: user.P.uuid }
+      { userId: user.P.uuid },
     );
 
     const ownerships = result.records.map((record) => ({
-      ownershipId: record.get('ownershipId'),
-      channelName: record.get('channelName'),
-      customName: record.get('customName'),
-      channelId: record.get('channelId'),
-      isPrimary: record.get('isPrimary'),
-      lastSelected: record.get('lastSelected'),
-      createdAt: record.get('createdAt'),
+      ownershipId: record.get("ownershipId"),
+      channelName: record.get("channelName"),
+      customName: record.get("customName"),
+      channelId: record.get("channelId"),
+      isPrimary: record.get("isPrimary"),
+      lastSelected: record.get("lastSelected"),
+      createdAt: record.get("createdAt"),
     }));
 
     return new Response(
@@ -64,11 +64,11 @@ export async function GET(event: APIEvent) {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   } catch (error) {
-    console.error('Error getting YouTube ownerships:', error);
+    console.error("Error getting YouTube ownerships:", error);
 
     return new Response(
       JSON.stringify({
@@ -76,12 +76,12 @@ export async function GET(event: APIEvent) {
         error:
           error instanceof Error
             ? error.message
-            : 'Failed to get YouTube ownerships',
+            : "Failed to get YouTube ownerships",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   } finally {
     await dbSession.close();

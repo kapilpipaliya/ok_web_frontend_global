@@ -151,7 +151,8 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
         <CustomModal
           open={() => showNewModal()}
           setOpen={(open) => {
-            if (open) setShowNewModal(true); else handleClose();
+            if (open) setShowNewModal(true);
+            else handleClose();
           }}
           title={`Add New ${gridState.tableId}`}
           containerCss={`return \`._id {

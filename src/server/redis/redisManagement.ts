@@ -596,7 +596,10 @@ export async function deleteRedisKeys(pattern: string) {
       deleted: keys.length,
     };
   } catch (error: any) {
-    console.error(`[Redis] Error deleting keys with pattern ${pattern}:`, error);
+    console.error(
+      `[Redis] Error deleting keys with pattern ${pattern}:`,
+      error,
+    );
     return {
       success: false,
       error: error.message,
@@ -775,7 +778,8 @@ export async function getBackupStatus() {
       recentFailed.length > 0
         ? {
             id: recentFailed[0].id,
-            timestamp: recentFailed[0].finishedOn || recentFailed[0].processedOn,
+            timestamp:
+              recentFailed[0].finishedOn || recentFailed[0].processedOn,
             error: recentFailed[0].failedReason,
           }
         : null;
@@ -804,7 +808,9 @@ export async function getBackupStatus() {
           id: job.id,
           timestamp: job.finishedOn,
           duration:
-            job.finishedOn && job.processedOn ? job.finishedOn - job.processedOn : null,
+            job.finishedOn && job.processedOn
+              ? job.finishedOn - job.processedOn
+              : null,
           success: !job.failedReason,
         })),
       },

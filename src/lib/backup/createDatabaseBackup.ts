@@ -3,20 +3,20 @@
  * Creates complete Neo4j database backups, compresses them, and uploads to cloud storage
  */
 
-import fs from 'fs';
-import { promisify } from 'util';
-import path from 'path';
-import zlib from 'zlib';
-import { pipeline } from 'stream';
-import type { Session } from 'neo4j-driver';
-import { uploadBackupToCloud } from './uploadBackupToCloud';
-import { getDriver } from '~/cypher/core/driver';
+import fs from "fs";
+import { promisify } from "util";
+import path from "path";
+import zlib from "zlib";
+import { pipeline } from "stream";
+import type { Session } from "neo4j-driver";
+import { uploadBackupToCloud } from "./uploadBackupToCloud";
+import { getDriver } from "~/cypher/core/driver";
 
 const pipelineAsync = promisify(pipeline);
 
 export interface CreateBackupOptions {
   databaseName: string;
-  backupType?: 'daily' | 'weekly' | 'monthly' | 'manual';
+  backupType?: "daily" | "weekly" | "monthly" | "manual";
   jobId?: string;
   session?: Session;
 }
@@ -42,14 +42,14 @@ export interface BackupResult {
  * Creates a complete backup of a Neo4j database
  */
 export async function createDatabaseBackup(
-  options: CreateBackupOptions
+  options: CreateBackupOptions,
 ): Promise<BackupResult> {
-  const { databaseName, backupType = 'daily', jobId } = options;
+  const { databaseName, backupType = "daily", jobId } = options;
 
   if (!databaseName) {
     return {
       success: false,
-      error: 'Database name is required',
+      error: "Database name is required",
     };
   }
 
@@ -60,22 +60,16 @@ export async function createDatabaseBackup(
   const startTime = Date.now();
 
   // Create backup directory if it doesn't exist
-  const backupDir = path.join(process.cwd(), 'backups');
+  const backupDir = path.join(process.cwd(), "backups");
   if (!fs.existsSync(backupDir)) {
     fs.mkdirSync(backupDir, { recursive: true });
   }
 
   // Generate backup filename with timestamp
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[:.]/g, '-')
-    .split('T')[0] +
-    '-' +
-    new Date()
-      .toISOString()
-      .split('T')[1]
-      .substring(0, 6)
-      .replace(/:/g, '');
+  const timestamp =
+    new Date().toISOString().replace(/[:.]/g, "-").split("T")[0] +
+    "-" +
+    new Date().toISOString().split("T")[1].substring(0, 6).replace(/:/g, "");
   const backupFilename = `${databaseName}-${timestamp}-${backupType}.dump`;
   const compressedFilename = `${backupFilename}.gz`;
   const backupPath = path.join(backupDir, backupFilename);
@@ -85,7 +79,7 @@ export async function createDatabaseBackup(
     console.log(`[Backup] Starting backup for database: ${databaseName}`);
     console.log(`[Backup] Using APOC export for ${databaseName}`);
 
-    const backupMethod = 'apoc';
+    const backupMethod = "apoc";
 
     // Use APOC export with just the filename (not full path)
     // Neo4j will write to its configured import/export directory
@@ -96,20 +90,23 @@ export async function createDatabaseBackup(
         useOptimizations: { type: 'UNWIND_BATCH', unwindBatchSize: 20 }
       })
       `,
-      { filename: backupFilename }
+      { filename: backupFilename },
     );
 
     console.log(`[Backup] APOC export completed for ${databaseName}`);
 
     // APOC writes to Neo4j's import directory, we need to find and copy the file
-    const neo4jImportDir = process.env.NEO4J_IMPORT_DIR || '/var/lib/neo4j/import';
+    const neo4jImportDir =
+      process.env.NEO4J_IMPORT_DIR || "/var/lib/neo4j/import";
     const apocExportPath = path.join(neo4jImportDir, backupFilename);
 
     console.log(`[Backup] Looking for APOC export file at: ${apocExportPath}`);
 
     // Check if file exists in Neo4j import directory
     if (!fs.existsSync(apocExportPath)) {
-      throw new Error(`APOC export file not found at ${apocExportPath}. Check Neo4j import directory configuration.`);
+      throw new Error(
+        `APOC export file not found at ${apocExportPath}. Check Neo4j import directory configuration.`,
+      );
     }
 
     // Copy the file from Neo4j import directory to our backup directory
@@ -118,7 +115,9 @@ export async function createDatabaseBackup(
 
     // Delete the file from Neo4j import directory
     fs.unlinkSync(apocExportPath);
-    console.log(`[Backup] Cleaned up APOC export file from Neo4j import directory`);
+    console.log(
+      `[Backup] Cleaned up APOC export file from Neo4j import directory`,
+    );
 
     // Get backup file size
     const stats = fs.statSync(backupPath);
@@ -133,7 +132,7 @@ export async function createDatabaseBackup(
     await pipelineAsync(
       fs.createReadStream(backupPath),
       zlib.createGzip({ level: 9 }),
-      fs.createWriteStream(compressedPath)
+      fs.createWriteStream(compressedPath),
     );
 
     console.log(`[Backup] Compression complete: ${compressedPath}`);
@@ -141,10 +140,17 @@ export async function createDatabaseBackup(
     // Get compressed file size
     const compressedStats = fs.statSync(compressedPath);
     const compressedSizeInBytes = compressedStats.size;
-    const compressedSizeInMB = (compressedSizeInBytes / (1024 * 1024)).toFixed(2);
-    const compressionRatio = ((1 - compressedSizeInBytes / fileSizeInBytes) * 100).toFixed(2);
+    const compressedSizeInMB = (compressedSizeInBytes / (1024 * 1024)).toFixed(
+      2,
+    );
+    const compressionRatio = (
+      (1 - compressedSizeInBytes / fileSizeInBytes) *
+      100
+    ).toFixed(2);
 
-    console.log(`[Backup] Compressed size: ${compressedSizeInMB} MB (${compressionRatio}% reduction)`);
+    console.log(
+      `[Backup] Compressed size: ${compressedSizeInMB} MB (${compressionRatio}% reduction)`,
+    );
 
     // Upload to cloud storage
     console.log(`[Backup] Uploading to cloud storage...`);
@@ -160,12 +166,14 @@ export async function createDatabaseBackup(
         compressionRatio,
         backupMethod,
         timestamp,
-        jobId: jobId || '',
+        jobId: jobId || "",
       },
     });
 
     if (!uploadResult.success) {
-      throw new Error(`Upload failed: ${uploadResult.error || 'Unknown error'}`);
+      throw new Error(
+        `Upload failed: ${uploadResult.error || "Unknown error"}`,
+      );
     }
 
     console.log(`[Backup] Upload complete for ${databaseName}`);
@@ -188,12 +196,12 @@ export async function createDatabaseBackup(
       data: {
         databaseName,
         filename: compressedFilename,
-        size: compressedSizeInMB + ' MB',
-        originalSize: fileSizeInMB + ' MB',
-        compressionRatio: compressionRatio + '%',
+        size: compressedSizeInMB + " MB",
+        originalSize: fileSizeInMB + " MB",
+        compressionRatio: compressionRatio + "%",
         backupMethod,
         uploadedAt: new Date().toISOString(),
-        duration: Math.round(duration / 1000) + 's',
+        duration: Math.round(duration / 1000) + "s",
         cloudUrl: uploadResult.data?.url,
       },
     };
@@ -213,13 +221,13 @@ export async function createDatabaseBackup(
       error: error.message,
       data: {
         databaseName,
-        filename: '',
-        size: '',
-        originalSize: '',
-        compressionRatio: '',
-        backupMethod: '',
-        uploadedAt: '',
-        duration: '',
+        filename: "",
+        size: "",
+        originalSize: "",
+        compressionRatio: "",
+        backupMethod: "",
+        uploadedAt: "",
+        duration: "",
       },
     };
   } finally {

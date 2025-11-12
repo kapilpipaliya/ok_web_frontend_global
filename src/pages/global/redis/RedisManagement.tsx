@@ -55,12 +55,15 @@ export function RedisManagement() {
   // Pagination state
   const [currentPage, setCurrentPage] = createSignal(1);
   const [pageSize, setPageSize] = createSignal(
-    parseInt(localStorage.getItem("redisJobPageSize") || "50")
+    parseInt(localStorage.getItem("redisJobPageSize") || "50"),
   );
 
   // Search and filter state
   const [jobSearchQuery, setJobSearchQuery] = createSignal("");
-  const [attemptFilter, setAttemptFilter] = createSignal<{ min?: number; max?: number }>({});
+  const [attemptFilter, setAttemptFilter] = createSignal<{
+    min?: number;
+    max?: number;
+  }>({});
 
   // Bulk selection state
   const [selectedJobs, setSelectedJobs] = createSignal<Set<string>>(new Set());
@@ -335,17 +338,25 @@ export function RedisManagement() {
       if (searchQuery) {
         const matchesId = job.id.toLowerCase().includes(searchQuery);
         const matchesName = job.name.toLowerCase().includes(searchQuery);
-        const matchesData = JSON.stringify(job.data).toLowerCase().includes(searchQuery);
+        const matchesData = JSON.stringify(job.data)
+          .toLowerCase()
+          .includes(searchQuery);
         if (!matchesId && !matchesName && !matchesData) {
           return false;
         }
       }
 
       // Attempt count filter
-      if (attemptFilters.min !== undefined && (job.attemptsMade || 0) < attemptFilters.min) {
+      if (
+        attemptFilters.min !== undefined &&
+        (job.attemptsMade || 0) < attemptFilters.min
+      ) {
         return false;
       }
-      if (attemptFilters.max !== undefined && (job.attemptsMade || 0) > attemptFilters.max) {
+      if (
+        attemptFilters.max !== undefined &&
+        (job.attemptsMade || 0) > attemptFilters.max
+      ) {
         return false;
       }
 
@@ -702,7 +713,9 @@ export function RedisManagement() {
 }\`;`}
                     onClick={() => handleToggleQueue(queue.name)}
                   >
-                    <As as="span">{expandedQueue() === queue.name ? "▼" : "▶"}</As>
+                    <As as="span">
+                      {expandedQueue() === queue.name ? "▼" : "▶"}
+                    </As>
                     <As as="span">{queue.name}</As>
                   </As>
                   <As as="div">{queue.waiting}</As>
@@ -875,7 +888,9 @@ export function RedisManagement() {
                             <Show when={selectedState() === "failed"}>
                               <As
                                 as="button"
-                                onClick={() => setConfirmAction(`bulkRetry:${queue.name}`)}
+                                onClick={() =>
+                                  setConfirmAction(`bulkRetry:${queue.name}`)
+                                }
                                 css={`return \`._id {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
@@ -896,7 +911,9 @@ export function RedisManagement() {
                             </Show>
                             <As
                               as="button"
-                              onClick={() => setConfirmAction(`bulkDelete:${queue.name}`)}
+                              onClick={() =>
+                                setConfirmAction(`bulkDelete:${queue.name}`)
+                              }
                               css={`return \`._id {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
@@ -954,7 +971,9 @@ export function RedisManagement() {
                           type="text"
                           placeholder="Search by job ID, name, or data..."
                           value={jobSearchQuery()}
-                          onInput={(e) => setJobSearchQuery(e.currentTarget.value)}
+                          onInput={(e) =>
+                            setJobSearchQuery(e.currentTarget.value)
+                          }
                           css={`return \`._id {
   flex: 1;
   min-width: 250px;
@@ -978,7 +997,9 @@ export function RedisManagement() {
                           onInput={(e) =>
                             setAttemptFilter((prev) => ({
                               ...prev,
-                              min: e.currentTarget.value ? parseInt(e.currentTarget.value) : undefined,
+                              min: e.currentTarget.value
+                                ? parseInt(e.currentTarget.value)
+                                : undefined,
                             }))
                           }
                           css={`return \`._id {
@@ -1003,7 +1024,9 @@ export function RedisManagement() {
                           onInput={(e) =>
                             setAttemptFilter((prev) => ({
                               ...prev,
-                              max: e.currentTarget.value ? parseInt(e.currentTarget.value) : undefined,
+                              max: e.currentTarget.value
+                                ? parseInt(e.currentTarget.value)
+                                : undefined,
                             }))
                           }
                           css={`return \`._id {
@@ -1020,7 +1043,13 @@ export function RedisManagement() {
   border-color: \${args.theme.var.color.primary};
 }\`;`}
                         />
-                        <Show when={jobSearchQuery() || attemptFilter().min || attemptFilter().max}>
+                        <Show
+                          when={
+                            jobSearchQuery() ||
+                            attemptFilter().min ||
+                            attemptFilter().max
+                          }
+                        >
                           <As
                             as="button"
                             onClick={() => {
@@ -1046,7 +1075,12 @@ export function RedisManagement() {
                             Clear Filters
                           </As>
                         </Show>
-                        <Show when={filteredJobs().length !== (jobs()?.data?.length || 0)}>
+                        <Show
+                          when={
+                            filteredJobs().length !==
+                            (jobs()?.data?.length || 0)
+                          }
+                        >
                           <As
                             as="div"
                             css={`return \`._id {
@@ -1055,7 +1089,8 @@ export function RedisManagement() {
   white-space: nowrap;
 }\`;`}
                           >
-                            {filteredJobs().length} of {jobs()?.data?.length || 0} jobs
+                            {filteredJobs().length} of{" "}
+                            {jobs()?.data?.length || 0} jobs
                           </As>
                         </Show>
                       </As>
@@ -1070,7 +1105,17 @@ export function RedisManagement() {
   border-bottom: 2px solid \${args.theme.var.color.border};
 }\`;`}
                       >
-                        <For each={["waiting", "active", "completed", "failed", "delayed"] as const}>
+                        <For
+                          each={
+                            [
+                              "waiting",
+                              "active",
+                              "completed",
+                              "failed",
+                              "delayed",
+                            ] as const
+                          }
+                        >
                           {(state) => (
                             <As
                               as="button"
@@ -1161,10 +1206,16 @@ export function RedisManagement() {
                                 type="checkbox"
                                 checked={
                                   filteredJobs().length > 0 &&
-                                  filteredJobs().every((j) => selectedJobs().has(j.id))
+                                  filteredJobs().every((j) =>
+                                    selectedJobs().has(j.id),
+                                  )
                                 }
                                 onChange={() => {
-                                  if (filteredJobs().every((j) => selectedJobs().has(j.id))) {
+                                  if (
+                                    filteredJobs().every((j) =>
+                                      selectedJobs().has(j.id),
+                                    )
+                                  ) {
                                     handleDeselectAll();
                                   } else {
                                     handleSelectAll();
@@ -1208,7 +1259,9 @@ export function RedisManagement() {
                                     as="input"
                                     type="checkbox"
                                     checked={selectedJobs().has(job.id)}
-                                    onChange={() => handleToggleJobSelection(job.id)}
+                                    onChange={() =>
+                                      handleToggleJobSelection(job.id)
+                                    }
                                     css={`return \`._id {
   width: 18px;
   height: 18px;
@@ -1260,9 +1313,7 @@ export function RedisManagement() {
                                   >
                                     {formatTimestamp(job.timestamp)}
                                   </As>
-                                  <As as="div">
-                                    {job.attemptsMade || 0}
-                                  </As>
+                                  <As as="div">{job.attemptsMade || 0}</As>
                                   <As
                                     as="div"
                                     css={`return \`._id {
@@ -1293,7 +1344,9 @@ export function RedisManagement() {
                                     <Show when={selectedState() === "failed"}>
                                       <As
                                         as="button"
-                                        onClick={() => handleRetryJob(queue.name, job.id)}
+                                        onClick={() =>
+                                          handleRetryJob(queue.name, job.id)
+                                        }
                                         css={`return \`._id {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
@@ -1314,7 +1367,9 @@ export function RedisManagement() {
                                     </Show>
                                     <As
                                       as="button"
-                                      onClick={() => handleDeleteJob(queue.name, job.id)}
+                                      onClick={() =>
+                                        handleDeleteJob(queue.name, job.id)
+                                      }
                                       css={`return \`._id {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
@@ -1364,13 +1419,20 @@ export function RedisManagement() {
                             >
                               <As as="span">
                                 Showing {(currentPage() - 1) * pageSize() + 1}-
-                                {Math.min(currentPage() * pageSize(), jobCount()?.count || 0)} of{" "}
-                                {jobCount()?.count || 0} jobs
+                                {Math.min(
+                                  currentPage() * pageSize(),
+                                  jobCount()?.count || 0,
+                                )}{" "}
+                                of {jobCount()?.count || 0} jobs
                               </As>
                               <As
                                 as="select"
                                 value={pageSize()}
-                                onChange={(e) => handlePageSizeChange(parseInt(e.currentTarget.value))}
+                                onChange={(e) =>
+                                  handlePageSizeChange(
+                                    parseInt(e.currentTarget.value),
+                                  )
+                                }
                                 css={`return \`._id {
   padding: 0.375rem 0.75rem;
   border: 1px solid \${args.theme.var.color.border};
@@ -1385,10 +1447,18 @@ export function RedisManagement() {
   border-color: \${args.theme.var.color.primary};
 }\`;`}
                               >
-                                <As as="option" value="25">25 per page</As>
-                                <As as="option" value="50">50 per page</As>
-                                <As as="option" value="100">100 per page</As>
-                                <As as="option" value="200">200 per page</As>
+                                <As as="option" value="25">
+                                  25 per page
+                                </As>
+                                <As as="option" value="50">
+                                  50 per page
+                                </As>
+                                <As as="option" value="100">
+                                  100 per page
+                                </As>
+                                <As as="option" value="200">
+                                  200 per page
+                                </As>
                               </As>
                             </As>
                             <As
@@ -1434,13 +1504,18 @@ export function RedisManagement() {
 }\`;`}
                               >
                                 Page {currentPage()} of{" "}
-                                {Math.ceil((jobCount()?.count || 0) / pageSize())}
+                                {Math.ceil(
+                                  (jobCount()?.count || 0) / pageSize(),
+                                )}
                               </As>
                               <As
                                 as="button"
                                 onClick={handleNextPage}
                                 disabled={
-                                  currentPage() >= Math.ceil((jobCount()?.count || 0) / pageSize())
+                                  currentPage() >=
+                                  Math.ceil(
+                                    (jobCount()?.count || 0) / pageSize(),
+                                  )
                                 }
                                 css={`return \`._id {
   padding: 0.5rem 1rem;
@@ -1528,11 +1603,16 @@ export function RedisManagement() {
   color: \${args.theme.var.color.muted};
 }\`;`}
                 >
-                  {type === "delete" && `Are you sure you want to delete queue "${queueName}"? This action cannot be undone.`}
-                  {type === "empty" && `Are you sure you want to empty all jobs from queue "${queueName}"?`}
-                  {type === "deleteKeys" && `Are you sure you want to delete all keys matching pattern "${searchPattern()}"?`}
-                  {type === "bulkDelete" && `Are you sure you want to delete ${selectedJobs().size} selected job(s)? This action cannot be undone.`}
-                  {type === "bulkRetry" && `Are you sure you want to retry ${selectedJobs().size} selected failed job(s)?`}
+                  {type === "delete" &&
+                    `Are you sure you want to delete queue "${queueName}"? This action cannot be undone.`}
+                  {type === "empty" &&
+                    `Are you sure you want to empty all jobs from queue "${queueName}"?`}
+                  {type === "deleteKeys" &&
+                    `Are you sure you want to delete all keys matching pattern "${searchPattern()}"?`}
+                  {type === "bulkDelete" &&
+                    `Are you sure you want to delete ${selectedJobs().size} selected job(s)? This action cannot be undone.`}
+                  {type === "bulkRetry" &&
+                    `Are you sure you want to retry ${selectedJobs().size} selected failed job(s)?`}
                 </As>
                 <As
                   as="div"
@@ -1770,7 +1850,9 @@ export function RedisManagement() {
   font-weight: 500;
 }\`;`}
                         >
-                          {job.timestamp ? new Date(job.timestamp).toLocaleString() : "N/A"}
+                          {job.timestamp
+                            ? new Date(job.timestamp).toLocaleString()
+                            : "N/A"}
                         </As>
                         <As
                           as="div"
@@ -1890,7 +1972,13 @@ export function RedisManagement() {
   font-size: 0.875rem;
 }\`;`}
                     >
-                      Attempts Made: <As as="span" css={`return \`._id { font-weight: 600; }\`;`}>{job.attemptsMade || 0}</As>
+                      Attempts Made:{" "}
+                      <As
+                        as="span"
+                        css={`return \`._id { font-weight: 600; }\`;`}
+                      >
+                        {job.attemptsMade || 0}
+                      </As>
                     </As>
                   </As>
 

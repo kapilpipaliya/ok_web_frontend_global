@@ -114,7 +114,7 @@ return `._id {
         props: '''
 return {
   as: "img",
-  src: "https://ytorganizer.localhost.com:3001/api/file/download/big_logo_white.png",
+  src: "/api/file/download/big_logo_white.png",
   alt: "YT Organizer Logo"
 };
 ''',

@@ -4,14 +4,14 @@
  * USE WITH CAUTION - This deletes all existing data in the target database
  */
 
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
-import zlib from 'zlib';
-import { pipeline } from 'stream';
-import { downloadBackupFromCloud } from './downloadBackupFromCloud';
-import { getDriver } from '~/cypher/core/driver';
-import {stopWorkersForSubdomain} from "~/server/queue/initWorkersCore";
+import fs from "fs";
+import path from "path";
+import { promisify } from "util";
+import zlib from "zlib";
+import { pipeline } from "stream";
+import { downloadBackupFromCloud } from "./downloadBackupFromCloud";
+import { getDriver } from "~/cypher/core/driver";
+import { stopWorkersForSubdomain } from "~/server/queue/initWorkersCore";
 
 const pipelineAsync = promisify(pipeline);
 
@@ -50,7 +50,7 @@ export interface RestoreResult {
  * Restores a database from a backup file
  */
 export async function restoreFromBackup(
-  options: RestoreFromBackupOptions
+  options: RestoreFromBackupOptions,
 ): Promise<RestoreResult> {
   const {
     filename,
@@ -65,14 +65,14 @@ export async function restoreFromBackup(
   if (!filename) {
     return {
       success: false,
-      error: 'filename is required',
+      error: "filename is required",
     };
   }
 
   if (!sourceDatabaseName) {
     return {
       success: false,
-      error: 'sourceDatabaseName is required',
+      error: "sourceDatabaseName is required",
     };
   }
 
@@ -82,13 +82,14 @@ export async function restoreFromBackup(
   if (!confirmed) {
     return {
       success: false,
-      error: 'Restore operation requires explicit confirmation',
+      error: "Restore operation requires explicit confirmation",
       data: {
         sourceBackup: filename,
         sourceDatabaseName,
         targetDatabaseName: restoreToDatabase,
-        warning: 'This operation will DELETE all existing data in the target database!',
-        requiredAction: 'Set confirmed: true to proceed',
+        warning:
+          "This operation will DELETE all existing data in the target database!",
+        requiredAction: "Set confirmed: true to proceed",
       },
     };
   }
@@ -98,9 +99,9 @@ export async function restoreFromBackup(
   console.log(`[Restore] Target database: ${restoreToDatabase}`);
 
   const startTime = Date.now();
-  const restoreDir = path.join(process.cwd(), 'restore');
+  const restoreDir = path.join(process.cwd(), "restore");
   const compressedPath = path.join(restoreDir, filename);
-  const decompressedPath = compressedPath.replace('.gz', '');
+  const decompressedPath = compressedPath.replace(".gz", "");
 
   try {
     // Step 1: Create restore directory
@@ -118,10 +119,14 @@ export async function restoreFromBackup(
     });
 
     if (!downloadResult.success) {
-      throw new Error(`Download failed: ${downloadResult.error || 'Unknown error'}`);
+      throw new Error(
+        `Download failed: ${downloadResult.error || "Unknown error"}`,
+      );
     }
 
-    console.log(`[Restore] Download complete: ${downloadResult.data?.sizeFormatted}`);
+    console.log(
+      `[Restore] Download complete: ${downloadResult.data?.sizeFormatted}`,
+    );
 
     // Step 3: Decompress backup file
     console.log(`[Restore] Step 2/6: Decompressing backup file...`);
@@ -129,14 +134,18 @@ export async function restoreFromBackup(
     await pipelineAsync(
       fs.createReadStream(compressedPath),
       zlib.createGunzip(),
-      fs.createWriteStream(decompressedPath)
+      fs.createWriteStream(decompressedPath),
     );
 
     const decompressedSize = fs.statSync(decompressedPath).size;
-    console.log(`[Restore] Decompression complete: ${(decompressedSize / (1024 * 1024)).toFixed(2)} MB`);
+    console.log(
+      `[Restore] Decompression complete: ${(decompressedSize / (1024 * 1024)).toFixed(2)} MB`,
+    );
 
     // Step 4: Stop workers for target database
-    console.log(`[Restore] Step 3/6: Stopping workers for database: ${restoreToDatabase}...`);
+    console.log(
+      `[Restore] Step 3/6: Stopping workers for database: ${restoreToDatabase}...`,
+    );
 
     try {
       // Dynamic import to avoid circular dependencies
@@ -148,12 +157,14 @@ export async function restoreFromBackup(
     }
 
     // Step 5: Drop and recreate database
-    console.log(`[Restore] Step 4/6: Dropping existing database: ${restoreToDatabase}...`);
+    console.log(
+      `[Restore] Step 4/6: Dropping existing database: ${restoreToDatabase}...`,
+    );
 
     // CRITICAL: This deletes all data in the target database
     // Create a system session for database management operations
     const driver = await getDriver();
-    const systemSession = driver.session({ database: 'system' });
+    const systemSession = driver.session({ database: "system" });
 
     try {
       await systemSession.run(`DROP DATABASE ${restoreToDatabase} IF EXISTS`);
@@ -163,7 +174,9 @@ export async function restoreFromBackup(
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Create new empty database
-      await systemSession.run(`CREATE DATABASE ${restoreToDatabase} IF NOT EXISTS`);
+      await systemSession.run(
+        `CREATE DATABASE ${restoreToDatabase} IF NOT EXISTS`,
+      );
       console.log(`[Restore] New database created`);
 
       // Wait for database to be ready
@@ -178,14 +191,16 @@ export async function restoreFromBackup(
     console.log(`[Restore] Step 5/6: Restoring data from backup...`);
 
     // Read the backup file
-    const backupContent = fs.readFileSync(decompressedPath, 'utf8');
+    const backupContent = fs.readFileSync(decompressedPath, "utf8");
 
     // Create a session for the target database
     const targetSession = driver.session({ database: restoreToDatabase });
 
     try {
       // Split backup into individual statements
-      const statements = backupContent.split(';\n').filter((stmt) => stmt.trim());
+      const statements = backupContent
+        .split(";\n")
+        .filter((stmt) => stmt.trim());
 
       console.log(`[Restore] Found ${statements.length} statements to execute`);
 
@@ -205,24 +220,30 @@ export async function restoreFromBackup(
           } catch (stmtError: any) {
             failedCount++;
             errors.push({
-              statement: statement.substring(0, 100) + '...',
+              statement: statement.substring(0, 100) + "...",
               error: stmtError.message,
             });
 
             // Stop if too many errors
             if (failedCount > 10) {
-              throw new Error(`Too many errors during restore (${failedCount}). Stopping.`);
+              throw new Error(
+                `Too many errors during restore (${failedCount}). Stopping.`,
+              );
             }
           }
         }
 
         // Progress update every 1000 statements
         if (i % 1000 === 0 && i > 0) {
-          console.log(`[Restore] Progress: ${i}/${statements.length} statements`);
+          console.log(
+            `[Restore] Progress: ${i}/${statements.length} statements`,
+          );
         }
       }
 
-      console.log(`[Restore] Restore complete: ${executedCount} statements executed, ${failedCount} failed`);
+      console.log(
+        `[Restore] Restore complete: ${executedCount} statements executed, ${failedCount} failed`,
+      );
 
       if (failedCount > 0) {
         console.warn(`[Restore] Errors during restore:`, errors);
@@ -232,10 +253,14 @@ export async function restoreFromBackup(
     }
 
     // Step 7: Restart workers
-    console.log(`[Restore] Step 6/6: Restarting workers for database: ${restoreToDatabase}...`);
+    console.log(
+      `[Restore] Step 6/6: Restarting workers for database: ${restoreToDatabase}...`,
+    );
 
     try {
-      const { initSubdomainWorkersForSubdomain } = await import('~/server/queue/initWorkersCore');
+      const { initSubdomainWorkersForSubdomain } = await import(
+        "~/server/queue/initWorkersCore"
+      );
       await initSubdomainWorkersForSubdomain(restoreToDatabase);
       console.log(`[Restore] Workers restarted successfully`);
     } catch (workerError) {
@@ -254,11 +279,14 @@ export async function restoreFromBackup(
 
     const duration = Date.now() - startTime;
 
-    console.log(`[Restore] ✅ Restore completed successfully in ${Math.round(duration / 1000)}s`);
+    console.log(
+      `[Restore] ✅ Restore completed successfully in ${Math.round(duration / 1000)}s`,
+    );
 
     // Send notification email
     try {
-      const alertEmail = process.env.BACKUP_ALERT_EMAIL || process.env.ADMIN_EMAIL;
+      const alertEmail =
+        process.env.BACKUP_ALERT_EMAIL || process.env.ADMIN_EMAIL;
       if (alertEmail && sendEmail) {
         await sendEmail({
           to: alertEmail,
@@ -287,7 +315,7 @@ export async function restoreFromBackup(
                     </tr>
                     <tr>
                       <td style="padding: 8px; color: #6b7280;">Completed At:</td>
-                      <td style="padding: 8px; color: #111827; font-weight: 600;">${new Date().toLocaleString('en-US', { timeZone: 'UTC' })} UTC</td>
+                      <td style="padding: 8px; color: #111827; font-weight: 600;">${new Date().toLocaleString("en-US", { timeZone: "UTC" })} UTC</td>
                     </tr>
                   </table>
                 </div>
@@ -307,7 +335,7 @@ export async function restoreFromBackup(
         sourceBackup: filename,
         sourceDatabaseName,
         targetDatabaseName: restoreToDatabase,
-        duration: Math.round(duration / 1000) + 's',
+        duration: Math.round(duration / 1000) + "s",
         restoredAt: new Date().toISOString(),
       },
     };
@@ -324,7 +352,8 @@ export async function restoreFromBackup(
 
     // Send failure notification
     try {
-      const alertEmail = process.env.BACKUP_ALERT_EMAIL || process.env.ADMIN_EMAIL;
+      const alertEmail =
+        process.env.BACKUP_ALERT_EMAIL || process.env.ADMIN_EMAIL;
       if (alertEmail && sendEmail) {
         await sendEmail({
           to: alertEmail,
@@ -352,7 +381,7 @@ export async function restoreFromBackup(
                     </tr>
                     <tr>
                       <td style="padding: 8px; color: #6b7280;">Failed At:</td>
-                      <td style="padding: 8px; color: #111827; font-weight: 600;">${new Date().toLocaleString('en-US', { timeZone: 'UTC' })} UTC</td>
+                      <td style="padding: 8px; color: #111827; font-weight: 600;">${new Date().toLocaleString("en-US", { timeZone: "UTC" })} UTC</td>
                     </tr>
                   </table>
                 </div>
@@ -362,7 +391,10 @@ export async function restoreFromBackup(
         });
       }
     } catch (emailError) {
-      console.error(`[Restore] Failed to send failure notification:`, emailError);
+      console.error(
+        `[Restore] Failed to send failure notification:`,
+        emailError,
+      );
     }
 
     return {

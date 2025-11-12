@@ -365,9 +365,7 @@ export async function initSubdomainWorkersForSubdomain(subdomain: string) {
       await dbSession.close();
     }
 
-    console.log(
-      `[Workers] Worker initialization complete for ${subdomain}`,
-    );
+    console.log(`[Workers] Worker initialization complete for ${subdomain}`);
   })();
 
   // Store the promise
@@ -394,9 +392,7 @@ export async function initAllSubdomainWorkers() {
       ORDER BY s.key
     `);
 
-    const subdomains = result.records.map((record) =>
-      record.get("subdomain"),
-    );
+    const subdomains = result.records.map((record) => record.get("subdomain"));
 
     console.log(
       `[Workers] Found ${subdomains.length} subdomains: ${subdomains.join(", ")}`,

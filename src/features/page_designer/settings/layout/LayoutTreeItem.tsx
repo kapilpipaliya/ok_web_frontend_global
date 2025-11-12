@@ -219,9 +219,11 @@ export function LayoutTreeItem(
     }
 
     if (isSelectedLayoutId(props.metaVertex.id)) {
-      boxShadow += " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
+      boxShadow +=
+        " background-color:${args.theme.var.color.primary_light_300}; color:${args.theme.var.color.primary_light_300_text};";
     } else if (isSelectedHoverId(props.metaVertex.id)) {
-      boxShadow += " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
+      boxShadow +=
+        " background-color:${args.theme.var.color.primary_light_750}; color:${args.theme.var.color.primary_light_750_text};";
     }
 
     return boxShadow;
