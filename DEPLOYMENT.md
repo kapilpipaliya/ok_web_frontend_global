@@ -1,6 +1,20 @@
 # Zero-Downtime Deployment Guide
 
-This guide explains how to deploy updates without taking your application offline.
+This guide explains how to deploy updates without taking your application offline using PM2 with cluster mode.
+
+## Overview
+
+**PM2 Configuration:**
+- **File:** `ecosystem.config.cjs` (CommonJS with JSDoc type annotations)
+- **Environment Loading:** Uses `require('dotenv')` to load `.env` file
+- **Instances:** 2 processes in cluster mode for zero-downtime deployments
+- **Type Safety:** JSDoc annotations provide TypeScript autocomplete without compilation
+
+**Key Commands:**
+- `npm run pm2:start` - Initial deployment (pull, install, build, start)
+- `npm run deploy` - Update deployment (pull, install, build, reload with zero downtime)
+- `npm run pm2:reload` - Gracefully reload without downtime
+- `npm run pm2:logs` - View application logs
 
 ## Quick Start
 
@@ -11,11 +25,16 @@ This guide explains how to deploy updates without taking your application offlin
    npm install -g pm2
    ```
 
-2. **Build and start the application:**
+2. **Initial deployment (pulls code, installs deps, builds, and starts PM2):**
    ```bash
-   npm run build
    npm run pm2:start
    ```
+
+   This command will:
+   - Pull latest code from git
+   - Install dependencies
+   - Build the application
+   - Start PM2 with 2 instances in cluster mode
 
 3. **Save PM2 process list (optional - for auto-restart on server reboot):**
    ```bash
@@ -34,7 +53,7 @@ npm run deploy
 
 This single command will:
 1. Pull latest code from git
-2. Install dependencies
+2. Install dependencies with `--force`
 3. Build the application
 4. Gracefully reload PM2 instances (zero downtime)
 
@@ -153,6 +172,47 @@ Edit `ecosystem.config.cjs` to customize:
 - **kill_timeout:** How long to wait for graceful shutdown
 - **env:** Environment variables
 
+### Environment Variables
+
+The ecosystem config automatically loads environment variables from `.env` file using `require('dotenv')`:
+
+```javascript
+// ecosystem.config.cjs
+// @ts-check
+
+// Load environment variables from .env file
+require('dotenv').config({ path: '.env' });
+
+/**
+ * PM2 Ecosystem Configuration
+ * @type {import('pm2').StartOptions}
+ */
+module.exports = {
+  apps: [{
+    env: {
+      ...process.env,  // All .env variables loaded here
+      NODE_ENV: process.env.NODE_ENV || "production",
+      PORT: process.env.DOMAIN_PORT || 3001,
+    },
+    // ... other config
+  }]
+};
+```
+
+All environment variables from `.env` are automatically passed to PM2 processes, including:
+- `NODE_ENV`
+- `DOMAIN_PORT`
+- `NEO4J_USERNAME`, `NEO4J_PASSWORD`
+- `REDIS_HOST`, `REDIS_PORT`
+- `OPENROUTER_API_KEY`
+- `SMTP_*` variables
+- `RAZORPAY_*` variables
+- All other variables defined in `.env`
+
+**Note:** The config file uses JSDoc type annotations (`@type {import('pm2').StartOptions}`) to provide TypeScript autocomplete and type checking in VS Code without requiring TypeScript compilation.
+
+Make sure `.env` file exists before starting PM2.
+
 ## Alternative Approaches
 
 ### Option 2: Docker with Rolling Updates
@@ -245,13 +305,15 @@ pm2 start ecosystem.config.cjs
 
 ## Production Checklist
 
-- [ ] PM2 installed globally
+- [ ] PM2 installed globally (`npm install -g pm2`)
+- [ ] `.env` file exists with all required environment variables
 - [ ] Ecosystem config set to 2+ instances
-- [ ] PM2 startup script configured for auto-restart
+- [ ] PM2 startup script configured for auto-restart (`pm2 startup`)
 - [ ] Logs directory exists: `mkdir -p logs`
-- [ ] Environment variables loaded correctly
+- [ ] Environment variables loaded correctly (verify with `pm2 env 0`)
 - [ ] Test reload command before production use
-- [ ] Monitor memory usage after deployment
+- [ ] Monitor memory usage after deployment (`pm2 monit`)
+- [ ] Save PM2 process list (`pm2 save`)
 - [ ] Set up PM2 keymetrics for monitoring (optional)
 
 ## Best Practices
@@ -259,10 +321,12 @@ pm2 start ecosystem.config.cjs
 1. **Always use `pm2 reload` for zero downtime** (not `restart`)
 2. **Run at least 2 instances** to enable graceful reload
 3. **Test builds locally** before deploying to production
-4. **Monitor logs** during and after deployment
+4. **Monitor logs** during and after deployment (`npm run pm2:logs`)
 5. **Keep PM2 updated:** `npm update -g pm2`
 6. **Use PM2 ecosystem file** for consistent configuration
 7. **Set up health checks** if using load balancer
+8. **Use JSDoc type annotations** for type safety without TypeScript compilation
+9. **Always ensure `.env` file exists** before starting PM2
 
 ## References
 
