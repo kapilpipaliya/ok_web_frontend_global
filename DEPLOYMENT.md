@@ -74,8 +74,8 @@ pm2 logs ok-web-frontend --lines 100
 pm2 flush
 
 # Stop and restart with new config
-pm2 delete ecosystem.config.js
-pm2 start ecosystem.config.js
+pm2 delete ecosystem.config.cjs
+pm2 start ecosystem.config.cjs
 
 # Scale to more instances
 pm2 scale ok-web-frontend 4
@@ -146,7 +146,7 @@ Each request will be handled by a different worker (you'll see different process
 
 ## Configuration
 
-Edit `ecosystem.config.js` to customize:
+Edit `ecosystem.config.cjs` to customize:
 
 - **instances:** Number of processes (2 recommended, or "max" for all CPU cores)
 - **max_memory_restart:** Auto-restart if memory exceeds limit
@@ -229,7 +229,7 @@ npm run pm2:start
 # Monitor memory usage
 pm2 monit
 
-# Lower max_memory_restart in ecosystem.config.js
+# Lower max_memory_restart in ecosystem.config.cjs
 # Or increase instances to distribute load
 ```
 
@@ -240,7 +240,7 @@ pm2 restart ok-web-frontend
 
 # Or fully restart PM2
 pm2 kill
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 ```
 
 ## Production Checklist
