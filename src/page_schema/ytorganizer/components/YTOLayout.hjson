@@ -1305,7 +1305,7 @@ return {
         css: '''
 const isCollapsed = args.fns.isSidebarCollapsed?.();
 const sidebarWidth = isCollapsed ? '72px' : '240px';
-const sidebarPadding = isCollapsed ? '${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}' : '${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}';
+const sidebarPadding = isCollapsed ? `${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}` : `${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}`;
 
 return `._id {
   display: none;
@@ -1322,7 +1322,6 @@ return `._id {
     padding: ${sidebarPadding};
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     transition: width ${args.theme.var.animation?.normal || '300ms'} ease, padding ${args.theme.var.animation?.normal || '300ms'} ease;
-    overflow-x: hidden;
     position: relative;
   }
 }`;
@@ -1477,14 +1476,19 @@ return `._id {
   cursor: pointer;
   transition: all ${args.theme.var.animation?.fast || '150ms'} ease;
   padding: 0;
-  margin: 0 auto ${args.theme.var.spacing?.md || '1rem'} auto;
+  flex-shrink: 0;
 
   ${!isCollapsed ? `
     position: absolute;
-    top: ${args.theme.var.spacing?.md || '1rem'};
-    right: ${args.theme.var.spacing?.md || '1rem'};
-    margin: 0;
-  ` : ''}
+    top: 1rem;
+    right: 0;
+    transform: translateX(50%);
+    z-index: 10;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  ` : `
+    margin: 0 auto ${args.theme.var.spacing?.md || '1rem'} auto;
+  `}
 
   &:hover {
     background: ${args.theme.var.color.background_light_300};
@@ -1492,7 +1496,7 @@ return `._id {
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: ${!isCollapsed ? 'translateX(50%) scale(0.95)' : 'scale(0.95)'};
   }
 }`;
 '''
