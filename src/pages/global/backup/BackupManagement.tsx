@@ -285,7 +285,7 @@ export function BackupManagement() {
           // Add or update the vertex in the local array
           setNotesVertices((prev) => {
             const index = prev.findIndex(
-              (v: any) => v.P?.backupKey === modal.backupKey
+              (v: any) => v.P?.backupKey === modal.backupKey,
             );
             if (index >= 0) {
               // Update existing
@@ -300,7 +300,7 @@ export function BackupManagement() {
         } else {
           // Note was deleted (empty note)
           setNotesVertices((prev) =>
-            prev.filter((v: any) => v.P?.backupKey !== modal.backupKey)
+            prev.filter((v: any) => v.P?.backupKey !== modal.backupKey),
           );
         }
       } else {
