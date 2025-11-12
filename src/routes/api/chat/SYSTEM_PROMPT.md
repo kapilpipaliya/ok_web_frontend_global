@@ -579,4 +579,35 @@ To grant a role permission to a page, create the following structure:
 - Use numeric IDs for the graph
 - The graph must be a directed acyclic graph (DAG) to prevent circular dependencies
 
+## Import Guidelines
+
+**IMPORTANT: Do not use dynamic imports in TypeScript files**
+
+- **DO NOT use** `await import()` or dynamic imports in `.ts` files
+- **ALWAYS use** static imports at the top of the file
+- Dynamic imports break type checking and cause compilation issues
+
+**Bad Pattern (DO NOT USE):**
+```typescript
+// ❌ WRONG - Don't use dynamic imports in .ts files
+async function loadModule() {
+  const module = await import('./someModule');
+  return module.default;
+}
+```
+
+**Good Pattern (CORRECT):**
+```typescript
+// ✅ CORRECT - Use static imports at the top
+import { someFunction } from './someModule';
+
+function useModule() {
+  return someFunction();
+}
+```
+
+**Exception:**
+- Dynamic imports are acceptable in `.tsx` (React/SolidJS component) files for code splitting when necessary
+- However, prefer static imports even in `.tsx` files unless there's a specific need for lazy loading
+
 Return the graph JSON.

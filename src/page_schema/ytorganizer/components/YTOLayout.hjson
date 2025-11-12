@@ -1039,6 +1039,35 @@ const getPriorityInfo = (priority) => {
   return STATUS_CONSTANTS.priorities[priority] || null;
 };
 
+// Sidebar collapse state management
+const [isSidebarCollapsed, setIsSidebarCollapsed] = args.createSignal(false);
+
+const toggleSidebar = async () => {
+  const newState = !isSidebarCollapsed();
+  setIsSidebarCollapsed(newState);
+
+  // Save to database
+  try {
+    await args.executeServerFunction('saveSidebarPreference', {
+      isCollapsed: newState
+    });
+  } catch (error) {
+    console.error('Failed to save sidebar preference:', error);
+  }
+};
+
+const loadSidebarState = async () => {
+  try {
+    const result = await args.executeServerFunction('getSidebarPreference', {});
+
+    if (result.success && result.data) {
+      setIsSidebarCollapsed(result.data.isCollapsed);
+    }
+  } catch (error) {
+    console.error('Failed to load sidebar preference:', error);
+  }
+};
+
 return {
   checkAdminRole,
   impersonatedUser,
@@ -1091,16 +1120,20 @@ return {
   closeAddToPlaylistModal,
   addVideoToPlaylists,
   getStatusInfo,
-  getPriorityInfo
+  getPriorityInfo,
+  isSidebarCollapsed,
+  toggleSidebar,
+  loadSidebarState
 };
 ''',
         props: '''
 return {
   as: "div",
   onMount: async () => {
-    // Load saved state from sessionStorage
+    // Load saved state from sessionStorage and database
     args.fns.loadImpersonationState?.();
     args.fns.loadOwnershipState?.();
+    await args.fns.loadSidebarState?.();
 
     // Fetch ownerships (will auto-select first one if none selected)
     await args.fns.fetchOwnerships?.();
@@ -1270,6 +1303,10 @@ return {
 };
 ''',
         css: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+const sidebarWidth = isCollapsed ? '72px' : '240px';
+const sidebarPadding = isCollapsed ? '${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}' : '${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}';
+
 return `._id {
   display: none;
 }
@@ -1277,13 +1314,16 @@ return `._id {
 @media (min-width: 768px) {
   ._id {
     display: flex;
-    width: 240px;
+    width: ${sidebarWidth};
     min-height: 100vh;
     background: ${args.theme.var.color.background};
     border-right: 1px solid ${args.theme.var.color.border};
     flex-direction: column;
-    padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.lg};
+    padding: ${sidebarPadding};
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: width ${args.theme.var.animation?.normal || '300ms'} ease, padding ${args.theme.var.animation?.normal || '300ms'} ease;
+    overflow-x: hidden;
+    position: relative;
   }
 }`;
 '''
@@ -1301,10 +1341,13 @@ return {
 };
 ''',
         css: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
 return `._id {
   margin-bottom: ${args.theme.var.spacing.md};
   padding-bottom: ${args.theme.var.spacing.md};
   border-bottom: 1px solid ${args.theme.var.color.border};
+  display: ${isCollapsed ? 'none' : 'block'};
 }`;
 '''
       }
@@ -1353,6 +1396,127 @@ return `._id {
       }
     },
     {
+      id: "collapsed_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1.3,
+        componentName: "Html",
+        props: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "div",
+  hide: !isCollapsed
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: ${args.theme.var.spacing?.md || '1rem'} 0;
+  margin-bottom: ${args.theme.var.spacing?.md || '1rem'};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "collapsed_logo_img",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Logo",
+  onClick: () => args.navigate?.('/home')
+};
+''',
+        css: '''
+return `._id {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "sidebar_toggle_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1.7,
+        componentName: "Html",
+        props: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "button",
+  onClick: args.fns.toggleSidebar,
+  title: isCollapsed ? "Expand sidebar" : "Collapse sidebar",
+  "aria-label": isCollapsed ? "Expand sidebar" : "Collapse sidebar"
+};
+''',
+        css: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return `._id {
+  width: 32px;
+  height: 32px;
+  border-radius: ${args.theme.var.borderRadius?.sm || '0.25rem'};
+  background: ${args.theme.var.color.background_light_200};
+  border: 1px solid ${args.theme.var.color.border};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all ${args.theme.var.animation?.fast || '150ms'} ease;
+  padding: 0;
+  margin: 0 auto ${args.theme.var.spacing?.md || '1rem'} auto;
+
+  ${!isCollapsed ? `
+    position: absolute;
+    top: ${args.theme.var.spacing?.md || '1rem'};
+    right: ${args.theme.var.spacing?.md || '1rem'};
+    margin: 0;
+  ` : ''}
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_300};
+    border-color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "sidebar_toggle_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "icon",
+  icon: isCollapsed ? "carbon:chevron-right" : "carbon:chevron-left",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
       id: "ownership_selector_container",
       L: "Attr",
       P: {
@@ -1361,10 +1525,11 @@ return `._id {
         props: '''
 const ownerships = args.fns.ownerships?.() || [];
 const showSelector = ownerships.length > 0;
+const isCollapsed = args.fns.isSidebarCollapsed?.();
 
 return {
   as: "div",
-  hide: !showSelector
+  hide: !showSelector || isCollapsed
 };
 ''',
         css: '''
@@ -1634,10 +1799,12 @@ return {
         props: '''
 const section = args.contextData.navSection;
 const title = section.title;
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
 return {
   as: "h3",
   text: title,
-  hide: !title
+  hide: !title || isCollapsed
 };
 ''',
         css: '''
@@ -1738,18 +1905,20 @@ const item = args.contextData.navItem;
 const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
 const isButton = item.isButton;
 const isDanger = item.isDanger;
+const isCollapsed = args.fns.isSidebarCollapsed?.();
 
 return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${isCollapsed ? args.theme.var.spacing.sm : args.theme.var.spacing.md};
   border-radius: ${args.theme.var.borderRadius.md};
   background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
   color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
   transition: all ${args.theme.var.animation.fast} ease;
+  ${isCollapsed ? 'justify-content: center;' : ''}
   ${isButton ? `
     border: none;
     font-size: inherit;
@@ -1763,7 +1932,7 @@ return `._id {
     background: ${isDanger ? args.theme.var.color.error_light_100 : args.theme.var.color.background_light_200};
     color: ${isDanger ? args.theme.var.color.error_light_100_text : args.theme.var.color.primary};
   }
-  
+
   ${isButton ? `
     &:active {
       transform: scale(0.98);
@@ -1802,6 +1971,16 @@ return {
   as: "span",
   text: item.label
 };
+''',
+        css: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return `._id {
+  display: ${isCollapsed ? 'none' : 'inline'};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}`;
 '''
       }
     },
@@ -2071,6 +2250,10 @@ return {
     { id: "e3c", T: "Attr", S: "navigation_overlay", E: "navigation_spinner" },
     { id: "e4", T: "Attr", S: "layout_container", E: "left_nav" },
     { id: "e5", T: "Attr", S: "left_nav", E: "left_nav_header" },
+    { id: "e5a", T: "Attr", S: "left_nav", E: "collapsed_logo" },
+    { id: "e5b", T: "Attr", S: "collapsed_logo", E: "collapsed_logo_img" },
+    { id: "e5c", T: "Attr", S: "left_nav", E: "sidebar_toggle_button" },
+    { id: "e5d", T: "Attr", S: "sidebar_toggle_button", E: "sidebar_toggle_icon" },
     { id: "e6", T: "Attr", S: "left_nav_header", E: "left_nav_logo" },
     { id: "e6b", T: "Attr", S: "left_nav_logo", E: "left_nav_logo_img" },
     { id: "e6c", T: "Attr", S: "left_nav", E: "ownership_selector_container" },

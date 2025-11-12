@@ -161,15 +161,23 @@ export async function saveBackupNote(backupKey: string, note: string) {
     const session = driver.session({ database: "admin" });
 
     try {
+      let vertex = null;
+
       if (note.trim()) {
-        // Create or update note
-        await session.run(
+        // Create or update note and return it
+        const result = await session.run(
           `
           MERGE (n:BackupNote {backupKey: $backupKey})
           SET n.note = $note, n.updatedAt = timestamp()
+          RETURN n
           `,
           { backupKey, note: note.trim() },
         );
+
+        if (result.records.length > 0) {
+          const node = result.records[0].get("n");
+          vertex = convertNodeToJson(node);
+        }
       } else {
         // Delete note if empty
         await session.run(
@@ -184,6 +192,7 @@ export async function saveBackupNote(backupKey: string, note: string) {
       return {
         success: true,
         message: note.trim() ? "Note saved" : "Note deleted",
+        data: vertex,
       };
     } finally {
       await session.close();

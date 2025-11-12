@@ -72,19 +72,29 @@ export function BackupManagement() {
   } | null>(null);
   const [noteInput, setNoteInput] = createSignal("");
 
-  // Load notes from database
-  const backupNotesVertices = createAsync(
+  // Load notes from database initially
+  const initialNotesVertices = createAsync(
     async () => {
-      const key = refreshKey(); // Use refreshKey as dependency
       const result = await getBackupNotesServer();
       return result.success ? result.data : [];
     },
     { deferStream: true },
   );
 
+  // Store notes locally in a signal
+  const [notesVertices, setNotesVertices] = createSignal<any[]>([]);
+
+  // Initialize notes from server
+  createMemo(() => {
+    const initial = initialNotesVertices();
+    if (initial && initial.length >= 0) {
+      setNotesVertices(initial);
+    }
+  });
+
   // Convert vertices to key-value map for easy access
   const backupNotes = createMemo(() => {
-    const vertices = backupNotesVertices() || [];
+    const vertices = notesVertices();
     const notesMap: Record<string, string> = {};
     vertices.forEach((vertex: any) => {
       if (vertex.P?.backupKey && vertex.P?.note) {
@@ -269,7 +279,30 @@ export function BackupManagement() {
       const result = await saveBackupNoteServer(modal.backupKey, noteInput());
       if (result.success) {
         showSuccessToast(result.message || "Note saved successfully");
-        setRefreshKey((prev) => prev + 1);
+
+        // Update local state with the new vertex
+        if (result.data) {
+          // Add or update the vertex in the local array
+          setNotesVertices((prev) => {
+            const index = prev.findIndex(
+              (v: any) => v.P?.backupKey === modal.backupKey
+            );
+            if (index >= 0) {
+              // Update existing
+              const updated = [...prev];
+              updated[index] = result.data;
+              return updated;
+            } else {
+              // Add new
+              return [...prev, result.data];
+            }
+          });
+        } else {
+          // Note was deleted (empty note)
+          setNotesVertices((prev) =>
+            prev.filter((v: any) => v.P?.backupKey !== modal.backupKey)
+          );
+        }
       } else {
         showErrorToast(result.error || "Failed to save note");
       }

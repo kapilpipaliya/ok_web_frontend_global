@@ -1,0 +1,67 @@
+{
+  vertexes: [
+    {
+      id: "save_sidebar_preference_function",
+      L: "Function",
+      P: {
+        key: "saveSidebarPreference",
+        description: "Saves the user's sidebar collapsed/expanded preference",
+        body: '''
+try {
+  const { isCollapsed } = args.contextData;
+  const userId = args.user?.id;
+
+  if (!userId) {
+    return {
+      success: false,
+      error: "User not authenticated"
+    };
+  }
+
+  if (typeof isCollapsed !== 'boolean') {
+    return {
+      success: false,
+      error: "Invalid preference value"
+    };
+  }
+
+  // Update or create user preference for sidebar state
+  const result = await args.session.run(
+    `MATCH (u:User {id: $userId})
+     MERGE (u)-[:UserUserPreference]->(p:UserPreference {key: 'sidebarCollapsed'})
+     SET p.value = $isCollapsed,
+         p.updatedAt = datetime()
+     ON CREATE SET p.createdAt = datetime()
+     RETURN p`,
+    {
+      userId,
+      isCollapsed
+    }
+  );
+
+  if (result.records.length === 0) {
+    return {
+      success: false,
+      error: "Failed to save preference"
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      isCollapsed
+    }
+  };
+} catch (error) {
+  console.error("Save sidebar preference error:", error);
+  return {
+    success: false,
+    error: error.message || "Failed to save sidebar preference"
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
