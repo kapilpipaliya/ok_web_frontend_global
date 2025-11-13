@@ -27,44 +27,11 @@ const hideMessage = () => {
   setMessageState('visible', false);
 };
 
-// Feedback modal state
-const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);
-
-const openFeedbackModal = () => {
-  setIsFeedbackModalOpen(true);
-};
-
-const closeFeedbackModal = () => {
-  setIsFeedbackModalOpen(false);
-};
-
-const submitFeedback = async (data) => {
-  try {
-    const result = await args.fns.executeYTOFunction("saveFeedback", data);
-
-    if (result?.result?.success) {
-      showMessage('success', result.result.message);
-      return result.result;
-    } else {
-      showMessage('error', result?.result?.message || "Failed to submit feedback");
-      return result?.result;
-    }
-  } catch (error) {
-    console.error("Error submitting feedback:", error);
-    showMessage('error', "An error occurred while submitting feedback");
-    return { success: false };
-  }
-};
-
 return {
   enabled: true,
   messageState,
   showMessage,
   hideMessage,
-  isFeedbackModalOpen,
-  openFeedbackModal,
-  closeFeedbackModal,
-  submitFeedback
 };
 ''',
         props: '''
@@ -1153,6 +1120,7 @@ return `._id {
   border: 1px solid ${args.theme.var.color.error_light_300};
   border-radius: 0.75rem;
   padding: 2rem;
+  margin-bottom: 2rem;
 }`;
 '''
       }
@@ -1366,16 +1334,145 @@ return {
       }
     },
     {
-      id: "feedback_modal",
+      id: "logout_section",
       L: "Attr",
       P: {
-        displayOrder: 7,
-        componentName: "YTOFeedbackModal",
+        displayOrder: 6.5,
+        componentName: "Html",
         props: '''
 return {
-  isOpen: args.fns.isFeedbackModalOpen,
-  onClose: args.fns.closeFeedbackModal,
-  onSubmit: args.fns.submitFeedback
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  display: none;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    display: block;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Account"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_text_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "logout_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Sign Out"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  display: block;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Sign out of your YSaar account"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOButton",
+        props: '''
+return {
+  text: "Logout",
+  variant: "danger",
+  onClick: () => args.navigate("/auth/logout")
 };
 '''
       }
@@ -1426,6 +1523,13 @@ return {
     { id: "e27", T: "Attr", S: "feedback_text_wrapper", E: "feedback_label" },
     { id: "e28", T: "Attr", S: "feedback_text_wrapper", E: "feedback_description" },
     { id: "e29", T: "Attr", S: "feedback_card", E: "feedback_button" },
+    { id: "e29a", T: "Attr", S: "settings_container", E: "logout_section" },
+    { id: "e29b", T: "Attr", S: "logout_section", E: "logout_title" },
+    { id: "e29c", T: "Attr", S: "logout_section", E: "logout_card" },
+    { id: "e29d", T: "Attr", S: "logout_card", E: "logout_text_wrapper" },
+    { id: "e29e", T: "Attr", S: "logout_text_wrapper", E: "logout_label" },
+    { id: "e29f", T: "Attr", S: "logout_text_wrapper", E: "logout_description" },
+    { id: "e29g", T: "Attr", S: "logout_card", E: "logout_button" },
     { id: "e30", T: "Attr", S: "settings_container", E: "data_section" },
     { id: "e31", T: "Attr", S: "data_section", E: "data_title" },
     { id: "e32", T: "Attr", S: "data_title", E: "data_title_icon" },
@@ -1433,7 +1537,6 @@ return {
     { id: "e34", T: "Attr", S: "data_section", E: "clear_data_button" },
     { id: "e35", T: "Attr", S: "data_section", E: "data_separator" },
     { id: "e36", T: "Attr", S: "data_section", E: "delete_account_warning" },
-    { id: "e37", T: "Attr", S: "data_section", E: "delete_account_button" },
-    { id: "e38", T: "Attr", S: "settings_container", E: "feedback_modal" }
+    { id: "e37", T: "Attr", S: "data_section", E: "delete_account_button" }
   ]
 }

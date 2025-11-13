@@ -1068,6 +1068,35 @@ const loadSidebarState = async () => {
   }
 };
 
+// Feedback modal state management
+const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);
+
+const openFeedbackModal = () => {
+  setIsFeedbackModalOpen(true);
+};
+
+const closeFeedbackModal = () => {
+  setIsFeedbackModalOpen(false);
+};
+
+const submitFeedback = async (data) => {
+  try {
+    const result = await executeYTOFunction("saveFeedback", data);
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message || "Feedback submitted successfully");
+      return result.result;
+    } else {
+      args.showErrorToast(result?.result?.message || "Failed to submit feedback");
+      return result?.result;
+    }
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    args.showErrorToast("An error occurred while submitting feedback");
+    return { success: false };
+  }
+};
+
 return {
   checkAdminRole,
   impersonatedUser,
@@ -1123,7 +1152,11 @@ return {
   getPriorityInfo,
   isSidebarCollapsed,
   toggleSidebar,
-  loadSidebarState
+  loadSidebarState,
+  isFeedbackModalOpen,
+  openFeedbackModal,
+  closeFeedbackModal,
+  submitFeedback
 };
 ''',
         props: '''
@@ -1753,6 +1786,113 @@ return `._id {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.lg};
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "feedback_button_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "div",
+  hide: isCollapsed
+};
+''',
+        css: '''
+return `._id {
+  margin-top: auto;
+  padding-top: ${args.theme.var.spacing.md};
+  border-top: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "feedback_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => {
+    args.fns.openFeedbackModal();
+  },
+  title: "Send Feedback"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feedback_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:chat",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "feedback_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Send Feedback"
+};
+''',
+        css: '''
+return `._id {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }`;
 '''
       }
@@ -2234,6 +2374,21 @@ return {
 };
 '''
       }
+    },
+    {
+      id: "feedback_modal",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "YTOFeedbackModal",
+        props: '''
+return {
+  isOpen: args.fns.isFeedbackModalOpen,
+  onClose: args.fns.closeFeedbackModal,
+  onSubmit: args.fns.submitFeedback
+};
+'''
+      }
     }
   ],
   edges: [
@@ -2269,6 +2424,10 @@ return {
     { id: "e6i", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_text_content" },
     { id: "e6j", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_link" },
     { id: "e7", T: "Attr", S: "left_nav", E: "left_nav_menu" },
+    { id: "e7a", T: "Attr", S: "left_nav", E: "feedback_button_container" },
+    { id: "e7b", T: "Attr", S: "feedback_button_container", E: "feedback_button" },
+    { id: "e7c", T: "Attr", S: "feedback_button", E: "feedback_icon" },
+    { id: "e7d", T: "Attr", S: "feedback_button", E: "feedback_text" },
     { id: "e8", T: "Attr", S: "left_nav_menu", E: "nav_sections_loop" },
     { id: "e9", T: "Attr", S: "nav_sections_loop", E: "nav_section" },
     { id: "e10", T: "Attr", S: "nav_section", E: "nav_section_title" },
@@ -2285,6 +2444,7 @@ return {
     { id: "e55", T: "Attr", S: "mobile_nav_item", E: "mobile_nav_text" },
     { id: "e60", T: "Attr", S: "layout_container", E: "video_player" },
     { id: "e61", T: "Attr", S: "layout_container", E: "queue_modal" },
-    { id: "e62", T: "Attr", S: "layout_container", E: "playlist_modal" }
+    { id: "e62", T: "Attr", S: "layout_container", E: "playlist_modal" },
+    { id: "e63", T: "Attr", S: "layout_container", E: "feedback_modal" }
   ]
 }

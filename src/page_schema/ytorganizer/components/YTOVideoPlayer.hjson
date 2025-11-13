@@ -124,8 +124,91 @@ const createResizeHandler = (direction) => {
   };
 };
 
+// Touch resize handler for iPad/mobile support
+const createTouchResizeHandler = (direction) => {
+  // Determine resize behavior based on direction
+  const resizeWidth = direction.includes('e') ? 'add' : direction.includes('w') ? 'subtract' : null;
+  const resizeHeight = direction.includes('s') ? 'add' : direction.includes('n') ? 'subtract' : null;
+  const adjustX = direction.includes('w');
+  const adjustY = direction.includes('n');
+
+  return (e) => {
+    const getPlayerState = args.contextData.props?.playerState;
+    const state = getPlayerState?.();
+    if (state !== "minimized") return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Show overlay to prevent iframe from capturing touch events
+    setIsResizing(true);
+
+    const touch = e.touches[0];
+    const playerEl = e.currentTarget.parentElement;
+    const rect = playerEl.getBoundingClientRect();
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+    const startWidth = rect.width;
+    const startHeight = rect.height;
+    const startLeft = rect.left;
+    const startTop = rect.top;
+    const setPlayerSize = args.contextData.props?.setPlayerSize;
+    const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+    const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
+
+    const handleTouchMove = (moveEvent) => {
+      const touch = moveEvent.touches[0];
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+      let newX = playerPosition.x;
+      let newY = playerPosition.y;
+
+      // Get responsive values
+      const { minWidth, minHeight, maxWidth } = getResponsiveValues();
+
+      // Calculate new dimensions based on resize direction
+      if (resizeWidth === 'add') {
+        newWidth = Math.min(maxWidth, Math.max(minWidth, startWidth + deltaX));
+      } else if (resizeWidth === 'subtract') {
+        newWidth = Math.min(maxWidth, Math.max(minWidth, startWidth - deltaX));
+      }
+
+      if (resizeHeight === 'add') {
+        newHeight = Math.max(minHeight, startHeight + deltaY);
+      } else if (resizeHeight === 'subtract') {
+        newHeight = Math.max(minHeight, startHeight - deltaY);
+      }
+
+      // Adjust position if resizing from left or top
+      if (adjustX) {
+        newX = startLeft + (startWidth - newWidth);
+      }
+      if (adjustY) {
+        newY = startTop + (startHeight - newHeight);
+      }
+
+      setPlayerSize?.({ width: newWidth, height: newHeight });
+      setPlayerPosition?.({ x: newX, y: newY });
+    };
+
+    const handleTouchEnd = () => {
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+      // Hide overlay after resize completes
+      setIsResizing(false);
+    };
+
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
+  };
+};
+
 return {
   createResizeHandler,
+  createTouchResizeHandler,
   isResizing,
   getResponsiveValues
 };
@@ -222,39 +305,61 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const getPlayerState = args.contextData.props?.playerState;
-const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+let lastClickTime = 0;
+let hasDragged = false;
 
 const handleMouseDown = (e) => {
+  const getPlayerState = args.contextData.props?.playerState;
   const state = getPlayerState?.();
-  if (state !== "minimized") return;
+  const isMinimized = state === "minimized";
 
-  // Prevent text selection while dragging
-  e.preventDefault();
-
+  hasDragged = false;
   const startX = e.clientX;
   const startY = e.clientY;
-  const playerEl = e.currentTarget.parentElement;
-  const rect = playerEl.getBoundingClientRect();
-  const offsetX = startX - rect.left;
-  const offsetY = startY - rect.top;
+
+  let playerEl, rect, offsetX, offsetY;
+  if (isMinimized) {
+    playerEl = e.currentTarget.parentElement;
+    rect = playerEl.getBoundingClientRect();
+    offsetX = startX - rect.left;
+    offsetY = startY - rect.top;
+  }
 
   const handleMouseMove = (moveEvent) => {
-    const newX = moveEvent.clientX - offsetX;
-    const newY = moveEvent.clientY - offsetY;
+    if (!isMinimized) return;
 
-    // Keep player within viewport bounds
-    const maxX = window.innerWidth - rect.width;
-    const maxY = window.innerHeight - rect.height;
-    const boundedX = Math.max(0, Math.min(newX, maxX));
-    const boundedY = Math.max(0, Math.min(newY, maxY));
+    const deltaX = Math.abs(moveEvent.clientX - startX);
+    const deltaY = Math.abs(moveEvent.clientY - startY);
 
-    setPlayerPosition?.({ x: boundedX, y: boundedY });
+    if (deltaX > 5 || deltaY > 5) {
+      hasDragged = true;
+      const newX = moveEvent.clientX - offsetX;
+      const newY = moveEvent.clientY - offsetY;
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+
+      const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+      setPlayerPosition?.({
+        x: Math.max(0, Math.min(newX, maxX)),
+        y: Math.max(0, Math.min(newY, maxY))
+      });
+    }
   };
 
   const handleMouseUp = () => {
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
+
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTime;
+
+    if (timeSinceLastClick < 300 && !hasDragged) {
+      const togglePlayerState = args.contextData.props?.togglePlayerState;
+      togglePlayerState?.();
+      lastClickTime = 0;
+    } else {
+      lastClickTime = now;
+    }
   };
 
   document.addEventListener('mousemove', handleMouseMove);
@@ -262,6 +367,7 @@ const handleMouseDown = (e) => {
 };
 
 const handleTouchStart = (e) => {
+  const getPlayerState = args.contextData.props?.playerState;
   const state = getPlayerState?.();
   if (state !== "minimized") return;
 
@@ -287,6 +393,7 @@ const handleTouchStart = (e) => {
     const boundedX = Math.max(0, Math.min(newX, maxX));
     const boundedY = Math.max(0, Math.min(newY, maxY));
 
+    const setPlayerPosition = args.contextData.props?.setPlayerPosition;
     setPlayerPosition?.({ x: boundedX, y: boundedY });
   };
 
@@ -946,6 +1053,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('se'),
+  onTouchStart: args.fns.createTouchResizeHandler('se'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -961,6 +1069,7 @@ return `._id {
   height: 20px;
   cursor: se-resize;
   z-index: 11;
+  touch-action: none;
 
   &::after {
     content: '';
@@ -971,6 +1080,11 @@ return `._id {
     height: 10px;
     border-right: 2px solid ${args.theme.var.color.background_dark_700};
     border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
+  }
+
+  @media (max-width: 1024px) {
+    width: 30px;
+    height: 30px;
   }
 }`;
 '''
@@ -988,6 +1102,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('e'),
+  onTouchStart: args.fns.createTouchResizeHandler('e'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1003,6 +1118,11 @@ return `._id {
   width: 6px;
   cursor: e-resize;
   z-index: 10;
+  touch-action: none;
+
+  @media (max-width: 1024px) {
+    width: 12px;
+  }
 }`;
 '''
       }
@@ -1019,6 +1139,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('s'),
+  onTouchStart: args.fns.createTouchResizeHandler('s'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1034,6 +1155,11 @@ return `._id {
   height: 6px;
   cursor: s-resize;
   z-index: 10;
+  touch-action: none;
+
+  @media (max-width: 1024px) {
+    height: 12px;
+  }
 }`;
 '''
       }
@@ -1050,6 +1176,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('w'),
+  onTouchStart: args.fns.createTouchResizeHandler('w'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1065,6 +1192,11 @@ return `._id {
   width: 6px;
   cursor: w-resize;
   z-index: 10;
+  touch-action: none;
+
+  @media (max-width: 1024px) {
+    width: 12px;
+  }
 }`;
 '''
       }
@@ -1081,6 +1213,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('n'),
+  onTouchStart: args.fns.createTouchResizeHandler('n'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1096,6 +1229,11 @@ return `._id {
   height: 6px;
   cursor: n-resize;
   z-index: 10;
+  touch-action: none;
+
+  @media (max-width: 1024px) {
+    height: 12px;
+  }
 }`;
 '''
       }
@@ -1112,6 +1250,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('ne'),
+  onTouchStart: args.fns.createTouchResizeHandler('ne'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1127,6 +1266,7 @@ return `._id {
   height: 20px;
   cursor: ne-resize;
   z-index: 11;
+  touch-action: none;
 
   &::after {
     content: '';
@@ -1137,6 +1277,11 @@ return `._id {
     height: 10px;
     border-right: 2px solid ${args.theme.var.color.background_dark_700};
     border-top: 2px solid ${args.theme.var.color.background_dark_700};
+  }
+
+  @media (max-width: 1024px) {
+    width: 30px;
+    height: 30px;
   }
 }`;
 '''
@@ -1154,6 +1299,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('nw'),
+  onTouchStart: args.fns.createTouchResizeHandler('nw'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1169,6 +1315,7 @@ return `._id {
   height: 20px;
   cursor: nw-resize;
   z-index: 11;
+  touch-action: none;
 
   &::after {
     content: '';
@@ -1179,6 +1326,11 @@ return `._id {
     height: 10px;
     border-left: 2px solid ${args.theme.var.color.background_dark_700};
     border-top: 2px solid ${args.theme.var.color.background_dark_700};
+  }
+
+  @media (max-width: 1024px) {
+    width: 30px;
+    height: 30px;
   }
 }`;
 '''
@@ -1196,6 +1348,7 @@ const getPlayerState = args.contextData.props?.playerState;
 return {
   as: "div",
   onMouseDown: args.fns.createResizeHandler('sw'),
+  onTouchStart: args.fns.createTouchResizeHandler('sw'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -1211,6 +1364,7 @@ return `._id {
   height: 20px;
   cursor: sw-resize;
   z-index: 11;
+  touch-action: none;
 
   &::after {
     content: '';
@@ -1221,6 +1375,11 @@ return `._id {
     height: 10px;
     border-left: 2px solid ${args.theme.var.color.background_dark_700};
     border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
+  }
+
+  @media (max-width: 1024px) {
+    width: 30px;
+    height: 30px;
   }
 }`;
 '''
