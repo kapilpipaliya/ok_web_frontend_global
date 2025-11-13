@@ -15,33 +15,20 @@
         displayOrder: 1,
         componentName: "Html",
         fns: '''
-// Initialize signal - default to showing (server-side safe)
-const [showBanner, setShowBanner] = args.createSignal(true);
-let checkedLocalStorage = false;
-
 return {
-  showBanner,
-  checkAndUpdateBanner: () => {
-    // Only check localStorage once on client-side
-    if (!checkedLocalStorage) {
-      const hasAccepted = localStorage.getItem('cookie_consent_accepted') === 'true';
-      if (hasAccepted) {
-        setShowBanner(false);
-      }
-      checkedLocalStorage = true;
-    }
-  },
   acceptCookies: () => {
     localStorage.setItem('cookie_consent_accepted', 'true');
-    setShowBanner(false);
+    args.fns.setHasCookieConsent(true);
   }
 };
 ''',
         props: '''
+// Get cookie consent state from parent layout
+const hasCookieConsent = args.fns.hasCookieConsent?.() || false;
+
 return {
   as: "div",
-  hide: () => !args.fns.showBanner(),
-  onMount: args.fns.checkAndUpdateBanner
+  hide: hasCookieConsent
 };
 ''',
         css: '''

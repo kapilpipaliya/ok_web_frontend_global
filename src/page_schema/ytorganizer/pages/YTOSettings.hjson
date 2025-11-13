@@ -1337,7 +1337,7 @@ return {
       id: "logout_section",
       L: "Attr",
       P: {
-        displayOrder: 6.5,
+        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {

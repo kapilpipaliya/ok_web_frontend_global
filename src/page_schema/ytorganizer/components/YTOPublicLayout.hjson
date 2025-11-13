@@ -15,9 +15,23 @@
       P: {
         displayOrder: 1,
         componentName: "Html",
+        fns: '''
+// Global state for cookie consent
+const [hasCookieConsent, setHasCookieConsent] = args.createSignal(false);
+
+return {
+  hasCookieConsent,
+  setHasCookieConsent
+};
+''',
         props: '''
 return {
-  as: "div"
+  as: "div",
+    onMount: () => {
+      // Check localStorage for cookie consent
+      const hasAccepted = localStorage.getItem('cookie_consent_accepted') === 'true';
+      args.fns.setHasCookieConsent(hasAccepted);
+    }
 };
 ''',
         css: '''
@@ -139,6 +153,53 @@ return `._id {
       P: {
         displayOrder: 2,
         componentName: "Html",
+        fns: '''
+// Define navigation links data
+const navLinks = [
+  {
+    id: "pricing",
+    text: "Pricing",
+    href: "#pricing",
+    onClick: (e) => {
+      e.preventDefault();
+      // Only scroll if on landing page
+      if (args.location.pathname === '/') {
+        document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        args.navigate('/#pricing');
+      }
+    }
+  },
+  {
+    id: "privacy",
+    text: "Privacy",
+    onClick: (e) => {
+      e.preventDefault();
+      args.navigate('/privacy');
+    }
+  },
+  {
+    id: "terms",
+    text: "Terms",
+    onClick: (e) => {
+      e.preventDefault();
+      args.navigate('/terms');
+    }
+  },
+  {
+    id: "signin",
+    text: "Sign In",
+    onClick: (e) => {
+      e.preventDefault();
+      args.navigate('/auth/signin');
+    }
+  }
+];
+
+return {
+  navLinks
+};
+''',
         props: '''
 return {
   as: "nav"
@@ -160,62 +221,39 @@ return `._id {
       }
     },
     {
-      id: "nav_pricing_link",
+      id: "nav_links_loop",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
+        contextName: "navLink",
+        loop: true,
         props: '''
 return {
-  as: "a",
-  text: "Pricing",
-  href: "#pricing",
-  onClick: (e) => {
-    e.preventDefault();
-    // Only scroll if on landing page
-    if (args.location.pathname === '/') {
-      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      args.navigate('/#pricing');
-    }
-  }
+  as: "div",
+  data: args.fns.navLinks
 };
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text};
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-  cursor: pointer;
-}
-
-._id:hover {
-  color: ${args.theme.var.color.primary};
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: 0.875rem;
-  }
+  display: contents;
 }`;
 '''
       }
     },
     {
-      id: "nav_signin_link",
+      id: "nav_link_item",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
+const link = args.contextData.navLink;
 return {
   as: "a",
-  text: "Sign In",
-  onClick: (e) => {
-    e.preventDefault();
-    args.navigate('/auth/signin');
-  }
+  text: link.text,
+  href: link.href,
+  onClick: link.onClick
 };
 ''',
         css: '''
@@ -274,7 +312,13 @@ return `._id {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
   }
-}`;
+}
+@media (max-width: 485px) {
+  ._id {
+    display: none;
+  }
+}
+`;
 '''
       }
     },
@@ -323,15 +367,20 @@ return {
 };
 ''',
         css: '''
+const hasCookieConsent = args.fns.hasCookieConsent?.();
+
 return `._id {
   background: ${args.theme.var.color.background_dark_100};
   border-top: 1px solid ${args.theme.var.color.border};
   padding: 3rem 2rem;
+  ${!hasCookieConsent ? 'padding-bottom: calc(3rem + 80px);' : ''}
+  transition: padding-bottom 0.3s ease;
 }
 
 @media (max-width: 768px) {
   ._id {
     padding: 2rem 1rem;
+    ${!hasCookieConsent ? 'padding-bottom: calc(2rem + 180px);' : ''}
   }
 }`;
 '''
@@ -575,8 +624,8 @@ return {};
     { id: "e4", T: "Attr", S: "header_content", E: "header_logo_wrapper" },
     { id: "e5", T: "Attr", S: "header_logo_wrapper", E: "header_logo" },
     { id: "e7", T: "Attr", S: "header_content", E: "header_nav" },
-    { id: "e8", T: "Attr", S: "header_nav", E: "nav_pricing_link" },
-    { id: "e9", T: "Attr", S: "header_nav", E: "nav_signin_link" },
+    { id: "e8", T: "Attr", S: "header_nav", E: "nav_links_loop" },
+    { id: "e8a", T: "Attr", S: "nav_links_loop", E: "nav_link_item" },
     { id: "e10", T: "Attr", S: "header_nav", E: "nav_get_started_button" },
 
     // Root to main content

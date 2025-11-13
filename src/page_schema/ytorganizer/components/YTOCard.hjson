@@ -25,7 +25,7 @@ return `._id {
   border-radius: 0;
   padding: 0.5rem 0.75rem;
   cursor: default;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
@@ -108,10 +108,71 @@ return `._id {
   transition: transform 0.2s ease;
   text-decoration: none;
   display: block;
+  position: relative;
 
   &:hover {
     transform: scale(1.05);
   }
+}`;
+'''
+      }
+    },
+    {
+      id: "card_playing_indicator",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+const currentVideo = args.fns?.currentVideo;
+
+const isCurrentlyPlaying = itemType === "video" &&
+  currentVideo?.() &&
+  item?.P?.youtubeId === currentVideo()?.P?.youtubeId;
+
+return {
+  as: "div",
+  hide: !isCurrentlyPlaying
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: ${args.theme.var.color.primary};
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_playing_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:play-filled",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary_text};
 }`;
 '''
       }
@@ -1228,6 +1289,8 @@ return {
   edges: [
     { id: "e1", T: "Attr", S: "component_root", E: "card_container" },
     { id: "e2", T: "Attr", S: "card_container", E: "card_thumbnail" },
+    { id: "e2_1", T: "Attr", S: "card_thumbnail", E: "card_playing_indicator" },
+    { id: "e2_2", T: "Attr", S: "card_playing_indicator", E: "card_playing_icon" },
     { id: "e3", T: "Attr", S: "card_container", E: "card_info" },
     { id: "e4", T: "Attr", S: "card_info", E: "card_type_badge" },
     { id: "e5", T: "Attr", S: "card_info", E: "card_title" },

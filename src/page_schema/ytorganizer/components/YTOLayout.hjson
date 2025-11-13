@@ -837,22 +837,22 @@ const navigationSectionsData = [
       }
     ]
   },
-    {
-    id: "admin",
-    title: "Admin",
-    items: [
-      {
-        id: "admin_dashboard",
-        href: "/yto/admin",
-        label: "Dashboard",
-        icon: "carbon:dashboard-reference",
-        title: "Admin dashboard home",
-        pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/"
-      }
-    ],
-    // Only show for admin users
-    showIf: checkAdminRole
-  }
+  //   {
+  //   id: "admin",
+  //   title: "Admin",
+  //   items: [
+  //     {
+  //       id: "admin_dashboard",
+  //       href: "/yto/admin",
+  //       label: "Dashboard",
+  //       icon: "carbon:dashboard-reference",
+  //       title: "Admin dashboard home",
+  //       pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/"
+  //     }
+  //   ],
+  //   // Only show for admin users
+  //   showIf: checkAdminRole
+  // }
 ];
 
 // Filter navigation sections based on showIf condition
