@@ -26,7 +26,7 @@ type TestStateStore = ReturnType<
 >;
 
 // Define type for email settings data
-interface EmailSettingsData {
+interface EmailSettingData {
   active?: string;
   smtpHost?: string;
   smtpPort?: string;
@@ -40,7 +40,7 @@ interface EmailSettingsData {
 }
 
 // Extend FunctionArgumentType to include our contextData
-interface EmailSettingsFunctionArgumentType extends FunctionArgumentType {
+interface EmailSettingFunctionArgumentType extends FunctionArgumentType {
   contextData: {
     saveState: SaveStateStore;
     testState: TestStateStore;
@@ -68,7 +68,7 @@ const validatePort = (value: string | undefined) => {
 };
 
 // Validation function based on provider
-const validateFormData = (data: EmailSettingsData) => {
+const validateFormData = (data: EmailSettingData) => {
   const errors: Record<string, string> = {};
   const provider = data.active;
 
@@ -120,7 +120,7 @@ const validateFormData = (data: EmailSettingsData) => {
   return Object.keys(errors).length > 0 ? errors : null;
 };
 
-export function EmailSettings() {
+export function EmailSetting() {
   const { showErrorToast, showSuccessToast } = useToast();
   const loadSettingsData = async () => {
     return await getAPI(API.settings.email.getUrl);
@@ -177,14 +177,14 @@ export function EmailSettings() {
                 key: "smtpHost",
                 placeholder: "Enter SMTP host",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as EmailSettingsData).active === "smtp"
+                  data.P && (data.P as EmailSettingData).active === "smtp"
                     ? validateRequired(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
@@ -208,14 +208,14 @@ export function EmailSettings() {
                 placeholder: "Enter SMTP port",
                 type: "number",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as EmailSettingsData).active === "smtp"
+                  data.P && (data.P as EmailSettingData).active === "smtp"
                     ? validatePort(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
@@ -238,14 +238,14 @@ export function EmailSettings() {
                 key: "smtpUsername",
                 placeholder: "Enter SMTP username",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as EmailSettingsData).active === "smtp"
+                  data.P && (data.P as EmailSettingData).active === "smtp"
                     ? validateRequired(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
@@ -269,14 +269,14 @@ export function EmailSettings() {
                 placeholder: "Enter SMTP password",
                 type: "password",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as EmailSettingsData).active === "smtp"
+                  data.P && (data.P as EmailSettingData).active === "smtp"
                     ? validateRequired(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
@@ -300,14 +300,14 @@ export function EmailSettings() {
                 placeholder: "Enter SendGrid API key",
                 type: "password",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as EmailSettingsData).active === "sendgrid"
+                  data.P && (data.P as EmailSettingData).active === "sendgrid"
                     ? validateRequired(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "sendgrid",
             }),
           },
@@ -331,14 +331,14 @@ export function EmailSettings() {
                 placeholder: "Enter Resend API key (re_...)",
                 type: "password",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as EmailSettingsData).active === "resend"
+                  data.P && (data.P as EmailSettingData).active === "resend"
                     ? validateRequired(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "resend",
             }),
           },
@@ -362,7 +362,7 @@ export function EmailSettings() {
                 placeholder: "Enter from email address",
                 type: "email",
                 validate: (value: string, data: Record<string, unknown>) => {
-                  if (data.P && !(data.P as EmailSettingsData).active) {
+                  if (data.P && !(data.P as EmailSettingData).active) {
                     return undefined;
                   }
                   if (!value) {
@@ -374,7 +374,7 @@ export function EmailSettings() {
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => !options.data?.P.active,
             }),
           },
@@ -400,7 +400,7 @@ export function EmailSettings() {
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: EmailSettingsFunctionArgumentType) => ({
+            props: (options: EmailSettingFunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
@@ -417,13 +417,13 @@ export function EmailSettings() {
                     as: "button",
                     css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
-                    props: (options: EmailSettingsFunctionArgumentType) => ({
+                    props: (options: EmailSettingFunctionArgumentType) => ({
                       disabled: options.contextData.saveState[0]?.isLoading,
                       onClick: async () => {
                         // Validate form data
                         const settings = options.data;
                         const errors = validateFormData(
-                          settings.P as EmailSettingsData,
+                          settings.P as EmailSettingData,
                         );
 
                         if (errors) {
@@ -588,7 +588,7 @@ export function EmailSettings() {
                     as: "button",
                     css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
-                    props: (options: EmailSettingsFunctionArgumentType) => ({
+                    props: (options: EmailSettingFunctionArgumentType) => ({
                       disabled:
                         options.contextData.testEmailState[0]?.isLoading,
                       onClick: async () => {
@@ -681,7 +681,7 @@ export function EmailSettings() {
   return (
     <div>
       <SchemaRenderer
-        form={{ attributes: [form], key: "EmailSettings" }}
+        form={{ attributes: [form], key: "EmailSetting" }}
         getFormData={loadSettingsData}
       />
       <SchemaRenderer

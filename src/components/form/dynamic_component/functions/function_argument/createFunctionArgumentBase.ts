@@ -39,6 +39,7 @@ import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunct
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { debounce } from "@solid-primitives/scheduled";
+import * as focusTrap from "focus-trap";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -274,5 +275,6 @@ export function createFunctionArgumentBase(
     executeNamedServerFunction,
     floatingUI,
     debounce,
+    focusTrap
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

@@ -425,7 +425,7 @@ if (args.contextData.action === 'start') {
         });
 
         // CORRECTED SCHEMA:
-        // 1. Create ownership-level VideoSetting (global settings: watched, notes, favourites)
+        // 1. Create ownership-level VideoSetting (global setting: watched, notes, favourites)
         // 2. Create PlaylistSetting->Video relationship (per-ownership playlist membership)
 
         const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;

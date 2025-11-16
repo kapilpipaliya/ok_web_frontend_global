@@ -31,7 +31,7 @@ YSaar uses Neo4j graph database with the following schema:
 **PlaylistSetting** (User-specific playlist preferences)
 - Properties: `key`, `customName`, `notifications`, `autoDownload`, `sortBy`, `showThumbnails`, `viewMode`, `createdAt`, `updatedAt`
 
-**VideoSettings** (User-specific video data)
+**VideoSetting** (User-specific video data)
 - Properties: `key`, `watched`, `note`, `isFavourite`, `customPosition`, `addedToPlaylistAt`, `createdAt`, `updatedAt`
 
 **Feedback** (User feedback)
@@ -53,7 +53,7 @@ YSaar uses Neo4j graph database with the following schema:
 
 **Video Relationships:**
 ```
-(User)-[:UserVideoSetting]->(VideoSettings)-[:VideoSettingsVideo]->(Video)
+(User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 ```
 
 **Feedback Relationships:**
@@ -65,9 +65,9 @@ YSaar uses Neo4j graph database with the following schema:
 
 1. **No Direct Channel-Video Relationship**: Videos are only accessible through playlists. Each channel has an `uploadsPlaylistId` that references the playlist containing all channel uploads.
 
-2. **User-Specific Settings**: Each user has their own settings nodes (ChannelSetting, PlaylistSetting, VideoSettings) that store user-specific data like custom names, notes, and favorites. This allows multiple users to have the same channel/playlist/video with different preferences.
+2. **User-Specific Setting**: Each user has their own setting nodes (ChannelSetting, PlaylistSetting, VideoSetting) that store user-specific data like custom names, notes, and favorites. This allows multiple users to have the same channel/playlist/video with different preferences.
 
-3. **Shared Content Nodes**: Channel, Playlist, and Video nodes are shared across users. When deleting, the system only removes the user's settings and relationships. The actual content nodes are only deleted if no other users reference them.
+3. **Shared Content Nodes**: Channel, Playlist, and Video nodes are shared across users. When deleting, the system only removes the user's setting and relationships. The actual content nodes are only deleted if no other users reference them.
 
 4. **Multi-User Safety**: All delete operations check for other users before removing shared nodes, ensuring one user's deletion doesn't affect other users' data.
 
@@ -202,11 +202,11 @@ Server functions return consistent data format across all pages:
 ### Available Functions
 
 **getUserChannels**
-- Returns user's YouTube channels with settings
+- Returns user's YouTube channels with setting
 - Data format: `{ channels: Array<{channel, channelSetting}>, totalCount, userId }`
 
 **getUserPlaylists**
-- Returns user's YouTube playlists with settings
+- Returns user's YouTube playlists with setting
 - Data format: `{ playlists: Array<{playlist, playlistSetting}>, totalCount, userId }`
 
 **saveFeedback**
@@ -364,7 +364,7 @@ const channel = {
 
 ### Future Enhancements
 - Detailed channel/playlist view pages
-- Edit custom names and settings inline
+- Edit custom names and setting inline
 - Delete channels/playlists with confirmation
 - Virtualized scrolling for large lists
 - Bulk operations (select multiple, batch actions)

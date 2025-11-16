@@ -60,15 +60,15 @@ export async function sendEmailDirect(options: EmailOptions) {
   // Process HTML content with juice to inline CSS
   const processedContent = juice(content);
 
-  const dbSettings = await getEmailSettings(subDomain);
+  const dbSetting = await getEmailSetting(subDomain);
   let emailInfo;
   try {
-    if (dbSettings?.P.active === "resend") {
+    if (dbSetting?.P.active === "resend") {
       // Use official Resend SDK for Resend provider
-      const resend = new Resend(dbSettings.P.resendApiKey);
+      const resend = new Resend(dbSetting.P.resendApiKey);
 
       const { data, error } = await resend.emails.send({
-        from: dbSettings.P.fromEmail,
+        from: dbSetting.P.fromEmail,
         to: [to],
         subject,
         html: processedContent,
@@ -82,16 +82,16 @@ export async function sendEmailDirect(options: EmailOptions) {
       }
 
       emailInfo = { messageId: data?.id };
-    } else if (dbSettings?.P.active && dbSettings.P.active !== "smtp") {
+    } else if (dbSetting?.P.active && dbSetting.P.active !== "smtp") {
       // Use email service provider for other providers (SendGrid, etc.)
-      const emailService = useEmail(dbSettings);
+      const emailService = useEmail(dbSetting);
       emailInfo = await emailService.send({
         // Not supported yet
         // attachments: attachmentPath && attachmentName ? [{
         //   filename: attachmentName,
         //   path: attachmentPath,
         // }] : undefined,
-        from: dbSettings.P.fromEmail || process.env.SMTP_FROM,
+        from: dbSetting.P.fromEmail || process.env.SMTP_FROM,
         html: processedContent,
         subject,
         to,
@@ -100,13 +100,13 @@ export async function sendEmailDirect(options: EmailOptions) {
       // Fall back to SMTP if no active provider
       const transporter = nodemailer.createTransport({
         auth: {
-          pass: dbSettings?.P.smtpPassword || process.env.SMTP_PASS,
-          user: dbSettings?.P.smtpUsername || process.env.SMTP_USER,
+          pass: dbSetting?.P.smtpPassword || process.env.SMTP_PASS,
+          user: dbSetting?.P.smtpUsername || process.env.SMTP_USER,
         },
-        host: dbSettings?.P.smtpHost || process.env.SMTP_HOST,
-        port: dbSettings?.P.smtpPort || Number(process.env.SMTP_PORT),
+        host: dbSetting?.P.smtpHost || process.env.SMTP_HOST,
+        port: dbSetting?.P.smtpPort || Number(process.env.SMTP_PORT),
         secure:
-          (dbSettings?.P.secure ?? process.env.SMTP_SECURE)
+          (dbSetting?.P.secure ?? process.env.SMTP_SECURE)
             ? process.env.SMTP_SECURE === "true"
             : false,
         tls: {
@@ -126,7 +126,7 @@ export async function sendEmailDirect(options: EmailOptions) {
                 },
               ]
             : undefined,
-        from: dbSettings?.P.fromEmail || process.env.SMTP_FROM,
+        from: dbSetting?.P.fromEmail || process.env.SMTP_FROM,
         html: processedContent,
         subject,
         to,
@@ -143,7 +143,7 @@ export async function sendEmailDirect(options: EmailOptions) {
     attachmentName,
     attachmentPath,
     content: processedContent, // Save the processed content
-    dbSettings,
+    dbSetting,
     emailInfo,
     subject,
     to,
@@ -152,7 +152,7 @@ export async function sendEmailDirect(options: EmailOptions) {
   return emailInfo;
 }
 
-async function getEmailSettings(subDomain: string): Promise<null | Vertex> {
+async function getEmailSetting(subDomain: string): Promise<null | Vertex> {
   const driver = await getDriver();
   const dbSession = driver.session({ database: subDomain });
 
@@ -161,7 +161,7 @@ async function getEmailSettings(subDomain: string): Promise<null | Vertex> {
       subDomain,
       dbSession,
     );
-    return emailSettingVertex || getEnvEmailSettings();
+    return emailSettingVertex || getEnvEmailSetting();
   } finally {
     await dbSession.close();
   }
@@ -172,16 +172,16 @@ async function getEmailSettingVertex(
   dbSession: Session,
 ): Promise<null | Vertex> {
   if (subDomain === ADMIN_DB_NAME) {
-    return await getSystemEmailSettings(subDomain, dbSession);
+    return await getSystemEmailSetting(subDomain, dbSession);
   }
 
   return (
-    (await getSubdomainEmailSettings(dbSession)) ||
-    (await getParentAccountEmailSettings(subDomain))
+    (await getSubdomainEmailSetting(dbSession)) ||
+    (await getParentAccountEmailSetting(subDomain))
   );
 }
 
-function getEnvEmailSettings(): null | Vertex {
+function getEnvEmailSetting(): null | Vertex {
   if (
     !(
       process.env.SMTP_HOST &&
@@ -211,20 +211,20 @@ function getEnvEmailSettings(): null | Vertex {
   };
 }
 
-async function getParentAccountEmailSettings(
+async function getParentAccountEmailSetting(
   subDomain: string,
 ): Promise<null | Vertex> {
   const driver = await getDriver();
   const systemSession = driver.session({ database: ADMIN_DB_NAME });
 
   try {
-    return await getSystemEmailSettings(subDomain, systemSession);
+    return await getSystemEmailSetting(subDomain, systemSession);
   } finally {
     await systemSession.close();
   }
 }
 
-async function getSubdomainEmailSettings(
+async function getSubdomainEmailSetting(
   dbSession: Session,
 ): Promise<null | Vertex> {
   const result = await dbSession.run(
@@ -239,7 +239,7 @@ async function getSubdomainEmailSettings(
     : null;
 }
 
-async function getSystemEmailSettings(
+async function getSystemEmailSetting(
   subDomain: string,
   dbSession: Session,
 ): Promise<null | Vertex> {
@@ -263,7 +263,7 @@ async function saveEmailToDatabase(
     attachmentName,
     attachmentPath,
     content,
-    dbSettings,
+    dbSetting,
     emailInfo,
     subject,
     to,
@@ -271,7 +271,7 @@ async function saveEmailToDatabase(
     attachmentName?: string;
     attachmentPath?: string;
     content: string;
-    dbSettings: null | Vertex;
+    dbSetting: null | Vertex;
     emailInfo: nodemailer.SentMessageInfo | undefined;
     subject: string;
     to: string;
@@ -296,8 +296,8 @@ async function saveEmailToDatabase(
         attachmentPath: attachmentPath || null,
         content,
         from:
-          dbSettings?.P.fromEmail ||
-          dbSettings?.P.from ||
+          dbSetting?.P.fromEmail ||
+          dbSetting?.P.from ||
           process.env.SMTP_FROM ||
           null,
         messageId:

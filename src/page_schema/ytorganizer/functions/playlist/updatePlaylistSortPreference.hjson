@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "updatePlaylistSortPreference",
-        description: "Updates the sort preference and custom order for a user's playlist settings. Supports multi-ownership model - requires ownershipId.",
+        description: "Updates the sort preference and custom order for a user's playlist setting. Supports multi-ownership model - requires ownershipId.",
         body: '''
 // Get the parameters from the context
 const { playlistId, sortBy, customOrder, ownershipId } = args.contextData;
@@ -35,7 +35,7 @@ try {
     throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
   }
 
-  // Update the playlist settings with new sort preference for specific ownership
+  // Update the playlist setting with new sort preference for specific ownership
   const updateQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
     SET ps.sortBy = $sortBy,
@@ -53,7 +53,7 @@ try {
   });
 
   if (updateResult.records.length === 0) {
-    throw new Error("Playlist settings not found for this ownership");
+    throw new Error("Playlist setting not found for this ownership");
   }
 
   // Fetch updated playlist data with video count using helper function

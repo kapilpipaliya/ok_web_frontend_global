@@ -4,15 +4,15 @@ import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-export async function getStripeSettings(): Promise<ServerResult> {
+export async function getStripeSetting(): Promise<ServerResult> {
   "use server";
 
   const { dbSession } = await getDBSessionForSubdomain();
 
   try {
-    // Fetch Stripe settings from database
+    // Fetch Stripe setting from database
     const result = await dbSession.run(
-      "MATCH (s:StripeSettings) RETURN s LIMIT 1",
+      "MATCH (s:StripeSetting) RETURN s LIMIT 1",
     );
 
     if (result.records.length > 0) {
@@ -48,7 +48,7 @@ export async function getStripeSettings(): Promise<ServerResult> {
       };
     }
 
-    // Return empty array if no settings found
+    // Return empty array if no setting found
     return {
       result: [],
     };
@@ -59,7 +59,7 @@ export async function getStripeSettings(): Promise<ServerResult> {
   }
 }
 
-export async function saveStripeSettings(settings: {
+export async function saveStripeSetting(setting: {
   stripeEnabled?: boolean;
   stripePublishableKey?: string;
   stripeSecretKey?: string;
@@ -75,7 +75,7 @@ export async function saveStripeSettings(settings: {
       stripePublishableKey,
       stripeSecretKey,
       stripeWebhookSecret,
-    } = settings;
+    } = setting;
 
     // Encrypt the secret key if provided
     let encryptedSecretKey = stripeSecretKey;
@@ -90,15 +90,15 @@ export async function saveStripeSettings(settings: {
         Buffer.from(stripeWebhookSecret).toString("base64");
     }
 
-    // Check if StripeSettings vertex exists
+    // Check if StripeSetting vertex exists
     const checkResult = await dbSession.run(
-      "MATCH (s:StripeSettings) RETURN s LIMIT 1",
+      "MATCH (s:StripeSetting) RETURN s LIMIT 1",
     );
 
     if (checkResult.records.length > 0) {
-      // Update existing settings
+      // Update existing setting
       const updateQuery = `
-        MATCH (s:StripeSettings)
+        MATCH (s:StripeSetting)
         SET s.stripeEnabled = $stripeEnabled,
             s.stripePublishableKey = $stripePublishableKey,
             s.stripeSecretKey = $stripeSecretKey,
@@ -113,9 +113,9 @@ export async function saveStripeSettings(settings: {
         stripeWebhookSecret: encryptedWebhookSecret || "",
       });
     } else {
-      // Create new settings
+      // Create new setting
       const createQuery = `
-        CREATE (s:StripeSettings {
+        CREATE (s:StripeSetting {
           stripeEnabled: $stripeEnabled,
           stripePublishableKey: $stripePublishableKey,
           stripeSecretKey: $stripeSecretKey,
@@ -132,7 +132,7 @@ export async function saveStripeSettings(settings: {
       });
     }
 
-    return { result: [], message: "Stripe settings saved successfully" };
+    return { result: [], message: "Stripe setting saved successfully" };
   } catch (error) {
     return handleAPIError(error);
   } finally {
@@ -148,7 +148,7 @@ export async function isStripeEnabled(): Promise<ServerResult> {
   try {
     // Check if Stripe is enabled
     const result = await dbSession.run(
-      "MATCH (s:StripeSettings) WHERE s.stripeEnabled = true RETURN s LIMIT 1",
+      "MATCH (s:StripeSetting) WHERE s.stripeEnabled = true RETURN s LIMIT 1",
     );
 
     return { result: result.records.length > 0 };

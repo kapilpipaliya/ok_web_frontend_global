@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "clearAllUserData",
-        description: "Clears all user-specific data (channel settings, playlist settings, video settings) without deleting the actual channels, playlists, or videos",
+        description: "Clears all user-specific data (channel setting, playlist setting, video setting) without deleting the actual channels, playlists, or videos",
         body: '''
 try {
   // Get current authenticated user from session
@@ -53,7 +53,7 @@ try {
     userToClear = currentUser;
   }
 
-  // Step 1: Delete all ownership channel settings and relationships
+  // Step 1: Delete all ownership channel setting and relationships
   const deleteChannelSettingQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
@@ -64,32 +64,32 @@ try {
     userUuid: userToClear.P.uuid
   });
 
-  // Step 2: Delete all ownership playlist settings and relationships
-  const deletePlaylistSettingsQuery = `
+  // Step 2: Delete all ownership playlist setting and relationships
+  const deletePlaylistSettingQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
     DETACH DELETE ps
   `;
 
-  const playlistSettingsResult = await args.session.run(deletePlaylistSettingsQuery, {
+  const playlistSettingResult = await args.session.run(deletePlaylistSettingQuery, {
     userUuid: userToClear.P.uuid
   });
 
-  // Step 3: Delete all ownership video settings and relationships
-  const deleteVideoSettingsQuery = `
+  // Step 3: Delete all ownership video setting and relationships
+  const deleteVideoSettingQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)
     DETACH DELETE vs
   `;
 
-  const videoSettingsResult = await args.session.run(deleteVideoSettingsQuery, {
+  const videoSettingResult = await args.session.run(deleteVideoSettingQuery, {
     userUuid: userToClear.P.uuid
   });
 
   // Get statistics for the response
   const channelSettingDeleted = channelSettingResult.summary.counters.updates().nodesDeleted || 0;
-  const playlistSettingDeleted = playlistSettingsResult.summary.counters.updates().nodesDeleted || 0;
-  const videoSettingDeleted = videoSettingsResult.summary.counters.updates().nodesDeleted || 0;
+  const playlistSettingDeleted = playlistSettingResult.summary.counters.updates().nodesDeleted || 0;
+  const videoSettingDeleted = videoSettingResult.summary.counters.updates().nodesDeleted || 0;
 
   const username = userToClear.P.username || 'User';
   const message = isAdminClear

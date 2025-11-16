@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "deleteVideo",
-        description: "Deletes videos (array, 'all', or 'allInContext') from specific playlists by removing PlaylistSetting->VideoSetting relationships, then cleaning up orphan VideoSettings and Videos. 'allInContext' deletes all videos in the context playlists. With the new schema, videos are owned by playlists, not ownerships.",
+        description: "Deletes videos (array, 'all', or 'allInContext') from specific playlists by removing PlaylistSetting->VideoSetting relationships, then cleaning up orphan VideoSetting and Videos. 'allInContext' deletes all videos in the context playlists. With the new schema, videos are owned by playlists, not ownerships.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -143,37 +143,37 @@ try {
   const deletedVRaw = vResult.records[0]?.get('deletedVideos');
   const deletedVideos = deletedVRaw ? (typeof deletedVRaw.toNumber === 'function' ? deletedVRaw.toNumber() : Number(deletedVRaw)) : 0;
 
-  // CORRECTED SCHEMA - Step 3: Delete orphan VideoSettings (not referenced by any Video)
+  // CORRECTED SCHEMA - Step 3: Delete orphan VideoSetting (not referenced by any Video)
   // This happens when a video is deleted from all playlists
   let videoSettingFilter = '';
   if (videos === 'all' || videos === 'allInContext') {
-    // Check VideoSettings for this ownership
+    // Check VideoSetting for this ownership
     videoSettingFilter = `
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
     `;
   } else {
-    // Check VideoSettings for specific videos
+    // Check VideoSetting for specific videos
     videoSettingFilter = `
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
       WHERE v.youtubeId IN $videoIds
     `;
   }
 
-  const deleteOrphanVideoSettingsQuery = `
+  const deleteOrphanVideoSettingQuery = `
     ${videoSettingFilter}
 
     // Check if the video still exists
     WITH vs, v
     WHERE NOT EXISTS((v)<-[:PlaylistSettingVideo]-(:PlaylistSetting))
 
-    // Video has no playlist references, delete its settings
+    // Video has no playlist references, delete its setting
     DETACH DELETE vs
-    RETURN count(vs) as deletedVideoSettings
+    RETURN count(vs) as deletedVideoSetting
   `;
 
-  const vsResult = await args.session.run(deleteOrphanVideoSettingsQuery, queryParams);
-  const deletedVSRaw = vsResult.records[0]?.get('deletedVideoSettings');
-  const deletedVideoSettings = deletedVSRaw ? (typeof deletedVSRaw.toNumber === 'function' ? deletedVSRaw.toNumber() : Number(deletedVSRaw)) : 0;
+  const vsResult = await args.session.run(deleteOrphanVideoSettingQuery, queryParams);
+  const deletedVSRaw = vsResult.records[0]?.get('deletedVideoSetting');
+  const deletedVideoSetting = deletedVSRaw ? (typeof deletedVSRaw.toNumber === 'function' ? deletedVSRaw.toNumber() : Number(deletedVSRaw)) : 0;
 
   // Generate context name for message
   let contextName = contextType || "playlists";
@@ -186,17 +186,17 @@ try {
   let message;
   const isAll = videos === 'all';
   const isAllInContext = videos === 'allInContext';
-  const totalProcessed = deletedRelationships + deletedVideos + deletedVideoSettings;
+  const totalProcessed = deletedRelationships + deletedVideos + deletedVideoSetting;
 
   if (isAll) {
-    message = `Successfully removed all videos from all playlists${totalProcessed > 0 ? ` (${deletedRelationships} removed)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSettings > 0 ? `, deleted ${deletedVideoSettings} orphan setting(s)` : ''}`;
+    message = `Successfully removed all videos from all playlists${totalProcessed > 0 ? ` (${deletedRelationships} removed)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSetting > 0 ? `, deleted ${deletedVideoSetting} orphan setting(s)` : ''}`;
   } else if (isAllInContext) {
-    message = `Successfully removed all videos from ${contextName}${totalProcessed > 0 ? ` (${deletedRelationships} removed)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSettings > 0 ? `, deleted ${deletedVideoSettings} orphan setting(s)` : ''}`;
+    message = `Successfully removed all videos from ${contextName}${totalProcessed > 0 ? ` (${deletedRelationships} removed)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSetting > 0 ? `, deleted ${deletedVideoSetting} orphan setting(s)` : ''}`;
   } else if (videos.length === 1) {
     const videoTitle = videos[0].P?.title || "Video";
     message = `Successfully removed "${videoTitle}" from ${contextName}${deletedVideos > 0 ? ` (permanently deleted)` : ''}`;
   } else {
-    message = `Successfully removed ${videos.length} video(s) from ${contextName}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSettings > 0 ? `, deleted ${deletedVideoSettings} orphan setting(s)` : ''}`;
+    message = `Successfully removed ${videos.length} video(s) from ${contextName}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}${deletedVideoSetting > 0 ? `, deleted ${deletedVideoSetting} orphan setting(s)` : ''}`;
   }
 
   // Generate contextIds array for return data
@@ -214,7 +214,7 @@ try {
       contextType: contextType,
       contextIds: returnContextIds,
       deletedRelationships: deletedRelationships,
-      deletedVideoSettings: deletedVideoSettings,
+      deletedVideoSetting: deletedVideoSetting,
       deletedVideos: deletedVideos,
       totalVideos: totalVideos,
       totalContextItems: contextItemArray.length

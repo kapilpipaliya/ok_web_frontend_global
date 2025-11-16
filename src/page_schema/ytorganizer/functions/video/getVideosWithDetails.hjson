@@ -29,7 +29,7 @@
  * - skip: number (optional) - Number of results to skip (for pagination)
  *
  * Returns:
- * - Array of {video: Vertex, videoSettings: Vertex, parentPlaylist: {playlist: Vertex, playlistSetting: Vertex}|null}
+ * - Array of {video: Vertex, videoSetting: Vertex, parentPlaylist: {playlist: Vertex, playlistSetting: Vertex}|null}
  */
 try {
   const {
@@ -112,7 +112,7 @@ try {
       OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
     `;
   } else {
-    // Match videos through VideoSettings (only videos belonging to this ownership)
+    // Match videos through VideoSetting (only videos belonging to this ownership)
     videoMatchClause = `
       MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
     `;
@@ -156,7 +156,7 @@ try {
   const videos = result.records.map(record => {
     const videoData = {
       video: args.convertNodeToJson(record.get('v')),
-      videoSettings: args.convertNodeToJson(record.get('vs'))
+      videoSetting: args.convertNodeToJson(record.get('vs'))
     };
 
     // Add playlist information if requested

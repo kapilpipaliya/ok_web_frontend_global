@@ -11,21 +11,21 @@ export async function GET({ request }: APIEvent) {
   try {
     // Fetch OAuth settings from database
     const result = await dbSession.run(
-      "MATCH (o:OAuthSettings) WHERE o.googleEnabled = true RETURN o LIMIT 1",
+      "MATCH (o:OAuthSetting) WHERE o.googleEnabled = true RETURN o LIMIT 1",
     );
 
     if (result.records.length === 0) {
       throw new APIError("Google OAuth is not configured or enabled", 400);
     }
 
-    const oauthSettings = result.records[0].get("o").properties;
+    const oauthSetting = result.records[0].get("o").properties;
 
     // Decrypt the client secret
     let clientSecret = "";
-    if (oauthSettings.googleClientSecretEncrypted) {
+    if (oauthSetting.googleClientSecretEncrypted) {
       try {
         clientSecret = decryptClientSecret(
-          oauthSettings.googleClientSecretEncrypted,
+          oauthSetting.googleClientSecretEncrypted,
         );
       } catch (e) {
         console.error("Failed to decrypt Google client secret:", e);
@@ -33,7 +33,7 @@ export async function GET({ request }: APIEvent) {
       }
     }
 
-    const clientId = oauthSettings.googleClientId;
+    const clientId = oauthSetting.googleClientId;
 
     if (!(clientId && clientSecret)) {
       throw new APIError(

@@ -1,7 +1,7 @@
 /**
  * YouTube API Usage Tracking - Shared Project Quota
  *
- * Tracks YouTube API quota usage at the Google Cloud Project level (OAuthSettings).
+ * Tracks YouTube API quota usage at the Google Cloud Project level (OAuthSetting).
  * All users and ownerships share a single 10,000 units/day quota pool.
  *
  * Key Features:
@@ -72,15 +72,15 @@ export async function logSharedAPIUsage(
     today.setUTCHours(0, 0, 0, 0);
     const dateKey = today.toISOString().split("T")[0]; // YYYY-MM-DD
 
-    // Track at OAuthSettings level (shared quota)
+    // Track at OAuthSetting level (shared quota)
     await session.run(
       `
-      MATCH (settings:OAuthSettings)
-      WHERE settings.googleEnabled = true
-      WITH settings LIMIT 1
+      MATCH (setting:OAuthSetting)
+      WHERE setting.googleEnabled = true
+      WITH setting LIMIT 1
 
       // Create or update shared usage record for today
-      MERGE (settings)-[:OAuthSettingsAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
+      MERGE (setting)-[:OAuthSettingAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
       ON CREATE SET
         usage.date = $dateKey,
         usage.totalCost = 0,
@@ -153,15 +153,15 @@ export async function getTodaySharedAPIUsage(session: Session): Promise<{
 
   const result = await session.run(
     `
-    MATCH (settings:OAuthSettings)
-    WHERE settings.googleEnabled = true
-    WITH settings LIMIT 1
+    MATCH (setting:OAuthSetting)
+    WHERE setting.googleEnabled = true
+    WITH setting LIMIT 1
 
-    OPTIONAL MATCH (settings)-[:OAuthSettingsAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
+    OPTIONAL MATCH (setting)-[:OAuthSettingAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
     OPTIONAL MATCH (usage)-[:YouTubeAPIUsageOperation]->(op:YouTubeOperationUsage)
 
     // Get active (non-expired) reservations
-    OPTIONAL MATCH (settings)-[:OAuthSettingsQuotaReservation]->(res:QuotaReservation)
+    OPTIONAL MATCH (setting)-[:OAuthSettingQuotaReservation]->(res:QuotaReservation)
     WHERE res.expiresAt > datetime()
 
     RETURN COALESCE(usage.totalCost, 0) as totalCost,
@@ -238,7 +238,7 @@ export async function getSharedAPIUsageByOwnership(
 
   const result = await session.run(
     `
-    MATCH (settings:OAuthSettings)-[:OAuthSettingsAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
+    MATCH (setting:OAuthSetting)-[:OAuthSettingAPIUsage]->(usage:YouTubeAPIUsage {date: $dateKey})
     MATCH (usage)-[:YouTubeAPIUsageByOwnership]->(ownershipUsage:YouTubeOwnershipUsage)
     MATCH (o:YouTubeOwnership {key: ownershipUsage.ownershipId})
 
@@ -322,9 +322,9 @@ export async function reserveQuota(
 
   await session.run(
     `
-    MATCH (settings:OAuthSettings)
-    WHERE settings.googleEnabled = true
-    WITH settings LIMIT 1
+    MATCH (setting:OAuthSetting)
+    WHERE setting.googleEnabled = true
+    WITH setting LIMIT 1
 
     CREATE (res:QuotaReservation {
       id: $reservationId,
@@ -335,7 +335,7 @@ export async function reserveQuota(
       createdAt: datetime(),
       expiresAt: datetime($expiresAt)
     })
-    CREATE (settings)-[:OAuthSettingsQuotaReservation]->(res)
+    CREATE (setting)-[:OAuthSettingQuotaReservation]->(res)
 
     RETURN res.id as id
   `,
@@ -387,7 +387,7 @@ async function tryBumpLowerPriorityReservations(
   // Find lower priority reservations
   const result = await session.run(
     `
-    MATCH (settings:OAuthSettings)-[:OAuthSettingsQuotaReservation]->(res:QuotaReservation)
+    MATCH (setting:OAuthSetting)-[:OAuthSettingQuotaReservation]->(res:QuotaReservation)
     WHERE res.priority < $myPriority AND res.expiresAt > datetime()
     RETURN res.id as id, res.reservedAmount as amount, res.ownershipId as ownershipId
     ORDER BY res.priority ASC, res.createdAt ASC
@@ -460,7 +460,7 @@ export async function getSharedAPIUsageHistory(
 > {
   const result = await session.run(
     `
-    MATCH (settings:OAuthSettings)-[:OAuthSettingsAPIUsage]->(usage:YouTubeAPIUsage)
+    MATCH (setting:OAuthSetting)-[:OAuthSettingAPIUsage]->(usage:YouTubeAPIUsage)
     WHERE usage.createdAt >= datetime() - duration({days: $days})
     OPTIONAL MATCH (usage)-[:YouTubeAPIUsageOperation]->(op:YouTubeOperationUsage)
     RETURN usage.date as date,

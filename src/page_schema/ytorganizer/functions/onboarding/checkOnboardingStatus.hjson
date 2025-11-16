@@ -20,15 +20,15 @@ try {
 
   const { markComplete } = args.contextData || {};
 
-  // Check if user has onboarding status in settings
-  const settingsResult = await args.session.run(`
+  // Check if user has onboarding status in setting
+  const settingResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})
     RETURN u.ytoOnboardingComplete as onboardingComplete
   `, { userUuid: user.P.uuid });
 
   let isOnboarded = false;
-  if (settingsResult.records.length > 0) {
-    isOnboarded = settingsResult.records[0].get('onboardingComplete') || false;
+  if (settingResult.records.length > 0) {
+    isOnboarded = settingResult.records[0].get('onboardingComplete') || false;
   }
 
   // If marking as complete

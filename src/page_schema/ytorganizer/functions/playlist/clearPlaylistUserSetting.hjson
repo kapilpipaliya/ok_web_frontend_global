@@ -1,11 +1,11 @@
 {
   vertexes: [
     {
-      id: "clear_playlist_user_settings_function",
+      id: "clear_playlist_user_setting_function",
       L: "Function",
       P: {
-        key: "clearPlaylistUserSettings",
-        description: "Clears all user-specific settings for a playlist including custom name, sort preferences, and display preferences",
+        key: "clearPlaylistUserSetting",
+        description: "Clears all user-specific setting for a playlist including custom name, sort preferences, and display preferences",
         body: '''
 // Get the playlist ID and ownershipId from the context
 const { playlistId, ownershipId } = args.contextData;
@@ -61,15 +61,15 @@ try {
   if (!playlistSetting) {
     return {
       success: true,
-      message: "No user settings found for this playlist",
+      message: "No user setting found for this playlist",
       data: {
         playlistId: playlistId,
-        settingsCleared: false
+        settingCleared: false
       }
     };
   }
 
-  // Reset the playlist settings to default values instead of deleting
+  // Reset the playlist setting to default values instead of deleting
   // This maintains the relationship structure and follows the same pattern as savePlaylist
   const resetQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
@@ -92,17 +92,17 @@ try {
 
   return {
     success: true,
-    message: wasReset ? "Playlist settings have been reset to defaults" : "No user settings found for this playlist",
+    message: wasReset ? "Playlist setting have been reset to defaults" : "No user setting found for this playlist",
     data: {
       playlistId: playlistId,
-      settingsCleared: wasReset,
+      settingCleared: wasReset,
       resetCount: wasReset ? 1 : 0
     }
   };
 
 } catch (error) {
-  console.error('Error clearing playlist user settings:', error);
-  throw new Error(`Failed to clear playlist settings: ${error.message}`);
+  console.error('Error clearing playlist user setting:', error);
+  throw new Error(`Failed to clear playlist setting: ${error.message}`);
 }
 '''
       }

@@ -1,0 +1,164 @@
+{
+  vertexes: [
+    {
+      id: "save_yto_user_setting_function",
+      L: "Function",
+      P: {
+        key: "saveYTOUserSetting",
+        description: "Saves YouTube Organizer user setting (sort preferences, view modes, etc.)",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Get setting from request
+  const { setting } = args.contextData;
+
+  if (!setting) {
+    throw new Error("Setting object is required");
+  }
+
+  // Default values for setting
+  const defaultSortPreferences = {
+    channels: "title_asc",
+    playlists: "title_asc",
+    videos: "position_asc",
+    favourites: "favourited_desc"
+  };
+
+  const defaultCardFieldSetting = {
+    video: ["description", "channel", "publishedAt", "duration", "viewCount"],
+    playlist: ["description", "videoCount", "updatedAt", "channelTitle"],
+    channel: ["description", "videoCount", "subscriberCount", "publishedAt"]
+  };
+
+  // Parse sortPreferences if it's a string, otherwise use as-is
+  const sortPrefs = typeof setting.sortPreferences === 'string'
+    ? setting.sortPreferences
+    : JSON.stringify(setting.sortPreferences || defaultSortPreferences);
+
+  // Parse and validate cardFieldSetting
+  let cardFieldSetting = defaultCardFieldSetting;
+  if (setting.cardFieldSetting) {
+    const parsed = typeof setting.cardFieldSetting === 'string'
+      ? JSON.parse(setting.cardFieldSetting)
+      : setting.cardFieldSetting;
+
+    // Validate structure and limits
+    if (parsed && typeof parsed === 'object') {
+      const validatedCardSetting = {};
+
+      // Validate video fields (max 5)
+      if (Array.isArray(parsed.video)) {
+        validatedCardSetting.video = parsed.video.slice(0, 5);
+      } else {
+        validatedCardSetting.video = defaultCardFieldSetting.video;
+      }
+
+      // Validate playlist fields (max 5)
+      if (Array.isArray(parsed.playlist)) {
+        validatedCardSetting.playlist = parsed.playlist.slice(0, 5);
+      } else {
+        validatedCardSetting.playlist = defaultCardFieldSetting.playlist;
+      }
+
+      // Validate channel fields (max 5)
+      if (Array.isArray(parsed.channel)) {
+        validatedCardSetting.channel = parsed.channel.slice(0, 5);
+      } else {
+        validatedCardSetting.channel = defaultCardFieldSetting.channel;
+      }
+
+      cardFieldSetting = validatedCardSetting;
+    }
+  }
+
+  const cardFieldSettingString = JSON.stringify(cardFieldSetting);
+
+  // Validate and prepare setting for storage
+  const validatedSetting = {
+    sortPreferences: sortPrefs,
+    viewMode: setting.viewMode || "grid",
+    itemsPerPage: setting.itemsPerPage || 50,
+    autoRefreshEnabled: setting.autoRefreshEnabled || false,
+    defaultOwnershipId: setting.defaultOwnershipId || null,
+    cardFieldSetting: cardFieldSettingString
+  };
+
+  // Save or update setting
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    MERGE (u)-[:YTOUserSetting]->(s:YTOUserSetting)
+    ON CREATE SET
+      s.key = $key,
+      s.createdAt = datetime()
+    SET
+      s.sortPreferences = $sortPreferences,
+      s.viewMode = $viewMode,
+      s.itemsPerPage = $itemsPerPage,
+      s.autoRefreshEnabled = $autoRefreshEnabled,
+      s.defaultOwnershipId = $defaultOwnershipId,
+      s.cardFieldSetting = $cardFieldSetting,
+      s.updatedAt = datetime()
+    RETURN s
+  `;
+
+  const result = await args.session.run(query, {
+    userUuid: user.P.uuid,
+    key: `yto_setting_${user.P.uuid}`,
+    sortPreferences: validatedSetting.sortPreferences,
+    viewMode: validatedSetting.viewMode,
+    itemsPerPage: validatedSetting.itemsPerPage,
+    autoRefreshEnabled: validatedSetting.autoRefreshEnabled,
+    defaultOwnershipId: validatedSetting.defaultOwnershipId,
+    cardFieldSetting: validatedSetting.cardFieldSetting
+  });
+
+  if (result.records.length === 0) {
+    throw new Error("Failed to save setting");
+  }
+
+  // Convert saved node to vertex format
+  const savedNode = result.records[0].get('s');
+  const savedVertex = args.convertNodeToJson(savedNode);
+
+  return {
+    success: true,
+    data: {
+      setting: savedVertex
+    },
+    message: "Setting saved successfully"
+  };
+
+} catch (error) {
+  console.error("Error saving YTO user setting:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to save setting. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to save your setting.";
+  } else if (error.message.includes("Setting object is required")) {
+    userMessage = "Invalid setting data provided.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

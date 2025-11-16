@@ -29,15 +29,15 @@ const initializeFormData = () => {
 
   if (editMode && itemData) {
     // Determine actual type from itemData structure
-    let settings;
+    let setting;
     if (itemData.video) {
-      settings = itemData.videoSettings;
+      setting = itemData.videoSetting;
     } else if (itemData.playlist) {
-      settings = itemData.playlistSetting;
+      setting = itemData.playlistSetting;
     } else {
-      settings = itemData.channelSetting;
+      setting = itemData.channelSetting;
     }
-    setCustomName(settings?.P?.customName || "");
+    setCustomName(setting?.P?.customName || "");
   } else {
     setUrl("");
     setCustomName("");
@@ -82,21 +82,21 @@ const handleSave = async () => {
     let result;
 
     if (editMode) {
-      // Edit mode: update settings
+      // Edit mode: update setting
       let data, youtubeId, functionName;
 
       if (actualType === "videos") {
         data = itemData.video;
         youtubeId = data?.P?.youtubeId;
-        functionName = "updateVideoSettings";
+        functionName = "updateVideoSetting";
       } else if (actualType === "playlists") {
         data = itemData.playlist;
         youtubeId = data?.P?.youtubeId;
-        functionName = "updatePlaylistSettings";
+        functionName = "updatePlaylistSetting";
       } else {
         data = itemData.channel?.channel || itemData.channel;
         youtubeId = data?.P?.youtubeId;
-        functionName = "updateChannelSettings";
+        functionName = "updateChannelSetting";
       }
 
       result = await args.fns.executeYTOFunction(functionName, {
@@ -323,7 +323,7 @@ if (isProcessing) {
   title = `${itemTypeName} Processing`;
 } else {
   title = editMode
-    ? (actualType === "videos" ? "Edit Video Settings" : (actualType === "playlists" ? "Edit Playlist Settings" : "Edit Channel Settings"))
+    ? (actualType === "videos" ? "Edit Video Setting" : (actualType === "playlists" ? "Edit Playlist Setting" : "Edit Channel Setting"))
     : (contentType === "playlists" ? "Add Playlist" : "Add Channel");
 }
 

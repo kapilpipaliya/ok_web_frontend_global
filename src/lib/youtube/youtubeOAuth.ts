@@ -38,7 +38,7 @@ async function getOAuthConfig(
   redirectUri: string;
 }> {
   const result = await session.run(`
-    MATCH (s:OAuthSettings)
+    MATCH (s:OAuthSetting)
     WHERE s.googleEnabled = true
     RETURN s.googleClientId as clientId,
            s.googleClientSecretEncrypted as clientSecretEncrypted

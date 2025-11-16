@@ -80,7 +80,7 @@ try {
 
   // Get OAuth configuration from database
   const configResult = await args.session.run(`
-    MATCH (s:OAuthSettings)
+    MATCH (s:OAuthSetting)
     WHERE s.googleEnabled = true
     RETURN s.googleClientId as clientId,
            s.googleClientSecretEncrypted as clientSecretEncrypted

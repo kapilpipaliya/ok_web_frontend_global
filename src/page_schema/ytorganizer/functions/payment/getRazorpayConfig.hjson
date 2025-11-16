@@ -8,9 +8,9 @@
         description: "Get Razorpay public configuration (Key ID only, not secrets)",
         body: '''
 try {
-  // Fetch Razorpay settings from database
+  // Fetch Razorpay setting from database
   const result = await args.session.run(
-    "MATCH (s:RazorpaySettings) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
+    "MATCH (s:RazorpaySetting) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
   );
 
   if (result.records.length === 0) {
@@ -24,14 +24,14 @@ try {
     };
   }
 
-  const settings = result.records[0].get("s").properties;
+  const setting = result.records[0].get("s").properties;
 
   // Only return public key ID, not secrets
   return {
     success: true,
     data: {
-      enabled: settings.razorpayEnabled || false,
-      keyId: settings.razorpayKeyId || null
+      enabled: setting.razorpayEnabled || false,
+      keyId: setting.razorpayKeyId || null
     }
   };
 

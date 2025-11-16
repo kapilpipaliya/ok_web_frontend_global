@@ -90,7 +90,7 @@ export function decryptToken(encryptedToken: string): string {
 }
 
 /**
- * Encrypts client secret (for OAuth settings)
+ * Encrypts client secret (for OAuth setting)
  * Same implementation as token encryption
  */
 export function encryptClientSecret(secret: string): string {
@@ -98,7 +98,7 @@ export function encryptClientSecret(secret: string): string {
 }
 
 /**
- * Decrypts client secret (for OAuth settings)
+ * Decrypts client secret (for OAuth setting)
  * Same implementation as token decryption
  */
 export function decryptClientSecret(encryptedSecret: string): string {

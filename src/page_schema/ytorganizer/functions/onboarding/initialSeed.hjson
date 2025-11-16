@@ -5,20 +5,20 @@
       L: "Function",
       P: {
         key: "initialSeed",
-        description: "Seeds initial data for general settings, email settings, and OAuth settings",
+        description: "Seeds initial data for general setting, email setting, and OAuth setting",
         body: '''
-// This function initializes the database with default settings
+// This function initializes the database with default setting
 // It should only be run once during initial setup
 
 try {
   const results = {
-    generalSettings: null,
-    emailSettings: null,
-    oauthSettings: null
+    generalSetting: null,
+    emailSetting: null,
+    oauthSetting: null
   };
 
-  // 1. Create/Update General Settings
-  const generalSettingsData = {
+  // 1. Create/Update General Setting
+  const generalSettingData = {
     appName: "YSaar",
     redirectUrlAfterSignin: "/home"
   };
@@ -31,12 +31,12 @@ try {
     // Update existing
     const updateGeneral = await args.session.run(
       `MATCH (s:GlobalSetting)
-       SET s += $settings,
+       SET s += $setting,
            s.updatedAt = datetime()
        RETURN s`,
-      { settings: generalSettingsData }
+      { setting: generalSettingData }
     );
-    results.generalSettings = updateGeneral.records[0]?.get("s").properties;
+    results.generalSetting = updateGeneral.records[0]?.get("s").properties;
   } else {
     // Create new
     const createGeneral = await args.session.run(
@@ -45,15 +45,15 @@ try {
         createdAt: datetime(),
         updatedAt: datetime()
       })
-      SET s += $settings
+      SET s += $setting
       RETURN s`,
-      { key: "Default", settings: generalSettingsData }
+      { key: "Default", setting: generalSettingData }
     );
-    results.generalSettings = createGeneral.records[0]?.get("s").properties;
+    results.generalSetting = createGeneral.records[0]?.get("s").properties;
   }
 
-  // 2. Create/Update Email Settings
-  const emailSettingsData = {
+  // 2. Create/Update Email Setting
+  const emailSettingData = {
     active: "resend",
     resendApiKey: "re_cHB3wryZ_9aGvavTVXqbMYVAndzQvcxNY",
     fromEmail: "noreplay@updates.ysaar.com"
@@ -67,12 +67,12 @@ try {
     // Update existing
     const updateEmail = await args.session.run(
       `MATCH (s:EmailSetting)
-       SET s += $settings,
+       SET s += $setting,
            s.updatedAt = datetime()
        RETURN s`,
-      { settings: emailSettingsData }
+      { setting: emailSettingData }
     );
-    results.emailSettings = updateEmail.records[0]?.get("s").properties;
+    results.emailSetting = updateEmail.records[0]?.get("s").properties;
   } else {
     // Create new
     const createEmail = await args.session.run(
@@ -81,14 +81,14 @@ try {
         createdAt: datetime(),
         updatedAt: datetime()
       })
-      SET s += $settings
+      SET s += $setting
       RETURN s`,
-      { key: "Default", settings: emailSettingsData }
+      { key: "Default", setting: emailSettingData }
     );
-    results.emailSettings = createEmail.records[0]?.get("s").properties;
+    results.emailSetting = createEmail.records[0]?.get("s").properties;
   }
 
-  // 3. Create/Update OAuth Settings
+  // 3. Create/Update OAuth Setting
   const googleClientSecret = "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";
   let encryptedSecret = "";
 
@@ -99,32 +99,32 @@ try {
     throw new Error("Failed to encrypt OAuth client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured.");
   }
 
-  const oauthSettingsData = {
+  const oauthSettingData = {
     googleEnabled: true,
     googleClientId: "39168961833-tu9lboivh4c7580q1paj70ccd0hlg1fb.apps.googleusercontent.com",
     googleClientSecretEncrypted: encryptedSecret
   };
 
   const checkOAuth = await args.session.run(
-    "MATCH (o:OAuthSettings) RETURN o"
+    "MATCH (o:OAuthSetting) RETURN o"
   );
 
   if (checkOAuth.records.length > 0) {
     // Update existing
     const updateOAuth = await args.session.run(
-      `MATCH (o:OAuthSettings)
+      `MATCH (o:OAuthSetting)
        SET o.googleClientId = $googleClientId,
            o.googleClientSecretEncrypted = $googleClientSecretEncrypted,
            o.googleEnabled = $googleEnabled,
            o.updatedAt = datetime()
        RETURN o`,
-      oauthSettingsData
+      oauthSettingData
     );
-    results.oauthSettings = updateOAuth.records[0]?.get("o").properties;
+    results.oauthSetting = updateOAuth.records[0]?.get("o").properties;
   } else {
     // Create new
     const createOAuth = await args.session.run(
-      `CREATE (o:OAuthSettings {
+      `CREATE (o:OAuthSetting {
         googleClientId: $googleClientId,
         googleClientSecretEncrypted: $googleClientSecretEncrypted,
         googleEnabled: $googleEnabled,
@@ -132,9 +132,9 @@ try {
         updatedAt: datetime()
       })
       RETURN o`,
-      oauthSettingsData
+      oauthSettingData
     );
-    results.oauthSettings = createOAuth.records[0]?.get("o").properties;
+    results.oauthSetting = createOAuth.records[0]?.get("o").properties;
   }
 
   return {

@@ -24,7 +24,7 @@ A full-stack Razorpay payment integration that enables users to subscribe to dif
 
 #### Razorpay Settings Management
 **Files Created**:
-- `src/pages/global/razorpay/razorpayServerFunctions.ts`
+- `src/pages/global/razorpay/razorpayServerFunction.ts`
 - `src/pages/global/razorpay/RazorpaySettings.tsx`
 
 **Features**:
@@ -112,7 +112,7 @@ A full-stack Razorpay payment integration that enables users to subscribe to dif
 
 **RazorpaySettings**:
 ```cypher
-(:RazorpaySettings {
+(:RazorpaySetting {
   razorpayEnabled: boolean,
   razorpayKeyId: string,
   razorpayKeySecret: string (encrypted),
@@ -293,7 +293,7 @@ RAZORPAY_WEBHOOK_SECRET=xxxxxxxxxxxxxxxx
 ```
 src/
 ├── pages/global/razorpay/
-│   ├── razorpayServerFunctions.ts
+│   ├── razorpayServerFunction.ts
 │   └── RazorpaySettings.tsx
 ├── routes/api/razorpay/
 │   ├── checkout.ts

@@ -26,18 +26,16 @@ const initializeNote = () => {
 const handleSave = async () => {
   const noteValue = note().trim();
   const item = args.contextData.props?.item;
-  const itemType = args.contextData.props?.itemType; // 'video', 'channel', 'playlist'
   const onSave = args.contextData.props?.onSave;
   const onClose = args.contextData.props?.onClose;
 
   setIsSubmitting(true);
 
   try {
-    // Call save callback with note data
+    // Call save callback with note data (itemType is inferred server-side)
     if (onSave) {
       await onSave({
         item,
-        itemType,
         note: noteValue
       });
     }
@@ -167,10 +165,21 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const itemType = args.contextData.props?.itemType || "item";
+const item = args.contextData.props?.item;
 const existingNote = args.contextData.props?.existingNote || "";
 const hasNote = existingNote.length > 0;
 const action = hasNote ? "Edit" : "Add";
+
+// Infer item type from the item labels
+let itemType = "item";
+if (item?.L?.includes('Video')) {
+  itemType = "video";
+} else if (item?.L?.includes('Channel')) {
+  itemType = "channel";
+} else if (item?.L?.includes('Playlist')) {
+  itemType = "playlist";
+}
+
 const title = `${action} note for ${itemType}`;
 
 return {

@@ -20,18 +20,18 @@ try {
     throw new Error("Order ID, payment ID, and signature are required");
   }
 
-  // Fetch Razorpay settings
-  const settingsResult = await args.session.run(
-    "MATCH (s:RazorpaySettings) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
+  // Fetch Razorpay setting
+  const settingResult = await args.session.run(
+    "MATCH (s:RazorpaySetting) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
   );
 
-  if (settingsResult.records.length === 0) {
+  if (settingResult.records.length === 0) {
     throw new Error("Payment system is not configured");
   }
 
-  const settingsNode = settingsResult.records[0].get("s");
-  const settingsVertex = args.convertNodeToJson(settingsNode);
-  const keySecret = Buffer.from(settingsVertex.P.razorpayKeySecret, "base64").toString("utf-8");
+  const settingNode = settingResult.records[0].get("s");
+  const settingVertex = args.convertNodeToJson(settingNode);
+  const keySecret = Buffer.from(settingVertex.P.razorpayKeySecret, "base64").toString("utf-8");
 
   // Verify signature using Razorpay's algorithm
   const crypto = require("crypto");

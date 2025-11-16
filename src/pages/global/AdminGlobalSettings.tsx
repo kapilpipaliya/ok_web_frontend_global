@@ -1,9 +1,9 @@
 import { SettingsLayout } from "~/components/styled/SettingsLayout";
 import { ActivityLog } from "~/pages/global/activity/ActivityLog";
 import { EmailAudit } from "~/pages/global/email/EmailAudit";
-import { EmailSettings } from "~/pages/global/email/EmailSettings";
+import { EmailSetting } from "~/pages/global/email/EmailSetting";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
-import { OAuthSettings } from "~/pages/global/oauth/OAuthSettings";
+import { OAuthSetting } from "~/pages/global/oauth/OAuthSetting";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 import { RazorpaySettings } from "~/pages/global/razorpay/RazorpaySettings";
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
@@ -30,14 +30,14 @@ export default function AdminGlobalSettings() {
     //   label: "Company Details",
     // },
     {
-      component: EmailSettings,
+      component: EmailSetting,
       group: "Communication",
       icon: "ph:envelope",
       id: "email",
       label: "Email Settings",
     },
     {
-      component: OAuthSettings,
+      component: OAuthSetting,
       group: "Authentication",
       icon: "ph:key",
       id: "oauth",

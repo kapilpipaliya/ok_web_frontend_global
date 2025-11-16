@@ -67,7 +67,7 @@ export async function POST({ request }: APIEvent) {
 
     // Fetch Razorpay settings
     const settingsResult = await dbSession.run(
-      "MATCH (s:RazorpaySettings) WHERE s.razorpayEnabled = true RETURN s LIMIT 1",
+      "MATCH (s:RazorpaySetting) WHERE s.razorpayEnabled = true RETURN s LIMIT 1",
     );
 
     if (settingsResult.records.length === 0) {

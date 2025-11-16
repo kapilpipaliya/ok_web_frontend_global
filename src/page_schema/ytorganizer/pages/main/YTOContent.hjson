@@ -61,9 +61,9 @@ const [searchInput, setSearchInput] = args.createSignal(searchQuery);
 // State for favourites view
 const [favouritesData, setFavouritesData] = args.createSignal(null);
 
-// State for user settings
-const [userSettings, setUserSettings] = args.createSignal(null);
-const [settingsLoaded, setSettingsLoaded] = args.createSignal(false);
+// State for user setting
+const [userSetting, setUserSetting] = args.createSignal(null);
+const [settingLoaded, setSettingLoaded] = args.createSignal(false);
 
 // Sort state for different views - split into field + direction for better UX
 // List view (channels/playlists)
@@ -180,20 +180,20 @@ const splitSortValue = (sortValue) => {
   return { field: match[1], direction: match[2] };
 };
 
-// Function to load user settings
-const loadUserSettings = async () => {
+// Function to load user setting
+const loadUserSetting = async () => {
   try {
-    const result = await args.fns.executeYTOFunction("getYTOUserSettings", {});
+    const result = await args.fns.executeYTOFunction("getYTOUserSetting", {});
 
-    if (result?.result?.success && result?.result?.data?.settings) {
-      const settingsVertex = result.result.data.settings;
-      setUserSettings(settingsVertex);
+    if (result?.result?.success && result?.result?.data?.setting) {
+      const settingVertex = result.result.data.setting;
+      setUserSetting(settingVertex);
 
-      // Update sort signals from saved settings (access via .P property)
-      if (settingsVertex.P?.sortPreferences) {
-        const prefs = typeof settingsVertex.P.sortPreferences === 'string'
-          ? JSON.parse(settingsVertex.P.sortPreferences)
-          : settingsVertex.P.sortPreferences;
+      // Update sort signals from saved setting (access via .P property)
+      if (settingVertex.P?.sortPreferences) {
+        const prefs = typeof settingVertex.P.sortPreferences === 'string'
+          ? JSON.parse(settingVertex.P.sortPreferences)
+          : settingVertex.P.sortPreferences;
 
         // Set initial sort values from preferences (split into field + direction)
         if (prefs.channels) {
@@ -213,11 +213,11 @@ const loadUserSettings = async () => {
         }
       }
 
-      setSettingsLoaded(true);
+      setSettingLoaded(true);
     }
   } catch (error) {
-    console.error("Error loading user settings:", error);
-    setSettingsLoaded(true);  // Mark as loaded even on error to prevent blocking
+    console.error("Error loading user setting:", error);
+    setSettingLoaded(true);  // Mark as loaded even on error to prevent blocking
   }
 };
 
@@ -229,15 +229,15 @@ args.createEffect(() => {
   const favourites = isFavouritesView();
 
   // Clear URL on view change (not on initial mount)
-  if (settingsLoaded()) {
+  if (settingLoaded()) {
     clearURLSort();
   }
 });
 
-// Save user settings when sort preferences change
-const debouncedSaveSettings = args.debounce(async () => {
+// Save user setting when sort preferences change
+const debouncedSaveSetting = args.debounce(async () => {
   try {
-    const currentSettingsVertex = userSettings() || { P: {} };
+    const currentSettingVertex = userSetting() || { P: {} };
 
     const sortPreferences = {
       channels: listSortBy(),
@@ -246,33 +246,33 @@ const debouncedSaveSettings = args.debounce(async () => {
       favourites: favouritesSortBy()
     };
 
-    const updatedSettingsProps = {
-      ...currentSettingsVertex.P,
+    const updatedSettingProps = {
+      ...currentSettingVertex.P,
       sortPreferences: JSON.stringify(sortPreferences)
     };
 
-    await args.fns.executeYTOFunction("saveYTOUserSettings", {
-      settings: updatedSettingsProps
+    await args.fns.executeYTOFunction("saveYTOUserSetting", {
+      setting: updatedSettingProps
     });
 
     // Update local vertex with new properties
-    setUserSettings({
-      ...currentSettingsVertex,
-      P: updatedSettingsProps
+    setUserSetting({
+      ...currentSettingVertex,
+      P: updatedSettingProps
     });
   } catch (error) {
-    console.error("Error saving user settings:", error);
+    console.error("Error saving user setting:", error);
   }
 }, 1000);  // Debounce for 1 second to avoid excessive saves
 
-// Watch sort changes and save settings
+// Watch sort changes and save setting
 args.createEffect(
   args.on(
-    () => [listSortBy(), detailSortBy(), favouritesSortBy(), settingsLoaded()],
+    () => [listSortBy(), detailSortBy(), favouritesSortBy(), settingLoaded()],
     () => {
-      // Only save if settings have been loaded (avoid saving defaults before load)
-      if (settingsLoaded()) {
-        debouncedSaveSettings();
+      // Only save if setting have been loaded (avoid saving defaults before load)
+      if (settingLoaded()) {
+        debouncedSaveSetting();
       }
     }
   )
@@ -387,7 +387,7 @@ const handleSortDirectionToggle = () => {
 
 // Note modal state
 const [isNoteModalOpen, setIsNoteModalOpen] = args.createSignal(false);
-const [noteModalData, setNoteModalData] = args.createStore({ item: null, itemType: null, existingNote: "" });
+const [noteModalData, setNoteModalData] = args.createStore({ item: null, existingNote: "" });
 
 // Virtualization constants
 const overscan = 5;
@@ -431,11 +431,11 @@ const filteredDetailItems = args.createMemo(() => {
     // For videos (in playlist detail view)
     if (item.video) {
       const video = item.video;
-      const videoSettings = item.videoSettings;
+      const videoSetting = item.videoSetting;
       const title = video?.P?.title?.toLowerCase() || "";
       const description = video?.P?.description?.toLowerCase() || "";
       const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
-      const notes = videoSettings?.P?.notes?.toLowerCase() || "";
+      const notes = videoSetting?.P?.notes?.toLowerCase() || "";
       return title.includes(term) || description.includes(term) || channelTitle.includes(term) || notes.includes(term);
     }
 
@@ -529,11 +529,11 @@ const getFavouritesItems = args.createMemo(() => {
         combined.push({ ...item, resultType: 'video' });
       } else {
         const video = item.video;
-        const videoSettings = item.videoSettings;
+        const videoSetting = item.videoSetting;
         const title = video?.P?.title?.toLowerCase() || "";
         const description = video?.P?.description?.toLowerCase() || "";
         const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
-        const notes = videoSettings?.P?.notes?.toLowerCase() || "";
+        const notes = videoSetting?.P?.notes?.toLowerCase() || "";
         if (title.includes(term) || description.includes(term) || channelTitle.includes(term) || notes.includes(term)) {
           combined.push({ ...item, resultType: 'video' });
         }
@@ -1056,32 +1056,25 @@ const editCustomName = async (item) => {
 };
 
 // Alias for YTOCard component - converts item structure to match editCustomName expectations
-const openCustomNameModal = (item, itemType, itemSettings) => {
-  let contentType, itemData;
-
-  if (itemType === "video") {
-    contentType = "videos";
-    itemData = { video: item, videoSettings: itemSettings };
-  } else if (itemType === "playlist") {
-    contentType = "playlists";
-    itemData = { playlist: item, playlistSetting: itemSettings };
-  } else {
-    contentType = "channels";
-    itemData = { channel: item, channelSetting: itemSettings };
+const openCustomNameModal = (itemData) => {
+  // If called with old signature (item, itemType, itemSetting), convert to new format
+  if (arguments.length > 1) {
+    const [item, itemType, itemSetting] = arguments;
+    const typeMap = {
+      video: { itemKey: 'video', settingKey: 'videoSetting' },
+      playlist: { itemKey: 'playlist', settingKey: 'playlistSetting' },
+      channel: { itemKey: 'channel', settingKey: 'channelSetting' }
+    };
+    const config = typeMap[itemType] || typeMap.channel;
+    itemData = { [config.itemKey]: item, [config.settingKey]: itemSetting };
   }
 
   setModalData({ editMode: true, itemData });
   setIsModalOpen(true);
 };
 
+// Unified delete function for channels, playlists, and videos
 const deleteItem = async (item) => {
-  // Determine item type based on what exists in the item object
-  // This is important because we can delete playlists from a channel detail view
-  const isPlaylist = !!item.playlist;
-  const data = isPlaylist ? item.playlist : item.channel;
-  const itemType = isPlaylist ? "playlist" : "channel";
-  const title = data?.P?.title || "this item";
-
   const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
   if (!rbConfirm) {
     args.showErrorToast("Confirmation dialog not available");
@@ -1089,12 +1082,32 @@ const deleteItem = async (item) => {
     return;
   }
 
-  let message = `Are you sure you want to delete "${title}"?`;
-  if (itemType === "channel") {
-    message += "\n\nThis will also delete:\n• All playlists in this channel\n• All videos that are only in this channel's playlists";
-  } else if (itemType === "playlist") {
-    message += "\n\nThis will also delete:\n• All videos that are only in this playlist";
+  // Infer item type and extract data
+  const itemInfo = inferItemType(item);
+  if (!itemInfo) {
+    args.showErrorToast("Cannot determine item type");
+    setActiveMenu(null);
+    return;
   }
+
+  const { type: itemType, item: data } = itemInfo;
+  const title = data?.P?.title || "this item";
+
+  // Build confirmation message with type-specific details
+  const deleteMessages = {
+    channel: "\n\nThis will also delete:\n• All playlists in this channel\n• All videos that are only in this channel's playlists",
+    playlist: "\n\nThis will also delete:\n• All videos that are only in this playlist",
+    video: () => {
+      const detail = detailData();
+      const contextItem = detail?.playlist?.playlist;
+      const contextName = contextItem?.P?.title || "current view";
+      return `\n\nRemoving from ${contextName}.\n\nNote: This video will only be deleted if it doesn't exist in other playlists or the channel.`;
+    }
+  };
+
+  let message = `Are you sure you want to delete "${title}"?`;
+  const extraMessage = deleteMessages[itemType];
+  message += typeof extraMessage === 'function' ? extraMessage() : extraMessage;
   message += "\n\nThis action cannot be undone!";
 
   const confirmed = await rbConfirm({
@@ -1107,86 +1120,53 @@ const deleteItem = async (item) => {
 
   if (confirmed) {
     try {
-      const functionName = itemType === "channel" ? "deleteChannel" : "deletePlaylist";
-      const result = await args.fns.executeYTOFunction(functionName, {
-        items: [data],
-        itemType,
-        contextItems: []
-      });
+      // Call appropriate delete function with unified pattern
+      const deleteConfig = {
+        channel: {
+          functionName: 'deleteChannel',
+          params: { items: [data], itemType, contextItems: [] },
+          onSuccess: loadData
+        },
+        playlist: {
+          functionName: 'deletePlaylist',
+          params: { items: [data], itemType, contextItems: [] },
+          onSuccess: loadData
+        },
+        video: {
+          functionName: 'deleteVideo',
+          params: () => {
+            const detail = detailData();
+            const contextItem = detail?.playlist?.playlist;
+            if (!contextItem) {
+              throw new Error("Playlist information not found");
+            }
+            return { videos: [data], contextType: 'playlist', contextItems: [contextItem] };
+          },
+          onSuccess: loadDetailData
+        }
+      };
+
+      const config = deleteConfig[itemType];
+      const params = typeof config.params === 'function' ? config.params() : config.params;
+
+      const result = await args.fns.executeYTOFunction(config.functionName, params);
 
       if (result?.result?.success) {
         args.showSuccessToast(result.result.message);
-        await loadData();
+        await config.onSuccess();
       } else {
         args.showErrorToast(result?.result?.message || `Failed to delete ${itemType}`);
       }
     } catch (error) {
       console.error(`Error deleting ${itemType}:`, error);
-      args.showErrorToast(`An error occurred while deleting ${itemType}`);
+      args.showErrorToast(error.message || `An error occurred while deleting ${itemType}`);
     }
   }
   setActiveMenu(null);
 };
 
-const deleteVideo = async (videoData) => {
-  const video = videoData?.video;
-  const title = video?.P?.title || "this video";
-
-  // Get current detail data to determine context
-  const detail = detailData();
-  if (!detail) {
-    args.showErrorToast("Detail view not loaded");
-    return;
-  }
-
-  // Videos can only be deleted from playlists
-  const currentContext = "playlist";
-  const contextItem = detail.playlist?.playlist;
-  const contextName = contextItem?.P?.title || "current view";
-
-  if (!contextItem) {
-    args.showErrorToast("Playlist information not found");
-    return;
-  }
-
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
-  if (!rbConfirm) {
-    args.showErrorToast("Confirmation dialog not available");
-    return;
-  }
-
-  let message = `Are you sure you want to remove "${title}" from ${contextName}?`;
-  message += "\n\nNote: This video will only be deleted if it doesn't exist in other playlists or the channel.";
-  message += "\n\nThis action cannot be undone!";
-
-  const confirmed = await rbConfirm({
-    title: "Delete Video",
-    message,
-    confirmText: "Delete Video",
-    cancelText: "Cancel",
-    variant: "danger"
-  });
-
-  if (confirmed) {
-    try {
-      const result = await args.fns.executeYTOFunction("deleteVideo", {
-        videos: [video],
-        contextType: currentContext,
-        contextItems: [contextItem]
-      });
-
-      if (result?.result?.success) {
-        args.showSuccessToast(result.result.message);
-        await loadDetailData();
-      } else {
-        args.showErrorToast(result?.result?.message || "Failed to delete video");
-      }
-    } catch (error) {
-      console.error("Error deleting video:", error);
-      args.showErrorToast("An error occurred while deleting video");
-    }
-  }
-};
+// Alias for backward compatibility
+const deleteVideo = deleteItem;
 
 // Modal actions
 const openModal = () => {
@@ -1204,7 +1184,7 @@ const handleModalSave = async (saveData) => {
 
   if (saveData?.editMode && saveData?.result) {
     // Edit mode - update local data instead of refetching
-    args.fns.updateLocalItemSettings(saveData.result);
+    args.fns.updateLocalItemSetting(saveData.result);
   } else {
     // Add mode, reload all data
     await loadData();
@@ -1212,14 +1192,14 @@ const handleModalSave = async (saveData) => {
 };
 
 // Note modal functions
-const openNoteModal = (item, itemType, existingNote = "") => {
-  setNoteModalData({ item, itemType, existingNote });
+const openNoteModal = (item, existingNote = "") => {
+  setNoteModalData({ item, existingNote });
   setIsNoteModalOpen(true);
 };
 
 const closeNoteModal = () => {
   setIsNoteModalOpen(false);
-  setNoteModalData({ item: null, itemType: null, existingNote: "" });
+  setNoteModalData({ item: null, existingNote: "" });
 };
 
 const saveNote = async (data) => {
@@ -1251,9 +1231,9 @@ const saveNote = async (data) => {
 };
 
 // Toggle favourite function
-const toggleFavourite = async (item, itemType) => {
+const toggleFavourite = async (item) => {
   try {
-    const result = await args.fns.executeYTOFunction("toggleFavourite", { item, itemType });
+    const result = await args.fns.executeYTOFunction("toggleFavourite", { item });
 
     if (result?.result?.success) {
       args.showSuccessToast(result.result.message);
@@ -1279,258 +1259,98 @@ const toggleFavourite = async (item, itemType) => {
   }
 };
 
-// Update item data after toggle favourite
-const updateItemDataAfterToggleFavourite = (updatedData) => {
-  const { itemType } = updatedData;
-  if (!itemType) return;
-
-  // Extract settings and item based on itemType
-  let settings, item;
-  if (itemType === 'channel') {
-    settings = updatedData.channelSetting;
-    item = updatedData.channel;
-  } else if (itemType === 'playlist') {
-    settings = updatedData.playlistSetting;
-    item = updatedData.playlist;
-  } else if (itemType === 'video') {
-    settings = updatedData.videoSettings;
-    item = updatedData.video;
+// Unified helper: Infer item type from data structure
+const inferItemType = (data) => {
+  if (data.channel && data.channelSetting) {
+    return { type: 'channel', item: data.channel, setting: data.channelSetting };
   }
+  if (data.playlist && data.playlistSetting) {
+    return { type: 'playlist', item: data.playlist, setting: data.playlistSetting };
+  }
+  if (data.video && data.videoSetting) {
+    return { type: 'video', item: data.video, setting: data.videoSetting };
+  }
+  return null;
+};
 
-  if (!settings || !item) return;
+// Unified helper: Update item in array by ID
+const updateItemInArrayById = (items, itemId, itemKey, settingKey, newSetting) => {
+  return items.map(existingItem => {
+    if (existingItem[itemKey]?.P?.youtubeId === itemId) {
+      return { ...existingItem, [settingKey]: newSetting };
+    }
+    return existingItem;
+  });
+};
 
+// Unified helper: Update all views with new item data
+const updateAllViews = (itemInfo) => {
+  if (!itemInfo) return;
+
+  const { type, item, setting } = itemInfo;
   const itemId = item.P?.youtubeId;
   if (!itemId) return;
 
-  // Helper to update an item in an array
-  const updateItemInArray = (items, itemKey, settingsKey) => {
-    return items.map(existingItem => {
-      const existingData = existingItem[itemKey];
-      if (existingData?.P?.youtubeId === itemId) {
-        // Update the settings
-        return {
-          ...existingItem,
-          [settingsKey]: settings
-        };
-      }
-      return existingItem;
-    });
+  // Map of type to field names
+  const typeMap = {
+    channel: { itemKey: 'channel', settingKey: 'channelSetting', arrayKey: 'channels' },
+    playlist: { itemKey: 'playlist', settingKey: 'playlistSetting', arrayKey: 'playlists' },
+    video: { itemKey: 'video', settingKey: 'videoSetting', arrayKey: 'videos' }
   };
 
-  // Update list view data
-  if (isListView()) {
-    if (itemType === 'channel' && contentType === 'channels') {
-      setItems(updateItemInArray(items(), 'channel', 'channelSetting'));
-    } else if (itemType === 'playlist' && contentType === 'playlists') {
-      setItems(updateItemInArray(items(), 'playlist', 'playlistSetting'));
-    }
+  const { itemKey, settingKey, arrayKey } = typeMap[type];
+
+  // Update list view
+  if (isListView() && contentType === arrayKey) {
+    setItems(updateItemInArrayById(items(), itemId, itemKey, settingKey, setting));
   }
 
-  // Update detail view data
+  // Update detail view
   if (isDetailView()) {
     const detail = detailData();
-    if (detail) {
-      if (itemType === 'video' && detail.videos) {
-        // Update video in detail videos list
-        const updatedVideos = detail.videos.map(videoItem => {
-          if (videoItem.video?.P?.youtubeId === itemId) {
-            return {
-              ...videoItem,
-              videoSettings: settings
-            };
-          }
-          return videoItem;
-        });
-        setDetailData({ ...detail, videos: updatedVideos });
-      } else if (itemType === 'channel' && detail.channel) {
-        // Update channel in detail view
-        if (detail.channel.channel?.P?.youtubeId === itemId) {
-          setDetailData({ ...detail, channel: { ...detail.channel, channelSetting: settings } });
-        }
-      } else if (itemType === 'playlist') {
-        // Update playlist in detail view
-        if (detail.playlist?.playlist?.P?.youtubeId === itemId) {
-          // Single playlist detail view
-          setDetailData({ ...detail, playlist: { ...detail.playlist, playlistSetting: settings } });
-        } else if (detail.playlists) {
-          // Channel detail view showing playlists
-          const updatedPlaylists = detail.playlists.map(playlistItem => {
-            if (playlistItem.playlist?.P?.youtubeId === itemId) {
-              return {
-                ...playlistItem,
-                playlistSetting: settings
-              };
-            }
-            return playlistItem;
-          });
-          setDetailData({ ...detail, playlists: updatedPlaylists });
-        }
-      }
+    if (!detail) return;
+
+    // Update arrays in detail view
+    if (detail[arrayKey]) {
+      const updated = updateItemInArrayById(detail[arrayKey], itemId, itemKey, settingKey, setting);
+      setDetailData({ ...detail, [arrayKey]: updated });
+    }
+
+    // Update single item in detail view (channel/playlist object)
+    if (detail[type]?.[itemKey]?.P?.youtubeId === itemId) {
+      setDetailData({ ...detail, [type]: { ...detail[type], [settingKey]: setting } });
     }
   }
 
   // Update search results
   if (isSearchView()) {
     const results = searchResults();
-    if (results) {
-      const updatedResults = { ...results };
-
-      if (itemType === 'channel' && results.channels) {
-        updatedResults.channels = updateItemInArray(results.channels, 'channel', 'channelSetting');
-      } else if (itemType === 'playlist' && results.playlists) {
-        updatedResults.playlists = updateItemInArray(results.playlists, 'playlist', 'playlistSetting');
-      } else if (itemType === 'video' && results.videos) {
-        updatedResults.videos = updateItemInArray(results.videos, 'video', 'videoSettings');
-      }
-
-      setSearchResults(updatedResults);
+    if (results?.[arrayKey]) {
+      const updated = updateItemInArrayById(results[arrayKey], itemId, itemKey, settingKey, setting);
+      setSearchResults({ ...results, [arrayKey]: updated });
     }
   }
 
-  // Update favourites data
+  // Update favourites
   if (isFavouritesView()) {
     const favourites = favouritesData();
-    if (favourites) {
-      const updatedFavourites = { ...favourites };
-
-      if (itemType === 'channel' && favourites.channels) {
-        updatedFavourites.channels = updateItemInArray(favourites.channels, 'channel', 'channelSetting');
-      } else if (itemType === 'playlist' && favourites.playlists) {
-        updatedFavourites.playlists = updateItemInArray(favourites.playlists, 'playlist', 'playlistSetting');
-      } else if (itemType === 'video' && favourites.videos) {
-        updatedFavourites.videos = updateItemInArray(favourites.videos, 'video', 'videoSettings');
-      }
-
-      setFavouritesData(updatedFavourites);
+    if (favourites?.[arrayKey]) {
+      const updated = updateItemInArrayById(favourites[arrayKey], itemId, itemKey, settingKey, setting);
+      setFavouritesData({ ...favourites, [arrayKey]: updated });
     }
   }
 };
 
+// Update item data after toggle favourite
+const updateItemDataAfterToggleFavourite = (updatedData) => {
+  const itemInfo = inferItemType(updatedData);
+  updateAllViews(itemInfo);
+};
+
 // Update item data after note is saved
 const updateItemDataAfterNoteSave = (updatedData) => {
-  const { itemType } = updatedData;
-  if (!itemType) return;
-
-  // Extract settings and item based on itemType
-  let settings, item;
-  if (itemType === 'channel') {
-    settings = updatedData.channelSetting;
-    item = updatedData.channel;
-  } else if (itemType === 'playlist') {
-    settings = updatedData.playlistSetting;
-    item = updatedData.playlist;
-  } else if (itemType === 'video') {
-    settings = updatedData.videoSettings;
-    item = updatedData.video;
-  }
-
-  if (!settings || !item) return;
-
-  const itemId = item.P?.youtubeId;
-  if (!itemId) return;
-
-  // Helper to update an item in an array
-  const updateItemInArray = (items, itemKey, settingsKey) => {
-    return items.map(existingItem => {
-      const existingData = existingItem[itemKey];
-      if (existingData?.P?.youtubeId === itemId) {
-        // Update the settings
-        return {
-          ...existingItem,
-          [settingsKey]: settings
-        };
-      }
-      return existingItem;
-    });
-  };
-
-  // Update list view data
-  if (isListView()) {
-    if (itemType === 'channel' && contentType === 'channels') {
-      setItems(updateItemInArray(items(), 'channel', 'channelSetting'));
-    } else if (itemType === 'playlist' && contentType === 'playlists') {
-      setItems(updateItemInArray(items(), 'playlist', 'playlistSetting'));
-    }
-  }
-
-  // Update detail view data
-  if (isDetailView()) {
-    const detail = detailData();
-    if (detail) {
-      if (itemType === 'video' && detail.videos) {
-        // Update video in detail videos list
-        const updatedVideos = detail.videos.map(videoItem => {
-          if (videoItem.video?.P?.youtubeId === itemId) {
-            return {
-              ...videoItem,
-              videoSettings: settings
-            };
-          }
-          return videoItem;
-        });
-        setDetailData({ ...detail, videos: updatedVideos });
-      } else if (itemType === 'channel' && detail.channel) {
-        // Update channel in detail view
-        if (detail.channel.channel?.P?.youtubeId === itemId) {
-          setDetailData({ ...detail, channel: { ...detail.channel, channelSetting: settings } });
-        }
-      } else if (itemType === 'playlist') {
-        // Update playlist in detail view
-        if (detail.playlist?.playlist?.P?.youtubeId === itemId) {
-          // Single playlist detail view
-          setDetailData({ ...detail, playlist: { ...detail.playlist, playlistSetting: settings } });
-        } else if (detail.playlists) {
-          // Channel detail view showing playlists
-          const updatedPlaylists = detail.playlists.map(playlistItem => {
-            if (playlistItem.playlist?.P?.youtubeId === itemId) {
-              return {
-                ...playlistItem,
-                playlistSetting: settings
-              };
-            }
-            return playlistItem;
-          });
-          setDetailData({ ...detail, playlists: updatedPlaylists });
-        }
-      }
-    }
-  }
-
-  // Update search results
-  if (isSearchView()) {
-    const results = searchResults();
-    if (results) {
-      const updatedResults = { ...results };
-
-      if (itemType === 'channel' && results.channels) {
-        updatedResults.channels = updateItemInArray(results.channels, 'channel', 'channelSetting');
-      } else if (itemType === 'playlist' && results.playlists) {
-        updatedResults.playlists = updateItemInArray(results.playlists, 'playlist', 'playlistSetting');
-      } else if (itemType === 'video' && results.videos) {
-        updatedResults.videos = updateItemInArray(results.videos, 'video', 'videoSettings');
-      }
-
-      setSearchResults(updatedResults);
-    }
-  }
-
-  // Update favourites data
-  if (isFavouritesView()) {
-    const favourites = favouritesData();
-    if (favourites) {
-      const updatedFavourites = { ...favourites };
-
-      if (itemType === 'channel' && favourites.channels) {
-        updatedFavourites.channels = updateItemInArray(favourites.channels, 'channel', 'channelSetting');
-      } else if (itemType === 'playlist' && favourites.playlists) {
-        updatedFavourites.playlists = updateItemInArray(favourites.playlists, 'playlist', 'playlistSetting');
-      } else if (itemType === 'video' && favourites.videos) {
-        updatedFavourites.videos = updateItemInArray(favourites.videos, 'video', 'videoSettings');
-      }
-
-      setFavouritesData(updatedFavourites);
-    }
-  }
+  const itemInfo = inferItemType(updatedData);
+  updateAllViews(itemInfo);
 };
 
 // Sync current channel or playlist
@@ -1596,172 +1416,10 @@ const syncCurrentItem = async () => {
 // Add videos to playlist modal
 const [isAddVideosModalOpen, setIsAddVideosModalOpen] = args.createSignal(false);
 
-// Update local item settings across all views
-const updateLocalItemSettings = (updatedData) => {
-  const isVideo = !!updatedData.video;
-  const isPlaylist = !!updatedData.playlist;
-
-  if (isVideo) {
-    // Update video settings locally
-    const videoSettings = updatedData.videoSettings;
-    const youtubeId = updatedData.video.P.youtubeId;
-
-    // Update in detail view (videos are shown in playlist detail view)
-    if (isDetailView()) {
-      const detail = detailData();
-      if (detail?.videos) {
-        setDetailData({
-          ...detail,
-          videos: detail.videos.map(item => {
-            if (item.video?.P?.youtubeId === youtubeId) {
-              return { ...item, videoSettings };
-            }
-            return item;
-          })
-        });
-      }
-    }
-
-    // Update in search results
-    if (isSearchView()) {
-      const results = searchResults();
-      if (results?.videos) {
-        setSearchResults({
-          ...results,
-          videos: results.videos.map(item => {
-            if (item.video?.P?.youtubeId === youtubeId) {
-              return { ...item, videoSettings };
-            }
-            return item;
-          })
-        });
-      }
-    }
-
-    // Update in favourites
-    if (isFavouritesView()) {
-      const favourites = favouritesData();
-      if (favourites?.videos) {
-        setFavouritesData({
-          ...favourites,
-          videos: favourites.videos.map(item => {
-            if (item.video?.P?.youtubeId === youtubeId) {
-              return { ...item, videoSettings };
-            }
-            return item;
-          })
-        });
-      }
-    }
-  } else if (isPlaylist) {
-    // Update playlist settings locally
-    const playlistSetting = updatedData.playlistSetting;
-    const youtubeId = updatedData.playlist.P.youtubeId;
-
-    // Update in list view
-    if (isListView() && contentType === "playlists") {
-      setItems(items().map(item => {
-        if (item.playlist?.P?.youtubeId === youtubeId) {
-          return { ...item, playlistSetting };
-        }
-        return item;
-      }));
-    }
-
-    // Update in detail view
-    if (isDetailView()) {
-      const detail = detailData();
-      if (detail?.playlist?.playlist?.P?.youtubeId === youtubeId) {
-        setDetailData({ ...detail, playlist: { ...detail.playlist, playlistSetting } });
-      }
-    }
-
-    // Update in search results
-    if (isSearchView()) {
-      const results = searchResults();
-      if (results?.playlists) {
-        setSearchResults({
-          ...results,
-          playlists: results.playlists.map(item => {
-            if (item.playlist?.P?.youtubeId === youtubeId) {
-              return { ...item, playlistSetting };
-            }
-            return item;
-          })
-        });
-      }
-    }
-
-    // Update in favourites
-    if (isFavouritesView()) {
-      const favourites = favouritesData();
-      if (favourites?.playlists) {
-        setFavouritesData({
-          ...favourites,
-          playlists: favourites.playlists.map(item => {
-            if (item.playlist?.P?.youtubeId === youtubeId) {
-              return { ...item, playlistSetting };
-            }
-            return item;
-          })
-        });
-      }
-    }
-  } else {
-    // Update channel settings locally
-    const channelSetting = updatedData.channelSetting;
-    const youtubeId = updatedData.channel.P.youtubeId;
-
-    // Update in list view (structure: { channel: vertex, channelSetting: vertex })
-    if (isListView() && contentType === "channels") {
-      setItems(items().map(item => {
-        if (item.channel?.P?.youtubeId === youtubeId) {
-          return { ...item, channelSetting };
-        }
-        return item;
-      }));
-    }
-
-    // Update in detail view (structure: { channel: { channel: vertex, channelSetting: vertex } })
-    if (isDetailView()) {
-      const detail = detailData();
-      if (detail?.channel?.channel?.P?.youtubeId === youtubeId) {
-        setDetailData({ ...detail, channel: { ...detail.channel, channelSetting } });
-      }
-    }
-
-    // Update in search results (structure: { channel: vertex, channelSetting: vertex })
-    if (isSearchView()) {
-      const results = searchResults();
-      if (results?.channels) {
-        setSearchResults({
-          ...results,
-          channels: results.channels.map(item => {
-            if (item.channel?.P?.youtubeId === youtubeId) {
-              return { ...item, channelSetting };
-            }
-            return item;
-          })
-        });
-      }
-    }
-
-    // Update in favourites (structure: { channel: vertex, channelSetting: vertex })
-    if (isFavouritesView()) {
-      const favourites = favouritesData();
-      if (favourites?.channels) {
-        setFavouritesData({
-          ...favourites,
-          channels: favourites.channels.map(item => {
-            if (item.channel?.P?.youtubeId === youtubeId) {
-              return { ...item, channelSetting };
-            }
-            return item;
-          })
-        });
-      }
-    }
-  }
+// Update local item setting across all views
+const updateLocalItemSetting = (updatedData) => {
+  const itemInfo = inferItemType(updatedData);
+  updateAllViews(itemInfo);
 };
 
 // Polling state for all items (to track processing status and other metadata)
@@ -2091,20 +1749,20 @@ const formatProcessingStatus = (processingStatus, itemType) => {
     return null;
   }
 
-  // Try to extract settings from different possible structures
-  let settings = null;
+  // Try to extract setting from different possible structures
+  let setting = null;
   if (itemType === "playlist") {
-    settings = processingStatus.playlistSetting;
+    setting = processingStatus.playlistSetting;
   } else if (itemType === "channel") {
-    settings = processingStatus.channelSetting;
+    setting = processingStatus.channelSetting;
   }
 
-  // If no settings found, return null
-  if (!settings) {
+  // If no setting found, return null
+  if (!setting) {
     return null;
   }
 
-  const props = settings.P;
+  const props = setting.P;
 
   // Check if we have a valid status
   const status = props.status;
@@ -2178,7 +1836,7 @@ return {
   openModal,
   closeModal,
   handleModalSave,
-  updateLocalItemSettings,
+  updateLocalItemSetting,
   isDetailView,
   isSearchView,
   isFavouritesView,
@@ -2247,7 +1905,7 @@ return {
   favouritesSortDirection,
   setFavouritesSortField,
   setFavouritesSortDirection,
-  loadUserSettings,
+  loadUserSetting,
   initializeSortFromURL,
   updateURLSort,
   clearURLSort,
@@ -2261,8 +1919,8 @@ return {
     // Initialize sort from URL (highest priority)
     const hasURLSort = args.fns.initializeSortFromURL();
 
-    // Load user settings (will be overridden by URL if present)
-    args.fns.loadUserSettings();
+    // Load user setting (will be overridden by URL if present)
+    args.fns.loadUserSetting();
 
     // Initialize window width and add resize listener
     args.fns.handleResize();
@@ -2388,33 +2046,33 @@ if (!processingData) {
 }
 
 // Extract data from vertex format
-const settings = contentType === "playlists"
+const setting = contentType === "playlists"
   ? processingData.playlistSetting
   : processingData.channelSetting;
 
-if (!settings || !settings.P) {
+if (!setting || !setting.P) {
   return { hide: true };
 }
 
 let details = '';
 if (contentType === "channels") {
-  const processedPlaylists = settings.P.processedPlaylists || 0;
-  const totalPlaylists = settings.P.totalPlaylists || 0;
-  const processedVideos = settings.P.processedVideos || 0;
-  const totalVideos = settings.P.totalVideos || 0;
+  const processedPlaylists = setting.P.processedPlaylists || 0;
+  const totalPlaylists = setting.P.totalPlaylists || 0;
+  const processedVideos = setting.P.processedVideos || 0;
+  const totalVideos = setting.P.totalVideos || 0;
   details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
 } else {
-  const processedVideos = settings.P.processedVideos || 0;
-  const totalVideos = settings.P.totalVideos || 0;
+  const processedVideos = setting.P.processedVideos || 0;
+  const totalVideos = setting.P.totalVideos || 0;
   details = `${processedVideos}/${totalVideos} videos`;
 }
 
 return {
-  status: settings.P.status,
-  progress: settings.P.progress || 0,
+  status: setting.P.status,
+  progress: setting.P.progress || 0,
   type: contentType === "playlists" ? "playlist" : "channel",
   details,
-  error: settings.P.error || ''
+  error: setting.P.error || ''
 };
 '''
       }
@@ -3201,55 +2859,55 @@ const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
 const contentType = args.searchParams?.type || "channels";
 
-let itemData, itemSettings, itemType, processingStatus, showTypeBadge, itemId, item;
+let item, itemData, itemSetting, itemType, processingStatus, showTypeBadge, itemId;
 
 if (isListView) {
   const virtualItem = args.contextData.virtualItem;
-  item = args.fns.filteredItems()[virtualItem.index];
-  itemData = contentType === "playlists" ? item.playlist : item.channel;
-  itemId = itemData?.P?.youtubeId;
+  itemData = args.fns.filteredItems()[virtualItem.index];
+  item = contentType === "playlists" ? itemData.playlist : itemData.channel;
+  itemId = item?.P?.youtubeId;
   processingStatus = contentType === "playlists"
     ? args.fns.getPlaylistProcessingStatus(itemId)
     : args.fns.getChannelProcessingStatus(itemId);
-  itemSettings = contentType === "playlists" ? item.playlistSetting : item.channelSetting;
+  itemSetting = contentType === "playlists" ? itemData.playlistSetting : itemData.channelSetting;
   itemType = contentType === "playlists" ? "playlist" : "channel";
   showTypeBadge = false;
 } else if (isDetailView) {
   const videoItem = args.contextData.videoItem;
-  item = args.fns.filteredDetailItems()[videoItem.index];
+  itemData = args.fns.filteredDetailItems()[videoItem.index];
   const isPlaylistItem = contentType === "channels";
-  itemData = isPlaylistItem ? item.playlist : item.video;
-  itemId = itemData?.P?.youtubeId;
+  item = isPlaylistItem ? itemData.playlist : itemData.video;
+  itemId = item?.P?.youtubeId;
   processingStatus = isPlaylistItem ? args.fns.getPlaylistProcessingStatus(itemId) : null;
-  itemSettings = isPlaylistItem ? item.playlistSetting : item.videoSettings;
+  itemSetting = isPlaylistItem ? itemData.playlistSetting : itemData.videoSetting;
   itemType = isPlaylistItem ? "playlist" : "video";
   showTypeBadge = false;
 } else if (isSearchView) {
   const searchItem = args.contextData.searchItem;
-  item = args.fns.getSearchItems()[searchItem.index];
-  const resultType = item.resultType;
-  itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
-  itemId = itemData?.P?.youtubeId;
+  itemData = args.fns.getSearchItems()[searchItem.index];
+  const resultType = itemData.resultType;
+  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+  itemId = item?.P?.youtubeId;
   processingStatus = resultType === "channel"
     ? args.fns.getChannelProcessingStatus(itemId)
     : resultType === "playlist"
     ? args.fns.getPlaylistProcessingStatus(itemId)
     : null;
-  itemSettings = resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSetting : item.videoSettings);
+  itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
   itemType = resultType;
   showTypeBadge = true;
 } else if (isFavouritesView) {
   const favouriteItem = args.contextData.favouriteItem;
-  item = args.fns.getFavouritesItems()[favouriteItem.index];
-  const resultType = item.resultType;
-  itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
-  itemId = itemData?.P?.youtubeId;
+  itemData = args.fns.getFavouritesItems()[favouriteItem.index];
+  const resultType = itemData.resultType;
+  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+  itemId = item?.P?.youtubeId;
   processingStatus = resultType === "channel"
     ? args.fns.getChannelProcessingStatus(itemId)
     : resultType === "playlist"
     ? args.fns.getPlaylistProcessingStatus(itemId)
     : null;
-  itemSettings = resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSetting : item.videoSettings);
+  itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
   itemType = resultType;
   showTypeBadge = true;
 }
@@ -3258,8 +2916,9 @@ if (isListView) {
 processingStatus = args.fns.formatProcessingStatus(processingStatus, itemType);
 
 return {
-  item: itemData,
-  itemSettings,
+  item,
+  itemData,
+  itemSetting,
   itemType,
   showTypeBadge,
   processingStatus
@@ -3301,7 +2960,6 @@ return {
   isOpen: args.fns.isNoteModalOpen,
   onClose: args.fns.closeNoteModal,
   item: args.fns.noteModalData.item,
-  itemType: args.fns.noteModalData.itemType,
   existingNote: args.fns.noteModalData.existingNote,
   onSave: args.fns.saveNote
 };

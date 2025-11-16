@@ -1,11 +1,11 @@
 {
   vertexes: [
     {
-      id: "update_video_settings_function",
+      id: "update_playlist_setting_function",
       L: "Function",
       P: {
-        key: "updateVideoSettings",
-        description: "Updates video settings like custom name. Supports multi-ownership model - requires ownershipId.",
+        key: "updatePlaylistSetting",
+        description: "Updates playlist setting like custom name. Supports multi-ownership model - requires ownershipId.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -17,7 +17,7 @@ try {
   const { youtubeId, customName, ownershipId } = args.contextData;
 
   if (!youtubeId) {
-    throw new Error("Video ID is required");
+    throw new Error("Playlist ID is required");
   }
 
   if (!ownershipId) {
@@ -34,13 +34,13 @@ try {
     throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
   }
 
-  // Update VideoSetting for specific ownership
+  // Step 1: Update PlaylistSetting for specific ownership
   const updateQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video {youtubeId: $youtubeId})
-    SET vs.customName = $customName,
-        vs.updatedAt = datetime()
-    RETURN vs
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $youtubeId})
+    SET ps.customName = $customName,
+        ps.updatedAt = datetime()
+    RETURN p.youtubeId as youtubeId
   `;
 
   const updateResult = await args.session.run(updateQuery, {
@@ -50,42 +50,42 @@ try {
   });
 
   if (updateResult.records.length === 0) {
-    throw new Error("Video not found");
+    throw new Error("Playlist not found");
   }
 
-  // Fetch updated video data with details using helper function
+  // Step 2: Fetch updated playlist with video count using helper function
   const fetchResult = await args.executeNamedServerFunction({
-    functionName: "getVideosWithDetails",
+    functionName: "getPlaylistsWithVideoCount",
     contextData: {
       userUuid: user.P.uuid,
       ownershipId,  // Filter by specific ownership
-      videoIds: [youtubeId]
+      playlistIds: [youtubeId]
     }
   });
 
   if (!fetchResult.result || !fetchResult.result.success || fetchResult.result.data.length === 0) {
-    throw new Error("Failed to fetch updated video data");
+    throw new Error("Failed to fetch updated playlist data");
   }
 
-  const videoData = fetchResult.result.data[0];
+  const playlistData = fetchResult.result.data[0];
 
   return {
     success: true,
-    message: "Video settings updated successfully",
-    data: videoData
+    message: "Playlist setting updated successfully",
+    data: playlistData
   };
 
 } catch (error) {
-  console.error("Error updating video settings:", error);
+  console.error("Error updating playlist setting:", error);
 
-  let userMessage = "Failed to update video settings. Please try again.";
+  let userMessage = "Failed to update playlist setting. Please try again.";
 
   if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to update video settings.";
-  } else if (error.message.includes("Video not found")) {
-    userMessage = "Video not found.";
-  } else if (error.message.includes("Video ID is required")) {
-    userMessage = "Video ID is required.";
+    userMessage = "Please log in to update playlist setting.";
+  } else if (error.message.includes("Playlist not found")) {
+    userMessage = "Playlist not found.";
+  } else if (error.message.includes("Playlist ID is required")) {
+    userMessage = "Playlist ID is required.";
   }
 
   return {

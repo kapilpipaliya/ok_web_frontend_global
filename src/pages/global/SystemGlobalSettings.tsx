@@ -1,5 +1,5 @@
 import { SettingsLayout } from "~/components/styled/SettingsLayout";
-import { EmailSettings } from "~/pages/global/email/EmailSettings";
+import { EmailSetting } from "~/pages/global/email/EmailSetting";
 import { AdminWorkerManagement } from "~/pages/global/worker/AdminWorkerManagement";
 import { RedisManagement } from "~/pages/global/redis/RedisManagement";
 import { BackupManagement } from "~/pages/global/backup/BackupManagement";
@@ -7,7 +7,7 @@ import { BackupManagement } from "~/pages/global/backup/BackupManagement";
 export default function SystemGlobalSettings() {
   const menuItems = [
     {
-      component: EmailSettings,
+      component: EmailSetting,
       icon: "ph:envelope",
       id: "email",
       label: "Email Settings",

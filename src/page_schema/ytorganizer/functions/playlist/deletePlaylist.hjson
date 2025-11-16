@@ -208,7 +208,7 @@ try {
     // Continue with playlist deletion even if video deletion fails
   }
 
-  // Step 4: Delete this ownership's PlaylistSettings
+  // Step 4: Delete this ownership's PlaylistSetting
   let queryParams = { ownershipId };
   let playlistFilter = '';
 
@@ -220,20 +220,20 @@ try {
     playlistFilter = 'WHERE p.youtubeId IN $playlistIds';
   }
 
-  const deletePlaylistSettingsQuery = `
+  const deletePlaylistSettingQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
     ${playlistFilter}
     DETACH DELETE ps
-    RETURN count(ps) as deletedPlaylistSettings
+    RETURN count(ps) as deletedPlaylistSetting
   `;
 
-  const playlistSettingResult = await args.session.run(deletePlaylistSettingsQuery, queryParams);
+  const playlistSettingResult = await args.session.run(deletePlaylistSettingQuery, queryParams);
 
-  const deletedPSRaw = playlistSettingResult.records[0]?.get('deletedPlaylistSettings');
-  const deletedPlaylistSettings = deletedPSRaw ? (typeof deletedPSRaw.toNumber === 'function' ? deletedPSRaw.toNumber() : Number(deletedPSRaw)) : 0;
+  const deletedPSRaw = playlistSettingResult.records[0]?.get('deletedPlaylistSetting');
+  const deletedPlaylistSetting = deletedPSRaw ? (typeof deletedPSRaw.toNumber === 'function' ? deletedPSRaw.toNumber() : Number(deletedPSRaw)) : 0;
 
-  if (deletedPlaylistSettings === 0) {
+  if (deletedPlaylistSetting === 0) {
     throw new Error("Playlists not found or already deleted");
   }
 
@@ -284,7 +284,7 @@ try {
   let message;
   const isAll = items === 'all';
   const isAllInContext = items === 'allInContext';
-  const totalProcessed = deletedPlaylistSettings + deletedPlaylists;
+  const totalProcessed = deletedPlaylistSetting + deletedPlaylists;
 
   if (isAll) {
     message = `Successfully processed all playlists${totalProcessed > 0 ? ` (${totalProcessed} playlist(s))` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
@@ -307,7 +307,9 @@ try {
       deletedVideos: deletedVideos,
       deletedPlaylists: deletedPlaylists,
       totalPlaylists: totalPlaylists,
-      totalVideosInPlaylists: deletedVideos
+      totalVideosInPlaylists: deletedVideos,
+      userId: user.id,
+      ownershipId: ownershipId
     },
     message: message
   };

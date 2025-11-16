@@ -4,7 +4,7 @@
       id: "page_root",
       L: "Page",
       P: {
-        key: "YTOCardFieldSettings",
+        key: "YTOCardFieldSetting",
         url: "/settings/card-fields",
         signinRequired: true,
         fns: '''
@@ -37,14 +37,14 @@ const FIELD_OPTIONS = {
   ]
 };
 
-// Default settings
-const defaultSettings = {
+// Default setting
+const defaultSetting = {
   video: ["description", "channel", "publishedAt", "duration", "viewCount"],
   playlist: ["description", "videoCount", "updatedAt", "channelTitle"],
   channel: ["description", "videoCount", "subscriberCount", "publishedAt"]
 };
 
-// Local state for edited settings - start with empty arrays
+// Local state for edited setting - start with empty arrays
 const [videoFields, setVideoFields] = args.createSignal([]);
 const [playlistFields, setPlaylistFields] = args.createSignal([]);
 const [channelFields, setChannelFields] = args.createSignal([]);
@@ -52,18 +52,18 @@ const [channelFields, setChannelFields] = args.createSignal([]);
 // Save state
 const [isSaving, setIsSaving] = args.createSignal(false);
 
-// Initialize from layout settings on mount
+// Initialize from layout setting on mount
 args.createEffect(() => {
-  const settings = args.fns.cardFieldSettings?.();
-  if (settings) {
-    setVideoFields(settings.video || defaultSettings.video);
-    setPlaylistFields(settings.playlist || defaultSettings.playlist);
-    setChannelFields(settings.channel || defaultSettings.channel);
+  const setting = args.fns.cardFieldSetting?.();
+  if (setting) {
+    setVideoFields(setting.video || defaultSetting.video);
+    setPlaylistFields(setting.playlist || defaultSetting.playlist);
+    setChannelFields(setting.channel || defaultSetting.channel);
   } else {
-    // Use defaults if no settings exist
-    setVideoFields(defaultSettings.video);
-    setPlaylistFields(defaultSettings.playlist);
-    setChannelFields(defaultSettings.channel);
+    // Use defaults if no setting exist
+    setVideoFields(defaultSetting.video);
+    setPlaylistFields(defaultSetting.playlist);
+    setChannelFields(defaultSetting.channel);
   }
 });
 
@@ -71,16 +71,16 @@ args.createEffect(() => {
 const handleSave = async () => {
   setIsSaving(true);
   try {
-    const newSettings = {
+    const newSetting = {
       video: videoFields(),
       playlist: playlistFields(),
       channel: channelFields()
     };
 
-    // saveCardFieldSettings already shows success/error toasts
-    await args.fns.saveCardFieldSettings(newSettings);
+    // saveCardFieldSetting already shows success/error toasts
+    await args.fns.saveCardFieldSetting(newSetting);
   } catch (error) {
-    console.error("Error saving card field settings:", error);
+    console.error("Error saving card field setting:", error);
   } finally {
     setIsSaving(false);
   }

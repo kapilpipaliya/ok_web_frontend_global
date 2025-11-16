@@ -8,7 +8,7 @@ import {
   decryptClientSecret,
 } from "~/lib/auth/tokenEncryption";
 
-export async function getOAuthSettings(): Promise<ServerResult> {
+export async function getOAuthSetting(): Promise<ServerResult> {
   "use server";
 
   const { dbSession } = await getDBSessionForSubdomain();
@@ -16,7 +16,7 @@ export async function getOAuthSettings(): Promise<ServerResult> {
   try {
     // Fetch OAuth settings from database
     const result = await dbSession.run(
-      "MATCH (o:OAuthSettings) RETURN o LIMIT 1",
+      "MATCH (o:OAuthSetting) RETURN o LIMIT 1",
     );
 
     if (result.records.length > 0) {
@@ -55,7 +55,7 @@ export async function getOAuthSettings(): Promise<ServerResult> {
   }
 }
 
-export async function saveOAuthSettings(settings: {
+export async function saveOAuthSetting(settings: {
   googleClientId?: string;
   googleClientSecret?: string;
   googleEnabled?: boolean;
@@ -81,15 +81,15 @@ export async function saveOAuthSettings(settings: {
       }
     }
 
-    // Check if OAuthSettings vertex exists
+    // Check if OAuthSetting vertex exists
     const checkResult = await dbSession.run(
-      "MATCH (o:OAuthSettings) RETURN o LIMIT 1",
+      "MATCH (o:OAuthSetting) RETURN o LIMIT 1",
     );
 
     if (checkResult.records.length > 0) {
       // Update existing settings
       const updateQuery = `
-        MATCH (o:OAuthSettings)
+        MATCH (o:OAuthSetting)
         SET o.googleClientId = $googleClientId,
             o.googleClientSecretEncrypted = $googleClientSecretEncrypted,
             o.googleEnabled = $googleEnabled,
@@ -105,7 +105,7 @@ export async function saveOAuthSettings(settings: {
     } else {
       // Create new settings
       const createQuery = `
-        CREATE (o:OAuthSettings {
+        CREATE (o:OAuthSetting {
           googleClientId: $googleClientId,
           googleClientSecretEncrypted: $googleClientSecretEncrypted,
           googleEnabled: $googleEnabled,
@@ -138,7 +138,7 @@ export async function isGoogleOAuthEnabled(): Promise<ServerResult> {
   try {
     // Check if Google OAuth is enabled
     const result = await dbSession.run(
-      "MATCH (o:OAuthSettings) WHERE o.googleEnabled = true RETURN o LIMIT 1",
+      "MATCH (o:OAuthSetting) WHERE o.googleEnabled = true RETURN o LIMIT 1",
     );
 
     return { result: result.records.length > 0 };

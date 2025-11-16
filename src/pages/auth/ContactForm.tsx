@@ -1,6 +1,5 @@
 import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
-import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
@@ -194,15 +193,42 @@ export function ContactForm() {
         attributes: [
           {
             ...wrapFormInCard(form),
-            props: (options: FunctionArgumentType) => ({
-              beforeMount: () => {
-                createFocusTrap({
-                  element: options.ref,
-                  observeChanges: true,
-                  restoreFocus: true,
-                  initialFocusElement: () =>
-                    document.getElementsByTagName("input")[0],
+            fns: `
+              let trap = null;
+
+              const initializeFocusTrap = () => {
+                const element = args.ref();
+                if (!element) return;
+
+                trap = args.focusTrap.createFocusTrap(element, {
+                  initialFocus: () => document.getElementsByTagName("input")[0],
+                  fallbackFocus: () => element,
+                  escapeDeactivates: false,
+                  allowOutsideClick: true,
+                  returnFocusOnDeactivate: true,
                 });
+
+                trap.activate();
+              };
+
+              const cleanupFocusTrap = () => {
+                if (trap) {
+                  trap.deactivate();
+                  trap = null;
+                }
+              };
+
+              return {
+                initializeFocusTrap,
+                cleanupFocusTrap
+              };
+            `,
+            props: (options: FunctionArgumentType) => ({
+              onMount: () => {
+                options.fns.initializeFocusTrap?.();
+              },
+              onCleanup: () => {
+                options.fns.cleanupFocusTrap?.();
               },
             }),
           },

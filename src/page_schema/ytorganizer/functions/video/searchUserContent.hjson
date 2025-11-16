@@ -167,7 +167,9 @@ try {
       videos: results.videos,
       totalCount,
       query,
-      type: type || 'all'
+      type: type || 'all',
+      userId: user.id,
+      ownershipId: ownershipId
     },
     message
   };

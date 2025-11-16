@@ -1,11 +1,11 @@
 import type { Session } from "neo4j-driver";
 
-import type { EmailSettings } from "~/cypher/mutate/email/type/EmailSettings";
+import type { EmailSetting } from "~/cypher/mutate/email/type/EmailSetting";
 
-export async function createOrUpdateAccountEmailSettings(
+export async function createOrUpdateAccountEmailSetting(
   dbSession: Session,
   accountId: string,
-  settings: EmailSettings,
+  setting: EmailSetting,
 ) {
   // First try to find existing EmailSetting
   const findResult = await dbSession.run(
@@ -14,11 +14,11 @@ export async function createOrUpdateAccountEmailSettings(
     { accountId },
   );
 
-  let settingsKey: string;
+  let settingKey: string;
 
   if (findResult.records.length === 0) {
     // Create new EmailSetting if not found
-    settingsKey = "Default";
+    settingKey = "Default";
     await dbSession.run(
       `MATCH (a:Account {id: $accountId})
        CREATE (s:EmailSetting {
@@ -27,21 +27,21 @@ export async function createOrUpdateAccountEmailSettings(
          updatedAt: datetime()
        })
        CREATE (a)-[:AccountEmailSetting]->(s)
-       SET s += $settings
+       SET s += $setting
        RETURN s.key as key`,
-      { accountId, key: settingsKey, settings },
+      { accountId, key: settingKey, setting },
     );
   } else {
     // Update existing EmailSetting
-    settingsKey = findResult.records[0].get("key");
+    settingKey = findResult.records[0].get("key");
     await dbSession.run(
       `MATCH (a:Account {id: $accountId})-[:AccountEmailSetting]->(s:EmailSetting)
-       SET s += $settings,
+       SET s += $setting,
            s.updatedAt = datetime()
        RETURN s.key as key`,
-      { accountId, settings },
+      { accountId, setting },
     );
   }
 
-  return settingsKey;
+  return settingKey;
 }

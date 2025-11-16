@@ -1,5 +1,4 @@
 import { createStore } from "solid-js/store";
-import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { MutationResult } from "~/cypher/types/MutationArgs";
@@ -401,19 +400,44 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
+                    fns: `
+                      let trap = null;
+
+                      const initializeFocusTrap = () => {
+                        const element = args.ref();
+                        if (!element || !args.contextData.modalState[0]?.showModal) return;
+
+                        trap = args.focusTrap.createFocusTrap(element, {
+                          fallbackFocus: () => element,
+                          escapeDeactivates: false,
+                          allowOutsideClick: true,
+                          returnFocusOnDeactivate: true,
+                        });
+
+                        trap.activate();
+                      };
+
+                      const cleanupFocusTrap = () => {
+                        if (trap) {
+                          trap.deactivate();
+                          trap = null;
+                        }
+                      };
+
+                      return {
+                        initializeFocusTrap,
+                        cleanupFocusTrap
+                      };
+                    `,
                     props: (options: RoleFormFunctionArgumentType) => ({
                       style: {
                         "z-index": options.zIndex + 1,
                       },
-                      beforeMount: () => {
-                        // Create focus trap
-                        createFocusTrap({
-                          element: options.ref,
-                          enabled: () =>
-                            options.contextData.modalState[0]?.showModal,
-                          observeChanges: true,
-                          restoreFocus: true,
-                        });
+                      onMount: () => {
+                        options.fns.initializeFocusTrap?.();
+                      },
+                      onCleanup: () => {
+                        options.fns.cleanupFocusTrap?.();
                       },
                     }),
                   },

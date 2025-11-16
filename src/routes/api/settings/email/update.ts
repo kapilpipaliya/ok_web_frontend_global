@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { createOrUpdateAccountEmailSettings } from "~/cypher/mutate/email/createOrUpdateAccountEmailSettings";
+import { createOrUpdateAccountEmailSetting } from "~/cypher/mutate/email/createOrUpdateAccountEmailSetting";
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -53,7 +53,7 @@ export async function POST({ request }: APIEvent) {
       }
 
       // Create or update account-specific email settings
-      settingsKey = await createOrUpdateAccountEmailSettings(
+      settingsKey = await createOrUpdateAccountEmailSetting(
         dbSession,
         accountId,
         settings,

@@ -434,7 +434,7 @@ https://merchant.razorpay.com/policy/RdV79YatVmuWqr/contact_us
   1. Backend Infrastructure
 
   ✅ Razorpay Settings Management
-  - razorpayServerFunctions.ts - Get/save Razorpay configuration with encryption
+  - razorpayServerFunction.ts - Get/save Razorpay configuration with encryption
   - RazorpaySettings.tsx - Admin UI for configuring Razorpay (Key ID, Secret, Webhook)
 
   ✅ YTO Server Functions (5 hjson functions)

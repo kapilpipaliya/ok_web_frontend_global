@@ -9,7 +9,7 @@ import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import { getOAuthSettings, saveOAuthSettings } from "./oauthServerFunctions";
+import { getOAuthSetting, saveOAuthSetting } from "./oauthServerFunctions";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -22,7 +22,7 @@ type SaveStateStore = ReturnType<
 >;
 
 // Define type for OAuth settings data
-interface OAuthSettingsData {
+interface OAuthSettingData {
   googleClientId?: string;
   googleClientSecret?: string;
   googleEnabled?: boolean;
@@ -30,7 +30,7 @@ interface OAuthSettingsData {
 }
 
 // Extend FunctionArgumentType to include our contextData
-interface OAuthSettingsFunctionArgumentType extends FunctionArgumentType {
+interface OAuthSettingFunctionArgumentType extends FunctionArgumentType {
   contextData: {
     saveState: SaveStateStore;
     [key: string]: unknown;
@@ -46,7 +46,7 @@ const validateRequired = (value: string | undefined) => {
 };
 
 // Validation function
-const validateFormData = (data: OAuthSettingsData) => {
+const validateFormData = (data: OAuthSettingData) => {
   const errors: Record<string, string> = {};
 
   if (data.googleEnabled) {
@@ -64,7 +64,7 @@ const validateFormData = (data: OAuthSettingsData) => {
   return Object.keys(errors).length > 0 ? errors : null;
 };
 
-export function OAuthSettings() {
+export function OAuthSetting() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
@@ -75,7 +75,7 @@ export function OAuthSettings() {
     {
       id: formDataId,
       IN: {},
-      L: ["OAuthSettings"],
+      L: ["OAuthSetting"],
       OUT: {},
       P: {},
     },
@@ -239,7 +239,7 @@ export function OAuthSettings() {
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: OAuthSettingsFunctionArgumentType) => ({
+            props: (options: OAuthSettingFunctionArgumentType) => ({
               hide: () => !options.data?.P.googleEnabled,
             }),
           },
@@ -258,14 +258,14 @@ export function OAuthSettings() {
                 key: "googleClientId",
                 placeholder: "Enter Google Client ID",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as OAuthSettingsData).googleEnabled
+                  data.P && (data.P as OAuthSettingData).googleEnabled
                     ? validateRequired(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: OAuthSettingsFunctionArgumentType) => ({
+            props: (options: OAuthSettingFunctionArgumentType) => ({
               hide: () => !options.data?.P.googleEnabled,
             }),
           },
@@ -289,14 +289,14 @@ export function OAuthSettings() {
                 placeholder: "Enter Google Client Secret",
                 type: "password",
                 validate: (value: string, data: Record<string, unknown>) =>
-                  data.P && (data.P as OAuthSettingsData).googleEnabled
+                  data.P && (data.P as OAuthSettingData).googleEnabled
                     ? validateRequired(value)
                     : undefined,
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
-            props: (options: OAuthSettingsFunctionArgumentType) => ({
+            props: (options: OAuthSettingFunctionArgumentType) => ({
               hide: () => !options.data?.P.googleEnabled,
             }),
           },
@@ -313,7 +313,7 @@ export function OAuthSettings() {
                     as: "button",
                     css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
-                    props: (options: OAuthSettingsFunctionArgumentType) => ({
+                    props: (options: OAuthSettingFunctionArgumentType) => ({
                       disabled: options.contextData.saveState[0]?.isLoading,
                       onClick: async () => {
                         try {
@@ -322,7 +322,7 @@ export function OAuthSettings() {
 
                           // Validate form data
                           const errors = validateFormData(
-                            settings.P as OAuthSettingsData,
+                            settings.P as OAuthSettingData,
                           );
 
                           if (errors) {
@@ -337,8 +337,8 @@ export function OAuthSettings() {
                           options.clearAllErrors();
 
                           // Use server function to save settings
-                          const response = await saveOAuthSettings(
-                            settings.P as OAuthSettingsData,
+                          const response = await saveOAuthSetting(
+                            settings.P as OAuthSettingData,
                           );
 
                           if (response.error) {
@@ -394,7 +394,7 @@ export function OAuthSettings() {
   // Load settings data function
   const loadSettingsData = async () => {
     try {
-      const response = await getOAuthSettings();
+      const response = await getOAuthSetting();
       // Extract the first vertex from the result array
       const vertex = response.result?.[0];
 
@@ -413,7 +413,7 @@ export function OAuthSettings() {
 
   return (
     <SchemaRenderer
-      form={{ attributes: [form], key: "OAuthSettings" }}
+      form={{ attributes: [form], key: "OAuthSetting" }}
       formDataId={formDataId}
     />
   );

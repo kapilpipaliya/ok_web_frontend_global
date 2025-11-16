@@ -132,7 +132,7 @@ try {
     const channelSetting = args.convertNodeToJson(record.get('cs'));
     const videoCount = record.get('videoCount');
 
-    // Add ownership-specific video count to channel settings
+    // Add ownership-specific video count to channel setting
     if (channelSetting && channelSetting.P) {
       channelSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
     }

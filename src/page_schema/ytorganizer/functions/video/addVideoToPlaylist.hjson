@@ -151,7 +151,7 @@ try {
       const newPosition = currentCount + results.length;
 
       // CORRECTED SCHEMA:
-      // 1. Create ownership-level VideoSetting (global settings)
+      // 1. Create ownership-level VideoSetting (global setting)
       // 2. Create PlaylistSetting->Video relationship (playlist membership)
 
       const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;

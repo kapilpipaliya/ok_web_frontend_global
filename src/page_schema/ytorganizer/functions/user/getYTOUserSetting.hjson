@@ -1,11 +1,11 @@
 {
   vertexes: [
     {
-      id: "get_yto_user_settings_function",
+      id: "get_yto_user_setting_function",
       L: "Function",
       P: {
-        key: "getYTOUserSettings",
-        description: "Fetches YouTube Organizer user settings (sort preferences, view modes, etc.)",
+        key: "getYTOUserSetting",
+        description: "Fetches YouTube Organizer user setting (sort preferences, view modes, etc.)",
         body: '''
 try {
   // Get current authenticated user from session
@@ -14,7 +14,7 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Query for user's YTO settings
+  // Query for user's YTO setting
   const query = `
     MATCH (u:User {uuid: $userUuid})-[:YTOUserSetting]->(s:YTOUserSetting)
     RETURN s
@@ -24,8 +24,8 @@ try {
     userUuid: user.P.uuid
   });
 
-  // Default settings properties
-  const defaultSettingsProps = {
+  // Default setting properties
+  const defaultSettingProps = {
     sortPreferences: JSON.stringify({
       channels: "title_asc",
       playlists: "title_asc",
@@ -36,7 +36,7 @@ try {
     itemsPerPage: 50,
     autoRefreshEnabled: false,
     defaultOwnershipId: null,  // null means "all ownerships"
-    cardFieldSettings: JSON.stringify({
+    cardFieldSetting: JSON.stringify({
       video: ["description", "channel", "publishedAt", "duration", "viewCount"],
       playlist: ["description", "videoCount", "updatedAt", "channelTitle"],
       channel: ["description", "videoCount", "subscriberCount", "publishedAt"]
@@ -44,11 +44,11 @@ try {
   };
 
   if (result.records.length === 0) {
-    // No settings found, return defaults in vertex format
+    // No setting found, return defaults in vertex format
     const defaultVertex = {
-      id: "yto_settings_default",
+      id: "yto_setting_default",
       L: ["YTOUserSetting"],
-      P: defaultSettingsProps,
+      P: defaultSettingProps,
       IN: {},
       OUT: {}
     };
@@ -56,52 +56,52 @@ try {
     return {
       success: true,
       data: {
-        settings: defaultVertex,
+        setting: defaultVertex,
         isDefault: true
       },
-      message: "Using default settings (not yet customized)"
+      message: "Using default setting (not yet customized)"
     };
   }
 
-  // Settings exist - convert to vertex format
-  const settingsNode = result.records[0].get('s');
-  const settingsVertex = args.convertNodeToJson(settingsNode);
+  // Setting exist - convert to vertex format
+  const settingNode = result.records[0].get('s');
+  const settingVertex = args.convertNodeToJson(settingNode);
 
   // Ensure all default fields are present in properties
   const mergedProps = {
-    ...defaultSettingsProps,
-    ...settingsVertex.P
+    ...defaultSettingProps,
+    ...settingVertex.P
   };
 
   // Return vertex with merged properties
   const completeVertex = {
-    ...settingsVertex,
+    ...settingVertex,
     P: mergedProps
   };
 
   return {
     success: true,
     data: {
-      settings: completeVertex,
+      setting: completeVertex,
       isDefault: false
     },
-    message: "Settings loaded successfully"
+    message: "Setting loaded successfully"
   };
 
 } catch (error) {
-  console.error("Error fetching YTO user settings:", error);
+  console.error("Error fetching YTO user setting:", error);
 
   // Handle specific error types
-  let userMessage = "Failed to fetch settings. Using defaults.";
+  let userMessage = "Failed to fetch setting. Using defaults.";
 
   if (error.message.includes("User session not found")) {
     userMessage = "Please log in to view your settings.";
   } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Using default settings.";
+    userMessage = "Database connection error. Using default setting.";
   }
 
   // Return defaults on error in vertex format
-  const defaultSettingsProps = {
+  const defaultSettingProps = {
     sortPreferences: JSON.stringify({
       channels: "title_asc",
       playlists: "title_asc",
@@ -112,7 +112,7 @@ try {
     itemsPerPage: 50,
     autoRefreshEnabled: false,
     defaultOwnershipId: null,
-    cardFieldSettings: JSON.stringify({
+    cardFieldSetting: JSON.stringify({
       video: ["description", "channel", "publishedAt", "duration", "viewCount"],
       playlist: ["description", "videoCount", "updatedAt", "channelTitle"],
       channel: ["description", "videoCount", "subscriberCount", "publishedAt"]
@@ -120,9 +120,9 @@ try {
   };
 
   const defaultVertex = {
-    id: "yto_settings_default",
+    id: "yto_setting_default",
     L: ["YTOUserSetting"],
-    P: defaultSettingsProps,
+    P: defaultSettingProps,
     IN: {},
     OUT: {}
   };
@@ -135,7 +135,7 @@ try {
       details: error.message
     },
     data: {
-      settings: defaultVertex,
+      setting: defaultVertex,
       isDefault: true
     }
   };

@@ -274,8 +274,8 @@ const [ownershipsLoading, setOwnershipsLoading] = args.createSignal(false);
 const [quotaUsage, setQuotaUsage] = args.createSignal(null);
 const [quotaLoading, setQuotaLoading] = args.createSignal(false);
 
-// Card field settings state management
-const [cardFieldSettings, setCardFieldSettings] = args.createSignal();
+// Card field setting state management
+const [cardFieldSetting, setCardFieldSetting] = args.createSignal();
 
 // Load impersonation state from sessionStorage (client-side only)
 // This is called from onMount to avoid SSR/hydration mismatch
@@ -477,59 +477,59 @@ const getQuotaUsagePercentage = () => {
   return Math.round(usage.quota.percentUsed);
 };
 
-// Load card field settings from user settings
-const loadCardFieldSettings = async () => {
+// Load card field setting from user setting
+const loadCardFieldSetting = async () => {
   try {
     const result = await executeYTOFunction('getYTOUserSettings', {});
-    if (result?.result?.success && result?.result?.data?.settings) {
-      const settings = result.result.data.settings;
-      if (settings.P.cardFieldSettings) {
-        const parsed = typeof settings.P.cardFieldSettings === 'string'
-          ? JSON.parse(settings.P.cardFieldSettings)
-          : settings.P.cardFieldSettings;
-        setCardFieldSettings(parsed);
+    if (result?.result?.success && result?.result?.data?.setting) {
+      const setting = result.result.data.setting;
+      if (setting.P.cardFieldSetting) {
+        const parsed = typeof setting.P.cardFieldSetting === 'string'
+          ? JSON.parse(setting.P.cardFieldSetting)
+          : setting.P.cardFieldSetting;
+        setCardFieldSetting(parsed);
       }
     }
   } catch (error) {
-    console.error('Error loading card field settings:', error);
-    // Keep default settings on error
+    console.error('Error loading card field setting:', error);
+    // Keep default setting on error
   }
 };
 
-// Save card field settings to user settings
-const saveCardFieldSettings = async (newSettings) => {
+// Save card field setting to user setting
+const saveCardFieldSetting = async (newSetting) => {
   try {
     // Validate structure
-    if (!newSettings || typeof newSettings !== 'object') {
-      throw new Error('Invalid card field settings');
+    if (!newSetting || typeof newSetting !== 'object') {
+      throw new Error('Invalid card field setting');
     }
 
     // Ensure all required keys exist
     const validated = {
-      video: Array.isArray(newSettings.video) ? newSettings.video : cardFieldSettings().video,
-      playlist: Array.isArray(newSettings.playlist) ? newSettings.playlist : cardFieldSettings().playlist,
-      channel: Array.isArray(newSettings.channel) ? newSettings.channel : cardFieldSettings().channel
+      video: Array.isArray(newSetting.video) ? newSetting.video : cardFieldSetting().video,
+      playlist: Array.isArray(newSetting.playlist) ? newSetting.playlist : cardFieldSetting().playlist,
+      channel: Array.isArray(newSetting.channel) ? newSetting.channel : cardFieldSetting().channel
     };
 
     // Update local state
-    setCardFieldSettings(validated);
+    setCardFieldSetting(validated);
 
     // Save to backend
     const result = await executeYTOFunction('saveYTOUserSettings', {
-      settings: {
-        cardFieldSettings: validated
+      setting: {
+        cardFieldSetting: validated
       }
     });
 
     if (result?.result?.success) {
-      args.showSuccessToast('Card field settings saved successfully');
+      args.showSuccessToast('Card field setting saved successfully');
       return true;
     } else {
-      throw new Error('Failed to save settings');
+      throw new Error('Failed to save setting');
     }
   } catch (error) {
-    console.error('Error saving card field settings:', error);
-    args.showErrorToast('Failed to save card field settings');
+    console.error('Error saving card field setting:', error);
+    args.showErrorToast('Failed to save card field setting');
     return false;
   }
 };
@@ -1117,9 +1117,9 @@ return {
   isAtQuotaLimit,
   getQuotaResetTime,
   getQuotaUsagePercentage,
-  cardFieldSettings,
-  loadCardFieldSettings,
-  saveCardFieldSettings,
+  cardFieldSetting,
+  loadCardFieldSetting,
+  saveCardFieldSetting,
   navigationSections,
   setNavigationSections,
   mobileNavigationItems,
@@ -1174,8 +1174,8 @@ return {
     // Fetch quota usage for selected ownership
     args.fns.fetchQuotaUsage?.();
 
-    // Load card field settings from user settings
-    args.fns.loadCardFieldSettings?.();
+    // Load card field setting from user setting
+    args.fns.loadCardFieldSetting?.();
 
     // Refresh quota usage every 5 minutes
     const quotaInterval = setInterval(() => {

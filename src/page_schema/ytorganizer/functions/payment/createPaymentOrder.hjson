@@ -60,24 +60,24 @@ try {
 
   const videoQuota = quotaLimits[plan];
 
-  // Fetch Razorpay settings
-  const settingsResult = await args.session.run(
-    "MATCH (s:RazorpaySettings) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
+  // Fetch Razorpay setting
+  const settingResult = await args.session.run(
+    "MATCH (s:RazorpaySetting) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
   );
 
-  if (settingsResult.records.length === 0) {
+  if (settingResult.records.length === 0) {
     throw new Error("Payment system is not configured. Please contact support.");
   }
 
-  const settings = settingsResult.records[0].get("s").properties;
+  const setting = settingResult.records[0].get("s").properties;
 
   // Decrypt the key secret
-  const keySecret = Buffer.from(settings.razorpayKeySecret, "base64").toString("utf-8");
+  const keySecret = Buffer.from(setting.razorpayKeySecret, "base64").toString("utf-8");
 
   // Create Razorpay order using API
   const Razorpay = (await import("razorpay")).default;
   const razorpayInstance = new Razorpay({
-    key_id: settings.razorpayKeyId,
+    key_id: setting.razorpayKeyId,
     key_secret: keySecret
   });
 
@@ -149,7 +149,7 @@ try {
       orderId: razorpayOrder.id,
       amount: amount,
       currency: "USD",
-      keyId: settings.razorpayKeyId,
+      keyId: setting.razorpayKeyId,
       plan: plan,
       billingCycle: billingCycle,
       videoQuota: videoQuota

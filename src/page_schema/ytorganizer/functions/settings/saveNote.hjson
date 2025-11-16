@@ -15,7 +15,7 @@ try {
   }
 
   // Extract parameters
-  const { item, itemType, note, ownershipId } = args.contextData;
+  const { item, note, ownershipId } = args.contextData;
 
   if (!item) {
     throw new Error("Item is required");
@@ -25,8 +25,16 @@ try {
     throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
-  if (!itemType || !["video", "channel", "playlist"].includes(itemType)) {
-    throw new Error("Invalid item type. Must be 'video', 'channel', or 'playlist'");
+  // Infer itemType from the item labels
+  let itemType;
+  if (item.L?.includes('Video')) {
+    itemType = 'video';
+  } else if (item.L?.includes('Channel')) {
+    itemType = 'channel';
+  } else if (item.L?.includes('Playlist')) {
+    itemType = 'playlist';
+  } else {
+    throw new Error("Cannot determine item type from labels. Item must be a video, channel, or playlist.");
   }
 
   // Verify ownership belongs to user
@@ -46,41 +54,41 @@ try {
   }
 
   // Determine the correct node label and relationship
-  let nodeLabel, settingsLabel, ownershipRelation, settingRelation, itemRelation;
+  let nodeLabel, settingLabel, ownershipRelation, settingRelation, itemRelation;
 
   if (itemType === "video") {
     nodeLabel = "Video";
-    settingsLabel = "VideoSetting";
+    settingLabel = "VideoSetting";
     ownershipRelation = "YouTubeOwnershipVideoSetting";
     settingRelation = "VideoSettingVideo";
     itemRelation = "VideoSettingVideo";
   } else if (itemType === "channel") {
     nodeLabel = "Channel";
-    settingsLabel = "ChannelSetting";
+    settingLabel = "ChannelSetting";
     ownershipRelation = "YouTubeOwnershipChannelSetting";
     settingRelation = "ChannelSettingChannel";
     itemRelation = "ChannelSettingChannel";
   } else {
     nodeLabel = "Playlist";
-    settingsLabel = "PlaylistSetting";
+    settingLabel = "PlaylistSetting";
     ownershipRelation = "YouTubeOwnershipPlaylistSetting";
     settingRelation = "PlaylistSettingPlaylist";
     itemRelation = "PlaylistSettingPlaylist";
   }
 
-  // Query to create or update the settings node with note
+  // Query to create or update the setting node with note
   const query = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (item:${nodeLabel} {youtubeId: $itemId})
-    MERGE (o)-[:${ownershipRelation}]->(settings:${settingsLabel})-[:${itemRelation}]->(item)
+    MERGE (o)-[:${ownershipRelation}]->(setting:${settingLabel})-[:${itemRelation}]->(item)
     ON CREATE SET
-      settings.note = $note,
-      settings.noteUpdatedAt = datetime(),
-      settings.createdAt = datetime()
+      setting.note = $note,
+      setting.noteUpdatedAt = datetime(),
+      setting.createdAt = datetime()
     ON MATCH SET
-      settings.note = $note,
-      settings.noteUpdatedAt = datetime()
-    RETURN settings, item
+      setting.note = $note,
+      setting.noteUpdatedAt = datetime()
+    RETURN setting, item
   `;
 
   // Execute the query
@@ -143,7 +151,8 @@ try {
     success: true,
     data: {
       ...itemData,
-      itemType
+      userId: user.id,
+      ownershipId: ownershipId
     },
     message: note ? `Note saved for ${itemType}` : `Note cleared for ${itemType}`
   };

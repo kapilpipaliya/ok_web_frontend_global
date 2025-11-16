@@ -22,7 +22,7 @@ try {
   const alertCheckKey = `quota_alert_${level}_${today}`;
 
   const existingAlert = await args.session.run(`
-    MATCH (settings:OAuthSettings)-[:QuotaAlert]->(alert:QuotaAlertSent {alertKey: $alertKey})
+    MATCH (setting:OAuthSetting)-[:QuotaAlert]->(alert:QuotaAlertSent {alertKey: $alertKey})
     RETURN alert
   `, { alertKey: alertCheckKey });
 
@@ -134,9 +134,9 @@ try {
 
   // Mark alert as sent
   await args.session.run(`
-    MATCH (settings:OAuthSettings)
-    WHERE settings.googleEnabled = true
-    WITH settings LIMIT 1
+    MATCH (setting:OAuthSetting)
+    WHERE setting.googleEnabled = true
+    WITH setting LIMIT 1
 
     CREATE (alert:QuotaAlertSent {
       alertKey: $alertKey,
@@ -147,7 +147,7 @@ try {
       emailsQueued: $emailsQueued,
       sentAt: datetime()
     })
-    CREATE (settings)-[:QuotaAlert]->(alert)
+    CREATE (setting)-[:QuotaAlert]->(alert)
 
     RETURN alert
   `, {

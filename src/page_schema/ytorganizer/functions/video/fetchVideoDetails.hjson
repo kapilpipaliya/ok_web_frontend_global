@@ -187,14 +187,14 @@ try {
     videoSettingKey
   });
 
-  const videoSettings = args.convertNodeToJson(videoSettingResult.records[0].get('vs'));
+  const videoSetting = args.convertNodeToJson(videoSettingResult.records[0].get('vs'));
 
   return {
     success: true,
     message: isNewVideo ? `Video "${video.P.title}" fetched and saved successfully!` : `Video "${video.P.title}" found in database.`,
     data: {
       video: video,
-      videoSettings: videoSettings,
+      videoSetting: videoSetting,
       isNewVideo: isNewVideo,
       videoId: videoId,
       userId: user.id

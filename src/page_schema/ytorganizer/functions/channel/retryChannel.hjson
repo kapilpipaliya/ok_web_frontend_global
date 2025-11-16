@@ -123,7 +123,7 @@ try {
         cs.updatedAt = datetime()
   `, { ownershipId, channelId });
 
-  // Also reset all playlist settings for this channel to queued
+  // Also reset all playlist setting for this channel to queued
   // This ensures playlists are re-processed even if some were completed before
   await args.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)

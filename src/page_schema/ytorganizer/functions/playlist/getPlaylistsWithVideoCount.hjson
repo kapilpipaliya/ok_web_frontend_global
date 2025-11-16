@@ -131,7 +131,7 @@ try {
     const playlistSetting = args.convertNodeToJson(record.get('ps'));
     const videoCount = record.get('videoCount');
 
-    // Add ownership-specific video count to playlist settings
+    // Add ownership-specific video count to playlist setting
     if (playlistSetting && playlistSetting.P) {
       playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
     }

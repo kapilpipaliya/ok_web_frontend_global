@@ -29,8 +29,8 @@ The system uses a multi-ownership architecture where each user can connect multi
 (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
 
-(OAuthSettings)-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
-(OAuthSettings)-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
+(OAuthSetting)-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
+(OAuthSetting)-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
 
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
 (User)-[:UserFeedback]->(Feedback)
@@ -43,11 +43,11 @@ The system uses a multi-ownership architecture where each user can connect multi
 - **Multi-Ownership**: Users can connect multiple YouTube accounts, each represented by a YouTubeOwnership node
 - **Shared Quota**: All users share a single 10,000 units/day API quota pool at the Google Cloud Project level
 - **Priority-Based Allocation**: Quota reservations support priority levels for fair resource distribution
-- **Separate Settings**: Each ownership maintains its own channel, playlist, and video preferences
+- **Separate Setting**: Each ownership maintains its own channel, playlist, and video preferences
 - **Ownership Switching**: Users can switch between connected accounts via dropdown selector
 - **Videos via Playlists**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
 - **Per-Ownership Playlist Membership**: Video membership in playlists is managed through `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)` relationships, allowing independent playlist management per ownership
-- **Global Video Settings**: VideoSettings (watched, notes, favourites) are stored at the ownership level via `(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)`, applying globally across all playlists for that ownership
+- **Global Video Setting**: VideoSetting (watched, notes, favourites) are stored at the ownership level via `(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)`, applying globally across all playlists for that ownership
 
 ### OAuth 2.0 Authentication & Multi-Ownership
 
@@ -164,7 +164,7 @@ The system supports connecting multiple YouTube accounts per user, with each acc
   - `callCount`: Number of API calls made by this ownership
   - `operations`: JSON object tracking operation counts for this ownership
   - `createdAt`, `updatedAt`: Timestamps
-- **OAuthSettings**: Global OAuth configuration (singleton node)
+- **OAuthSetting**: Global OAuth configuration (singleton node)
   - `key`: "oauth_settings" (single instance)
   - `quotaLimit`: Daily quota limit (10,000 units)
   - `quotaResetTime`: Time when quota resets (midnight Pacific Time)
@@ -314,7 +314,7 @@ The system tracks YouTube API quota consumption with a shared 10,000 units/day l
 - **Automatic Logging**: All API calls logged with operation type, cost, and ownership
 - **Quota Reservations**: Reserve quota before operations to prevent race conditions
 - **Expiry Management**: Reservations auto-expire after 5 minutes, quota auto-released
-- Daily quota tracking stored in Neo4j: `(OAuthSettings)-[:SharedAPIUsage]->(SharedAPIUsage)` (global) and `(OAuthSettings)-[:OwnershipAPIUsage]->(OwnershipAPIUsage)` (per ownership)
+- Daily quota tracking stored in Neo4j: `(OAuthSetting)-[:SharedAPIUsage]->(SharedAPIUsage)` (global) and `(OAuthSetting)-[:OwnershipAPIUsage]->(OwnershipAPIUsage)` (per ownership)
 
 **Visual Indicators:**
 - Color-coded status in admin quota monitor:
@@ -1201,7 +1201,7 @@ try {
 **Key Database Structure Features:**
 - **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
 - **Proper Relationships**: Follows (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
-- **Global Video Settings**: Creates (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video) for ownership-wide preferences
+- **Global Video Setting**: Creates (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video) for ownership-wide preferences
 - **Playlist Membership**: Uses (PlaylistSetting)-[:PlaylistSettingVideo]->(Video) relationships with position stored on edge
 - **Per-Ownership Privacy**: Each ownership has independent playlist and video settings
 - **Data Separation**: Global YouTube data separate from user preferences
@@ -1436,13 +1436,13 @@ This documentation serves as the foundation for implementing the YSaar system an
 
 ### Version 3.2 - Corrected Schema Architecture (Current)
 - ✅ **Per-Ownership Playlist Membership**: Changed from global `(Playlist)-[:PlaylistVideo]->(Video)` to per-ownership `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)`
-- ✅ **Global Video Settings**: VideoSettings remain at ownership level for global properties (watched, notes, favourites)
+- ✅ **Global Video Setting**: VideoSetting remain at ownership level for global properties (watched, notes, favourites)
 - ✅ **Independent Playlist Management**: Videos can be removed from individual playlists without affecting other playlists
 - ✅ **Position on Relationship**: Video position/playlistIndex stored on `PlaylistSettingVideo` relationship edge
 - ✅ **Simplified Frontend**: No `playlistId` required for video settings operations (notes, favourites, watched status)
 - ✅ **Updated Delete Operations**: Enhanced deleteVideo, deletePlaylist functions with proper orphan cleanup
 - ✅ **Updated Query Functions**: Modified getVideosWithDetails, getChannelsWithVideoCount, getPlaylistsWithVideoCount for new schema
-- ✅ **Updated Helper Functions**: Modified addVideoToPlaylist, saveNote, toggleFavourite, updateVideoSettings
+- ✅ **Updated Helper Functions**: Modified addVideoToPlaylist, saveNote, toggleFavourite, updateVideoSetting
 - ✅ **Better UX**: Marking video as "watched" or adding notes applies globally across all playlists
 
 ### Version 3.1 - Shared Quota Architecture
@@ -1466,10 +1466,10 @@ This documentation serves as the foundation for implementing the YSaar system an
 - ✅ **Centralized Architecture**: YTOLayout manages ownership state globally
 - ✅ **executeYTOFunction Wrapper**: Automatically injects ownershipId into all server function calls
 - ✅ **Updated All Server Functions**: Refactored 69+ backend functions for ownership-based relationships
-- ✅ **Per-Ownership Settings**: Each account maintains separate channel, playlist, and video preferences
+- ✅ **Per-Ownership Setting**: Each account maintains separate channel, playlist, and video preferences
 - ✅ **Session Persistence**: Selected ownership persists across page reloads
 - ✅ **Zero Page Updates**: All frontend pages automatically compatible through wrapper architecture
-- ✅ **Graph Schema Migration**: From User→Settings to User→YouTubeOwnership→Settings relationships
+- ✅ **Graph Schema Migration**: From User→Setting to User→YouTubeOwnership→Setting relationships
 - ✅ **Token Isolation**: Each ownership has independent OAuth tokens
 
 ### Version 2.0 - OAuth & API Usage Monitoring

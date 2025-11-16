@@ -91,7 +91,8 @@ try {
       playlists,
       videos,
       totalCount: channels.length + playlists.length + videos.length,
-      userId: user.id
+      userId: user.id,
+      ownershipId: ownershipId
     },
     message: `Found ${channels.length} channels, ${playlists.length} playlists, and ${videos.length} videos`
   };

@@ -199,7 +199,7 @@ try {
     // Continue with channel deletion even if playlist deletion fails
   }
 
-  // Step 4: Delete this ownership's ChannelSettings
+  // Step 4: Delete this ownership's ChannelSetting
   let queryParams = { ownershipId };
   let channelFilter = '';
 
@@ -208,20 +208,20 @@ try {
     channelFilter = 'WHERE c.youtubeId IN $channelIds';
   }
 
-  const deleteChannelSettingsQuery = `
+  const deleteChannelSettingQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
     ${channelFilter}
     DETACH DELETE cs
-    RETURN count(cs) as deletedChannelSettings
+    RETURN count(cs) as deletedChannelSetting
   `;
 
-  const channelSettingResult = await args.session.run(deleteChannelSettingsQuery, queryParams);
+  const channelSettingResult = await args.session.run(deleteChannelSettingQuery, queryParams);
 
-  const deletedCSRaw = channelSettingResult.records[0]?.get('deletedChannelSettings');
-  const deletedChannelSettings = deletedCSRaw ? (typeof deletedCSRaw.toNumber === 'function' ? deletedCSRaw.toNumber() : Number(deletedCSRaw)) : 0;
+  const deletedCSRaw = channelSettingResult.records[0]?.get('deletedChannelSetting');
+  const deletedChannelSetting = deletedCSRaw ? (typeof deletedCSRaw.toNumber === 'function' ? deletedCSRaw.toNumber() : Number(deletedCSRaw)) : 0;
 
-  if (deletedChannelSettings === 0) {
+  if (deletedChannelSetting === 0) {
     throw new Error("Channels not found or already deleted");
   }
 
@@ -257,7 +257,7 @@ try {
   let message;
   const isAll = items === 'all';
   const isAllInContext = items === 'allInContext';
-  const totalProcessed = deletedChannelSettings + deletedChannels;
+  const totalProcessed = deletedChannelSetting + deletedChannels;
 
   if (isAll || isAllInContext) {
     // For channels, both 'all' and 'allInContext' have the same behavior
@@ -280,7 +280,9 @@ try {
       deletedPlaylists: deletedPlaylists,
       deletedVideos: deletedVideos,
       totalChannels: totalChannels,
-      totalPlaylistsInChannels: deletedPlaylists
+      totalPlaylistsInChannels: deletedPlaylists,
+      userId: user.id,
+      ownershipId: ownershipId
     },
     message: message
   };

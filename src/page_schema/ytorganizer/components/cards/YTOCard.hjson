@@ -264,11 +264,11 @@ return `._id {
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 
 const baseTitle = item?.P?.title || "Untitled";
-const customName = itemSettings?.P?.customName;
+const customName = itemSetting?.P?.customName;
 
 // For playlists, channels, and videos, show custom name in brackets if it exists
 let displayTitle = baseTitle;
@@ -304,11 +304,11 @@ return `._id {
         displayOrder: 2.5,
         componentName: "Html",
         props: '''
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 
-// Get status from itemSettings
-const status = itemSettings?.P?.status;
+// Get status from itemSetting
+const status = itemSetting?.P?.status;
 
 // Hide for videos (they don't have processing status)
 if (itemType === "video") {
@@ -352,8 +352,8 @@ return {
 };
 ''',
         css: '''
-const itemSettings = args.contextData.props?.itemSettings;
-const status = itemSettings?.P?.status;
+const itemSetting = args.contextData.props?.itemSetting;
+const status = itemSetting?.P?.status;
 const statusInfo = args.fns.getStatusInfo?.(status);
 
 // Map color names to theme colors
@@ -411,8 +411,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const itemSettings = args.contextData.props?.itemSettings;
-const status = itemSettings?.P?.status;
+const itemSetting = args.contextData.props?.itemSetting;
+const status = itemSetting?.P?.status;
 
 // Get status info from constants
 const statusInfo = args.fns.getStatusInfo?.(status);
@@ -441,13 +441,13 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 
-// Get status and progress from itemSettings
-const status = itemSettings?.P?.status || '';
-const progress = itemSettings?.P?.progress || 0;
-const processedCount = itemSettings?.P?.processedPlaylists || itemSettings?.P?.processedVideos || 0;
-const totalCount = itemSettings?.P?.totalPlaylists || itemSettings?.P?.totalVideos || 0;
+// Get status and progress from itemSetting
+const status = itemSetting?.P?.status || '';
+const progress = itemSetting?.P?.progress || 0;
+const processedCount = itemSetting?.P?.processedPlaylists || itemSetting?.P?.processedVideos || 0;
+const totalCount = itemSetting?.P?.totalPlaylists || itemSetting?.P?.totalVideos || 0;
 
 // Get status info from constants
 const statusInfo = args.fns.getStatusInfo?.(status);
@@ -492,11 +492,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 
-// Get status and error from itemSettings
-const status = itemSettings?.P?.status || '';
-const error = itemSettings?.P?.error || '';
+// Get status and error from itemSetting
+const status = itemSetting?.P?.status || '';
+const error = itemSetting?.P?.error || '';
 
 // Only show error for failed or completed_with_errors status
 if ((status !== 'failed' && status !== 'completed_with_errors') || !error) {
@@ -552,14 +552,14 @@ return `._id {
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 
 let metaText = "";
 
 if (itemType === "channel") {
   const subscriberCount = item?.P?.subscriberCount || 0;
-  const videoCount = itemSettings?.P?.userVideoCount ?? 0;
+  const videoCount = itemSetting?.P?.userVideoCount ?? 0;
 
   let parts = [];
   if (subscriberCount >= 1000000) {
@@ -573,7 +573,7 @@ if (itemType === "channel") {
   parts.push(`${videoCount} video${videoCount !== 1 ? 's' : ''}`);
   metaText = parts.join(' • ');
 } else if (itemType === "playlist") {
-  const videoCount = itemSettings?.P?.userVideoCount ?? 0;
+  const videoCount = itemSetting?.P?.userVideoCount ?? 0;
   metaText = `${videoCount} video${videoCount !== 1 ? 's' : ''}`;
 
   // If there's a parent channel, show it
@@ -607,16 +607,16 @@ return `._id {
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
-const isFavourite = itemSettings?.P?.isFavourite || false;
+const isFavourite = itemSetting?.P?.isFavourite || false;
 
 return {
   as: "button",
   hide: !isFavourite,
   onClick: async (e) => {
     e.stopPropagation();
-    await args.fns.toggleFavourite?.(item, itemType);
+    await args.fns.toggleFavourite?.(item);
   },
   title: "Remove from favourites"
 };
@@ -724,8 +724,8 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const itemSettings = args.contextData.props?.itemSettings;
-const note = itemSettings?.P?.note || "";
+const itemSetting = args.contextData.props?.itemSetting;
+const note = itemSetting?.P?.note || "";
 const hasNote = note.length > 0;
 
 return {
@@ -772,9 +772,9 @@ return `._id {
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
-const note = itemSettings?.P?.note || "";
+const note = itemSetting?.P?.note || "";
 const shouldTruncate = note.length > 30;
 const displayNote = shouldTruncate ? note.substring(0, 30) + "..." : note;
 
@@ -783,7 +783,7 @@ return {
   text: displayNote,
   onClick: (e) => {
     e.stopPropagation();
-    args.fns.openNoteModal?.(item, itemType, note);
+    args.fns.openNoteModal?.(item, note);
   }
 };
 ''',
@@ -811,8 +811,8 @@ return `._id {
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
-// Get configured fields from layout settings
-const cardFieldSettings = args.fns.cardFieldSettings?.() || {
+// Get configured fields from layout setting
+const cardFieldSetting = args.fns.cardFieldSetting?.() || {
   video: [],
   playlist: [],
   channel: []
@@ -821,11 +821,11 @@ const cardFieldSettings = args.fns.cardFieldSettings?.() || {
 // Determine which fields to show based on item type
 let fieldsToShow = [];
 if (itemType === "video") {
-  fieldsToShow = cardFieldSettings.video || [];
+  fieldsToShow = cardFieldSetting.video || [];
 } else if (itemType === "playlist") {
-  fieldsToShow = cardFieldSettings.playlist || [];
+  fieldsToShow = cardFieldSetting.playlist || [];
 } else if (itemType === "channel") {
-  fieldsToShow = cardFieldSettings.channel || [];
+  fieldsToShow = cardFieldSetting.channel || [];
 }
 
 // If no fields configured, hide this section
@@ -1017,14 +1017,17 @@ return `._id {
         componentName: "YTOFloatingMenu",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemData = args.contextData.props?.itemData;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 
+// pass data to parent component else args.contextData.props?.itemData will not work on YTOMenuItem
 return {
   placement: "bottom-end",
-  item: item,
-  itemSettings: itemSettings,
-  itemType: itemType
+  item,
+  itemData,
+  itemSetting,
+  itemType
 };
 '''
       }
@@ -1038,9 +1041,9 @@ return {
         slot: "menu-items",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
-const note = itemSettings?.P?.note || "";
+const note = itemSetting?.P?.note || "";
 const hasNote = note.length > 0;
 
 return {
@@ -1048,7 +1051,7 @@ return {
   text: hasNote ? "Edit a note" : "Add a note",
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.openNoteModal?.(item, itemType, note);
+    args.fns.openNoteModal?.(item, note);
     args.contextData.floatingMenuContext?.closeMenu?.();
   }
 };
@@ -1088,16 +1091,16 @@ return {
         slot: "menu-items",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
-const isFavourite = itemSettings?.P?.isFavourite || false;
+const isFavourite = itemSetting?.P?.isFavourite || false;
 
 return {
   icon: isFavourite ? "carbon:favorite-filled" : "carbon:favorite",
   text: isFavourite ? "Remove from favourites" : "Add to favourites",
   onClick: async (e) => {
     e?.stopPropagation();
-    await args.fns.toggleFavourite?.(item, itemType);
+    await args.fns.toggleFavourite?.(item);
     args.contextData.floatingMenuContext?.closeMenu?.();
   }
 };
@@ -1187,16 +1190,12 @@ return {
         componentName: "YTOMenuItem",
         slot: "menu-items",
         props: '''
-const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
-const itemType = args.contextData.props?.itemType;
-
 return {
   icon: "carbon:edit",
   text: "Edit custom name",
   onClick: (e) => {
     e?.stopPropagation();
-    args.fns.openCustomNameModal?.(item, itemType, itemSettings);
+    args.fns.openCustomNameModal?.(args.contextData.props?.itemData);
     args.contextData.floatingMenuContext?.closeMenu?.();
   }
 };
@@ -1212,9 +1211,9 @@ return {
         slot: "menu-items",
         props: '''
 const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
-const status = itemSettings?.P?.status;
+const status = itemSetting?.P?.status;
 const youtubeId = item?.P?.youtubeId;
 const ownershipId = args.fns.getSelectedOwnershipId?.();
 
@@ -1260,25 +1259,13 @@ return {
         componentName: "YTOMenuItem",
         slot: "menu-items",
         props: '''
-const item = args.contextData.props?.item;
-const itemSettings = args.contextData.props?.itemSettings;
-const itemType = args.contextData.props?.itemType;
-
 return {
   icon: "carbon:trash-can",
   text: "Delete",
   type: "danger",
   onClick: (e) => {
     e?.stopPropagation();
-    const itemData = {[itemType]: item, [`${itemType}Settings`]: itemSettings};
-
-    // Call appropriate delete function based on item type
-    if (itemType === "video") {
-      args.fns.deleteVideo?.(itemData);
-          } else {
-            args.fns.deleteItem?.(itemData, itemType);
-    }
-
+    args.fns.deleteItem?.(args.contextData.props?.itemData);
     args.contextData.floatingMenuContext?.closeMenu?.();
   }
 };

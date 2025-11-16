@@ -1,4 +1,4 @@
-export interface EmailSettings {
+export interface EmailSetting {
   active?: string; // 'smtp', 'sendgrid', 'resend', etc. Empty means not configured
   fromEmail?: string;
   secure?: boolean;

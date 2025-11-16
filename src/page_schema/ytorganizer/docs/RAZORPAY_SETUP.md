@@ -104,7 +104,7 @@ The Razorpay integration creates the following database structures:
 
 #### RazorpaySettings
 ```cypher
-(:RazorpaySettings {
+(:RazorpaySetting {
   razorpayEnabled: boolean,
   razorpayKeyId: string,
   razorpayKeySecret: string (base64 encrypted),
@@ -374,7 +374,7 @@ Check logs in the terminal where the app is running.
 
 ```cypher
 // Check Razorpay settings
-MATCH (s:RazorpaySettings) RETURN s
+MATCH (s:RazorpaySetting) RETURN s
 
 // Check user subscriptions
 MATCH (u:User)-[:UserSubscription]->(s:UserSubscription)

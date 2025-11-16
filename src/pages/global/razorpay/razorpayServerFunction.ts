@@ -4,15 +4,15 @@ import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-export async function getRazorpaySettings(): Promise<ServerResult> {
+export async function getRazorpaySetting(): Promise<ServerResult> {
   "use server";
 
   const { dbSession } = await getDBSessionForSubdomain();
 
   try {
-    // Fetch Razorpay settings from database
+    // Fetch Razorpay setting from database
     const result = await dbSession.run(
-      "MATCH (s:RazorpaySettings) RETURN s LIMIT 1",
+      "MATCH (s:RazorpaySetting) RETURN s LIMIT 1",
     );
 
     if (result.records.length > 0) {
@@ -48,7 +48,7 @@ export async function getRazorpaySettings(): Promise<ServerResult> {
       };
     }
 
-    // Return empty array if no settings found
+    // Return empty array if no setting found
     return {
       result: [],
     };
@@ -59,7 +59,7 @@ export async function getRazorpaySettings(): Promise<ServerResult> {
   }
 }
 
-export async function saveRazorpaySettings(settings: {
+export async function saveRazorpaySetting(setting: {
   razorpayEnabled?: boolean;
   razorpayKeyId?: string;
   razorpayKeySecret?: string;
@@ -75,7 +75,7 @@ export async function saveRazorpaySettings(settings: {
       razorpayKeyId,
       razorpayKeySecret,
       razorpayWebhookSecret,
-    } = settings;
+    } = setting;
 
     // Encrypt the key secret if provided
     let encryptedKeySecret = razorpayKeySecret;
@@ -91,15 +91,15 @@ export async function saveRazorpaySettings(settings: {
       );
     }
 
-    // Check if RazorpaySettings vertex exists
+    // Check if RazorpaySetting vertex exists
     const checkResult = await dbSession.run(
-      "MATCH (s:RazorpaySettings) RETURN s LIMIT 1",
+      "MATCH (s:RazorpaySetting) RETURN s LIMIT 1",
     );
 
     if (checkResult.records.length > 0) {
-      // Update existing settings
+      // Update existing setting
       const updateQuery = `
-        MATCH (s:RazorpaySettings)
+        MATCH (s:RazorpaySetting)
         SET s.razorpayEnabled = $razorpayEnabled,
             s.razorpayKeyId = $razorpayKeyId,
             s.razorpayKeySecret = $razorpayKeySecret,
@@ -114,9 +114,9 @@ export async function saveRazorpaySettings(settings: {
         razorpayWebhookSecret: encryptedWebhookSecret || "",
       });
     } else {
-      // Create new settings
+      // Create new setting
       const createQuery = `
-        CREATE (s:RazorpaySettings {
+        CREATE (s:RazorpaySetting {
           razorpayEnabled: $razorpayEnabled,
           razorpayKeyId: $razorpayKeyId,
           razorpayKeySecret: $razorpayKeySecret,
@@ -133,7 +133,7 @@ export async function saveRazorpaySettings(settings: {
       });
     }
 
-    return { result: [], message: "Razorpay settings saved successfully" };
+    return { result: [], message: "Razorpay setting saved successfully" };
   } catch (error) {
     return handleAPIError(error);
   } finally {
@@ -149,7 +149,7 @@ export async function isRazorpayEnabled(): Promise<ServerResult> {
   try {
     // Check if Razorpay is enabled
     const result = await dbSession.run(
-      "MATCH (s:RazorpaySettings) WHERE s.razorpayEnabled = true RETURN s LIMIT 1",
+      "MATCH (s:RazorpaySetting) WHERE s.razorpayEnabled = true RETURN s LIMIT 1",
     );
 
     return { result: result.records.length > 0 };
