@@ -537,6 +537,7 @@ export function SignInForm() {
                   createFocusTrap({
                     element: options.ref,
                     observeChanges: true,
+                    enabled: () => options.ref(),
                     restoreFocus: true,
                     initialFocusElement: () =>
                       document.getElementsByTagName("input")[0],

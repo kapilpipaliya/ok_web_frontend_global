@@ -31,10 +31,14 @@ function parseModulePath(path: string): ParsedPath | null {
   )
     return null;
 
+  // Use only the filename for all schema types (no subfolder path)
+  // Subfolders are just for organization, not namespacing
+  const fileName = parts[parts.length - 1].replace(".hjson", "");
+
   return {
     websiteName: parts[1],
     schemaType: schemaType as SchemaType,
-    fileName: parts[3].replace(".hjson", ""),
+    fileName: fileName,
   };
 }
 
@@ -114,7 +118,8 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
 
   // We have to use the general pattern, but we'll filter efficiently
   // Use explicit default import for better compatibility
-  const allModules = import.meta.glob("./*/*/**.hjson", {
+  // Pattern matches: ./website/schemaType/**/*.hjson (any depth of nesting)
+  const allModules = import.meta.glob("./*//**/*.hjson", {
     eager: true,
     query: "?raw",
     import: "default",
@@ -155,7 +160,8 @@ function loadAllWebsiteSchemasSync(): AllWebsiteSchemas {
 
   // Import all hjson files synchronously
   // Use explicit default import for better compatibility
-  const eagerModules = import.meta.glob("./*/*/**.hjson", {
+  // Pattern matches: ./website/schemaType/**/*.hjson (any depth of nesting)
+  const eagerModules = import.meta.glob("./*//**/*.hjson", {
     eager: true,
     query: "?raw",
     import: "default",
