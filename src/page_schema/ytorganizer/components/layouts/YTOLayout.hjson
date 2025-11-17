@@ -1338,7 +1338,6 @@ return {
         css: '''
 const isCollapsed = args.fns.isSidebarCollapsed?.();
 const sidebarWidth = isCollapsed ? '72px' : '240px';
-const sidebarPadding = isCollapsed ? `${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}` : `${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}`;
 
 return `._id {
   display: none;
@@ -1348,15 +1347,81 @@ return `._id {
   ._id {
     display: flex;
     width: ${sidebarWidth};
-    min-height: 100vh;
+    height: 100vh;
     background: ${args.theme.var.color.background};
     border-right: 1px solid ${args.theme.var.color.border};
     flex-direction: column;
-    padding: ${sidebarPadding};
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-    transition: width ${args.theme.var.animation?.normal || '300ms'} ease, padding ${args.theme.var.animation?.normal || '300ms'} ease;
+    transition: width ${args.theme.var.animation?.normal || '300ms'} ease;
+    position: sticky;
+    top: 0;
     position: relative;
   }
+}`;
+'''
+      }
+    },
+    {
+      id: "sidebar_border_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 0.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: args.fns.toggleSidebar,
+  title: args.fns.isSidebarCollapsed?.() ? "Expand sidebar" : "Collapse sidebar"
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -8px;
+  bottom: 0;
+  width: 16px;
+  cursor: col-resize;
+  z-index: 100;
+  transition: background ${args.theme.var.animation?.fast || '150ms'} ease;
+
+  /* Only apply hover on devices that support hover (not touch devices) */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary};
+      opacity: 0.3;
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary};
+    opacity: 0.5;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "sidebar_content_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+const sidebarPadding = isCollapsed ? `${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}` : `${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}`;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding: ${sidebarPadding};
 }`;
 '''
       }
@@ -1368,6 +1433,8 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
 return {
   as: "div"
 };
@@ -1474,82 +1541,6 @@ return `._id {
   object-fit: contain;
   cursor: pointer;
 }`;
-'''
-      }
-    },
-    {
-      id: "sidebar_toggle_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1.7,
-        componentName: "Html",
-        props: '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-
-return {
-  as: "button",
-  onClick: args.fns.toggleSidebar,
-  title: isCollapsed ? "Expand sidebar" : "Collapse sidebar",
-  "aria-label": isCollapsed ? "Expand sidebar" : "Collapse sidebar"
-};
-''',
-        css: '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-
-return `._id {
-  width: 32px;
-  height: 32px;
-  border-radius: ${args.theme.var.borderRadius?.sm || '0.25rem'};
-  background: ${args.theme.var.color.background_light_200};
-  border: 1px solid ${args.theme.var.color.border};
-  color: ${args.theme.var.color.text};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all ${args.theme.var.animation?.fast || '150ms'} ease;
-  padding: 0;
-  flex-shrink: 0;
-
-  ${!isCollapsed ? `
-    position: absolute;
-    top: 1rem;
-    right: 0;
-    transform: translateX(50%);
-    z-index: 10;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  ` : `
-    margin: 0 auto ${args.theme.var.spacing?.md || '1rem'} auto;
-  `}
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_300};
-    border-color: ${args.theme.var.color.primary};
-  }
-
-  &:active {
-    transform: ${!isCollapsed ? 'translateX(50%) scale(0.95)' : 'scale(0.95)'};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "sidebar_toggle_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-
-return {
-  as: "icon",
-  icon: isCollapsed ? "carbon:chevron-right" : "carbon:chevron-left",
-  width: 20,
-  height: 20
-};
 '''
       }
     },
@@ -1792,10 +1783,33 @@ return `._id {
       }
     },
     {
-      id: "feedback_button_container",
+      id: "sidebar_footer",
       L: "Attr",
       P: {
         displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: auto;
+  padding-top: ${args.theme.var.spacing.md};
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "feedback_button_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 const isCollapsed = args.fns.isSidebarCollapsed?.();
@@ -1804,13 +1818,6 @@ return {
   as: "div",
   hide: isCollapsed
 };
-''',
-        css: '''
-return `._id {
-  margin-top: auto;
-  padding-top: ${args.theme.var.spacing.md};
-  border-top: 1px solid ${args.theme.var.color.border};
-}`;
 '''
       }
     },
@@ -2408,14 +2415,14 @@ return {
     { id: "e3b", T: "Attr", S: "main_content", E: "navigation_overlay" },
     { id: "e3c", T: "Attr", S: "navigation_overlay", E: "navigation_spinner" },
     { id: "e4", T: "Attr", S: "layout_container", E: "left_nav" },
-    { id: "e5", T: "Attr", S: "left_nav", E: "left_nav_header" },
-    { id: "e5a", T: "Attr", S: "left_nav", E: "collapsed_logo" },
+    { id: "e4a", T: "Attr", S: "left_nav", E: "sidebar_border_toggle" },
+    { id: "e4c", T: "Attr", S: "left_nav", E: "sidebar_content_wrapper" },
+    { id: "e5", T: "Attr", S: "sidebar_content_wrapper", E: "left_nav_header" },
+    { id: "e5a", T: "Attr", S: "sidebar_content_wrapper", E: "collapsed_logo" },
     { id: "e5b", T: "Attr", S: "collapsed_logo", E: "collapsed_logo_img" },
-    { id: "e5c", T: "Attr", S: "left_nav", E: "sidebar_toggle_button" },
-    { id: "e5d", T: "Attr", S: "sidebar_toggle_button", E: "sidebar_toggle_icon" },
     { id: "e6", T: "Attr", S: "left_nav_header", E: "left_nav_logo" },
     { id: "e6b", T: "Attr", S: "left_nav_logo", E: "left_nav_logo_img" },
-    { id: "e6c", T: "Attr", S: "left_nav", E: "ownership_selector_container" },
+    { id: "e6c", T: "Attr", S: "sidebar_content_wrapper", E: "ownership_selector_container" },
     { id: "e6d", T: "Attr", S: "ownership_selector_container", E: "ownership_selector_label" },
     { id: "e6e", T: "Attr", S: "ownership_selector_container", E: "ownership_selector" },
     { id: "e6f", T: "Attr", S: "ownership_selector_container", E: "ownership_selector_help" },
@@ -2423,11 +2430,12 @@ return {
     { id: "e6h", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_text" },
     { id: "e6i", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_text_content" },
     { id: "e6j", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_link" },
-    { id: "e7", T: "Attr", S: "left_nav", E: "left_nav_menu" },
-    { id: "e7a", T: "Attr", S: "left_nav", E: "feedback_button_container" },
-    { id: "e7b", T: "Attr", S: "feedback_button_container", E: "feedback_button" },
-    { id: "e7c", T: "Attr", S: "feedback_button", E: "feedback_icon" },
-    { id: "e7d", T: "Attr", S: "feedback_button", E: "feedback_text" },
+    { id: "e7", T: "Attr", S: "sidebar_content_wrapper", E: "left_nav_menu" },
+    { id: "e7a", T: "Attr", S: "sidebar_content_wrapper", E: "sidebar_footer" },
+    { id: "e7b", T: "Attr", S: "sidebar_footer", E: "feedback_button_container" },
+    { id: "e7c", T: "Attr", S: "feedback_button_container", E: "feedback_button" },
+    { id: "e7d", T: "Attr", S: "feedback_button", E: "feedback_icon" },
+    { id: "e7e", T: "Attr", S: "feedback_button", E: "feedback_text" },
     { id: "e8", T: "Attr", S: "left_nav_menu", E: "nav_sections_loop" },
     { id: "e9", T: "Attr", S: "nav_sections_loop", E: "nav_section" },
     { id: "e10", T: "Attr", S: "nav_section", E: "nav_section_title" },

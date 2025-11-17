@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">YSaar</string>
+    <string name="title_activity_main">YSaar</string>
+    <string name="package_name">com.ysaar.app</string>
+    <string name="custom_url_scheme">com.ysaar.app</string>
+</resources>

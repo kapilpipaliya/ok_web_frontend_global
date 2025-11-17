@@ -1,0 +1,14 @@
+{
+  "appId": "com.ysaar.app",
+  "appName": "YSaar",
+  "webDir": "dist",
+  "server": {
+    "url": "https://ysaar.com/auth/signin",
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true
+    }
+  }
+}
