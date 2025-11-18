@@ -15,6 +15,7 @@ import { getBaseDir } from "~/lib/files/getBaseDir";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { stopWorkersForSubdomain } from "~/server/queue/initWorkersCore";
 import { deleteAllQueuesForSubdomain } from "~/server/redis/redisManagement";
+import { broadcastStopWorkers } from "~/server/cluster/clusterCommunication";
 
 // Not used in the system yet
 export async function DELETE({ request }: APIEvent) {
@@ -58,9 +59,48 @@ export async function DELETE({ request }: APIEvent) {
     const account = accessResult.records[0].get("a");
     const subdomain = accessResult.records[0].get("s");
 
-    // Step 1: Stop all workers for this subdomain
+    // Step 1: Stop all workers for this subdomain on ALL cluster nodes
     console.log(`[Subdomain Delete] Stopping workers for subdomain: ${key}`);
+
+    // Stop workers on this node
     await stopWorkersForSubdomain(key);
+
+    // Broadcast stop command to all other cluster nodes and wait for acknowledgments
+    try {
+      const result = await broadcastStopWorkers(key, undefined, 10000); // subdomain, workerKey (undefined = all), timeout
+
+      if (result.totalNodes > 0) {
+        console.log(
+          `[Subdomain Delete] Workers stopped on ${result.respondedNodes}/${result.totalNodes} node(s) in ${result.duration}ms`,
+        );
+
+        if (result.errors.size > 0) {
+          console.warn(
+            `[Subdomain Delete] Some nodes failed to stop workers:`,
+            Array.from(result.errors.entries()),
+          );
+        }
+
+        if (result.timedOutNodes > 0) {
+          console.warn(
+            `[Subdomain Delete] ${result.timedOutNodes} node(s) did not respond in time`,
+          );
+        }
+      } else {
+        console.log(
+          `[Subdomain Delete] No other nodes in cluster, skipping broadcast`,
+        );
+      }
+    } catch (error) {
+      // Log error but continue with deletion
+      console.error(
+        `[Subdomain Delete] Error during worker shutdown broadcast:`,
+        error,
+      );
+      console.log(
+        `[Subdomain Delete] Continuing with deletion despite broadcast error`,
+      );
+    }
 
     // Step 2: Delete all Redis queues for this subdomain
     console.log(

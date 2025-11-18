@@ -48,7 +48,7 @@ return [
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 99;
     background: ${args.theme.var.color.background_dark_200};
     border-top: 1px solid ${args.theme.var.color.border};
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);

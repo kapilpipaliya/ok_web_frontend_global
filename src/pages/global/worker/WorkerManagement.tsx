@@ -3,7 +3,7 @@ import { createSignal, For, Show } from "solid-js";
 import { useToast } from "~/components/styled/modal/Toast";
 import { As } from "~/components/As";
 import {
-  getWorkerStatus,
+  getSubdomainClusterWorkerStatus,
   initSubdomainWorkersUI,
   startWorker,
   stopWorker,
@@ -14,6 +14,8 @@ interface Worker {
   key: string;
   description: string;
   active: boolean;
+  nodeId: string;
+  hostname: string;
 }
 
 interface WorkerStatus {
@@ -22,17 +24,48 @@ interface WorkerStatus {
   totalWorkers: number;
   activeWorkers: number;
   workers: Worker[];
+  nodes?: Array<{
+    nodeId: string;
+    hostname: string;
+    pid: number;
+    startedAt: number;
+    lastHeartbeat: number;
+  }>;
+  currentNode?: {
+    nodeId: string;
+    hostname: string;
+    pid: number;
+    startedAt: number;
+    lastHeartbeat: number;
+  } | null;
+  clusterInfo?: {
+    totalNodes: number;
+    respondedNodes: number;
+    timedOutNodes: number;
+    duration: number;
+  };
 }
 
 export function WorkerManagement() {
   const { showSuccessToast, showErrorToast } = useToast();
   const [refreshKey, setRefreshKey] = createSignal(0);
 
+  const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
+
   const workerStatus = createAsync(
     async () => {
       // Use refreshKey as dependency
       refreshKey();
-      return await getWorkerStatus();
+      setErrorMessage(null); // Clear previous errors
+      const result = await getSubdomainClusterWorkerStatus();
+      if (result.success && result.data) {
+        return result.data;
+      }
+      // Handle error case
+      if (!result.success && result.error) {
+        setErrorMessage(result.error);
+      }
+      return null;
     },
     { deferStream: true },
   );
@@ -189,19 +222,75 @@ export function WorkerManagement() {
         </As>
       </As>
 
-      <Show
-        when={workerStatus()}
-        fallback={
+      {/* Error Display */}
+      <Show when={errorMessage()}>
+        <As
+          as="div"
+          css={`return \`._id {
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid \${args.theme.var.color.error};
+  background: \${args.theme.var.color.error_light_900};
+  margin-bottom: 2rem;
+}\`;`}
+        >
           <As
             as="div"
             css={`return \`._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}\`;`}
+          >
+            <As
+              as="span"
+              css={`return \`._id {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}\`;`}
+            >
+              ⚠️
+            </As>
+            <As as="div">
+              <As
+                as="div"
+                css={`return \`._id {
+  font-weight: 600;
+  color: \${args.theme.var.color.error_dark_300};
+  margin-bottom: 0.5rem;
+}\`;`}
+              >
+                Error Loading Worker Status
+              </As>
+              <As
+                as="div"
+                css={`return \`._id {
+  color: \${args.theme.var.color.error_dark_300};
+  font-size: 0.875rem;
+}\`;`}
+              >
+                {errorMessage()}
+              </As>
+            </As>
+          </As>
+        </As>
+      </Show>
+
+      <Show
+        when={workerStatus()}
+        fallback={
+          <Show when={!errorMessage()}>
+            <As
+              as="div"
+              css={`return \`._id {
   padding: 3rem;
   text-align: center;
   color: \${args.theme.var.color.text_light_600};
 }\`;`}
-          >
-            Loading worker status...
-          </As>
+            >
+              Loading worker status...
+            </As>
+          </Show>
         }
       >
         {(status) => (
@@ -324,6 +413,38 @@ export function WorkerManagement() {
   text-transform: uppercase;
 }\`;`}
                 >
+                  Cluster Nodes
+                </As>
+                <As
+                  as="p"
+                  css={`return \`._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin: 0;
+}\`;`}
+                >
+                  {status().clusterInfo?.totalNodes || 0}
+                </As>
+              </As>
+              <As
+                as="div"
+                css={`return \`._id {
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid \${args.theme.var.color.border};
+  background: \${args.theme.var.color.background};
+}\`;`}
+              >
+                <As
+                  as="h3"
+                  css={`return \`._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: \${args.theme.var.color.text_light_600};
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+}\`;`}
+                >
                   Total Workers
                 </As>
                 <As
@@ -370,6 +491,162 @@ export function WorkerManagement() {
                 </As>
               </As>
             </As>
+
+            {/* Cluster Nodes Section */}
+            <Show when={status().nodes && status().nodes!.length > 0}>
+              <As
+                as="div"
+                css={`return \`._id {
+  margin-bottom: 2rem;
+}\`;`}
+              >
+                <As
+                  as="h2"
+                  css={`return \`._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}\`;`}
+                >
+                  Active Cluster Nodes for this Subdomain
+                </As>
+                <As
+                  as="div"
+                  css={`return \`._id {
+  display: grid;
+  gap: 1rem;
+}\`;`}
+                >
+                  <For each={status().nodes}>
+                    {(node) => {
+                      const isCurrentNode =
+                        status().currentNode?.nodeId === node.nodeId;
+                      const uptime = Date.now() - node.startedAt;
+                      const uptimeMinutes = Math.floor(uptime / 1000 / 60);
+                      const uptimeHours = Math.floor(uptimeMinutes / 60);
+                      const uptimeStr =
+                        uptimeHours > 0
+                          ? `${uptimeHours}h ${uptimeMinutes % 60}m`
+                          : `${uptimeMinutes}m`;
+
+                      return (
+                        <As
+                          as="div"
+                          css={`return \`._id {
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid \${args.theme.var.color.border};
+  background: \${args.theme.var.color.background};
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 2rem;
+  align-items: center;
+}\`;`}
+                        >
+                          <As as="div">
+                            <As
+                              as="div"
+                              css={`return \`._id {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}\`;`}
+                            >
+                              {node.hostname}
+                              {isCurrentNode && (
+                                <As
+                                  as="span"
+                                  css={`return \`._id {
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  background: \${args.theme.var.color.primary_light_900};
+  color: \${args.theme.var.color.primary_dark_300};
+}\`;`}
+                                >
+                                  Current
+                                </As>
+                              )}
+                            </As>
+                            <As
+                              as="div"
+                              css={`return \`._id {
+  font-size: 0.75rem;
+  color: \${args.theme.var.color.text_light_600};
+  font-family: monospace;
+  margin-top: 0.25rem;
+}\`;`}
+                            >
+                              {node.nodeId}
+                            </As>
+                          </As>
+                          <As
+                            as="div"
+                            css={`return \`._id {
+  text-align: right;
+}\`;`}
+                          >
+                            <As
+                              as="div"
+                              css={`return \`._id {
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.text_light_600};
+}\`;`}
+                            >
+                              PID: {node.pid}
+                            </As>
+                          </As>
+                          <As
+                            as="div"
+                            css={`return \`._id {
+  text-align: right;
+}\`;`}
+                          >
+                            <As
+                              as="div"
+                              css={`return \`._id {
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.text_light_600};
+}\`;`}
+                            >
+                              Uptime: {uptimeStr}
+                            </As>
+                          </As>
+                          <As as="div">
+                            <As
+                              as="span"
+                              css={`return \`._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: \${args.theme.var.color.success_light_900};
+  color: \${args.theme.var.color.success_dark_300};
+}\`;`}
+                            >
+                              <As
+                                as="span"
+                                css={`return \`._id {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: \${args.theme.var.color.success};
+}\`;`}
+                              />
+                              Online
+                            </As>
+                          </As>
+                        </As>
+                      );
+                    }}
+                  </For>
+                </As>
+              </As>
+            </Show>
 
             <As
               as="div"
@@ -499,12 +776,14 @@ export function WorkerManagement() {
   font-weight: 600;
   font-size: 0.875rem;
   display: grid;
-  grid-template-columns: 2fr 3fr 100px 150px;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr 100px 150px;
   gap: 1rem;
 }\`;`}
                 >
                   <As as="div">Worker Key</As>
                   <As as="div">Description</As>
+                  <As as="div">Hostname</As>
+                  <As as="div">Node ID</As>
                   <As as="div">Status</As>
                   <As as="div">Actions</As>
                 </As>
@@ -516,7 +795,7 @@ export function WorkerManagement() {
   padding: 1rem 1.5rem;
   border-top: 1px solid \${args.theme.var.color.border};
   display: grid;
-  grid-template-columns: 2fr 3fr 100px 150px;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr 100px 150px;
   gap: 1rem;
   align-items: center;
   background: \${args.theme.var.color.background};
@@ -543,6 +822,30 @@ export function WorkerManagement() {
 }\`;`}
                       >
                         {worker.description || "No description"}
+                      </As>
+                      <As
+                        as="div"
+                        css={`return \`._id {
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.text};
+}\`;`}
+                      >
+                        {worker.hostname}
+                      </As>
+                      <As
+                        as="div"
+                        css={`return \`._id {
+  font-size: 0.75rem;
+  color: \${args.theme.var.color.text_light_600};
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}\`;`}
+                        title={worker.nodeId}
+                      >
+                        {worker.nodeId.length > 20
+                          ? `${worker.nodeId.substring(0, 20)}...`
+                          : worker.nodeId}
                       </As>
                       <As as="div">
                         <As

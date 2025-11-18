@@ -1,6 +1,7 @@
 import { SettingsLayout } from "~/components/styled/SettingsLayout";
 import { EmailSetting } from "~/pages/global/email/EmailSetting";
 import { AdminWorkerManagement } from "~/pages/global/worker/AdminWorkerManagement";
+import { AdminNodeManagement } from "~/pages/global/cluster/AdminNodeManagement";
 import { RedisManagement } from "~/pages/global/redis/RedisManagement";
 import { BackupManagement } from "~/pages/global/backup/BackupManagement";
 
@@ -17,6 +18,12 @@ export default function SystemGlobalSettings() {
       icon: "ph:circles-three",
       id: "admin-workers",
       label: "All Subdomain Workers",
+    },
+    {
+      component: AdminNodeManagement,
+      icon: "ph:computer-tower",
+      id: "cluster-nodes",
+      label: "Cluster Nodes",
     },
     {
       component: RedisManagement,

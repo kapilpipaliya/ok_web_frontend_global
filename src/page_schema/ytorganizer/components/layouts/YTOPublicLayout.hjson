@@ -79,6 +79,22 @@ return {
       // Check localStorage for cookie consent
       const hasAccepted = localStorage.getItem('cookie_consent_accepted') === 'true';
       args.fns.setHasCookieConsent(hasAccepted);
+
+      // Load Google Analytics gtag.js
+      if (!window.dataLayer) {
+        // Initialize dataLayer
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){window.dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', 'AW-17540558480');
+
+        // Load gtag.js script
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17540558480';
+        document.head.appendChild(script);
+      }
     }
 };
 ''',

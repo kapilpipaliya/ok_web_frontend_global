@@ -1,5 +1,9 @@
 "use server";
 
+import fs from "node:fs";
+import zlib from "node:zlib";
+import { promisify } from "node:util";
+
 import { listCloudBackups } from "~/lib/backup/listCloudBackups";
 import { deleteCloudBackup } from "~/lib/backup/deleteCloudBackup";
 import { downloadBackupFromCloud } from "~/lib/backup/downloadBackupFromCloud";
@@ -7,6 +11,8 @@ import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
 import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
 import { getDriver } from "~/cypher/core/driver";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+
+const gunzip = promisify(zlib.gunzip);
 
 /**
  * Get all subdomains (database names)
@@ -250,11 +256,6 @@ export async function compareBackups(
   databaseName2: string,
 ) {
   try {
-    const fs = await import("fs");
-    const zlib = await import("zlib");
-    const { promisify } = await import("util");
-    const gunzip = promisify(zlib.gunzip);
-
     // Download both backups
     const tmpPath1 = `/tmp/compare_${Date.now()}_1_${filename1}`;
     const tmpPath2 = `/tmp/compare_${Date.now()}_2_${filename2}`;
@@ -355,14 +356,6 @@ export async function compareBackups(
  */
 export async function previewBackup(filename: string, databaseName: string) {
   try {
-    const { downloadBackupFromCloud } = await import(
-      "~/lib/backup/downloadBackupFromCloud"
-    );
-    const fs = await import("fs");
-    const zlib = await import("zlib");
-    const { promisify } = await import("util");
-    const gunzip = promisify(zlib.gunzip);
-
     // Download backup
     const tmpPath = `/tmp/preview_${Date.now()}_${filename}`;
 

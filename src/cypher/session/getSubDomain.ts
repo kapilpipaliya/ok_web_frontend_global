@@ -14,6 +14,13 @@ export async function getSubDomain(host: string) {
   const effectiveDomain = domain || hostname;
   const effectiveSubdomain = subdomain;
 
+  // Handle nip.io domains (e.g., subdomain.192.168.1.1.nip.io)
+  // if (effectiveDomain === "nip.io") {
+  //   // Extract the first part before the IP address as subdomain
+  //   const firstPart = hostname?.split(".")[0];
+  //   return { domain: effectiveDomain, subdomain: firstPart || "www" };
+  // }
+
   if (effectiveSubdomain === "admin") {
     return { domain, subdomain: ADMIN_DB_NAME };
   }

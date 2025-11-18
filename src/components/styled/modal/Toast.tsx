@@ -55,6 +55,7 @@ interface LoadingToastParams<T extends { [key: string]: any }> {
 type ValueOrFunction<T, Args> = ((args: Args) => T) | T;
 
 export function useToast() {
+  // Todo: Fix this giving error: useTheme must be used within a ThemeProvider
   function showCustomToast(message: string, showDismiss: boolean) {
     toastValue.toast.custom(
       (t) => (

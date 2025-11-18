@@ -4,6 +4,7 @@ import { csrf } from "shieldwall/start";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
+import {initializeWorkersIfNeeded} from "~/server/initWorkersOnStartup";
 
 // https://docs.solidjs.com/solid-start/guides/security
 // https://github.com/atilafassina/shieldwall
@@ -51,9 +52,6 @@ export default createMiddleware({
     async (event) => {
       // Only run on server
       if (typeof window === "undefined") {
-        const { initializeWorkersIfNeeded } = await import(
-          "./server/initWorkersOnStartup"
-        );
         await initializeWorkersIfNeeded();
       }
     },

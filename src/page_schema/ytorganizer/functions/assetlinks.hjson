@@ -1,0 +1,29 @@
+{
+  vertexes: [
+    {
+      id: "assetlinks_function",
+      L: "Function",
+      P: {
+        key: "assetlinks",
+        description: "Returns Android App Links Digital Asset Links JSON for app deep linking verification",
+        body: '''
+// Return the Digital Asset Links JSON for Android App Links
+// This allows the Android app to handle URLs from the website domain
+return [
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ysaar.app",
+      "sha256_cert_fingerprints": [
+        "5F:28:9B:2D:68:C2:59:46:77:51:44:5C:90:CD:D2:F7:DB:38:3A:BC:D2:3B:FF:D3:1F:61:B2:F2:02:E7:B5:6A"
+      ]
+    }
+  }
+];
+'''
+      }
+    }
+  ],
+  edges: []
+}

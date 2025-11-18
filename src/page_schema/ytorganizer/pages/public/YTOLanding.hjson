@@ -1686,6 +1686,328 @@ return `._id {
 }`;
 '''
       }
+    },
+    // Mobile Apps Coming Soon Section
+    {
+      id: "mobile_apps_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.theme.var.color.background_dark_50};
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 0.5s both;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "COMING SOON"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+  border: 2px solid ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "YSaar On The Go"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Take your YouTube organization everywhere with our mobile apps for Android and iOS"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 3rem 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_icons_container",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 3rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_android_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+._id:hover {
+  opacity: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_android_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "logos:android-icon",
+  width: 80,
+  height: 80
+};
+''',
+        css: '''
+return `._id {
+  filter: grayscale(30%);
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_android_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Android"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_ios_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+._id:hover {
+  opacity: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_ios_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "logos:apple-app-store",
+  width: 80,
+  height: 80
+};
+''',
+        css: '''
+return `._id {
+  filter: grayscale(30%);
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_ios_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "iOS"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_notify_text",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Sign up now to get notified when our mobile apps launch!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
     }
   ],
   edges: [
@@ -1747,6 +2069,21 @@ return `._id {
     { id: "e77", T: "Attr", S: "stats_rating", E: "stats_rating_text" },
     { id: "e78", T: "Attr", S: "stats_grid", E: "stats_videos" },
     { id: "e79", T: "Attr", S: "stats_videos", E: "stats_videos_number" },
-    { id: "e80", T: "Attr", S: "stats_videos", E: "stats_videos_label" }
+    { id: "e80", T: "Attr", S: "stats_videos", E: "stats_videos_label" },
+
+    // Mobile Apps Section
+    { id: "e81", T: "Attr", S: "main_content", E: "mobile_apps_section" },
+    { id: "e82", T: "Attr", S: "mobile_apps_section", E: "mobile_apps_container" },
+    { id: "e83", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_badge" },
+    { id: "e84", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_title" },
+    { id: "e85", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_subtitle" },
+    { id: "e86", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_icons_container" },
+    { id: "e87", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_android_container" },
+    { id: "e88", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_icon" },
+    { id: "e89", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_text" },
+    { id: "e90", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_ios_container" },
+    { id: "e91", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_icon" },
+    { id: "e92", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_text" },
+    { id: "e93", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_notify_text" }
   ]
 }

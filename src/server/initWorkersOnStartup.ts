@@ -9,6 +9,7 @@ import {
   initAllSubdomainWorkers,
   initWorkersCore,
 } from "~/server/queue/initWorkersCore";
+import { initClusterCommunication } from "~/server/cluster/clusterCommunication";
 
 // Use global shared state to prevent duplicate initialization across module instances
 // (Vinxi dev mode creates multiple module instances in separate contexts)
@@ -60,6 +61,11 @@ export async function initializeWorkersIfNeeded() {
       }
 
       console.log("[Server] ✓ Redis is running");
+
+      // Initialize cluster communication
+      console.log("[Server] Initializing cluster communication...");
+      await initClusterCommunication();
+      console.log("[Server] ✓ Cluster communication initialized successfully");
 
       // Initialize platform workers
       console.log("[Server] Initializing platform workers...");

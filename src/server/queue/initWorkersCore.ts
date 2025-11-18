@@ -6,6 +6,8 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { getDriver } from "~/cypher/core/driver";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
+import { closeClusterCommunication } from "~/server/cluster/clusterCommunication";
+import { closeDriver } from "~/cypher/core/driver";
 
 /**
  * Worker state management
@@ -112,10 +114,14 @@ export async function initWorkersCore() {
       await closeAllWorkersForShutdown();
       console.log("[Workers] ✓ All workers stopped");
 
-      // Step 2: Close Neo4j driver connection pool
+      // Step 2: Close cluster communication
+      console.log("[Cluster] Closing cluster communication...");
+      await closeClusterCommunication();
+      console.log("[Cluster] ✓ Cluster communication closed");
+
+      // Step 3: Close Neo4j driver connection pool
       // This releases all connections back to Neo4j server
       console.log("[Database] Closing Neo4j driver connection pool...");
-      const { closeDriver } = await import("~/cypher/core/driver");
       await closeDriver();
       console.log(
         "[Database] ✓ Neo4j driver closed (all connections released)",

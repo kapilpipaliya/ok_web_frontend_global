@@ -54,7 +54,7 @@ export interface NamedServerFunctionRequest {
 
 /**
  * Core function execution logic (without "use server")
- * Used by both executeNamedServerFunction and executeNamedServerFunctionDirect
+ * Used by executeNamedServerFunction
  *
  * Executes server-side functions stored in the Neo4j database by:
  * 1. Fetching the function definition from database
