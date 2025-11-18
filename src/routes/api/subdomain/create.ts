@@ -19,6 +19,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { initSubdomainWorkersForSubdomain } from "~/server/queue/initWorkersCore";
 import { importSchemas } from "~/lib/schema/importSchemas";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
+import { broadcastStartWorkers } from "~/server/cluster/clusterCommunication";
 
 // Reserved subdomain keys that cannot be used
 const RESERVED_SUBDOMAINS = new Set([
@@ -139,18 +140,60 @@ export async function POST({ request }: APIEvent) {
       // Don't throw - seed function failure shouldn't block subdomain creation
     }
 
-    // Start all workers for the subdomain
+    // Start all workers for the subdomain on ALL cluster nodes
+    console.log(
+      `[Subdomain Create] Starting workers for subdomain: ${key} on all nodes`,
+    );
+
+    // Start workers on this node
     try {
       await initSubdomainWorkersForSubdomain(key);
       console.log(
-        `[Subdomain Create] Workers initialized for subdomain: ${key}`,
+        `[Subdomain Create] Workers initialized on current node for subdomain: ${key}`,
       );
     } catch (error) {
       console.error(
-        `[Subdomain Create] Failed to initialize workers for subdomain: ${key}`,
+        `[Subdomain Create] Failed to initialize workers on current node for subdomain: ${key}`,
         error,
       );
       // Don't throw - worker initialization failure shouldn't block subdomain creation
+    }
+
+    // Broadcast start command to all other cluster nodes
+    try {
+      const result = await broadcastStartWorkers(key, undefined, 10000); // subdomain, workerKey (undefined = all), timeout
+
+      if (result.totalNodes > 0) {
+        console.log(
+          `[Subdomain Create] Workers started on ${result.respondedNodes}/${result.totalNodes} node(s) in ${result.duration}ms`,
+        );
+
+        if (result.errors.size > 0) {
+          console.warn(
+            `[Subdomain Create] Some nodes failed to start workers:`,
+            Array.from(result.errors.entries()),
+          );
+        }
+
+        if (result.timedOutNodes > 0) {
+          console.warn(
+            `[Subdomain Create] ${result.timedOutNodes} node(s) did not respond in time`,
+          );
+        }
+      } else {
+        console.log(
+          `[Subdomain Create] No other nodes in cluster, skipping broadcast`,
+        );
+      }
+    } catch (error) {
+      // Log error but don't fail subdomain creation
+      console.error(
+        `[Subdomain Create] Error during worker start broadcast:`,
+        error,
+      );
+      console.log(
+        `[Subdomain Create] Subdomain created successfully despite broadcast error`,
+      );
     }
 
     return {

@@ -237,7 +237,17 @@ return `._id {
 return {
   as: "button",
   text: "Start Organizing for Free",
-  onClick: () => args.navigate('/auth/signup')
+  onClick: () => {
+    // Track conversion
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
+        'value': 1.0,
+        'currency': 'INR'
+      });
+    }
+    args.navigate('/auth/signup');
+  }
 };
 ''',
         css: '''
@@ -289,6 +299,14 @@ return {
   as: "button",
   text: "Watch Demo",
   onClick: () => {
+    // Track conversion
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
+        'value': 1.0,
+        'currency': 'INR'
+      });
+    }
     // Open the demo video
     const demoVideo = {
       P: {
@@ -1322,6 +1340,15 @@ return {
   as: "button",
   text: tier?.buttonText || "Get Started",
   onClick: () => {
+    // Track conversion
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
+        'value': 1.0,
+        'currency': 'INR'
+      });
+    }
+
     if (planName === "free") {
       // Free plan - just sign up
       args.navigate('/auth/signup');

@@ -4,6 +4,7 @@ import {executeNamedServerFunctionCore} from "~/cypher/get/executeNamedServerFun
 /**
  * GET API endpoint for Android App Links verification
  * Returns Digital Asset Links JSON for app deep linking
+ * https://capacitorjs.com/docs/guides/deep-links
  */
 export async function GET(event: APIEvent) {
   try {

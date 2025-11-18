@@ -13,7 +13,7 @@
 import { google } from "googleapis";
 import type { Session } from "neo4j-driver";
 import neo4j from "neo4j-driver";
-import { encryptToken, decryptToken } from "~/lib/auth/tokenEncryption";
+import {encryptToken, decryptToken, decryptClientSecret} from "~/lib/auth/tokenEncryption";
 import { randomUUID } from "crypto";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import {
@@ -62,7 +62,6 @@ async function getOAuthConfig(
   }
 
   // Decrypt client secret
-  const { decryptClientSecret } = await import("~/lib/auth/tokenEncryption");
   const clientSecret = decryptClientSecret(clientSecretEncrypted);
 
   return {

@@ -11,7 +11,7 @@ import zlib from "zlib";
 import { pipeline } from "stream";
 import { downloadBackupFromCloud } from "./downloadBackupFromCloud";
 import { getDriver } from "~/cypher/core/driver";
-import { stopWorkersForSubdomain } from "~/server/queue/initWorkersCore";
+import { stopWorkersForSubdomain, initSubdomainWorkersForSubdomain } from "~/server/queue/initWorkersCore";
 
 const pipelineAsync = promisify(pipeline);
 
@@ -258,9 +258,6 @@ export async function restoreFromBackup(
     );
 
     try {
-      const { initSubdomainWorkersForSubdomain } = await import(
-        "~/server/queue/initWorkersCore"
-      );
       await initSubdomainWorkersForSubdomain(restoreToDatabase);
       console.log(`[Restore] Workers restarted successfully`);
     } catch (workerError) {
