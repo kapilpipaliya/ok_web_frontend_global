@@ -534,6 +534,56 @@ const saveCardFieldSetting = async (newSetting) => {
   }
 };
 
+// Keep Awake wrapper functions
+const keepAwake = async () => {
+  await args.KeepAwake.keepAwake();
+};
+
+const allowSleep = async () => {
+  await args.KeepAwake.allowSleep();
+};
+
+const isSupported = async () => {
+  const result = await args.KeepAwake.isSupported();
+  return result.isSupported;
+};
+
+const isKeptAwake = async () => {
+  const result = await args.KeepAwake.isKeptAwake();
+  return result.isKeptAwake;
+};
+
+// Keep Awake management
+const enableKeepAwake = async () => {
+  try {
+    const supported = await isSupported();
+    if (!supported) return;
+
+    const alreadyAwake = await isKeptAwake();
+    if (alreadyAwake) return;
+
+    await keepAwake();
+    console.log('Keep Awake enabled');
+  } catch (error) {
+    console.error('Error enabling Keep Awake:', error);
+  }
+};
+
+const disableKeepAwake = async () => {
+  try {
+    const supported = await isSupported();
+    if (!supported) return;
+
+    const awake = await isKeptAwake();
+    if (!awake) return;
+
+    await allowSleep();
+    console.log('Keep Awake disabled');
+  } catch (error) {
+    console.error('Error disabling Keep Awake:', error);
+  }
+};
+
 // Video player state management
 const [playerState, setPlayerState] = args.createSignal("closed"); // closed, minimized, maximized
 const [currentVideo, setCurrentVideo] = args.createSignal(null);
@@ -546,9 +596,10 @@ const [playerSize, setPlayerSize] = args.createStore({ width: 400, height: 250 }
 const [videoQueue, setVideoQueue] = args.createSignal([]);
 
 // Play video in the player
-const playVideo = (video) => {
+const playVideo = async (video) => {
   setCurrentVideo(video);
   setPlayerState("minimized");
+  await enableKeepAwake();
 };
 
 // Add video to queue
@@ -745,9 +796,10 @@ const togglePlayerState = () => {
 };
 
 // Close player
-const closePlayer = () => {
+const closePlayer = async () => {
   setPlayerState("closed");
   setCurrentVideo(null);
+  await disableKeepAwake();
 };
 
 // Define navigation items for both desktop and mobile menus
@@ -1124,6 +1176,12 @@ return {
   setNavigationSections,
   mobileNavigationItems,
   setMobileNavigationItems,
+  keepAwake,
+  allowSleep,
+  isSupported,
+  isKeptAwake,
+  enableKeepAwake,
+  disableKeepAwake,
   playerState,
   currentVideo,
   playVideo,

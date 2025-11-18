@@ -9,6 +9,7 @@
 import { handleYouTubeCallback } from "~/lib/youtube/youtubeOAuth";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
+import { createRedirectResponse } from "~/lib/api/server/capacitorRedirect";
 import type { APIEvent } from "@solidjs/start/server";
 
 export async function GET(event: APIEvent) {
@@ -23,28 +24,22 @@ export async function GET(event: APIEvent) {
 
     // Handle user denial
     if (error === "access_denied") {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location:
-            "/accounts?error=" +
-            encodeURIComponent(
-              "Authorization was cancelled. You need to authorize access to use YouTube features.",
-            ),
-        },
-      });
+      return createRedirectResponse(
+        event.request,
+        "/accounts?error=" +
+          encodeURIComponent(
+            "Authorization was cancelled. You need to authorize access to use YouTube features.",
+          )
+      );
     }
 
     // Validate required parameters
     if (!code || !state) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location:
-            "/accounts?error=" +
-            encodeURIComponent("Invalid OAuth callback: missing parameters"),
-        },
-      });
+      return createRedirectResponse(
+        event.request,
+        "/accounts?error=" +
+          encodeURIComponent("Invalid OAuth callback: missing parameters")
+      );
     }
 
     // Parse state (now contains userId, ownershipId, customName)
@@ -60,14 +55,11 @@ export async function GET(event: APIEvent) {
       }
     } catch (parseError) {
       console.error("Failed to parse OAuth state:", parseError);
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location:
-            "/accounts?error=" +
-            encodeURIComponent("Invalid OAuth state parameter"),
-        },
-      });
+      return createRedirectResponse(
+        event.request,
+        "/accounts?error=" +
+          encodeURIComponent("Invalid OAuth state parameter")
+      );
     }
 
     // Exchange code for tokens and create ownership
@@ -79,14 +71,11 @@ export async function GET(event: APIEvent) {
     );
 
     if (!result.success) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location:
-            "/accounts?error=" +
-            encodeURIComponent(result.error || "Failed to connect YouTube"),
-        },
-      });
+      return createRedirectResponse(
+        event.request,
+        "/accounts?error=" +
+          encodeURIComponent(result.error || "Failed to connect YouTube")
+      );
     }
 
     // Trigger auto-fetch of all channels for this ownership
@@ -131,27 +120,21 @@ export async function GET(event: APIEvent) {
     }
 
     // Success! Redirect to accounts page
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: "/accounts?success=" + encodeURIComponent(successMessage),
-      },
-    });
+    return createRedirectResponse(
+      event.request,
+      "/accounts?success=" + encodeURIComponent(successMessage)
+    );
   } catch (error) {
     console.error("YouTube OAuth callback error:", error);
-
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location:
-          "/accounts?error=" +
-          encodeURIComponent(
-            error instanceof Error
-              ? error.message
-              : "Failed to complete YouTube authorization",
-          ),
-      },
-    });
+    return createRedirectResponse(
+      event.request,
+      "/accounts?error=" +
+        encodeURIComponent(
+          error instanceof Error
+            ? error.message
+            : "Failed to complete YouTube authorization",
+        )
+    );
   } finally {
     await dbSession.close();
   }

@@ -40,6 +40,7 @@ import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { debounce } from "@solid-primitives/scheduled";
 import * as focusTrap from "focus-trap";
+import { KeepAwake } from '@capacitor-community/keep-awake';
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -275,6 +276,7 @@ export function createFunctionArgumentBase(
     executeNamedServerFunction,
     floatingUI,
     debounce,
-    focusTrap
+    focusTrap,
+    KeepAwake
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

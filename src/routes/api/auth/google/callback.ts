@@ -6,6 +6,7 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
+import { createRedirectResponse } from "~/lib/api/server/capacitorRedirect";
 import { decryptClientSecret } from "~/lib/auth/tokenEncryption";
 import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
@@ -209,23 +210,14 @@ export async function GET({ request }: APIEvent) {
     updateRedirectUrl(user, subDomain!, configuredRedirectUrl);
 
     // Redirect to the application
-    return new Response(null, {
-      headers: {
-        Location: user.P.redirectUrl || "/",
-      },
-      status: 302,
-    });
+    const redirectUrl = user.P.redirectUrl || "/";
+    return createRedirectResponse(request, redirectUrl);
   } catch (error) {
     console.error("Google OAuth callback error:", error);
-    // Redirect to signin page with error
-    return new Response(null, {
-      headers: {
-        Location: `/auth/signin?error=${encodeURIComponent(
-          error instanceof Error ? error.message : "Google sign-in failed",
-        )}`,
-      },
-      status: 302,
-    });
+    const errorUrl = `/auth/signin?error=${encodeURIComponent(
+      error instanceof Error ? error.message : "Google sign-in failed",
+    )}`;
+    return createRedirectResponse(request, errorUrl);
   } finally {
     await dbSession.close();
   }

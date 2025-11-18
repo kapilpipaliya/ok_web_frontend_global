@@ -4,7 +4,12 @@
   "webDir": "dist",
   "server": {
     "url": "https://ysaar.com/auth/signin",
-    "cleartext": true
+    "cleartext": true,
+    "allowNavigation": [
+      "https://ysaar.com/*",
+      "https://accounts.google.com/*",
+      "https://*.google.com/*"
+    ]
   },
   "plugins": {
     "SplashScreen": {
