@@ -19,9 +19,57 @@
 // Global state for cookie consent
 const [hasCookieConsent, setHasCookieConsent] = args.createSignal(false);
 
+// Global state for video player
+const [playerState, setPlayerState] = args.createSignal("closed"); // "closed", "minimized", "maximized"
+const [currentVideo, setCurrentVideo] = args.createSignal(null);
+const [videoQueue, setVideoQueue] = args.createSignal([]);
+const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
+const [playerSize, setPlayerSize] = args.createStore({ width: 480, height: 270 });
+
+// Player control functions
+const openPlayer = (video) => {
+  setCurrentVideo(video);
+  setPlayerState("minimized");
+};
+
+const closePlayer = () => {
+  setPlayerState("closed");
+  setCurrentVideo(null);
+  setVideoQueue([]);
+};
+
+const togglePlayerState = () => {
+  setPlayerState(prev => prev === "minimized" ? "maximized" : "minimized");
+};
+
+const playNext = () => {
+  const queue = videoQueue();
+  if (queue.length > 0) {
+    const [nextVideo, ...rest] = queue;
+    setCurrentVideo(nextVideo);
+    setVideoQueue(rest);
+  } else {
+    closePlayer();
+  }
+};
+
 return {
   hasCookieConsent,
-  setHasCookieConsent
+  setHasCookieConsent,
+  playerState,
+  setPlayerState,
+  currentVideo,
+  setCurrentVideo,
+  videoQueue,
+  setVideoQueue,
+  playerPosition,
+  setPlayerPosition,
+  playerSize,
+  setPlayerSize,
+  openPlayer,
+  closePlayer,
+  togglePlayerState,
+  playNext
 };
 ''',
         props: '''
@@ -64,7 +112,7 @@ return `._id {
   padding: 1rem 2rem;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 99;
   backdrop-filter: blur(10px);
 }
 
@@ -612,6 +660,30 @@ return {};
 return {};
 '''
       }
+    },
+    // Video Player
+    {
+      id: "video_player",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "YTOVideoPlayer",
+        props: '''
+return {
+  playerState: args.fns.playerState,
+  currentVideo: args.fns.currentVideo,
+  videoQueue: args.fns.videoQueue,
+  playerPosition: args.fns.playerPosition,
+  playerSize: args.fns.playerSize,
+  setPlayerPosition: args.fns.setPlayerPosition,
+  setPlayerSize: args.fns.setPlayerSize,
+  closePlayer: args.fns.closePlayer,
+  togglePlayerState: args.fns.togglePlayerState,
+  playNext: args.fns.playNext,
+  openQueueModal: () => {}
+};
+'''
+      }
     }
   ],
   edges: [
@@ -645,6 +717,9 @@ return {};
     { id: "e22", T: "Attr", S: "footer_container", E: "footer_youtube_attribution" },
 
     // Root to cookie banner
-    { id: "e23", T: "Attr", S: "layout_root", E: "cookie_banner" }
+    { id: "e23", T: "Attr", S: "layout_root", E: "cookie_banner" },
+
+    // Root to video player
+    { id: "e24", T: "Attr", S: "layout_root", E: "video_player" }
   ]
 }

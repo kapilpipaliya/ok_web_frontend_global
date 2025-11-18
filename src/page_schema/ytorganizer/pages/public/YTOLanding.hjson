@@ -115,7 +115,7 @@ return `._id {
 return {
   as: "img",
   src: "/api/file/download/big_logo_white.png",
-  alt: "YT Organizer Logo"
+  alt: "YSaar Organizer Logo"
 };
 ''',
         css: '''
@@ -199,10 +199,39 @@ return `._id {
       }
     },
     {
-      id: "hero_cta_button",
+      id: "hero_cta_buttons_container",
       L: "Attr",
       P: {
         displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_cta_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
@@ -242,8 +271,88 @@ return `._id {
   ._id {
     padding: 0.875rem 2rem;
     font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
   }
 }`;
+'''
+      }
+    },
+    {
+      id: "hero_demo_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Watch Demo",
+  onClick: () => {
+    // Open the demo video
+    const demoVideo = {
+      P: {
+        youtubeId: "sf-i_T4RWek",
+        title: "YSaar Signup Demo"
+      }
+    };
+    args.fns.openPlayer(demoVideo);
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: transparent;
+  color: ${args.theme.var.color.primary_text};
+  border: 3px solid ${args.theme.var.color.background};
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+._id:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+._id:active {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_demo_button_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:play-filled",
+  width: 20,
+  height: 20
+};
 '''
       }
     },
@@ -1587,7 +1696,10 @@ return `._id {
     { id: "e12", T: "Attr", S: "hero_section", E: "hero_icon" },
     { id: "e13", T: "Attr", S: "hero_section", E: "hero_title" },
     { id: "e14", T: "Attr", S: "hero_section", E: "hero_subtitle" },
-    { id: "e15", T: "Attr", S: "hero_section", E: "hero_cta_button" },
+    { id: "e15", T: "Attr", S: "hero_section", E: "hero_cta_buttons_container" },
+    { id: "e15a", T: "Attr", S: "hero_cta_buttons_container", E: "hero_cta_button" },
+    { id: "e15b", T: "Attr", S: "hero_cta_buttons_container", E: "hero_demo_button" },
+    { id: "e15c", T: "Attr", S: "hero_demo_button", E: "hero_demo_button_icon" },
     { id: "e16", T: "Attr", S: "main_content", E: "features_section" },
     { id: "e17", T: "Attr", S: "features_section", E: "features_container" },
     { id: "e18", T: "Attr", S: "features_container", E: "features_title" },
