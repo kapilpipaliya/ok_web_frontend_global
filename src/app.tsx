@@ -1,8 +1,9 @@
 import { MetaProvider } from "@solidjs/meta";
-import { Router } from "@solidjs/router";
+import { Router, useNavigate } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { FileRoutes } from "@solidjs/start/router";
 import { ToastProvider } from "solid-hot-toast";
+import { App as CapacitorApp } from "@capacitor/app";
 
 // import "~/base.css";
 import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
@@ -55,6 +56,19 @@ export default function App() {
           root={(props) => {
             // <A> and 'use' router primitives can be only used inside a Route.
             // const location = useLocation();
+            const navigate = useNavigate();
+
+            // Set up Capacitor deep linking listener
+            onMount(() => {
+              if (!isServer) {
+                CapacitorApp.addListener('appUrlOpen', (data) => {
+                  const url = new URL(data.url);
+                  const path = url.pathname + url.search;
+                  navigate(path);
+                });
+              }
+            });
+
             return (
               <MetaProvider>
                 <ErrorBoundary
