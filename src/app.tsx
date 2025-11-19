@@ -62,13 +62,16 @@ export default function App() {
             onMount(() => {
               if (isServer) return;
 
-              const handleDeepLink = (urlString: string, useTimeout = false) => {
+              const handleDeepLink = (
+                urlString: string,
+                useTimeout = false,
+              ) => {
                 try {
                   const url = new URL(urlString);
                   const path = url.pathname + url.search + url.hash;
 
                   // API routes need full page reload, client routes use SPA navigation
-                  if (path.startsWith('/api/')) {
+                  if (path.startsWith("/api/")) {
                     window.location.href = path;
                   } else if (useTimeout) {
                     setTimeout(() => navigate(path), 100);
@@ -76,17 +79,21 @@ export default function App() {
                     navigate(path);
                   }
                 } catch (err) {
-                  console.error('[Deep Link] Error:', err, 'URL:', urlString);
+                  console.error("[Deep Link] Error:", err, "URL:", urlString);
                 }
               };
 
               // Handle cold start (app was closed when link clicked)
               CapacitorApp.getLaunchUrl()
-                .then(result => result?.url && handleDeepLink(result.url, true))
-                .catch(err => console.error('[Deep Link] Launch URL error:', err));
+                .then(
+                  (result) => result?.url && handleDeepLink(result.url, true),
+                )
+                .catch((err) =>
+                  console.error("[Deep Link] Launch URL error:", err),
+                );
 
               // Handle warm start (app was running when link clicked)
-              CapacitorApp.addListener('appUrlOpen', (data) => {
+              CapacitorApp.addListener("appUrlOpen", (data) => {
                 if (data.url) handleDeepLink(data.url);
               });
             });

@@ -13,7 +13,11 @@
 import { google } from "googleapis";
 import type { Session } from "neo4j-driver";
 import neo4j from "neo4j-driver";
-import {encryptToken, decryptToken, decryptClientSecret} from "~/lib/auth/tokenEncryption";
+import {
+  encryptToken,
+  decryptToken,
+  decryptClientSecret,
+} from "~/lib/auth/tokenEncryption";
 import { randomUUID } from "crypto";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import {

@@ -427,6 +427,7 @@ export function SignInForm() {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 12px;
   margin-bottom: 16px;
 }\`;`,
                 componentName: "Html",

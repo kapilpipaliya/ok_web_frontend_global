@@ -116,9 +116,7 @@ export class NodeRegistry {
       // Add to node registry set
       await this.redis.sadd(CLUSTER_KEYS.NODE_REGISTRY, this.nodeId);
 
-      console.log(
-        `[NodeRegistry] Node registered with TTL: ${ttlSeconds}s`,
-      );
+      console.log(`[NodeRegistry] Node registered with TTL: ${ttlSeconds}s`);
     } catch (error) {
       console.error("[NodeRegistry] Failed to register node:", error);
     }
@@ -162,9 +160,7 @@ export class NodeRegistry {
       // Refresh membership in registry set
       await this.redis.sadd(CLUSTER_KEYS.NODE_REGISTRY, this.nodeId);
 
-      console.log(
-        `[NodeRegistry] Heartbeat sent: ${this.nodeId}`,
-      );
+      console.log(`[NodeRegistry] Heartbeat sent: ${this.nodeId}`);
     } catch (error) {
       console.error("[NodeRegistry] Failed to send heartbeat:", error);
     }
@@ -229,10 +225,7 @@ export class NodeRegistry {
       const exists = await this.redis.exists(nodeKey);
       return exists === 1;
     } catch (error) {
-      console.error(
-        `[NodeRegistry] Failed to check node ${nodeId}:`,
-        error,
-      );
+      console.error(`[NodeRegistry] Failed to check node ${nodeId}:`, error);
       return false;
     }
   }
@@ -285,9 +278,7 @@ export class NodeRegistry {
       }
 
       if (removedCount > 0) {
-        console.log(
-          `[NodeRegistry] Cleaned up ${removedCount} stale node(s)`,
-        );
+        console.log(`[NodeRegistry] Cleaned up ${removedCount} stale node(s)`);
       }
 
       return removedCount;

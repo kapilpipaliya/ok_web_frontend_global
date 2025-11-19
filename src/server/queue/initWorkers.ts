@@ -42,7 +42,11 @@ export async function initSubdomainWorkersUI() {
   try {
     await initializeWorkersIfNeeded();
 
-    const broadcastResult = await broadcastStartWorkers(subDomain, undefined, 10000);
+    const broadcastResult = await broadcastStartWorkers(
+      subDomain,
+      undefined,
+      10000,
+    );
 
     if (broadcastResult.totalNodes > 0) {
       console.log(
@@ -81,7 +85,11 @@ export async function stopWorkers() {
   try {
     await initializeWorkersIfNeeded();
 
-    const broadcastResult = await broadcastStopWorkers(subDomain, undefined, 10000);
+    const broadcastResult = await broadcastStopWorkers(
+      subDomain,
+      undefined,
+      10000,
+    );
 
     if (broadcastResult.totalNodes > 0) {
       console.log(
@@ -713,7 +721,11 @@ export async function initAllSubdomainWorkersUI() {
         if (sd === "admin") continue; // Skip admin
 
         try {
-          const broadcastResult = await broadcastStartWorkers(sd, undefined, 10000);
+          const broadcastResult = await broadcastStartWorkers(
+            sd,
+            undefined,
+            10000,
+          );
 
           if (broadcastResult.totalNodes > 0) {
             console.log(
@@ -721,10 +733,7 @@ export async function initAllSubdomainWorkersUI() {
             );
           }
         } catch (error) {
-          console.error(
-            `[Workers] Error broadcasting init for ${sd}:`,
-            error,
-          );
+          console.error(`[Workers] Error broadcasting init for ${sd}:`, error);
         }
       }
     } catch (error) {
@@ -805,7 +814,11 @@ export async function stopAllSubdomainWorkersUI() {
       // Broadcast stop for each subdomain
       for (const sd of subdomainsToStop) {
         try {
-          const broadcastResult = await broadcastStopWorkers(sd, undefined, 10000);
+          const broadcastResult = await broadcastStopWorkers(
+            sd,
+            undefined,
+            10000,
+          );
 
           if (broadcastResult.totalNodes > 0) {
             console.log(
@@ -813,10 +826,7 @@ export async function stopAllSubdomainWorkersUI() {
             );
           }
         } catch (error) {
-          console.error(
-            `[Workers] Error broadcasting stop for ${sd}:`,
-            error,
-          );
+          console.error(`[Workers] Error broadcasting stop for ${sd}:`, error);
         }
       }
     } catch (error) {
@@ -936,7 +946,10 @@ export async function getClusterWorkerStatus() {
 
     // Add local node workers (if not already included in responses)
     if (currentNode) {
-      for (const [subdomainKey, workers] of workerState.activeWorkers.entries()) {
+      for (const [
+        subdomainKey,
+        workers,
+      ] of workerState.activeWorkers.entries()) {
         if (subdomainKey === "platform") continue;
 
         const subdomainData = subdomainMap.get(subdomainKey);
@@ -945,9 +958,7 @@ export async function getClusterWorkerStatus() {
         for (const [workerKey] of workers.entries()) {
           // Check if this worker is already in the list (from cluster response)
           const alreadyExists = subdomainData.workers.some(
-            (w) =>
-              w.workerKey === workerKey &&
-              w.nodeId === currentNode.nodeId,
+            (w) => w.workerKey === workerKey && w.nodeId === currentNode.nodeId,
           );
 
           if (!alreadyExists) {
@@ -982,7 +993,9 @@ export async function getClusterWorkerStatus() {
       }
 
       // Sort workers by key for consistent display
-      subdomainData.workers.sort((a, b) => a.workerKey.localeCompare(b.workerKey));
+      subdomainData.workers.sort((a, b) =>
+        a.workerKey.localeCompare(b.workerKey),
+      );
     }
 
     // Convert map to array, removing the configuredWorkers set
@@ -1126,7 +1139,9 @@ export async function getSubdomainClusterWorkerStatus() {
           if (!activeWorkersOnNodes.has(worker.workerKey)) {
             activeWorkersOnNodes.set(worker.workerKey, new Set());
           }
-          activeWorkersOnNodes.get(worker.workerKey)!.add(response.nodeInfo.nodeId);
+          activeWorkersOnNodes
+            .get(worker.workerKey)!
+            .add(response.nodeInfo.nodeId);
         }
       }
     }

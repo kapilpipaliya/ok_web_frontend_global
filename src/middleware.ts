@@ -4,14 +4,16 @@ import { csrf } from "shieldwall/start";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
-import {initializeWorkersIfNeeded} from "~/server/initWorkersOnStartup";
+import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
 
 // Helper to check if logging should be skipped
 const shouldSkipLogging = (pathname: string) => {
-  return pathname.startsWith("/_build") ||
-         pathname.startsWith("/assets") ||
-         pathname === "/favicon.ico" ||
-         pathname === "/health";
+  return (
+    pathname.startsWith("/_build") ||
+    pathname.startsWith("/assets") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/health"
+  );
 };
 
 // https://docs.solidjs.com/solid-start/guides/security
@@ -28,13 +30,13 @@ export default createMiddleware({
       // Convert HEAD to GET for processing
       if (isHeadRequest) {
         (event.locals as any).isHeadRequest = true;
-        Object.defineProperty(event, 'request', {
+        Object.defineProperty(event, "request", {
           value: new Request(event.request.url, {
             method: "GET",
             headers: event.request.headers,
           }),
           writable: false,
-          configurable: true
+          configurable: true,
         });
       }
 
@@ -48,8 +50,10 @@ export default createMiddleware({
             method: isHeadRequest ? "HEAD" : event.request.method,
             url: url.pathname + url.search,
             userAgent: event.request.headers.get("user-agent") || undefined,
-            ip: event.request.headers.get("x-forwarded-for") ||
-                event.request.headers.get("x-real-ip") || undefined,
+            ip:
+              event.request.headers.get("x-forwarded-for") ||
+              event.request.headers.get("x-real-ip") ||
+              undefined,
           },
           `→ ${isHeadRequest ? "HEAD" : event.request.method} ${url.pathname}`,
         );
@@ -98,14 +102,14 @@ export default createMiddleware({
 
       // Strip body from HEAD requests
       if ((event.locals as any).isHeadRequest && event.response) {
-        Object.defineProperty(event, 'response', {
+        Object.defineProperty(event, "response", {
           value: new Response(null, {
             status: event.response.status,
             statusText: event.response.statusText,
             headers: event.response.headers,
           }),
           writable: false,
-          configurable: true
+          configurable: true,
         });
       }
 
@@ -116,13 +120,17 @@ export default createMiddleware({
         const duration = startTime ? Date.now() - startTime : undefined;
 
         logger.logRequest({
-          method: (event.locals as any).isHeadRequest ? "HEAD" : event.request.method,
+          method: (event.locals as any).isHeadRequest
+            ? "HEAD"
+            : event.request.method,
           url: url.pathname + url.search,
           statusCode: event.response?.status || 200,
           duration,
           userAgent: event.request.headers.get("user-agent") || undefined,
-          ip: event.request.headers.get("x-forwarded-for") ||
-              event.request.headers.get("x-real-ip") || undefined,
+          ip:
+            event.request.headers.get("x-forwarded-for") ||
+            event.request.headers.get("x-real-ip") ||
+            undefined,
         });
       }
     },

@@ -1,5 +1,5 @@
 import { type APIEvent } from "@solidjs/start/server";
-import {executeNamedServerFunctionCore} from "~/cypher/get/executeNamedServerFunctionCore";
+import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
 
 /**
  * GET API endpoint for Android App Links verification

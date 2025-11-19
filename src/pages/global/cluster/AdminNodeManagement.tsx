@@ -2,7 +2,10 @@ import { createAsync } from "@solidjs/router";
 import { createSignal, For, Show, onCleanup, createEffect } from "solid-js";
 import { useToast } from "~/components/styled/modal/Toast";
 import { As } from "~/components/As";
-import { getClusterNodes, getClusterWorkerStatus } from "~/server/queue/initWorkers";
+import {
+  getClusterNodes,
+  getClusterWorkerStatus,
+} from "~/server/queue/initWorkers";
 
 interface NodeInfo {
   nodeId: string;
@@ -24,27 +27,37 @@ export function AdminNodeManagement() {
   const [refreshKey, setRefreshKey] = createSignal(0);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
   const [expandedNodeId, setExpandedNodeId] = createSignal<string | null>(null);
-  const [nodeWorkers, setNodeWorkers] = createSignal<Record<string, WorkerInfo[]>>({});
+  const [nodeWorkers, setNodeWorkers] = createSignal<
+    Record<string, WorkerInfo[]>
+  >({});
 
   // Auto-refresh state - properly initialize from localStorage
   const getInitialAutoRefresh = () => {
-    if (typeof window === 'undefined') return false;
+    if (typeof window === "undefined") return false;
     const saved = localStorage.getItem("clusterNodes_autoRefresh");
     return saved === "true";
   };
 
   const getInitialInterval = () => {
-    if (typeof window === 'undefined') return 30;
+    if (typeof window === "undefined") return 30;
     const saved = localStorage.getItem("clusterNodes_refreshInterval");
     return saved ? parseInt(saved) : 30;
   };
 
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = createSignal(getInitialAutoRefresh());
-  const [refreshInterval, setRefreshInterval] = createSignal(getInitialInterval());
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = createSignal(
+    getInitialAutoRefresh(),
+  );
+  const [refreshInterval, setRefreshInterval] = createSignal(
+    getInitialInterval(),
+  );
 
   // Previous state for change detection
-  const [previousNodeCount, setPreviousNodeCount] = createSignal<number | null>(null);
-  const [previousHealthyCount, setPreviousHealthyCount] = createSignal<number | null>(null);
+  const [previousNodeCount, setPreviousNodeCount] = createSignal<number | null>(
+    null,
+  );
+  const [previousHealthyCount, setPreviousHealthyCount] = createSignal<
+    number | null
+  >(null);
   const [isInitialLoad, setIsInitialLoad] = createSignal(true);
 
   const clusterNodes = createAsync(
@@ -94,7 +107,9 @@ export function AdminNodeManagement() {
 
     const nodes = data.data.nodes;
     const currentCount = nodes.length;
-    const currentHealthy = nodes.filter((n: NodeInfo) => isNodeHealthy(n.lastHeartbeat)).length;
+    const currentHealthy = nodes.filter((n: NodeInfo) =>
+      isNodeHealthy(n.lastHeartbeat),
+    ).length;
 
     // Skip notifications on initial load
     if (isInitialLoad()) {
@@ -110,7 +125,9 @@ export function AdminNodeManagement() {
     // Check for node count changes - only update if different
     if (prevCount !== null && prevCount !== currentCount) {
       if (currentCount > prevCount) {
-        showSuccessToast(`🆕 New node joined the cluster (${currentCount} total)`);
+        showSuccessToast(
+          `🆕 New node joined the cluster (${currentCount} total)`,
+        );
       } else {
         showErrorToast(`❌ Node left the cluster (${currentCount} remaining)`);
       }
@@ -122,9 +139,13 @@ export function AdminNodeManagement() {
     // Check for health status changes - only update if different
     if (prevHealthy !== null && prevHealthy !== currentHealthy) {
       if (currentHealthy < prevHealthy) {
-        showErrorToast(`⚠️ Node became unhealthy (${currentHealthy}/${currentCount} healthy)`);
+        showErrorToast(
+          `⚠️ Node became unhealthy (${currentHealthy}/${currentCount} healthy)`,
+        );
       } else if (currentHealthy > prevHealthy) {
-        showSuccessToast(`✅ Node recovered (${currentHealthy}/${currentCount} healthy)`);
+        showSuccessToast(
+          `✅ Node recovered (${currentHealthy}/${currentCount} healthy)`,
+        );
       }
       setPreviousHealthyCount(currentHealthy);
     } else if (prevHealthy === null) {
@@ -345,7 +366,11 @@ export function AdminNodeManagement() {
               <As
                 as="select"
                 value={refreshInterval()}
-                onChange={(e: Event) => handleIntervalChange(parseInt((e.target as HTMLSelectElement).value))}
+                onChange={(e: Event) =>
+                  handleIntervalChange(
+                    parseInt((e.target as HTMLSelectElement).value),
+                  )
+                }
                 css={`return \`._id {
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
@@ -355,10 +380,18 @@ export function AdminNodeManagement() {
   cursor: pointer;
 }\`;`}
               >
-                <As as="option" value="5">5s</As>
-                <As as="option" value="10">10s</As>
-                <As as="option" value="30">30s</As>
-                <As as="option" value="60">60s</As>
+                <As as="option" value="5">
+                  5s
+                </As>
+                <As as="option" value="10">
+                  10s
+                </As>
+                <As as="option" value="30">
+                  30s
+                </As>
+                <As as="option" value="60">
+                  60s
+                </As>
               </As>
             </Show>
           </As>
@@ -466,7 +499,9 @@ export function AdminNodeManagement() {
           const nodes = data.nodes;
           const currentNode = data.currentNode;
           const totalNodes = nodes.length;
-          const healthyCount = nodes.filter((n: NodeInfo) => isNodeHealthy(n.lastHeartbeat)).length;
+          const healthyCount = nodes.filter((n: NodeInfo) =>
+            isNodeHealthy(n.lastHeartbeat),
+          ).length;
 
           return (
             <>
@@ -754,7 +789,9 @@ export function AdminNodeManagement() {
   ${healthy ? "animation: pulse-dot 2s ease-in-out infinite;" : ""}
 }\`;`}
                                 />
-                                <As as="span">{healthy ? "Healthy" : "Stale"}</As>
+                                <As as="span">
+                                  {healthy ? "Healthy" : "Stale"}
+                                </As>
                               </As>
                             </As>
 
@@ -1058,7 +1095,8 @@ export function AdminNodeManagement() {
                       Healthy:
                     </As>
                     <As as="span">
-                      Node has sent a heartbeat within the last 90 seconds (pulsing green indicator)
+                      Node has sent a heartbeat within the last 90 seconds
+                      (pulsing green indicator)
                     </As>
                   </As>
                   <As
@@ -1079,8 +1117,8 @@ export function AdminNodeManagement() {
                       Stale:
                     </As>
                     <As as="span">
-                      Node hasn't sent a heartbeat for more than 90 seconds
-                      (may be offline or experiencing issues)
+                      Node hasn't sent a heartbeat for more than 90 seconds (may
+                      be offline or experiencing issues)
                     </As>
                   </As>
                   <As
@@ -1093,9 +1131,11 @@ export function AdminNodeManagement() {
 }\`;`}
                   >
                     Nodes automatically register when they start and send
-                    heartbeat signals every 30 seconds. Click any node row to expand
-                    and view detailed information including workers running on that node.
-                    {autoRefreshEnabled() && ` Page auto-refreshes every ${refreshInterval()} seconds.`}
+                    heartbeat signals every 30 seconds. Click any node row to
+                    expand and view detailed information including workers
+                    running on that node.
+                    {autoRefreshEnabled() &&
+                      ` Page auto-refreshes every ${refreshInterval()} seconds.`}
                   </As>
                 </As>
               </As>

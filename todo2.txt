@@ -570,3 +570,7 @@ https://console.cloud.google.com/
 
 analyze ssl:
 https://www.ssllabs.com/ssltest/analyze.html
+
+https://capacitorjs.com/docs/apis/cookies
+Capacitor.isNativePlatform()
+

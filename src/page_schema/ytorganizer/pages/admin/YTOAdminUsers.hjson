@@ -139,25 +139,37 @@ const getFilteredUsers = () => {
 
 // Start impersonation
 const startImpersonation = async (userUuid) => {
-  const result = await args.fns.executeYTOFunction("impersonateUser", { targetUserUuid: userUuid });
+  try {
+    const result = await args.fns.executeYTOFunction("impersonateUser", {
+      targetUserUuid: userUuid
+    });
 
-  if (result.error) {
-    args.showErrorToast(result.error);
-    return;
-  }
+    if (result.error) {
+      args.showErrorToast(result.error);
+      return;
+    }
 
-  const serverResult = result.result;
+    const serverResult = result.result;
 
-  if (serverResult?.success) {
-    const impersonatedUser = serverResult.data.impersonatedUser;
+    if (serverResult?.success) {
+      const impersonatedUser = serverResult.data.impersonatedUser;
 
-    sessionStorage.setItem('yto_impersonatedUser', JSON.stringify(impersonatedUser));
+      // Store impersonation in sessionStorage
+      sessionStorage.setItem('yto_impersonatedUser', JSON.stringify(impersonatedUser));
 
-    setStore('impersonatedUserUuid', userUuid);
-    args.showSuccessToast("Now viewing as user");
-    args.navigate('/content');
-  } else {
-    args.showErrorToast(serverResult?.message || "Failed to start impersonation");
+      // Reload the impersonation state in YTOLayout
+      args.fns.loadImpersonationState?.();
+
+      args.showSuccessToast(serverResult.message || "Now viewing as user");
+
+      // Navigate to content page
+      args.navigate('/content');
+    } else {
+      args.showErrorToast(serverResult?.message || "Failed to start impersonation");
+    }
+  } catch (error) {
+    args.showErrorToast("Error starting impersonation: " + error.message);
+    console.error("Impersonation error:", error);
   }
 };
 

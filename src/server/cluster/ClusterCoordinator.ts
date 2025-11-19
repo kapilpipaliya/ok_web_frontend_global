@@ -203,9 +203,7 @@ export class ClusterCoordinator {
 
     await this.publisher.publish(channel, JSON.stringify(fullResponse));
 
-    console.log(
-      `[ClusterCoordinator] Sent response for request: ${requestId}`,
-    );
+    console.log(`[ClusterCoordinator] Sent response for request: ${requestId}`);
   }
 
   /**
@@ -248,16 +246,12 @@ export class ClusterCoordinator {
       }
 
       // Check if all nodes responded
-      const totalResponded =
-        pending.responses.size + pending.errors.size;
+      const totalResponded = pending.responses.size + pending.errors.size;
       if (totalResponded >= pending.expectedNodes.size) {
         this.completeRequest(requestId);
       }
     } catch (error) {
-      console.error(
-        "[ClusterCoordinator] Error handling response:",
-        error,
-      );
+      console.error("[ClusterCoordinator] Error handling response:", error);
     }
   }
 
@@ -268,8 +262,7 @@ export class ClusterCoordinator {
     const pending = this.pendingRequests.get(requestId);
     if (!pending) return;
 
-    const totalResponded =
-      pending.responses.size + pending.errors.size;
+    const totalResponded = pending.responses.size + pending.errors.size;
     const timedOutNodes = pending.expectedNodes.size - totalResponded;
 
     console.warn(
@@ -280,10 +273,7 @@ export class ClusterCoordinator {
 
     // Add timeout errors for non-responsive nodes
     for (const nodeId of pending.expectedNodes) {
-      if (
-        !pending.responses.has(nodeId) &&
-        !pending.errors.has(nodeId)
-      ) {
+      if (!pending.responses.has(nodeId) && !pending.errors.has(nodeId)) {
         pending.errors.set(nodeId, "Response timeout");
       }
     }
@@ -305,16 +295,13 @@ export class ClusterCoordinator {
     const duration = Date.now() - pending.startTime;
 
     // Build result
-    const totalResponded =
-      pending.responses.size + pending.errors.size;
+    const totalResponded = pending.responses.size + pending.errors.size;
     const timedOutNodes = pending.expectedNodes.size - totalResponded;
 
     const result: ClusterOperationResult = {
       success:
         pending.responses.size > 0 &&
-        (this.config.requireAllNodes
-          ? pending.errors.size === 0
-          : true),
+        (this.config.requireAllNodes ? pending.errors.size === 0 : true),
       requestId,
       totalNodes: pending.expectedNodes.size,
       respondedNodes: totalResponded,
@@ -397,10 +384,7 @@ export class ClusterCoordinator {
 
       // Add shutdown errors for all expected nodes
       for (const nodeId of pending.expectedNodes) {
-        if (
-          !pending.responses.has(nodeId) &&
-          !pending.errors.has(nodeId)
-        ) {
+        if (!pending.responses.has(nodeId) && !pending.errors.has(nodeId)) {
           pending.errors.set(nodeId, "Coordinator shutting down");
         }
       }

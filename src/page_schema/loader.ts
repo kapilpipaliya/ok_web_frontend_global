@@ -1,7 +1,7 @@
 import type { ExportedSchema } from "~/routes/api/schema/ExportedSchema";
 import { parseHjsonPreservingMultiline } from "~/lib/hjson/parseHjsonPreservingMultiline";
-import {Vertex} from "~/lib/graph/type/vertex";
-import {Edge} from "~/lib/graph/type/edge";
+import { Vertex } from "~/lib/graph/type/vertex";
+import { Edge } from "~/lib/graph/type/edge";
 
 export interface WebsiteSchemas {
   components?: Record<string, ExportedSchema>;
@@ -50,11 +50,11 @@ function extractKeyFromSchema(schema: ExportedSchema): string | null {
   try {
     // Convert to arrays if needed
     const vertexesArray = Array.isArray(schema.vertexes)
-      ? schema.vertexes as Vertex[]
-      : Object.values(schema.vertexes || {}) as Vertex[];
+      ? (schema.vertexes as Vertex[])
+      : (Object.values(schema.vertexes || {}) as Vertex[]);
     const edgesArray = Array.isArray(schema.edges)
-      ? schema.edges as Edge[]
-      : Object.values(schema.edges || {}) as Edge[];
+      ? (schema.edges as Edge[])
+      : (Object.values(schema.edges || {}) as Edge[]);
 
     // Find root vertices (those with no incoming edges) - same logic as importGraphStructure
     const parentMap = new Map<string, boolean>();

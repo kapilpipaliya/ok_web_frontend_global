@@ -29,7 +29,7 @@ export async function GET(event: APIEvent) {
         "/accounts?error=" +
           encodeURIComponent(
             "Authorization was cancelled. You need to authorize access to use YouTube features.",
-          )
+          ),
       );
     }
 
@@ -38,7 +38,7 @@ export async function GET(event: APIEvent) {
       return createRedirectResponse(
         event.request,
         "/accounts?error=" +
-          encodeURIComponent("Invalid OAuth callback: missing parameters")
+          encodeURIComponent("Invalid OAuth callback: missing parameters"),
       );
     }
 
@@ -58,7 +58,7 @@ export async function GET(event: APIEvent) {
       return createRedirectResponse(
         event.request,
         "/accounts?error=" +
-          encodeURIComponent("Invalid OAuth state parameter")
+          encodeURIComponent("Invalid OAuth state parameter"),
       );
     }
 
@@ -74,7 +74,7 @@ export async function GET(event: APIEvent) {
       return createRedirectResponse(
         event.request,
         "/accounts?error=" +
-          encodeURIComponent(result.error || "Failed to connect YouTube")
+          encodeURIComponent(result.error || "Failed to connect YouTube"),
       );
     }
 
@@ -122,7 +122,7 @@ export async function GET(event: APIEvent) {
     // Success! Redirect to accounts page
     return createRedirectResponse(
       event.request,
-      "/accounts?success=" + encodeURIComponent(successMessage)
+      "/accounts?success=" + encodeURIComponent(successMessage),
     );
   } catch (error) {
     console.error("YouTube OAuth callback error:", error);
@@ -133,7 +133,7 @@ export async function GET(event: APIEvent) {
           error instanceof Error
             ? error.message
             : "Failed to complete YouTube authorization",
-        )
+        ),
     );
   } finally {
     await dbSession.close();

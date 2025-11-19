@@ -211,10 +211,7 @@ async function handleStopWorkersRequest(
       `[Cluster]${workerInfo} stopped successfully for subdomain: ${subdomain}`,
     );
   } catch (error) {
-    console.error(
-      `[Cluster] Error stopping workers for ${subdomain}:`,
-      error,
-    );
+    console.error(`[Cluster] Error stopping workers for ${subdomain}:`, error);
 
     // Send error response
     if (clusterState.coordinator) {
@@ -280,10 +277,7 @@ async function handleStartWorkersRequest(
       `[Cluster]${workerInfo} started successfully for subdomain: ${subdomain} (count: ${workersStarted})`,
     );
   } catch (error) {
-    console.error(
-      `[Cluster] Error starting workers for ${subdomain}:`,
-      error,
-    );
+    console.error(`[Cluster] Error starting workers for ${subdomain}:`, error);
 
     // Send error response
     if (clusterState.coordinator) {
@@ -310,9 +304,7 @@ async function handleWorkerStatusRequest(
   const { requestId, subdomain } = request;
 
   try {
-    console.log(
-      `[Cluster] Getting worker status (request: ${requestId})`,
-    );
+    console.log(`[Cluster] Getting worker status (request: ${requestId})`);
 
     // Collect worker info from this node
     const workers: WorkerInfo[] = [];
@@ -412,15 +404,10 @@ export async function broadcastStopWorkers(
     `[Cluster] Broadcasting stop${workerInfo} command for subdomain: ${subdomain}`,
   );
 
-  const result =
-    await clusterState.coordinator.broadcastAndWait<
-      StopWorkersRequest,
-      StopWorkersResponse
-    >(
-      CLUSTER_CHANNELS.STOP_WORKERS,
-      { subdomain, workerKey },
-      timeout,
-    );
+  const result = await clusterState.coordinator.broadcastAndWait<
+    StopWorkersRequest,
+    StopWorkersResponse
+  >(CLUSTER_CHANNELS.STOP_WORKERS, { subdomain, workerKey }, timeout);
 
   console.log(
     `[Cluster] Stop${workerInfo} broadcast completed. Success: ${result.success}, ` +
@@ -451,15 +438,10 @@ export async function broadcastStartWorkers(
     `[Cluster] Broadcasting start${workerInfo} command for subdomain: ${subdomain}`,
   );
 
-  const result =
-    await clusterState.coordinator.broadcastAndWait<
-      StartWorkersRequest,
-      StartWorkersResponse
-    >(
-      CLUSTER_CHANNELS.START_WORKERS,
-      { subdomain, workerKey },
-      timeout,
-    );
+  const result = await clusterState.coordinator.broadcastAndWait<
+    StartWorkersRequest,
+    StartWorkersResponse
+  >(CLUSTER_CHANNELS.START_WORKERS, { subdomain, workerKey }, timeout);
 
   console.log(
     `[Cluster] Start${workerInfo} broadcast completed. Success: ${result.success}, ` +
@@ -488,15 +470,10 @@ export async function getClusterWorkerStatus(
     `[Cluster] Requesting worker status${subdomain ? ` for subdomain: ${subdomain}` : " (all subdomains)"}`,
   );
 
-  const result =
-    await clusterState.coordinator.broadcastAndWait<
-      WorkerStatusRequest,
-      WorkerStatusResponse
-    >(
-      CLUSTER_CHANNELS.WORKER_STATUS_REQUEST,
-      { subdomain },
-      timeout,
-    );
+  const result = await clusterState.coordinator.broadcastAndWait<
+    WorkerStatusRequest,
+    WorkerStatusResponse
+  >(CLUSTER_CHANNELS.WORKER_STATUS_REQUEST, { subdomain }, timeout);
 
   console.log(
     `[Cluster] Worker status request completed. ` +
