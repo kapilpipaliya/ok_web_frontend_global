@@ -10,14 +10,17 @@
 try {
   const { channelIds = [], playlistIds = [], ownershipId } = args.contextData;
 
-  // Get current user
-  const user = await args.getUserFromSession();
-  if (!user) {
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
     return {
       success: false,
       message: "User session not found"
     };
   }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
   let channels = [];
   let playlists = [];

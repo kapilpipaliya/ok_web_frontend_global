@@ -46,9 +46,9 @@ try {
     };
   }
 
-  // Get current authenticated user
-  const user = await args.getUserFromSession();
-  if (!user) {
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
     return {
       success: false,
       message: "User session not found. Please log in and try again.",
@@ -58,6 +58,9 @@ try {
       }
     };
   }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
   // Verify ownership belongs to user
   const ownershipCheck = await args.session.run(`

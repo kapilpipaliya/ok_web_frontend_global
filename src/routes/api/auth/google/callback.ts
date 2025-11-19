@@ -158,6 +158,18 @@ export async function GET({ request }: APIEvent) {
     } else {
       // Create new user with Google data
       const uuid = uuidv7();
+      const baseUsername = googleUser.email.split("@")[0];
+
+      // Check if username is already taken
+      const usernameCheckResult = await dbSession.run(
+        "MATCH (u:User) WHERE u.username = $username RETURN u",
+        { username: baseUsername },
+      );
+
+      const username =
+        usernameCheckResult.records.length > 0
+          ? `${baseUsername}_${uuidv7().slice(0, 8)}`
+          : baseUsername;
 
       await dbSession.run(
         `CREATE (u:User {
@@ -179,7 +191,7 @@ export async function GET({ request }: APIEvent) {
           googleId: googleUser.id,
           googleProfilePicture: googleUser.picture || "",
           name: googleUser.name || "",
-          username: googleUser.email.split("@")[0] + "_" + uuidv7().slice(0, 8),
+          username,
           uuid,
         },
       );

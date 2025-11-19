@@ -11,7 +11,7 @@
  */
 export function createRedirectResponse(
   request: Request,
-  redirectUrl: string
+  redirectUrl: string,
 ): Response {
   // Check if request is from Capacitor mobile app
   const userAgent = request.headers.get("user-agent") || "";
@@ -36,7 +36,7 @@ export function createRedirectResponse(
       {
         headers: { "Content-Type": "text/html" },
         status: 200,
-      }
+      },
     );
   }
 

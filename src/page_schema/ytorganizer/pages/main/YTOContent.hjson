@@ -945,61 +945,51 @@ const resetScrollPositions = () => {
   }, 0);
 };
 
-// Watch for query parameter changes and reload data
+// Consolidated effect to watch URL params and sort changes
+// This prevents duplicate data loads by tracking both in a single effect
 args.createEffect(
   args.on(
-    () => [args.searchParams?.type, args.searchParams?.id, args.searchParams?.q],
-    () => {
-      // Reset scroll positions FIRST before loading new data (untracked to avoid creating dependencies)
-      args.untrack(() => resetScrollPositions());
+    () => [
+      args.searchParams?.type,
+      args.searchParams?.id,
+      args.searchParams?.q,
+      listSortBy(),
+      detailSortBy(),
+      searchSortBy(),
+      favouritesSortBy()
+    ],
+    (
+      [currentType, currentId, currentQuery, currentListSort, currentDetailSort, currentSearchSort, currentFavouritesSort],
+      [prevType, prevId, prevQuery, prevListSort, prevDetailSort, prevSearchSort, prevFavouritesSort] = []
+    ) => {
+      // Check what changed
+      const urlParamsChanged = currentType !== prevType || currentId !== prevId || currentQuery !== prevQuery;
+      const listSortChanged = currentListSort !== prevListSort;
+      const detailSortChanged = currentDetailSort !== prevDetailSort;
+      const searchSortChanged = currentSearchSort !== prevSearchSort;
+      const favouritesSortChanged = currentFavouritesSort !== prevFavouritesSort;
 
-      // Trigger reload when params change (untracked to prevent infinite loops)
-      args.untrack(() => loadData());
-    }
-  )
-);
-
-// Watch for sort changes and reload data
-args.createEffect(
-  args.on(
-    () => listSortBy(),
-    () => {
-      if (isListView()) {
-        args.untrack(() => loadListData());
+      // Reset scroll positions if URL params changed
+      if (urlParamsChanged) {
+        resetScrollPositions();
       }
-    }
-  )
-);
 
-args.createEffect(
-  args.on(
-    () => detailSortBy(),
-    () => {
-      if (isDetailView()) {
-        args.untrack(() => loadDetailData());
-      }
-    }
-  )
-);
-
-args.createEffect(
-  args.on(
-    () => searchSortBy(),
-    () => {
-      if (isSearchView()) {
-        const currentSearchQuery = args.searchParams?.q;
-        args.untrack(() => loadSearchData(currentSearchQuery));
-      }
-    }
-  )
-);
-
-args.createEffect(
-  args.on(
-    () => favouritesSortBy(),
-    () => {
-      if (isFavouritesView()) {
-        args.untrack(() => loadFavouritesData());
+      // Load data based on what changed
+      // Priority: URL change loads everything, sort changes only reload if view hasn't changed
+      if (urlParamsChanged) {
+        // URL changed, load appropriate data for new view
+        loadData();
+      } else {
+        // Only sort changed, reload current view
+        if (listSortChanged && isListView()) {
+          loadListData();
+        } else if (detailSortChanged && isDetailView()) {
+          loadDetailData();
+        } else if (searchSortChanged && isSearchView()) {
+          loadSearchData(currentQuery);
+        } else if (favouritesSortChanged && isFavouritesView()) {
+          loadFavouritesData();
+        }
       }
     }
   )

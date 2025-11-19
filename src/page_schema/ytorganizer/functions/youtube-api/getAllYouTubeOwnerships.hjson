@@ -7,11 +7,14 @@
         key: "getAllYouTubeOwnerships"
         description: "Get all YouTube ownerships for a user (including disconnected/revoked)"
         body: '''
-// Get user from session
-const user = await args.getUserFromSession(args.request);
-if (!user) {
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession(args.request);
+if (!actualUser) {
   throw new Error('User not authenticated');
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Get all ownerships for the user (including revoked)
 const result = await args.session.run(`

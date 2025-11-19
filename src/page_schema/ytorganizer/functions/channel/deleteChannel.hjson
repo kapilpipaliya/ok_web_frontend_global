@@ -9,10 +9,13 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
-  if (!user) {
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
     throw new Error("User session not found. Please log in and try again.");
   }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
   // Extract parameters - accepts array of items, 'all', or 'allInContext'
   const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;

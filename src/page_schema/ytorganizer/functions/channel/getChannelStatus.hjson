@@ -14,11 +14,14 @@ try {
     throw new Error("Channel ID is required");
   }
 
-  // Get current authenticated user
-  const user = await args.getUserFromSession();
-  if (!user) {
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
     throw new Error("User session not found");
   }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
   // Use helper function to fetch channel with video count
   const result = await args.executeNamedServerFunction({

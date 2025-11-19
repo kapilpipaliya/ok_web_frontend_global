@@ -9,10 +9,13 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const currentUser = await args.getUserFromSession();
-  if (!currentUser) {
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
     throw new Error("User session not found. Please log in and try again.");
   }
+
+  // Get effective user (handles admin impersonation)
+  const currentUser = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
   // Check if this is an admin clearing another user's data
   const targetUserId = args.contextData.userId;
@@ -20,11 +23,11 @@ try {
   let isAdminClear = false;
 
   if (targetUserId) {
-    // Admin deletion - verify admin role
+    // Admin deletion - verify admin role (use actualUser for admin check, not impersonated user)
     const adminCheck = await args.session.run(
       `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
        RETURN u`,
-      { userId: currentUser.P.uuid }
+      { userId: actualUser.P.uuid }
     );
 
     if (adminCheck.records.length === 0) {
