@@ -1770,21 +1770,21 @@ return `._id {
         props: '''
 return {
   as: "div",
-  text: "COMING SOON"
+  text: "ANDROID CLOSED TESTING"
 };
 ''',
         css: '''
 return `._id {
   display: inline-block;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_light_100_text};
+  background: ${args.theme.var.color.success_light_100};
+  color: ${args.theme.var.color.success_light_100_text};
   padding: 0.5rem 1.5rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   margin-bottom: 1.5rem;
-  border: 2px solid ${args.theme.var.color.primary};
+  border: 2px solid ${args.theme.var.color.success};
 }`;
 '''
       }
@@ -1798,7 +1798,7 @@ return `._id {
         props: '''
 return {
   as: "h3",
-  text: "YSaar On The Go"
+  text: "YSaar Android App - Join Beta Testing"
 };
 ''',
         css: '''
@@ -1826,7 +1826,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Take your YouTube organization everywhere with our mobile apps for Android and iOS"
+  text: "Be among the first to experience YSaar on Android! Join our closed testing program and help shape the future of mobile YouTube organization."
 };
 ''',
         css: '''
@@ -1885,7 +1885,10 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "button",
+  onClick: () => {
+    window.open("https://play.google.com/apps/testing/com.ysaar.app", "_blank");
+  }
 };
 ''',
         css: '''
@@ -1894,12 +1897,23 @@ return `._id {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.success};
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 ._id:hover {
-  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: ${args.theme.var.color.success_dark_200};
+}
+
+._id:active {
+  transform: translateY(-2px);
 }`;
 '''
       }
@@ -1913,14 +1927,14 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "logos:android-icon",
+  icon: "mdi:android",
   width: 80,
   height: 80
 };
 ''',
         css: '''
 return `._id {
-  filter: grayscale(30%);
+  color: ${args.theme.var.color.success};
 }`;
 '''
       }
@@ -1934,13 +1948,13 @@ return `._id {
         props: '''
 return {
   as: "div",
-  text: "Android"
+  text: "Join Android Beta"
 };
 ''',
         css: '''
 return `._id {
   font-size: 1.125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: ${args.theme.var.color.text};
 }`;
 '''
@@ -1963,12 +1977,11 @@ return `._id {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-}
-
-._id:hover {
-  opacity: 1;
+  padding: 2rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border: 2px dashed ${args.theme.var.color.border};
+  border-radius: 1rem;
+  opacity: 0.6;
 }`;
 '''
       }
@@ -1982,14 +1995,15 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "logos:apple-app-store",
+  icon: "mdi:apple",
   width: 80,
   height: 80
 };
 ''',
         css: '''
 return `._id {
-  filter: grayscale(30%);
+  color: ${args.theme.var.color.muted};
+  filter: grayscale(100%);
 }`;
 '''
       }
@@ -2003,14 +2017,14 @@ return `._id {
         props: '''
 return {
   as: "div",
-  text: "iOS"
+  text: "iOS Coming Soon"
 };
 ''',
         css: '''
 return `._id {
   font-size: 1.125rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
+  font-weight: 700;
+  color: ${args.theme.var.color.muted};
 }`;
 '''
       }
@@ -2024,7 +2038,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Sign up now to get notified when our mobile apps launch!"
+  text: "Test the Android app now and help us improve! iOS version launching soon."
 };
 ''',
         css: '''
