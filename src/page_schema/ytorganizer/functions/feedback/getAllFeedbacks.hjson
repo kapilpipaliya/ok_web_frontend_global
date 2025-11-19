@@ -44,16 +44,18 @@ const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
 const sortDirection = sortOrder === 'asc' ? 'ASC' : 'DESC';
 const orderByClause = `ORDER BY f.${sortField} ${sortDirection}`;
 
-// Count query
+// Count query - include both authenticated and anonymous feedback
 const countQuery = `
-  MATCH (user:User)-[:UserFeedback]->(f:Feedback)
+  MATCH (f:Feedback)
+  OPTIONAL MATCH (user:User)-[:UserFeedback]->(f)
   ${whereClause}
   RETURN count(f) as total
 `;
 
-// Data query
+// Data query - include both authenticated and anonymous feedback
 const dataQuery = `
-  MATCH (user:User)-[:UserFeedback]->(f:Feedback)
+  MATCH (f:Feedback)
+  OPTIONAL MATCH (user:User)-[:UserFeedback]->(f)
   ${whereClause}
   RETURN f, user
   ${orderByClause}
@@ -84,9 +86,17 @@ const feedbacks = dataResult.records.map(record => {
   const feedbackNode = record.get('f');
   const userNode = record.get('user');
 
+  const user = userNode ? args.convertNodeToJson(userNode) : null;
+
+  // Remove sensitive fields from user data
+  if (user && user.P) {
+    delete user.P.password;
+    delete user.P.salt;
+  }
+
   return {
     feedback: args.convertNodeToJson(feedbackNode),
-    user: args.convertNodeToJson(userNode)
+    user
   };
 });
 

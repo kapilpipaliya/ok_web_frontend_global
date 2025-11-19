@@ -1,5 +1,6 @@
 import { getErrorMessage } from "./getErrorMessage";
 import { isValidResponse } from "./isValidResponse";
+import { getCookiesForRequest, syncCookiesFromResponse } from "./capacitorCookieSync";
 
 // must use this function in try catch block
 export async function postAPI(
@@ -7,13 +8,20 @@ export async function postAPI(
   data: object,
   action: "DELETE" | "POST" = "POST",
 ): Promise<Record<string, unknown>> {
+  // Get cookies for the request (handles both web and Capacitor)
+  const cookies = await getCookiesForRequest(url);
+
   const response = await fetch(url, {
     body: JSON.stringify(data),
     headers: {
       "Content-Type": "application/json",
+      ...(cookies && { "Cookie": cookies }),
     },
     method: action,
   });
+
+  // Sync response cookies to Capacitor storage
+  await syncCookiesFromResponse(response, url);
 
   const contentType = response.headers.get("content-type");
 

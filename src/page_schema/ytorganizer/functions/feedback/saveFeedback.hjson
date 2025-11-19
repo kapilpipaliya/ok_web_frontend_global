@@ -8,14 +8,8 @@
         description: "Saves user feedback to the database",
         body: '''
 try {
-  // Get current authenticated user from session
-  const user = await args.getUserFromSession();
-  if (!user) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
   // Extract parameters
-  const { feedback, category } = args.contextData;
+  const { feedback, category, email } = args.contextData;
 
   if (!feedback || typeof feedback !== 'string') {
     throw new Error("Feedback text is required");
@@ -38,32 +32,74 @@ try {
     throw new Error("Invalid feedback category");
   }
 
-  // Query to create feedback node and relationship
-  const query = `
-    MATCH (u:User {uuid: $userUuid})
-    CREATE (f:Feedback {
-      feedback: $feedback,
-      category: $category,
-      createdAt: datetime(),
-      status: 'pending'
-    })
-    CREATE (u)-[:UserFeedback]->(f)
-    RETURN f, u
-  `;
+  // Get current authenticated user from session (may be null for anonymous feedback)
+  const user = await args.getUserFromSession();
+
+  let query, params;
+
+  if (user) {
+    // Authenticated user feedback
+    query = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (f:Feedback {
+        feedback: $feedback,
+        category: $category,
+        createdAt: datetime(),
+        status: 'pending'
+      })
+      CREATE (u)-[:UserFeedback]->(f)
+      RETURN f, u
+    `;
+
+    params = {
+      userUuid: user.P.uuid,
+      feedback: feedbackText,
+      category: feedbackCategory
+    };
+  } else {
+    // Anonymous feedback with email
+    if (!email || typeof email !== 'string') {
+      throw new Error("Email is required for anonymous feedback");
+    }
+
+    const emailTrimmed = email.trim();
+    if (emailTrimmed.length === 0) {
+      throw new Error("Email cannot be empty");
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrimmed)) {
+      throw new Error("Please provide a valid email address");
+    }
+
+    query = `
+      CREATE (f:Feedback {
+        feedback: $feedback,
+        category: $category,
+        email: $email,
+        createdAt: datetime(),
+        status: 'pending'
+      })
+      RETURN f
+    `;
+
+    params = {
+      feedback: feedbackText,
+      category: feedbackCategory,
+      email: emailTrimmed
+    };
+  }
 
   // Execute the query
-  const result = await args.session.run(query, {
-    userUuid: user.P.uuid,
-    feedback: feedbackText,
-    category: feedbackCategory
-  });
+  const result = await args.session.run(query, params);
 
   if (result.records.length === 0) {
     throw new Error("Failed to save feedback");
   }
 
   const savedFeedback = args.convertNodeToJson(result.records[0].get('f'));
-  const feedbackUser = args.convertNodeToJson(result.records[0].get('u'));
+  const feedbackUser = user ? args.convertNodeToJson(result.records[0].get('u')) : null;
 
   return {
     success: true,
@@ -80,8 +116,10 @@ try {
   // Handle specific error types
   let userMessage = "Failed to submit feedback. Please try again.";
 
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to submit feedback.";
+  if (error.message.includes("Email is required") ||
+      error.message.includes("Email cannot be empty") ||
+      error.message.includes("valid email address")) {
+    userMessage = error.message;
   } else if (error.message.includes("Feedback text is required") ||
              error.message.includes("Feedback cannot be empty")) {
     userMessage = error.message;

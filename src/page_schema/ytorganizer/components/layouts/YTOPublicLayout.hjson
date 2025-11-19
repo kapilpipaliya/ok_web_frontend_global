@@ -105,6 +105,38 @@ const playNext = () => {
   }
 };
 
+// Feedback modal state management
+const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);
+
+const openFeedbackModal = () => {
+  setIsFeedbackModalOpen(true);
+};
+
+const closeFeedbackModal = () => {
+  setIsFeedbackModalOpen(false);
+};
+
+const submitFeedback = async (data) => {
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "saveFeedback",
+      contextData: data
+    });
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message || "Feedback submitted successfully");
+      return result.result;
+    } else {
+      args.showErrorToast(result?.result?.message || "Failed to submit feedback");
+      return result?.result;
+    }
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    args.showErrorToast("An error occurred while submitting feedback");
+    return { success: false };
+  }
+};
+
 return {
   hasCookieConsent,
   setHasCookieConsent,
@@ -127,7 +159,11 @@ return {
   isSupported,
   isKeptAwake,
   enableKeepAwake,
-  disableKeepAwake
+  disableKeepAwake,
+  isFeedbackModalOpen,
+  openFeedbackModal,
+  closeFeedbackModal,
+  submitFeedback
 };
 ''',
         props: '''
@@ -147,10 +183,17 @@ return {
         gtag('js', new Date());
         gtag('config', 'AW-17540558480');
 
-        // Load gtag.js script
+        // Load gtag.js script with error handling
         const script = document.createElement('script');
         script.async = true;
         script.src = 'https://www.googletagmanager.com/gtag/js?id=AW-17540558480';
+
+        // Handle script load errors (e.g., ad blockers)
+        script.onerror = () => {
+          // Silently fail if blocked by ad blocker or privacy extension
+          console.info('Google Analytics blocked by browser extension');
+        };
+
         document.head.appendChild(script);
       }
     }
@@ -713,6 +756,40 @@ return `._id {
       }
     },
     {
+      id: "footer_feedback_link",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Send Feedback",
+  onClick: () => {
+    args.fns.openFeedbackModal();
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
       id: "footer_youtube_attribution",
       L: "Attr",
       P: {
@@ -758,6 +835,23 @@ return {
 };
 '''
       }
+    },
+    // Feedback Modal
+    {
+      id: "feedback_modal",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "YTOFeedbackModal",
+        props: '''
+return {
+  isOpen: args.fns.isFeedbackModalOpen,
+  onClose: args.fns.closeFeedbackModal,
+  onSubmit: args.fns.submitFeedback,
+  isAnonymous: true
+};
+'''
+      }
     }
   ],
   edges: [
@@ -788,12 +882,16 @@ return {
     { id: "e19", T: "Attr", S: "footer_links", E: "footer_privacy_link" },
     { id: "e20", T: "Attr", S: "footer_links", E: "footer_terms_link" },
     { id: "e21", T: "Attr", S: "footer_links", E: "footer_contact_link" },
+    { id: "e21a", T: "Attr", S: "footer_links", E: "footer_feedback_link" },
     { id: "e22", T: "Attr", S: "footer_container", E: "footer_youtube_attribution" },
 
     // Root to cookie banner
     { id: "e23", T: "Attr", S: "layout_root", E: "cookie_banner" },
 
     // Root to video player
-    { id: "e24", T: "Attr", S: "layout_root", E: "video_player" }
+    { id: "e24", T: "Attr", S: "layout_root", E: "video_player" },
+
+    // Root to feedback modal
+    { id: "e25", T: "Attr", S: "layout_root", E: "feedback_modal" }
   ]
 }

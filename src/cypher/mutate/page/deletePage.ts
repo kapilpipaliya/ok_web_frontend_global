@@ -216,7 +216,7 @@ export async function deleteVertex(
           MATCH (p:Page)
           WHERE elementId(p) = $id
           OPTIONAL MATCH (p)-[r:PageUnique]->(pu:PageUnique)
-          WITH pu, 
+          WITH pu,
                collect(DISTINCT elementId(pu)) as nodeIds,
                collect(DISTINCT elementId(r)) as edgeIds
           DETACH DELETE pu
@@ -233,6 +233,36 @@ export async function deleteVertex(
         if (pageUniqueIds && pageUniqueIds.length > 0) {
           deletedVertexIds.push(...pageUniqueIds);
           deletedVertexCount += pageUniqueIds.length;
+        }
+        if (edgeIds && edgeIds.length > 0) {
+          deletedEdgeIds.push(...edgeIds);
+          deletedEdgeCount += edgeIds.length;
+        }
+      }
+
+      // Delete PageLayout nodes (only for Page)
+      const pageLayoutResult = await tx.run(
+        `
+          MATCH (p:Page)
+          WHERE elementId(p) = $id
+          OPTIONAL MATCH (p)-[r:PageLayout]->(pl:PageLayout)
+          WITH pl,
+               collect(DISTINCT elementId(pl)) as nodeIds,
+               collect(DISTINCT elementId(r)) as edgeIds
+          DETACH DELETE pl
+          RETURN nodeIds as deletedNodeIds, edgeIds as deletedEdgeIds
+        `,
+        { id: vertexId },
+      );
+
+      if (pageLayoutResult.records.length > 0) {
+        const record = pageLayoutResult.records[0];
+        const pageLayoutIds = record.get("deletedNodeIds");
+        const edgeIds = record.get("deletedEdgeIds");
+
+        if (pageLayoutIds && pageLayoutIds.length > 0) {
+          deletedVertexIds.push(...pageLayoutIds);
+          deletedVertexCount += pageLayoutIds.length;
         }
         if (edgeIds && edgeIds.length > 0) {
           deletedEdgeIds.push(...edgeIds);

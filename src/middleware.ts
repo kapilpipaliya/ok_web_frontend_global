@@ -6,46 +6,54 @@ import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission
 import { logger } from "./lib/logger";
 import {initializeWorkersIfNeeded} from "~/server/initWorkersOnStartup";
 
+// Helper to check if logging should be skipped
+const shouldSkipLogging = (pathname: string) => {
+  return pathname.startsWith("/_build") ||
+         pathname.startsWith("/assets") ||
+         pathname === "/favicon.ico" ||
+         pathname === "/health";
+};
+
 // https://docs.solidjs.com/solid-start/guides/security
 // https://github.com/atilafassina/shieldwall
 // Note: this authorization will not work in client side
 export default createMiddleware({
   onRequest: [
-    // Log incoming requests
+    // Handle HEAD requests and log incoming requests
     async (event) => {
-      // Only log on server
       if (typeof window !== "undefined") return;
 
-      const url = new URL(event.request.url);
-      const startTime = Date.now();
+      const isHeadRequest = event.request.method === "HEAD";
 
-      // Store start time for response logging
-      (event.locals as any).requestStartTime = startTime;
-
-      // Skip logging for static assets and health checks
-      if (
-        url.pathname.startsWith("/_build") ||
-        url.pathname.startsWith("/assets") ||
-        url.pathname === "/favicon.ico" ||
-        url.pathname === "/health"
-      ) {
-        return;
+      // Convert HEAD to GET for processing
+      if (isHeadRequest) {
+        (event.locals as any).isHeadRequest = true;
+        Object.defineProperty(event, 'request', {
+          value: new Request(event.request.url, {
+            method: "GET",
+            headers: event.request.headers,
+          }),
+          writable: false,
+          configurable: true
+        });
       }
 
-      // Log the incoming request
-      logger.debug(
-        {
-          type: "http_request_start",
-          method: event.request.method,
-          url: url.pathname + url.search,
-          userAgent: event.request.headers.get("user-agent") || undefined,
-          ip:
-            event.request.headers.get("x-forwarded-for") ||
-            event.request.headers.get("x-real-ip") ||
-            undefined,
-        },
-        `→ ${event.request.method} ${url.pathname}`,
-      );
+      const url = new URL(event.request.url);
+      if (!shouldSkipLogging(url.pathname)) {
+        (event.locals as any).requestStartTime = Date.now();
+
+        logger.debug(
+          {
+            type: "http_request_start",
+            method: isHeadRequest ? "HEAD" : event.request.method,
+            url: url.pathname + url.search,
+            userAgent: event.request.headers.get("user-agent") || undefined,
+            ip: event.request.headers.get("x-forwarded-for") ||
+                event.request.headers.get("x-real-ip") || undefined,
+          },
+          `→ ${isHeadRequest ? "HEAD" : event.request.method} ${url.pathname}`,
+        );
+      }
     },
     csrf,
     // Initialize workers on first request (server-side only)
@@ -86,39 +94,37 @@ export default createMiddleware({
   ],
   onBeforeResponse: [
     async (event) => {
-      // Only log on server
       if (typeof window !== "undefined") return;
 
-      const url = new URL(event.request.url);
-      const startTime = (event.locals as any).requestStartTime;
-
-      // Skip logging for static assets and health checks
-      if (
-        url.pathname.startsWith("/_build") ||
-        url.pathname.startsWith("/assets") ||
-        url.pathname === "/favicon.ico" ||
-        url.pathname === "/health"
-      ) {
-        return;
+      // Strip body from HEAD requests
+      if ((event.locals as any).isHeadRequest && event.response) {
+        Object.defineProperty(event, 'response', {
+          value: new Response(null, {
+            status: event.response.status,
+            statusText: event.response.statusText,
+            headers: event.response.headers,
+          }),
+          writable: false,
+          configurable: true
+        });
       }
 
-      const duration = startTime ? Date.now() - startTime : undefined;
+      // Log response
+      const url = new URL(event.request.url);
+      if (!shouldSkipLogging(url.pathname)) {
+        const startTime = (event.locals as any).requestStartTime;
+        const duration = startTime ? Date.now() - startTime : undefined;
 
-      // Determine status code (default to 200 if not set)
-      const statusCode = event.response?.status || 200;
-
-      // Log the response
-      logger.logRequest({
-        method: event.request.method,
-        url: url.pathname + url.search,
-        statusCode,
-        duration,
-        userAgent: event.request.headers.get("user-agent") || undefined,
-        ip:
-          event.request.headers.get("x-forwarded-for") ||
-          event.request.headers.get("x-real-ip") ||
-          undefined,
-      });
+        logger.logRequest({
+          method: (event.locals as any).isHeadRequest ? "HEAD" : event.request.method,
+          url: url.pathname + url.search,
+          statusCode: event.response?.status || 200,
+          duration,
+          userAgent: event.request.headers.get("user-agent") || undefined,
+          ip: event.request.headers.get("x-forwarded-for") ||
+              event.request.headers.get("x-real-ip") || undefined,
+        });
+      }
     },
   ],
 });

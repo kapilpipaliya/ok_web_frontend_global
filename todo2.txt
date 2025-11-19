@@ -567,3 +567,6 @@ https://console.cloud.google.com/
   - Grafana dashboard template
   - DataDog integration
   - CloudWatch alarms
+
+analyze ssl:
+https://www.ssllabs.com/ssltest/analyze.html

@@ -1,5 +1,7 @@
 import type { ExportedSchema } from "~/routes/api/schema/ExportedSchema";
 import { parseHjsonPreservingMultiline } from "~/lib/hjson/parseHjsonPreservingMultiline";
+import {Vertex} from "~/lib/graph/type/vertex";
+import {Edge} from "~/lib/graph/type/edge";
 
 export interface WebsiteSchemas {
   components?: Record<string, ExportedSchema>;
@@ -42,6 +44,50 @@ function parseModulePath(path: string): ParsedPath | null {
   };
 }
 
+// Helper to extract the key from schema content
+// Uses the same logic as importGraphStructure and preprocessSchemaForExistingNodes
+function extractKeyFromSchema(schema: ExportedSchema): string | null {
+  try {
+    // Convert to arrays if needed
+    const vertexesArray = Array.isArray(schema.vertexes)
+      ? schema.vertexes as Vertex[]
+      : Object.values(schema.vertexes || {}) as Vertex[];
+    const edgesArray = Array.isArray(schema.edges)
+      ? schema.edges as Edge[]
+      : Object.values(schema.edges || {}) as Edge[];
+
+    // Find root vertices (those with no incoming edges) - same logic as importGraphStructure
+    const parentMap = new Map<string, boolean>();
+
+    for (const edge of edgesArray) {
+      parentMap.set(edge.E, true);
+    }
+
+    const rootVertices = vertexesArray.filter((v) => !parentMap.has(v.id));
+
+    // Find the root vertex with label "Page", "Component", "Theme", or "Function"
+    for (const vertex of rootVertices) {
+      const labels = Array.isArray(vertex.L) ? vertex.L : [vertex.L];
+
+      if (
+        labels.includes("Page") ||
+        labels.includes("Component") ||
+        labels.includes("Theme") ||
+        labels.includes("Function")
+      ) {
+        if (vertex.P && vertex.P.key) {
+          return vertex.P.key as string;
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Failed to extract key from schema:", error);
+    return null;
+  }
+}
+
 // Helper to process a single schema file
 function processSchemaFile(
   schemas: AllWebsiteSchemas | WebsiteSchemas,
@@ -50,6 +96,17 @@ function processSchemaFile(
 ): void {
   try {
     const schema = parseHjsonPreservingMultiline(content);
+
+    // Extract the actual key from the schema content
+    const schemaKey = extractKeyFromSchema(schema);
+    if (!schemaKey) {
+      console.warn(
+        `Schema at ${parsedPath.websiteName}/${parsedPath.schemaType}/${parsedPath.fileName} does not have a valid key property. Falling back to filename.`,
+      );
+    }
+
+    // Use the extracted key or fall back to fileName
+    const key = schemaKey || parsedPath.fileName;
 
     // Handle both AllWebsiteSchemas and WebsiteSchemas types
     if (
@@ -63,7 +120,7 @@ function processSchemaFile(
       if (!websiteSchemas[parsedPath.schemaType]) {
         websiteSchemas[parsedPath.schemaType] = {};
       }
-      websiteSchemas[parsedPath.schemaType]![parsedPath.fileName] = schema;
+      websiteSchemas[parsedPath.schemaType]![key] = schema;
     } else {
       // AllWebsiteSchemas
       const allSchemas = schemas as AllWebsiteSchemas;
@@ -73,9 +130,7 @@ function processSchemaFile(
       if (!allSchemas[parsedPath.websiteName][parsedPath.schemaType]) {
         allSchemas[parsedPath.websiteName][parsedPath.schemaType] = {};
       }
-      allSchemas[parsedPath.websiteName][parsedPath.schemaType]![
-        parsedPath.fileName
-      ] = schema;
+      allSchemas[parsedPath.websiteName][parsedPath.schemaType]![key] = schema;
     }
   } catch (error) {
     console.error(

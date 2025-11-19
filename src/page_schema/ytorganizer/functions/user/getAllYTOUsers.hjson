@@ -66,20 +66,30 @@ const toNumber = (value) => {
 };
 
 // Convert all results to vertex format
-let allUsers = dataResult.records.map(record => ({
-  user: args.convertNodeToJson(record.get('u')),
-  stats: {
-    channelCount: toNumber(record.get('channelCount')),
-    playlistCount: toNumber(record.get('playlistCount')),
-    videoCount: toNumber(record.get('videoCount')),
-    favoriteChannelCount: toNumber(record.get('favoriteChannelCount')),
-    favoritePlaylistCount: toNumber(record.get('favoritePlaylistCount')),
-    favoriteVideoCount: toNumber(record.get('favoriteVideoCount')),
-    lastChannelAdded: record.get('lastChannelAdded')?.toStandardDate().toISOString(),
-    lastPlaylistAdded: record.get('lastPlaylistAdded')?.toStandardDate().toISOString(),
-    lastVideoActivity: record.get('lastVideoActivity')?.toStandardDate().toISOString()
+let allUsers = dataResult.records.map(record => {
+  const user = args.convertNodeToJson(record.get('u'));
+
+  // Remove sensitive fields from user data
+  if (user && user.P) {
+    delete user.P.password;
+    delete user.P.salt;
   }
-}));
+
+  return {
+    user,
+    stats: {
+      channelCount: toNumber(record.get('channelCount')),
+      playlistCount: toNumber(record.get('playlistCount')),
+      videoCount: toNumber(record.get('videoCount')),
+      favoriteChannelCount: toNumber(record.get('favoriteChannelCount')),
+      favoritePlaylistCount: toNumber(record.get('favoritePlaylistCount')),
+      favoriteVideoCount: toNumber(record.get('favoriteVideoCount')),
+      lastChannelAdded: record.get('lastChannelAdded')?.toStandardDate().toISOString(),
+      lastPlaylistAdded: record.get('lastPlaylistAdded')?.toStandardDate().toISOString(),
+      lastVideoActivity: record.get('lastVideoActivity')?.toStandardDate().toISOString()
+    }
+  };
+});
 
 // Apply status filter if provided (server-side filtering)
 const filterStatus = args.contextData.filterStatus;

@@ -1000,8 +1000,10 @@ export async function getClusterWorkerStatus() {
         currentNode,
         subdomains: subdomainWorkers,
         clusterResult: {
-          totalNodes: result.totalNodes,
-          respondedNodes: result.respondedNodes,
+          // result.totalNodes only counts OTHER nodes (excludes current node)
+          // Add 1 to include the current node in the total
+          totalNodes: result.totalNodes + 1,
+          respondedNodes: result.respondedNodes + 1,
           timedOutNodes: result.timedOutNodes,
           duration: result.duration,
         },
@@ -1196,8 +1198,10 @@ export async function getSubdomainClusterWorkerStatus() {
         ),
         currentNode,
         clusterInfo: {
-          totalNodes: result.totalNodes,
-          respondedNodes: result.respondedNodes,
+          // result.totalNodes only counts OTHER nodes (excludes current node)
+          // Add 1 to include the current node in the total
+          totalNodes: result.totalNodes + 1,
+          respondedNodes: result.respondedNodes + 1,
           timedOutNodes: result.timedOutNodes,
           duration: result.duration,
         },

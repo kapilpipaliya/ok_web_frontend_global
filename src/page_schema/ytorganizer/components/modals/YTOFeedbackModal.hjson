@@ -16,20 +16,38 @@
         fns: '''
 const [feedback, setFeedback] = args.createSignal("");
 const [category, setCategory] = args.createSignal("general");
+const [email, setEmail] = args.createSignal("");
 const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 
 const initializeFeedback = () => {
   setFeedback("");
   setCategory("general");
+  setEmail("");
   setIsSubmitting(false);
 };
 
 const handleSubmit = async () => {
   const feedbackValue = feedback().trim();
+  const isAnonymous = args.contextData.props?.isAnonymous;
 
   if (!feedbackValue) {
     args.showErrorToast("Please enter your feedback");
     return;
+  }
+
+  // Validate email for anonymous feedback
+  if (isAnonymous) {
+    const emailValue = email().trim();
+    if (!emailValue) {
+      args.showErrorToast("Please enter your email address");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue)) {
+      args.showErrorToast("Please enter a valid email address");
+      return;
+    }
   }
 
   const onSubmit = args.contextData.props?.onSubmit;
@@ -39,10 +57,17 @@ const handleSubmit = async () => {
 
   try {
     if (onSubmit) {
-      await onSubmit({
+      const data = {
         feedback: feedbackValue,
         category: category()
-      });
+      };
+
+      // Add email for anonymous feedback
+      if (isAnonymous) {
+        data.email = email().trim();
+      }
+
+      await onSubmit(data);
     }
 
     onClose?.();
@@ -58,6 +83,8 @@ return {
   setFeedback,
   category,
   setCategory,
+  email,
+  setEmail,
   isSubmitting,
   initializeFeedback,
   handleSubmit
@@ -96,11 +123,20 @@ return `._id {
   justify-content: center;
   padding: 1rem;
   animation: fadeIn 0.2s ease;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
 }`;
 '''
       }
@@ -127,6 +163,8 @@ return `._id {
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: slideUp 0.3s ease;
+  max-height: 90vh;
+  overflow: hidden;
 }
 
 @keyframes slideUp {
@@ -137,6 +175,14 @@ return `._id {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: calc(100vh - 4rem);
+    border-radius: 0.5rem;
   }
 }`;
 '''
@@ -160,6 +206,12 @@ return `._id {
   justify-content: space-between;
   padding: 1.5rem;
   border-bottom: 1px solid ${args.theme.var.color.border};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
 }`;
 '''
       }
@@ -253,6 +305,14 @@ return {
 return `._id {
   padding: 1.5rem;
   flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
 }`;
 '''
       }
@@ -459,6 +519,113 @@ return {
       }
     },
     {
+      id: "email_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2.5,
+        componentName: "Html",
+        props: '''
+const isAnonymous = args.contextData.props?.isAnonymous;
+
+return {
+  as: "div",
+  hide: !isAnonymous
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "email_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Email Address"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "email_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "email",
+  value: args.fns.email(),
+  onInput: (e) => args.fns.setEmail(e.target.value),
+  placeholder: "your.email@example.com",
+  disabled: args.fns.isSubmitting(),
+  required: true
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-family: inherit;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "email_help_text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We'll use this to follow up on your feedback if needed."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
       id: "feedback_field",
       L: "Attr",
       P: {
@@ -586,6 +753,14 @@ return `._id {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+    flex-direction: column-reverse;
+  }
 }`;
 '''
       }
@@ -645,6 +820,10 @@ return {
     { id: "e15", T: "Attr", S: "category_select", E: "category_option_feature" },
     { id: "e16", T: "Attr", S: "category_select", E: "category_option_improvement" },
     { id: "e17", T: "Attr", S: "category_select", E: "category_option_other" },
+    { id: "e17a", T: "Attr", S: "form_element", E: "email_field" },
+    { id: "e17b", T: "Attr", S: "email_field", E: "email_label" },
+    { id: "e17c", T: "Attr", S: "email_field", E: "email_input" },
+    { id: "e17d", T: "Attr", S: "email_field", E: "email_help_text" },
     { id: "e18", T: "Attr", S: "form_element", E: "feedback_field" },
     { id: "e19", T: "Attr", S: "feedback_field", E: "feedback_label" },
     { id: "e20", T: "Attr", S: "feedback_field", E: "feedback_textarea" },

@@ -3,7 +3,7 @@
   "appName": "YSaar",
   "webDir": "dist",
   "server": {
-    "url": "https://ysaar.com/auth/signin",
+    "url": "https://ysaar.com/home",
     "cleartext": true,
     "allowNavigation": [
       "https://ysaar.com/*",
@@ -14,6 +14,12 @@
   "plugins": {
     "SplashScreen": {
       "launchAutoHide": true
+    },
+    "CapacitorCookies": {
+      "enabled": true
+    },
+    "CapacitorHttp": {
+      "enabled": true
     }
   }
 }
