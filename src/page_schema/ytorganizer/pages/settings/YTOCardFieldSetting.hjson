@@ -9,21 +9,22 @@
         signinRequired: true,
         fns: '''
 // Available field options for each content type
+// Using YouTube API field names directly
 const FIELD_OPTIONS = {
   video: [
     { value: "description", label: "Description" },
-    { value: "channel", label: "Channel Name" },
+    { value: "channelTitle", label: "Channel Name" },
     { value: "publishedAt", label: "Published Date" },
     { value: "duration", label: "Duration" },
     { value: "viewCount", label: "View Count" },
     { value: "likeCount", label: "Like Count" },
     { value: "commentCount", label: "Comment Count" },
     { value: "position", label: "Position (in Playlist)" },
-    { value: "notes", label: "Personal Notes" }
+    { value: "note", label: "Personal Notes" }
   ],
   playlist: [
     { value: "description", label: "Description" },
-    { value: "videoCount", label: "Video Count" },
+    { value: "itemCount", label: "Video Count" },
     { value: "updatedAt", label: "Last Updated" },
     { value: "channelTitle", label: "Channel" },
     { value: "publishedAt", label: "Published Date" }
@@ -32,15 +33,14 @@ const FIELD_OPTIONS = {
     { value: "description", label: "Description" },
     { value: "videoCount", label: "Video Count" },
     { value: "subscriberCount", label: "Subscriber Count" },
-    { value: "publishedAt", label: "Created Date" },
-    { value: "customDescription", label: "Custom Description" }
+    { value: "publishedAt", label: "Created Date" }
   ]
 };
 
-// Default setting
+// Default setting - using YouTube API field names
 const defaultSetting = {
-  video: ["description", "channel", "publishedAt", "duration", "viewCount"],
-  playlist: ["description", "videoCount", "updatedAt", "channelTitle"],
+  video: ["description", "channelTitle", "publishedAt", "duration", "viewCount"],
+  playlist: ["description", "itemCount", "updatedAt", "channelTitle"],
   channel: ["description", "videoCount", "subscriberCount", "publishedAt"]
 };
 

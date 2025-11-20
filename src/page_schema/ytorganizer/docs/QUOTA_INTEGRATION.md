@@ -95,16 +95,15 @@ if (quotaCheck.success && quotaCheck.data.shouldShowUpgradePrompt) {
 
 ```javascript
 // After successfully adding playlist with video count
-const videoCount = playlistMetadata.contentDetails?.itemCount || 0;
+const itemCount = playlistMetadata.contentDetails?.itemCount || 0;
 
 // Update user's video quota
 await args.session.run(
   `MATCH (u:User {uuid: $userId})
-   SET u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0) + $videoCount
+   SET u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0) + $itemCount
    RETURN u`,
   {
-    userId: user.P.uuid,
-    videoCount: parseInt(videoCount)
+    userId: user.P.uuid, itemCount: parseInt(videoCount)
   }
 );
 ```

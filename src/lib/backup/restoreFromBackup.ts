@@ -30,6 +30,7 @@ export interface RestoreFromBackupOptions {
     subDomain?: string;
   }) => Promise<any>;
   subDomain?: string;
+  isLocalFile?: boolean; // Flag to indicate if filename is a local path
 }
 
 export interface RestoreResult {
@@ -62,6 +63,7 @@ export async function restoreFromBackup(
     confirmed = false,
     sendEmail,
     subDomain,
+    isLocalFile = false,
   } = options;
 
   // Validate inputs
@@ -100,36 +102,53 @@ export async function restoreFromBackup(
   console.log(`[Restore] ⚠️  WARNING: Starting restore operation`);
   console.log(`[Restore] Source backup: ${filename}`);
   console.log(`[Restore] Target database: ${restoreToDatabase}`);
+  console.log(`[Restore] Local file: ${isLocalFile}`);
 
   const startTime = Date.now();
   const restoreDir = path.join(process.cwd(), "restore");
-  const compressedPath = path.join(restoreDir, filename);
+
+  // If it's a local file, use the provided path directly
+  const compressedPath = isLocalFile ? filename : path.join(restoreDir, filename);
   const decompressedPath = compressedPath.replace(".gz", "");
 
   try {
-    // Step 1: Create restore directory
-    if (!fs.existsSync(restoreDir)) {
+    // Step 1: Create restore directory (only if not using local file)
+    if (!isLocalFile && !fs.existsSync(restoreDir)) {
       fs.mkdirSync(restoreDir, { recursive: true });
     }
 
-    // Step 2: Download backup from cloud storage
-    console.log(`[Restore] Step 1/6: Downloading backup from cloud storage...`);
+    // Step 2: Download backup from cloud storage (skip if local file)
+    if (!isLocalFile) {
+      console.log(`[Restore] Step 1/6: Downloading backup from cloud storage...`);
 
-    const downloadResult = await downloadBackupFromCloud({
-      filename,
-      databaseName: sourceDatabaseName,
-      localPath: compressedPath,
-    });
+      const downloadResult = await downloadBackupFromCloud({
+        filename,
+        databaseName: sourceDatabaseName,
+        localPath: compressedPath,
+      });
 
-    if (!downloadResult.success) {
-      throw new Error(
-        `Download failed: ${downloadResult.error || "Unknown error"}`,
+      if (!downloadResult.success) {
+        throw new Error(
+          `Download failed: ${downloadResult.error || "Unknown error"}`,
+        );
+      }
+
+      console.log(
+        `[Restore] Download complete: ${downloadResult.data?.sizeFormatted}`,
+      );
+    } else {
+      console.log(`[Restore] Step 1/6: Using local file: ${compressedPath}`);
+
+      // Verify the local file exists
+      if (!fs.existsSync(compressedPath)) {
+        throw new Error(`Local backup file not found: ${compressedPath}`);
+      }
+
+      const fileSize = fs.statSync(compressedPath).size;
+      console.log(
+        `[Restore] Local file size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB`,
       );
     }
-
-    console.log(
-      `[Restore] Download complete: ${downloadResult.data?.sizeFormatted}`,
-    );
 
     // Step 3: Decompress backup file
     console.log(`[Restore] Step 2/6: Decompressing backup file...`);
@@ -190,67 +209,58 @@ export async function restoreFromBackup(
       await systemSession.close();
     }
 
-    // Step 6: Restore data from backup
-    console.log(`[Restore] Step 5/6: Restoring data from backup...`);
+    // Step 6: Restore data from backup using APOC
+    console.log(`[Restore] Step 5/6: Restoring data from backup using APOC...`);
 
-    // Read the backup file
-    const backupContent = fs.readFileSync(decompressedPath, "utf8");
+    // Copy decompressed file to Neo4j import directory for APOC to access
+    const neo4jImportDir =
+      process.env.NEO4J_IMPORT_DIR || "/var/lib/neo4j/import";
+    const importFilename = path.basename(decompressedPath);
+    const importPath = path.join(neo4jImportDir, importFilename);
+
+    console.log(`[Restore] Copying backup to Neo4j import directory: ${importPath}`);
+    fs.copyFileSync(decompressedPath, importPath);
 
     // Create a session for the target database
     const targetSession = driver.session({ database: restoreToDatabase });
 
     try {
-      // Split backup into individual statements
-      const statements = backupContent
-        .split(";\n")
-        .filter((stmt) => stmt.trim());
+      // Use APOC to run the Cypher file
+      console.log(`[Restore] Running APOC import for file: ${importFilename}`);
 
-      console.log(`[Restore] Found ${statements.length} statements to execute`);
-
-      // Execute statements in batches for better performance
-      const batchSize = 100;
-      let executedCount = 0;
-      let failedCount = 0;
-      const errors: Array<{ statement: string; error: string }> = [];
-
-      for (let i = 0; i < statements.length; i += batchSize) {
-        const batch = statements.slice(i, i + batchSize);
-
-        for (const statement of batch) {
-          try {
-            await targetSession.run(statement);
-            executedCount++;
-          } catch (stmtError: any) {
-            failedCount++;
-            errors.push({
-              statement: statement.substring(0, 100) + "...",
-              error: stmtError.message,
-            });
-
-            // Stop if too many errors
-            if (failedCount > 10) {
-              throw new Error(
-                `Too many errors during restore (${failedCount}). Stopping.`,
-              );
-            }
-          }
-        }
-
-        // Progress update every 1000 statements
-        if (i % 1000 === 0 && i > 0) {
-          console.log(
-            `[Restore] Progress: ${i}/${statements.length} statements`,
-          );
-        }
-      }
-
-      console.log(
-        `[Restore] Restore complete: ${executedCount} statements executed, ${failedCount} failed`,
+      const result = await targetSession.run(
+        `
+        CALL apoc.cypher.runFile($filename)
+        YIELD row, result
+        RETURN count(*) as totalStatements
+        `,
+        { filename: importFilename }
       );
 
-      if (failedCount > 0) {
-        console.warn(`[Restore] Errors during restore:`, errors);
+      const totalStatements = result.records[0]?.get("totalStatements");
+      const count = typeof totalStatements === 'number' ? totalStatements : (totalStatements?.toInt?.() || 0);
+      console.log(`[Restore] APOC import complete: ${count} operations executed`);
+
+      // Clean up the file from Neo4j import directory
+      try {
+        fs.unlinkSync(importPath);
+        console.log(`[Restore] Cleaned up import file from Neo4j import directory`);
+      } catch (cleanupError) {
+        console.warn(`[Restore] Failed to clean up import file:`, cleanupError);
       }
+    } catch (apocError: any) {
+      console.error(`[Restore] APOC import failed:`, apocError);
+
+      // Clean up import file on error
+      try {
+        if (fs.existsSync(importPath)) {
+          fs.unlinkSync(importPath);
+        }
+      } catch (cleanupError) {
+        console.error(`[Restore] Failed to clean up import file:`, cleanupError);
+      }
+
+      throw new Error(`APOC import failed: ${apocError.message}`);
     } finally {
       await targetSession.close();
     }

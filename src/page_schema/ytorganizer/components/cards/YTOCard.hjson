@@ -559,7 +559,7 @@ let metaText = "";
 
 if (itemType === "channel") {
   const subscriberCount = item?.P?.subscriberCount || 0;
-  const videoCount = itemSetting?.P?.userVideoCount ?? 0;
+  const videoCount = itemSetting?.P?.videoCount ?? 0;
 
   let parts = [];
   if (subscriberCount >= 1000000) {
@@ -573,7 +573,7 @@ if (itemType === "channel") {
   parts.push(`${videoCount} video${videoCount !== 1 ? 's' : ''}`);
   metaText = parts.join(' • ');
 } else if (itemType === "playlist") {
-  const videoCount = itemSetting?.P?.userVideoCount ?? 0;
+  const videoCount = itemSetting?.P?.videoCount ?? 0;
   metaText = `${videoCount} video${videoCount !== 1 ? 's' : ''}`;
 
   // If there's a parent channel, show it
@@ -809,6 +809,7 @@ return `._id {
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 
 // Get configured fields from layout setting
@@ -835,7 +836,23 @@ if (fieldsToShow.length === 0) {
 
 // Helper function to format values
 const formatValue = (field) => {
-  const value = item?.P?.[field];
+  let value;
+
+  // Fields from itemSetting (user-specific or relationship-specific)
+  if (field === "note") {
+    value = itemSetting?.P?.note;
+  } else if (field === "position") {
+    value = itemSetting?.P?.position;
+  } else if (field === "itemCount") {
+    // For playlists: use videoCount from setting (actual count of user's videos)
+    value = itemSetting?.P?.videoCount;
+  } else if (field === "videoCount") {
+    // For channels: use videoCount from setting
+    value = itemSetting?.P?.videoCount;
+  } else {
+    // All other fields come directly from the item (YouTube API fields)
+    value = item?.P?.[field];
+  }
 
   // Handle different field types
   if (field === "duration" && value) {
@@ -857,6 +874,9 @@ const formatValue = (field) => {
   } else if (field.includes("Count") && value !== null && value !== undefined) {
     // Format counts with commas
     return Number(value).toLocaleString();
+  } else if (field === "position" && value !== null && value !== undefined) {
+    // Format position with # prefix
+    return `#${value}`;
   } else if (field.includes("Date") || field === "publishedAt" || field === "updatedAt") {
     // Format dates
     if (value) {
@@ -876,19 +896,18 @@ const formatValue = (field) => {
 const getFieldLabel = (field) => {
   const labels = {
     description: "Description",
-    channel: "Channel",
+    channelTitle: "Channel",
     publishedAt: "Published",
     duration: "Duration",
     viewCount: "Views",
     likeCount: "Likes",
     commentCount: "Comments",
     position: "Position",
-    notes: "Notes",
+    note: "Notes",
     videoCount: "Videos",
+    itemCount: "Videos",
     updatedAt: "Updated",
-    channelTitle: "Channel",
-    subscriberCount: "Subscribers",
-    customDescription: "Custom Desc"
+    subscriberCount: "Subscribers"
   };
   return labels[field] || field;
 };
@@ -941,8 +960,8 @@ if (!fieldData || !fieldData.field) {
   return { hide: true };
 }
 
-// For description fields, show full text
-if (fieldData.field === "description" || fieldData.field === "customDescription") {
+// For description field, show full text
+if (fieldData.field === "description") {
   return {
     as: "div",
     text: fieldData.value,
@@ -965,7 +984,7 @@ if (!fieldData || !fieldData.field) {
 }
 
 // Different styling for description vs other fields
-if (fieldData.field === "description" || fieldData.field === "customDescription") {
+if (fieldData.field === "description") {
   return `._id {
     font-size: 0.75rem;
     color: ${args.theme.var.color.text_light_200};

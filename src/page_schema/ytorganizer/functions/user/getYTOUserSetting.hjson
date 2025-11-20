@@ -40,8 +40,8 @@ try {
     autoRefreshEnabled: false,
     defaultOwnershipId: null,  // null means "all ownerships"
     cardFieldSetting: JSON.stringify({
-      video: ["description", "channel", "publishedAt", "duration", "viewCount"],
-      playlist: ["description", "videoCount", "updatedAt", "channelTitle"],
+      video: ["description", "channelTitle", "publishedAt", "duration", "viewCount"],
+      playlist: ["description", "itemCount", "updatedAt", "channelTitle"],
       channel: ["description", "videoCount", "subscriberCount", "publishedAt"]
     })
   };
@@ -116,8 +116,8 @@ try {
     autoRefreshEnabled: false,
     defaultOwnershipId: null,
     cardFieldSetting: JSON.stringify({
-      video: ["description", "channel", "publishedAt", "duration", "viewCount"],
-      playlist: ["description", "videoCount", "updatedAt", "channelTitle"],
+      video: ["description", "channelTitle", "publishedAt", "duration", "viewCount"],
+      playlist: ["description", "itemCount", "updatedAt", "channelTitle"],
       channel: ["description", "videoCount", "subscriberCount", "publishedAt"]
     })
   };

@@ -177,7 +177,7 @@ try {
       vs.createdAt = datetime()
     SET
       vs.watched = false,
-      vs.notes = null,
+      vs.note = null,
       vs.customPosition = null,
       vs.addedAt = datetime(),
       vs.updatedAt = datetime()

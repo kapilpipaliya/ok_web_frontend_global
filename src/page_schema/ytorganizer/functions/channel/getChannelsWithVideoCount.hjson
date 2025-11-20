@@ -27,7 +27,7 @@
  * - skip: number (optional) - Number of results to skip (for pagination)
  *
  * Returns:
- * - Array of {channel: Vertex, channelSetting: Vertex} with userVideoCount in channelSetting.P
+ * - Array of {channel: Vertex, channelSetting: Vertex} with videoCount in channelSetting.P
  */
 try {
   const {
@@ -134,7 +134,7 @@ try {
 
     // Add ownership-specific video count to channel setting
     if (channelSetting && channelSetting.P) {
-      channelSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+      channelSetting.P.videoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
     }
 
     return {

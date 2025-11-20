@@ -72,6 +72,14 @@ export function BackupManagement() {
   } | null>(null);
   const [noteInput, setNoteInput] = createSignal("");
 
+  // Feature: Upload Backup
+  const [uploadModal, setUploadModal] = createSignal(false);
+  const [uploadFile, setUploadFile] = createSignal<File | null>(null);
+  const [uploadTargetDb, setUploadTargetDb] = createSignal("");
+  const [uploadShouldRestore, setUploadShouldRestore] = createSignal(false);
+  const [uploadConfirmed, setUploadConfirmed] = createSignal(false);
+  const [isUploading, setIsUploading] = createSignal(false);
+
   // Load notes from database initially
   const initialNotesVertices = createAsync(
     async () => {
@@ -549,6 +557,68 @@ export function BackupManagement() {
     }
   };
 
+  const handleUploadBackup = async () => {
+    const file = uploadFile();
+    const targetDb = uploadTargetDb();
+
+    if (!file) {
+      showErrorToast("Please select a backup file");
+      return;
+    }
+
+    if (!targetDb) {
+      showErrorToast("Please select a target database");
+      return;
+    }
+
+    if (uploadShouldRestore() && !uploadConfirmed()) {
+      showErrorToast(
+        "Please confirm that you understand this will delete all data",
+      );
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      showSuccessToast("Uploading backup file... This may take a while.");
+
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("targetDatabase", targetDb);
+      formData.append("shouldRestore", uploadShouldRestore().toString());
+      formData.append("confirmed", uploadConfirmed().toString());
+
+      // Upload file using fetch API
+      const response = await fetch("/api/backup/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        if (uploadShouldRestore()) {
+          showSuccessToast(`Backup uploaded and restored successfully to ${targetDb}`);
+        } else {
+          showSuccessToast("Backup uploaded successfully");
+        }
+        setUploadModal(false);
+        setUploadFile(null);
+        setUploadTargetDb("");
+        setUploadShouldRestore(false);
+        setUploadConfirmed(false);
+        setRefreshKey((prev) => prev + 1);
+      } else {
+        showErrorToast(result.error || "Failed to upload backup");
+      }
+    } catch (error: any) {
+      showErrorToast(`Upload error: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <As
       as="div"
@@ -577,9 +647,39 @@ export function BackupManagement() {
           Backup Management
         </As>
         <As
-          as="button"
-          onClick={handleRefresh}
+          as="div"
           css={`return \`._id {
+  display: flex;
+  gap: 1rem;
+}\`;`}
+        >
+          <As
+            as="button"
+            onClick={() => setUploadModal(true)}
+            css={`return \`._id {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  background: \${args.theme.var.color.primary};
+  color: \${args.theme.var.color.primary_text};
+}
+._id:hover {
+  background: \${args.theme.var.color.primary_dark_200};
+}\`;`}
+          >
+            {"⬆️ Upload Backup"}
+          </As>
+          <As
+            as="button"
+            onClick={handleRefresh}
+            css={`return \`._id {
   padding: 0.625rem 1.25rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -596,8 +696,9 @@ export function BackupManagement() {
 ._id:hover {
   background: \${args.theme.var.color.background_dark_400};
 }\`;`}
-        >
-          {"🔄 Refresh"}
+          >
+            {"🔄 Refresh"}
+          </As>
         </As>
       </As>
 
@@ -3408,6 +3509,397 @@ export function BackupManagement() {
 }\`;`}
                   >
                     Close
+                  </As>
+                </As>
+              </As>
+            </As>
+          );
+        }}
+      </Show>
+
+      {/* Upload Backup Modal */}
+      <Show when={uploadModal()}>
+        {() => {
+          const databases = subdomains()?.data || [];
+          return (
+            <As
+              as="div"
+              css={`return \`._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}\`;`}
+              onClick={() => {
+                if (!isUploading()) {
+                  setUploadModal(false);
+                  setUploadFile(null);
+                  setUploadTargetDb("");
+                  setUploadShouldRestore(false);
+                  setUploadConfirmed(false);
+                }
+              }}
+            >
+              <As
+                as="div"
+                css={`return \`._id {
+  background: \${args.theme.var.color.background};
+  padding: 2rem;
+  border-radius: 0.5rem;
+  max-width: 600px;
+  width: 90%;
+  border: 1px solid \${args.theme.var.color.border};
+}\`;`}
+                onClick={(e: MouseEvent) => e.stopPropagation()}
+              >
+                <As
+                  as="h3"
+                  css={`return \`._id {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+}\`;`}
+                >
+                  ⬆️ Upload Backup File
+                </As>
+
+                <As
+                  as="div"
+                  css={`return \`._id {
+  margin-bottom: 1.5rem;
+}\`;`}
+                >
+                  <As
+                    as="div"
+                    css={`return \`._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}\`;`}
+                  >
+                    <As
+                      as="label"
+                      css={`return \`._id {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.muted};
+}\`;`}
+                    >
+                      Select Backup File (.gz):
+                    </As>
+                    <As
+                      as="input"
+                      type="file"
+                      accept=".gz"
+                      onChange={(e: Event) => {
+                        const target = e.target as HTMLInputElement;
+                        const file = target.files?.[0];
+                        if (file) {
+                          setUploadFile(file);
+                        }
+                      }}
+                      css={`return \`._id {
+  padding: 0.75rem;
+  border: 1px solid \${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: \${args.theme.var.color.background};
+  color: \${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+._id:focus {
+  outline: none;
+  border-color: \${args.theme.var.color.primary};
+}\`;`}
+                    />
+                    <Show when={uploadFile()}>
+                      <As
+                        as="div"
+                        css={`return \`._id {
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.muted};
+  padding: 0.5rem;
+  background: \${args.theme.var.color.background_light_200};
+  border-radius: 0.375rem;
+}\`;`}
+                      >
+                        Selected: {uploadFile()!.name} (
+                        {(uploadFile()!.size / (1024 * 1024)).toFixed(2)} MB)
+                      </As>
+                    </Show>
+                  </As>
+
+                  <As
+                    as="div"
+                    css={`return \`._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}\`;`}
+                  >
+                    <As
+                      as="label"
+                      css={`return \`._id {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.muted};
+}\`;`}
+                    >
+                      Target Database:
+                    </As>
+                    <As
+                      as="select"
+                      value={uploadTargetDb()}
+                      onChange={(e: Event) =>
+                        setUploadTargetDb((e.target as HTMLSelectElement).value)
+                      }
+                      css={`return \`._id {
+  padding: 0.75rem;
+  border: 1px solid \${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: \${args.theme.var.color.background};
+  color: \${args.theme.var.color.text};
+  font-family: monospace;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+._id:focus {
+  outline: none;
+  border-color: \${args.theme.var.color.primary};
+}\`;`}
+                    >
+                      <As as="option" value="">
+                        Select database...
+                      </As>
+                      <For each={databases}>
+                        {(db) => (
+                          <As as="option" value={db.name}>
+                            {db.name}
+                          </As>
+                        )}
+                      </For>
+                    </As>
+                  </As>
+
+                  <As
+                    as="div"
+                    css={`return \`._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: \${args.theme.var.color.background_light_200};
+  border-radius: 0.375rem;
+}\`;`}
+                  >
+                    <As
+                      as="input"
+                      type="checkbox"
+                      checked={uploadShouldRestore()}
+                      onChange={(e: Event) =>
+                        setUploadShouldRestore(
+                          (e.target as HTMLInputElement).checked,
+                        )
+                      }
+                      css={`return \`._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}\`;`}
+                    />
+                    <As
+                      as="label"
+                      css={`return \`._id {
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.text};
+  cursor: pointer;
+}\`;`}
+                      onClick={() => setUploadShouldRestore(!uploadShouldRestore())}
+                    >
+                      Restore to database immediately without upload
+                    </As>
+                  </As>
+
+                  <Show when={uploadShouldRestore()}>
+                    <As
+                      as="div"
+                      css={`return \`._id {
+  background: \${args.theme.var.color.warning_light_900};
+  border: 1px solid \${args.theme.var.color.warning};
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}\`;`}
+                    >
+                      <As
+                        as="p"
+                        css={`return \`._id {
+  margin: 0 0 0.5rem 0;
+  color: \${args.theme.var.color.warning_dark_300};
+  font-weight: 600;
+}\`;`}
+                      >
+                        ⚠️ WARNING: This will DELETE all existing data!
+                      </As>
+                      <As
+                        as="p"
+                        css={`return \`._id {
+  margin: 0;
+  color: \${args.theme.var.color.warning_dark_300};
+  font-size: 0.875rem;
+}\`;`}
+                      >
+                        All current data in the target database will be
+                        permanently deleted and replaced with the backup data.
+                      </As>
+                    </As>
+
+                    <As
+                      as="div"
+                      css={`return \`._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: \${args.theme.var.color.error_light_900};
+  border-radius: 0.375rem;
+  border: 1px solid \${args.theme.var.color.error};
+  margin-bottom: 1rem;
+}\`;`}
+                    >
+                      <As
+                        as="input"
+                        type="checkbox"
+                        checked={uploadConfirmed()}
+                        onChange={(e: Event) =>
+                          setUploadConfirmed(
+                            (e.target as HTMLInputElement).checked,
+                          )
+                        }
+                        css={`return \`._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}\`;`}
+                      />
+                      <As
+                        as="label"
+                        css={`return \`._id {
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.error_dark_300};
+  font-weight: 500;
+  cursor: pointer;
+}\`;`}
+                        onClick={() => setUploadConfirmed(!uploadConfirmed())}
+                      >
+                        I understand this will DELETE all data in the target
+                        database
+                      </As>
+                    </As>
+                  </Show>
+                </As>
+
+                <As
+                  as="div"
+                  css={`return \`._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}\`;`}
+                >
+                  <As
+                    as="button"
+                    onClick={() => {
+                      if (!isUploading()) {
+                        setUploadModal(false);
+                        setUploadFile(null);
+                        setUploadTargetDb("");
+                        setUploadShouldRestore(false);
+                        setUploadConfirmed(false);
+                      }
+                    }}
+                    disabled={isUploading()}
+                    css={`return \`._id {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid \${args.theme.var.color.border};
+  background: \${args.theme.var.color.background};
+  color: \${args.theme.var.color.text};
+  transition: all 0.2s;
+}
+._id:hover:not(:disabled) {
+  background: \${args.theme.var.color.background_light_200};
+}
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}\`;`}
+                  >
+                    Cancel
+                  </As>
+                  <As
+                    as="button"
+                    onClick={handleUploadBackup}
+                    disabled={!uploadFile() || !uploadTargetDb() || isUploading()}
+                    css={`return \`._id {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: \${args.theme.var.color.primary};
+  color: \${args.theme.var.color.primary_text};
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+._id:hover:not(:disabled) {
+  background: \${args.theme.var.color.primary_dark_200};
+}
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}\`;`}
+                  >
+                    <Show
+                      when={isUploading()}
+                      fallback={
+                        <>
+                          {uploadShouldRestore()
+                            ? "⬆️ Upload & Restore"
+                            : "⬆️ Upload"}
+                        </>
+                      }
+                    >
+                      <As
+                        as="span"
+                        css={`return \`._id {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}\`;`}
+                      />
+                      <As as="span">Uploading...</As>
+                    </Show>
                   </As>
                 </As>
               </As>

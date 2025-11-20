@@ -1310,12 +1310,12 @@ Both functions return data in vertex format:
   data: [
     {
       channel: Vertex,           // Channel vertex
-      channelSetting: Vertex     // ChannelSetting vertex with userVideoCount in P
+      channelSetting: Vertex     // ChannelSetting vertex with videoCount in P
     }
     // or for playlists:
     {
       playlist: Vertex,          // Playlist vertex
-      playlistSetting: Vertex,   // PlaylistSetting vertex with userVideoCount in P
+      playlistSetting: Vertex,   // PlaylistSetting vertex with videoCount in P
       channel: Vertex | null     // Parent channel if exists
     }
   ]

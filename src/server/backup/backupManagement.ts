@@ -9,6 +9,7 @@ import { deleteCloudBackup } from "~/lib/backup/deleteCloudBackup";
 import { downloadBackupFromCloud } from "~/lib/backup/downloadBackupFromCloud";
 import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
 import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
+import { uploadBackupToCloud } from "~/lib/backup/uploadBackupToCloud";
 import { getDriver } from "~/cypher/core/driver";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
@@ -427,6 +428,73 @@ export async function previewBackup(filename: string, databaseName: string) {
         ),
       },
     };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+/**
+ * Upload a backup file and optionally restore it
+ */
+export async function uploadAndRestoreBackup(
+  tmpPath: string, // temporary file path
+  filename: string,
+  targetDatabaseName: string,
+  shouldRestore: boolean = false,
+  confirmed: boolean = false,
+) {
+  try {
+    console.log(`[Upload] Processing file: ${tmpPath}`);
+
+    // If restore is requested, restore the backup
+    if (shouldRestore) {
+      const result = await restoreFromBackup({
+        filename: tmpPath,
+        sourceDatabaseName: targetDatabaseName,
+        targetDatabaseName: targetDatabaseName,
+        confirmed,
+        isLocalFile: true, // Flag to indicate this is a local file, not from cloud
+      });
+
+      // Note: restoreFromBackup already cleans up the temp file, so we don't need to do it here
+
+      return result;
+    }
+
+    // Otherwise, just upload to cloud storage
+    const uploadResult = await uploadBackupToCloud({
+      localPath: tmpPath,
+      filename,
+      databaseName: targetDatabaseName,
+      backupType: "daily",
+      metadata: {
+        uploadedManually: "true",
+        uploadedAt: new Date().toISOString(),
+      },
+    });
+
+    // Clean up temp file
+    try {
+      fs.unlinkSync(tmpPath);
+    } catch (cleanupError) {
+      console.error("Failed to clean up temp file:", cleanupError);
+    }
+
+    if (uploadResult.success) {
+      return {
+        success: true,
+        message: "Backup uploaded successfully",
+        data: uploadResult.data,
+      };
+    } else {
+      return {
+        success: false,
+        error: uploadResult.error || "Upload failed",
+      };
+    }
   } catch (error: any) {
     return {
       success: false,

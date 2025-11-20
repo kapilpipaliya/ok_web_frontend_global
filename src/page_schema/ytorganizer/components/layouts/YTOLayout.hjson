@@ -515,7 +515,7 @@ const saveCardFieldSetting = async (newSetting) => {
     setCardFieldSetting(validated);
 
     // Save to backend
-    const result = await executeYTOFunction('saveYTOUserSettings', {
+    const result = await executeYTOFunction('saveYTOUserSetting', {
       setting: {
         cardFieldSetting: validated
       }

@@ -17,7 +17,7 @@
  * - playlistId: string (optional) - Filter videos by specific playlist ID
  * - statusFilter: string[] (optional) - Filter by status values (e.g., ['watched', 'unwatched'])
  * - isFavouriteOnly: boolean (optional) - Filter to only favourite videos (default: false)
- * - customFilter: string (optional) - Custom WHERE clause condition (e.g., 'v.title =~ $pattern OR vs.notes =~ $pattern')
+ * - customFilter: string (optional) - Custom WHERE clause condition (e.g., 'v.title =~ $pattern OR vs.note =~ $pattern')
  * - customFilterParams: object (optional) - Parameters for the custom filter (e.g., {pattern: '(?i).*search.*'})
  * - includePlaylist: boolean (optional) - Include first playlist information (default: false)
  * - orderBy: string (optional) - Field to order by (default: 'vs.updatedAt')

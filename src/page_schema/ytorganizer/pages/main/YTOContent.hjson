@@ -435,8 +435,8 @@ const filteredDetailItems = args.createMemo(() => {
       const title = video?.P?.title?.toLowerCase() || "";
       const description = video?.P?.description?.toLowerCase() || "";
       const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
-      const notes = videoSetting?.P?.notes?.toLowerCase() || "";
-      return title.includes(term) || description.includes(term) || channelTitle.includes(term) || notes.includes(term);
+      const note = videoSetting?.P?.note?.toLowerCase() || "";
+      return title.includes(term) || description.includes(term) || channelTitle.includes(term) || note.includes(term);
     }
 
     return false;
@@ -533,8 +533,8 @@ const getFavouritesItems = args.createMemo(() => {
         const title = video?.P?.title?.toLowerCase() || "";
         const description = video?.P?.description?.toLowerCase() || "";
         const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
-        const notes = videoSetting?.P?.notes?.toLowerCase() || "";
-        if (title.includes(term) || description.includes(term) || channelTitle.includes(term) || notes.includes(term)) {
+        const note = videoSetting?.P?.note?.toLowerCase() || "";
+        if (title.includes(term) || description.includes(term) || channelTitle.includes(term) || note.includes(term)) {
           combined.push({ ...item, resultType: 'video' });
         }
       }

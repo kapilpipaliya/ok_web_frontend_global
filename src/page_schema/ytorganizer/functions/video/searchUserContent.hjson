@@ -126,7 +126,7 @@ try {
       contextData: {
         userUuid: user.P.uuid,
         ownershipId,  // Filter by ownership if provided
-        customFilter: 'v.title =~ $pattern OR v.description =~ $pattern OR v.channelTitle =~ $pattern OR vs.notes =~ $pattern',
+        customFilter: 'v.title =~ $pattern OR v.description =~ $pattern OR v.channelTitle =~ $pattern OR vs.note =~ $pattern',
         customFilterParams: { pattern: searchPattern },
         includePlaylist: true,
         orderBy,

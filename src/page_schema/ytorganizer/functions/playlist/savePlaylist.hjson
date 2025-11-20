@@ -233,6 +233,7 @@ try {
     channelTitle: playlistData.snippet.channelTitle,
     channelId: playlistData.snippet.channelId,
     privacyStatus: playlistData.status?.privacyStatus || "unknown",
+    // videoCount cannot come from playlists because playlists can contain videos from anywhere, deleted videos, private videos etc.. reasons
     itemCount: playlistData.contentDetails?.itemCount || 0,
     originalPlaylistId: isSpecialPlaylist ? originalPlaylistId : null,
     publishedAt: playlistData.snippet.publishedAt
