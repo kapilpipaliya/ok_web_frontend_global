@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "backgroundRetryPendingQuota",
-        description: "Background worker that automatically retries pending_quota jobs at midnight UTC every day",
+        description: "Background worker that automatically retries pending_quota jobs at midnight Pacific Time every day",
         body: '''
 // This is a background worker function that runs on a schedule
 if (args.contextData.action === 'start') {
@@ -26,7 +26,7 @@ if (args.contextData.action === 'start') {
     }
   };
 
-  await logMessage('info', 'Starting background retry pending quota worker (scheduled for midnight UTC)');
+  await logMessage('info', 'Starting background retry pending quota worker (scheduled for midnight Pacific Time)');
 
   // Initialize queue helpers and Redis connection
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
@@ -48,8 +48,9 @@ if (args.contextData.action === 'start') {
   // Create a queue for the scheduled retry jobs
   const retryQueue = new Queue('backgroundRetryPendingQuota', { connection });
 
-  // Add a repeatable job that runs at midnight UTC every day
+  // Add a repeatable job that runs at midnight Pacific Time every day
   // Cron pattern: "0 0 * * *" = At 00:00 (midnight) every day
+  // YouTube API quotas reset at midnight Pacific Time (PT)
   await retryQueue.add(
     'midnight-quota-retry',
     {
@@ -58,16 +59,16 @@ if (args.contextData.action === 'start') {
     },
     {
       repeat: {
-        pattern: '0 0 * * *', // Midnight UTC every day
-        tz: 'UTC'
+        pattern: '0 0 * * *', // Midnight PT every day
+        tz: 'America/Los_Angeles'
       },
       jobId: 'midnight-quota-retry-repeatable' // Prevent duplicates
     }
   );
 
-  await logMessage('info', 'Scheduled repeatable job for midnight UTC', {
+  await logMessage('info', 'Scheduled repeatable job for midnight Pacific Time', {
     cronPattern: '0 0 * * *',
-    timezone: 'UTC'
+    timezone: 'America/Los_Angeles'
   });
 
   // Small delay to ensure queue is fully initialized
@@ -153,7 +154,7 @@ if (args.contextData.action === 'start') {
 
         // Remove the repeatable job
         try {
-          await retryQueue.removeRepeatableByKey('backgroundRetryPendingQuota:midnight-quota-retry-repeatable::0 0 * * *:UTC');
+          await retryQueue.removeRepeatableByKey('backgroundRetryPendingQuota:midnight-quota-retry-repeatable::0 0 * * *:America/Los_Angeles');
           await logMessage('info', 'Removed repeatable job');
         } catch (error) {
           console.error('Error removing repeatable job:', error);

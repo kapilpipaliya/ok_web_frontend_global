@@ -95,118 +95,12 @@ return `._id {
 '''
       }
     }
-    // Welcome section
-    {
-      id: "4"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "div"
-};
-'''
-        css: '''
-return `._id {
-  text-align: center;
-  padding: 2rem 1rem;
-  margin-bottom: 2rem;
-  background: ${args.theme.var.color.primary_light_100};
-  border-radius: 1rem;
-
-  @media (max-width: 768px) {
-    padding: 1.5rem 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-}`;
-'''
-      }
-    }
-    // Welcome icon
-    {
-      id: "5"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:video",
-  width: 64,
-  height: 64
-};
-'''
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary_light_100_text};
-  margin-bottom: 1rem;
-}`;
-'''
-      }
-    }
-    // Welcome heading
-    {
-      id: "6"
-      L: "Attr"
-      P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "h1",
-  text: "Welcome to YSaar"
-};
-'''
-        css: '''
-return `._id {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: ${args.theme.var.color.primary_light_100_text};
-
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
-}`;
-'''
-      }
-    }
-    // Welcome description
-    {
-      id: "7"
-      L: "Attr"
-      P: {
-        displayOrder: 3
-        componentName: "Html"
-        props: '''
-return {
-  as: "p",
-  text: "Organize your favorite YouTube channels and playlists in one place. Mobile-first, accessible, and easy to use."
-};
-'''
-        css: '''
-return `._id {
-  font-size: 1.125rem;
-  color: ${args.theme.var.color.primary_light_100_text};
-  opacity: 0.9;
-  max-width: 600px;
-  margin: 0 auto;
-
-  @media (max-width: 768px) {
-    font-size: 1rem;
-  }
-}`;
-'''
-      }
-    }
     // Example content section
     {
       id: "23"
       L: "Attr"
       P: {
-        displayOrder: 3
+        displayOrder: 1
         componentName: "Html"
         props: '''
 return {
@@ -527,10 +421,6 @@ return {
   edges: [
     { id: "e1", T: "PageLayout", S: "1", E: "2" }
     { id: "e2", T: "Attr", S: "1", E: "3" }
-    { id: "e3", T: "Attr", S: "3", E: "4" }
-    { id: "e4", T: "Attr", S: "4", E: "5" }
-    { id: "e5", T: "Attr", S: "4", E: "6" }
-    { id: "e6", T: "Attr", S: "4", E: "7" }
     { id: "e22", T: "Attr", S: "3", E: "23" }
     { id: "e23", T: "Attr", S: "23", E: "24" }
     { id: "e24", T: "Attr", S: "23", E: "25" }

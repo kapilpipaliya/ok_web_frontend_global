@@ -43,6 +43,54 @@ const getResponsiveValues = () => {
   };
 };
 
+// Function to constrain player position within viewport bounds
+const constrainPlayerPosition = () => {
+  const getPlayerState = args.contextData.props?.playerState;
+  const state = getPlayerState?.();
+  if (state !== "minimized") return;
+
+  const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
+  const playerSize = args.contextData.props?.playerSize || { width: 480, height: 270 };
+  const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+
+  if (playerPosition.x === null || playerPosition.y === null) return;
+
+  // Get viewport bounds
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  // Calculate constrained position
+  const maxX = Math.max(0, viewportWidth - playerSize.width);
+  const maxY = Math.max(0, viewportHeight - playerSize.height);
+
+  let newX = playerPosition.x;
+  let newY = playerPosition.y;
+  let needsUpdate = false;
+
+  // Constrain X position
+  if (newX < 0) {
+    newX = 0;
+    needsUpdate = true;
+  } else if (newX > maxX) {
+    newX = maxX;
+    needsUpdate = true;
+  }
+
+  // Constrain Y position
+  if (newY < 0) {
+    newY = 0;
+    needsUpdate = true;
+  } else if (newY > maxY) {
+    newY = maxY;
+    needsUpdate = true;
+  }
+
+  // Update position if needed
+  if (needsUpdate) {
+    setPlayerPosition?.({ x: newX, y: newY });
+  }
+};
+
 // Common resize handler factory
 // Accepts direction: 'n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'
 const createResizeHandler = (direction) => {
@@ -210,7 +258,8 @@ return {
   createResizeHandler,
   createTouchResizeHandler,
   isResizing,
-  getResponsiveValues
+  getResponsiveValues,
+  constrainPlayerPosition
 };
 ''',
         props: '''
@@ -249,7 +298,26 @@ return {
     return state === "closed";
   },
   "data-state": currentState,
-  style: positionStyle
+  style: positionStyle,
+  onMount: () => {
+    // Handle viewport resize/rotation to keep player visible
+    const handleResize = () => {
+      args.fns.constrainPlayerPosition();
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    // Initial constraint check
+    handleResize();
+  },
+  onCleanup: () => {
+    const handleResize = () => {
+      args.fns.constrainPlayerPosition();
+    };
+    window.removeEventListener('resize', handleResize);
+    window.removeEventListener('orientationchange', handleResize);
+  }
 };
 ''',
         css: '''

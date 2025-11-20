@@ -1289,6 +1289,9 @@ return {
 };
 ''',
         css: '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+const sidebarWidth = isCollapsed ? '72px' : '240px';
+
 return `._id {
   flex: 1;
   padding-bottom: 80px;
@@ -1299,6 +1302,8 @@ return `._id {
 @media (min-width: 768px) {
   ._id {
     padding-bottom: 0;
+    margin-left: ${sidebarWidth};
+    transition: margin-left ${args.theme.var.animation?.normal || '300ms'} ease;
   }
 }`;
 '''
@@ -1411,9 +1416,10 @@ return `._id {
     flex-direction: column;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
     transition: width ${args.theme.var.animation?.normal || '300ms'} ease;
-    position: sticky;
+    position: fixed;
     top: 0;
-    position: relative;
+    left: 0;
+    z-index: 10;
   }
 }`;
 '''
