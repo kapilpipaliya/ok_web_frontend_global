@@ -5,9 +5,9 @@
       L: "Function",
       P: {
         key: "initialSeed",
-        description: "Seeds initial data for general setting, email setting, and OAuth setting",
+        description: "Seeds initial data for general setting, email setting, and OAuth setting using unified Setting format",
         body: '''
-// This function initializes the database with default setting
+// This function initializes the database with default settings using the unified Setting vertex format
 // It should only be run once during initial setup
 
 try {
@@ -52,7 +52,7 @@ try {
     results.generalSetting = createGeneral.records[0]?.get("s").properties;
   }
 
-  // 2. Create/Update Email Setting
+  // 2. Create/Update Email Setting (using unified Setting format)
   const emailSettingData = {
     active: "resend",
     resendApiKey: "re_cHB3wryZ_9aGvavTVXqbMYVAndzQvcxNY",
@@ -60,13 +60,13 @@ try {
   };
 
   const checkEmail = await args.session.run(
-    "MATCH (s:EmailSetting) RETURN s"
+    "MATCH (s:Setting {type: 'email'}) RETURN s"
   );
 
   if (checkEmail.records.length > 0) {
     // Update existing
     const updateEmail = await args.session.run(
-      `MATCH (s:EmailSetting)
+      `MATCH (s:Setting {type: 'email'})
        SET s += $setting,
            s.updatedAt = datetime()
        RETURN s`,
@@ -74,21 +74,22 @@ try {
     );
     results.emailSetting = updateEmail.records[0]?.get("s").properties;
   } else {
-    // Create new
+    // Create new with unified format
     const createEmail = await args.session.run(
-      `CREATE (s:EmailSetting {
+      `CREATE (s:Setting {
         key: $key,
+        type: 'email',
         createdAt: datetime(),
         updatedAt: datetime()
       })
       SET s += $setting
       RETURN s`,
-      { key: "Default", setting: emailSettingData }
+      { key: "email_Default", setting: emailSettingData }
     );
     results.emailSetting = createEmail.records[0]?.get("s").properties;
   }
 
-  // 3. Create/Update OAuth Setting
+  // 3. Create/Update OAuth Setting (using unified Setting format)
   const googleClientSecret = "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";
   let encryptedSecret = "";
 
@@ -102,44 +103,46 @@ try {
   const oauthSettingData = {
     googleEnabled: true,
     googleClientId: "39168961833-tu9lboivh4c7580q1paj70ccd0hlg1fb.apps.googleusercontent.com",
-    googleClientSecretEncrypted: encryptedSecret
+    googleClientSecret: encryptedSecret
   };
 
   const checkOAuth = await args.session.run(
-    "MATCH (o:OAuthSetting) RETURN o"
+    "MATCH (s:Setting {type: 'oauth'}) RETURN s"
   );
 
   if (checkOAuth.records.length > 0) {
     // Update existing
     const updateOAuth = await args.session.run(
-      `MATCH (o:OAuthSetting)
-       SET o.googleClientId = $googleClientId,
-           o.googleClientSecretEncrypted = $googleClientSecretEncrypted,
-           o.googleEnabled = $googleEnabled,
-           o.updatedAt = datetime()
-       RETURN o`,
+      `MATCH (s:Setting {type: 'oauth'})
+       SET s.googleClientId = $googleClientId,
+           s.googleClientSecret = $googleClientSecret,
+           s.googleEnabled = $googleEnabled,
+           s.updatedAt = datetime()
+       RETURN s`,
       oauthSettingData
     );
-    results.oauthSetting = updateOAuth.records[0]?.get("o").properties;
+    results.oauthSetting = updateOAuth.records[0]?.get("s").properties;
   } else {
-    // Create new
+    // Create new with unified format
     const createOAuth = await args.session.run(
-      `CREATE (o:OAuthSetting {
+      `CREATE (s:Setting {
+        key: 'oauth_Default',
+        type: 'oauth',
         googleClientId: $googleClientId,
-        googleClientSecretEncrypted: $googleClientSecretEncrypted,
+        googleClientSecret: $googleClientSecret,
         googleEnabled: $googleEnabled,
         createdAt: datetime(),
         updatedAt: datetime()
       })
-      RETURN o`,
+      RETURN s`,
       oauthSettingData
     );
-    results.oauthSetting = createOAuth.records[0]?.get("o").properties;
+    results.oauthSetting = createOAuth.records[0]?.get("s").properties;
   }
 
   return {
     success: true,
-    message: "Initial seed completed successfully",
+    message: "Initial seed completed successfully using unified Setting format",
     data: results
   };
 } catch (error) {

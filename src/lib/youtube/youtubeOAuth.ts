@@ -42,10 +42,10 @@ async function getOAuthConfig(
   redirectUri: string;
 }> {
   const result = await session.run(`
-    MATCH (s:OAuthSetting)
+    MATCH (s:Setting {type: 'oauth'})
     WHERE s.googleEnabled = true
     RETURN s.googleClientId as clientId,
-           s.googleClientSecretEncrypted as clientSecretEncrypted
+           s.googleClientSecret as clientSecret
     LIMIT 1
   `);
 
@@ -57,7 +57,7 @@ async function getOAuthConfig(
 
   const record = result.records[0];
   const clientId = record.get("clientId");
-  const clientSecretEncrypted = record.get("clientSecretEncrypted");
+  const clientSecretEncrypted = record.get("clientSecret");
 
   if (!clientId || !clientSecretEncrypted) {
     throw new Error(
@@ -255,8 +255,8 @@ export async function handleYouTubeCallback(
 
         // Create new token
         CREATE (newToken:YouTubeToken {
-          accessTokenEncrypted: $accessToken,
-          refreshTokenEncrypted: $refreshToken,
+          accessToken: $accessToken,
+          refreshToken: $refreshToken,
           expiresAt: datetime({epochMillis: $expiresAt}),
           scope: $scope,
           issuedAt: datetime(),
@@ -311,8 +311,8 @@ export async function handleYouTubeCallback(
         CREATE (u)-[:UserYouTubeOwnership]->(ownership)
 
         CREATE (token:YouTubeToken {
-          accessTokenEncrypted: $accessToken,
-          refreshTokenEncrypted: $refreshToken,
+          accessToken: $accessToken,
+          refreshToken: $refreshToken,
           expiresAt: datetime({epochMillis: $expiresAt}),
           scope: $scope,
           issuedAt: datetime(),
@@ -404,8 +404,8 @@ export async function getValidYouTubeToken(
   }
 
   // Decrypt tokens
-  const accessToken = decryptToken(token.P.accessTokenEncrypted);
-  const refreshToken = decryptToken(token.P.refreshTokenEncrypted);
+  const accessToken = decryptToken(token.P.accessToken);
+  const refreshToken = decryptToken(token.P.refreshToken);
 
   // Check if access token is expired (with 5 minute buffer)
   const expiresAt = new Date(token.P.expiresAt);
@@ -446,7 +446,7 @@ export async function getValidYouTubeToken(
       await session.run(
         `
         MATCH (ownership:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipToken]->(token:YouTubeToken)
-        SET token.accessTokenEncrypted = $accessToken,
+        SET token.accessToken = $accessToken,
             token.expiresAt = datetime({epochMillis: $expiresAt}),
             token.lastRefreshed = datetime()
       `,

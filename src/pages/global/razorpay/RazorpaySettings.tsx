@@ -9,10 +9,7 @@ import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import {
-  getRazorpaySetting,
-  saveRazorpaySetting,
-} from "./razorpayServerFunction";
+import { getSetting, saveSetting } from "~/lib/api/client/settingsClient";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -258,7 +255,8 @@ export function RazorpaySettings() {
                           options.clearAllErrors();
 
                           // Use server function to save settings
-                          const response = await saveRazorpaySetting(
+                          const response = await saveSetting(
+                            "razorpay",
                             settings.P as RazorpaySettingsData,
                           );
 
@@ -316,7 +314,7 @@ export function RazorpaySettings() {
   // Load settings data function
   const loadSettingsData = async () => {
     try {
-      const response = await getRazorpaySetting();
+      const response = await getSetting("razorpay");
       // Extract the first vertex from the result array
       const vertex = response.result?.[0];
 

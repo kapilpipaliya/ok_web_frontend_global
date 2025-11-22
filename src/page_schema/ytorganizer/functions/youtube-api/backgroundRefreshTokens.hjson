@@ -91,12 +91,12 @@ if (args.contextData.action === 'start') {
       // Get all users with YouTube OAuth tokens
       const usersResult = await session.run(`
         MATCH (u:User)-[r:UserYouTubeToken]->(token:YouTubeToken)
-        WHERE token.accessTokenEncrypted IS NOT NULL
+        WHERE token.accessToken IS NOT NULL
           AND token.isRevoked = false
         RETURN u.uuid as userUuid,
                u.email as userEmail,
                token.expiresAt as expiresAt,
-               token.refreshTokenEncrypted as refreshTokenEncrypted
+               token.refreshToken as refreshToken
       `);
 
       if (usersResult.records.length === 0) {
@@ -122,7 +122,7 @@ if (args.contextData.action === 'start') {
         const userUuid = record.get('userUuid');
         const userEmail = record.get('userEmail');
         const expiresAt = record.get('expiresAt');
-        const refreshTokenEncrypted = record.get('refreshTokenEncrypted');
+        const refreshToken = record.get('refreshToken');
 
         // Check if token needs refresh (expires in less than 1 hour or already expired)
         const expiryTime = expiresAt ? new Date(expiresAt).getTime() : 0;
@@ -138,7 +138,7 @@ if (args.contextData.action === 'start') {
           continue;
         }
 
-        if (!refreshTokenEncrypted) {
+        if (!refreshToken) {
           await logMessage('warn', `No refresh token available for user ${userEmail}`, { userUuid });
           tokensFailed++;
           errors.push({

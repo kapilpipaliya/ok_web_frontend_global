@@ -4,7 +4,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/general/getApi";
+import { getSetting, saveSetting } from "~/lib/api/client/settingsClient";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
@@ -123,7 +123,7 @@ const validateFormData = (data: EmailSettingData) => {
 export function EmailSetting() {
   const { showErrorToast, showSuccessToast } = useToast();
   const loadSettingsData = async () => {
-    return await getAPI(API.settings.email.getUrl);
+    return await getSetting("email");
   };
 
   const form = {
@@ -437,19 +437,26 @@ export function EmailSetting() {
 
                         options.clearAllErrors();
 
-                        // Use the common handleApiRequest function
-                        await handleApiRequest(
-                          API.settings.email.updateUrl,
-                          settings.P,
-                          "Email settings updated successfully",
-                          (isLoading) =>
-                            options.contextData.saveState[1](
-                              "isLoading",
-                              isLoading,
-                            ),
-                          showSuccessToast,
-                          showErrorToast,
-                        );
+                        // Use server function to save settings
+                        try {
+                          options.contextData.saveState[1]("isLoading", true);
+                          const response = await saveSetting(
+                            "email",
+                            settings.P as EmailSettingData,
+                          );
+
+                          if (response.error) {
+                            showErrorToast(
+                              response.error || "Failed to save email settings",
+                            );
+                          } else {
+                            showSuccessToast(
+                              response.message || "Email settings updated successfully",
+                            );
+                          }
+                        } finally {
+                          options.contextData.saveState[1]("isLoading", false);
+                        }
                       },
                       text: options.contextData.saveState[0]?.isLoading
                         ? "Saving..."

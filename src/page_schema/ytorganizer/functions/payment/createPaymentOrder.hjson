@@ -62,7 +62,7 @@ try {
 
   // Fetch Razorpay setting
   const settingResult = await args.session.run(
-    "MATCH (s:RazorpaySetting) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
+    "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
   );
 
   if (settingResult.records.length === 0) {

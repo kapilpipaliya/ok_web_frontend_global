@@ -22,7 +22,7 @@ import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { validateUsername } from "~/lib/validation/validateUsername";
-import { isGoogleOAuthEnabled } from "~/pages/global/oauth/oauthServerFunctions";
+import { isGoogleOAuthEnabled } from "~/lib/api/client/isSettingEnabled";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";

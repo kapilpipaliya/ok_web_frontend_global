@@ -40,8 +40,8 @@ try {
   const tokenResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
     WHERE token.isRevoked = false
-    RETURN token.accessTokenEncrypted as accessTokenEncrypted,
-           token.refreshTokenEncrypted as refreshTokenEncrypted,
+    RETURN token.accessToken as accessToken,
+           token.refreshToken as refreshToken,
            token.expiresAt as expiresAt
   `, { userUuid });
 
@@ -58,12 +58,12 @@ try {
   }
 
   const record = tokenResult.records[0];
-  const accessTokenEncrypted = record.get('accessTokenEncrypted');
-  const refreshTokenEncrypted = record.get('refreshTokenEncrypted');
+  const accessToken = record.get('accessToken');
+  const refreshToken = record.get('refreshToken');
   const expiresAt = record.get('expiresAt');
 
   // Check if refresh token exists
-  if (!refreshTokenEncrypted) {
+  if (!refreshToken) {
     console.error(`[Token Refresh] No refresh token available for user ${userUuid}`);
     return {
       success: false,
@@ -76,14 +76,14 @@ try {
   }
 
   // Decrypt refresh token
-  const refreshToken = args.decryptToken(refreshTokenEncrypted);
+  const refreshTokenDecrypted = args.decryptToken(refreshToken);
 
   // Get OAuth configuration from database
   const configResult = await args.session.run(`
-    MATCH (s:OAuthSetting)
+    MATCH (s:Setting {type: 'oauth'})
     WHERE s.googleEnabled = true
     RETURN s.googleClientId as clientId,
-           s.googleClientSecretEncrypted as clientSecretEncrypted
+           s.googleClientSecret as clientSecret
     LIMIT 1
   `);
 
@@ -101,7 +101,7 @@ try {
 
   const configRecord = configResult.records[0];
   const clientId = configRecord.get('clientId');
-  const clientSecretEncrypted = configRecord.get('clientSecretEncrypted');
+  const clientSecretEncrypted = configRecord.get('clientSecret');
 
   if (!clientId || !clientSecretEncrypted) {
     console.error('[Token Refresh] Incomplete OAuth configuration');
@@ -130,7 +130,7 @@ try {
 
   // Set refresh token
   oauth2Client.setCredentials({
-    refresh_token: refreshToken
+    refresh_token: refreshTokenDecrypted
   });
 
   try {
@@ -151,7 +151,7 @@ try {
     // Update token in database
     await args.session.run(`
       MATCH (u:User {uuid: $userUuid})-[:UserYouTubeToken]->(token:YouTubeToken)
-      SET token.accessTokenEncrypted = $accessToken,
+      SET token.accessToken = $accessToken,
           token.expiresAt = datetime({epochMillis: $expiresAt}),
           token.lastRefreshed = datetime()
     `, {

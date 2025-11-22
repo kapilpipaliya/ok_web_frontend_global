@@ -37,8 +37,8 @@ const ownerships = result.records.map((record) => {
 
   // Remove sensitive token fields before sending to client
   if (token && token.P) {
-    delete token.P.accessTokenEncrypted;
-    delete token.P.refreshTokenEncrypted;
+    delete token.P.accessToken;
+    delete token.P.refreshToken;
   }
 
   return {

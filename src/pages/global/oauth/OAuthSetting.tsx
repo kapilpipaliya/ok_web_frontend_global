@@ -9,7 +9,7 @@ import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import { getOAuthSetting, saveOAuthSetting } from "./oauthServerFunctions";
+import { getSetting, saveSetting } from "~/lib/api/client/settingsClient";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -337,7 +337,8 @@ export function OAuthSetting() {
                           options.clearAllErrors();
 
                           // Use server function to save settings
-                          const response = await saveOAuthSetting(
+                          const response = await saveSetting(
+                            "oauth",
                             settings.P as OAuthSettingData,
                           );
 
@@ -394,7 +395,7 @@ export function OAuthSetting() {
   // Load settings data function
   const loadSettingsData = async () => {
     try {
-      const response = await getOAuthSetting();
+      const response = await getSetting("oauth");
       // Extract the first vertex from the result array
       const vertex = response.result?.[0];
 

@@ -9,7 +9,7 @@ import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import { getStripeSetting, saveStripeSetting } from "./stripeServerFunctions";
+import { getSetting, saveSetting } from "~/lib/api/client/settingsClient";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -255,7 +255,8 @@ export function StripeSettings() {
                           options.clearAllErrors();
 
                           // Use server function to save settings
-                          const response = await saveStripeSetting(
+                          const response = await saveSetting(
+                            "stripe",
                             settings.P as StripeSettingsData,
                           );
 
@@ -313,7 +314,7 @@ export function StripeSettings() {
   // Load settings data function
   const loadSettingsData = async () => {
     try {
-      const response = await getStripeSetting();
+      const response = await getSetting("stripe");
       // Extract the first vertex from the result array
       const vertex = response.result?.[0];
 

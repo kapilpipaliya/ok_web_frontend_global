@@ -23,7 +23,7 @@ export async function POST({ request }: APIEvent) {
 
     // Fetch Razorpay settings to get webhook secret
     const settingsResult = await dbSession.run(
-      "MATCH (s:RazorpaySetting) WHERE s.razorpayEnabled = true RETURN s LIMIT 1",
+      "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1",
     );
 
     if (settingsResult.records.length === 0) {

@@ -4,6 +4,7 @@ import { google } from "googleapis";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { decryptClientSecret } from "~/lib/auth/tokenEncryption";
+import {isMaskedValue} from "~/lib/api/server/settings/settingsFunctions";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -11,7 +12,7 @@ export async function GET({ request }: APIEvent) {
   try {
     // Fetch OAuth settings from database
     const result = await dbSession.run(
-      "MATCH (o:OAuthSetting) WHERE o.googleEnabled = true RETURN o LIMIT 1",
+      "MATCH (o:Setting {type: 'oauth'}) WHERE o.googleEnabled = true RETURN o LIMIT 1",
     );
 
     if (result.records.length === 0) {
@@ -22,10 +23,10 @@ export async function GET({ request }: APIEvent) {
 
     // Decrypt the client secret
     let clientSecret = "";
-    if (oauthSetting.googleClientSecretEncrypted) {
+    if (oauthSetting.googleClientSecret && isMaskedValue(oauthSetting.googleClientSecret)) {
       try {
         clientSecret = decryptClientSecret(
-          oauthSetting.googleClientSecretEncrypted,
+          oauthSetting.googleClientSecret,
         );
       } catch (e) {
         console.error("Failed to decrypt Google client secret:", e);

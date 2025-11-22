@@ -228,7 +228,7 @@ async function getSubdomainEmailSetting(
   dbSession: Session,
 ): Promise<null | Vertex> {
   const result = await dbSession.run(
-    `MATCH (e:EmailSetting)
+    `MATCH (e:Setting {type: 'email'})
      WHERE e.active IS NOT NULL AND e.active <> ''
      RETURN e as settings
      LIMIT 1`,
@@ -245,7 +245,7 @@ async function getSystemEmailSetting(
 ): Promise<null | Vertex> {
   const result = await dbSession.run(
     `MATCH (s:SubDomain {key: $subDomain})<-[:AccountSubdomain]-(a:Account)
-     MATCH (a)-[:AccountEmailSetting]->(e:EmailSetting)
+     MATCH (a)-[:AccountSetting]->(e:Setting {type: 'email'})
      WHERE e.active IS NOT NULL AND e.active <> ''
      RETURN e as settings
      LIMIT 1`,

@@ -19,7 +19,7 @@ import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader
 import { createPasswordField } from "~/pages/auth/functions/schema/createPasswordField";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import { isGoogleOAuthEnabled } from "~/pages/global/oauth/oauthServerFunctions";
+import { isGoogleOAuthEnabled } from "~/lib/api/client/isSettingEnabled";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
