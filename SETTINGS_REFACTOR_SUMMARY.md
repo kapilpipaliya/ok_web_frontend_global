@@ -58,7 +58,7 @@ Created migration utilities to convert existing data:
 
 ### New Unified Format
 
-**Before:**
+**Before (old separate labels):**
 ```cypher
 (:OAuthSetting {googleClientId: "...", googleEnabled: true})
 (:EmailSetting {active: "smtp", smtpHost: "..."})
@@ -66,7 +66,7 @@ Created migration utilities to convert existing data:
 (:StripeSetting {stripeEnabled: true, stripePublishableKey: "..."})
 ```
 
-**After (clean migration - old labels removed):**
+**After (unified Setting label with type property):**
 ```cypher
 (:Setting {type: "oauth", key: "oauth_Default", googleClientId: "...", googleEnabled: true})
 (:Setting {type: "email", key: "email_Default", active: "smtp", smtpHost: "..."})
@@ -161,13 +161,14 @@ All settings pages should be tested:
 
 ## Notes
 
-- **Old labels are REMOVED** - The migration script removes old labels (OAuthSetting, EmailSetting, etc.) and keeps only the `Setting` label
-- New queries use `MATCH (s:Setting {type: $type})` instead of `MATCH (s:OAuthSetting)`
+- **Unified Setting Label** - All settings now use the `Setting` label with a `type` property
+- New queries use `MATCH (s:Setting {type: $type})` instead of separate labels like `MATCH (s:OAuthSetting)`
 - Account-specific email settings use `AccountSetting` relationship instead of `AccountEmailSetting`
-- All encryption/decryption logic can be added to the unified functions as needed
+- All encryption/decryption logic is handled in the unified functions
 - **All imports use static imports at the top** - following TypeScript best practices for better type checking and performance
 - **Deprecated functions deleted** - All old setting-specific server functions have been removed
 - **Updated initialSeed** - The YSaar initial seed function now creates settings in the unified format
+- **Migration backward compatible** - Old data with separate labels can be migrated to unified format
 
 ## Architecture Follows
 

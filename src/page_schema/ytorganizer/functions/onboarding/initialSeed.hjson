@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "initialSeed",
-        description: "Seeds initial data for general setting, email setting, and OAuth setting using unified Setting format",
+        description: "Seeds initial data for general setting, email setting, and Google OAuth setting using unified Setting format",
         body: '''
 // This function initializes the database with default settings using the unified Setting vertex format
 // It should only be run once during initial setup
@@ -89,21 +89,21 @@ try {
     results.emailSetting = createEmail.records[0]?.get("s").properties;
   }
 
-  // 3. Create/Update OAuth Setting (using unified Setting format)
+  // 3. Create/Update Google OAuth Setting (using unified Setting format)
   const googleClientSecret = "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";
-  let encryptedSecret = "";
+  let encryptedGoogleSecret = "";
 
   try {
-    encryptedSecret = args.encryptClientSecret(googleClientSecret);
+    encryptedGoogleSecret = args.encryptClientSecret(googleClientSecret);
   } catch (error) {
-    console.error("Failed to encrypt client secret:", error);
+    console.error("Failed to encrypt Google client secret:", error);
     throw new Error("Failed to encrypt OAuth client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured.");
   }
 
   const oauthSettingData = {
     googleEnabled: true,
     googleClientId: "39168961833-tu9lboivh4c7580q1paj70ccd0hlg1fb.apps.googleusercontent.com",
-    googleClientSecret: encryptedSecret
+    googleClientSecret: encryptedGoogleSecret
   };
 
   const checkOAuth = await args.session.run(
@@ -142,7 +142,7 @@ try {
 
   return {
     success: true,
-    message: "Initial seed completed successfully using unified Setting format",
+    message: "Initial seed completed successfully",
     data: results
   };
 } catch (error) {

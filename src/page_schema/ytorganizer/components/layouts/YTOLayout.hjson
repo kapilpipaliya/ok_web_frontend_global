@@ -820,8 +820,8 @@ const navigationSectionsData = [
     ]
   },
   {
-    id: "content",
-    title: "Content",
+    id: "youtube",
+    title: "YouTube",
     items: [
       {
         id: "search",

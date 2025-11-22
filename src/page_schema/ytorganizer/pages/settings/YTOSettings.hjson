@@ -97,7 +97,7 @@ return {
         props: '''
 return {
   as: "p",
-  text: "Manage your YSaar preferences and data. Need to connect a YouTube account? Go to Accounts in the navigation."
+  text: "Manage your YSaar preferences and data."
 };
 ''',
         css: '''

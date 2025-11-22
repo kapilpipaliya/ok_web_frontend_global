@@ -6,22 +6,25 @@ A mobile-first YouTube channel and playlist management system built with accessi
 
 YSaar is a comprehensive page schema implementation that provides:
 
+### YouTube Features
 - **Channel Management**: Add, organize, and browse YouTube channels
 - **Playlist Management**: Create and manage custom playlists
 - **Video Organization**: View videos from channels and playlists
 - **Multi-Ownership Support**: Connect multiple YouTube accounts per user with shared 10,000 units/day quota across all users
 - **OAuth 2.0 Authentication**: Secure per-account YouTube API access with encrypted token storage
 - **API Usage Monitoring**: Real-time tracking of YouTube API quota consumption with visual indicators
+
+### Unified Features
 - **Mobile-First Design**: Optimized for mobile devices with touch-friendly interfaces
 - **Accessibility**: Screen reader friendly with proper ARIA labels and semantic HTML
 - **Bottom Navigation**: Easy navigation between main sections
 - **Privacy & Terms**: Comprehensive privacy policy and terms of service compliance
-- **YouTube Branding**: Full compliance with YouTube's branding guidelines
 
 ## Graph Schema
 
 The system uses a multi-ownership architecture where each user can connect multiple YouTube accounts. Each YouTube account (ownership) has its own OAuth token and content settings. All users share a single 10,000 units/day API quota pool at the Google Cloud Project level:
 
+### YouTube Schema
 ```
 (User)-[:UserYouTubeOwnership]->(YouTubeOwnership)
 (YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)
@@ -29,17 +32,22 @@ The system uses a multi-ownership architecture where each user can connect multi
 (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
 
-(OAuthSetting)-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
-(OAuthSetting)-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
-
-(User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
-(User)-[:UserFeedback]->(Feedback)
+(Setting {type: 'oauth'})-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
+(Setting {type: 'oauth'})-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
 
 (Channel)-[:ChannelPlaylist]->(Playlist)
 (PlaylistSetting)-[:PlaylistSettingVideo]->(Video)
 ```
 
+### Shared Schema
+```
+(User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
+(User)-[:UserFeedback]->(Feedback)
+```
+
 **Key Architecture Principles:**
+
+**YouTube Architecture:**
 - **Multi-Ownership**: Users can connect multiple YouTube accounts, each represented by a YouTubeOwnership node
 - **Shared Quota**: All users share a single 10,000 units/day API quota pool at the Google Cloud Project level
 - **Priority-Based Allocation**: Quota reservations support priority levels for fair resource distribution
@@ -50,6 +58,8 @@ The system uses a multi-ownership architecture where each user can connect multi
 - **Global Video Setting**: VideoSetting (watched, notes, favourites) are stored at the ownership level via `(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)`, applying globally across all playlists for that ownership
 
 ### OAuth 2.0 Authentication & Multi-Ownership
+
+#### YouTube OAuth & Multi-Ownership
 
 The system supports connecting multiple YouTube accounts per user, with each account (ownership) having independent OAuth tokens. All users share a single 10,000 units/day API quota pool:
 
@@ -164,8 +174,9 @@ The system supports connecting multiple YouTube accounts per user, with each acc
   - `callCount`: Number of API calls made by this ownership
   - `operations`: JSON object tracking operation counts for this ownership
   - `createdAt`, `updatedAt`: Timestamps
-- **OAuthSetting**: Global OAuth configuration (singleton node)
-  - `key`: "oauth_settings" (single instance)
+- **Setting** (type: 'oauth'): Global OAuth configuration (singleton node)
+  - `type`: "oauth"
+  - `key`: "oauth_Default" (single instance)
   - `quotaLimit`: Daily quota limit (10,000 units)
   - `quotaResetTime`: Time when quota resets (midnight Pacific Time)
   - `alertThresholds`: JSON array of alert thresholds (e.g., [80, 95, 100])
@@ -241,6 +252,8 @@ All components follow the YTO prefix naming convention:
 - **YTOTabBar**: Tab navigation for channel/playlist detail views
 
 #### UI Components
+
+**YouTube Components:**
 - **YTOFloatingButton**: Basic floating action button component
 - **YTOAddChannelButton**: Specialized button with modal for adding YouTube channels
 - **YTOAddPlaylistButton**: Specialized button with modal for adding YouTube playlists
@@ -249,21 +262,29 @@ All components follow the YTO prefix naming convention:
 - **YTOVideoCard**: Video display card with thumbnail and metadata
 - **YTOCard**: Display Youtube Item
 - **YTOYouTubeAttribution**: YouTube branding compliance component with clickable logo
+
+**Shared Components:**
 - **YTOButton**: Reusable button component with variants (primary, secondary, danger)
 - **YTOPageTitle**: Consistent page title component
 - **YTOFeedbackModal**: Modal for collecting user feedback
 
 #### Pages
+
+**YouTube Pages:**
 - **YTOHome**: Dashboard overview of recent activity
 - **YTOChannels**: List of user's subscribed channels with add functionality
 - **YTOPlaylists**: List of user's playlists with add functionality
 - **YTOChannelDetail**: Channel details with videos/playlists tabs
 - **YTOPlaylistDetail**: Playlist details with video list
-- **YTOSettings**: User settings including YouTube connection, theme, and data management
-- **YTOPrivacy**: Privacy policy page with YouTube API Services disclosures
-- **YTOTerms**: Terms of Service page with comprehensive legal information
 - **YTOAdminHome**: Admin dashboard with quick links to admin features
 - **YTOQuotaMonitor**: Admin page for monitoring shared API quota (real-time usage, breakdown by ownership, alerts)
+
+**Settings Pages:**
+- **YTOSettings**: User settings including YouTube connection, theme, and data management
+
+**Legal Pages:**
+- **YTOPrivacy**: Privacy policy page with YouTube API Services disclosures
+- **YTOTerms**: Terms of Service page with comprehensive legal information
 
 ### API Functions
 
@@ -314,7 +335,7 @@ The system tracks YouTube API quota consumption with a shared 10,000 units/day l
 - **Automatic Logging**: All API calls logged with operation type, cost, and ownership
 - **Quota Reservations**: Reserve quota before operations to prevent race conditions
 - **Expiry Management**: Reservations auto-expire after 5 minutes, quota auto-released
-- Daily quota tracking stored in Neo4j: `(OAuthSetting)-[:SharedAPIUsage]->(SharedAPIUsage)` (global) and `(OAuthSetting)-[:OwnershipAPIUsage]->(OwnershipAPIUsage)` (per ownership)
+- Daily quota tracking stored in Neo4j: `(Setting {type: 'oauth'})-[:SharedAPIUsage]->(SharedAPIUsage)` (global) and `(Setting {type: 'oauth'})-[:OwnershipAPIUsage]->(OwnershipAPIUsage)` (per ownership)
 
 **Visual Indicators:**
 - Color-coded status in admin quota monitor:
@@ -552,71 +573,78 @@ Users can set their preferred language through LanguageSetting vertex:
 ```
 /src/page_schema/ytorganizer/
 ├── components/
-│   ├── YTOLayout.hjson              # Main layout with multi-ownership state management
-│   ├── YTOAdminLayout.hjson         # Admin section layout with navigation
-│   ├── YTOFloatingButton.hjson      # Basic floating action button
-│   ├── YTOAddChannelButton.hjson    # Channel add button with modal
-│   ├── YTOAddPlaylistButton.hjson   # Playlist add button with modal
-│   ├── YTOChannelCard.hjson         # Channel display card
-│   ├── YTOPlaylistCard.hjson        # Playlist display card
-│   ├── YTOVideoCard.hjson           # Video display card
-│   ├── YTOCard.hjson                # Generic card component with header/footer slots
-│   ├── YTOTabBar.hjson              # Tab navigation component
-│   ├── YTOYouTubeAttribution.hjson  # YouTube branding compliance
-│   ├── YTOButton.hjson              # Reusable button component
-│   ├── YTOPageTitle.hjson           # Page title component
-│   └── YTOFeedbackModal.hjson       # User feedback modal
+│   ├── layouts/
+│   │   ├── YTOLayout.hjson              # Main layout with multi-ownership state management
+│   │   ├── YTOAdminLayout.hjson         # Admin section layout with navigation
+│   │   └── YTOTabBar.hjson              # Tab navigation component
+│   ├── buttons/
+│   │   ├── YTOFloatingButton.hjson      # Basic floating action button
+│   │   ├── YTOAddChannelButton.hjson    # Channel add button with modal
+│   │   ├── YTOAddPlaylistButton.hjson   # Playlist add button with modal
+│   │   └── YTOButton.hjson              # Reusable button component
+│   ├── cards/
+│   │   ├── YTOChannelCard.hjson         # YouTube channel display card
+│   │   ├── YTOPlaylistCard.hjson        # YouTube playlist display card
+│   │   ├── YTOVideoCard.hjson           # YouTube video display card
+│   │   ├── YTOCard.hjson                # Generic card component
+│   ├── shared/
+│   │   ├── YTOYouTubeAttribution.hjson  # YouTube branding compliance
+│   │   ├── YTOPageTitle.hjson           # Page title component
+│   │   └── YTOFeedbackModal.hjson       # User feedback modal
 ├── pages/
-│   ├── YTOHome.hjson                # Dashboard/home page
-│   ├── YTOChannels.hjson            # Channels list page
-│   ├── YTOPlaylists.hjson           # Playlists list page
-│   ├── YTOChannelDetail.hjson       # Channel detail with tabs
-│   ├── YTOPlaylistDetail.hjson      # Playlist detail with videos
-│   ├── YTOSettings.hjson            # User settings and YouTube connection
-│   ├── YTOPrivacy.hjson             # Privacy policy page
-│   ├── YTOTerms.hjson               # Terms of Service page
-│   ├── YTOOnboarding.hjson          # New user onboarding flow
-│   ├── YTOAdminHome.hjson           # Admin: Dashboard with quick links
-│   ├── YTOQuotaMonitor.hjson        # Admin: Shared quota monitoring (NEW v3.1)
-│   ├── YTOWorkerHealth.hjson        # Admin: Queue/worker health monitoring
-│   ├── YTOWorkerLogs.hjson          # Admin: Worker logs viewer
-│   ├── YTOAdminUsers.hjson          # Admin: User management
-│   └── YTOAPIKeyManagement.hjson    # Admin: API key management
+│   ├── main/
+│   │   ├── YTOHome.hjson                # Dashboard/home page
+│   ├── youtube/
+│   │   ├── YTOChannels.hjson            # YouTube channels list page
+│   │   ├── YTOPlaylists.hjson           # YouTube playlists list page
+│   │   ├── YTOChannelDetail.hjson       # YouTube channel detail with tabs
+│   │   └── YTOPlaylistDetail.hjson      # YouTube playlist detail with videos
+│   ├── settings/
+│   │   ├── YTOSettings.hjson            # User settings and YouTube connection
+│   ├── legal/
+│   │   ├── YTOPrivacy.hjson             # Privacy policy page
+│   │   ├── YTOTerms.hjson               # Terms of Service page
+│   │   └── YTOOnboarding.hjson          # New user onboarding flow
+│   └── admin/
+│       ├── YTOAdminHome.hjson           # Admin: Dashboard with quick links
+│       ├── YTOQuotaMonitor.hjson        # Admin: Shared quota monitoring
+│       ├── YTOWorkerHealth.hjson        # Admin: Queue/worker health monitoring
+│       ├── YTOWorkerLogs.hjson          # Admin: Worker logs viewer
+│       ├── YTOAdminUsers.hjson          # Admin: User management
+│       └── YTOAPIKeyManagement.hjson    # Admin: API key management
 ├── themes/
 │   └── YTOTheme.hjson               # Custom theme for video content
 ├── functions/
-│   ├── savePlaylist.hjson           # Save YouTube playlist (updated for ownership)
-│   ├── saveChannel.hjson            # Save YouTube channel (updated for ownership)
-│   ├── getSharedQuotaStatus.hjson   # Get comprehensive shared quota status (NEW v3.1)
-│   ├── monitorQuotaLevels.hjson     # Background worker: Monitor quota levels (NEW v3.1)
-│   ├── sendQuotaAlertEmail.hjson    # Send quota threshold alert emails (NEW v3.1)
-│   ├── getChannelsWithVideoCount.hjson  # Get channels with video counts
-│   ├── getPlaylistsWithVideoCount.hjson # Get playlists with video counts
-│   ├── getYouTubeOwnerships.hjson   # Get all connected YouTube accounts
-│   ├── updateOwnershipLastSelected.hjson # Track ownership selection
-│   ├── autoFetchOwnershipChannels.hjson  # Auto-fetch channels for ownership
-│   ├── clearAllUserData.hjson       # Clear all ownership's YTO data
-│   ├── deleteAccount.hjson          # Delete user account
-│   ├── saveFeedback.hjson           # Save user feedback
-│   └── ... (72+ total functions)    # All updated for shared quota architecture
+│   ├── youtube/
+│   │   ├── savePlaylist.hjson           # Save YouTube playlist
+│   │   ├── saveChannel.hjson            # Save YouTube channel
+│   │   ├── getChannelsWithVideoCount.hjson  # Get channels with video counts
+│   │   ├── getPlaylistsWithVideoCount.hjson # Get playlists with video counts
+│   │   ├── getYouTubeOwnerships.hjson   # Get all connected YouTube accounts
+│   │   ├── updateOwnershipLastSelected.hjson # Track ownership selection
+│   │   └── ... (60+ YouTube functions) # All updated for shared quota architecture
+│   └── admin/
+│       ├── getSharedQuotaStatus.hjson   # Get shared quota status
+│       ├── monitorQuotaLevels.hjson     # Monitor quota levels
+│       └── sendQuotaAlertEmail.hjson    # Send quota alerts
 └── docs/
     └── README.md                    # This documentation
 
 /src/lib/youtube/
-├── youtubeOAuth.ts                  # OAuth 2.0 token management
-└── apiUsageTracking.ts              # API quota tracking functions
+├── youtubeOAuth.ts                  # YouTube OAuth 2.0 token management
+└── apiUsageTracking.ts              # YouTube API quota tracking functions
 
 /src/lib/auth/
 └── tokenEncryption.ts               # Token encryption/decryption utilities
 
 /src/routes/api/
 ├── auth/youtube/
-│   ├── connect.ts                   # Initiate OAuth flow
-│   ├── callback.ts                  # OAuth callback handler
+│   ├── connect.ts                   # Initiate YouTube OAuth flow
+│   ├── callback.ts                  # YouTube OAuth callback handler
 │   ├── disconnect.ts                # Disconnect YouTube account
-│   └── status.ts                    # Check connection status
+│   └── status.ts                    # Check YouTube connection status
 └── youtube/
-    └── usage.ts                     # Get API usage statistics
+    └── usage.ts                     # Get YouTube API usage statistics
 ```
 
 ## Usage Patterns
@@ -1346,8 +1374,6 @@ Both functions return data in vertex format:
    - Scopes: `https://www.googleapis.com/auth/youtube.readonly`
 5. Configure environment variables:
    ```bash
-   YOUTUBE_CLIENT_ID=your_client_id
-   YOUTUBE_CLIENT_SECRET=your_client_secret
    TOKEN_ENCRYPTION_KEY=your_32_byte_encryption_key
    ```
 
@@ -1393,12 +1419,12 @@ Both pages include:
 
 ## Dependencies
 
-The system dynamically imports the following npm packages in server functions:
-- `googleapis`: Google's official Node.js client library for accessing Google APIs
+The system dynamically imports and uses the following npm packages in server functions:
+- `googleapis`: Google's official Node.js client library for accessing Google APIs (YouTube)
 
 ### Installation (if not already installed)
 ```bash
-npm install googleapis
+npm install googleapis --force
 ```
 
 ## Future Enhancements

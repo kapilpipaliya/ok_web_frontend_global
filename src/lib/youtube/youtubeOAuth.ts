@@ -78,13 +78,19 @@ async function getOAuthConfig(
 /**
  * Construct redirect URI from request
  * For background workers without request, uses environment variable or default
+ *
+ * @param request - Optional request object
+ * @param callbackPath - Callback path (default: '/api/auth/youtube/callback')
  */
-export function getRedirectUriFromRequest(request?: Request): string {
+export function getRedirectUriFromRequest(
+  request?: Request,
+  callbackPath: string = "/api/auth/youtube/callback"
+): string {
   // If no request provided (background workers), use environment or default
   if (!request) {
     return process.env.APP_URL
-      ? `${process.env.APP_URL}/api/auth/youtube/callback`
-      : "https://localhost:3000/api/auth/youtube/callback";
+      ? `${process.env.APP_URL}${callbackPath}`
+      : `https://localhost:3001${callbackPath}`;
   }
 
   const url = new URL(request.url);
@@ -94,7 +100,7 @@ export function getRedirectUriFromRequest(request?: Request): string {
   const protocol = url.hostname === "localhost" ? url.protocol : "https:";
 
   // Construct the redirect URI
-  return `${protocol}//${url.host}/api/auth/youtube/callback`;
+  return `${protocol}//${url.host}${callbackPath}`;
 }
 
 /**
