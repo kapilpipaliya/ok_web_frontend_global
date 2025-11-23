@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import type {ManagedTransaction, Transaction} from "neo4j-driver";
+import type { ManagedTransaction, Transaction } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
@@ -102,19 +102,10 @@ export async function POST({ request }: APIEvent) {
       await validateKeyAndDomain(tx, key, domain);
 
       // Create subdomain
-      const subdomain = await createSubdomain(
-        tx,
-        key,
-        domain,
-        description,
-      );
+      const subdomain = await createSubdomain(tx, key, domain, description);
 
       // Create AccountSubdomain relationship in same transaction
-      await createAccountSubdomainRelation(
-        tx,
-        account.id,
-        subdomain.id,
-      );
+      await createAccountSubdomainRelation(tx, account.id, subdomain.id);
 
       return subdomain;
     });
@@ -233,10 +224,9 @@ async function validateKeyAndDomain(
     );
   }
 
-  const existingKey = await tx.run(
-    "MATCH (s:SubDomain {key: $key}) RETURN s",
-    { key },
-  );
+  const existingKey = await tx.run("MATCH (s:SubDomain {key: $key}) RETURN s", {
+    key,
+  });
   if (existingKey.records.length > 0) {
     throw new APIError("Subdomain with this key already exists", 400);
   }

@@ -20,9 +20,15 @@ export async function POST({ request }: APIEvent) {
     }
 
     // Get form fields
-    const targetDatabase = data.find((item) => item.name === "targetDatabase")?.data?.toString() || "";
-    const shouldRestore = data.find((item) => item.name === "shouldRestore")?.data?.toString() === "true";
-    const confirmed = data.find((item) => item.name === "confirmed")?.data?.toString() === "true";
+    const targetDatabase =
+      data.find((item) => item.name === "targetDatabase")?.data?.toString() ||
+      "";
+    const shouldRestore =
+      data.find((item) => item.name === "shouldRestore")?.data?.toString() ===
+      "true";
+    const confirmed =
+      data.find((item) => item.name === "confirmed")?.data?.toString() ===
+      "true";
 
     if (!targetDatabase) {
       throw new APIError("Target database is required", 400);
@@ -32,7 +38,9 @@ export async function POST({ request }: APIEvent) {
     tmpPath = `/tmp/upload_${Date.now()}_${file.filename}`;
     fs.writeFileSync(tmpPath, file.data);
 
-    console.log(`[Upload] File written to ${tmpPath}, size: ${file.data.length} bytes`);
+    console.log(
+      `[Upload] File written to ${tmpPath}, size: ${file.data.length} bytes`,
+    );
 
     // Call the backup management function
     const result = await uploadAndRestoreBackup(

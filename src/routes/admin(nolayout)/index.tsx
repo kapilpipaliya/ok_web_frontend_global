@@ -10,7 +10,7 @@ import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { AuthRequired } from "~/components/auth/AuthRequired";
-import {RedirectUrlIconButton} from "~/components/styled/buttons/RedirectUrlIconButton";
+import { RedirectUrlIconButton } from "~/components/styled/buttons/RedirectUrlIconButton";
 
 export default function Admin() {
   return (

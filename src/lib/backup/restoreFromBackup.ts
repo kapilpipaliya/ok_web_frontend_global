@@ -108,7 +108,9 @@ export async function restoreFromBackup(
   const restoreDir = path.join(process.cwd(), "restore");
 
   // If it's a local file, use the provided path directly
-  const compressedPath = isLocalFile ? filename : path.join(restoreDir, filename);
+  const compressedPath = isLocalFile
+    ? filename
+    : path.join(restoreDir, filename);
   const decompressedPath = compressedPath.replace(".gz", "");
 
   try {
@@ -119,7 +121,9 @@ export async function restoreFromBackup(
 
     // Step 2: Download backup from cloud storage (skip if local file)
     if (!isLocalFile) {
-      console.log(`[Restore] Step 1/6: Downloading backup from cloud storage...`);
+      console.log(
+        `[Restore] Step 1/6: Downloading backup from cloud storage...`,
+      );
 
       const downloadResult = await downloadBackupFromCloud({
         filename,
@@ -225,7 +229,9 @@ export async function restoreFromBackup(
       );
     }
 
-    console.log(`[Restore] Copying backup to Neo4j import directory: ${importPath}`);
+    console.log(
+      `[Restore] Copying backup to Neo4j import directory: ${importPath}`,
+    );
     fs.copyFileSync(decompressedPath, importPath);
 
     // Create a session for the target database
@@ -241,17 +247,24 @@ export async function restoreFromBackup(
         YIELD row, result
         RETURN count(*) as totalStatements
         `,
-        { filename: importFilename }
+        { filename: importFilename },
       );
 
       const totalStatements = result.records[0]?.get("totalStatements");
-      const count = typeof totalStatements === 'number' ? totalStatements : (totalStatements?.toInt?.() || 0);
-      console.log(`[Restore] APOC import complete: ${count} operations executed`);
+      const count =
+        typeof totalStatements === "number"
+          ? totalStatements
+          : totalStatements?.toInt?.() || 0;
+      console.log(
+        `[Restore] APOC import complete: ${count} operations executed`,
+      );
 
       // Clean up the file from Neo4j import directory
       try {
         fs.unlinkSync(importPath);
-        console.log(`[Restore] Cleaned up import file from Neo4j import directory`);
+        console.log(
+          `[Restore] Cleaned up import file from Neo4j import directory`,
+        );
       } catch (cleanupError) {
         console.warn(`[Restore] Failed to clean up import file:`, cleanupError);
       }
@@ -264,7 +277,10 @@ export async function restoreFromBackup(
           fs.unlinkSync(importPath);
         }
       } catch (cleanupError) {
-        console.error(`[Restore] Failed to clean up import file:`, cleanupError);
+        console.error(
+          `[Restore] Failed to clean up import file:`,
+          cleanupError,
+        );
       }
 
       throw new Error(`APOC import failed: ${apocError.message}`);

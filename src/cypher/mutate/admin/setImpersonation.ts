@@ -30,10 +30,9 @@ export async function setImpersonation(
     }
 
     // Verify target user exists
-    const targetResult = await tx.run(
-      "MATCH (u:User {uuid: $uuid}) RETURN u",
-      { uuid: targetUserUuid },
-    );
+    const targetResult = await tx.run("MATCH (u:User {uuid: $uuid}) RETURN u", {
+      uuid: targetUserUuid,
+    });
 
     if (targetResult.records.length === 0) {
       throw new Error("Target user not found");

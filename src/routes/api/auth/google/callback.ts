@@ -54,9 +54,7 @@ export async function GET({ request }: APIEvent) {
     let clientSecret = "";
     if (oauthSetting.googleClientSecret) {
       try {
-        clientSecret = decryptClientSecret(
-          oauthSetting.googleClientSecret,
-        );
+        clientSecret = decryptClientSecret(oauthSetting.googleClientSecret);
       } catch (e) {
         console.error("Failed to decrypt Google client secret:", e);
         throw new APIError("Failed to decrypt Google OAuth credentials", 500);

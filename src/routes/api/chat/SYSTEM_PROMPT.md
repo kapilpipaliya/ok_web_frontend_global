@@ -342,6 +342,49 @@ The `serverFunction` property allows executing server-side code with database ac
 - The returned data is available to child components via `args.contextData.contextName`
 - Server functions are executed asynchronously and results are cached
 
+#### Using Transactions for Atomic Operations
+When you need to perform multiple database operations that must succeed or fail together, use transactions:
+
+**IMPORTANT**: When calling functions that run queries (like `createActivityLog`) from within a transaction, you MUST pass the transaction object (`tx`) instead of the session.
+
+```javascript
+serverFunction: `
+  // Use executeWrite for write operations that need to be atomic
+  const result = await args.session.executeWrite(async (tx) => {
+    // Create a user
+    const userResult = await tx.run(
+      'CREATE (u:User {uuid: $uuid, email: $email, createdAt: datetime()}) RETURN u',
+      { uuid: generateUUID(), email: 'user@example.com' }
+    );
+
+    const user = userResult.records[0].get('u');
+
+    // Create activity log - MUST pass tx, not session
+    await createActivityLog(
+      tx,  // ✅ Pass transaction object
+      'user-created',
+      'User',
+      user.properties.uuid,
+      user.properties.email,
+      'New user created'
+    );
+
+    // All operations succeed together or fail together
+    return user;
+  });
+
+  return result;
+`
+```
+
+**Key Points:**
+- Use `session.executeWrite()` for write operations
+- Use `session.executeRead()` for read-only operations
+- Pass the transaction object (`tx`) to any helper functions that run queries
+- Never use `session.run()` inside a transaction - always use `tx.run()`
+- Transactions ensure atomicity - if any operation fails, all changes are rolled back
+- Common use cases: Creating related entities, updating multiple records, preventing race conditions
+
 ### Background Worker Functions
 Worker functions are special Function vertices that run continuously in the background. They are useful for processing queues, scheduled tasks, and long-running operations.
 

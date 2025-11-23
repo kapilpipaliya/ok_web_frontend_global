@@ -1,6 +1,9 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { getSetting as getSettingFunc, saveSetting as saveSettingFunc } from "~/lib/api/server/settings/settingsFunctions";
+import {
+  getSetting as getSettingFunc,
+  saveSetting as saveSettingFunc,
+} from "~/lib/api/server/settings/settingsFunctions";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 

@@ -57,7 +57,9 @@ function maskSecretFields(vertex: Vertex): Vertex {
  * @param data - Settings data to process
  * @returns Processed data with encrypted secrets
  */
-function encryptSecretFields(data: Record<string, unknown>): Record<string, unknown> {
+function encryptSecretFields(
+  data: Record<string, unknown>,
+): Record<string, unknown> {
   const processed: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(data)) {
@@ -117,7 +119,9 @@ export async function getSetting(
     );
 
     // Mask secret fields in the result
-    const maskedSettings = settings.map((setting: Vertex) => maskSecretFields(setting));
+    const maskedSettings = settings.map((setting: Vertex) =>
+      maskSecretFields(setting),
+    );
 
     // Mask secret fields in the graph nodes
     const maskedNodes: { [key: string]: Vertex } = {};
@@ -283,7 +287,10 @@ export async function deleteSetting(
     }
 
     return {
-      result: { success: true, message: `${type} settings deleted successfully` },
+      result: {
+        success: true,
+        message: `${type} settings deleted successfully`,
+      },
     };
   } catch (error) {
     return handleAPIError(error);

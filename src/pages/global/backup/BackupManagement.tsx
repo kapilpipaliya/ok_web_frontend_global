@@ -599,7 +599,9 @@ export function BackupManagement() {
 
       if (result.success) {
         if (uploadShouldRestore()) {
-          showSuccessToast(`Backup uploaded and restored successfully to ${targetDb}`);
+          showSuccessToast(
+            `Backup uploaded and restored successfully to ${targetDb}`,
+          );
         } else {
           showSuccessToast("Backup uploaded successfully");
         }
@@ -3722,7 +3724,9 @@ export function BackupManagement() {
   color: \${args.theme.var.color.text};
   cursor: pointer;
 }\`;`}
-                      onClick={() => setUploadShouldRestore(!uploadShouldRestore())}
+                      onClick={() =>
+                        setUploadShouldRestore(!uploadShouldRestore())
+                      }
                     >
                       Restore to database immediately without upload
                     </As>
@@ -3851,7 +3855,9 @@ export function BackupManagement() {
                   <As
                     as="button"
                     onClick={handleUploadBackup}
-                    disabled={!uploadFile() || !uploadTargetDb() || isUploading()}
+                    disabled={
+                      !uploadFile() || !uploadTargetDb() || isUploading()
+                    }
                     css={`return \`._id {
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;

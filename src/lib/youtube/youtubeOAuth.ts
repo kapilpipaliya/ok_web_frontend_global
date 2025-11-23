@@ -10,13 +10,20 @@
  * - Ownership relationships: User -[UserYouTubeOwnership]-> YouTubeOwnership -[YouTubeOwnershipToken]-> YouTubeToken
  */
 
-import {google} from "googleapis";
-import type {Session} from "neo4j-driver";
+import { google } from "googleapis";
+import type { Session } from "neo4j-driver";
 import neo4j from "neo4j-driver";
-import {decryptClientSecret, decryptToken, encryptToken,} from "~/lib/auth/tokenEncryption";
-import {randomUUID} from "crypto";
-import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
-import {logSharedAPIUsage, YOUTUBE_API_COSTS,} from "~/lib/youtube/apiUsageTracking";
+import {
+  decryptClientSecret,
+  decryptToken,
+  encryptToken,
+} from "~/lib/auth/tokenEncryption";
+import { randomUUID } from "crypto";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import {
+  logSharedAPIUsage,
+  YOUTUBE_API_COSTS,
+} from "~/lib/youtube/apiUsageTracking";
 
 const YOUTUBE_SCOPES = [
   "https://www.googleapis.com/auth/youtube.readonly", // readonly YouTube access
@@ -77,7 +84,7 @@ async function getOAuthConfig(
  */
 export function getRedirectUriFromRequest(
   request?: Request,
-  callbackPath: string = "/api/auth/youtube/callback"
+  callbackPath: string = "/api/auth/youtube/callback",
 ): string {
   // If no request provided (background workers), use environment or default
   if (!request) {
@@ -156,13 +163,19 @@ export async function handleYouTubeCallback(
   },
   session: Session,
   request: Request,
-): Promise<{ success: boolean; error?: string; ownership?: {
-   id: string;
-   channelName: string;
-   customName: string;
-   channelId: string;
-   isPrimary:boolean;
-  }; isUpdate?: boolean; wasRevoked?: boolean }> {
+): Promise<{
+  success: boolean;
+  error?: string;
+  ownership?: {
+    id: string;
+    channelName: string;
+    customName: string;
+    channelId: string;
+    isPrimary: boolean;
+  };
+  isUpdate?: boolean;
+  wasRevoked?: boolean;
+}> {
   try {
     const { userId, ownershipId, customName } = stateData;
 
@@ -280,7 +293,9 @@ export async function handleYouTubeCallback(
             customName: customName || null,
             accessToken: encryptedAccessToken,
             refreshToken: encryptedRefreshToken,
-            expiresAt: neo4j.int(tokens.expiry_date || Date.now() + 3600 * 1000),
+            expiresAt: neo4j.int(
+              tokens.expiry_date || Date.now() + 3600 * 1000,
+            ),
             scope: YOUTUBE_SCOPES.join(" "),
           },
         );
@@ -339,7 +354,9 @@ export async function handleYouTubeCallback(
             isPrimary,
             accessToken: encryptedAccessToken,
             refreshToken: encryptedRefreshToken,
-            expiresAt: neo4j.int(tokens.expiry_date || Date.now() + 3600 * 1000),
+            expiresAt: neo4j.int(
+              tokens.expiry_date || Date.now() + 3600 * 1000,
+            ),
             scope: YOUTUBE_SCOPES.join(" "),
           },
         );

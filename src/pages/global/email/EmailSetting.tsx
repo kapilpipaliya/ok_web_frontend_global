@@ -451,7 +451,8 @@ export function EmailSetting() {
                             );
                           } else {
                             showSuccessToast(
-                              response.message || "Email settings updated successfully",
+                              response.message ||
+                                "Email settings updated successfully",
                             );
                           }
                         } finally {

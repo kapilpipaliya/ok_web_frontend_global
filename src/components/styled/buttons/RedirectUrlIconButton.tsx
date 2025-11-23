@@ -10,7 +10,8 @@ export const RedirectUrlIconButton = () => {
   const [graph] = useGraph();
   const navigate = useNavigate();
 
-  const redirectUrl = () => getGlobalSettingVertex(graph)?.P.redirectUrlAfterSignin;
+  const redirectUrl = () =>
+    getGlobalSettingVertex(graph)?.P.redirectUrlAfterSignin;
 
   return (
     <Show when={redirectUrl()}>
