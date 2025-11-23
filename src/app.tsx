@@ -16,6 +16,7 @@ import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
 import { toastValue } from "./toastValue";
 import { GraphContext } from "~/lib/graph/context/GraphContext";
 import { GetInitialData } from "./GetInitialData";
+import { HydrationLoader } from "./components/HydrationLoader";
 
 // Create a generic error fallback component
 const ErrorFallback = (props: {
@@ -36,6 +37,7 @@ const ErrorFallback = (props: {
 export default function App() {
   const graph = createAppState();
   const [isHydrated, setIsHydrated] = createSignal(false);
+  const [showLoader, setShowLoader] = createSignal(true);
   const Toaster = clientOnly(() => import("./Toaster"));
 
   // Set up global error handlers on client-side only
@@ -46,6 +48,8 @@ export default function App() {
       setTimeout(() => {
         setIsHydrated(true);
       }, 3000);
+      // Hide loader after hydration
+      setShowLoader(false);
     }
   });
 
@@ -123,6 +127,7 @@ export default function App() {
                     <Toaster />
                     {/* </Show> */}
                   </Show>
+                  <HydrationLoader show={showLoader()} />
                 </ErrorBoundary>
               </MetaProvider>
             );
