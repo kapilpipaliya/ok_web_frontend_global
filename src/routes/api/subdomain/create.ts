@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import type { Session, Transaction } from "neo4j-driver";
+import type {ManagedTransaction, Transaction} from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
@@ -91,24 +91,33 @@ export async function POST({ request }: APIEvent) {
       throw new APIError(databaseNameError, 400);
     }
 
-    await validateKeyAndDomain(dbSession, key, domain);
     const databases = await getAllDatabases();
     if (databases.includes(key)) {
       throw new APIError("Subdomain with this key already exists", 400);
     }
-    const newSubdomain = await createSubdomain(
-      dbSession,
-      key,
-      domain,
-      description,
-    );
 
-    // Create AccountSubdomain relationship
-    await createAccountSubdomainRelation(
-      dbSession,
-      account.id,
-      newSubdomain.id,
-    );
+    // Use write transaction for atomicity - prevents race conditions
+    const newSubdomain = await dbSession.executeWrite(async (tx) => {
+      // Validate within transaction to prevent race conditions
+      await validateKeyAndDomain(tx, key, domain);
+
+      // Create subdomain
+      const subdomain = await createSubdomain(
+        tx,
+        key,
+        domain,
+        description,
+      );
+
+      // Create AccountSubdomain relationship in same transaction
+      await createAccountSubdomainRelation(
+        tx,
+        account.id,
+        subdomain.id,
+      );
+
+      return subdomain;
+    });
 
     await createActivityLog(
       dbSession,
@@ -210,31 +219,46 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-async function createAccountSubdomainRelation(
-  dbSession: Session,
-  accountId: string,
-  subdomainId: string,
+async function validateKeyAndDomain(
+  tx: Transaction | ManagedTransaction,
+  key: string,
+  domain: string,
 ) {
-  await dbSession.run(
-    `
-    MATCH (a:Account), (s:SubDomain)
-    WHERE elementId(a) = $accountId AND elementId(s) = $subdomainId
-    CREATE (a)-[:AccountSubdomain]->(s)
-  `,
-    {
-      accountId,
-      subdomainId,
-    },
+  // Check if subdomain key is reserved
+  const lowerKey = key.toLowerCase();
+  if (RESERVED_SUBDOMAINS.has(lowerKey)) {
+    throw new APIError(
+      `'${key}' is a reserved subdomain key and cannot be used`,
+      400,
+    );
+  }
+
+  const existingKey = await tx.run(
+    "MATCH (s:SubDomain {key: $key}) RETURN s",
+    { key },
   );
+  if (existingKey.records.length > 0) {
+    throw new APIError("Subdomain with this key already exists", 400);
+  }
+
+  if (domain) {
+    const existingDomain = await tx.run(
+      "MATCH (s:SubDomain {domain: $domain}) RETURN s",
+      { domain },
+    );
+    if (existingDomain.records.length > 0) {
+      throw new APIError("Domain name is already taken", 400);
+    }
+  }
 }
 
 async function createSubdomain(
-  dbSession: Session,
+  tx: Transaction | ManagedTransaction,
   key: string,
   domain?: string,
   description?: string,
 ) {
-  const result = await dbSession.run(
+  const result = await tx.run(
     `CREATE (s:SubDomain {
       key: $key,
       domain: $domain,
@@ -252,37 +276,22 @@ async function createSubdomain(
   return convertNodeToJson(result.records[0]?.get("s"));
 }
 
-async function validateKeyAndDomain(
-  dbSession: Session,
-  key: string,
-  domain: string,
+async function createAccountSubdomainRelation(
+  tx: Transaction | ManagedTransaction,
+  accountId: string,
+  subdomainId: string,
 ) {
-  // Check if subdomain key is reserved
-  const lowerKey = key.toLowerCase();
-  if (RESERVED_SUBDOMAINS.has(lowerKey)) {
-    throw new APIError(
-      `'${key}' is a reserved subdomain key and cannot be used`,
-      400,
-    );
-  }
-
-  const existingKey = await dbSession.run(
-    "MATCH (s:SubDomain {key: $key}) RETURN s",
-    { key },
+  await tx.run(
+    `
+    MATCH (a:Account), (s:SubDomain)
+    WHERE elementId(a) = $accountId AND elementId(s) = $subdomainId
+    CREATE (a)-[:AccountSubdomain]->(s)
+  `,
+    {
+      accountId,
+      subdomainId,
+    },
   );
-  if (existingKey.records.length > 0) {
-    throw new APIError("Subdomain with this key already exists", 400);
-  }
-
-  if (domain) {
-    const existingDomain = await dbSession.run(
-      "MATCH (s:SubDomain {domain: $domain}) RETURN s",
-      { domain },
-    );
-    if (existingDomain.records.length > 0) {
-      throw new APIError("Domain name is already taken", 400);
-    }
-  }
 }
 
 async function runSeedFunction(

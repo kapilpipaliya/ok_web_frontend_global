@@ -11,7 +11,6 @@ import { decryptClientSecret } from "~/lib/auth/tokenEncryption";
 import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
-import {isMaskedValue} from "~/lib/api/server/settings/settingsFunctions";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -53,7 +52,7 @@ export async function GET({ request }: APIEvent) {
 
     // Decrypt the client secret
     let clientSecret = "";
-    if (oauthSetting.googleClientSecret && isMaskedValue(oauthSetting.googleClientSecret)) {
+    if (oauthSetting.googleClientSecret) {
       try {
         clientSecret = decryptClientSecret(
           oauthSetting.googleClientSecret,
@@ -101,117 +100,122 @@ export async function GET({ request }: APIEvent) {
       throw new APIError("Unable to retrieve email from Google", 400);
     }
 
-    // Check if user exists with this email
-    const userResult = await dbSession.run(
-      "MATCH (u:User) WHERE u.email = $email RETURN u",
-      { email: googleUser.email.toLowerCase() },
-    );
+    // Use write transaction for atomicity - prevents race conditions
+    const user = await dbSession.executeWrite(async (tx) => {
+      // Check if user exists with this email
+      const userResult = await tx.run(
+        "MATCH (u:User) WHERE u.email = $email RETURN u",
+        { email: googleUser.email!.toLowerCase() },
+      );
 
-    let user;
+      let user;
 
-    if (userResult.records.length > 0) {
-      // User exists, update with Google data
-      user = convertNodeToJson(userResult.records[0].get("u"));
+      if (userResult.records.length > 0) {
+        // User exists, update with Google data
+        user = convertNodeToJson(userResult.records[0].get("u"));
 
-      // Check if the user's account is pending deletion
-      if (user.P.pendingDeletion === true) {
-        throw new APIError(
-          "This account is scheduled for deletion and cannot be accessed. Please contact support if this is a mistake.",
-          403,
+        // Check if the user's account is pending deletion
+        if (user.P.pendingDeletion === true) {
+          throw new APIError(
+            "This account is scheduled for deletion and cannot be accessed. Please contact support if this is a mistake.",
+            403,
+          );
+        }
+
+        // Update user with Google information
+        await tx.run(
+          `MATCH (u:User {uuid: $uuid})
+           SET u.googleId = $googleId,
+               u.googleEmail = $googleEmail,
+               u.googleProfilePicture = $googleProfilePicture,
+               u.authProvider = CASE
+                 WHEN u.password IS NOT NULL THEN 'both'
+                 ELSE 'google'
+               END,
+               u.emailConfirmed = true
+           RETURN u`,
+          {
+            googleEmail: googleUser.email,
+            googleId: googleUser.id,
+            googleProfilePicture: googleUser.picture || "",
+            uuid: user.P.uuid,
+          },
+        );
+
+        // Refresh user data
+        const updatedUserResult = await tx.run(
+          "MATCH (u:User {uuid: $uuid}) RETURN u",
+          { uuid: user.P.uuid },
+        );
+        user = convertNodeToJson(updatedUserResult.records[0].get("u"));
+
+        await createActivityLog(
+          dbSession,
+          "google-signin",
+          "User",
+          user.P.uuid,
+          user.P.email,
+          "User logged in with Google",
+        );
+      } else {
+        // Create new user with Google data
+        const uuid = uuidv7();
+        const baseUsername = googleUser.email!.split("@")[0];
+
+        // Check if username is already taken
+        const usernameCheckResult = await tx.run(
+          "MATCH (u:User) WHERE u.username = $username RETURN u",
+          { username: baseUsername },
+        );
+
+        const username =
+          usernameCheckResult.records.length > 0
+            ? `${baseUsername}_${uuidv7().slice(0, 8)}`
+            : baseUsername;
+
+        await tx.run(
+          `CREATE (u:User {
+            uuid: $uuid,
+            email: $email,
+            username: $username,
+            name: $name,
+            googleId: $googleId,
+            googleEmail: $googleEmail,
+            googleProfilePicture: $googleProfilePicture,
+            authProvider: 'google',
+            emailConfirmed: true,
+            createdAt: datetime()
+          })
+          RETURN u`,
+          {
+            email: googleUser.email!.toLowerCase(),
+            googleEmail: googleUser.email,
+            googleId: googleUser.id,
+            googleProfilePicture: googleUser.picture || "",
+            name: googleUser.name || "",
+            username,
+            uuid,
+          },
+        );
+
+        const newUserResult = await tx.run(
+          "MATCH (u:User {uuid: $uuid}) RETURN u",
+          { uuid },
+        );
+        user = convertNodeToJson(newUserResult.records[0].get("u"));
+
+        await createActivityLog(
+          dbSession,
+          "google-signup",
+          "User",
+          user.P.uuid,
+          user.P.email,
+          "User signed up with Google",
         );
       }
 
-      // Update user with Google information
-      await dbSession.run(
-        `MATCH (u:User {uuid: $uuid})
-         SET u.googleId = $googleId,
-             u.googleEmail = $googleEmail,
-             u.googleProfilePicture = $googleProfilePicture,
-             u.authProvider = CASE
-               WHEN u.password IS NOT NULL THEN 'both'
-               ELSE 'google'
-             END,
-             u.emailConfirmed = true
-         RETURN u`,
-        {
-          googleEmail: googleUser.email,
-          googleId: googleUser.id,
-          googleProfilePicture: googleUser.picture || "",
-          uuid: user.P.uuid,
-        },
-      );
-
-      // Refresh user data
-      const updatedUserResult = await dbSession.run(
-        "MATCH (u:User {uuid: $uuid}) RETURN u",
-        { uuid: user.P.uuid },
-      );
-      user = convertNodeToJson(updatedUserResult.records[0].get("u"));
-
-      await createActivityLog(
-        dbSession,
-        "google-signin",
-        "User",
-        user.P.uuid,
-        user.P.email,
-        "User logged in with Google",
-      );
-    } else {
-      // Create new user with Google data
-      const uuid = uuidv7();
-      const baseUsername = googleUser.email.split("@")[0];
-
-      // Check if username is already taken
-      const usernameCheckResult = await dbSession.run(
-        "MATCH (u:User) WHERE u.username = $username RETURN u",
-        { username: baseUsername },
-      );
-
-      const username =
-        usernameCheckResult.records.length > 0
-          ? `${baseUsername}_${uuidv7().slice(0, 8)}`
-          : baseUsername;
-
-      await dbSession.run(
-        `CREATE (u:User {
-          uuid: $uuid,
-          email: $email,
-          username: $username,
-          name: $name,
-          googleId: $googleId,
-          googleEmail: $googleEmail,
-          googleProfilePicture: $googleProfilePicture,
-          authProvider: 'google',
-          emailConfirmed: true,
-          createdAt: datetime()
-        })
-        RETURN u`,
-        {
-          email: googleUser.email.toLowerCase(),
-          googleEmail: googleUser.email,
-          googleId: googleUser.id,
-          googleProfilePicture: googleUser.picture || "",
-          name: googleUser.name || "",
-          username,
-          uuid,
-        },
-      );
-
-      const newUserResult = await dbSession.run(
-        "MATCH (u:User {uuid: $uuid}) RETURN u",
-        { uuid },
-      );
-      user = convertNodeToJson(newUserResult.records[0].get("u"));
-
-      await createActivityLog(
-        dbSession,
-        "google-signup",
-        "User",
-        user.P.uuid,
-        user.P.email,
-        "User signed up with Google",
-      );
-    }
+      return user;
+    });
 
     // Create session
     await updateSession(user);

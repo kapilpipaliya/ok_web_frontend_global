@@ -3,6 +3,7 @@ import type { RouteSectionProps } from "@solidjs/router";
 import { Link } from "@solidjs/meta";
 
 import { HomeIconButton } from "~/components/styled/buttons/HomeIconButton";
+import { RedirectUrlIconButton } from "~/components/styled/buttons/RedirectUrlIconButton";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
@@ -21,6 +22,7 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <HomeIconButton />
+          <RedirectUrlIconButton />
           <As
             as="div"
             css={`return \`._id {

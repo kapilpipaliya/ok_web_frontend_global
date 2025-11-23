@@ -16,44 +16,47 @@ export async function setImpersonation(
   adminUser: Vertex,
   targetUserUuid: string,
 ) {
-  // Verify admin role
-  const adminCheck = await session.run(
-    `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
-     RETURN u`,
-    { userId: adminUser.P.uuid },
-  );
+  // Use write transaction for atomicity - prevents race conditions
+  return await session.executeWrite(async (tx) => {
+    // Verify admin role
+    const adminCheck = await tx.run(
+      `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
+       RETURN u`,
+      { userId: adminUser.P.uuid },
+    );
 
-  if (adminCheck.records.length === 0) {
-    throw new Error("Only admins can impersonate users");
-  }
+    if (adminCheck.records.length === 0) {
+      throw new Error("Only admins can impersonate users");
+    }
 
-  // Verify target user exists
-  const targetResult = await session.run(
-    "MATCH (u:User {uuid: $uuid}) RETURN u",
-    { uuid: targetUserUuid },
-  );
+    // Verify target user exists
+    const targetResult = await tx.run(
+      "MATCH (u:User {uuid: $uuid}) RETURN u",
+      { uuid: targetUserUuid },
+    );
 
-  if (targetResult.records.length === 0) {
-    throw new Error("Target user not found");
-  }
+    if (targetResult.records.length === 0) {
+      throw new Error("Target user not found");
+    }
 
-  const targetUser = convertNodeToJson(targetResult.records[0].get("u"));
+    const targetUser = convertNodeToJson(targetResult.records[0].get("u"));
 
-  // Create audit log
-  await session.run(
-    `MATCH (admin:User {uuid: $adminId})
-     MATCH (target:User {uuid: $targetUserUuid})
-     CREATE (admin)-[:AuditLog]->(log:AuditLog {
-       key: "audit_" + toString(datetime()) + "_" + randomUUID(),
-       action: "impersonate",
-       timestamp: datetime(),
-       details: "Admin started impersonating user"
-     })-[:AuditLogTarget]->(target)`,
-    { adminId: adminUser.P.uuid, targetUserUuid },
-  );
+    // Create audit log
+    await tx.run(
+      `MATCH (admin:User {uuid: $adminId})
+       MATCH (target:User {uuid: $targetUserUuid})
+       CREATE (admin)-[:AuditLog]->(log:AuditLog {
+         key: "audit_" + toString(datetime()) + "_" + randomUUID(),
+         action: "impersonate",
+         timestamp: datetime(),
+         details: "Admin started impersonating user"
+       })-[:AuditLogTarget]->(target)`,
+      { adminId: adminUser.P.uuid, targetUserUuid },
+    );
 
-  return {
-    impersonatedUserUuid: targetUserUuid,
-    impersonatedUser: targetUser,
-  };
+    return {
+      impersonatedUserUuid: targetUserUuid,
+      impersonatedUser: targetUser,
+    };
+  });
 }

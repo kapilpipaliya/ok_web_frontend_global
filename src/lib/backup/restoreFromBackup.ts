@@ -218,6 +218,13 @@ export async function restoreFromBackup(
     const importFilename = path.basename(decompressedPath);
     const importPath = path.join(neo4jImportDir, importFilename);
 
+    // Verify Neo4j import directory exists
+    if (!fs.existsSync(neo4jImportDir)) {
+      throw new Error(
+        `Neo4j import directory does not exist: ${neo4jImportDir}. Please set NEO4J_IMPORT_DIR environment variable correctly.`,
+      );
+    }
+
     console.log(`[Restore] Copying backup to Neo4j import directory: ${importPath}`);
     fs.copyFileSync(decompressedPath, importPath);
 

@@ -44,56 +44,61 @@ try {
     throw new Error("Invalid payment signature. Payment verification failed.");
   }
 
-  // Find the pending subscription
-  const subscriptionResult = await args.session.run(
-    `MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription {razorpayOrderId: $orderId, status: 'pending'})
-     RETURN s`,
-    {
-      userId: user.P.uuid,
-      orderId: orderId
+  // Use write transaction for atomicity - prevents partial payment activation
+  const subscriptionVertex = await args.session.executeWrite(async (tx) => {
+    // Find the pending subscription
+    const subscriptionResult = await tx.run(
+      `MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription {razorpayOrderId: $orderId, status: 'pending'})
+       RETURN s`,
+      {
+        userId: user.P.uuid,
+        orderId: orderId
+      }
+    );
+
+    if (subscriptionResult.records.length === 0) {
+      throw new Error("No pending subscription found for this order");
     }
-  );
 
-  if (subscriptionResult.records.length === 0) {
-    throw new Error("No pending subscription found for this order");
-  }
+    const subscriptionNode = subscriptionResult.records[0].get("s");
+    const subscription = args.convertNodeToJson(subscriptionNode);
 
-  const subscriptionNode = subscriptionResult.records[0].get("s");
-  const subscriptionVertex = args.convertNodeToJson(subscriptionNode);
+    // Update subscription status to active
+    const updateSubscriptionQuery = `
+      MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription {razorpayOrderId: $orderId})
+      SET s.razorpayPaymentId = $paymentId,
+          s.razorpaySignature = $signature,
+          s.status = 'active',
+          s.updatedAt = datetime()
+      RETURN s
+    `;
 
-  // Update subscription status to active
-  const updateSubscriptionQuery = `
-    MATCH (u:User {uuid: $userId})-[:UserSubscription]->(s:UserSubscription {razorpayOrderId: $orderId})
-    SET s.razorpayPaymentId = $paymentId,
-        s.razorpaySignature = $signature,
-        s.status = 'active',
-        s.updatedAt = datetime()
-    RETURN s
-  `;
+    await tx.run(updateSubscriptionQuery, {
+      userId: user.P.uuid,
+      orderId: orderId,
+      paymentId: paymentId,
+      signature: signature
+    });
 
-  await args.session.run(updateSubscriptionQuery, {
-    userId: user.P.uuid,
-    orderId: orderId,
-    paymentId: paymentId,
-    signature: signature
-  });
+    // Update user's current plan and quota
+    const updateUserQuery = `
+      MATCH (u:User {uuid: $userId})
+      SET u.currentPlan = $plan,
+          u.videoQuotaLimit = $videoQuota,
+          u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0),
+          u.subscriptionStatus = 'active',
+          u.subscriptionExpiryDate = datetime($expiryDate)
+      RETURN u
+    `;
 
-  // Update user's current plan and quota
-  const updateUserQuery = `
-    MATCH (u:User {uuid: $userId})
-    SET u.currentPlan = $plan,
-        u.videoQuotaLimit = $videoQuota,
-        u.videoQuotaUsed = COALESCE(u.videoQuotaUsed, 0),
-        u.subscriptionStatus = 'active',
-        u.subscriptionExpiryDate = datetime($expiryDate)
-    RETURN u
-  `;
+    await tx.run(updateUserQuery, {
+      userId: user.P.uuid,
+      plan: subscription.P.plan,
+      videoQuota: subscription.P.videoQuota,
+      expiryDate: subscription.P.expiryDate
+    });
 
-  await args.session.run(updateUserQuery, {
-    userId: user.P.uuid,
-    plan: subscriptionVertex.P.plan,
-    videoQuota: subscriptionVertex.P.videoQuota,
-    expiryDate: subscriptionVertex.P.expiryDate
+    return subscription;
   });
 
   return {

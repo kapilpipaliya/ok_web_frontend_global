@@ -57,14 +57,35 @@ export async function GET({ request }: APIEvent) {
       );
 
       try {
-        // Update in system DB
-        const systemResult = await dbSession.run(
-          `MATCH (u:User {uuid: $uuid, email: $email})
-           SET u.emailConfirmed = true,
-               u.updatedAt = datetime()
-           RETURN u`,
-          { email, uuid },
-        );
+        // Use write transaction for atomicity in system DB
+        const systemResult = await dbSession.executeWrite(async (tx) => {
+          // Update in system DB
+          const result = await tx.run(
+            `MATCH (u:User {uuid: $uuid, email: $email})
+             SET u.emailConfirmed = true,
+                 u.updatedAt = datetime()
+             RETURN u`,
+            { email, uuid },
+          );
+
+          if (result.records.length === 0) {
+            throw new APIError("User not found", 404);
+          }
+
+          const user = convertNodeToJson(result.records[0].get("u"));
+
+          // Log the email verification
+          await createActivityLog(
+            tx,
+            "email_verification",
+            "User",
+            user.P.uuid,
+            user.P.email,
+            `Email ${user.P.email} verified successfully`,
+          );
+
+          return result;
+        });
 
         if (systemResult.records.length === 0) {
           return new Response(null, {
@@ -75,7 +96,7 @@ export async function GET({ request }: APIEvent) {
           });
         }
 
-        // Update in all subdomains
+        // Update in all subdomains (these are separate databases, can't be in same transaction)
         const updatePromises = updateSessions.map((session) =>
           session.run(
             `MATCH (u:User {uuid: $uuid})
@@ -90,16 +111,6 @@ export async function GET({ request }: APIEvent) {
 
         const updatedUser = convertNodeToJson(systemResult.records[0].get("u"));
 
-        // Log the email verification
-        await createActivityLog(
-          dbSession,
-          "email_verification",
-          "User",
-          updatedUser.P.uuid,
-          updatedUser.P.email,
-          `Email ${updatedUser.P.email} verified successfully`,
-        );
-
         return new Response(null, {
           headers: {
             Location: `${API.urls.admin.signIn}?message=${encodeURIComponent("Email verified successfully! You can now sign in.")}&type=success`,
@@ -110,14 +121,34 @@ export async function GET({ request }: APIEvent) {
         await Promise.all(updateSessions.map((session) => session.close()));
       }
     } else {
-      // Handle regular subdomain case
-      const result = await dbSession.run(
-        `MATCH (u:User {uuid: $uuid, email: $email})
-         SET u.emailConfirmed = true,
-             u.updatedAt = datetime()
-         RETURN u`,
-        { email, uuid },
-      );
+      // Handle regular subdomain case - use write transaction for atomicity
+      const result = await dbSession.executeWrite(async (tx) => {
+        const updateResult = await tx.run(
+          `MATCH (u:User {uuid: $uuid, email: $email})
+           SET u.emailConfirmed = true,
+               u.updatedAt = datetime()
+           RETURN u`,
+          { email, uuid },
+        );
+
+        if (updateResult.records.length === 0) {
+          throw new APIError("User not found", 404);
+        }
+
+        const user = convertNodeToJson(updateResult.records[0].get("u"));
+
+        // Log the email verification
+        await createActivityLog(
+          tx,
+          "email_verification",
+          "User",
+          user.P.uuid,
+          user.P.email,
+          `Email ${user.P.email} verified successfully`,
+        );
+
+        return updateResult;
+      });
 
       if (result.records.length === 0) {
         return new Response(null, {
@@ -129,16 +160,6 @@ export async function GET({ request }: APIEvent) {
       }
 
       const updatedUser = convertNodeToJson(result.records[0].get("u"));
-
-      // Log the email verification
-      await createActivityLog(
-        dbSession,
-        "email_verification",
-        "User",
-        updatedUser.P.uuid,
-        updatedUser.P.email,
-        `Email ${updatedUser.P.email} verified successfully`,
-      );
 
       return new Response(null, {
         headers: {

@@ -574,3 +574,71 @@ https://www.ssllabs.com/ssltest/analyze.html
 https://capacitorjs.com/docs/apis/cookies
 Capacitor.isNativePlatform()
 
+
+ Creating YouTube Shorts with Canva
+
+  1. Open Canva and search for "YouTube Shorts" template (or use custom dimensions: 1080 x 1920 pixels - vertical format)
+  2. Design Your Short:
+    - Use eye-catching visuals and bold text
+    - Keep it under 60 seconds (Shorts requirement)
+    - Add animations and transitions for engagement
+    - Use trending music or sounds (from Canva's library)
+  3. Key Design Tips:
+    - Use large, readable fonts
+    - Keep important content in the center (safe zone)
+    - Use bright colors and high contrast
+    - Add captions/subtitles for accessibility
+  4. Export Settings:
+    - File type: MP4 Video
+    - Quality: High (1080p)
+    - Duration: Maximum 60 seconds
+  5. Upload to YouTube:
+    - Use YouTube mobile app or desktop
+    - Add "#Shorts" in title or description
+    - Use vertical format (9:16 aspect ratio)
+    - Add relevant hashtags and thumbnail
+
+⭐ Real things that boost website users
+
+If your goal is more users, focus on:
+
+✓ Fast loading speed (very important)
+
+Use:
+
+Cloudflare CDN
+
+Image compression
+
+Caching
+
+Server optimization
+
+✓ SEO
+
+Proper titles, meta tags
+
+Backlinks
+
+Content quality
+
+✓ UI/UX & branding
+
+Clean design
+
+Trust badges
+
+Smooth onboarding
+
+✓ Performance on mobile
+
+Google ranks based on mobile-first indexing.
+
+✓ Marketing
+
+Social media
+
+Ads
+
+Engagement content
+

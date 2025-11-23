@@ -1,7 +1,7 @@
-import type { Session, Transaction } from "neo4j-driver";
+import type {ManagedTransaction, Session, Transaction} from "neo4j-driver";
 
 export async function createActivityLog(
-  dbSession: Session | Transaction,
+  dbSession: Session | Transaction | ManagedTransaction,
   action: string,
   entityType: string,
   entityId: string,

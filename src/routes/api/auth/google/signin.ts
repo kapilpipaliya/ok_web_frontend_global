@@ -4,7 +4,6 @@ import { google } from "googleapis";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { decryptClientSecret } from "~/lib/auth/tokenEncryption";
-import {isMaskedValue} from "~/lib/api/server/settings/settingsFunctions";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -23,7 +22,7 @@ export async function GET({ request }: APIEvent) {
 
     // Decrypt the client secret
     let clientSecret = "";
-    if (oauthSetting.googleClientSecret && isMaskedValue(oauthSetting.googleClientSecret)) {
+    if (oauthSetting.googleClientSecret) {
       try {
         clientSecret = decryptClientSecret(
           oauthSetting.googleClientSecret,

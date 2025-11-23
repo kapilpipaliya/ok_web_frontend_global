@@ -29,57 +29,60 @@ export async function POST({ request }: APIEvent) {
 
     const { email, name, roles, username } = await request.json();
 
-    // Check if user already exists with email
-    const existingUserEmail = await dbSession.run(
-      "MATCH (u:User {email: $email}) RETURN u",
-      { email },
-    );
-
-    if (existingUserEmail.records.length > 0) {
-      throw new APIError("User with this email already exists", 400);
-    }
-
-    // Check if username already exists
-    const existingUsername = await dbSession.run(
-      "MATCH (u:User {username: $username}) RETURN u",
-      { username },
-    );
-
-    if (existingUsername.records.length > 0) {
-      throw new APIError("Username already taken", 400);
-    }
-
     const newUserUuid = uuidv7();
 
-    // Create new user
-    const result = await dbSession.run(
-      `
-      CREATE (u:User {
-        uuid: $uuid,
-        email: $email,
-        username: $username,
-        name: $name,
-        status: "invited",
-        createdAt: datetime()
-      })
-      WITH u
-      UNWIND $roles as roleId
-      MATCH (r:Role)
-      WHERE elementId(r) = roleId
-      CREATE (u)-[:UserRole]->(r)
-      RETURN u
-    `,
-      {
-        email,
-        name,
-        roles,
-        username,
-        uuid: newUserUuid,
-      },
-    );
+    // Use write transaction for atomicity - prevents race conditions
+    const createdUser = await dbSession.executeWrite(async (tx) => {
+      // Check if user already exists with email
+      const existingUserEmail = await tx.run(
+        "MATCH (u:User {email: $email}) RETURN u",
+        { email },
+      );
 
-    // Extract the created user from the result
-    const createdUser = convertNodeToJson(result.records[0].get("u"));
+      if (existingUserEmail.records.length > 0) {
+        throw new APIError("User with this email already exists", 400);
+      }
+
+      // Check if username already exists
+      const existingUsername = await tx.run(
+        "MATCH (u:User {username: $username}) RETURN u",
+        { username },
+      );
+
+      if (existingUsername.records.length > 0) {
+        throw new APIError("Username already taken", 400);
+      }
+
+      // Create new user
+      const result = await tx.run(
+        `
+        CREATE (u:User {
+          uuid: $uuid,
+          email: $email,
+          username: $username,
+          name: $name,
+          status: "invited",
+          createdAt: datetime()
+        })
+        WITH u
+        UNWIND $roles as roleId
+        MATCH (r:Role)
+        WHERE elementId(r) = roleId
+        CREATE (u)-[:UserRole]->(r)
+        RETURN u
+      `,
+        {
+          email,
+          name,
+          roles,
+          username,
+          uuid: newUserUuid,
+        },
+      );
+
+      // Extract the created user from the result
+      return convertNodeToJson(result.records[0].get("u"));
+    });
 
     // Get role names for logging
     const rolesResult = await dbSession.run(

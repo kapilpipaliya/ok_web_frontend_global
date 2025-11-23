@@ -199,97 +199,121 @@ try {
     }
   }
 
-  // STEP 1: Create or update the main Playlist vertex with basic metadata
-  const playlistKey = `playlist_${playlistId}`;
+  // Use write transaction for atomicity - prevents race conditions
+  const { playlist, playlistSetting } = await args.session.executeWrite(async (tx) => {
+    // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
+    // This check happens within the transaction to ensure no race condition
+    if (!refresh) {
+      const existingPlaylistInTx = await tx.run(`
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
+              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        // WHERE ps.status IN ['queued', 'processing']
+        RETURN p.youtubeId as playlistId, ps.status as status, p.title as title
+      `, { ownershipId, playlistId });
 
-  const mergePlaylistQuery = `
-    MERGE (p:Playlist {youtubeId: $playlistId})
-    ON CREATE SET
-      p.key = $key,
-      p.youtubeId = $playlistId,
-      p.createdAt = datetime()
-    SET
-      p.title = $title,
-      p.description = $description,
-      p.thumbnail = $thumbnail,
-      p.channelTitle = $channelTitle,
-      p.channelId = $channelId,
-      p.privacyStatus = $privacyStatus,
-      p.itemCount = $itemCount,
-      p.originalPlaylistId = $originalPlaylistId,
-      p.publishedAt = datetime($publishedAt),
-      p.updatedAt = datetime()
-    RETURN p
-  `;
+      if (existingPlaylistInTx.records.length > 0) {
+        const record = existingPlaylistInTx.records[0];
+        const status = record.get('status');
+        const title = record.get('title');
 
-  await args.session.run(mergePlaylistQuery, {
-    key: playlistKey,
-    playlistId,
-    title: playlistData.snippet.title,
-    description: playlistData.snippet.description || "",
-    thumbnail: playlistData.snippet.thumbnails?.high?.url ||
-               playlistData.snippet.thumbnails?.medium?.url ||
-               playlistData.snippet.thumbnails?.default?.url || "",
-    channelTitle: playlistData.snippet.channelTitle,
-    channelId: playlistData.snippet.channelId,
-    privacyStatus: playlistData.status?.privacyStatus || "unknown",
-    // videoCount cannot come from playlists because playlists can contain videos from anywhere, deleted videos, private videos etc.. reasons
-    itemCount: playlistData.contentDetails?.itemCount || 0,
-    originalPlaylistId: isSpecialPlaylist ? originalPlaylistId : null,
-    publishedAt: playlistData.snippet.publishedAt
-  });
+        throw new Error(`Playlist "${title}" is already ${status} for this YouTube account.`); //  Please wait for it to complete before adding again.
+      }
+    }
 
-  // STEP 2: Create ownership-specific PlaylistSetting with status tracking
-  const playlistSettingKey = `playlist_setting_${ownershipId}_${playlistId}`;
+    // STEP 1: Create or update the main Playlist vertex with basic metadata
+    const playlistKey = `playlist_${playlistId}`;
 
-  const mergePlaylistSettingQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (p:Playlist {youtubeId: $playlistId})
-    MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-    ON CREATE SET
-      ps.key = $playlistSettingKey,
-      ps.createdAt = datetime()
-    SET
-      ps.customName = $customName,
-      ps.sortBy = 'index',
-      ps.showThumbnails = true,
-      ps.viewMode = 'list',
-      ps.priority = $priority,
-      ps.status = 'queued',
-      ps.progress = 0,
-      ps.totalVideos = 0,
-      ps.processedVideos = 0,
-      ps.error = null,
-      ps.queuedAt = datetime(),
-      ps.lastUpdated = datetime(),
-      ps.updatedAt = datetime()
-    RETURN ps, p
-  `;
-
-  const playlistSettingResult = await args.session.run(mergePlaylistSettingQuery, {
-    ownershipId,
-    playlistId,
-    playlistSettingKey,
-    customName: name || null,
-    priority: playlistPriority
-  });
-
-  // Extract the PlaylistSetting and Playlist vertices from the result
-  const playlistSettingNode = playlistSettingResult.records[0].get('ps');
-  const playlistNode = playlistSettingResult.records[0].get('p');
-  const playlistSetting = args.convertNodeToJson(playlistSettingNode);
-  const playlist = args.convertNodeToJson(playlistNode);
-
-  // If playlist is part of a channel, create the relationship
-  // (Validation already done earlier before any database operations)
-  if (channelId) {
-    const channelPlaylistQuery = `
-      MATCH (c:Channel {youtubeId: $channelId})
-      MATCH (p:Playlist {youtubeId: $playlistId})
-      MERGE (c)-[:ChannelPlaylist]->(p)
+    const mergePlaylistQuery = `
+      MERGE (p:Playlist {youtubeId: $playlistId})
+      ON CREATE SET
+        p.key = $key,
+        p.youtubeId = $playlistId,
+        p.createdAt = datetime()
+      SET
+        p.title = $title,
+        p.description = $description,
+        p.thumbnail = $thumbnail,
+        p.channelTitle = $channelTitle,
+        p.channelId = $channelId,
+        p.privacyStatus = $privacyStatus,
+        p.itemCount = $itemCount,
+        p.originalPlaylistId = $originalPlaylistId,
+        p.publishedAt = datetime($publishedAt),
+        p.updatedAt = datetime()
+      RETURN p
     `;
-    await args.session.run(channelPlaylistQuery, { channelId, playlistId });
-  }
+
+    await tx.run(mergePlaylistQuery, {
+      key: playlistKey,
+      playlistId,
+      title: playlistData.snippet.title,
+      description: playlistData.snippet.description || "",
+      thumbnail: playlistData.snippet.thumbnails?.high?.url ||
+                 playlistData.snippet.thumbnails?.medium?.url ||
+                 playlistData.snippet.thumbnails?.default?.url || "",
+      channelTitle: playlistData.snippet.channelTitle,
+      channelId: playlistData.snippet.channelId,
+      privacyStatus: playlistData.status?.privacyStatus || "unknown",
+      // videoCount cannot come from playlists because playlists can contain videos from anywhere, deleted videos, private videos etc.. reasons
+      itemCount: playlistData.contentDetails?.itemCount || 0,
+      originalPlaylistId: isSpecialPlaylist ? originalPlaylistId : null,
+      publishedAt: playlistData.snippet.publishedAt
+    });
+
+    // STEP 2: Create ownership-specific PlaylistSetting with status tracking
+    const playlistSettingKey = `playlist_setting_${ownershipId}_${playlistId}`;
+
+    const mergePlaylistSettingQuery = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (p:Playlist {youtubeId: $playlistId})
+      MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+      ON CREATE SET
+        ps.key = $playlistSettingKey,
+        ps.createdAt = datetime()
+      SET
+        ps.customName = $customName,
+        ps.sortBy = 'index',
+        ps.showThumbnails = true,
+        ps.viewMode = 'list',
+        ps.priority = $priority,
+        ps.status = 'queued',
+        ps.progress = 0,
+        ps.totalVideos = 0,
+        ps.processedVideos = 0,
+        ps.error = null,
+        ps.queuedAt = datetime(),
+        ps.lastUpdated = datetime(),
+        ps.updatedAt = datetime()
+      RETURN ps, p
+    `;
+
+    const playlistSettingResult = await tx.run(mergePlaylistSettingQuery, {
+      ownershipId,
+      playlistId,
+      playlistSettingKey,
+      customName: name || null,
+      priority: playlistPriority
+    });
+
+    // Extract the PlaylistSetting and Playlist vertices from the result
+    const playlistSettingNode = playlistSettingResult.records[0].get('ps');
+    const playlistNode = playlistSettingResult.records[0].get('p');
+    const playlistSettingVertex = args.convertNodeToJson(playlistSettingNode);
+    const playlistVertex = args.convertNodeToJson(playlistNode);
+
+    // If playlist is part of a channel, create the relationship
+    // (Validation already done earlier before any database operations)
+    if (channelId) {
+      const channelPlaylistQuery = `
+        MATCH (c:Channel {youtubeId: $channelId})
+        MATCH (p:Playlist {youtubeId: $playlistId})
+        MERGE (c)-[:ChannelPlaylist]->(p)
+      `;
+      await tx.run(channelPlaylistQuery, { channelId, playlistId });
+    }
+
+    return { playlist: playlistVertex, playlistSetting: playlistSettingVertex };
+  });
 
   // STEP 3: Add to background processing queue using BullMQ
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });

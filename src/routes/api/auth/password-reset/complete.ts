@@ -18,50 +18,55 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Missing required fields", 400);
     }
 
-    // Check if the user exists, OTP has been verified, and session token matches
-    const userResult = await dbSession.run(
-      `MATCH (u:User {uuid: $userUuid})
-       WHERE u.resetOTPVerified = true
-         AND u.resetSessionToken = $resetSessionToken
-       RETURN u`,
-      { resetSessionToken, userUuid },
-    );
-
-    if (userResult.records.length === 0) {
-      throw new APIError(
-        "User not found, OTP not verified, or invalid session",
-        401,
-      );
-    }
-
-    const user = convertNodeToJson(userResult.records[0].get("u"));
-
     // Hash the new password
     const { hashedPassword, salt } = await hashPassword(newPassword);
 
-    // Update password and clear reset-related fields
-    await dbSession.run(
-      `MATCH (u:User {uuid: $uuid})
-       SET u.password = $hashedPassword,
-           u.salt = $salt,
-           u.resetOTP = null,
-           u.resetOTPExpiry = null,
-           u.resetOTPVerified = null,
-           u.resetSessionToken = null,
-           u.updatedAt = datetime()
-       RETURN u`,
-      { hashedPassword, salt, uuid: user.P.uuid },
-    );
+    // Use write transaction for atomicity - prevents race conditions
+    const user = await dbSession.executeWrite(async (tx) => {
+      // Check if the user exists, OTP has been verified, and session token matches
+      const userResult = await tx.run(
+        `MATCH (u:User {uuid: $userUuid})
+         WHERE u.resetOTPVerified = true
+           AND u.resetSessionToken = $resetSessionToken
+         RETURN u`,
+        { resetSessionToken, userUuid },
+      );
 
-    // Log the password reset
-    await createActivityLog(
-      dbSession,
-      "password_reset_completed",
-      "User",
-      user.P.uuid,
-      user.P.email,
-      "Password was reset successfully",
-    );
+      if (userResult.records.length === 0) {
+        throw new APIError(
+          "User not found, OTP not verified, or invalid session",
+          401,
+        );
+      }
+
+      const userVertex = convertNodeToJson(userResult.records[0].get("u"));
+
+      // Update password and clear reset-related fields
+      await tx.run(
+        `MATCH (u:User {uuid: $uuid})
+         SET u.password = $hashedPassword,
+             u.salt = $salt,
+             u.resetOTP = null,
+             u.resetOTPExpiry = null,
+             u.resetOTPVerified = null,
+             u.resetSessionToken = null,
+             u.updatedAt = datetime()
+         RETURN u`,
+        { hashedPassword, salt, uuid: userVertex.P.uuid },
+      );
+
+      // Log the password reset
+      await createActivityLog(
+        tx,
+        "password_reset_completed",
+        "User",
+        userVertex.P.uuid,
+        userVertex.P.email,
+        "Password was reset successfully",
+      );
+
+      return userVertex;
+    });
 
     // Send notification email
     sendNotificationEmail(

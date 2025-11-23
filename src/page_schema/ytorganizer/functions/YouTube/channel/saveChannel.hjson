@@ -210,80 +210,104 @@ try {
   // Fetch ONLY basic channel metadata using ownership's OAuth
   const channelData = await fetchChannelMetadata(channelInfo, youtube, ownershipId, args.session);
 
-  // STEP 1: Create or update the main Channel vertex with basic metadata
-  const channelKey = `channel_${channelData.id}`;
+  // Use write transaction for atomicity - prevents race conditions
+  await args.session.executeWrite(async (tx) => {
+    // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
+    // This check happens after we know the actual channelId
+    if (!refresh) {
+      const existingChannelInTx = await tx.run(`
+        MATCH (c:Channel {youtubeId: $channelId})
+        WITH c
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
+              -[:ChannelSettingChannel]->(c)
+        // WHERE cs.status IN ['queued', 'processing']
+        RETURN c.youtubeId as channelId, cs.status as status, c.title as title
+      `, { ownershipId, channelId: channelData.id });
 
-  const mergeChannelQuery = `
-    MERGE (c:Channel {youtubeId: $channelId})
-    ON CREATE SET
-      c.key = $key,
-      c.youtubeId = $channelId,
-      c.createdAt = datetime()
-    SET
-      c.title = $title,
-      c.description = $description,
-      c.thumbnail = $thumbnail,
-      c.customUrl = $customUrl,
-      c.country = $country,
-      c.videoCount = $videoCount,
-      c.viewCount = $viewCount,
-      c.subscriberCount = $subscriberCount,
-      c.uploadsPlaylistId = $uploadsPlaylistId,
-      c.publishedAt = datetime($publishedAt),
-      c.updatedAt = datetime()
-    RETURN c
-  `;
+      if (existingChannelInTx.records.length > 0) {
+        const record = existingChannelInTx.records[0];
+        const status = record.get('status');
+        const title = record.get('title');
 
-  await args.session.run(mergeChannelQuery, {
-    key: channelKey,
-    channelId: channelData.id,
-    title: channelData.snippet.title,
-    description: channelData.snippet.description || "",
-    thumbnail: channelData.snippet.thumbnails?.high?.url ||
-               channelData.snippet.thumbnails?.medium?.url ||
-               channelData.snippet.thumbnails?.default?.url || "",
-    customUrl: channelData.snippet.customUrl || "",
-    country: channelData.snippet.country || "",
-    videoCount: parseInt(channelData.statistics?.videoCount || "0"),
-    viewCount: parseInt(channelData.statistics?.viewCount || "0"),
-    subscriberCount: parseInt(channelData.statistics?.subscriberCount || "0"),
-    uploadsPlaylistId: channelData.contentDetails?.relatedPlaylists?.uploads || "",
-    publishedAt: channelData.snippet.publishedAt
-  });
+        throw new Error(`Channel "${title}" is already ${status} for this YouTube account.`); // Please wait for it to complete before adding again.
+      }
+    }
 
-  // STEP 2: Create ownership-specific ChannelSetting with status tracking
-  const channelSettingKey = `channel_setting_${ownershipId}_${channelData.id}`;
+    // STEP 1: Create or update the main Channel vertex with basic metadata
+    const channelKey = `channel_${channelData.id}`;
 
-  const mergeChannelSettingQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (c:Channel {youtubeId: $channelId})
-    MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
-    ON CREATE SET
-      cs.key = $channelSettingKey,
-      cs.createdAt = datetime()
-    SET
-      cs.customName = $customName,
-      cs.notifications = true,
-      cs.autoDownload = false,
-      cs.priority = $priority,
-      cs.status = 'queued',
-      cs.progress = 0,
-      cs.totalPlaylists = 0,
-      cs.processedPlaylists = 0,
-      cs.totalVideos = 0,
-      cs.processedVideos = 0,
-      cs.error = null,
-      cs.queuedAt = datetime(),
-      cs.updatedAt = datetime()
-    RETURN cs
-  `;
+    const mergeChannelQuery = `
+      MERGE (c:Channel {youtubeId: $channelId})
+      ON CREATE SET
+        c.key = $key,
+        c.youtubeId = $channelId,
+        c.createdAt = datetime()
+      SET
+        c.title = $title,
+        c.description = $description,
+        c.thumbnail = $thumbnail,
+        c.customUrl = $customUrl,
+        c.country = $country,
+        c.videoCount = $videoCount,
+        c.viewCount = $viewCount,
+        c.subscriberCount = $subscriberCount,
+        c.uploadsPlaylistId = $uploadsPlaylistId,
+        c.publishedAt = datetime($publishedAt),
+        c.updatedAt = datetime()
+      RETURN c
+    `;
 
-  await args.session.run(mergeChannelSettingQuery, {
-    ownershipId,
-    channelId: channelData.id,
-    channelSettingKey,
-    customName: name || null,
-    priority: channelPriority
+    await tx.run(mergeChannelQuery, {
+      key: channelKey,
+      channelId: channelData.id,
+      title: channelData.snippet.title,
+      description: channelData.snippet.description || "",
+      thumbnail: channelData.snippet.thumbnails?.high?.url ||
+                 channelData.snippet.thumbnails?.medium?.url ||
+                 channelData.snippet.thumbnails?.default?.url || "",
+      customUrl: channelData.snippet.customUrl || "",
+      country: channelData.snippet.country || "",
+      videoCount: parseInt(channelData.statistics?.videoCount || "0"),
+      viewCount: parseInt(channelData.statistics?.viewCount || "0"),
+      subscriberCount: parseInt(channelData.statistics?.subscriberCount || "0"),
+      uploadsPlaylistId: channelData.contentDetails?.relatedPlaylists?.uploads || "",
+      publishedAt: channelData.snippet.publishedAt
+    });
+
+    // STEP 2: Create ownership-specific ChannelSetting with status tracking
+    const channelSettingKey = `channel_setting_${ownershipId}_${channelData.id}`;
+
+    const mergeChannelSettingQuery = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (c:Channel {youtubeId: $channelId})
+      MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
+      ON CREATE SET
+        cs.key = $channelSettingKey,
+        cs.createdAt = datetime()
+      SET
+        cs.customName = $customName,
+        cs.notifications = true,
+        cs.autoDownload = false,
+        cs.priority = $priority,
+        cs.status = 'queued',
+        cs.progress = 0,
+        cs.totalPlaylists = 0,
+        cs.processedPlaylists = 0,
+        cs.totalVideos = 0,
+        cs.processedVideos = 0,
+        cs.error = null,
+        cs.queuedAt = datetime(),
+        cs.updatedAt = datetime()
+      RETURN cs
+    `;
+
+    await tx.run(mergeChannelSettingQuery, {
+      ownershipId,
+      channelId: channelData.id,
+      channelSettingKey,
+      customName: name || null,
+      priority: channelPriority
+    });
   });
 
   // STEP 3: Add to background processing queue using BullMQ

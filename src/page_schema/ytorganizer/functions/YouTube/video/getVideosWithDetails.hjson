@@ -159,8 +159,8 @@ try {
       videoSetting: args.convertNodeToJson(record.get('vs'))
     };
 
-    // Add playlist information if requested
-    if (includePlaylist) {
+    // Add playlist information if requested AND playlistId was provided
+    if (includePlaylist && playlistId) {
       const parentPlaylist = record.get('parentPlaylist');
       const parentPlaylistSetting = record.get('parentPlaylistSetting');
       if (parentPlaylist && parentPlaylistSetting) {
