@@ -42,9 +42,9 @@ export async function GET({ request }: APIEvent) {
       );
     }
 
-    // Get the origin from the request
+    // Get the origin from the request - always use HTTPS
     const url = new URL(request.url);
-    const origin = url.origin;
+    const origin = `https://${url.hostname}`;
     const redirectUri = `${origin}/api/auth/google/callback`;
 
     // Create OAuth2 client

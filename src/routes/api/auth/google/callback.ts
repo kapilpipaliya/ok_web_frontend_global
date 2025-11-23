@@ -72,8 +72,8 @@ export async function GET({ request }: APIEvent) {
       );
     }
 
-    // Get the origin from the request
-    const origin = url.origin;
+    // Get the origin from the request - always use HTTPS
+    const origin = `https://${url.hostname}`;
     const redirectUri = `${origin}/api/auth/google/callback`;
 
     // Create OAuth2 client
@@ -150,7 +150,7 @@ export async function GET({ request }: APIEvent) {
         user = convertNodeToJson(updatedUserResult.records[0].get("u"));
 
         await createActivityLog(
-          dbSession,
+          tx,
           "google-signin",
           "User",
           user.P.uuid,
@@ -205,7 +205,7 @@ export async function GET({ request }: APIEvent) {
         user = convertNodeToJson(newUserResult.records[0].get("u"));
 
         await createActivityLog(
-          dbSession,
+          tx,
           "google-signup",
           "User",
           user.P.uuid,

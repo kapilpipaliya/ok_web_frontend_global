@@ -14,8 +14,8 @@ export function createRedirectResponse(
   redirectUrl: string,
 ): Response {
   // Check if request is from Capacitor mobile app
-  const userAgent = request.headers.get("user-agent") || "";
-  const isCapacitor = userAgent.toLowerCase().includes("capacitor");
+  const requestedWith = request.headers.get("x-requested-with") || "";
+  const isCapacitor = requestedWith.startsWith("com.");
 
   if (isCapacitor) {
     // For Capacitor, return HTML with client-side redirect

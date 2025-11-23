@@ -88,7 +88,7 @@ export function getRedirectUriFromRequest(
 
   const url = new URL(request.url);
 
-  // Use HTTPS by default
+  // Always use HTTPS (Cloudflare proxy forwards as HTTP even when original request is HTTPS)
   // Only use HTTP for plain 'localhost' (without domain)
   const protocol = url.hostname === "localhost" ? url.protocol : "https:";
 
