@@ -1,0 +1,587 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "YTOExtensionPopup",
+        url: "/extension/popup",
+        signinRequired: true,
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+const [isLoading, setIsLoading] = args.createSignal(true);
+const [stats, setStats] = args.createSignal(null);
+const [error, setError] = args.createSignal(null);
+
+// Fetch dashboard stats
+const fetchStats = async () => {
+  try {
+    setIsLoading(true);
+    setError(null);
+
+    const result = await args.executeNamedServerFunction({
+      functionName: 'getUserYTODetails',
+      contextData: {
+        userUuid: args.user?.P?.uuid
+      }
+    });
+
+    if (result.result?.success) {
+      const data = result.result.data;
+      setStats({
+        channels: data.channels?.length || 0,
+        playlists: data.playlists?.length || 0,
+        videos: data.totalVideos || 0
+      });
+    } else {
+      throw new Error(result.result?.message || 'Failed to load stats');
+    }
+  } catch (err) {
+    console.error('Error loading stats:', err);
+    setError(err.message || 'Failed to load dashboard');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Initialize on mount
+const onMount = () => {
+  fetchStats();
+};
+
+return {
+  isLoading,
+  stats,
+  error,
+  fetchStats,
+  onMount
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: args.fns.onMount
+};
+''',
+        css: '''
+return `._id {
+  min-height: 600px;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanyRectangularLogo",
+  alt: "YSaar"
+};
+''',
+        css: '''
+return `._id {
+  height: 32px;
+  width: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => !args.fns.isLoading?.()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOLoadingSpinner",
+        props: '''
+return {
+  size: "medium",
+  color: "primary",
+  text: "Loading..."
+};
+'''
+      }
+    },
+    {
+      id: "error_state",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => !args.fns.error?.()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_message",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const error = args.fns.error?.();
+return {
+  as: "p",
+  text: error || "An error occurred"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  margin: 0 0 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_retry",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOButton",
+        props: '''
+return {
+  text: "Try Again",
+  variant: "primary",
+  onClick: args.fns.fetchStats
+};
+'''
+      }
+    },
+    {
+      id: "main_content",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.isLoading?.() || args.fns.error?.()
+};
+'''
+      }
+    },
+    {
+      id: "greeting",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: `Hello, ${args.user?.P?.username || 'there'}!`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Quick access to your YouTube content"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "stat",
+        loop: true,
+        props: '''
+const stats = args.fns.stats?.() || { channels: 0, playlists: 0, videos: 0 };
+
+return {
+  as: "div",
+  data: [
+    { label: "Channels", count: stats.channels, icon: "mdi:youtube", href: "/content?type=channels" },
+    { label: "Playlists", count: stats.playlists, icon: "mdi:playlist-play", href: "/content?type=playlists" },
+    { label: "Videos", count: stats.videos, icon: "mdi:video-outline" }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: contents;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div",
+  onClick: stat.href ? () => {
+    // Open in new tab
+    window.open(`https://ysaar.com${stat.href}`, '_blank');
+  } : undefined
+};
+''',
+        css: '''
+const stat = args.contextData.stat;
+return `._id {
+  background: ${args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  ${stat.href ? 'cursor: pointer;' : ''}
+  transition: all 0.2s ease;
+}
+
+${stat.href ? `
+  ._id:hover {
+    background: ${args.theme.var.color.background_light_200};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+` : ''}`;
+'''
+      }
+    },
+    {
+      id: "stat_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "icon",
+  icon: stat.icon,
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_count",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div",
+  text: stat.count.toLocaleString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_label",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div",
+  text: stat.label
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}`;
+'''
+      }
+    },
+    {
+      id: "actions",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "open_app_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOButton",
+        props: '''
+return {
+  text: "Open YSaar",
+  variant: "primary",
+  fullWidth: true,
+  onClick: () => {
+    window.open('https://ysaar.com/home', '_blank');
+  }
+};
+'''
+      }
+    },
+    {
+      id: "view_favourites_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOButton",
+        props: '''
+return {
+  text: "View Favourites",
+  variant: "secondary",
+  fullWidth: true,
+  onClick: () => {
+    window.open('https://ysaar.com/content?type=favourites', '_blank');
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Browse YouTube and click the floating button to save content!"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  text-align: center;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "page_root", E: "page_container" },
+    { id: "e2", T: "Attr", S: "page_container", E: "header" },
+    { id: "e3", T: "Attr", S: "header", E: "header_logo" },
+    { id: "e4", T: "Attr", S: "page_container", E: "content" },
+    { id: "e5", T: "Attr", S: "content", E: "loading_state" },
+    { id: "e6", T: "Attr", S: "loading_state", E: "loading_spinner" },
+    { id: "e7", T: "Attr", S: "content", E: "error_state" },
+    { id: "e8", T: "Attr", S: "error_state", E: "error_message" },
+    { id: "e9", T: "Attr", S: "error_state", E: "error_retry" },
+    { id: "e10", T: "Attr", S: "content", E: "main_content" },
+    { id: "e11", T: "Attr", S: "main_content", E: "greeting" },
+    { id: "e12", T: "Attr", S: "main_content", E: "subtitle" },
+    { id: "e13", T: "Attr", S: "main_content", E: "stats_grid" },
+    { id: "e14", T: "Attr", S: "stats_grid", E: "stats_loop" },
+    { id: "e15", T: "Attr", S: "stats_loop", E: "stat_card" },
+    { id: "e16", T: "Attr", S: "stat_card", E: "stat_icon" },
+    { id: "e17", T: "Attr", S: "stat_card", E: "stat_count" },
+    { id: "e18", T: "Attr", S: "stat_card", E: "stat_label" },
+    { id: "e19", T: "Attr", S: "main_content", E: "actions" },
+    { id: "e20", T: "Attr", S: "actions", E: "open_app_button" },
+    { id: "e21", T: "Attr", S: "actions", E: "view_favourites_button" },
+    { id: "e22", T: "Attr", S: "page_container", E: "footer" },
+    { id: "e23", T: "Attr", S: "footer", E: "footer_text" }
+  ]
+}

@@ -1714,6 +1714,566 @@ return `._id {
 '''
       }
     },
+    // Chrome Extension Section
+    {
+      id: "chrome_extension_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.theme.var.color.background};
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 0.45s both;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "NOW AVAILABLE"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+  border: 2px solid ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Chrome Extension - Save from YouTube"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Save YouTube channels and playlists directly from YouTube.com with one click. No need to copy-paste URLs anymore!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 3rem 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_features_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 3rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 968px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:save",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "One-Click Save"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Save channels & playlists without leaving YouTube"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  text-align: center;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:dashboard",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Quick Stats"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "View your saved content stats from the extension popup"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  text-align: center;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:login",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Auto Login"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Uses your existing YSaar login - no separate authentication"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  text-align: center;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_cta",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => {
+    // TODO: Replace with Chrome Web Store URL when published
+    // For now, show installation instructions
+    args.showSuccessToast("Chrome Extension coming soon to Chrome Web Store! Contact support for early access.");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+}
+
+._id:active {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_button_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:google-chrome",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "chrome_extension_button_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Add to Chrome"
+};
+'''
+      }
+    },
+    {
+      id: "chrome_extension_note",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Free extension • Works with your YSaar account"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
     // Mobile Apps Coming Soon Section
     {
       id: "mobile_apps_section",
@@ -2112,19 +2672,44 @@ return `._id {
     { id: "e79", T: "Attr", S: "stats_videos", E: "stats_videos_number" },
     { id: "e80", T: "Attr", S: "stats_videos", E: "stats_videos_label" },
 
+    // Chrome Extension Section
+    { id: "e81", T: "Attr", S: "main_content", E: "chrome_extension_section" },
+    { id: "e82", T: "Attr", S: "chrome_extension_section", E: "chrome_extension_container" },
+    { id: "e83", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_badge" },
+    { id: "e84", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_title" },
+    { id: "e85", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_subtitle" },
+    { id: "e86", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_features_grid" },
+    { id: "e87", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_1" },
+    { id: "e88", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_icon" },
+    { id: "e89", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_text" },
+    { id: "e90", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_desc" },
+    { id: "e91", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_2" },
+    { id: "e92", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_icon" },
+    { id: "e93", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_text" },
+    { id: "e94", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_desc" },
+    { id: "e95", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_3" },
+    { id: "e96", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_icon" },
+    { id: "e97", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_text" },
+    { id: "e98", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_desc" },
+    { id: "e99", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_cta" },
+    { id: "e100", T: "Attr", S: "chrome_extension_cta", E: "chrome_extension_button" },
+    { id: "e101", T: "Attr", S: "chrome_extension_button", E: "chrome_extension_button_icon" },
+    { id: "e102", T: "Attr", S: "chrome_extension_button", E: "chrome_extension_button_text" },
+    { id: "e103", T: "Attr", S: "chrome_extension_cta", E: "chrome_extension_note" },
+
     // Mobile Apps Section
-    { id: "e81", T: "Attr", S: "main_content", E: "mobile_apps_section" },
-    { id: "e82", T: "Attr", S: "mobile_apps_section", E: "mobile_apps_container" },
-    { id: "e83", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_badge" },
-    { id: "e84", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_title" },
-    { id: "e85", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_subtitle" },
-    { id: "e86", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_icons_container" },
-    { id: "e87", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_android_container" },
-    { id: "e88", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_icon" },
-    { id: "e89", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_text" },
-    { id: "e90", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_ios_container" },
-    { id: "e91", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_icon" },
-    { id: "e92", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_text" },
-    { id: "e93", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_notify_text" }
+    { id: "e110", T: "Attr", S: "main_content", E: "mobile_apps_section" },
+    { id: "e111", T: "Attr", S: "mobile_apps_section", E: "mobile_apps_container" },
+    { id: "e112", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_badge" },
+    { id: "e113", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_title" },
+    { id: "e114", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_subtitle" },
+    { id: "e115", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_icons_container" },
+    { id: "e116", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_android_container" },
+    { id: "e117", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_icon" },
+    { id: "e118", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_text" },
+    { id: "e119", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_ios_container" },
+    { id: "e120", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_icon" },
+    { id: "e121", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_text" },
+    { id: "e122", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_notify_text" }
   ]
 }
