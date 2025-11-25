@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import { createAsync } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
@@ -28,6 +28,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
+import { handleGoogleOAuthClick } from "~/pages/auth/functions/handleGoogleOAuthClick";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<
@@ -46,6 +47,7 @@ interface SignupFormFunctionArgumentType extends FunctionArgumentType {
 
 export function SignupForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const graph = useGraph();
 
   // Check if Google OAuth is enabled
@@ -92,9 +94,18 @@ export function SignupForm() {
 
   // Submit handler using our utility
   const handleSubmit = async (formData: Vertex) => {
+    // Build API URL with query parameters
+    const url = new URL(API.auth.signUpUrl, window.location.origin);
+    // Add all current query parameters to the signup URL
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (value) {
+        url.searchParams.append(key, value as string);
+      }
+    });
+
     await submitForm(formData, {
       apiCall: (data) =>
-        postAPI(API.auth.signUpUrl, {
+        postAPI(url.pathname + url.search, {
           email: data.P.email.toLowerCase(),
           password: data.P.password,
           subDomain: data.P.subDomain,
@@ -197,7 +208,7 @@ export function SignupForm() {
 }\`;`,
                 props: () => ({
                   onClick: () => {
-                    window.location.href = "/api/auth/google/signin";
+                    handleGoogleOAuthClick(searchParams);
                   },
                   type: "button",
                 }),
@@ -460,7 +471,9 @@ export function SignupForm() {
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
-                    navigate(API.urls.admin.signIn);
+                    const params = new URLSearchParams(searchParams as Record<string, string>);
+                    const queryString = params.toString();
+                    navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
                   },
                 }),
                 text: "Sign in",

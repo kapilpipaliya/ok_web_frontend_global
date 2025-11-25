@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -66,6 +66,7 @@ interface ForgotPasswordFunctionArgumentType extends FunctionArgumentType {
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { showErrorToast, showSuccessToast } = useToast();
 
   const [showPassword, toggleVisibility] = usePasswordVisibility([
@@ -227,7 +228,9 @@ export function ForgotPasswordForm() {
 
       // Redirect to signIn page after successful reset
       setTimeout(() => {
-        navigate(API.urls.admin.signIn);
+        const params = new URLSearchParams(searchParams as Record<string, string>);
+        const queryString = params.toString();
+        navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
       }, 3000);
 
       return true;
@@ -270,7 +273,9 @@ export function ForgotPasswordForm() {
           createLinkButton(
             () => "Back to Sign In",
             () => {
-              navigate(API.urls.admin.signIn);
+              const params = new URLSearchParams(searchParams as Record<string, string>);
+              const queryString = params.toString();
+              navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
             },
           ),
         ],

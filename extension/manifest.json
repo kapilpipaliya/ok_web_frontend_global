@@ -9,18 +9,20 @@
   ],
   "host_permissions": [
     "https://ysaar.com/*",
+    "http://localhost:3000/*",
+    "https://ytorganizer.localhost.com:3001/*",
     "https://www.youtube.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_icon": {
+    "_default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
-  "icons": {
+  "_icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
@@ -29,7 +31,7 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["content.js"],
+      "js": ["config.js", "content.js"],
       "css": ["content.css"]
     }
   ],

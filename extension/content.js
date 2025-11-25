@@ -2,132 +2,284 @@
 (function() {
   'use strict';
 
+  // Get config (with fallback for safety)
+  const CONFIG = (typeof EXTENSION_CONFIG !== 'undefined')
+    ? EXTENSION_CONFIG
+    : {
+        DOMAIN: "https://ysaar.com",
+        FLOATING_BUTTON: {
+          POSITION: { bottom: "80px", right: "24px" },
+          TEXT: "Save to YSaar",
+          COLORS: { primary: "#3498db", hover: "#2980b9", text: "#ffffff" }
+        },
+        NOTIFICATION: {
+          DURATION: 3000,
+          POSITION: { bottom: "24px", right: "24px" }
+        }
+      };
+
+  // Extract origin from DOMAIN for message verification
+  const DOMAIN_ORIGIN = new URL(CONFIG.DOMAIN || "https://ysaar.com").origin;
+
   // Extract YouTube information from current page
   function getYouTubeInfo() {
     const url = window.location.href;
     const pathname = window.location.pathname;
-
-    // Channel page: /channel/UCxxx or /@handle
-    if (pathname.startsWith('/channel/') || pathname.startsWith('/@')) {
-      return {
-        type: 'channel',
-        url: url,
-        id: pathname.startsWith('/@') ? pathname.substring(2) : pathname.split('/')[2]
-      };
-    }
-
-    // Playlist page: has ?list= parameter
     const urlParams = new URLSearchParams(window.location.search);
-    const playlistId = urlParams.get('list');
-    if (playlistId) {
-      return {
-        type: 'playlist',
-        url: url,
-        id: playlistId
-      };
-    }
+    const pageTitle = document.querySelector('title')?.textContent || '';
 
-    // Video page: /watch?v=xxx
-    const videoId = urlParams.get('v');
-    if (videoId) {
-      return {
-        type: 'video',
-        url: url,
-        id: videoId
-      };
-    }
-
-    return null;
-  }
-
-  // Create floating save button
-  function createSaveButton() {
-    const info = getYouTubeInfo();
-    if (!info) return;
-
-    // Check if button already exists
-    if (document.getElementById('ysaar-save-button')) return;
-
-    const button = document.createElement('button');
-    button.id = 'ysaar-save-button';
-    button.className = 'ysaar-floating-button';
-    button.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H14L21 10V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M17 21V13H7V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M7 3V10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Save to YSaar</span>
-    `;
-
-    button.onclick = function() {
-      // Send message to background script to save
-      chrome.runtime.sendMessage({
-        action: 'save',
-        data: info
-      }, function(response) {
-        if (response && response.success) {
-          showNotification('Saved to YSaar!', 'success');
-        } else {
-          showNotification(response?.message || 'Failed to save', 'error');
-        }
-      });
+    const result = {
+      channels: [],
+      playlists: [],
+      videos: []
     };
 
-    document.body.appendChild(button);
-  }
+    // Track unique IDs to avoid duplicates
+    const channelIds = new Set();
+    const playlistIds = new Set();
+    const videoIds = new Set();
 
-  // Show notification
-  function showNotification(message, type) {
-    // Check if notification already exists
-    let notification = document.getElementById('ysaar-notification');
-    if (notification) {
-      notification.remove();
+    // 1. Extract current page item FIRST (active tab URL)
+    // Extract current channel
+    if (pathname.startsWith('/channel/') || pathname.startsWith('/@')) {
+      const channelId = pathname.startsWith('/@')
+        ? pathname.substring(2).split('/')[0]
+        : pathname.split('/')[2];
+
+      const channelTitle = document.querySelector('ytd-channel-name yt-formatted-string')?.textContent?.trim() ||
+                          document.querySelector('#channel-name')?.textContent?.trim() ||
+                          pageTitle.replace(' - YouTube', '').trim();
+
+      // Try to get channel thumbnail from the page
+      const channelThumbnail = document.querySelector('ytd-c4-tabbed-header-renderer img')?.src ||
+                              document.querySelector('yt-img-shadow#avatar img')?.src ||
+                              document.querySelector('#channel-header img')?.src ||
+                              document.querySelector('img[class*="avatar"]')?.src ||
+                              null;
+
+      if (channelId && !channelIds.has(channelId)) {
+        channelIds.add(channelId);
+        result.channels.push({
+          id: channelId,
+          url: url,
+          title: channelTitle,
+          thumbnail: channelThumbnail,
+          isCurrentPage: true
+        });
+      }
     }
 
-    notification = document.createElement('div');
-    notification.id = 'ysaar-notification';
-    notification.className = `ysaar-notification ysaar-notification-${type}`;
-    notification.textContent = message;
+    // Extract current playlist
+    const currentPlaylistId = urlParams.get('list');
+    if (currentPlaylistId) {
+      const playlistTitle = document.querySelector('yt-formatted-string.ytd-playlist-header-renderer')?.textContent?.trim() ||
+                           document.querySelector('#title')?.textContent?.trim() ||
+                           pageTitle.replace(' - YouTube', '').trim();
 
-    document.body.appendChild(notification);
+      // Try to get playlist thumbnail from the page
+      const playlistThumbnail = document.querySelector('ytd-playlist-header-renderer img')?.src ||
+                               document.querySelector('ytd-playlist-thumbnail img')?.src ||
+                               document.querySelector('#thumbnail img')?.src ||
+                               null;
 
-    // Show notification
-    setTimeout(() => {
-      notification.classList.add('show');
-    }, 10);
+      if (!playlistIds.has(currentPlaylistId)) {
+        playlistIds.add(currentPlaylistId);
+        result.playlists.push({
+          id: currentPlaylistId,
+          url: `https://www.youtube.com/playlist?list=${currentPlaylistId}`,
+          title: playlistTitle,
+          thumbnail: playlistThumbnail,
+          isCurrentPage: true
+        });
+      }
+    }
 
-    // Hide and remove notification after 3 seconds
-    setTimeout(() => {
-      notification.classList.remove('show');
+    // Extract current video
+    const currentVideoId = urlParams.get('v');
+    if (currentVideoId) {
+      const videoTitle = document.querySelector('h1.ytd-watch-metadata yt-formatted-string')?.textContent?.trim() ||
+                        document.querySelector('h1.title')?.textContent?.trim() ||
+                        pageTitle.replace(' - YouTube', '').trim();
+
+      if (!videoIds.has(currentVideoId)) {
+        videoIds.add(currentVideoId);
+        result.videos.push({
+          id: currentVideoId,
+          url: `https://www.youtube.com/watch?v=${currentVideoId}`,
+          title: videoTitle,
+          isCurrentPage: true
+        });
+      }
+    }
+
+    // 2. Extract ALL channels found in the page
+    const channelLinks = document.querySelectorAll('a[href*="/channel/"], a[href*="/@"]');
+    channelLinks.forEach(link => {
+      try {
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        const linkUrl = href.startsWith('http') ? new URL(href) : new URL(href, 'https://www.youtube.com');
+        const linkPath = linkUrl.pathname;
+
+        let channelId;
+        if (linkPath.startsWith('/@')) {
+          channelId = linkPath.substring(2).split('/')[0];
+        } else if (linkPath.startsWith('/channel/')) {
+          channelId = linkPath.split('/')[2];
+        }
+
+        if (channelId && !channelIds.has(channelId)) {
+          channelIds.add(channelId);
+
+          // Try to get channel name from link text or nearby elements
+          const channelName = link.querySelector('#channel-name')?.textContent?.trim() ||
+                            link.querySelector('yt-formatted-string')?.textContent?.trim() ||
+                            link.textContent?.trim() ||
+                            null;
+
+          // Try to get channel thumbnail
+          const channelThumbnail = link.querySelector('img')?.src ||
+                                  link.closest('ytd-channel-renderer')?.querySelector('img')?.src ||
+                                  link.closest('ytd-video-owner-renderer')?.querySelector('img')?.src ||
+                                  null;
+
+          result.channels.push({
+            id: channelId,
+            url: linkUrl.href,
+            title: channelName,
+            thumbnail: channelThumbnail,
+            isCurrentPage: false
+          });
+        }
+      } catch (err) {
+        // Skip invalid links
+      }
+    });
+
+    // 3. Extract ALL playlists found in the page
+    const playlistLinks = document.querySelectorAll('a[href*="list="]');
+    playlistLinks.forEach(link => {
+      try {
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        const linkUrl = href.startsWith('http') ? new URL(href) : new URL(href, 'https://www.youtube.com');
+        const playlistId = linkUrl.searchParams.get('list');
+
+        if (playlistId && !playlistIds.has(playlistId)) {
+          playlistIds.add(playlistId);
+
+          // Try to get playlist title
+          const playlistTitle = link.querySelector('#video-title')?.textContent?.trim() ||
+                               link.querySelector('yt-formatted-string')?.textContent?.trim() ||
+                               link.textContent?.trim() ||
+                               null;
+
+          // Try to get playlist thumbnail
+          const playlistThumbnail = link.querySelector('img')?.src ||
+                                   link.closest('ytd-playlist-renderer')?.querySelector('img')?.src ||
+                                   link.closest('ytd-grid-playlist-renderer')?.querySelector('img')?.src ||
+                                   null;
+
+          result.playlists.push({
+            id: playlistId,
+            url: `https://www.youtube.com/playlist?list=${playlistId}`,
+            title: playlistTitle,
+            thumbnail: playlistThumbnail,
+            isCurrentPage: false
+          });
+        }
+      } catch (err) {
+        // Skip invalid links
+      }
+    });
+
+    // 4. Extract ALL videos found in the page
+    const videoLinks = document.querySelectorAll('a[href*="/watch?v="], a[href*="shorts/"]');
+    videoLinks.forEach(link => {
+      try {
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        const linkUrl = href.startsWith('http') ? new URL(href) : new URL(href, 'https://www.youtube.com');
+        let videoId;
+
+        if (linkUrl.pathname.startsWith('/shorts/')) {
+          videoId = linkUrl.pathname.split('/')[2];
+        } else {
+          videoId = linkUrl.searchParams.get('v');
+        }
+
+        if (videoId && !videoIds.has(videoId)) {
+          videoIds.add(videoId);
+
+          // Try to get video title - prioritize different sources
+          let videoTitle = null;
+
+          // Check for title in h3 tag (new YouTube layout with yt-lockup-view-model)
+          const h3Title = link.closest('yt-lockup-view-model')?.querySelector('h3[title]')?.getAttribute('title');
+          if (h3Title) {
+            videoTitle = h3Title.trim();
+          }
+
+          // Fallback to other methods
+          if (!videoTitle) {
+            videoTitle = link.getAttribute('title')?.trim() ||
+                        link.getAttribute('aria-label')?.trim() ||
+                        link.querySelector('#video-title')?.textContent?.trim() ||
+                        link.querySelector('yt-formatted-string')?.textContent?.trim() ||
+                        null;
+          }
+
+          // Clean up aria-label if it contains extra info (e.g., "by Channel Name")
+          if (videoTitle && videoTitle.includes(' by ')) {
+            videoTitle = videoTitle.split(' by ')[0].trim();
+          }
+
+          result.videos.push({
+            id: videoId,
+            url: `https://www.youtube.com/watch?v=${videoId}`,
+            title: videoTitle,
+            isCurrentPage: false
+          });
+        }
+      } catch (err) {
+        // Skip invalid links
+      }
+    });
+
+    return result;
+  }
+
+  // Listen for messages from popup to extract YouTube info
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === 'GET_YOUTUBE_INFO') {
+      console.log('Content script received GET_YOUTUBE_INFO request');
+
+      // Wait a moment for page to be fully loaded
       setTimeout(() => {
-        notification.remove();
-      }, 300);
-    }, 3000);
-  }
+        const info = getYouTubeInfo();
+        console.log('Extracted YouTube info:', info);
 
-  // Initialize when page loads
-  function init() {
-    createSaveButton();
-  }
+        // Send response back through runtime message
+        chrome.runtime.sendMessage({
+          type: 'YOUTUBE_INFO_RESPONSE',
+          data: info
+        }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('Error sending response:', chrome.runtime.lastError);
+          } else {
+            console.log('Response sent successfully');
+          }
+        });
 
-  // Watch for URL changes (YouTube is a SPA)
-  let lastUrl = location.href;
-  new MutationObserver(() => {
-    const url = location.href;
-    if (url !== lastUrl) {
-      lastUrl = url;
-      // Remove old button and create new one
-      const oldButton = document.getElementById('ysaar-save-button');
-      if (oldButton) oldButton.remove();
-      createSaveButton();
+        // Also send response directly
+        sendResponse({ success: true, data: info });
+      }, 500);
+
+      return true; // Keep channel open for async response
     }
-  }).observe(document, { subtree: true, childList: true });
+  });
 
-  // Initial load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
 })();

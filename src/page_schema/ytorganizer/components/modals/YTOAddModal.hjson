@@ -26,6 +26,7 @@ const [formError, setFormError] = args.createSignal(null);
 const initializeFormData = () => {
   const editMode = args.contextData.props?.editMode || false;
   const itemData = args.contextData.props?.itemData;
+  const initialUrl = args.contextData.props?.initialUrl;
 
   if (editMode && itemData) {
     // Determine actual type from itemData structure
@@ -39,7 +40,7 @@ const initializeFormData = () => {
     }
     setCustomName(setting?.P?.customName || "");
   } else {
-    setUrl("");
+    setUrl(initialUrl || "");
     setCustomName("");
     setPriority("normal");
   }

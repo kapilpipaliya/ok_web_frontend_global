@@ -30,7 +30,7 @@ export function AuthRequired(props: ParentProps) {
     if ("error" in userData) {
       // Handle API error - redirect to login
       console.error("Failed to load user data:", userData.error);
-      const params = new URLSearchParams();
+      const params = new URLSearchParams(location.search);
       params.set("redirectUrl", location.pathname);
       navigate(`${API.urls.admin.signIn}?${params.toString()}`, {
         replace: true,
@@ -55,7 +55,7 @@ export function AuthRequired(props: ParentProps) {
       try {
         const userData = await getUserRPC();
         if (userData.error || !userData?.user) {
-          const params = new URLSearchParams();
+          const params = new URLSearchParams(location.search);
           params.set("redirectUrl", location.pathname);
           navigate(`${API.urls.admin.signIn}?${params.toString()}`, {
             replace: true,
@@ -64,7 +64,7 @@ export function AuthRequired(props: ParentProps) {
         }
         return userData;
       } catch (_error) {
-        const params = new URLSearchParams();
+        const params = new URLSearchParams(location.search);
         params.set("redirectUrl", location.pathname);
         navigate(`${API.urls.admin.signIn}?${params.toString()}`, {
           replace: true,

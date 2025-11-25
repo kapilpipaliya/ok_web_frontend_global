@@ -1,0 +1,67 @@
+{
+  vertexes: [
+    {
+      id: "check_playlist_exists_function",
+      L: "Function",
+      P: {
+        key: "checkPlaylistExists",
+        description: "Check if a playlist already exists for a specific ownership",
+        body: '''
+try {
+  const { youtubeId, ownershipId } = args.contextData;
+
+  if (!youtubeId) {
+    throw new Error("YouTube ID is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("Ownership ID is required");
+  }
+
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
+    throw new Error("User session not found");
+  }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+  // Check if playlist exists for this ownership
+  const result = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $youtubeId})
+    RETURN p, ps
+    LIMIT 1
+  `, {
+    userUuid: user.P.uuid,
+    ownershipId,
+    youtubeId
+  });
+
+  const exists = result.records.length > 0;
+
+  return {
+    success: true,
+    exists,
+    data: exists ? {
+      playlist: args.convertNodeToJson(result.records[0].get('p')),
+      playlistSetting: args.convertNodeToJson(result.records[0].get('ps'))
+    } : null
+  };
+
+} catch (error) {
+  console.error("Error checking if playlist exists:", error);
+  return {
+    success: false,
+    exists: false,
+    message: "Failed to check if playlist exists",
+    error: { details: error.message }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -25,6 +25,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
+import { handleGoogleOAuthClick } from "~/pages/auth/functions/handleGoogleOAuthClick";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<
@@ -120,9 +121,18 @@ export function SignInForm() {
 
   // Submit handler using our utility
   const handleSubmit = async (formData: Vertex) => {
+    // Build API URL with query parameters
+    const url = new URL(API.auth.signInUrl, window.location.origin);
+    // Add all current query parameters to the signin URL
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (value) {
+        url.searchParams.append(key, value as string);
+      }
+    });
+
     await submitForm(formData, {
       apiCall: (data) =>
-        postAPI(API.auth.signInUrl, {
+        postAPI(url.pathname + url.search, {
           email: data.P.email.toLowerCase(),
           password: data.P.password,
         }),
@@ -321,7 +331,7 @@ export function SignInForm() {
 }\`;`,
                 props: () => ({
                   onClick: () => {
-                    window.location.href = "/api/auth/google/signin";
+                    handleGoogleOAuthClick(searchParams);
                   },
                   type: "button",
                 }),
@@ -402,7 +412,9 @@ export function SignInForm() {
                     componentName: "Html",
                     props: () => ({
                       onClick: () => {
-                        navigate(API.urls.user.forgotPassword);
+                        const params = new URLSearchParams(searchParams as Record<string, string>);
+                        const queryString = params.toString();
+                        navigate(`${API.urls.user.forgotPassword}${queryString ? `?${queryString}` : ""}`);
                       },
                     }),
                     text: "Forgot Password?",
@@ -417,7 +429,9 @@ export function SignInForm() {
                     componentName: "Html",
                     props: () => ({
                       onClick: () => {
-                        navigate(API.urls.user.resendVerification);
+                        const params = new URLSearchParams(searchParams as Record<string, string>);
+                        const queryString = params.toString();
+                        navigate(`${API.urls.user.resendVerification}${queryString ? `?${queryString}` : ""}`);
                       },
                     }),
                     text: "Resend Verification",
@@ -499,7 +513,9 @@ export function SignInForm() {
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
-                    navigate("/auth/signup");
+                    const params = new URLSearchParams(searchParams as Record<string, string>);
+                    const queryString = params.toString();
+                    navigate(`/auth/signup${queryString ? `?${queryString}` : ""}`);
                   },
                 }),
                 text: "Sign Up",

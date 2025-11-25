@@ -30,6 +30,15 @@ export async function POST({ request }: APIEvent) {
 
     const user = await authenticateUser(email, password, subDomain, dbSession);
 
+    // Extract query parameters from the request URL (excluding success and error)
+    const url = new URL(request.url);
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of url.searchParams.entries()) {
+      if (key !== "success" && key !== "error") {
+        queryParams.append(key, value);
+      }
+    }
+
     // Log successful authentication
     logger.logAuth({
       action: "signin",
@@ -54,7 +63,7 @@ export async function POST({ request }: APIEvent) {
     const generalSettings = await getGeneralSettings(dbSession);
     const configuredRedirectUrl = generalSettings?.P?.redirectUrlAfterSignin;
 
-    updateRedirectUrl(user, subDomain!, configuredRedirectUrl);
+    updateRedirectUrl(user, subDomain!, configuredRedirectUrl, queryParams);
 
     // Fire and forget the email sending process
     // sendNotificationEmail(EMAIL_TEMPLATES.LOGIN_NOTIFICATION,{}, "New Login to Your Account", user, subDomain!).catch(error => {

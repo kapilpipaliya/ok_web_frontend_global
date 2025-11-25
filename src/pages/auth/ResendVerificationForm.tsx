@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -33,6 +33,7 @@ interface ResendVerificationFunctionArgumentType extends FunctionArgumentType {
 
 export function ResendVerificationForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { showErrorToast, showSuccessToast } = useToast();
 
   const handleSubmit = async (
@@ -57,7 +58,9 @@ export function ResendVerificationForm() {
 
         // Redirect to sign in after 3 seconds
         setTimeout(() => {
-          navigate(API.urls.admin.signIn);
+          const params = new URLSearchParams(searchParams as Record<string, string>);
+          const queryString = params.toString();
+          navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
         }, 3000);
       } else {
         showErrorToast(response.error || "Failed to send verification email");
@@ -111,7 +114,9 @@ export function ResendVerificationForm() {
           createLinkButton(
             () => "Back to Sign In",
             () => {
-              navigate(API.urls.admin.signIn);
+              const params = new URLSearchParams(searchParams as Record<string, string>);
+              const queryString = params.toString();
+              navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
             },
           ),
         ],

@@ -10,22 +10,60 @@ A Chrome extension for saving and managing YouTube channels and playlists direct
 - 🎨 **Consistent UI**: Matches YSaar web app design perfectly
 - ⚡ **Live Sync**: Changes sync instantly with your YSaar account
 
+## Configuration
+
+### Changing the Domain
+
+The extension uses a centralized configuration file for easy customization:
+
+**File**: `extension/config.js`
+
+To change the domain (e.g., for local development or staging):
+
+```javascript
+// In config.js, change this line:
+DOMAIN: "https://ysaar.com",
+
+// To your desired domain:
+DOMAIN: "http://localhost:3000",
+// or
+DOMAIN: "https://staging.ysaar.com",
+```
+
+**Other configurable settings**:
+- Badge colors and text
+- Update intervals
+- Floating button position and colors
+- Notification duration and position
+- Cookie patterns for authentication
+- Route paths
+
+See `config.js` for full configuration options.
+
+**Important**: After changing the domain, you must:
+1. Update `host_permissions` in `manifest.json` to include your domain
+2. Reload the extension in Chrome (`chrome://extensions/` → Reload button)
+
 ## Installation
 
 ### For Development
 
-1. **Build Icons** (see `icons/README.md` for instructions)
+1. **Configure Domain** (optional, for local development)
+   - Edit `config.js` and change `DOMAIN` to your local server
+   - Update `manifest.json` host_permissions if needed
+
+2. **Build Icons** (see `icons/README.md` for instructions)
    - Create icon16.png, icon32.png, icon48.png, icon128.png
    - Or use placeholders for testing
 
-2. **Load Extension in Chrome**:
+3. **Load Extension in Chrome**:
    - Open Chrome and go to `chrome://extensions/`
    - Enable "Developer mode" (toggle in top right)
    - Click "Load unpacked"
    - Select the `extension/` directory from this project
    - The extension should now appear in your extensions list
 
-3. **Verify Installation**:
+4. **Verify Installation**:
    - You should see the YSaar icon in your Chrome toolbar
    - Click it to open the popup (you'll need to be logged in to ysaar.com)
 
@@ -39,24 +77,19 @@ _Production installation via Chrome Web Store will be available after publishing
 
 1. Navigate to any YouTube channel or playlist page
 2. Look for the blue "Save to YSaar" floating button in the bottom right
-3. Click it to save the current channel/playlist
-4. A notification will confirm the save operation
+3. Click it to open a modal with the quick add form
+4. Fill in optional custom name and select your YouTube account
+5. Click "Save" to save the channel/playlist
+6. A notification will confirm the save operation and the modal will close automatically
 
-### Method 2: Extension Popup
+### Method 2: Extension Popup Dashboard
 
-1. While on a YouTube page, click the YSaar extension icon in your toolbar
-2. The extension will automatically detect what you're viewing
-3. Fill in optional custom name
-4. Select your YouTube account (if you have multiple)
-5. Click "Save" button
-
-### Method 3: Extension Popup Dashboard
-
-1. Click the YSaar extension icon anytime (doesn't need to be on YouTube)
-2. View your quick stats (channels, playlists, videos)
-3. Click buttons to open YSaar in new tabs:
-   - "Open YSaar" - Go to YSaar dashboard
-   - "View Favourites" - See your favorite content
+1. Click the YSaar extension icon anytime to open the full YSaar app
+2. The popup shows the complete YSaar dashboard with:
+   - Full navigation sidebar
+   - Your channels, playlists, and videos
+   - All YSaar features accessible directly in the popup
+3. Navigate through the app just like the full website
 
 ## How It Works
 
@@ -67,18 +100,20 @@ This extension uses a unique architecture that maximizes code reuse:
 ```
 Extension Popup (iframe)
     ↓
-ysaar.com/extension/popup
+ ysaar.com/home
     ↓
-YTOExtensionPopup.hjson (Page Schema)
+Full YSaar Application with YTOLayout
     ↓
-Existing YSaar Components & Functions
+Complete App Features Available
 ```
 
 **Key Benefits:**
-- Extension UI is rendered from YSaar's page schema system
-- Zero duplication of business logic
+- Extension popup loads the full YSaar application
+- Zero duplication - uses the exact same code as the web app
+- All features accessible: navigation, stats, content management
 - Automatic updates when web app changes
 - Consistent styling and behavior
+- Users can navigate through the entire app in the popup
 
 ### Components
 
@@ -87,24 +122,26 @@ Existing YSaar Components & Functions
    - Requires access to ysaar.com and youtube.com
 
 2. **Popup (popup.html + popup.js)**
-   - Displays an iframe loading ysaar.com/extension/popup
+   - Displays an iframe loading ysaar.com/home (full app)
+   - Larger size (800x700px) for better usability
    - Handles authentication errors
    - Manages communication with iframe
 
 3. **Content Script (content.js + content.css)**
    - Injects floating "Save to YSaar" button on YouTube pages
    - Detects current YouTube page type (channel/playlist/video)
+   - Shows modal with quick add form in iframe
+   - Handles iframe communication for save/close events
    - Shows success/error notifications
 
 4. **Background Worker (background.js)**
-   - Handles save requests from content script
    - Updates extension badge based on login status
-   - Opens quick-add page when needed
+   - Monitors cookie changes for authentication state
 
 5. **Page Schemas**
-   - `YTOExtensionPopup.hjson` - Main popup dashboard
-   - `YTOExtensionQuickAdd.hjson` - Quick save form
-   - Both leverage existing YSaar components and functions
+   - `YTOExtensionQuickAdd.hjson` - Quick save form for modal
+   - Leverages existing YSaar components and functions
+   - Main popup uses the full YSaar home page
 
 ### Authentication
 
@@ -125,28 +162,32 @@ If you're not logged in:
 ```
 User clicks "Save" button on YouTube
     ↓
-Content script extracts URL/ID
+Content script extracts URL/ID and shows modal
     ↓
-Background script opens quick-add page
+Modal loads quick-add page in iframe
+    ↓
+User fills form and clicks save
     ↓
 Page calls saveChannel/savePlaylist function
     ↓
 Data saved to YSaar database
     ↓
-Success message shown
+Success message posted to parent window
+    ↓
+Modal closes and notification shown
 ```
 
-**Viewing Stats:**
+**Using Full App:**
 ```
 User opens extension popup
     ↓
-popup.html loads iframe from ysaar.com/extension/popup
+popup.html loads iframe from ysaar.com/home
     ↓
-YTOExtensionPopup page renders
+Full YSaar application loads with YTOLayout
     ↓
-Calls getUserYTODetails function
+User can navigate entire app in popup
     ↓
-Displays stats in popup
+All features work: channels, playlists, videos, settings, etc.
 ```
 
 ## Development
@@ -219,10 +260,10 @@ extension/
 
 ### Making Changes
 
-**To modify the popup UI:**
-- Edit `src/page_schema/ytorganizer/pages/extension/YTOExtensionPopup.hjson`
-- Reload YSaar app
-- Refresh extension popup
+**To modify the popup:**
+- The popup loads the full YSaar home page
+- Any changes to the home page or YTOLayout will reflect in the popup
+- No separate extension-specific page needed
 
 **To modify quick-add form:**
 - Edit `src/page_schema/ytorganizer/pages/extension/YTOExtensionQuickAdd.hjson`

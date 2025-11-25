@@ -24,7 +24,8 @@ export async function GET({ request }: APIEvent) {
       throw new APIError("Authorization code is missing", 400);
     }
 
-    // Verify state parameter for CSRF protection
+    // Verify state parameter for CSRF protection and extract query params
+    let preservedQueryParams: Record<string, string> = {};
     if (state) {
       try {
         const stateData = JSON.parse(
@@ -33,6 +34,10 @@ export async function GET({ request }: APIEvent) {
         // Check if timestamp is within 10 minutes
         if (Date.now() - stateData.timestamp > 600000) {
           throw new APIError("OAuth state expired", 400);
+        }
+        // Extract preserved query parameters
+        if (stateData.queryParams) {
+          preservedQueryParams = stateData.queryParams;
         }
       } catch (e) {
         throw new APIError("Invalid OAuth state", 400);
@@ -71,7 +76,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     // Get the origin from the request - always use HTTPS
-    const origin = `https://${url.hostname}`;
+    const origin = `https://${url.host}`;
     const redirectUri = `${origin}/api/auth/google/callback`;
 
     // Create OAuth2 client
@@ -222,10 +227,73 @@ export async function GET({ request }: APIEvent) {
     const generalSettings = await getGeneralSettings(dbSession);
     const configuredRedirectUrl = generalSettings?.P?.redirectUrlAfterSignin;
 
-    updateRedirectUrl(user, subDomain!, configuredRedirectUrl);
+    // Check if redirectUrl exists in preserved query params
+    const redirectUrlFromParams = preservedQueryParams.redirectUrl;
+
+    // Check if this was opened as a popup (from iframe context)
+    const isPopup = preservedQueryParams.popup === "true";
+
+    // Convert preserved query params to URLSearchParams (excluding redirectUrl and popup as they're used separately)
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(preservedQueryParams)) {
+      if (key !== "redirectUrl" && key !== "popup") {
+        queryParams.append(key, value);
+      }
+    }
+
+    // Priority: redirectUrl from query params > configured redirect URL from settings
+    const finalRedirectUrl = redirectUrlFromParams || configuredRedirectUrl;
+
+    updateRedirectUrl(user, subDomain!, finalRedirectUrl, queryParams);
 
     // Redirect to the application
     const redirectUrl = user.P.redirectUrl || "/";
+
+    // If this was opened as a popup (from iframe), return HTML that handles popup close
+    if (isPopup) {
+      return new Response(
+        `<!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Redirecting...</title>
+            <script>
+              // Store redirect URL in a const for safe usage
+              const REDIRECT_URL = "${redirectUrl}";
+
+              // This window was opened as a popup from an iframe
+              if (window.opener && window.opener !== window) {
+                try {
+                  // Try to navigate the opener window
+                  window.opener.location.href = REDIRECT_URL;
+                  // Close this popup after a short delay
+                  setTimeout(() => {
+                    window.close();
+                  }, 500);
+                } catch (e) {
+                  // If we can't access opener (cross-origin), just redirect this window
+                  console.error("Cannot access opener, redirecting current window", e);
+                  window.location.href = REDIRECT_URL;
+                }
+              } else {
+                // Fallback: No opener found, redirect this window
+                console.warn("No opener window found, redirecting current window");
+                window.location.href = REDIRECT_URL;
+              }
+            </script>
+          </head>
+          <body>
+            <p>Authentication successful! Redirecting...</p>
+          </body>
+        </html>`,
+        {
+          headers: { "Content-Type": "text/html" },
+          status: 200,
+        },
+      );
+    }
+
+    // Normal redirect for non-popup case
     return createRedirectResponse(request, redirectUrl);
   } catch (error) {
     console.error("Google OAuth callback error:", error);

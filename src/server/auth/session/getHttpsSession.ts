@@ -13,7 +13,8 @@ export function getHttpsSession() {
       maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
       httpOnly: true, // Prevents JavaScript access to the cookie (security best practice)
       secure: true, // process.env.NODE_ENV === "production",
-      sameSite: "lax" as const, // Provides CSRF protection while allowing navigation
+      //sameSite: "lax" as const, // Provides CSRF protection while allowing navigation
+      sameSite: "None" as const, // to work with Google Chrome
       path: "/", // Makes the cookie available across your entire site
     },
   };

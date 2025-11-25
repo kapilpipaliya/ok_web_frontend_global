@@ -723,16 +723,19 @@ return {
 const getCurrentVideo = args.contextData.props?.currentVideo;
 const video = getCurrentVideo?.();
 const youtubeId = video?.P?.youtubeId || "";
+const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
 
 return {
   as: "a",
-  href: `https://www.youtube.com/watch?v=${youtubeId}`,
+  href: youtubeUrl,
   target: "_blank",
   rel: "noopener",
   "aria-label": "Watch on YouTube",
   title: "Watch on YouTube",
   onClick: (e) => {
+    e.preventDefault();
     e.stopPropagation();
+    args.fns.openYouTubeInParentTab(youtubeUrl);
   }
 };
 ''',

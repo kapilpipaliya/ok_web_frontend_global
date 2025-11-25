@@ -42,7 +42,8 @@ const searchQuery = args.searchParams?.q || "";
 const isDetailView = args.createMemo(() => !!args.searchParams?.id);
 const isSearchView = args.createMemo(() => args.searchParams?.q !== undefined);
 const isFavouritesView = args.createMemo(() => contentType === "favourites");
-const isListView = args.createMemo(() => !isDetailView() && !isSearchView() && !isFavouritesView());
+const isExtensionView = args.createMemo(() => contentType === "extension");
+const isListView = args.createMemo(() => !isDetailView() && !isSearchView() && !isFavouritesView() && !isExtensionView());
 
 // State for data
 const [items, setItems] = args.createSignal([]);
@@ -60,6 +61,10 @@ const [searchInput, setSearchInput] = args.createSignal(searchQuery);
 
 // State for favourites view
 const [favouritesData, setFavouritesData] = args.createSignal(null);
+
+// State for extension view
+const [extensionData, setExtensionData] = args.createSignal(null);
+const [pageContent, setPageContent] = args.createSignal(null);
 
 // State for user setting
 const [userSetting, setUserSetting] = args.createSignal(null);
@@ -698,6 +703,264 @@ const handleFavouritesScroll = (e) => {
   setFavouritesScrollTop(e.target.scrollTop);
 };
 
+// Virtualization state for extension
+const [extensionScrollTop, setExtensionScrollTop] = args.createSignal(0);
+const [extensionScrollElement, setExtensionScrollElement] = args.createSignal(null);
+
+// Helper to convert extension item to Vertex format
+const convertToVertex = (item, type) => {
+  const label = type === 'channel' ? 'Channel' : type === 'playlist' ? 'Playlist' : 'Video';
+  const youtubeId = item.id;
+
+  // Generate thumbnail URLs based on type
+  let thumbnailProps = {};
+  if (type === 'video') {
+    // For videos, use YouTube's thumbnail URLs
+    thumbnailProps = {
+      thumbnailDefault: `https://i.ytimg.com/vi/${youtubeId}/default.jpg`,
+      thumbnailMedium: `https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg`,
+      thumbnailHigh: `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
+      thumbnailStandard: `https://i.ytimg.com/vi/${youtubeId}/sddefault.jpg`,
+      thumbnailMaxres: `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`
+    };
+  } else if (type === 'channel' || type === 'playlist') {
+    // For channels and playlists, use thumbnail from extension if available
+    if (item.thumbnail) {
+      thumbnailProps = {
+        thumbnailHigh: item.thumbnail,
+        thumbnailMedium: item.thumbnail,
+        thumbnailDefault: item.thumbnail
+      };
+    }
+  }
+
+  return {
+    resultType: type,
+    [type]: {
+      id: `ext:${type}:${youtubeId}`,
+      L: [label],
+      P: {
+        youtubeId: youtubeId,
+        title: item.title || youtubeId,
+        ...thumbnailProps,
+        // Extension-specific metadata (defaults to false if not provided)
+        extensionExists: item.exists ?? false,
+        extensionIsCurrentPage: item.isCurrentPage ?? false
+      },
+      IN: {},
+      OUT: {}
+    },
+    [`${type}Setting`]: null
+  };
+};
+
+// Helper to extract YouTube ID from item data (works for both raw and vertex data)
+const getItemYouTubeId = (itemData, type) => {
+  const item = itemData[type];
+  if (!item) return null;
+
+  // Raw extension data has .id property
+  if (itemData.extensionData) {
+    return item.id;
+  }
+
+  // Database vertex data has .P.youtubeId property
+  return item.P?.youtubeId || null;
+};
+
+// Helper to process extension item (handles both full vertex data and raw extension data)
+const processExtensionItem = (itemData, type) => {
+  // Check if this is raw extension data that needs conversion
+  if (itemData.extensionData) {
+    // Convert raw extension data to vertex format
+    const rawItem = itemData[type];
+    return convertToVertex(rawItem, type);
+  } else {
+    // Already has full vertex data from database
+    // Add resultType and mark as existing
+    const item = itemData[type];
+    const itemSetting = itemData[`${type}Setting`];
+
+    // Add extension metadata to the item properties
+    if (item && item.P) {
+      item.P.extensionExists = true;
+      item.P.extensionIsCurrentPage = false; // Database items are never current page
+    }
+
+    return {
+      resultType: type,
+      [type]: item,
+      [`${type}Setting`]: itemSetting
+    };
+  }
+};
+
+// Get combined extension items with filtering (in Vertex format)
+const getExtensionItems = args.createMemo(() => {
+  const data = extensionData();
+  if (!data) return [];
+
+  const combined = [];
+  const seenChannelIds = new Set(); // Track unique channel IDs
+  const seenPlaylistIds = new Set(); // Track unique playlist IDs
+  const seenVideoIds = new Set(); // Track unique video IDs
+
+  // Helper to add item if not duplicate
+  const addUniqueItem = (itemData, type) => {
+    const youtubeId = getItemYouTubeId(itemData, type);
+    if (!youtubeId) return; // Skip items without ID
+
+    // Check against the appropriate set for this type
+    const seenIds = type === 'channel' ? seenChannelIds :
+                    type === 'playlist' ? seenPlaylistIds :
+                    seenVideoIds;
+
+    if (!seenIds.has(youtubeId)) {
+      seenIds.add(youtubeId);
+      combined.push(processExtensionItem(itemData, type));
+    }
+  };
+
+  // First, add current page items (marked with isCurrentPage: true)
+  if (data.channels) {
+    for (const channelData of data.channels) {
+      const isCurrentPage = channelData.extensionData
+        ? channelData.channel.isCurrentPage
+        : false;
+
+      if (isCurrentPage) {
+        addUniqueItem(channelData, 'channel');
+      }
+    }
+  }
+  if (data.playlists) {
+    for (const playlistData of data.playlists) {
+      const isCurrentPage = playlistData.extensionData
+        ? playlistData.playlist.isCurrentPage
+        : false;
+
+      if (isCurrentPage) {
+        addUniqueItem(playlistData, 'playlist');
+      }
+    }
+  }
+  if (data.videos) {
+    for (const videoData of data.videos) {
+      const isCurrentPage = videoData.extensionData
+        ? videoData.video.isCurrentPage
+        : false;
+
+      if (isCurrentPage) {
+        addUniqueItem(videoData, 'video');
+      }
+    }
+  }
+
+  // Then add all channels (excluding current page)
+  if (data.channels) {
+    for (const channelData of data.channels) {
+      const isCurrentPage = channelData.extensionData
+        ? channelData.channel.isCurrentPage
+        : false;
+
+      if (!isCurrentPage) {
+        addUniqueItem(channelData, 'channel');
+      }
+    }
+  }
+
+  // Then add all playlists (excluding current page)
+  if (data.playlists) {
+    for (const playlistData of data.playlists) {
+      const isCurrentPage = playlistData.extensionData
+        ? playlistData.playlist.isCurrentPage
+        : false;
+
+      if (!isCurrentPage) {
+        addUniqueItem(playlistData, 'playlist');
+      }
+    }
+  }
+
+  // Finally add all videos (excluding current page)
+  if (data.videos) {
+    for (const videoData of data.videos) {
+      const isCurrentPage = videoData.extensionData
+        ? videoData.video.isCurrentPage
+        : false;
+
+      if (!isCurrentPage) {
+        addUniqueItem(videoData, 'video');
+      }
+    }
+  }
+
+  return combined;
+});
+
+// Filtered extension items
+const filteredExtensionItems = args.createMemo(() => {
+  const term = searchTerm().toLowerCase();
+  const items = getExtensionItems();
+
+  if (!term) return items;
+
+  return items.filter(itemData => {
+    const resultType = itemData.resultType;
+    const item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+    const title = item?.P?.title?.toLowerCase() || "";
+    return title.includes(term);
+  });
+});
+
+// Reactive item height for extension
+const getExtensionItemHeight = () => {
+  return 90;
+};
+
+// Calculate visible items for extension view
+const getExtensionVisibleRange = () => {
+  const el = extensionScrollElement();
+  const extensionItems = filteredExtensionItems();
+  const scroll = extensionScrollTop();
+  const itemHeight = getExtensionItemHeight();
+
+  const containerHeight = el?.clientHeight || 600;
+
+  const startIndex = Math.max(0, Math.floor(scroll / itemHeight) - overscan);
+  const endIndex = Math.min(
+    extensionItems.length - 1,
+    Math.ceil((scroll + containerHeight) / itemHeight) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+// Get virtual items to render for extension view
+const getExtensionVirtualItems = () => {
+  const { start, end } = getExtensionVisibleRange();
+  const virtualItems = [];
+  const itemHeight = getExtensionItemHeight();
+
+  for (let i = start; i <= end; i++) {
+    virtualItems.push({
+      index: i,
+      start: i * itemHeight,
+      size: itemHeight
+    });
+  }
+
+  return virtualItems;
+};
+
+// Total height of all extension items
+const getExtensionTotalSize = () => filteredExtensionItems().length * getExtensionItemHeight();
+
+// Handle scroll for extension view
+const handleExtensionScroll = (e) => {
+  setExtensionScrollTop(e.target.scrollTop);
+};
+
 // Menu state
 const [activeMenu, setActiveMenu] = args.createSignal(null);
 const [menuPosition, setMenuPosition] = args.createSignal({ x: 0, y: 0 });
@@ -908,6 +1171,58 @@ const loadFavouritesData = async () => {
   }
 };
 
+// Load extension data
+const loadExtensionData = async () => {
+  const content = pageContent();
+  if (!content) {
+    setLoading(false);
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const result = await args.fns.executeYTOFunction("checkPageItemsExistence", {
+      channels: content.channels || [],
+      playlists: content.playlists || [],
+      videos: content.videos || []
+    });
+
+    if (result?.error || result?.errorType) {
+      console.error("Error loading extension data:", result.error || result.message);
+      args.showErrorToast(result.error || "Failed to check items");
+      setExtensionData(null);
+    } else if (result?.result?.success && result?.result?.data) {
+      setExtensionData(result.result.data);
+    } else {
+      const errorMessage = result?.result?.message || "Failed to check items";
+      console.error("Error loading extension data:", errorMessage);
+      args.showErrorToast(errorMessage);
+      setExtensionData(null);
+    }
+  } catch (error) {
+    console.error("Unexpected error loading extension data:", error);
+    args.showErrorToast("Failed to load extension data");
+    setExtensionData(null);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Listen for messages from extension (popup or content script)
+const handleMessage = (event) => {
+  if (event.data.type === "PAGE_CONTENT") {
+    const { channels, playlists, videos } = event.data;
+    setPageContent({ channels: channels || [], playlists: playlists || [], videos: videos || [] });
+  }
+};
+
+// Request page content from parent window (extension popup/iframe)
+const requestPageContent = () => {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: "REQUEST_PAGE_CONTENT" }, "*");
+  }
+};
+
 // Load data based on view
 const loadData = async () => {
   const currentSearchQuery = args.searchParams?.q;
@@ -919,10 +1234,24 @@ const loadData = async () => {
     await loadDetailData();
   } else if (isFavouritesView()) {
     await loadFavouritesData();
+  } else if (isExtensionView()) {
+    await loadExtensionData();
   } else {
     await loadListData();
   }
 };
+
+// Watch pageContent changes and reload extension data
+args.createEffect(
+  args.on(
+    () => pageContent(),
+    (content) => {
+      if (isExtensionView() && content) {
+        loadExtensionData();
+      }
+    }
+  )
+);
 
 // Reset all scroll positions
 const resetScrollPositions = () => {
@@ -931,6 +1260,7 @@ const resetScrollPositions = () => {
   setDetailScrollTop(0);
   setSearchScrollTop(0);
   setFavouritesScrollTop(0);
+  setExtensionScrollTop(0);
 
   // Reset DOM elements after a small delay to ensure they're rendered
   setTimeout(() => {
@@ -938,10 +1268,12 @@ const resetScrollPositions = () => {
     const detailEl = detailScrollElement();
     const searchEl = searchScrollElement();
     const favouritesEl = favouritesScrollElement();
+    const extensionEl = extensionScrollElement();
     if (listEl) listEl.scrollTop = 0;
     if (detailEl) detailEl.scrollTop = 0;
     if (searchEl) searchEl.scrollTop = 0;
     if (favouritesEl) favouritesEl.scrollTop = 0;
+    if (extensionEl) extensionEl.scrollTop = 0;
   }, 0);
 };
 
@@ -1853,6 +2185,17 @@ return {
   getFavouritesTotalSize,
   setFavouritesScrollElement,
   handleFavouritesScroll,
+  extensionData,
+  getExtensionItems,
+  filteredExtensionItems,
+  getExtensionVirtualItems,
+  getExtensionTotalSize,
+  setExtensionScrollElement,
+  handleExtensionScroll,
+  isExtensionView,
+  handleMessage,
+  requestPageContent,
+  pageContent,
   handleSearch,
   loadData,
   loadListData,
@@ -1915,9 +2258,18 @@ return {
     // Initialize window width and add resize listener
     args.fns.handleResize();
     window.addEventListener('resize', args.fns.handleResize);
+
+    // Add message listener for extension view
+    window.addEventListener('message', args.fns.handleMessage);
+
+    // Request page content from parent if in extension view
+    if (args.fns.isExtensionView()) {
+      args.fns.requestPageContent();
+    }
   },
   onCleanup: () => {
     window.removeEventListener('resize', args.fns.handleResize);
+    window.removeEventListener('message', args.fns.handleMessage);
   }
 };
 ''',
@@ -1925,7 +2277,6 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  height: 100%;
 }`;
 '''
       }
@@ -1972,6 +2323,8 @@ if (args.fns.isSearchView()) {
   title = "Search";
 } else if (args.fns.isFavouritesView()) {
   title = "Favourites";
+} else if (args.fns.isExtensionView()) {
+  title = "Current Page Content";
 } else if (args.fns.isDetailView()) {
   const data = args.fns.detailData();
   if (data) {
@@ -2146,6 +2499,10 @@ if (args.fns.isSearchView()) {
   const items = args.fns.getFavouritesItems();
   const totalCount = items.length;
   description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isExtensionView()) {
+  const items = args.fns.filteredExtensionItems();
+  const totalCount = items.length;
+  description = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
 } else if (args.fns.isDetailView()) {
   const count = args.fns.filteredDetailItems().length;
   description = contentType === "playlists"
@@ -2279,12 +2636,6 @@ return {
         css: '''
 return `._id {
   flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    width: 100%;
-  }
 }`;
 '''
       }
@@ -2306,12 +2657,7 @@ return `._id {
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    width: 100%;
-  }
+  flex-wrap: wrap;
 }`;
 '''
       }
@@ -2400,6 +2746,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 
 // Set ref based on view
 let ref;
@@ -2407,6 +2754,7 @@ if (isListView) ref = args.fns.setScrollElement;
 else if (isDetailView) ref = args.fns.setDetailScrollElement;
 else if (isSearchView) ref = args.fns.setSearchScrollElement;
 else if (isFavouritesView) ref = args.fns.setFavouritesScrollElement;
+else if (isExtensionView) ref = args.fns.setExtensionScrollElement;
 
 // Set onScroll based on view
 let onScroll;
@@ -2414,6 +2762,7 @@ if (isListView) onScroll = args.fns.handleScroll;
 else if (isDetailView) onScroll = args.fns.handleDetailScroll;
 else if (isSearchView) onScroll = args.fns.handleSearchScroll;
 else if (isFavouritesView) onScroll = args.fns.handleFavouritesScroll;
+else if (isExtensionView) onScroll = args.fns.handleExtensionScroll;
 
 return {
   as: "main",
@@ -2434,7 +2783,7 @@ return `._id {
 @media (max-width: 768px) {
   ._id {
     padding: 0 1rem 1rem 1rem;
-    height: calc(100vh - 260px);
+    height: calc(100vh - 72px);
   }
 }`;
 '''
@@ -2488,6 +2837,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 const contentType = args.searchParams?.type || "channels";
 
 let text;
@@ -2499,6 +2849,8 @@ if (isListView) {
   text = "Searching...";
 } else if (isFavouritesView) {
   text = "Loading favourites...";
+} else if (isExtensionView) {
+  text = "Loading page content...";
 }
 
 return {
@@ -2532,6 +2884,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 
 let hasItems = false;
 if (isListView) {
@@ -2542,6 +2895,8 @@ if (isListView) {
   hasItems = args.fns.getSearchItems().length > 0;
 } else if (isFavouritesView) {
   hasItems = args.fns.getFavouritesItems().length > 0;
+} else if (isExtensionView) {
+  hasItems = args.fns.filteredExtensionItems().length > 0;
 }
 
 return {
@@ -2571,6 +2926,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 const contentType = args.searchParams?.type || "channels";
 
 let icon;
@@ -2582,6 +2938,8 @@ if (isListView) {
   icon = "mdi:magnify";
 } else if (isFavouritesView) {
   icon = "carbon:favorite";
+} else if (isExtensionView) {
+  icon = "carbon:data-1";
 }
 
 return {
@@ -2611,6 +2969,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 const contentType = args.searchParams?.type || "channels";
 const hasSearchTerm = args.fns.searchTerm().length > 0;
 const query = args.searchParams?.q || "";
@@ -2626,6 +2985,8 @@ if (isListView) {
   title = query ? "No results found" : "Enter a search query";
 } else if (isFavouritesView) {
   title = "No favourite items yet";
+} else if (isExtensionView) {
+  title = "No Content Found";
 }
 
 return {
@@ -2654,6 +3015,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 const contentType = args.searchParams?.type || "channels";
 const hasSearchTerm = args.fns.searchTerm().length > 0;
 const query = args.searchParams?.q || "";
@@ -2671,6 +3033,8 @@ if (isListView) {
   text = query ? "Try adjusting your search terms" : "to find channels, playlists, and videos";
 } else if (isFavouritesView) {
   text = "Start by adding channels, playlists, or videos to your favourites!";
+} else if (isExtensionView) {
+  text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
 }
 
 return {
@@ -2698,6 +3062,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 
 let hasItems = false;
 if (isListView) {
@@ -2708,6 +3073,8 @@ if (isListView) {
   hasItems = args.fns.getSearchItems().length > 0;
 } else if (isFavouritesView) {
   hasItems = args.fns.getFavouritesItems().length > 0;
+} else if (isExtensionView) {
+  hasItems = args.fns.filteredExtensionItems().length > 0;
 }
 
 return {
@@ -2733,6 +3100,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 
 let totalSize;
 if (isListView) {
@@ -2743,6 +3111,8 @@ if (isListView) {
   totalSize = args.fns.getSearchTotalSize();
 } else if (isFavouritesView) {
   totalSize = args.fns.getFavouritesTotalSize();
+} else if (isExtensionView) {
+  totalSize = args.fns.getExtensionTotalSize();
 }
 
 return {
@@ -2767,6 +3137,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 
 let virtualItems;
 let contextName;
@@ -2783,6 +3154,9 @@ if (isListView) {
 } else if (isFavouritesView) {
   virtualItems = args.fns.getFavouritesVirtualItems();
   contextName = "favouriteItem";
+} else if (isExtensionView) {
+  virtualItems = args.fns.getExtensionVirtualItems();
+  contextName = "extensionItem";
 }
 
 return {
@@ -2809,6 +3183,7 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 
 // Get the appropriate item based on view
 let item;
@@ -2820,6 +3195,8 @@ if (isListView) {
   item = args.contextData.searchItem;
 } else if (isFavouritesView) {
   item = args.contextData.favouriteItem;
+} else if (isExtensionView) {
+  item = args.contextData.extensionItem;
 }
 
 return {
@@ -2847,9 +3224,10 @@ const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
 const contentType = args.searchParams?.type || "channels";
 
-let item, itemData, itemSetting, itemType, processingStatus, showTypeBadge, itemId;
+let item, itemData, itemSetting, itemType, processingStatus, showTypeBadge, itemId, extensionItem;
 
 if (isListView) {
   const virtualItem = args.contextData.virtualItem;
@@ -2900,6 +3278,17 @@ if (isListView) {
   itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
   itemType = resultType;
   showTypeBadge = true;
+} else if (isExtensionView) {
+  const extensionItemVirtual = args.contextData.extensionItem;
+  itemData = args.fns.filteredExtensionItems()[extensionItemVirtual.index];
+  const resultType = itemData.resultType;
+  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+  itemId = item?.P?.youtubeId;
+  // Extension items don't have processing status
+  processingStatus = null;
+  itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
+  itemType = resultType;
+  showTypeBadge = true;
 }
 
 // Format processing status with detailed information
@@ -2933,6 +3322,7 @@ return {
   editMode: modalData.editMode,
   itemData: modalData.itemData,
   channelId: modalData.channelId,
+  initialUrl: modalData.initialUrl,
   onClose: args.fns.closeModal,
   onSave: args.fns.handleModalSave
 };
@@ -2982,6 +3372,12 @@ return {
         displayOrder: 2,
         componentName: "YTOSplitButton",
         props: '''
+// Hide sort controls on extension page
+const isExtension = args.fns.isExtensionView();
+if (isExtension) {
+  return { hide: true };
+}
+
 // Get sort field, direction, and options from fns
 const currentField = args.fns.getCurrentSortField();
 const currentDirection = args.fns.getCurrentSortDirection();

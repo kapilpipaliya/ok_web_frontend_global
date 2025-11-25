@@ -28,7 +28,17 @@ export async function POST({ request }: APIEvent) {
 
   try {
     const data: SignupRequestData = await request.json();
-    const user = await handleSignup(request, data, tx, subDomain);
+
+    // Extract query parameters from the request URL (excluding success and error)
+    const url = new URL(request.url);
+    const queryParams = new URLSearchParams();
+    for (const [key, value] of url.searchParams.entries()) {
+      if (key !== "success" && key !== "error") {
+        queryParams.append(key, value);
+      }
+    }
+
+    const user = await handleSignup(request, data, tx, subDomain, queryParams);
     if (user.error) {
       return {
         error: user.error,
@@ -51,6 +61,7 @@ async function handleSignup(
   data: SignupRequestData,
   tx: Transaction,
   subDomain: string,
+  queryParams: URLSearchParams,
 ) {
   try {
     let user;
@@ -91,7 +102,7 @@ async function handleSignup(
     const generalSettings = await getGeneralSettings(tx);
     const configuredRedirectUrl = generalSettings?.P?.redirectUrlAfterSignin;
 
-    updateRedirectUrl(user, subDomain, configuredRedirectUrl);
+    updateRedirectUrl(user, subDomain, configuredRedirectUrl, queryParams);
 
     return {
       graph: {

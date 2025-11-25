@@ -1516,3 +1516,20 @@ This documentation serves as the foundation for implementing the YSaar system an
 - ✅ Bottom navigation
 - ✅ Multi-language support (en, hi, gu)
 - ✅ Accessibility features
+
+TODO:
+TODO: In chrome extension remove open in YSaar button, Instead of bottom it should be next to channel, playlist and video. When user add video he have to select/create a playlist first and it will be added to that playlist.
+TODO: Even if the video is playing on parent Tab show playing on playlist.
+TODO: Make sure adding/editing Note for channel,playlist and video is working properly in youtube page (modify chrome extension).
+
+
+
+
+
+
+
+Letter tasks (future):
+Tell Sonet what should I do if I want global channel multiple users can see? & implement it.
+Save just openExtension url when URL changes it just redirect to Home API & add a proper URL. Note is working properly.
+On Home page user can add Testimonial section, users eye happy & cut directly.
+Add change icons, make users be full screen satisfied.

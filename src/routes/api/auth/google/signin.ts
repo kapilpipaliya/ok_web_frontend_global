@@ -42,8 +42,16 @@ export async function GET({ request }: APIEvent) {
 
     // Get the origin from the request - always use HTTPS
     const url = new URL(request.url);
-    const origin = `https://${url.hostname}`;
+    const origin = `https://${url.host}`;
     const redirectUri = `${origin}/api/auth/google/callback`;
+
+    // Extract query parameters from the request URL (excluding success and error)
+    const queryParams: Record<string, string> = {};
+    for (const [key, value] of url.searchParams.entries()) {
+      if (key !== "success" && key !== "error") {
+        queryParams[key] = value;
+      }
+    }
 
     // Create OAuth2 client
     const oauth2Client = new google.auth.OAuth2(
@@ -59,11 +67,12 @@ export async function GET({ request }: APIEvent) {
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email",
       ],
-      // Add state parameter for CSRF protection
+      // Add state parameter for CSRF protection and query params preservation
       state: Buffer.from(
         JSON.stringify({
           timestamp: Date.now(),
           origin,
+          queryParams,
         }),
       ).toString("base64"),
     });

@@ -1,0 +1,115 @@
+{
+  vertexes: [
+    {
+      id: "check_channel_exists_function",
+      L: "Function",
+      P: {
+        key: "checkChannelExists",
+        description: "Check if a channel already exists for a specific ownership",
+        body: '''
+try {
+  const { youtubeId, ownershipId } = args.contextData;
+
+  if (!youtubeId) {
+    throw new Error("YouTube ID is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("Ownership ID is required");
+  }
+
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
+    throw new Error("User session not found");
+  }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+  // Determine if youtubeId is a handle (doesn't start with UC) or actual channel ID
+  const isHandle = !youtubeId.startsWith('UC');
+  let actualChannelId = youtubeId;
+
+  // If it's a handle, we need to check using customUrl instead
+  if (isHandle) {
+    // Check if channel exists by customUrl (handle)
+    // Note: customUrl is stored with @ prefix and lowercase, so we need case-insensitive comparison
+    const handleQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+      MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+      WHERE toLower(c.customUrl) = toLower($handle) OR toLower(c.customUrl) = toLower($handleWithAt)
+      RETURN c, cs
+      LIMIT 1
+    `;
+
+    const handleParams = {
+      userUuid: user.P.uuid,
+      ownershipId,
+      handle: youtubeId,
+      handleWithAt: '@' + youtubeId
+    };
+
+    const handleResult = await args.session.run(handleQuery, handleParams);
+
+    if (handleResult.records.length > 0) {
+      return {
+        success: true,
+        exists: true,
+        data: {
+          channel: args.convertNodeToJson(handleResult.records[0].get('c')),
+          channelSetting: args.convertNodeToJson(handleResult.records[0].get('cs'))
+        }
+      };
+    }
+
+    // If not found by handle, return not exists
+    return {
+      success: true,
+      exists: false,
+      data: null
+    };
+  }
+
+  // Check if channel exists for this ownership by channel ID
+  const query = `
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $youtubeId})
+    RETURN c, cs
+    LIMIT 1
+  `;
+
+  const params = {
+    userUuid: user.P.uuid,
+    ownershipId,
+    youtubeId: actualChannelId
+  };
+
+  const result = await args.session.run(query, params);
+
+  const exists = result.records.length > 0;
+
+  return {
+    success: true,
+    exists,
+    data: exists ? {
+      channel: args.convertNodeToJson(result.records[0].get('c')),
+      channelSetting: args.convertNodeToJson(result.records[0].get('cs'))
+    } : null
+  };
+
+} catch (error) {
+  console.error("Error checking if channel exists:", error);
+  return {
+    success: false,
+    exists: false,
+    message: "Failed to check if channel exists",
+    error: { details: error.message }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

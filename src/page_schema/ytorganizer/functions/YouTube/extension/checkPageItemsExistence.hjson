@@ -1,0 +1,229 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "checkPageItemsExistence",
+        description: "Checks if channels, playlists, and videos from extension page exist in user's collection",
+        body: '''
+const { channels = [], playlists = [], videos = [] } = args.contextData;
+
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  throw new Error("User session not found. Please log in and try again.");
+}
+
+// Get effective user (handles admin impersonation)
+const effectiveUser = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+if (!effectiveUser) {
+  throw new Error("User not authenticated");
+}
+
+// Get ownership ID - try from context first, then fetch from user's ownerships
+const ownershipId = args.contextData.ownershipId;
+
+if (!ownershipId) {
+  throw new Error("YouTube ownership not found. Please connect a YouTube account.");
+}
+
+// Deduplicate channels by id (handles both UC IDs and @handles)
+const uniqueChannelsMap = new Map();
+for (const channel of channels) {
+  const key = channel.id.toLowerCase();
+  if (!uniqueChannelsMap.has(key)) {
+    uniqueChannelsMap.set(key, channel);
+  }
+}
+const uniqueChannels = Array.from(uniqueChannelsMap.values());
+
+// Deduplicate playlists by id
+const uniquePlaylistsMap = new Map();
+for (const playlist of playlists) {
+  if (!uniquePlaylistsMap.has(playlist.id)) {
+    uniquePlaylistsMap.set(playlist.id, playlist);
+  }
+}
+const uniquePlaylists = Array.from(uniquePlaylistsMap.values());
+
+// Deduplicate videos by id
+const uniqueVideosMap = new Map();
+for (const video of videos) {
+  if (!uniqueVideosMap.has(video.id)) {
+    uniqueVideosMap.set(video.id, video);
+  }
+}
+const uniqueVideos = Array.from(uniqueVideosMap.values());
+
+// Batch query for all channels at once using existing helper function
+let channelResults = [];
+if (uniqueChannels.length > 0) {
+  // Prepare channel IDs (both UC IDs and handles)
+  const channelYouTubeIds = uniqueChannels
+    .map(ch => ch.id)
+    .filter(id => id.startsWith('UC')); // Only actual YouTube IDs
+
+  // Use existing helper function to fetch channels with video counts
+  const channelsResult = await args.executeNamedServerFunction({
+    functionName: "getChannelsWithVideoCount",
+    contextData: {
+      userUuid: effectiveUser.P.uuid,
+      ownershipId,
+      channelIds: channelYouTubeIds
+    }
+  });
+
+  if (!channelsResult.result || !channelsResult.result.success) {
+    throw new Error(channelsResult.result?.message || "Failed to fetch channels");
+  }
+
+  const foundChannels = channelsResult.result.data || [];
+
+  // Create a map of found channels by youtubeId and customUrl
+  const foundChannelsMap = new Map();
+  for (const channelData of foundChannels) {
+    const channel = channelData.channel;
+    const youtubeId = channel.P.youtubeId;
+    const customUrl = channel.P.customUrl;
+
+    if (youtubeId) foundChannelsMap.set(youtubeId, channelData);
+    if (customUrl) {
+      foundChannelsMap.set(customUrl.toLowerCase(), channelData);
+      foundChannelsMap.set('@' + customUrl.toLowerCase(), channelData);
+    }
+  }
+
+  // Map results back to original channel data (deduplicated)
+  channelResults = uniqueChannels.map(channel => {
+    const found = foundChannelsMap.get(channel.id) ||
+                  foundChannelsMap.get(channel.id.toLowerCase()) ||
+                  foundChannelsMap.get('@' + channel.id.toLowerCase());
+
+    if (found) {
+      // Return full vertex data for existing channels
+      return found;
+    } else {
+      // Return extension data with exists flag for non-existing channels
+      return {
+        channel: channel,
+        channelSetting: null,
+        extensionData: true
+      };
+    }
+  });
+}
+
+// Batch query for all playlists at once using existing helper function
+let playlistResults = [];
+if (uniquePlaylists.length > 0) {
+  const playlistIds = uniquePlaylists.map(p => p.id);
+
+  // Use existing helper function to fetch playlists with video counts
+  const playlistsResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: effectiveUser.P.uuid,
+      ownershipId,
+      playlistIds
+    }
+  });
+
+  if (!playlistsResult.result || !playlistsResult.result.success) {
+    throw new Error(playlistsResult.result?.message || "Failed to fetch playlists");
+  }
+
+  const foundPlaylists = playlistsResult.result.data || [];
+
+  // Create a map of found playlists by youtubeId
+  const foundPlaylistsMap = new Map();
+  for (const playlistData of foundPlaylists) {
+    const playlist = playlistData.playlist;
+    const youtubeId = playlist.P.youtubeId;
+
+    if (youtubeId) {
+      foundPlaylistsMap.set(youtubeId, playlistData);
+    }
+  }
+
+  // Map results back to original playlist data (deduplicated)
+  playlistResults = uniquePlaylists.map(playlist => {
+    const found = foundPlaylistsMap.get(playlist.id);
+
+    if (found) {
+      // Return full vertex data for existing playlists
+      return found;
+    } else {
+      // Return extension data with exists flag for non-existing playlists
+      return {
+        playlist: playlist,
+        playlistSetting: null,
+        extensionData: true
+      };
+    }
+  });
+}
+
+// Batch query for all videos at once using existing helper function
+let videoResults = [];
+if (uniqueVideos.length > 0) {
+  const videoIds = uniqueVideos.map(v => v.id);
+
+  // Use existing helper function to fetch videos with details
+  const videosResult = await args.executeNamedServerFunction({
+    functionName: "getVideosWithDetails",
+    contextData: {
+      userUuid: effectiveUser.P.uuid,
+      ownershipId,
+      videoIds
+    }
+  });
+
+  if (!videosResult.result || !videosResult.result.success) {
+    throw new Error(videosResult.result?.message || "Failed to fetch videos");
+  }
+
+  const foundVideos = videosResult.result.data || [];
+
+  // Create a map of found videos by youtubeId
+  const foundVideosMap = new Map();
+  for (const videoData of foundVideos) {
+    const video = videoData.video;
+    const youtubeId = video.P.youtubeId;
+
+    if (youtubeId) {
+      foundVideosMap.set(youtubeId, videoData);
+    }
+  }
+
+  // Map results back to original video data (deduplicated)
+  videoResults = uniqueVideos.map(video => {
+    const found = foundVideosMap.get(video.id);
+
+    if (found) {
+      // Return full vertex data for existing videos
+      return found;
+    } else {
+      // Return extension data with exists flag for non-existing videos
+      return {
+        video: video,
+        extensionData: true
+      };
+    }
+  });
+}
+
+return {
+  success: true,
+  data: {
+    channels: channelResults,
+    playlists: playlistResults,
+    videos: videoResults
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}
