@@ -126,64 +126,78 @@ export function DynamicComponent(props: DynamicComponentProps) {
     hasEditPermission,
   });
 
-  // Create dynamic functions for the component
+  // Helper to create function arguments with a given functionProxy
+  // This eliminates duplication between temp and final versions
+  const createFunctionArgumentGetter = (fnProxy: Record<string, unknown>) => {
+    const getFunctionArg = () =>
+      createFunctionArgumentBase(
+        props,
+        {
+          formVertex,
+          formId,
+          componentName: () => componentName(),
+          isNoPermissionCheck,
+          isViewMode: () => isViewMode(),
+          mounted,
+          parentMeta,
+          ref,
+          setRef,
+          updateValue,
+          onChange,
+          hasFullPermission,
+          hasEditPermission,
+          hasCreatePermission,
+          hasViewPermission,
+        },
+        {
+          graph,
+          setGraph,
+          toast,
+          searchParams,
+          setSearchParams,
+          zIndex,
+          navigate,
+          location,
+          theme,
+          parentItems,
+          previewStore,
+          themeToggle,
+          owner: owner!,
+          parentRenderContext,
+          functionProxy: fnProxy,
+        },
+      );
+
+    return createMemo(() =>
+      createFunctionArgumentWithValue(getFunctionArg, value),
+    );
+  };
+
+  // Create temporary function proxy that falls back to parent context
+  // This breaks circular dependency during dynamicFns initialization
+  const tempFunctionProxy = createFunctionProxy(
+    () => ({}),
+    parentRenderContext,
+  );
+
+  // Create dynamicFns first using temp function arguments
   const dynamicFns = createDynamicFunctions(
     graph,
     () => props.meta,
-    () => getFunctionArgumentWithValue(),
+    createFunctionArgumentGetter(tempFunctionProxy),
     parentRenderContext,
     componentName,
   );
 
-  // Create function proxy
+  // Now create the real function proxy with actual dynamicFns
   const functionProxy = createFunctionProxy(
     () => dynamicFns,
     parentRenderContext,
   );
 
-  // Create function arguments
-  const getFunctionArgument = () =>
-    createFunctionArgumentBase(
-      props,
-      {
-        formVertex,
-        formId,
-        componentName: () => componentName(),
-        isNoPermissionCheck,
-        isViewMode: () => isViewMode(),
-        mounted,
-        parentMeta,
-        ref,
-        setRef,
-        updateValue,
-        onChange,
-        hasFullPermission,
-        hasEditPermission,
-        hasCreatePermission,
-        hasViewPermission,
-      },
-      {
-        graph,
-        setGraph,
-        toast,
-        searchParams,
-        setSearchParams,
-        zIndex,
-        navigate,
-        location,
-        theme,
-        parentItems,
-        previewStore,
-        themeToggle,
-        owner: owner!,
-        parentRenderContext,
-        functionProxy,
-      },
-    );
-
-  const getFunctionArgumentWithValue = createMemo(() =>
-    createFunctionArgumentWithValue(getFunctionArgument, value),
-  );
+  // Create the final function arguments with real functionProxy
+  const getFunctionArgumentWithValue =
+    createFunctionArgumentGetter(functionProxy);
 
   const dynamicProps = createDynamicPropsMemo(props, {
     graph,

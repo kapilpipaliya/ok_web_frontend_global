@@ -231,70 +231,82 @@ export function PageView(
         | undefined;
     const parentMeta = () => parentRenderContext()?.context.meta;
 
-    // Create dynamic functions for the component
+    // Helper to create function arguments with a given functionProxy
+    const createFunctionArgumentGetter = (fnProxy: Record<string, unknown>) => {
+      const getFunctionArg = () => {
+        const meta = props.metaVertex;
+        if (!meta) return {} as FunctionArgumentType;
+
+        return createFunctionArgumentBase(
+          {
+            data: props.data,
+            meta,
+          },
+          {
+            formVertex: () => ({}) as any,
+            formId: "page-view",
+            componentName,
+            isNoPermissionCheck: () => props.isNoPermissionCheck,
+            isViewMode: () => false,
+            mounted,
+            parentMeta,
+            ref,
+            setRef,
+            updateValue: () => {},
+            onChange: () => {},
+            hasFullPermission: () => true,
+            hasEditPermission: () => true,
+            hasCreatePermission: () => true,
+            hasViewPermission: () => true,
+          },
+          {
+            graph,
+            setGraph,
+            toast,
+            searchParams,
+            setSearchParams,
+            zIndex,
+            navigate,
+            location,
+            theme,
+            parentItems,
+            previewStore: previewStore2,
+            themeToggle,
+            owner: owner!,
+            parentRenderContext,
+            functionProxy: fnProxy,
+          },
+        );
+      };
+
+      return () =>
+        createFunctionArgumentWithValue(getFunctionArg, () => undefined);
+    };
+
+    // Create temporary function proxy that falls back to parent context
+    const tempFunctionProxy = createFunctionProxy(
+      () => ({}),
+      parentRenderContext,
+    );
+
+    // Create dynamic functions using temp function arguments
     const dynamicFns = createDynamicFunctions(
       graph,
       () => props.metaVertex,
-      () => getFunctionArgumentWithValue(),
+      createMemo(createFunctionArgumentGetter(tempFunctionProxy)),
       parentRenderContext,
       componentName,
     );
 
-    // Create function proxy
+    // Create the real function proxy with actual dynamicFns
     const functionProxy = createFunctionProxy(
       () => dynamicFns,
       parentRenderContext,
     );
 
-    // Create a proper function argument for evaluating dynamic props
-    const getFunctionArgument = () => {
-      const meta = props.metaVertex;
-      if (!meta) return {} as FunctionArgumentType;
-
-      return createFunctionArgumentBase(
-        {
-          data: props.data,
-          meta,
-        },
-        {
-          formVertex: () => ({}) as any,
-          formId: "page-view",
-          componentName,
-          isNoPermissionCheck: () => props.isNoPermissionCheck,
-          isViewMode: () => false,
-          mounted,
-          parentMeta,
-          ref,
-          setRef,
-          updateValue: () => {},
-          onChange: () => {},
-          hasFullPermission: () => true,
-          hasEditPermission: () => true,
-          hasCreatePermission: () => true,
-          hasViewPermission: () => true,
-        },
-        {
-          graph,
-          setGraph,
-          toast,
-          searchParams,
-          setSearchParams,
-          zIndex,
-          navigate,
-          location,
-          theme,
-          parentItems,
-          previewStore: previewStore2,
-          themeToggle,
-          owner: owner!,
-          parentRenderContext,
-          functionProxy,
-        },
-      );
-    };
-
-    const getFunctionArgumentWithValue = () =>
-      createFunctionArgumentWithValue(getFunctionArgument, () => undefined);
+    // Create final function arguments with real functionProxy
+    const getFunctionArgumentWithValue =
+      createFunctionArgumentGetter(functionProxy);
 
     // Evaluate dynamic props from metaVertex
     const dynamicProps = createDynamicPropsMemo(

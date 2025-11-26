@@ -412,9 +412,13 @@ export function SignInForm() {
                     componentName: "Html",
                     props: () => ({
                       onClick: () => {
-                        const params = new URLSearchParams(searchParams as Record<string, string>);
+                        const params = new URLSearchParams(
+                          searchParams as Record<string, string>,
+                        );
                         const queryString = params.toString();
-                        navigate(`${API.urls.user.forgotPassword}${queryString ? `?${queryString}` : ""}`);
+                        navigate(
+                          `${API.urls.user.forgotPassword}${queryString ? `?${queryString}` : ""}`,
+                        );
                       },
                     }),
                     text: "Forgot Password?",
@@ -429,9 +433,13 @@ export function SignInForm() {
                     componentName: "Html",
                     props: () => ({
                       onClick: () => {
-                        const params = new URLSearchParams(searchParams as Record<string, string>);
+                        const params = new URLSearchParams(
+                          searchParams as Record<string, string>,
+                        );
                         const queryString = params.toString();
-                        navigate(`${API.urls.user.resendVerification}${queryString ? `?${queryString}` : ""}`);
+                        navigate(
+                          `${API.urls.user.resendVerification}${queryString ? `?${queryString}` : ""}`,
+                        );
                       },
                     }),
                     text: "Resend Verification",
@@ -513,9 +521,13 @@ export function SignInForm() {
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
-                    const params = new URLSearchParams(searchParams as Record<string, string>);
+                    const params = new URLSearchParams(
+                      searchParams as Record<string, string>,
+                    );
                     const queryString = params.toString();
-                    navigate(`/auth/signup${queryString ? `?${queryString}` : ""}`);
+                    navigate(
+                      `/auth/signup${queryString ? `?${queryString}` : ""}`,
+                    );
                   },
                 }),
                 text: "Sign Up",

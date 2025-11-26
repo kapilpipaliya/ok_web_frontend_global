@@ -471,9 +471,13 @@ export function SignupForm() {
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
-                    const params = new URLSearchParams(searchParams as Record<string, string>);
+                    const params = new URLSearchParams(
+                      searchParams as Record<string, string>,
+                    );
                     const queryString = params.toString();
-                    navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
+                    navigate(
+                      `${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`,
+                    );
                   },
                 }),
                 text: "Sign in",

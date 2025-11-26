@@ -381,8 +381,9 @@ const selectOwnership = async (ownership) => {
     console.error('Error updating ownership lastSelected:', error);
   }
 
-  // Refresh quota usage for the new ownership
+  // Refresh data for the new ownership
   await fetchQuotaUsage();
+  await loadCardFieldSetting();
 };
 
 // Load ownership state from sessionStorage
@@ -423,6 +424,11 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
 
 // Fetch shared quota usage from server (10k units/day shared across all ownerships)
 const fetchQuotaUsage = async () => {
+  // Don't fetch if no ownership selected
+  if (!getSelectedOwnershipId()) {
+    return;
+  }
+
   setQuotaLoading(true);
   try {
     const result = await executeYTOFunction('getSharedQuotaStatus', {});
@@ -922,11 +928,11 @@ const [navigationSections, setNavigationSections] = args.createSignal(filteredNa
 const mobileNavigationItemsData = [
   {
     id: "extension_home",
-    href: "/extension/home",
-    label: "Extension",
-    icon: "carbon:application-web",
-    title: "Extension home page",
-    pathCheck: (pathname) => pathname === "/extension/home"
+    href: "/content?type=extension",
+    label: "Quick Add",
+    icon: "carbon:add-alt",
+    title: "Quick add channels, playlists, and videos",
+    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "extension"
   },
   {
     id: "home",
@@ -1259,13 +1265,8 @@ return {
     await args.fns.loadSidebarState?.();
 
     // Fetch ownerships (will auto-select first one if none selected)
+    // This will trigger fetchQuotaUsage() and loadCardFieldSetting() via selectOwnership()
     await args.fns.fetchOwnerships?.();
-
-    // Fetch quota usage for selected ownership
-    args.fns.fetchQuotaUsage?.();
-
-    // Load card field setting from user setting
-    args.fns.loadCardFieldSetting?.();
 
     // Refresh quota usage every 5 minutes
     const quotaInterval = setInterval(() => {

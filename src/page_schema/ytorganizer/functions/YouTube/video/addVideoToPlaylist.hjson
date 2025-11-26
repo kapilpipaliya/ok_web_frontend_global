@@ -99,7 +99,10 @@ try {
         // Fetch video details from URL
         const videoResult = await args.executeNamedServerFunction({
           functionName: "fetchVideoDetails",
-          contextData: { videoUrl: item.value }
+          contextData: {
+            videoUrl: item.value,
+            ownershipId: ownershipId
+          }
         });
 
         if (videoResult.error) {

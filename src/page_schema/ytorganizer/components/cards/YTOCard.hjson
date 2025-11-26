@@ -674,8 +674,14 @@ return {
     e.preventDefault();
 
     if (itemType === 'video') {
-      // For videos, show "feature coming very soon" message
-      args.showSuccessToast?.("Feature coming very soon!");
+      // For videos, open add video to playlist modal
+      const videoTitle = item?.P?.title || '';
+
+      args.fns?.setAddVideoToPlaylistData?.({
+        videoId: youtubeId,
+        videoTitle: videoTitle
+      });
+      args.fns?.setIsAddVideoToPlaylistModalOpen?.(true);
       return;
     }
 

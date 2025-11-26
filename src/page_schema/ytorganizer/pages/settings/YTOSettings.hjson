@@ -421,28 +421,6 @@ return `._id {
   font-weight: 500;
   color: ${args.theme.var.color.text};
   display: block;
-  margin-bottom: 0.25rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "theme_description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Toggle between light and dark mode"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0;
 }`;
 '''
       }
@@ -1061,29 +1039,6 @@ return `._id {
   font-weight: 600;
   color: ${args.theme.var.color.info_light_100_text};
   display: block;
-  margin-bottom: ${args.theme.var.spacing.xs};
-}`;
-'''
-      }
-    },
-    {
-      id: "feedback_description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Your feedback helps us improve! Share your thoughts, report bugs, or suggest new features. Every suggestion matters!"
-};
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.info_light_100_text};
-  margin: 0;
-  line-height: 1.5;
 }`;
 '''
       }
@@ -1341,13 +1296,12 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "section"
+  as: "div"
 };
 ''',
         css: '''
 return `._id {
   display: none;
-  margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {
@@ -1359,118 +1313,14 @@ return `._id {
       }
     },
     {
-      id: "logout_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h2",
-  text: "Account"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 1rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "logout_card",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "logout_text_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "logout_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  text: "Sign Out"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  display: block;
-  margin-bottom: 0.25rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "logout_description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Sign out of your YSaar account"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
       id: "logout_button",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "YTOButton",
         props: '''
 return {
-  text: "Logout",
+  text: "Sign Out",
   variant: "danger",
   onClick: () => args.navigate("/auth/logout")
 };
@@ -1494,7 +1344,6 @@ return {
     { id: "e18", T: "Attr", S: "appearance_section", E: "theme_preference" },
     { id: "e19", T: "Attr", S: "theme_preference", E: "theme_label_wrapper" },
     { id: "e20", T: "Attr", S: "theme_label_wrapper", E: "theme_label" },
-    { id: "e21", T: "Attr", S: "theme_label_wrapper", E: "theme_description" },
     { id: "e22", T: "Attr", S: "theme_preference", E: "theme_toggle_button" },
     { id: "e22a", T: "Attr", S: "setting_container", E: "youtube_connection_section" },
     { id: "e22c", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_card" },
@@ -1521,15 +1370,9 @@ return {
     { id: "e25", T: "Attr", S: "feedback_section", E: "feedback_card" },
     { id: "e26", T: "Attr", S: "feedback_card", E: "feedback_text_wrapper" },
     { id: "e27", T: "Attr", S: "feedback_text_wrapper", E: "feedback_label" },
-    { id: "e28", T: "Attr", S: "feedback_text_wrapper", E: "feedback_description" },
     { id: "e29", T: "Attr", S: "feedback_card", E: "feedback_button" },
     { id: "e29a", T: "Attr", S: "setting_container", E: "logout_section" },
-    { id: "e29b", T: "Attr", S: "logout_section", E: "logout_title" },
-    { id: "e29c", T: "Attr", S: "logout_section", E: "logout_card" },
-    { id: "e29d", T: "Attr", S: "logout_card", E: "logout_text_wrapper" },
-    { id: "e29e", T: "Attr", S: "logout_text_wrapper", E: "logout_label" },
-    { id: "e29f", T: "Attr", S: "logout_text_wrapper", E: "logout_description" },
-    { id: "e29g", T: "Attr", S: "logout_card", E: "logout_button" },
+    { id: "e29g", T: "Attr", S: "logout_section", E: "logout_button" },
     { id: "e30", T: "Attr", S: "setting_container", E: "data_section" },
     { id: "e31", T: "Attr", S: "data_section", E: "data_title" },
     { id: "e32", T: "Attr", S: "data_title", E: "data_title_icon" },

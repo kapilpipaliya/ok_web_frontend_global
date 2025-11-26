@@ -228,9 +228,13 @@ export function ForgotPasswordForm() {
 
       // Redirect to signIn page after successful reset
       setTimeout(() => {
-        const params = new URLSearchParams(searchParams as Record<string, string>);
+        const params = new URLSearchParams(
+          searchParams as Record<string, string>,
+        );
         const queryString = params.toString();
-        navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
+        navigate(
+          `${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`,
+        );
       }, 3000);
 
       return true;
@@ -273,9 +277,13 @@ export function ForgotPasswordForm() {
           createLinkButton(
             () => "Back to Sign In",
             () => {
-              const params = new URLSearchParams(searchParams as Record<string, string>);
+              const params = new URLSearchParams(
+                searchParams as Record<string, string>,
+              );
               const queryString = params.toString();
-              navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
+              navigate(
+                `${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`,
+              );
             },
           ),
         ],

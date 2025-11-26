@@ -27,7 +27,7 @@
  * - skip: number (optional) - Number of results to skip (for pagination)
  *
  * Returns:
- * - Array of {playlist: Vertex, playlistSetting: Vertex, channel: Vertex|null} with videoCount in playlistSetting.P
+ * - Array of {playlist: Vertex, playlistSetting: Vertex, channel: Vertex|null, ownership: Vertex} with videoCount in playlistSetting.P
  */
 try {
   const {
@@ -109,9 +109,9 @@ try {
     // CORRECTED SCHEMA: Count videos through PlaylistSetting->Video
     OPTIONAL MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
 
-    WITH p, ps, c, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+    WITH p, ps, c, o, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
 
-    RETURN p, ps, c, videoCount
+    RETURN p, ps, c, o, videoCount
     ORDER BY ${orderByClause}
     ${skipClause}
     ${limitClause}
@@ -127,9 +127,10 @@ try {
   });
 
   // Convert results to JSON format
-  const playlists = result.records.map(record => {
+  const playlists = result.records.map((record) => {
     const playlistSetting = args.convertNodeToJson(record.get('ps'));
     const videoCount = record.get('videoCount');
+    const ownership = args.convertNodeToJson(record.get('o'));
 
     // Add ownership-specific video count to playlist setting
     if (playlistSetting && playlistSetting.P) {
@@ -139,7 +140,8 @@ try {
     return {
       playlist: args.convertNodeToJson(record.get('p')),
       playlistSetting,
-      channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null
+      channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null,
+      ownership
     };
   });
 

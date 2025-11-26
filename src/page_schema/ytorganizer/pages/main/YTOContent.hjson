@@ -34,15 +34,16 @@ return {
         displayOrder: 1,
         componentName: "Html",
         fns: '''
-const contentType = args.searchParams?.type || "channels";
+// Reactive content type detection
+const contentType = args.createMemo(() => args.searchParams?.type || "channels");
 const detailId = args.searchParams?.id || null;
 const searchQuery = args.searchParams?.q || "";
 
 // Reactive view mode detection
 const isDetailView = args.createMemo(() => !!args.searchParams?.id);
 const isSearchView = args.createMemo(() => args.searchParams?.q !== undefined);
-const isFavouritesView = args.createMemo(() => contentType === "favourites");
-const isExtensionView = args.createMemo(() => contentType === "extension");
+const isFavouritesView = args.createMemo(() => contentType() === "favourites");
+const isExtensionView = args.createMemo(() => contentType() === "extension");
 const isListView = args.createMemo(() => !isDetailView() && !isSearchView() && !isFavouritesView() && !isExtensionView());
 
 // State for data
@@ -316,7 +317,7 @@ const getCurrentSortOptions = args.createMemo(() => {
     return favouritesSortOptions;
   }
   if (isDetailView()) {
-    return contentType === "channels" ? playlistSortOptions : videoSortOptions;
+    return contentType() === "channels" ? playlistSortOptions : videoSortOptions;
   }
   if (isSearchView()) {
     return [
@@ -325,7 +326,7 @@ const getCurrentSortOptions = args.createMemo(() => {
       { value: "created", text: "Created Date" }
     ];
   }
-  return contentType === "playlists" ? playlistSortOptions : channelSortOptions;
+  return contentType() === "playlists" ? playlistSortOptions : channelSortOptions;
 });
 
 // Get current sort value based on view
@@ -409,7 +410,7 @@ const detailItems = args.createMemo(() => {
   if (!data) return [];
 
   // For channels, return playlists
-  if (contentType === "channels") {
+  if (contentType() === "channels") {
     return data.playlists || [];
   }
 
@@ -1029,7 +1030,7 @@ const handleScroll = (e) => {
 const loadListData = async () => {
   setLoading(true);
   try {
-    const functionName = contentType === "playlists" ? "getUserPlaylists" : "getUserChannels";
+    const functionName = contentType() === "playlists" ? "getUserPlaylists" : "getUserChannels";
     const result = await args.fns.executeYTOFunction(functionName, {
       sortBy: listSortBy()
     });
@@ -1039,7 +1040,7 @@ const loadListData = async () => {
       args.showErrorToast(result.error);
       setItems([]);
     } else if (result?.result?.success && result?.result?.data) {
-      const itemsData = contentType === "playlists"
+      const itemsData = contentType() === "playlists"
         ? result.result.data.playlists || []
         : result.result.data.channels || [];
       setItems(itemsData);
@@ -1066,9 +1067,9 @@ const loadListData = async () => {
 const loadDetailData = async () => {
   setLoading(true);
   try {
-    const functionName = contentType === "playlists" ? "getPlaylistVideos" : "getChannelContents";
+    const functionName = contentType() === "playlists" ? "getPlaylistVideos" : "getChannelContents";
     const result = await args.fns.executeYTOFunction(functionName, {
-      [contentType === "playlists" ? "playlistId" : "channelId"]: detailId,
+      [contentType() === "playlists" ? "playlistId" : "channelId"]: detailId,
       sortBy: detailSortBy()
     });
 
@@ -1241,18 +1242,6 @@ const loadData = async () => {
   }
 };
 
-// Watch pageContent changes and reload extension data
-args.createEffect(
-  args.on(
-    () => pageContent(),
-    (content) => {
-      if (isExtensionView() && content) {
-        loadExtensionData();
-      }
-    }
-  )
-);
-
 // Reset all scroll positions
 const resetScrollPositions = () => {
   // Reset signals immediately
@@ -1288,18 +1277,27 @@ args.createEffect(
       listSortBy(),
       detailSortBy(),
       searchSortBy(),
-      favouritesSortBy()
+      favouritesSortBy(),
+      args.fns.selectedOwnership?.(), // Watch for ownership selection
+      pageContent() // Watch for page content changes (for extension view)
     ],
     (
-      [currentType, currentId, currentQuery, currentListSort, currentDetailSort, currentSearchSort, currentFavouritesSort],
-      [prevType, prevId, prevQuery, prevListSort, prevDetailSort, prevSearchSort, prevFavouritesSort] = []
+      [currentType, currentId, currentQuery, currentListSort, currentDetailSort, currentSearchSort, currentFavouritesSort, currentOwnership, currentPageContent],
+      [prevType, prevId, prevQuery, prevListSort, prevDetailSort, prevSearchSort, prevFavouritesSort, prevOwnership, prevPageContent] = []
     ) => {
+      // Don't load data until ownership is selected
+      if (!currentOwnership) {
+        return;
+      }
+
       // Check what changed
       const urlParamsChanged = currentType !== prevType || currentId !== prevId || currentQuery !== prevQuery;
       const listSortChanged = currentListSort !== prevListSort;
       const detailSortChanged = currentDetailSort !== prevDetailSort;
       const searchSortChanged = currentSearchSort !== prevSearchSort;
       const favouritesSortChanged = currentFavouritesSort !== prevFavouritesSort;
+      const ownershipChanged = currentOwnership !== prevOwnership;
+      const pageContentChanged = currentPageContent !== prevPageContent;
 
       // Reset scroll positions if URL params changed
       if (urlParamsChanged) {
@@ -1307,10 +1305,13 @@ args.createEffect(
       }
 
       // Load data based on what changed
-      // Priority: URL change loads everything, sort changes only reload if view hasn't changed
-      if (urlParamsChanged) {
-        // URL changed, load appropriate data for new view
+      // Priority: Ownership change or URL change loads everything, sort changes only reload if view hasn't changed
+      if (urlParamsChanged || ownershipChanged) {
+        // URL or ownership changed, load appropriate data for new view
         loadData();
+      } else if (pageContentChanged && isExtensionView()) {
+        // Page content changed in extension view, reload extension data only
+        loadExtensionData();
       } else {
         // Only sort changed, reload current view
         if (listSortChanged && isListView()) {
@@ -1342,7 +1343,7 @@ const filteredItems = args.createMemo(() => {
   if (!term) return items();
 
   return items().filter(item => {
-    const data = contentType === "playlists" ? item.playlist : item.channel;
+    const data = contentType() === "playlists" ? item.playlist : item.channel;
     const title = data?.P?.title?.toLowerCase() || "";
     const description = data?.P?.description?.toLowerCase() || "";
     return title.includes(term) || description.includes(term);
@@ -1351,20 +1352,20 @@ const filteredItems = args.createMemo(() => {
 
 // Navigation actions
 const navigateToDetail = (item) => {
-  const data = contentType === "playlists" ? item.playlist : item.channel;
+  const data = contentType() === "playlists" ? item.playlist : item.channel;
   const id = data?.P?.youtubeId || "";
-  args.navigate(`/content?type=${contentType}&id=${id}`);
+  args.navigate(`/content?type=${contentType()}&id=${id}`);
 };
 
 const navigateBack = () => {
-  args.navigate(`/content?type=${contentType}`);
+  args.navigate(`/content?type=${contentType()}`);
 };
 
 // Menu actions
 const openInYouTube = (item) => {
-  const data = contentType === "playlists" ? item.playlist : item.channel;
+  const data = contentType() === "playlists" ? item.playlist : item.channel;
   const youtubeId = data?.P?.youtubeId || "";
-  const url = contentType === "playlists"
+  const url = contentType() === "playlists"
     ? `https://www.youtube.com/playlist?list=${youtubeId}`
     : `https://www.youtube.com/channel/${youtubeId}`;
   window.open(url, "_blank");
@@ -1623,7 +1624,7 @@ const updateAllViews = (itemInfo) => {
   const { itemKey, settingKey, arrayKey } = typeMap[type];
 
   // Update list view
-  if (isListView() && contentType === arrayKey) {
+  if (isListView() && contentType() === arrayKey) {
     setItems(updateItemInArrayById(items(), itemId, itemKey, settingKey, setting));
   }
 
@@ -1661,6 +1662,15 @@ const updateAllViews = (itemInfo) => {
       setFavouritesData({ ...favourites, [arrayKey]: updated });
     }
   }
+
+  // Update extension view
+  if (isExtensionView()) {
+    const extension = extensionData();
+    if (extension?.[arrayKey]) {
+      const updated = updateItemInArrayById(extension[arrayKey], itemId, itemKey, settingKey, setting);
+      setExtensionData({ ...extension, [arrayKey]: updated });
+    }
+  }
 };
 
 // Update item data after toggle favourite
@@ -1679,7 +1689,7 @@ const updateItemDataAfterNoteSave = (updatedData) => {
 const [isSyncing, setIsSyncing] = args.createSignal(false);
 
 const syncCurrentItem = async () => {
-  const contentType = args.searchParams?.type || "channels";
+  const currentContentType = contentType();
   const data = detailData();
 
   if (!data) {
@@ -1690,7 +1700,7 @@ const syncCurrentItem = async () => {
   setIsSyncing(true);
 
   try {
-    if (contentType === "playlists") {
+    if (currentContentType === "playlists") {
       const playlist = data.playlist?.playlist;
       if (!playlist) {
         args.showErrorToast("Playlist not found");
@@ -1737,6 +1747,10 @@ const syncCurrentItem = async () => {
 
 // Add videos to playlist modal
 const [isAddVideosModalOpen, setIsAddVideosModalOpen] = args.createSignal(false);
+
+// Add single video to playlist modal (for extension)
+const [isAddVideoToPlaylistModalOpen, setIsAddVideoToPlaylistModalOpen] = args.createSignal(false);
+const [addVideoToPlaylistData, setAddVideoToPlaylistData] = args.createStore({ videoId: null, videoTitle: null });
 
 // Update local item setting across all views
 const updateLocalItemSetting = (updatedData) => {
@@ -1810,9 +1824,9 @@ args.createEffect(
       if (isListView() && !isSearchView() && !isFavouritesView()) {
         const currentItems = items();
 
-        if (contentType === "channels") {
+        if (contentType() === "channels") {
           extractProcessingItems(currentItems, null, channelsMap, playlistsMap);
-        } else if (contentType === "playlists") {
+        } else if (contentType() === "playlists") {
           extractProcessingItems(null, currentItems, channelsMap, playlistsMap);
         }
       }
@@ -1821,7 +1835,7 @@ args.createEffect(
       if (isDetailView()) {
         const detail = detailData();
         if (detail) {
-          if (contentType === "channels") {
+          if (contentType() === "channels") {
             // Include channel itself
             const channelId = detail.channel?.channel?.P?.youtubeId;
             if (channelId) {
@@ -1830,7 +1844,7 @@ args.createEffect(
 
             // Include playlists in channel
             extractProcessingItems(null, detail.playlists, channelsMap, playlistsMap);
-          } else if (contentType === "playlists") {
+          } else if (contentType() === "playlists") {
             // Include playlist itself
             const playlistId = detail.playlist?.playlist?.P?.youtubeId;
             if (playlistId) {
@@ -1874,9 +1888,9 @@ const collectVisibleIdsFromData = () => {
   if (isListView() && !isSearchView() && !isFavouritesView()) {
     const currentItems = items();
 
-    if (contentType === "channels") {
+    if (contentType() === "channels") {
       collectVisibleIds(currentItems, null, channelIds, playlistIds);
-    } else if (contentType === "playlists") {
+    } else if (contentType() === "playlists") {
       collectVisibleIds(null, currentItems, channelIds, playlistIds);
     }
   }
@@ -1885,7 +1899,7 @@ const collectVisibleIdsFromData = () => {
   if (isDetailView()) {
     const detail = detailData();
     if (detail) {
-      if (contentType === "channels") {
+      if (contentType() === "channels") {
         // Collect channel ID itself
         const channelId = detail.channel?.channel?.P?.youtubeId;
         if (channelId && !channelIds.includes(channelId)) {
@@ -1894,7 +1908,7 @@ const collectVisibleIdsFromData = () => {
 
         // Collect playlists in channel
         collectVisibleIds(null, detail.playlists, channelIds, playlistIds);
-      } else if (contentType === "playlists") {
+      } else if (contentType() === "playlists") {
         // Collect playlist ID itself
         const playlistId = detail.playlist?.playlist?.P?.youtubeId;
         if (playlistId && !playlistIds.includes(playlistId)) {
@@ -2055,6 +2069,15 @@ args.onCleanup(() => {
     args.untrack(() => stopPolling());
 });
 
+// Watch for extension view and request page content
+args.createEffect(
+  args.on([isExtensionView], () => {
+    if (isExtensionView()) {
+      requestPageContent();
+    }
+  })
+);
+
 // Get processing status for a specific channel
 const getChannelProcessingStatus = (channelId) => {
   return processingStatuses().channels[channelId] || null;
@@ -2124,6 +2147,7 @@ const formatProcessingStatus = (processingStatus, itemType) => {
 };
 
 return {
+  contentType,
   items,
   filteredItems,
   loading,
@@ -2207,6 +2231,10 @@ return {
   isSyncing,
   isAddVideosModalOpen,
   setIsAddVideosModalOpen,
+  isAddVideoToPlaylistModalOpen,
+  setIsAddVideoToPlaylistModalOpen,
+  addVideoToPlaylistData,
+  setAddVideoToPlaylistData,
   processingStatuses,
   getChannelProcessingStatus,
   getPlaylistProcessingStatus,
@@ -2261,11 +2289,6 @@ return {
 
     // Add message listener for extension view
     window.addEventListener('message', args.fns.handleMessage);
-
-    // Request page content from parent if in extension view
-    if (args.fns.isExtensionView()) {
-      args.fns.requestPageContent();
-    }
   },
   onCleanup: () => {
     window.removeEventListener('resize', args.fns.handleResize);
@@ -2315,7 +2338,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 // Determine title based on view
 let title = "";
@@ -2369,7 +2392,7 @@ return `._id {
         displayOrder: 2,
         componentName: "YTOProcessingStatus",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 const data = args.fns.detailData();
 
 if (!args.fns.isDetailView() || !data) {
@@ -2487,7 +2510,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 // Determine description based on view
 let description = "";
@@ -2573,7 +2596,7 @@ return `._id {
         displayOrder: 1,
         componentName: "YTOTextInput",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 // Determine placeholder and handlers based on view
 let placeholder = "";
@@ -2588,6 +2611,10 @@ if (args.fns.isSearchView()) {
   autofocus = true;
 } else if (args.fns.isFavouritesView()) {
   placeholder = "Filter favourites...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.setSearchTerm(e.target.value);
+} else if (args.fns.isExtensionView()) {
+  placeholder = "Filter items...";
   value = args.fns.searchTerm();
   onInput = (e) => args.fns.setSearchTerm(e.target.value);
 } else if (args.fns.isDetailView()) {
@@ -2622,7 +2649,7 @@ return {
         displayOrder: 2,
         componentName: "YTOButton",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 const text = contentType === "playlists" ? "Add Playlist" : "Add Channel";
 
 return {
@@ -2688,7 +2715,7 @@ return {
         displayOrder: 2,
         componentName: "YTOButton",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 return {
   text: "Add Playlist",
@@ -2722,7 +2749,7 @@ return {
         displayOrder: 3,
         componentName: "YTOButton",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 return {
   text: "Add Videos",
@@ -2838,7 +2865,7 @@ const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
 const isExtensionView = args.fns.isExtensionView();
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 let text;
 if (isListView) {
@@ -2927,7 +2954,7 @@ const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
 const isExtensionView = args.fns.isExtensionView();
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 let icon;
 if (isListView) {
@@ -2970,7 +2997,7 @@ const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
 const isExtensionView = args.fns.isExtensionView();
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 const hasSearchTerm = args.fns.searchTerm().length > 0;
 const query = args.searchParams?.q || "";
 
@@ -3016,7 +3043,7 @@ const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
 const isExtensionView = args.fns.isExtensionView();
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 const hasSearchTerm = args.fns.searchTerm().length > 0;
 const query = args.searchParams?.q || "";
 
@@ -3225,7 +3252,7 @@ const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
 const isFavouritesView = args.fns.isFavouritesView();
 const isExtensionView = args.fns.isExtensionView();
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 
 let item, itemData, itemSetting, itemType, processingStatus, showTypeBadge, itemId, extensionItem;
 
@@ -3312,7 +3339,7 @@ return {
         displayOrder: 9,
         componentName: "YTOAddModal",
         props: '''
-const contentType = args.searchParams?.type || "channels";
+const contentType = args.fns.contentType();
 const modalData = args.fns.modalData;
 const isOpen = args.fns.isModalOpen();
 
@@ -3353,14 +3380,50 @@ return {
         displayOrder: 11,
         componentName: "YTOAddVideosModal",
         props: '''
-const data = args.fns.detailData();
-const playlist = data?.playlist?.playlist;
+// Check which modal should be open and return function for isOpen
+const isDetailModalOpen = args.fns.isAddVideosModalOpen;
+const isExtensionModalOpen = args.fns.isAddVideoToPlaylistModalOpen;
 
+// Determine if any modal is open
+const getIsDetailOpen = isDetailModalOpen?.() || false;
+const getIsExtensionOpen = isExtensionModalOpen?.() || false;
+
+let playlist = null;
+let videoUrl = "";
+let onClose = null;
+let onSuccess = null;
+
+if (getIsDetailOpen) {
+  // Detail view: adding videos to specific playlist
+  const data = args.fns.detailData();
+  const playlistData = data?.playlist;
+  const playlistVertex = playlistData?.playlist;
+  const ownership = playlistData?.ownership;
+
+  // Add ownership key to playlist object for modal to use
+  playlist = playlistVertex ? {
+    ...playlistVertex,
+    ownershipId: ownership?.P?.key
+  } : null;
+
+  onClose = () => args.fns.setIsAddVideosModalOpen(false);
+  onSuccess = args.fns.loadDetailData;
+} else if (getIsExtensionOpen) {
+  // Extension view: user selects playlist, pre-filled video URL
+  const videoData = args.fns.addVideoToPlaylistData;
+  videoUrl = videoData.videoId ? `https://www.youtube.com/watch?v=${videoData.videoId}` : "";
+  playlist = null; // User will select from dropdown
+  onClose = () => args.fns.setIsAddVideoToPlaylistModalOpen(false);
+  onSuccess = () => args.fns.loadData?.();
+}
+
+// Return isOpen as a function that checks both modal states
 return {
-  isOpen: args.fns.isAddVideosModalOpen,
-  onClose: () => args.fns.setIsAddVideosModalOpen(false),
+  isOpen: () => isDetailModalOpen?.() || isExtensionModalOpen?.() || false,
+  onClose: onClose,
   playlist: playlist,
-  onSuccess: args.fns.loadDetailData
+  videoUrl: videoUrl,
+  onSuccess: onSuccess
 };
 '''
       }

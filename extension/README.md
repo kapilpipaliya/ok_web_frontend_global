@@ -31,11 +31,6 @@ DOMAIN: "https://staging.ysaar.com",
 ```
 
 **Other configurable settings**:
-- Badge colors and text
-- Update intervals
-- Floating button position and colors
-- Notification duration and position
-- Cookie patterns for authentication
 - Route paths
 
 See `config.js` for full configuration options.
@@ -135,8 +130,7 @@ Complete App Features Available
    - Shows success/error notifications
 
 4. **Background Worker (background.js)**
-   - Updates extension badge based on login status
-   - Monitors cookie changes for authentication state
+   - Handles extension initialization
 
 5. **Page Schemas**
    - `YTOExtensionQuickAdd.hjson` - Quick save form for modal
@@ -285,7 +279,6 @@ extension/
 
 ## Permissions Explained
 
-- `cookies`: Read session cookies for authentication
 - `activeTab`: Access current YouTube page URL for save feature
 - `https://ysaar.com/*`: Load extension UI from YSaar
 - `https://www.youtube.com/*`: Inject save button on YouTube pages

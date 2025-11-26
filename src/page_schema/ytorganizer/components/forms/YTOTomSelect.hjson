@@ -361,14 +361,14 @@ const loadTomSelectLibrary = () => {
     // If already loaded, initialize immediately
     if (window.TomSelect) {
       setTimeout(() => {
-        args.fns.initializeTomSelect();
+        initializeTomSelect();
       }, 100);
     } else {
       // If loading, wait for it to complete
       const checkLoaded = () => {
         if (window.TomSelect) {
           setTimeout(() => {
-            args.fns.initializeTomSelect();
+            initializeTomSelect();
           }, 100);
         } else {
           setTimeout(checkLoaded, 50);
@@ -397,7 +397,7 @@ const loadTomSelectLibrary = () => {
     script.onload = () => {
       window.tomSelectLoading = false;
       setTimeout(() => {
-        args.fns.initializeTomSelect();
+        initializeTomSelect();
       }, 100);
     };
     script.onerror = () => {
@@ -533,10 +533,14 @@ const initializeTomSelect = () => {
     // Set up change handler
     if (onChange) {
       tomSelectInstance.on('change', function(selectedValue) {
+        // Get the full option data from TomSelect's internal options
+        const fullOptionData = tomSelectInstance.options[selectedValue];
+
         if (multiple) {
           onChange(Array.isArray(selectedValue) ? selectedValue : [selectedValue].filter(Boolean));
         } else {
-          onChange(selectedValue);
+          // Pass both the value and the full option data
+          onChange(selectedValue, fullOptionData);
         }
       });
     }
@@ -621,7 +625,8 @@ const setupEffects = () => {
             const optionData = typeof opt === 'object' && opt !== null ? {
               value: opt.value || opt.label || opt,
               text: opt.label || opt.text || opt.value || opt,
-              description: opt.description
+              description: opt.description,
+              ...opt
             } : {
               value: opt,
               text: opt

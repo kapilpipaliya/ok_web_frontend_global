@@ -6,16 +6,7 @@
   const CONFIG = (typeof EXTENSION_CONFIG !== 'undefined')
     ? EXTENSION_CONFIG
     : {
-        DOMAIN: "https://ysaar.com",
-        FLOATING_BUTTON: {
-          POSITION: { bottom: "80px", right: "24px" },
-          TEXT: "Save to YSaar",
-          COLORS: { primary: "#3498db", hover: "#2980b9", text: "#ffffff" }
-        },
-        NOTIFICATION: {
-          DURATION: 3000,
-          POSITION: { bottom: "24px", right: "24px" }
-        }
+        DOMAIN: "https://ysaar.com"
       };
 
   // Extract origin from DOMAIN for message verification

@@ -58,9 +58,13 @@ export function ResendVerificationForm() {
 
         // Redirect to sign in after 3 seconds
         setTimeout(() => {
-          const params = new URLSearchParams(searchParams as Record<string, string>);
+          const params = new URLSearchParams(
+            searchParams as Record<string, string>,
+          );
           const queryString = params.toString();
-          navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
+          navigate(
+            `${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`,
+          );
         }, 3000);
       } else {
         showErrorToast(response.error || "Failed to send verification email");
@@ -114,9 +118,13 @@ export function ResendVerificationForm() {
           createLinkButton(
             () => "Back to Sign In",
             () => {
-              const params = new URLSearchParams(searchParams as Record<string, string>);
+              const params = new URLSearchParams(
+                searchParams as Record<string, string>,
+              );
               const queryString = params.toString();
-              navigate(`${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`);
+              navigate(
+                `${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`,
+              );
             },
           ),
         ],

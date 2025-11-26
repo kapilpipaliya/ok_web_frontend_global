@@ -267,10 +267,11 @@ if (args.contextData.action === 'start') {
       // Add uploads playlist if exists
       if (uploadsPlaylistId) {
         const channelData = channelResponse.data.items[0];
+        const channelTitle = channelData.snippet?.title || 'Channel';
         const uploadsPlaylist = {
           id: uploadsPlaylistId,
           snippet: {
-            title: 'All Uploads',
+            title: `${channelTitle} - All Uploads`,
             description: 'All videos uploaded by this channel',
             thumbnails: channelData.snippet?.thumbnails || {}
           }

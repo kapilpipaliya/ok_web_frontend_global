@@ -1,4 +1,4 @@
-import {SearchParams} from "@solidjs/router";
+import { SearchParams } from "@solidjs/router";
 
 /**
  * Handles Google OAuth sign-in click event.
@@ -7,12 +7,8 @@ import {SearchParams} from "@solidjs/router";
  *
  * @param searchParams - Current URL search parameters to preserve
  */
-export function handleGoogleOAuthClick(
-  searchParams: SearchParams,
-): void {
-  const params = new URLSearchParams(
-    searchParams as Record<string, string>,
-  );
+export function handleGoogleOAuthClick(searchParams: SearchParams): void {
+  const params = new URLSearchParams(searchParams as Record<string, string>);
 
   // Check if page is in an iframe
   const isInIframe = window.self !== window.top;
