@@ -55,7 +55,7 @@ export async function initSubdomainWorkersUI() {
 
       if (broadcastResult.errors.size > 0) {
         console.warn(
-          `[Workers] Some nodes failed to init workers:`,
+          "[Workers] Some nodes failed to init workers:",
           Array.from(broadcastResult.errors.entries()),
         );
       }
@@ -98,7 +98,7 @@ export async function stopWorkers() {
 
       if (broadcastResult.errors.size > 0) {
         console.warn(
-          `[Workers] Some nodes failed to stop workers:`,
+          "[Workers] Some nodes failed to stop workers:",
           Array.from(broadcastResult.errors.entries()),
         );
       }
@@ -290,7 +290,7 @@ export async function startWorker(workerKey: string) {
 
         if (broadcastResult.errors.size > 0) {
           console.warn(
-            `[Workers] Some nodes failed to start worker:`,
+            "[Workers] Some nodes failed to start worker:",
             Array.from(broadcastResult.errors.entries()),
           );
         }
@@ -364,7 +364,7 @@ export async function stopWorker(workerKey: string) {
 
         if (broadcastResult.errors.size > 0) {
           console.warn(
-            `[Workers] Some nodes failed to stop worker:`,
+            "[Workers] Some nodes failed to stop worker:",
             Array.from(broadcastResult.errors.entries()),
           );
         }
@@ -458,7 +458,7 @@ export async function getAllSubdomainWorkerStatus() {
         const workers = workerResult.records.map((record) => {
           const key = record.get("key");
           const subdomainWorkers = workerState.activeWorkers.get(subdomain.key);
-          const active = subdomainWorkers?.has(key) || false;
+          const active = subdomainWorkers?.has(key);
 
           return {
             key,

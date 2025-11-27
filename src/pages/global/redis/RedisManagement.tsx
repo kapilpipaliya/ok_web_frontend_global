@@ -341,7 +341,7 @@ export function RedisManagement() {
         const matchesData = JSON.stringify(job.data)
           .toLowerCase()
           .includes(searchQuery);
-        if (!matchesId && !matchesName && !matchesData) {
+        if (!((matchesId || matchesName ) || matchesData)) {
           return false;
         }
       }
@@ -1975,7 +1975,7 @@ export function RedisManagement() {
                       Attempts Made:{" "}
                       <As
                         as="span"
-                        css={`return \`._id { font-weight: 600; }\`;`}
+                        css={"return `._id { font-weight: 600; }`;"}
                       >
                         {job.attemptsMade || 0}
                       </As>

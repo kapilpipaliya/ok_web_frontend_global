@@ -15,7 +15,7 @@ export async function POST({ request }: APIEvent) {
 
     // Get the first file from the multipart data
     const file = data[0];
-    if (!file || !file.filename || !file.data) {
+    if (!((file && file.filename ) && file.data)) {
       throw new APIError("Invalid file data", 400);
     }
 
@@ -59,7 +59,7 @@ export async function POST({ request }: APIEvent) {
         fs.unlinkSync(tmpPath);
         console.log(`[Upload] Cleaned up temp file after error: ${tmpPath}`);
       } catch (cleanupError) {
-        console.error(`[Upload] Failed to clean up temp file:`, cleanupError);
+        console.error("[Upload] Failed to clean up temp file:", cleanupError);
       }
     }
     return handleAPIError(error);

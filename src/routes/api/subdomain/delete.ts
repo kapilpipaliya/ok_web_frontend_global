@@ -76,7 +76,7 @@ export async function DELETE({ request }: APIEvent) {
 
         if (result.errors.size > 0) {
           console.warn(
-            `[Subdomain Delete] Some nodes failed to stop workers:`,
+            "[Subdomain Delete] Some nodes failed to stop workers:",
             Array.from(result.errors.entries()),
           );
         }
@@ -88,17 +88,17 @@ export async function DELETE({ request }: APIEvent) {
         }
       } else {
         console.log(
-          `[Subdomain Delete] No other nodes in cluster, skipping broadcast`,
+          "[Subdomain Delete] No other nodes in cluster, skipping broadcast",
         );
       }
     } catch (error) {
       // Log error but continue with deletion
       console.error(
-        `[Subdomain Delete] Error during worker shutdown broadcast:`,
+        "[Subdomain Delete] Error during worker shutdown broadcast:",
         error,
       );
       console.log(
-        `[Subdomain Delete] Continuing with deletion despite broadcast error`,
+        "[Subdomain Delete] Continuing with deletion despite broadcast error",
       );
     }
 

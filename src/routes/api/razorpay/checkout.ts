@@ -22,7 +22,7 @@ export async function POST({ request }: APIEvent) {
     const body = await request.json();
     const { plan, billingCycle } = body;
 
-    if (!plan || !billingCycle) {
+    if (!(plan && billingCycle)) {
       throw new APIError("Plan and billing cycle are required", 400);
     }
 

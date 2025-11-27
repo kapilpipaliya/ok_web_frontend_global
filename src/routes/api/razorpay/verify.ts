@@ -22,7 +22,7 @@ export async function POST({ request }: APIEvent) {
     const body = await request.json();
     const { orderId, paymentId, signature } = body;
 
-    if (!orderId || !paymentId || !signature) {
+    if (!((orderId && paymentId ) && signature)) {
       throw new APIError(
         "Order ID, payment ID, and signature are required",
         400,

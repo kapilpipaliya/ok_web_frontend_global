@@ -19,7 +19,7 @@
  * }
  */
 
-import { APIEvent } from "@solidjs/start/server";
+import type { APIEvent } from "@solidjs/start/server";
 import { createYTOIndices } from "~/cypher/mutate/createYTOIndices";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { checkRole } from "~/cypher/permissions/isPermission";

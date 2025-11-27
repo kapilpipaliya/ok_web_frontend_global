@@ -49,7 +49,7 @@ export async function uploadBackupToCloud(
     metadata = {},
   } = options;
 
-  if (!localPath || !filename) {
+  if (!(localPath && filename)) {
     return {
       success: false,
       error: "localPath and filename are required",
@@ -132,7 +132,7 @@ export async function uploadBackupToCloud(
           uploadedAt: new Date().toISOString(),
         },
       };
-    } else if (storageType === "gcs") {
+    }if (storageType === "gcs") {
       // Google Cloud Storage Upload
       const projectId = process.env.GCS_PROJECT_ID;
       const bucketName = process.env.GCS_BUCKET;
@@ -188,11 +188,10 @@ export async function uploadBackupToCloud(
           uploadedAt: fileMetadata.timeCreated,
         },
       };
-    } else {
-      throw new Error(`Unsupported storage type: ${storageType}`);
     }
+      throw new Error(`Unsupported storage type: ${storageType}`);
   } catch (error: any) {
-    console.error(`[Storage] Upload error:`, error);
+    console.error("[Storage] Upload error:", error);
 
     return {
       success: false,

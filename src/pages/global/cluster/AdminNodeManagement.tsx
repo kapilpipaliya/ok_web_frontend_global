@@ -101,7 +101,7 @@ export function AdminNodeManagement() {
   // Change detection effect
   createEffect(() => {
     const data = clusterNodes();
-    if (!data?.success || !data.data) {
+    if (!(data?.success && data.data)) {
       return;
     }
 

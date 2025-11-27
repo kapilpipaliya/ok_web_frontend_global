@@ -1,4 +1,4 @@
-import { type APIEvent } from "@solidjs/start/server";
+import type { APIEvent } from "@solidjs/start/server";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
 
 /**

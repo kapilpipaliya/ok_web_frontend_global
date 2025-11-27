@@ -362,7 +362,7 @@ async function handleWorkerStatusRequest(
       `[Cluster] Sent worker status response (workers: ${workers.length})`,
     );
   } catch (error) {
-    console.error(`[Cluster] Error getting worker status:`, error);
+    console.error("[Cluster] Error getting worker status:", error);
 
     // Send error response (empty workers list)
     if (clusterState.coordinator) {
@@ -476,7 +476,7 @@ export async function getClusterWorkerStatus(
   >(CLUSTER_CHANNELS.WORKER_STATUS_REQUEST, { subdomain }, timeout);
 
   console.log(
-    `[Cluster] Worker status request completed. ` +
+    "[Cluster] Worker status request completed. " +
       `Responded: ${result.respondedNodes}/${result.totalNodes}, ` +
       `Duration: ${result.duration}ms`,
   );

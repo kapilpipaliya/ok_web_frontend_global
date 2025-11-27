@@ -104,7 +104,7 @@ function createTransport() {
         singleLine: false,
       },
     });
-  } else {
+  }
     // Production: Write to files with rotation
     if (enableLogRotation) {
       return pino.transport({
@@ -142,7 +142,7 @@ function createTransport() {
           },
         ],
       });
-    } else {
+    }
       // Production without rotation: simple file output
       return pino.transport({
         targets: [
@@ -161,8 +161,6 @@ function createTransport() {
           },
         ],
       });
-    }
-  }
 }
 
 // Create the base logger instance

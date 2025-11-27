@@ -255,14 +255,14 @@ export function BackupManagement() {
 
       if (result.success) {
         showSuccessToast(
-          `✅ Backup verified successfully! ` +
+          "✅ Backup verified successfully! " +
             `The backup was restored to ${testDbName} without errors. ` +
-            `You can delete the test database if not needed.`,
+            "You can delete the test database if not needed.",
         );
       } else {
         showErrorToast(
           `❌ Backup verification failed: ${result.error || "Unknown error"}. ` +
-            `The backup may be corrupted or incompatible.`,
+            "The backup may be corrupted or incompatible.",
         );
       }
     } catch (error: any) {
@@ -300,10 +300,9 @@ export function BackupManagement() {
               const updated = [...prev];
               updated[index] = result.data;
               return updated;
-            } else {
+            }
               // Add new
               return [...prev, result.data];
-            }
           });
         } else {
           // Note was deleted (empty note)
@@ -496,7 +495,7 @@ export function BackupManagement() {
     const backup1 = backups.find((b) => b.key === selectedForComparison()[0]);
     const backup2 = backups.find((b) => b.key === selectedForComparison()[1]);
 
-    if (!backup1 || !backup2) return;
+    if (!(backup1 && backup2)) return;
 
     setIsComparing(true);
     try {
@@ -1060,7 +1059,7 @@ export function BackupManagement() {
                     <As as="span">⏳</As>
                     <As
                       as="span"
-                      css={`return \`._id { font-weight: 500; }\`;`}
+                      css={"return `._id { font-weight: 500; }`;"}
                     >
                       Backup in progress...
                     </As>
@@ -3856,7 +3855,7 @@ export function BackupManagement() {
                     as="button"
                     onClick={handleUploadBackup}
                     disabled={
-                      !uploadFile() || !uploadTargetDb() || isUploading()
+                      !(uploadFile() && uploadTargetDb() ) || isUploading()
                     }
                     css={`return \`._id {
   padding: 0.5rem 1rem;

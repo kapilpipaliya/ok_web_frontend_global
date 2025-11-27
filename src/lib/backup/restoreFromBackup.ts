@@ -99,7 +99,7 @@ export async function restoreFromBackup(
     };
   }
 
-  console.log(`[Restore] ⚠️  WARNING: Starting restore operation`);
+  console.log("[Restore] ⚠️  WARNING: Starting restore operation");
   console.log(`[Restore] Source backup: ${filename}`);
   console.log(`[Restore] Target database: ${restoreToDatabase}`);
   console.log(`[Restore] Local file: ${isLocalFile}`);
@@ -115,14 +115,26 @@ export async function restoreFromBackup(
 
   try {
     // Step 1: Create restore directory (only if not using local file)
-    if (!isLocalFile && !fs.existsSync(restoreDir)) {
+    if (!(isLocalFile || fs.existsSync(restoreDir))) {
       fs.mkdirSync(restoreDir, { recursive: true });
     }
 
     // Step 2: Download backup from cloud storage (skip if local file)
-    if (!isLocalFile) {
+    if (isLocalFile) {
+      console.log(`[Restore] Step 1/6: Using local file: ${compressedPath}`);
+
+      // Verify the local file exists
+      if (!fs.existsSync(compressedPath)) {
+        throw new Error(`Local backup file not found: ${compressedPath}`);
+      }
+
+      const fileSize = fs.statSync(compressedPath).size;
       console.log(
-        `[Restore] Step 1/6: Downloading backup from cloud storage...`,
+        `[Restore] Local file size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB`,
+      );
+    } else {
+      console.log(
+        "[Restore] Step 1/6: Downloading backup from cloud storage...",
       );
 
       const downloadResult = await downloadBackupFromCloud({
@@ -140,22 +152,10 @@ export async function restoreFromBackup(
       console.log(
         `[Restore] Download complete: ${downloadResult.data?.sizeFormatted}`,
       );
-    } else {
-      console.log(`[Restore] Step 1/6: Using local file: ${compressedPath}`);
-
-      // Verify the local file exists
-      if (!fs.existsSync(compressedPath)) {
-        throw new Error(`Local backup file not found: ${compressedPath}`);
-      }
-
-      const fileSize = fs.statSync(compressedPath).size;
-      console.log(
-        `[Restore] Local file size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB`,
-      );
     }
 
     // Step 3: Decompress backup file
-    console.log(`[Restore] Step 2/6: Decompressing backup file...`);
+    console.log("[Restore] Step 2/6: Decompressing backup file...");
 
     await pipelineAsync(
       fs.createReadStream(compressedPath),
@@ -176,9 +176,9 @@ export async function restoreFromBackup(
     try {
       // Dynamic import to avoid circular dependencies
       await stopWorkersForSubdomain(restoreToDatabase);
-      console.log(`[Restore] Workers stopped successfully`);
+      console.log("[Restore] Workers stopped successfully");
     } catch (workerError) {
-      console.warn(`[Restore] Failed to stop workers:`, workerError);
+      console.warn("[Restore] Failed to stop workers:", workerError);
       // Continue anyway - workers might not be running
     }
 
@@ -194,7 +194,7 @@ export async function restoreFromBackup(
 
     try {
       await systemSession.run(`DROP DATABASE ${restoreToDatabase} IF EXISTS`);
-      console.log(`[Restore] Database dropped successfully`);
+      console.log("[Restore] Database dropped successfully");
 
       // Wait a moment for the database to be fully dropped
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -203,7 +203,7 @@ export async function restoreFromBackup(
       await systemSession.run(
         `CREATE DATABASE ${restoreToDatabase} IF NOT EXISTS`,
       );
-      console.log(`[Restore] New database created`);
+      console.log("[Restore] New database created");
 
       // Wait for database to be ready
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -214,7 +214,7 @@ export async function restoreFromBackup(
     }
 
     // Step 6: Restore data from backup using APOC
-    console.log(`[Restore] Step 5/6: Restoring data from backup using APOC...`);
+    console.log("[Restore] Step 5/6: Restoring data from backup using APOC...");
 
     // Copy decompressed file to Neo4j import directory for APOC to access
     const neo4jImportDir =
@@ -263,13 +263,13 @@ export async function restoreFromBackup(
       try {
         fs.unlinkSync(importPath);
         console.log(
-          `[Restore] Cleaned up import file from Neo4j import directory`,
+          "[Restore] Cleaned up import file from Neo4j import directory",
         );
       } catch (cleanupError) {
-        console.warn(`[Restore] Failed to clean up import file:`, cleanupError);
+        console.warn("[Restore] Failed to clean up import file:", cleanupError);
       }
     } catch (apocError: any) {
-      console.error(`[Restore] APOC import failed:`, apocError);
+      console.error("[Restore] APOC import failed:", apocError);
 
       // Clean up import file on error
       try {
@@ -278,7 +278,7 @@ export async function restoreFromBackup(
         }
       } catch (cleanupError) {
         console.error(
-          `[Restore] Failed to clean up import file:`,
+          "[Restore] Failed to clean up import file:",
           cleanupError,
         );
       }
@@ -295,9 +295,9 @@ export async function restoreFromBackup(
 
     try {
       await initSubdomainWorkersForSubdomain(restoreToDatabase);
-      console.log(`[Restore] Workers restarted successfully`);
+      console.log("[Restore] Workers restarted successfully");
     } catch (workerError) {
-      console.error(`[Restore] Failed to restart workers:`, workerError);
+      console.error("[Restore] Failed to restart workers:", workerError);
       // Don't fail the restore operation - workers can be manually restarted
     }
 
@@ -305,9 +305,9 @@ export async function restoreFromBackup(
     try {
       fs.unlinkSync(compressedPath);
       fs.unlinkSync(decompressedPath);
-      console.log(`[Restore] Cleaned up temporary files`);
+      console.log("[Restore] Cleaned up temporary files");
     } catch (cleanupError) {
-      console.error(`[Restore] Cleanup error:`, cleanupError);
+      console.error("[Restore] Cleanup error:", cleanupError);
     }
 
     const duration = Date.now() - startTime;
@@ -358,7 +358,7 @@ export async function restoreFromBackup(
         });
       }
     } catch (emailError) {
-      console.error(`[Restore] Failed to send notification email:`, emailError);
+      console.error("[Restore] Failed to send notification email:", emailError);
     }
 
     return {
@@ -373,14 +373,14 @@ export async function restoreFromBackup(
       },
     };
   } catch (error: any) {
-    console.error(`[Restore] ❌ Restore operation failed:`, error);
+    console.error("[Restore] ❌ Restore operation failed:", error);
 
     // Clean up temporary files on failure
     try {
       if (fs.existsSync(compressedPath)) fs.unlinkSync(compressedPath);
       if (fs.existsSync(decompressedPath)) fs.unlinkSync(decompressedPath);
     } catch (cleanupError) {
-      console.error(`[Restore] Cleanup error:`, cleanupError);
+      console.error("[Restore] Cleanup error:", cleanupError);
     }
 
     // Send failure notification
@@ -425,7 +425,7 @@ export async function restoreFromBackup(
       }
     } catch (emailError) {
       console.error(
-        `[Restore] Failed to send failure notification:`,
+        "[Restore] Failed to send failure notification:",
         emailError,
       );
     }

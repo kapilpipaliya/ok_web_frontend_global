@@ -34,7 +34,7 @@ export function isMaskedValue(value: string): boolean {
  * @returns Vertex with secret fields masked
  */
 function maskSecretFields(vertex: Vertex): Vertex {
-  if (!vertex || !vertex.P) return vertex;
+  if (!(vertex && vertex.P)) return vertex;
 
   const maskedProperties = { ...vertex.P };
 
@@ -283,7 +283,7 @@ export async function deleteSetting(
         { accountId, type },
       );
     } else {
-      await dbSession.run(`MATCH (s:Setting {type: $type}) DELETE s`, { type });
+      await dbSession.run("MATCH (s:Setting {type: $type}) DELETE s", { type });
     }
 
     return {

@@ -1,7 +1,7 @@
 import type { ExportedSchema } from "~/routes/api/schema/ExportedSchema";
 import { parseHjsonPreservingMultiline } from "~/lib/hjson/parseHjsonPreservingMultiline";
-import { Vertex } from "~/lib/graph/type/vertex";
-import { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { Edge } from "~/lib/graph/type/edge";
 
 export interface WebsiteSchemas {
   components?: Record<string, ExportedSchema>;

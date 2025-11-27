@@ -59,7 +59,7 @@ async function getOAuthConfig(
   const clientId = record.get("clientId");
   const clientSecretEncrypted = record.get("clientSecret");
 
-  if (!clientId || !clientSecretEncrypted) {
+  if (!(clientId && clientSecretEncrypted)) {
     throw new Error(
       "Incomplete OAuth configuration. Please check admin settings.",
     );
@@ -84,7 +84,7 @@ async function getOAuthConfig(
  */
 export function getRedirectUriFromRequest(
   request?: Request,
-  callbackPath: string = "/api/auth/youtube/callback",
+  callbackPath = "/api/auth/youtube/callback",
 ): string {
   // If no request provided (background workers), use environment or default
   if (!request) {
@@ -221,7 +221,7 @@ export async function handleYouTubeCallback(
     );
 
     const primaryChannel = channelsResponse.data.items?.[0];
-    if (!primaryChannel || !primaryChannel.id) {
+    if (!(primaryChannel && primaryChannel.id)) {
       throw new Error("Unable to fetch your YouTube channel information");
     }
 
@@ -566,7 +566,7 @@ export async function hasYouTubeConnection(
     { userId },
   );
 
-  return result.records[0]?.get("hasConnection") || false;
+  return result.records[0]?.get("hasConnection");
 }
 
 /**

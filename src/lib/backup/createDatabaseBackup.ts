@@ -116,7 +116,7 @@ export async function createDatabaseBackup(
     // Delete the file from Neo4j import directory
     fs.unlinkSync(apocExportPath);
     console.log(
-      `[Backup] Cleaned up APOC export file from Neo4j import directory`,
+      "[Backup] Cleaned up APOC export file from Neo4j import directory",
     );
 
     // Get backup file size
@@ -127,7 +127,7 @@ export async function createDatabaseBackup(
     console.log(`[Backup] Backup size: ${fileSizeInMB} MB`);
 
     // Compress the backup file
-    console.log(`[Backup] Compressing backup file...`);
+    console.log("[Backup] Compressing backup file...");
 
     await pipelineAsync(
       fs.createReadStream(backupPath),
@@ -153,7 +153,7 @@ export async function createDatabaseBackup(
     );
 
     // Upload to cloud storage
-    console.log(`[Backup] Uploading to cloud storage...`);
+    console.log("[Backup] Uploading to cloud storage...");
 
     const uploadResult = await uploadBackupToCloud({
       localPath: compressedPath,
@@ -182,9 +182,9 @@ export async function createDatabaseBackup(
     try {
       fs.unlinkSync(backupPath);
       fs.unlinkSync(compressedPath);
-      console.log(`[Backup] Cleaned up local backup files`);
+      console.log("[Backup] Cleaned up local backup files");
     } catch (cleanupError) {
-      console.error(`[Backup] Failed to clean up local files:`, cleanupError);
+      console.error("[Backup] Failed to clean up local files:", cleanupError);
       // Don't fail the backup if cleanup fails
     }
 
@@ -213,7 +213,7 @@ export async function createDatabaseBackup(
       if (fs.existsSync(backupPath)) fs.unlinkSync(backupPath);
       if (fs.existsSync(compressedPath)) fs.unlinkSync(compressedPath);
     } catch (cleanupError) {
-      console.error(`[Backup] Cleanup error:`, cleanupError);
+      console.error("[Backup] Cleanup error:", cleanupError);
     }
 
     return {

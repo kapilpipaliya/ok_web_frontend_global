@@ -34,7 +34,7 @@ export async function GET(event: APIEvent) {
     }
 
     // Validate required parameters
-    if (!code || !state) {
+    if (!(code && state)) {
       return createRedirectResponse(
         event.request,
         "/accounts?error=" +
@@ -50,7 +50,7 @@ export async function GET(event: APIEvent) {
     };
     try {
       stateData = JSON.parse(state);
-      if (!stateData.userId || !stateData.ownershipId) {
+      if (!(stateData.userId && stateData.ownershipId)) {
         throw new Error("Invalid state structure");
       }
     } catch (parseError) {

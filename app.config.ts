@@ -20,7 +20,6 @@ export default defineConfig({
       https: true,
     },
     build: {
-      outDir: process.env.BUILD_TEMP === "true" ? ".output-new" : ".output",
       rollupOptions: {
         external: [
           "node:async_hooks", // Mark node:async_hooks as external to prevent browser compatibility issues

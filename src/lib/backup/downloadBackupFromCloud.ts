@@ -38,7 +38,7 @@ export async function downloadBackupFromCloud(
 ): Promise<DownloadResult> {
   const { filename, databaseName, localPath } = options;
 
-  if (!filename || !localPath) {
+  if (!(filename && localPath)) {
     return {
       success: false,
       error: "filename and localPath are required",
@@ -116,7 +116,7 @@ export async function downloadBackupFromCloud(
           downloadedAt: new Date().toISOString(),
         },
       };
-    } else if (storageType === "gcs") {
+    }if (storageType === "gcs") {
       // Google Cloud Storage Download
       const projectId = process.env.GCS_PROJECT_ID;
       const bucketName = process.env.GCS_BUCKET;
@@ -164,11 +164,10 @@ export async function downloadBackupFromCloud(
           downloadedAt: new Date().toISOString(),
         },
       };
-    } else {
-      throw new Error(`Unsupported storage type: ${storageType}`);
     }
+      throw new Error(`Unsupported storage type: ${storageType}`);
   } catch (error: any) {
-    console.error(`[Storage] Download error:`, error);
+    console.error("[Storage] Download error:", error);
 
     // Clean up partial download
     try {
@@ -176,7 +175,7 @@ export async function downloadBackupFromCloud(
         fs.unlinkSync(localPath);
       }
     } catch (cleanupError) {
-      console.error(`[Storage] Cleanup error:`, cleanupError);
+      console.error("[Storage] Cleanup error:", cleanupError);
     }
 
     return {

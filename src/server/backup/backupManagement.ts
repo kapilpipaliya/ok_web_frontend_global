@@ -273,7 +273,7 @@ export async function compareBackups(
       localPath: tmpPath2,
     });
 
-    if (!download1.success || !download2.success) {
+    if (!(download1.success && download2.success)) {
       throw new Error("Failed to download one or both backups");
     }
 
@@ -443,8 +443,8 @@ export async function uploadAndRestoreBackup(
   tmpPath: string, // temporary file path
   filename: string,
   targetDatabaseName: string,
-  shouldRestore: boolean = false,
-  confirmed: boolean = false,
+  shouldRestore = false,
+  confirmed = false,
 ) {
   try {
     console.log(`[Upload] Processing file: ${tmpPath}`);
@@ -489,12 +489,11 @@ export async function uploadAndRestoreBackup(
         message: "Backup uploaded successfully",
         data: uploadResult.data,
       };
-    } else {
+    }
       return {
         success: false,
         error: uploadResult.error || "Upload failed",
       };
-    }
   } catch (error: any) {
     return {
       success: false,

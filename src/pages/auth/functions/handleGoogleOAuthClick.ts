@@ -1,4 +1,4 @@
-import { SearchParams } from "@solidjs/router";
+import type { SearchParams } from "@solidjs/router";
 
 /**
  * Handles Google OAuth sign-in click event.

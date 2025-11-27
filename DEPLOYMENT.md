@@ -1,8 +1,14 @@
 # Zero-Downtime Deployment Guide
 
-This guide explains how to deploy updates without taking your application offline using PM2 with cluster mode.
+This guide explains how to deploy updates without taking your application offline using a **build-swap strategy** with PM2 cluster mode.
 
 ## Overview
+
+**Deployment Strategy:**
+- Zero-downtime deployment with automatic rollback support
+- Three-directory build system (current, new, old)
+- Build validation before swapping
+- One-command rollback to previous version
 
 **PM2 Configuration:**
 - **File:** `ecosystem.config.cjs` (CommonJS with JSDoc type annotations)
@@ -11,9 +17,10 @@ This guide explains how to deploy updates without taking your application offlin
 - **Type Safety:** JSDoc annotations provide TypeScript autocomplete without compilation
 
 **Key Commands:**
-- `npm run pm2:start` - Initial deployment (pull, install, build, start)
-- `npm run deploy` - Update deployment (pull, install, build, reload with zero downtime)
-- `npm run pm2:reload` - Gracefully reload without downtime
+- `npm run deploy` - Deploy new version (pull, install, build, swap, reload)
+- `npm run deploy:rollback` - Rollback to previous version
+- `npm run cleanup:build` - Remove old builds after verifying deployment
+- `npm run pm2:status` - Check application status
 - `npm run pm2:logs` - View application logs
 
 ## Quick Start
@@ -52,18 +59,59 @@ npm run deploy
 ```
 
 This single command will:
-1. Pull latest code from git
-2. Install dependencies with `--force`
-3. Build the application
-4. Gracefully reload PM2 instances (zero downtime)
+1. 🔄 Pull latest code from git
+2. 📦 Install/update dependencies
+3. 🔨 Build new version to `.output-new`
+4. ✅ Validate new build (checks for `server/index.mjs`)
+5. 📦 Backup current `.output` to `.output-old`
+6. 🔄 Swap `.output-new` to `.output`
+7. 🔄 Gracefully reload PM2 instances (zero downtime)
+8. ✅ Deployment complete
 
-**OR** manually step-by-step:
+**The Build Swap System:**
+- `.output` - Current production build (active)
+- `.output-new` - New build being prepared (temporary)
+- `.output-old` - Previous build (backup for rollback)
+
+If any step fails, deployment stops and the current build stays active.
+
+### Rollback to Previous Version
+
+If something goes wrong after deployment:
 
 ```bash
-git pull
-npm install --force
-npm run build
-npm run pm2:reload
+npm run deploy:rollback
+```
+
+This will:
+1. ⏪ Restore `.output-old` to `.output`
+2. 🔄 Gracefully reload PM2
+3. ✅ You're back to the previous working version
+
+### Clean Up Old Builds
+
+After verifying the deployment works:
+
+```bash
+npm run cleanup:build
+```
+
+**⚠️ Warning:** After cleanup, you cannot rollback!
+
+## Deployment Workflow Example
+
+```bash
+# 1. Deploy new version
+npm run deploy
+
+# 2. Test the deployment
+# ... visit your site, check functionality ...
+
+# 3a. If everything works, clean up:
+npm run cleanup:build
+
+# 3b. If something is wrong, rollback:
+npm run deploy:rollback
 ```
 
 ## PM2 Commands
@@ -75,13 +123,21 @@ npm run pm2:reload
 - **Restart app (brief downtime):** `npm run pm2:restart`
 - **Reload app (zero downtime):** `npm run pm2:reload`
 - **Delete from PM2:** `npm run pm2:delete`
+- **Check status:** `npm run pm2:status`
 
 ### Monitoring
 
 - **View logs:** `npm run pm2:logs`
 - **Monitor resources:** `npm run pm2:monit`
-- **View status:** `pm2 status`
 - **View detailed info:** `pm2 show ok-web-frontend`
+
+### Build Scripts
+
+- **Normal build:** `npm run build` (replaces `.output`)
+- **Temporary build:** `npm run build:temp` (creates `.output-new`)
+- **Swap builds:** `npm run swap:build` (swap `.output-new` to `.output`)
+- **Rollback:** `npm run rollback:build` (restore `.output-old`)
+- **Cleanup:** `npm run cleanup:build` (remove old builds)
 
 ### Advanced
 
@@ -271,13 +327,71 @@ Use a reverse proxy to switch between two complete environments:
 
 ## Troubleshooting
 
+### Build Fails During Deployment
+
+**Problem:** Build fails during `npm run deploy`
+
+**Solution:**
+```bash
+# The old version stays active - no downtime
+# Fix the code issue, then try again
+npm run deploy
+```
+
+### App Crashes After Deployment
+
+**Problem:** New version has bugs or crashes
+
+**Solution:**
+```bash
+# Quick rollback to previous version
+npm run deploy:rollback
+
+# Check logs to see what went wrong
+npm run pm2:logs
+
+# Fix the issue and deploy again
+npm run deploy
+```
+
+### Cannot Rollback (No Old Build)
+
+**Problem:** `❌ No old build found for rollback`
+
+**Solution:**
+- This happens if you ran `cleanup:build` or this is first deployment
+- Deploy a working version:
+  ```bash
+  npm run deploy
+  ```
+
+### Swap Failed (Invalid New Build)
+
+**Problem:** `❌ No valid new build found`
+
+**Solution:**
+```bash
+# Check if build completed successfully
+ls -la .output-new/server/index.mjs
+
+# If missing, rebuild:
+npm run build:temp
+
+# Then try swapping:
+npm run swap:build
+npm run pm2:reload
+```
+
 ### App Won't Start
 ```bash
 # Check logs
-pm2 logs ok-web-frontend
+npm run pm2:logs
 
 # Check if port is in use
 lsof -i :3001
+
+# Check PM2 status
+npm run pm2:status
 
 # Try deleting and restarting
 pm2 delete ok-web-frontend
@@ -287,7 +401,7 @@ npm run pm2:start
 ### Memory Issues
 ```bash
 # Monitor memory usage
-pm2 monit
+npm run pm2:monit
 
 # Lower max_memory_restart in ecosystem.config.cjs
 # Or increase instances to distribute load
@@ -296,12 +410,33 @@ pm2 monit
 ### Reload Not Working
 ```bash
 # Use restart instead (brief downtime)
-pm2 restart ok-web-frontend
+npm run pm2:restart
 
 # Or fully restart PM2
 pm2 kill
 pm2 start ecosystem.config.cjs
 ```
+
+### Need to Test Build Before Deploying
+```bash
+# Build to temporary directory
+npm run build:temp
+
+# Manually inspect .output-new
+# When satisfied, swap:
+npm run swap:build
+npm run pm2:reload
+```
+
+## Safety Features
+
+✅ **Build Validation** - Swap only happens if `.output-new/server/index.mjs` exists
+✅ **Automatic Backup** - Current build always backed up before swap
+✅ **Graceful Reload** - PM2 reloads instances one at a time (zero downtime)
+✅ **Quick Rollback** - One command to restore previous version
+✅ **Error Handling** - Scripts stop on first error (using `&&` chaining)
+✅ **Visual Feedback** - Emoji indicators show progress
+✅ **Manual Cleanup** - Old builds kept until you explicitly remove them
 
 ## Production Checklist
 
@@ -311,7 +446,8 @@ pm2 start ecosystem.config.cjs
 - [ ] PM2 startup script configured for auto-restart (`pm2 startup`)
 - [ ] Logs directory exists: `mkdir -p logs`
 - [ ] Environment variables loaded correctly (verify with `pm2 env 0`)
-- [ ] Test reload command before production use
+- [ ] Test deployment process before production use
+- [ ] Test rollback process to ensure it works
 - [ ] Monitor memory usage after deployment (`pm2 monit`)
 - [ ] Save PM2 process list (`pm2 save`)
 - [ ] Set up PM2 keymetrics for monitoring (optional)

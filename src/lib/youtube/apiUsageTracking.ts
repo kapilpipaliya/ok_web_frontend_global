@@ -128,7 +128,7 @@ export const RESERVATION_EXPIRY_MS = 5 * 60 * 1000;
  */
 export function calculateOperationCost(
   operation: string,
-  additionalCost: number = 0,
+  additionalCost = 0,
 ): number {
   const baseCost =
     YOUTUBE_API_COSTS[operation as keyof typeof YOUTUBE_API_COSTS] ||
@@ -582,7 +582,7 @@ export async function getSharedAPIUsageHistory(
  */
 export async function isApproachingQuotaLimit(
   session: Session,
-  threshold: number = 0.8, // 80% threshold
+  threshold = 0.8, // 80% threshold
 ): Promise<{
   isApproaching: boolean;
   percentUsed: number;

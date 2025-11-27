@@ -170,7 +170,7 @@ export async function POST({ request }: APIEvent) {
 
         if (result.errors.size > 0) {
           console.warn(
-            `[Subdomain Create] Some nodes failed to start workers:`,
+            "[Subdomain Create] Some nodes failed to start workers:",
             Array.from(result.errors.entries()),
           );
         }
@@ -182,17 +182,17 @@ export async function POST({ request }: APIEvent) {
         }
       } else {
         console.log(
-          `[Subdomain Create] No other nodes in cluster, skipping broadcast`,
+          "[Subdomain Create] No other nodes in cluster, skipping broadcast",
         );
       }
     } catch (error) {
       // Log error but don't fail subdomain creation
       console.error(
-        `[Subdomain Create] Error during worker start broadcast:`,
+        "[Subdomain Create] Error during worker start broadcast:",
         error,
       );
       console.log(
-        `[Subdomain Create] Subdomain created successfully despite broadcast error`,
+        "[Subdomain Create] Subdomain created successfully despite broadcast error",
       );
     }
 
@@ -375,10 +375,7 @@ async function importSchemasForSubdomain(
 
   // If no schemas found, try loading from default website
   if (
-    !websiteSchemas.components &&
-    !websiteSchemas.pages &&
-    !websiteSchemas.themes &&
-    !websiteSchemas.functions
+    !(((websiteSchemas.components ||websiteSchemas.pages ) ||websiteSchemas.themes ) ||websiteSchemas.functions)
   ) {
     console.log(
       `[Subdomain Create] No schemas found for ${subdomainKey}, trying default...`,
@@ -386,10 +383,7 @@ async function importSchemasForSubdomain(
     const defaultSchemas = getWebsiteSchemasSync("default");
 
     if (
-      !defaultSchemas.components &&
-      !defaultSchemas.pages &&
-      !defaultSchemas.themes &&
-      !defaultSchemas.functions
+      !(((defaultSchemas.components ||defaultSchemas.pages ) ||defaultSchemas.themes ) ||defaultSchemas.functions)
     ) {
       console.log(
         `[Subdomain Create] No schemas found for ${subdomainKey} or default, skipping import`,

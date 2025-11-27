@@ -273,7 +273,7 @@ export class ClusterCoordinator {
 
     // Add timeout errors for non-responsive nodes
     for (const nodeId of pending.expectedNodes) {
-      if (!pending.responses.has(nodeId) && !pending.errors.has(nodeId)) {
+      if (!(pending.responses.has(nodeId) || pending.errors.has(nodeId))) {
         pending.errors.set(nodeId, "Response timeout");
       }
     }
@@ -384,7 +384,7 @@ export class ClusterCoordinator {
 
       // Add shutdown errors for all expected nodes
       for (const nodeId of pending.expectedNodes) {
-        if (!pending.responses.has(nodeId) && !pending.errors.has(nodeId)) {
+        if (!(pending.responses.has(nodeId) || pending.errors.has(nodeId))) {
           pending.errors.set(nodeId, "Coordinator shutting down");
         }
       }
