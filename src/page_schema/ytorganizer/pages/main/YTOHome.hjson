@@ -43,29 +43,6 @@ const [userPlan, setUserPlan] = args.createSignal('free');
 const [videoLimit, setVideoLimit] = args.createSignal(10000);
 const [hasNoAccounts, setHasNoAccounts] = args.createSignal(false);
 
-// Check onboarding status and redirect if needed
-const checkOnboarding = async () => {
-  try {
-    const response = await args.executeNamedServerFunction({
-      functionName: "checkOnboardingStatus",
-      contextData: {}
-    });
-
-    const result = response.result;
-
-    if (result.success && !result.data.isOnboarded) {
-      // User hasn't completed onboarding, redirect them
-      args.navigate('/onboarding');
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error('Onboarding check error:', error);
-    // If check fails, assume onboarded to avoid blocking access
-    return true;
-  }
-};
-
 // Function to fetch dashboard data
 const fetchDashboardData = async () => {
   try {
@@ -73,7 +50,7 @@ const fetchDashboardData = async () => {
     setDashboardError(null);
     setHasNoAccounts(false);
 
-    // Check for connected YouTube accounts
+    // Check for connected YouTube accounts first
     const ownershipsResult = await args.executeNamedServerFunction({
       functionName: "getAllYouTubeOwnerships",
       contextData: {}
@@ -81,6 +58,7 @@ const fetchDashboardData = async () => {
 
     if (ownershipsResult.result?.success) {
       const ownerships = ownershipsResult.result?.data || [];
+
       if (ownerships.length === 0) {
         setHasNoAccounts(true);
         setIsDashboardLoading(false);
@@ -141,13 +119,8 @@ const fetchDashboardData = async () => {
 
 // Fetch data on mount
 const onMount = async () => {
-  // Check onboarding first
-  const isOnboarded = await checkOnboarding();
-
-  // Only fetch dashboard data if user is onboarded
-  if (isOnboarded) {
-    fetchDashboardData();
-  }
+  // Fetch dashboard data (will check accounts and onboarding internally)
+  fetchDashboardData();
 };
 
 return {
@@ -174,6 +147,7 @@ return `._id {
   padding: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -352,120 +326,14 @@ return {
       }
     },
     {
-      id: "empty_state",
+      id: "no_accounts_message",
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "Html",
+        componentName: "YTONoAccountsMessage",
         props: '''
 return {
-  as: "div",
   hide: () => !args.fns.hasNoAccounts?.()
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2rem;
-  text-align: center;
-  background: ${args.theme.var.color.info_light_100};
-  border: 2px solid ${args.theme.var.color.info};
-  border-radius: 1rem;
-  margin: 1.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "empty_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:youtube",
-  width: 64,
-  height: 64
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "empty_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h2",
-  text: "Connect Your YouTube Account"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 0.75rem 0;
-
-  @media (max-width: 768px) {
-    font-size: 1.25rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "empty_message",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "To get started with YSaar, you need to connect your YouTube account. This allows you to add channels, create playlists, and organize your favorite videos."
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
-  margin: 0 0 1.5rem 0;
-  max-width: 500px;
-  line-height: 1.6;
-  font-size: 1rem;
-
-  @media (max-width: 768px) {
-    font-size: 0.9375rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "empty_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "YTOButton",
-        props: '''
-return {
-  text: "Connect YouTube Account",
-  variant: "primary",
-  icon: "mdi:youtube",
-  onClick: () => args.navigate('/accounts')
 };
 '''
       }
@@ -782,11 +650,7 @@ return `._id {
     { id: "e8", T: "Attr", S: "error_state", E: "error_title" },
     { id: "e9", T: "Attr", S: "error_state", E: "error_message" },
     { id: "e10", T: "Attr", S: "error_state", E: "error_retry_button" },
-    { id: "e10a", T: "Attr", S: "page_content", E: "empty_state" },
-    { id: "e10b", T: "Attr", S: "empty_state", E: "empty_icon" },
-    { id: "e10c", T: "Attr", S: "empty_state", E: "empty_title" },
-    { id: "e10d", T: "Attr", S: "empty_state", E: "empty_message" },
-    { id: "e10e", T: "Attr", S: "empty_state", E: "empty_button" },
+    { id: "e10a", T: "Attr", S: "page_content", E: "no_accounts_message" },
     { id: "e11", T: "Attr", S: "page_content", E: "main_content" },
     { id: "e12", T: "Attr", S: "main_content", E: "page_header" },
     { id: "e13", T: "Attr", S: "page_header", E: "page_title" },

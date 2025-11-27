@@ -13,15 +13,34 @@
   // Extract origin from DOMAIN for message verification
   const DOMAIN_ORIGIN = new URL(DOMAIN).origin;
 
+  // Track when loading started to ensure minimum display time
+  const loadingStartTime = Date.now();
+  const minimumLoadingTime = 500; // Show loading for at least 500ms
+
   // Set iframe source to content page with extension view
   iframe.src = EXTENSION_CONFIG.getUrl('/content?type=extension');
 
+  // Function to hide loading with minimum display time
+  const hideLoading = () => {
+    const elapsedTime = Date.now() - loadingStartTime;
+    const remainingTime = Math.max(0, minimumLoadingTime - elapsedTime);
+
+    setTimeout(() => {
+      loading.classList.add('hidden');
+      iframe.classList.add('visible');
+    }, remainingTime);
+  };
+
   // Check authentication by trying to load the iframe
   iframe.addEventListener('load', function() {
-    // Hide loading
-    loading.classList.add('hidden');
-    // Show iframe
-    iframe.classList.add('visible');
+    // Update loading text
+    const loadingText = document.getElementById('loadingText');
+    if (loadingText) {
+      loadingText.textContent = 'Loading YouTube data...';
+    }
+
+    // Hide loading after minimum time
+    hideLoading();
   });
 
   iframe.addEventListener('error', function() {
@@ -123,13 +142,16 @@
     let responded = false;
 
     // Set up one-time message listener for response from content script
-    const messageListener = (message, sender) => {
+    const messageListener = (message, sender, sendResponse) => {
       if (message.type === 'YOUTUBE_INFO_RESPONSE' && sender.tab && sender.tab.id === tab.id) {
         chrome.runtime.onMessage.removeListener(messageListener);
         if (!responded) {
           responded = true;
           callback(message.data || { channels: [], playlists: [], videos: [] });
         }
+        // Send acknowledgment back to content script
+        sendResponse({ received: true });
+        return true;
       }
     };
 

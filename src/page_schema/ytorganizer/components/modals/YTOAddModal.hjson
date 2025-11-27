@@ -795,7 +795,7 @@ return `._id {
 const contentType = args.contextData.props?.contentType || "channels";
 const placeholder = contentType === "playlists"
   ? "https://www.youtube.com/playlist?list=..."
-  : "https://www.youtube.com/channel/...";
+  : "https://www.youtube.com/@handle or https://www.youtube.com/channel/...";
 
 return {
   placeholder,

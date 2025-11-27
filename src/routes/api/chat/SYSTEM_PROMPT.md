@@ -488,13 +488,38 @@ Use the 'css' property for styling. It is a function body string that returns a 
   - **Note**: If the base background color is white (#FFFFFF), using `background_light_100` will have no visible effect as light shades of white remain white
   - Prefer using `background_dark_` shades or opacity-based overlays for dark mode styling
 
-### Theme Color Access
+### Theme Variable Access
+The theme system supports any custom variables, not just colors. Access all theme variables via `args.theme.var`.
+
+**Color Variables:**
 - Base colors: `args.theme.var.color.primary`, `args.theme.var.color.info`, `args.theme.var.color.success`, `args.theme.var.color.warning`, `args.theme.var.color.error`, `args.theme.var.color.text`, `args.theme.var.color.background`, `args.theme.var.color.border`
 - Standard colors: `args.theme.var.color.red`, `args.theme.var.color.blue`, `args.theme.var.color.green`, etc.
 - Light shades: `_light_100` to `_light_900` (light_100 = close to base, light_900 = close to white)
 - Dark shades: `_dark_100` to `_dark_900` (dark_100 = close to base, dark_900 = close to black)
 - Text colors: Automatic with `_text` suffix (e.g., `primary_text`, `background_light_200_text`)
 - **Dark mode behavior**: Shades automatically swap (`_light_` becomes `_dark_` and vice versa)
+
+**Custom Theme Variables:**
+You can define and use any custom variables in your theme:
+- Font sizes: `args.theme.var.fontSize.xs`, `args.theme.var.fontSize.sm`, `args.theme.var.fontSize.md`, `args.theme.var.fontSize.lg`, `args.theme.var.fontSize.xl`, `args.theme.var.fontSize.title`
+- Spacing: `args.theme.var.spacing.xs`, `args.theme.var.spacing.sm`, `args.theme.var.spacing.md`, `args.theme.var.spacing.lg`, `args.theme.var.spacing.xl`
+- Border radius: `args.theme.var.borderRadius.sm`, `args.theme.var.borderRadius.md`, `args.theme.var.borderRadius.lg`, `args.theme.var.borderRadius.full`
+- Animation timing: `args.theme.var.animation.fast`, `args.theme.var.animation.normal`, `args.theme.var.animation.slow`
+- Any other custom values: `args.theme.var.customCategory.customValue`
+
+**Example Usage:**
+```javascript
+css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  font-size: ${args.theme.var.fontSize.lg};
+  border-radius: ${args.theme.var.borderRadius.md};
+  transition: all ${args.theme.var.animation.normal} ease;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}`;
+'''
+```
 
 ## Component Variants
 

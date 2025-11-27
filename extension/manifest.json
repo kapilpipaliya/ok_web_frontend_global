@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "YSaar - YouTube Organizer",
   "version": "1.0.0",
-  "description": "Save and manage YouTube channels and playlists with YSaar",
+  "description": "Transform how you manage YouTube content with YSaar - the ultimate YouTube organization tool. Save channels, playlists, and videos instantly while browsing YouTube, then access everything through a beautiful, mobile-first dashboard.",
   "permissions": [
     "activeTab"
   ],

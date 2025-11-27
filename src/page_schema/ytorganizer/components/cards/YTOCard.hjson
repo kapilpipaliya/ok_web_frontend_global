@@ -13,6 +13,23 @@
       P: {
         displayOrder: 1,
         componentName: "Html",
+        fns: '''
+// Common function to get effective setting (prefers live polling data over stale itemSetting)
+const getEffectiveSetting = () => {
+  const itemSetting = args.contextData.props?.itemSetting;
+  const itemType = args.contextData.props?.itemType;
+  const processingStatus = args.contextData.props?.processingStatus;
+
+  // Prefer processing status setting (live updates from polling) over itemSetting (stale data)
+  return (itemType === "channel" && processingStatus?.channelSetting) ||
+         (itemType === "playlist" && processingStatus?.playlistSetting) ||
+         itemSetting;
+};
+
+return {
+  getEffectiveSetting
+};
+''',
         props: '''
 return {
   as: "div"
@@ -66,12 +83,9 @@ const thumbnailUrl = item?.P?.thumbnailMaxres ||
 
 const youtubeId = item?.P?.youtubeId || "";
 
-// For special playlists, use originalPlaylistId for YouTube URL, but keep youtubeId for internal navigation
-const originalPlaylistId = item?.P?.originalPlaylistId;
-
 let href, target;
 if (itemType === "video") {
-  href = `https://www.youtube.com/watch?v=${youtubeId}`;
+  href = args.fns.getYouTubeUrl?.(item, itemType);
   target = "_blank";
 } else if (itemType === "playlist") {
   href = `/content?type=playlists&id=${youtubeId}`;
@@ -94,6 +108,10 @@ return {
     // Check if running in extension iframe
     const isInExtension = window.self !== window.top;
 
+    // Check if this is an extension item that's not added yet
+    const isExtensionItem = item?.P?.extensionExists !== undefined;
+    const notAdded = isExtensionItem && !item?.P?.extensionExists;
+
     if (itemType === "video") {
       if (isInExtension) {
         // Use common function to open in parent tab when in extension
@@ -103,19 +121,16 @@ return {
         // Use video player when in main app
         args.fns.playVideo?.(item);
       }
-    } else if (itemType === "playlist") {
-      if (isInExtension) {
-        // Open in parent tab for extension
-        args.fns.openYouTubeInParentTab(`https://www.youtube.com/playlist?list=${youtubeId}`);
-      } else {
-        args.navigate(`/content?type=playlists&id=${youtubeId}`);
-      }
     } else {
-      if (isInExtension) {
-        // Open in parent tab for extension
-        args.fns.openYouTubeInParentTab(`https://www.youtube.com/channel/${youtubeId}`);
+      // Handle playlists and channels
+      const youtubeUrl = args.fns.getYouTubeUrl?.(item, itemType);
+
+      const contentType = itemType === "playlist" ? "playlists" : "channels";
+
+      if (notAdded) {
+        args.fns.openYouTubeInParentTab(youtubeUrl);
       } else {
-        args.navigate(`/content?type=channels&id=${youtubeId}`);
+        args.navigate(`/content?type=${contentType}&id=${youtubeId}`);
       }
     }
   }
@@ -143,10 +158,123 @@ return `._id {
       }
     },
     {
-      id: "card_playing_indicator",
+      id: "card_thumbnail_placeholder",
       L: "Attr",
       P: {
         displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if thumbnail exists
+const thumbnailUrl = item?.P?.thumbnailMaxres ||
+                     item?.P?.thumbnailStandard ||
+                     item?.P?.thumbnailHigh ||
+                     item?.P?.thumbnailMedium ||
+                     item?.P?.thumbnailDefault ||
+                     item?.P?.thumbnailUrl ||
+                     item?.P?.thumbnail || "";
+
+// Only show placeholder when no thumbnail exists
+return {
+  as: "div",
+  hide: !!thumbnailUrl
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  box-sizing: border-box;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_thumbnail_placeholder_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const itemType = args.contextData.props?.itemType;
+
+let iconName;
+if (itemType === "video") {
+  iconName = "mdi:video-outline";
+} else if (itemType === "playlist") {
+  iconName = "mdi:playlist-play";
+} else {
+  iconName = "mdi:youtube";
+}
+
+return {
+  as: "icon",
+  icon: iconName,
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  opacity: 0.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_thumbnail_placeholder_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const itemType = args.contextData.props?.itemType;
+
+let text;
+if (itemType === "video") {
+  text = "No Preview";
+} else if (itemType === "playlist") {
+  text = "Playlist";
+} else {
+  text = "Channel";
+}
+
+return {
+  as: "span",
+  text: text
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.65rem;
+  color: ${args.theme.var.color.muted};
+  opacity: 0.7;
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_playing_indicator",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
@@ -330,7 +458,6 @@ return `._id {
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 
 // Check if this is an extension item (has extensionExists property)
@@ -341,8 +468,11 @@ if (isExtensionItem) {
   return { hide: true };
 }
 
-// Get status from itemSetting
-const status = itemSetting?.P?.status;
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+// Get status from effective setting
+const status = effectiveSetting?.P?.status;
 
 // Hide for videos (they don't have processing status)
 if (itemType === "video") {
@@ -386,8 +516,10 @@ return {
 };
 ''',
         css: '''
-const itemSetting = args.contextData.props?.itemSetting;
-const status = itemSetting?.P?.status;
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+const status = effectiveSetting?.P?.status;
 const statusInfo = args.fns.getStatusInfo?.(status);
 
 // Map color names to theme colors
@@ -445,8 +577,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const itemSetting = args.contextData.props?.itemSetting;
-const status = itemSetting?.P?.status;
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+const status = effectiveSetting?.P?.status;
 
 // Get status info from constants
 const statusInfo = args.fns.getStatusInfo?.(status);
@@ -475,13 +609,14 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const itemSetting = args.contextData.props?.itemSetting;
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
 
-// Get status and progress from itemSetting
-const status = itemSetting?.P?.status || '';
-const progress = itemSetting?.P?.progress || 0;
-const processedCount = itemSetting?.P?.processedPlaylists || itemSetting?.P?.processedVideos || 0;
-const totalCount = itemSetting?.P?.totalPlaylists || itemSetting?.P?.totalVideos || 0;
+// Get status and progress from effective setting
+const status = effectiveSetting?.P?.status || '';
+const progress = effectiveSetting?.P?.progress || 0;
+const processedCount = effectiveSetting?.P?.processedPlaylists || effectiveSetting?.P?.processedVideos || 0;
+const totalCount = effectiveSetting?.P?.totalPlaylists || effectiveSetting?.P?.totalVideos || 0;
 
 // Get status info from constants
 const statusInfo = args.fns.getStatusInfo?.(status);
@@ -526,11 +661,12 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const itemSetting = args.contextData.props?.itemSetting;
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
 
-// Get status and error from itemSetting
-const status = itemSetting?.P?.status || '';
-const error = itemSetting?.P?.error || '';
+// Get status and error from effective setting
+const status = effectiveSetting?.P?.status || '';
+const error = effectiveSetting?.P?.error || '';
 
 // Only show error for failed or completed_with_errors status
 if ((status !== 'failed' && status !== 'completed_with_errors') || !error) {
@@ -598,23 +734,15 @@ return `._id {
         props: '''
 const item = args.contextData.props?.item;
 const exists = item?.P?.extensionExists || false;
-const isCurrentPage = item?.P?.extensionIsCurrentPage || false;
 
-// Only show icon for current page or already added items
-if (!isCurrentPage && !exists) {
+// Only show icon for already added items (not for current page)
+if (!exists) {
   return { hide: true };
-}
-
-let iconName;
-if (isCurrentPage) {
-  iconName = "carbon:star-filled";
-} else if (exists) {
-  iconName = "carbon:checkmark-filled";
 }
 
 return {
   as: "icon",
-  icon: iconName,
+  icon: "carbon:checkmark-filled",
   width: 16,
   height: 16
 };
@@ -622,12 +750,9 @@ return {
         css: '''
 const item = args.contextData.props?.item;
 const exists = item?.P?.extensionExists || false;
-const isCurrentPage = item?.P?.extensionIsCurrentPage || false;
 
 let iconColor;
-if (isCurrentPage) {
-  iconColor = args.theme.var.color.primary;
-} else if (exists) {
+if (exists) {
   iconColor = args.theme.var.color.success;
 }
 
@@ -656,10 +781,9 @@ if (!isExtensionItem) {
 }
 
 const exists = item?.P?.extensionExists || false;
-const isCurrentPage = item?.P?.extensionIsCurrentPage || false;
 
-// Only show button for "Not Added" items (not current page and not already added)
-if (isCurrentPage || exists) {
+// Only show button for items not already added
+if (exists) {
   return { hide: true };
 }
 
@@ -704,9 +828,9 @@ return {
 ''',
         css: '''
 return `._id {
-  padding: 0.25rem 0.5rem;
+  padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 500;
   cursor: pointer;
   border: 1px solid ${args.theme.var.color.primary};
@@ -714,6 +838,7 @@ return `._id {
   color: ${args.theme.var.color.primary_text};
   transition: all 0.2s ease;
   line-height: 1.2;
+  flex-shrink: 0;
 
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
@@ -754,7 +879,7 @@ return `._id {
       id: "card_meta_text",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 4,
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
@@ -779,7 +904,7 @@ if (itemType === "channel") {
   parts.push(`${videoCount} video${videoCount !== 1 ? 's' : ''}`);
   metaText = parts.join(' • ');
 } else if (itemType === "playlist") {
-  const videoCount = itemSetting?.P?.videoCount ?? 0;
+  const videoCount = item?.P?.itemCount ?? itemSetting?.P?.itemCount ?? 0;
   metaText = `${videoCount} video${videoCount !== 1 ? 's' : ''}`;
 
   // If there's a parent channel, show it
@@ -809,7 +934,7 @@ return `._id {
       id: "card_favourite_icon",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 const item = args.contextData.props?.item;
@@ -824,7 +949,7 @@ return {
     e.stopPropagation();
     await args.fns.toggleFavourite?.(item);
   },
-  title: "Remove from favourites"
+  title: isFavourite ? "Remove from favourites" : "Add to favourites"
 };
 ''',
         css: '''
@@ -927,7 +1052,7 @@ return {
       id: "card_note_display",
       L: "Attr",
       P: {
-        displayOrder: 4,
+        displayOrder: 5,
         componentName: "Html",
         props: '''
 const itemSetting = args.contextData.props?.itemSetting;
@@ -1050,8 +1175,7 @@ const formatValue = (field) => {
   } else if (field === "position") {
     value = itemSetting?.P?.position;
   } else if (field === "itemCount") {
-    // For playlists: use videoCount from setting (actual count of user's videos)
-    value = itemSetting?.P?.videoCount;
+    value = itemSetting?.P?.itemCount ?? item?.P?.itemCount ?? 0;
   } else if (field === "videoCount") {
     // For channels: use videoCount from setting
     value = itemSetting?.P?.videoCount;
@@ -1380,20 +1504,8 @@ return {
         props: '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
-const youtubeId = item?.P?.youtubeId || "";
 
-// For special playlists, use originalPlaylistId for YouTube URL
-const originalPlaylistId = item?.P?.originalPlaylistId;
-const playlistIdForUrl = originalPlaylistId || youtubeId;
-
-let youtubeUrl = "";
-if (itemType === "channel") {
-  youtubeUrl = `https://www.youtube.com/channel/${youtubeId}`;
-} else if (itemType === "playlist") {
-  youtubeUrl = `https://www.youtube.com/playlist?list=${playlistIdForUrl}`;
-} else {
-  youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
-}
+const youtubeUrl = args.fns.getYouTubeUrl?.(item, itemType) || "";
 
 return {
   icon: "carbon:launch",
@@ -1436,9 +1548,12 @@ return {
         slot: "menu-items",
         props: '''
 const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
-const status = itemSetting?.P?.status;
+
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+const status = effectiveSetting?.P?.status;
 const youtubeId = item?.P?.youtubeId;
 const ownershipId = args.fns.getSelectedOwnershipId?.();
 
@@ -1501,6 +1616,9 @@ return {
   edges: [
     { id: "e1", T: "Attr", S: "component_root", E: "card_container" },
     { id: "e2", T: "Attr", S: "card_container", E: "card_thumbnail" },
+    { id: "e2_0_1", T: "Attr", S: "card_thumbnail", E: "card_thumbnail_placeholder" },
+    { id: "e2_0_2", T: "Attr", S: "card_thumbnail_placeholder", E: "card_thumbnail_placeholder_icon" },
+    { id: "e2_0_3", T: "Attr", S: "card_thumbnail_placeholder", E: "card_thumbnail_placeholder_text" },
     { id: "e2_1", T: "Attr", S: "card_thumbnail", E: "card_playing_indicator" },
     { id: "e2_2", T: "Attr", S: "card_playing_indicator", E: "card_playing_icon" },
     { id: "e3", T: "Attr", S: "card_container", E: "card_info" },
@@ -1513,12 +1631,12 @@ return {
     { id: "e5_4", T: "Attr", S: "card_processing_status", E: "card_processing_status_error" },
     { id: "e5_5", T: "Attr", S: "card_info", E: "card_extension_existence_badge" },
     { id: "e5_5_1", T: "Attr", S: "card_extension_existence_badge", E: "card_extension_existence_icon" },
-    { id: "e5_5_2", T: "Attr", S: "card_extension_existence_badge", E: "card_extension_existence_add_button" },
     { id: "e6", T: "Attr", S: "card_info", E: "card_meta_row" },
     { id: "e6_1", T: "Attr", S: "card_info", E: "card_additional_fields" },
     { id: "e6_2", T: "Attr", S: "card_additional_fields", E: "card_additional_field_item" },
     { id: "e7", T: "Attr", S: "card_meta_row", E: "card_meta_text" },
     { id: "e8", T: "Attr", S: "card_meta_row", E: "card_favourite_icon" },
+    { id: "e8_1", T: "Attr", S: "card_meta_row", E: "card_extension_existence_add_button" },
     { id: "e9", T: "Attr", S: "card_favourite_icon", E: "card_favourite_icon_svg" },
     { id: "e10", T: "Attr", S: "card_meta_row", E: "card_queue_button" },
     { id: "e11", T: "Attr", S: "card_queue_button", E: "card_queue_icon" },

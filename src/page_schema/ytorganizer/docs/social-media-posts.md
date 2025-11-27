@@ -35,12 +35,13 @@ YSaar helps you organize your YouTube subscriptions and playlists like a persona
 - Real-time quota monitoring with automated alerts
 - BullMQ for background workers
 
-Perfect for researchers, students, lifelong learners, or anyone managing multiple YouTube accounts and large collections of educational/entertainment content! 🚀
+Perfect for students, researchers, lifelong learners, or anyone managing multiple YouTube accounts and large collections of educational/entertainment content! 🚀
 
 **Use Cases:**
 - Students organizing lecture series across multiple courses
 - Researchers tracking videos by topic/category
 - Language learners managing content in multiple languages
+- Entertainment enthusiasts organizing favorite shows and podcasts
 - Anyone with 100+ subscriptions wanting better organization
 
 🔗 Try it: https://ysaar.com

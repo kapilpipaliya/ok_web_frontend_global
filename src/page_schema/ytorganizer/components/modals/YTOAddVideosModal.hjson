@@ -715,7 +715,7 @@ return {
   value: args.fns.videoUrlsInput(),
   onChange: (e) => args.fns.setVideoUrlsInput(e.target.value),
   placeholder: "https://www.youtube.com/watch?v=...\nhttps://www.youtube.com/watch?v=...",
-  rows: 8
+  rows: 4
 };
 '''
       }

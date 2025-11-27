@@ -63,25 +63,30 @@
     // Extract current playlist
     const currentPlaylistId = urlParams.get('list');
     if (currentPlaylistId) {
-      const playlistTitle = document.querySelector('yt-formatted-string.ytd-playlist-header-renderer')?.textContent?.trim() ||
-                           document.querySelector('#title')?.textContent?.trim() ||
-                           pageTitle.replace(' - YouTube', '').trim();
+      // Filter out auto-generated playlists (start with "RD") and short system playlists (exactly 2 chars)
+      const shouldIncludePlaylist = !currentPlaylistId.startsWith('RD') && currentPlaylistId.length !== 2;
 
-      // Try to get playlist thumbnail from the page
-      const playlistThumbnail = document.querySelector('ytd-playlist-header-renderer img')?.src ||
-                               document.querySelector('ytd-playlist-thumbnail img')?.src ||
-                               document.querySelector('#thumbnail img')?.src ||
-                               null;
+      if (shouldIncludePlaylist) {
+        const playlistTitle = document.querySelector('yt-formatted-string.ytd-playlist-header-renderer')?.textContent?.trim() ||
+                             document.querySelector('#title')?.textContent?.trim() ||
+                             pageTitle.replace(' - YouTube', '').trim();
 
-      if (!playlistIds.has(currentPlaylistId)) {
-        playlistIds.add(currentPlaylistId);
-        result.playlists.push({
-          id: currentPlaylistId,
-          url: `https://www.youtube.com/playlist?list=${currentPlaylistId}`,
-          title: playlistTitle,
-          thumbnail: playlistThumbnail,
-          isCurrentPage: true
-        });
+        // Try to get playlist thumbnail from the page
+        const playlistThumbnail = document.querySelector('ytd-playlist-header-renderer img')?.src ||
+                                 document.querySelector('ytd-playlist-thumbnail img')?.src ||
+                                 document.querySelector('#thumbnail img')?.src ||
+                                 null;
+
+        if (!playlistIds.has(currentPlaylistId)) {
+          playlistIds.add(currentPlaylistId);
+          result.playlists.push({
+            id: currentPlaylistId,
+            url: `https://www.youtube.com/playlist?list=${currentPlaylistId}`,
+            title: playlistTitle,
+            thumbnail: playlistThumbnail,
+            isCurrentPage: true
+          });
+        }
       }
     }
 
@@ -158,7 +163,10 @@
         const linkUrl = href.startsWith('http') ? new URL(href) : new URL(href, 'https://www.youtube.com');
         const playlistId = linkUrl.searchParams.get('list');
 
-        if (playlistId && !playlistIds.has(playlistId)) {
+        // Filter out auto-generated playlists (start with "RD") and short system playlists (exactly 2 chars)
+        const shouldIncludePlaylist = playlistId && !playlistId.startsWith('RD') && playlistId.length !== 2;
+
+        if (shouldIncludePlaylist && !playlistIds.has(playlistId)) {
           playlistIds.add(playlistId);
 
           // Try to get playlist title
@@ -246,8 +254,6 @@
   // Listen for messages from popup to extract YouTube info
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'GET_YOUTUBE_INFO') {
-      console.log('Content script received GET_YOUTUBE_INFO request');
-
       // Wait a moment for page to be fully loaded
       setTimeout(() => {
         const info = getYouTubeInfo();

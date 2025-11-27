@@ -1640,7 +1640,22 @@ const createYouTubeLink = (job) => {
   const name = job.channelName || job.playlistName || job.customName || args.fns.truncate(job.channelId || job.playlistId, 20);
   let url = '';
   if (job.channelId) {
-    url = `https://www.youtube.com/channel/${job.channelId}`;
+    // For channels, prefer handle format if available
+    if (job.handle || job.customUrl) {
+      const handle = job.handle || job.customUrl;
+      const formattedHandle = handle.startsWith('@') ? handle : `@${handle}`;
+      url = `https://www.youtube.com/${formattedHandle}`;
+    } else {
+      // Check if channelId is a channel ID (starts with "UC") or a handle
+      if (job.channelId.startsWith('UC')) {
+        // Channel ID format
+        url = `https://www.youtube.com/channel/${job.channelId}`;
+      } else {
+        // Treat as handle format
+        const formattedHandle = job.channelId.startsWith('@') ? job.channelId : `@${job.channelId}`;
+        url = `https://www.youtube.com/${formattedHandle}`;
+      }
+    }
   } else if (job.playlistId) {
     url = `https://www.youtube.com/playlist?list=${job.playlistId}`;
   }

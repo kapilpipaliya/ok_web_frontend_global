@@ -36,8 +36,8 @@ return {
         fns: '''
 // Reactive content type detection
 const contentType = args.createMemo(() => args.searchParams?.type || "channels");
-const detailId = args.searchParams?.id || null;
-const searchQuery = args.searchParams?.q || "";
+const detailId = args.createMemo(() => args.searchParams?.id || null);
+const searchQuery = args.createMemo(() => args.searchParams?.q || "");
 
 // Reactive view mode detection
 const isDetailView = args.createMemo(() => !!args.searchParams?.id);
@@ -58,7 +58,7 @@ const [detailSearchTerm, setDetailSearchTerm] = args.createSignal("");
 
 // State for search view
 const [searchResults, setSearchResults] = args.createSignal(null);
-const [searchInput, setSearchInput] = args.createSignal(searchQuery);
+const [searchInput, setSearchInput] = args.createSignal(searchQuery());
 
 // State for favourites view
 const [favouritesData, setFavouritesData] = args.createSignal(null);
@@ -822,77 +822,24 @@ const getExtensionItems = args.createMemo(() => {
     }
   };
 
-  // First, add current page items (marked with isCurrentPage: true)
+  // Add all channels
   if (data.channels) {
     for (const channelData of data.channels) {
-      const isCurrentPage = channelData.extensionData
-        ? channelData.channel.isCurrentPage
-        : false;
-
-      if (isCurrentPage) {
-        addUniqueItem(channelData, 'channel');
-      }
+      addUniqueItem(channelData, 'channel');
     }
   }
+
+  // Add all playlists
   if (data.playlists) {
     for (const playlistData of data.playlists) {
-      const isCurrentPage = playlistData.extensionData
-        ? playlistData.playlist.isCurrentPage
-        : false;
-
-      if (isCurrentPage) {
-        addUniqueItem(playlistData, 'playlist');
-      }
+      addUniqueItem(playlistData, 'playlist');
     }
   }
+
+  // Add all videos
   if (data.videos) {
     for (const videoData of data.videos) {
-      const isCurrentPage = videoData.extensionData
-        ? videoData.video.isCurrentPage
-        : false;
-
-      if (isCurrentPage) {
-        addUniqueItem(videoData, 'video');
-      }
-    }
-  }
-
-  // Then add all channels (excluding current page)
-  if (data.channels) {
-    for (const channelData of data.channels) {
-      const isCurrentPage = channelData.extensionData
-        ? channelData.channel.isCurrentPage
-        : false;
-
-      if (!isCurrentPage) {
-        addUniqueItem(channelData, 'channel');
-      }
-    }
-  }
-
-  // Then add all playlists (excluding current page)
-  if (data.playlists) {
-    for (const playlistData of data.playlists) {
-      const isCurrentPage = playlistData.extensionData
-        ? playlistData.playlist.isCurrentPage
-        : false;
-
-      if (!isCurrentPage) {
-        addUniqueItem(playlistData, 'playlist');
-      }
-    }
-  }
-
-  // Finally add all videos (excluding current page)
-  if (data.videos) {
-    for (const videoData of data.videos) {
-      const isCurrentPage = videoData.extensionData
-        ? videoData.video.isCurrentPage
-        : false;
-
-      if (!isCurrentPage) {
-        addUniqueItem(videoData, 'video');
-      }
+      addUniqueItem(videoData, 'video');
     }
   }
 
@@ -1069,7 +1016,7 @@ const loadDetailData = async () => {
   try {
     const functionName = contentType() === "playlists" ? "getPlaylistVideos" : "getChannelContents";
     const result = await args.fns.executeYTOFunction(functionName, {
-      [contentType() === "playlists" ? "playlistId" : "channelId"]: detailId,
+      [contentType() === "playlists" ? "playlistId" : "channelId"]: detailId(),
       sortBy: detailSortBy()
     });
 
@@ -1279,14 +1226,24 @@ args.createEffect(
       searchSortBy(),
       favouritesSortBy(),
       args.fns.selectedOwnership?.(), // Watch for ownership selection
+      args.fns.ownershipsLoading?.(), // Watch for ownerships loading state
       pageContent() // Watch for page content changes (for extension view)
     ],
     (
-      [currentType, currentId, currentQuery, currentListSort, currentDetailSort, currentSearchSort, currentFavouritesSort, currentOwnership, currentPageContent],
-      [prevType, prevId, prevQuery, prevListSort, prevDetailSort, prevSearchSort, prevFavouritesSort, prevOwnership, prevPageContent] = []
+      [currentType, currentId, currentQuery, currentListSort, currentDetailSort, currentSearchSort, currentFavouritesSort, currentOwnership, currentOwnershipsLoading, currentPageContent],
+      [prevType, prevId, prevQuery, prevListSort, prevDetailSort, prevSearchSort, prevFavouritesSort, prevOwnership, prevOwnershipsLoading, prevPageContent] = []
     ) => {
-      // Don't load data until ownership is selected
+      // If ownerships are still loading, keep loading state
+      if (currentOwnershipsLoading) {
+        return;
+      }
+
+      // If ownerships are loaded but none exist (and no ownership selected), stop loading
       if (!currentOwnership) {
+        const ownerships = args.fns.ownerships?.() || [];
+        if (ownerships.length === 0) {
+          setLoading(false);
+        }
         return;
       }
 
@@ -2146,6 +2103,42 @@ const formatProcessingStatus = (processingStatus, itemType) => {
   };
 };
 
+// Generate YouTube URL for items (channels, playlists, videos)
+const getYouTubeUrl = (item, itemType) => {
+  if (!item) return null;
+
+  const youtubeId = item.P?.youtubeId || "";
+
+  if (itemType === "video") {
+    return `https://www.youtube.com/watch?v=${youtubeId}`;
+  } else if (itemType === "playlist") {
+    // For special playlists, use originalPlaylistId for YouTube URL
+    const playlistId = item.P?.originalPlaylistId || youtubeId;
+    return `https://www.youtube.com/playlist?list=${playlistId}`;
+  } else if (itemType === "channel") {
+    // For channels, prefer handle format (@handle) over channel ID
+    const handle = item.P?.handle || item.P?.customUrl;
+    if (handle) {
+      // Ensure handle starts with @
+      const formattedHandle = handle.startsWith('@') ? handle : `@${handle}`;
+      return `https://www.youtube.com/${formattedHandle}`;
+    } else {
+      // Check if youtubeId is a channel ID (starts with "UC") or a handle
+      // For extension items, youtubeId might be a handle directly
+      if (youtubeId.startsWith('UC')) {
+        // Channel ID format
+        return `https://www.youtube.com/channel/${youtubeId}`;
+      } else {
+        // Treat as handle format
+        const formattedHandle = youtubeId.startsWith('@') ? youtubeId : `@${youtubeId}`;
+        return `https://www.youtube.com/${formattedHandle}`;
+      }
+    }
+  }
+
+  return null;
+};
+
 return {
   contentType,
   items,
@@ -2270,7 +2263,8 @@ return {
   initializeSortFromURL,
   updateURLSort,
   clearURLSort,
-  splitSortValue
+  splitSortValue,
+  getYouTubeUrl
 };
 ''',
         props: '''
@@ -2450,8 +2444,13 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+// Check if no ownerships exist - hide search and actions when no accounts connected
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
 return {
-  as: "div"
+  as: "div",
+  hide: hasNoOwnerships
 };
 ''',
         css: '''
@@ -2464,8 +2463,8 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    flex-direction: column;
-    gap: 0.75rem;
+    /*flex-direction: column;*/
+    /*gap: 0.75rem;*/
   }
 }`;
 '''
@@ -2478,9 +2477,13 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+// Check if no ownerships exist - hide sort controls when no accounts connected
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
 return {
   as: "div",
-  hide: args.fns.loading()
+  hide: args.fns.loading() || hasNoOwnerships
 };
 ''',
         css: '''
@@ -2494,8 +2497,8 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    flex-direction: column;
-    align-items: flex-start;
+    /*flex-direction: column;*/
+    /*align-items: flex-start;*/
     gap: 0.5rem;
     margin: 0 0 ${args.theme.var.spacing.md} 0;
   }
@@ -2901,12 +2904,33 @@ return `._id {
       }
     },
     {
-      id: "empty_state",
+      id: "no_accounts_message",
       L: "Attr",
       P: {
         displayOrder: 2,
+        componentName: "YTONoAccountsMessage",
+        props: '''
+// Check if no ownerships exist
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+return {
+  hide: args.fns.loading() || !hasNoOwnerships
+};
+'''
+      }
+    },
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
         componentName: "Html",
         props: '''
+// Check if no ownerships exist - don't show this state if no accounts
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
 const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
@@ -2928,7 +2952,7 @@ if (isListView) {
 
 return {
   as: "div",
-  hide: args.fns.loading() || hasItems
+  hide: args.fns.loading() || hasItems || hasNoOwnerships
 };
 ''',
         css: '''
@@ -3466,7 +3490,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    width: 100%;
+
   }
 }`;
 '''
@@ -3494,7 +3518,8 @@ return `._id {
     { id: "e9", T: "Attr", S: "main_content_container", E: "loading_state" },
     { id: "e10", T: "Attr", S: "loading_state", E: "loading_spinner" },
     { id: "e11", T: "Attr", S: "loading_state", E: "loading_text" },
-    { id: "e12", T: "Attr", S: "main_content_container", E: "empty_state" },
+    { id: "e12", T: "Attr", S: "main_content_container", E: "no_accounts_message" },
+    { id: "e12a", T: "Attr", S: "main_content_container", E: "empty_state" },
     { id: "e13", T: "Attr", S: "empty_state", E: "empty_icon" },
     { id: "e14", T: "Attr", S: "empty_state", E: "empty_title" },
     { id: "e15", T: "Attr", S: "empty_state", E: "empty_description" },

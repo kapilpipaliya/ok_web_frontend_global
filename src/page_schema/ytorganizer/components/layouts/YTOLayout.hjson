@@ -277,6 +277,9 @@ const [quotaLoading, setQuotaLoading] = args.createSignal(false);
 // Card field setting state management
 const [cardFieldSetting, setCardFieldSetting] = args.createSignal();
 
+// Check if running in iframe (initialized on mount to avoid hydration issues)
+const [isInIframe, setIsInIframe] = args.createSignal(false);
+
 // Load impersonation state from sessionStorage (client-side only)
 // This is called from onMount to avoid SSR/hydration mismatch
 const loadImpersonationState = () => {
@@ -932,7 +935,8 @@ const mobileNavigationItemsData = [
     label: "Quick Add",
     icon: "carbon:add-alt",
     title: "Quick add channels, playlists, and videos",
-    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "extension"
+    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "extension",
+    showIf: () => isInIframe()
   },
   {
     id: "home",
@@ -1002,16 +1006,16 @@ const mobileNavigationItemsData = [
   },
 ];
 
-// Filter mobile navigation items based on showIf condition
-const filteredMobileNavigationItems = mobileNavigationItemsData.filter(item => {
-  if (item.showIf && typeof item.showIf === 'function') {
-    return item.showIf();
-  }
-  return true; // Show by default if no showIf condition
+// Create reactive memo for mobile navigation items
+// Automatically updates when isInIframe changes
+const mobileNavigationItems = args.createMemo(() => {
+  return mobileNavigationItemsData.filter(item => {
+    if (item.showIf && typeof item.showIf === 'function') {
+      return item.showIf();
+    }
+    return true; // Show by default if no showIf condition
+  });
 });
-
-// Create signal for mobile navigation items
-const [mobileNavigationItems, setMobileNavigationItems] = args.createSignal(filteredMobileNavigationItems);
 
 // Status messages from constants
 const STATUS_CONSTANTS = {
@@ -1212,7 +1216,8 @@ return {
   navigationSections,
   setNavigationSections,
   mobileNavigationItems,
-  setMobileNavigationItems,
+  isInIframe,
+  setIsInIframe,
   keepAwake,
   allowSleep,
   isSupported,
@@ -1259,6 +1264,10 @@ return {
 return {
   as: "div",
   onMount: async () => {
+    if (typeof window !== 'undefined') {
+      args.fns.setIsInIframe?.(window.self !== window.top);
+    }
+
     // Load saved state from sessionStorage and database
     args.fns.loadImpersonationState?.();
     args.fns.loadOwnershipState?.();
