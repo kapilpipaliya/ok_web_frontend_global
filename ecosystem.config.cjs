@@ -11,7 +11,7 @@ module.exports = {
   apps: [
     {
       name: "ok-web-frontend",
-      script: "./.output/server/index.mjs",
+      script: "./production/server/index.mjs",
       instances: 2, // Run 2 instances (or use "max" for all CPU cores)
       exec_mode: "cluster",
       // Load environment variables from .env file

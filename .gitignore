@@ -2,8 +2,8 @@
 dist
 .solid
 .output
-.output-new
-.output-old
+production
+production-old
 .vercel
 .netlify
 netlify

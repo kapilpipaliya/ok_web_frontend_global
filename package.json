@@ -6,10 +6,10 @@
     "pretty": "prettier --write \"./**/*.{js,jsx,css,ts,tsx,json}\"",
     "dev": "vinxi dev --host --port 3001",
     "build": "vinxi build --no-minify",
-    "build:temp": "echo '🔨 Starting temporary build...' && rm -rf .output-new && vinxi build --no-minify && mv .output .output-new && echo '✅ Temporary build created in .output-new'",
-    "swap:build": "if [ -d .output-new ] && [ -f .output-new/server/index.mjs ]; then echo '🔄 Swapping builds...' && rm -rf .output-old && mv .output .output-old && mv .output-new .output && echo '✅ Build swapped successfully' && echo '📦 Old build saved in .output-old for rollback'; else echo '❌ No valid new build found (.output-new/server/index.mjs missing)'; exit 1; fi",
-    "rollback:build": "if [ -d .output-old ] && [ -f .output-old/server/index.mjs ]; then echo '⏪ Rolling back to previous build...' && rm -rf .output && mv .output-old .output && echo '✅ Rolled back to previous build successfully'; else echo '❌ No old build found for rollback'; exit 1; fi",
-    "cleanup:build": "echo '🧹 Cleaning up old builds...' && rm -rf .output-old .output-new && echo '✅ Cleanup complete'",
+    "deploy:build": "echo '🔨 Building application...' && vinxi build --no-minify && echo '✅ Build complete in .output'",
+    "deploy:activate": "if [ -f .output/server/index.mjs ]; then echo '🔄 Activating new build...' && rm -rf production-old && mv production production-old 2>/dev/null || true && cp -r .output production && echo '✅ New build activated' && echo '📦 Old build saved in production-old for rollback'; else echo '❌ Build invalid (.output/server/index.mjs missing)'; exit 1; fi",
+    "rollback": "if [ -d production-old ] && [ -f production-old/server/index.mjs ]; then echo '⏪ Rolling back...' && rm -rf production && mv production-old production && echo '✅ Rollback successful'; else echo '❌ No backup found for rollback'; exit 1; fi",
+    "deploy:cleanup": "echo '🧹 Cleaning up...' && rm -rf production-old && echo '✅ Cleanup complete'",
     "startDev": "dotenv -e .env -- vinxi start --port 3001",
     "start": "dotenv -e .env -- vinxi start --port 3001",
     "prepare": "husky",
@@ -25,8 +25,8 @@
     "pm2:monit": "pm2 monit",
     "pm2:status": "pm2 status",
     "setup": "git pull && npm i --force && npm run build && npm run pm2:start",
-    "deploy": "echo '🚀 Starting deployment...' && git pull && npm i --force && npm run build:temp && npm run swap:build && npm run pm2:reload && echo '✅ Deployment complete! Run \"npm run cleanup:build\" to remove old build.'",
-    "deploy:rollback": "echo '⏪ Starting rollback...' && npm run rollback:build && npm run pm2:reload && echo '✅ Rollback complete!'"
+    "deploy": "echo '🚀 Starting deployment...' && git pull && npm i --force && npm run deploy:build && npm run deploy:activate && npm run pm2:reload && echo '✅ Deployment complete! Run \"npm run deploy:cleanup\" to remove old build.'",
+    "deploy:rollback": "echo '⏪ Starting rollback...' && npm run rollback && npm run pm2:reload && echo '✅ Rollback complete!'"
   },
   "dependencies": {
     "@ai-sdk/openai": "2.0.68",

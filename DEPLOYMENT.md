@@ -1,25 +1,37 @@
 # Zero-Downtime Deployment Guide
 
-This guide explains how to deploy updates without taking your application offline using a **build-swap strategy** with PM2 cluster mode.
+This guide explains how to deploy updates without taking your application offline using PM2 cluster mode with **separate build and runtime directories**.
 
 ## Overview
 
-**Deployment Strategy:**
-- Zero-downtime deployment with automatic rollback support
-- Three-directory build system (current, new, old)
-- Build validation before swapping
-- One-command rollback to previous version
+**The Simple Strategy:**
+
+PM2 runs from `production/` directory, Vinxi builds to `.output/` directory. Deploy = copy `.output/` to `production/`. That's it!
+
+**Why This Works:**
+- ✅ Build never touches production (PM2 keeps running)
+- ✅ Copy is fast and atomic
+- ✅ PM2 reload picks up new files
+- ✅ Zero downtime guaranteed
+
+**Directory Structure:**
+```
+.output/           ← Vinxi build output (can be overwritten safely)
+production/        ← PM2 runs from here (never touched during build)
+production-old/    ← Backup for rollback
+```
 
 **PM2 Configuration:**
 - **File:** `ecosystem.config.cjs` (CommonJS with JSDoc type annotations)
+- **Script:** `./production/server/index.mjs` (separate from build output)
 - **Environment Loading:** Uses `require('dotenv')` to load `.env` file
 - **Instances:** 2 processes in cluster mode for zero-downtime deployments
 - **Type Safety:** JSDoc annotations provide TypeScript autocomplete without compilation
 
 **Key Commands:**
-- `npm run deploy` - Deploy new version (pull, install, build, swap, reload)
+- `npm run deploy` - Deploy new version (pull, install, build, activate, reload)
 - `npm run deploy:rollback` - Rollback to previous version
-- `npm run cleanup:build` - Remove old builds after verifying deployment
+- `npm run deploy:cleanup` - Remove old backups after verifying deployment
 - `npm run pm2:status` - Check application status
 - `npm run pm2:logs` - View application logs
 
@@ -61,19 +73,30 @@ npm run deploy
 This single command will:
 1. 🔄 Pull latest code from git
 2. 📦 Install/update dependencies
-3. 🔨 Build new version to `.output-new`
+3. 🔨 Build to `.output/` (production untouched!)
 4. ✅ Validate new build (checks for `server/index.mjs`)
-5. 📦 Backup current `.output` to `.output-old`
-6. 🔄 Swap `.output-new` to `.output`
+5. 📦 Backup current `production/` to `production-old/`
+6. 🔄 Copy `.output/` to `production/`
 7. 🔄 Gracefully reload PM2 instances (zero downtime)
 8. ✅ Deployment complete
 
-**The Build Swap System:**
-- `.output` - Current production build (active)
-- `.output-new` - New build being prepared (temporary)
-- `.output-old` - Previous build (backup for rollback)
+**How It Works:**
+```
+Before:
+production/  ← PM2 running from here
 
-If any step fails, deployment stops and the current build stays active.
+Build Phase:
+.output/     ← Fresh build created (PM2 unaffected!)
+
+Activate Phase:
+production-old/  ← Backup created
+production/      ← New build copied here
+
+PM2 Reload:
+PM2 gracefully reloads from new production/
+```
+
+**Key Safety Feature:** Production directory is never touched during build phase, so PM2 keeps running even if build fails!
 
 ### Rollback to Previous Version
 
@@ -84,7 +107,7 @@ npm run deploy:rollback
 ```
 
 This will:
-1. ⏪ Restore `.output-old` to `.output`
+1. ⏪ Restore `production-old/` to `production/`
 2. 🔄 Gracefully reload PM2
 3. ✅ You're back to the previous working version
 
@@ -93,7 +116,7 @@ This will:
 After verifying the deployment works:
 
 ```bash
-npm run cleanup:build
+npm run deploy:cleanup
 ```
 
 **⚠️ Warning:** After cleanup, you cannot rollback!
@@ -108,11 +131,48 @@ npm run deploy
 # ... visit your site, check functionality ...
 
 # 3a. If everything works, clean up:
-npm run cleanup:build
+npm run deploy:cleanup
 
 # 3b. If something is wrong, rollback:
 npm run deploy:rollback
 ```
+
+## Why This Design Is Better
+
+### Separation of Concerns
+```
+.output/           ← Build artifact (temporary, can be deleted)
+production/        ← Runtime directory (stable, PM2 always reads from here)
+```
+
+**Benefits:**
+- ✅ Build phase never affects running application
+- ✅ Vinxi can use its default `.output/` behavior
+- ✅ No complex directory choreography
+- ✅ Clearer mental model (build vs runtime)
+- ✅ Safer deployments (production is sacred)
+
+### What Happens During Build
+
+**Old (Complex) Method:**
+```
+❌ Move .output → .output-current
+❌ Build to .output
+❌ Move .output → .output-new
+❌ Move .output-current → .output
+❌ Validate .output-new
+❌ Move .output → .output-old
+❌ Move .output-new → .output
+```
+7 directory operations, easy to break!
+
+**New (Simple) Method:**
+```
+✅ Build to .output (PM2 unaffected - reads from production/)
+✅ Copy .output to production
+✅ PM2 reload
+```
+3 operations, simple and safe!
 
 ## PM2 Commands
 
@@ -131,13 +191,12 @@ npm run deploy:rollback
 - **Monitor resources:** `npm run pm2:monit`
 - **View detailed info:** `pm2 show ok-web-frontend`
 
-### Build Scripts
+### Deployment Scripts
 
-- **Normal build:** `npm run build` (replaces `.output`)
-- **Temporary build:** `npm run build:temp` (creates `.output-new`)
-- **Swap builds:** `npm run swap:build` (swap `.output-new` to `.output`)
-- **Rollback:** `npm run rollback:build` (restore `.output-old`)
-- **Cleanup:** `npm run cleanup:build` (remove old builds)
+- **Build:** `npm run deploy:build` (builds to `.output/`)
+- **Activate:** `npm run deploy:activate` (copy `.output/` to `production/`)
+- **Rollback:** `npm run rollback` (restore `production-old/` to `production/`)
+- **Cleanup:** `npm run deploy:cleanup` (remove `production-old/`)
 
 ### Advanced
 
@@ -356,29 +415,29 @@ npm run deploy
 
 ### Cannot Rollback (No Old Build)
 
-**Problem:** `❌ No old build found for rollback`
+**Problem:** `❌ No backup found for rollback`
 
 **Solution:**
-- This happens if you ran `cleanup:build` or this is first deployment
+- This happens if you ran `deploy:cleanup` or this is first deployment
 - Deploy a working version:
   ```bash
   npm run deploy
   ```
 
-### Swap Failed (Invalid New Build)
+### Activate Failed (Invalid Build)
 
-**Problem:** `❌ No valid new build found`
+**Problem:** `❌ Build invalid (.output/server/index.mjs missing)`
 
 **Solution:**
 ```bash
 # Check if build completed successfully
-ls -la .output-new/server/index.mjs
+ls -la .output/server/index.mjs
 
 # If missing, rebuild:
-npm run build:temp
+npm run deploy:build
 
-# Then try swapping:
-npm run swap:build
+# Then try activating:
+npm run deploy:activate
 npm run pm2:reload
 ```
 
@@ -419,24 +478,28 @@ pm2 start ecosystem.config.cjs
 
 ### Need to Test Build Before Deploying
 ```bash
-# Build to temporary directory
-npm run build:temp
+# Build first
+npm run deploy:build
 
-# Manually inspect .output-new
-# When satisfied, swap:
-npm run swap:build
+# Manually inspect .output/
+ls -la .output/
+
+# When satisfied, activate:
+npm run deploy:activate
 npm run pm2:reload
 ```
 
 ## Safety Features
 
-✅ **Build Validation** - Swap only happens if `.output-new/server/index.mjs` exists
-✅ **Automatic Backup** - Current build always backed up before swap
+✅ **Build Validation** - Activate only happens if `.output/server/index.mjs` exists
+✅ **Automatic Backup** - Current production always backed up before activating new build
+✅ **Separate Directories** - Build (.output/) never affects running app (production/)
 ✅ **Graceful Reload** - PM2 reloads instances one at a time (zero downtime)
 ✅ **Quick Rollback** - One command to restore previous version
 ✅ **Error Handling** - Scripts stop on first error (using `&&` chaining)
 ✅ **Visual Feedback** - Emoji indicators show progress
 ✅ **Manual Cleanup** - Old builds kept until you explicitly remove them
+✅ **Simple & Clear** - Only 3 operations instead of 7
 
 ## Production Checklist
 
@@ -456,13 +519,15 @@ npm run pm2:reload
 
 1. **Always use `pm2 reload` for zero downtime** (not `restart`)
 2. **Run at least 2 instances** to enable graceful reload
-3. **Test builds locally** before deploying to production
-4. **Monitor logs** during and after deployment (`npm run pm2:logs`)
-5. **Keep PM2 updated:** `npm update -g pm2`
-6. **Use PM2 ecosystem file** for consistent configuration
-7. **Set up health checks** if using load balancer
-8. **Use JSDoc type annotations** for type safety without TypeScript compilation
-9. **Always ensure `.env` file exists** before starting PM2
+3. **Separate build and runtime directories** - Never let PM2 run from `.output/`
+4. **Test builds locally** before deploying to production
+5. **Monitor logs** during and after deployment (`npm run pm2:logs`)
+6. **Keep PM2 updated:** `npm update -g pm2`
+7. **Use PM2 ecosystem file** for consistent configuration
+8. **Set up health checks** if using load balancer
+9. **Use JSDoc type annotations** for type safety without TypeScript compilation
+10. **Always ensure `.env` file exists** before starting PM2
+11. **Keep it simple** - Avoid complex directory juggling
 
 ## References
 
