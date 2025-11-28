@@ -19,7 +19,10 @@ import { closeDriver } from "~/cypher/core/driver";
 declare global {
   var __workerState:
     | {
-        activeWorkers: Map<string, Map<string, { stop: () => Promise<void> }>>;
+        activeWorkers: Map<
+          string,
+          Map<string, { stop: (force?: boolean) => Promise<void> }>
+        >;
         platformInitPromise: Promise<void> | null;
         subdomainInitPromises: Map<string, Promise<void>>;
         workerStartPromises: Map<string, Promise<any>>;
@@ -494,8 +497,13 @@ export async function closeAllWorkersForShutdown() {
 /**
  * Stop all workers for a specific subdomain (internal use)
  * Used when deleting a subdomain
+ * @param subdomain - The subdomain key
+ * @param force - If true, forces immediate shutdown without waiting for active jobs to complete
  */
-export async function stopWorkersForSubdomain(subdomain: string) {
+export async function stopWorkersForSubdomain(
+  subdomain: string,
+  force = false,
+) {
   const subdomainWorkers = workerState.activeWorkers.get(subdomain);
 
   if (!subdomainWorkers) {
@@ -503,14 +511,16 @@ export async function stopWorkersForSubdomain(subdomain: string) {
     return;
   }
 
-  console.log(`[Workers] Stopping all workers for subdomain: ${subdomain}`);
+  console.log(
+    `[Workers] Stopping all workers for subdomain: ${subdomain}${force ? " (force)" : ""}`,
+  );
 
   for (const [workerName, worker] of subdomainWorkers.entries()) {
     try {
       console.log(
-        `[Workers] Stopping worker: ${workerName} (subdomain: ${subdomain})`,
+        `[Workers] Stopping worker: ${workerName} (subdomain: ${subdomain})${force ? " (force)" : ""}`,
       );
-      await worker.stop();
+      await worker.stop(force);
 
       // Clean up individual worker start promise
       const workerStartKey = `${subdomain}:${workerName}`;

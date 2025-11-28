@@ -41,6 +41,7 @@ export interface ClusterMessage {
 export interface StopWorkersRequest extends ClusterMessage {
   subdomain: string;
   workerKey?: string;
+  force?: boolean; // If true, forces immediate shutdown without waiting for active jobs
 }
 
 /**

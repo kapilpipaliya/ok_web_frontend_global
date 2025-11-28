@@ -746,10 +746,10 @@ if (args.contextData.action === 'start') {
 
     // Return stop function for graceful shutdown
     return {
-      stop: async () => {
-        await logMessage('info', 'Stopping playlist processing worker');
+      stop: async (force = false) => {
+        await logMessage('info', `Stopping playlist processing worker${force ? ' (force)' : ''}`);
         if (worker) {
-          await worker.close();
+          await worker.close(force);
         }
       }
     };

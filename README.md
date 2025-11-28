@@ -15,7 +15,7 @@ Welcome to the project documentation. This repository has been organized into fo
 
 - [Cypher Manual](https://neo4j.com/docs/getting-started/cypher-intro/resources/)
 - [JavaScript Driver Manual](https://neo4j.com/docs/javascript-manual/current/)
-- [Local Development Server](http://localhost:3001)
+- [Local Development Server](https://admin.localhost.com:3001)
 - [Neo4j Browser](http://localhost:7474/browser/) 
 
 to view md document onlie: https://stackedit.io/app

@@ -168,15 +168,16 @@ export async function startEmailWorker() {
 
 /**
  * Stop the email worker
+ * @param force - If true, forces immediate shutdown without waiting for active jobs to complete
  */
-export async function stopEmailWorker() {
+export async function stopEmailWorker(force = false) {
   if (!global.__emailWorker) {
     logger.debug("Email worker not running");
     return;
   }
 
-  logger.info("Stopping email worker...");
-  await global.__emailWorker.close();
+  logger.info(`Stopping email worker${force ? " (force)" : ""}...`);
+  await global.__emailWorker.close(force);
   global.__emailWorker = undefined;
   global.__emailWorkerStartPromise = undefined; // Reset promise so worker can be restarted
   logger.info("Email worker stopped");

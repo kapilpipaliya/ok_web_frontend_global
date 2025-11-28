@@ -59,19 +59,27 @@ export async function DELETE({ request }: APIEvent) {
     const account = accessResult.records[0].get("a");
     const subdomain = accessResult.records[0].get("s");
 
-    // Step 1: Stop all workers for this subdomain on ALL cluster nodes
-    console.log(`[Subdomain Delete] Stopping workers for subdomain: ${key}`);
+    // Step 1: Force stop all workers for this subdomain on ALL cluster nodes
+    // Use force=true to immediately terminate workers even if they're processing jobs
+    console.log(
+      `[Subdomain Delete] Force stopping workers for subdomain: ${key}`,
+    );
 
-    // Stop workers on this node
-    await stopWorkersForSubdomain(key);
+    // Force stop workers on this node
+    await stopWorkersForSubdomain(key, true);
 
-    // Broadcast stop command to all other cluster nodes and wait for acknowledgments
+    // Broadcast force stop command to all other cluster nodes and wait for acknowledgments
     try {
-      const result = await broadcastStopWorkers(key, undefined, 10000); // subdomain, workerKey (undefined = all), timeout
+      const result = await broadcastStopWorkers(
+        key,
+        undefined,
+        10000,
+        true,
+      ); // subdomain, workerKey (undefined = all), timeout, force
 
       if (result.totalNodes > 0) {
         console.log(
-          `[Subdomain Delete] Workers stopped on ${result.respondedNodes}/${result.totalNodes} node(s) in ${result.duration}ms`,
+          `[Subdomain Delete] Workers force stopped on ${result.respondedNodes}/${result.totalNodes} node(s) in ${result.duration}ms`,
         );
 
         if (result.errors.size > 0) {

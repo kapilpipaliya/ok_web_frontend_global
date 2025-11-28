@@ -5,33 +5,33 @@ This document provides detailed information about all available API endpoints in
 ## Section Links
 
 ### Admin Routes
-- http://localhost:3001/admin/UserSettings
-- http://localhost:3001/admin/GlobalSettings
-- http://localhost:3001/admin/
-- http://localhost:3001/admin/Page
+- https://admin.localhost.com:3001/admin/UserSettings
+- https://admin.localhost.com:3001/admin/GlobalSettings
+- https://admin.localhost.com:3001/admin/
+- https://admin.localhost.com:3001/admin/Page
 
 ### Authentication
-- http://localhost:3001/auth/signin
+- https://admin.localhost.com:3001/auth/signin
 
 ### Email Templates
-- http://localhost:3001/internal/page/AccountDeletionRequest
-- http://localhost:3001/internal/page/TwoFactorAuth
-- http://localhost:3001/internal/page/VerificationCode
-- http://localhost:3001/internal/page/TestEmail
-- http://localhost:3001/internal/page/PasswordChanged
-- http://localhost:3001/internal/page/ProfileUpdated
-- http://localhost:3001/internal/page/SignupConfirmation
-- http://localhost:3001/internal/page/WelcomeEmail
-- http://localhost:3001/internal/page/EmailChanged
-- http://localhost:3001/internal/page/EmailChangeSuccessful
-- http://localhost:3001/internal/page/EmailConfirmation
-- http://localhost:3001/internal/page/InvitationEmail
+- https://admin.localhost.com:3001/internal/page/AccountDeletionRequest
+- https://admin.localhost.com:3001/internal/page/TwoFactorAuth
+- https://admin.localhost.com:3001/internal/page/VerificationCode
+- https://admin.localhost.com:3001/internal/page/TestEmail
+- https://admin.localhost.com:3001/internal/page/PasswordChanged
+- https://admin.localhost.com:3001/internal/page/ProfileUpdated
+- https://admin.localhost.com:3001/internal/page/SignupConfirmation
+- https://admin.localhost.com:3001/internal/page/WelcomeEmail
+- https://admin.localhost.com:3001/internal/page/EmailChanged
+- https://admin.localhost.com:3001/internal/page/EmailChangeSuccessful
+- https://admin.localhost.com:3001/internal/page/EmailConfirmation
+- https://admin.localhost.com:3001/internal/page/InvitationEmail
 
 ### Support
-- http://localhost:3001/support/contact
+- https://admin.localhost.com:3001/support/contact
 
 ### Admin DB Setup
-- Admin DB Setup: http://localhost:3001/api/setup/adminUserSetup
+- Admin DB Setup: https://admin.localhost.com:3001/api/setup/adminUserSetup
 
 ## REST API Endpoints
 

@@ -26,6 +26,9 @@ export function useDeleteRowConfirm(
     if (!gridState.deleteRowId) {
       return;
     }
+    if (gridState.isDeletingRow) {
+      return;
+    }
     if (!(gridState.hasFullPermission() ?? gridState.isNoPermissionCheck)) {
       showErrorToast("You do not have permission to delete this row.");
       return;
@@ -38,6 +41,7 @@ export function useDeleteRowConfirm(
     }
     if (deleteEndpoint) {
       try {
+        setGridState("isDeletingRow", true);
         // For subdomains, use 'key' property from the vertex instead of 'id'
         let deletePayload: { id?: string; key?: string };
 
@@ -68,32 +72,39 @@ export function useDeleteRowConfirm(
       } catch (error) {
         showErrorToast(`Error deleting ${gridState.tableId}: ${error.message}`);
       } finally {
+        setGridState("isDeletingRow", false);
         setGridState("deleteRowId", null);
       }
       return;
     }
 
-    const txnId = generateNewTxnId(graph, setGraph);
-    const deleteResult = deleteVertex(
-      txnId,
-      gridState.deleteRowId,
-      graph,
-      setGraph,
-    );
-    if (deleteResult?.error) {
-      showErrorToast(deleteResult?.error.toString());
-      return;
+    try {
+      setGridState("isDeletingRow", true);
+      const txnId = generateNewTxnId(graph, setGraph);
+      const deleteResult = deleteVertex(
+        txnId,
+        gridState.deleteRowId,
+        graph,
+        setGraph,
+      );
+      if (deleteResult?.error) {
+        showErrorToast(deleteResult?.error.toString());
+        return;
+      }
+      const data = commitTxn(txnId, graph);
+      if (!data) {
+        return;
+      }
+      await showLoadingToast({
+        loadMessage: "Deleting Row...",
+        onSuccess: () => setTimeout(() => navigate(-1), 0),
+        promise: submitDataCall(data, graph, setGraph, txnId),
+        successMessage: "Row deleted successfully",
+      });
+    } finally {
+      setGridState("isDeletingRow", false);
+      setGridState("deleteRowId", null);
     }
-    const data = commitTxn(txnId, graph);
-    if (!data) {
-      return;
-    }
-    await showLoadingToast({
-      loadMessage: "Deleting Row...",
-      onSuccess: () => setTimeout(() => navigate(-1), 0),
-      promise: submitDataCall(data, graph, setGraph, txnId),
-      successMessage: "Row deleted successfully",
-    });
   };
 }
 

@@ -149,8 +149,8 @@ if (args.contextData.action === 'start') {
 
     // Return stop function for graceful shutdown
     return {
-      stop: async () => {
-        await logMessage('info', 'Stopping background retry pending quota worker');
+      stop: async (force = false) => {
+        await logMessage('info', `Stopping background retry pending quota worker${force ? ' (force)' : ''}`);
 
         // Remove the repeatable job
         try {
@@ -162,9 +162,9 @@ if (args.contextData.action === 'start') {
 
         // Close the worker and queue
         if (worker) {
-          await worker.close();
+          await worker.close(force);
         }
-        await retryQueue.close();
+        await retryQueue.close(force);
         await logMessage('info', 'Stopped background retry pending quota worker');
       }
     };

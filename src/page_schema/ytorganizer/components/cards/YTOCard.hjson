@@ -810,7 +810,8 @@ return {
     }
 
     // For channels and playlists, open add modal with prefilled URL
-    const url = `https://www.youtube.com/${itemType === 'channel' ? 'channel/' + youtubeId : 'playlist?list=' + youtubeId}`;
+    // Use getYouTubeUrl function to generate proper URL (handles @handle, channel IDs, etc)
+    const url = args.fns?.getYouTubeUrl?.(item, itemType);
     const contentType = itemType === 'channel' ? 'channels' : 'playlists';
 
     // Set modal data with content type and initial URL
@@ -886,6 +887,9 @@ const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 
+// Check if this is an extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+
 let metaText = "";
 
 if (itemType === "channel") {
@@ -901,16 +905,27 @@ if (itemType === "channel") {
     parts.push(`${subscriberCount} subscriber${subscriberCount !== 1 ? 's' : ''}`);
   }
 
-  parts.push(`${videoCount} video${videoCount !== 1 ? 's' : ''}`);
+  // Don't show video count for extension items
+  if (!isExtensionItem) {
+    parts.push(`${videoCount} video${videoCount !== 1 ? 's' : ''}`);
+  }
   metaText = parts.join(' • ');
 } else if (itemType === "playlist") {
   const videoCount = item?.P?.itemCount ?? itemSetting?.P?.itemCount ?? 0;
-  metaText = `${videoCount} video${videoCount !== 1 ? 's' : ''}`;
+  const channelTitle = item?.P?.channelTitle || "";
+
+  // Don't show video count for extension items
+  if (!isExtensionItem) {
+    metaText = `${videoCount} video${videoCount !== 1 ? 's' : ''}`;
+  }
 
   // If there's a parent channel, show it
-  const channelTitle = item?.P?.channelTitle || "";
   if (channelTitle) {
-    metaText += ` • ${channelTitle}`;
+    if (metaText) {
+      metaText += ` • ${channelTitle}`;
+    } else {
+      metaText = channelTitle;
+    }
   }
 } else if (itemType === "video") {
   const channelTitle = item?.P?.channelTitle || "";
@@ -942,9 +957,13 @@ const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 const isFavourite = itemSetting?.P?.isFavourite || false;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   as: "button",
-  hide: !isFavourite,
+  hide: !isFavourite || notSaved,
   onClick: async (e) => {
     e.stopPropagation();
     await args.fns.toggleFavourite?.(item);
@@ -996,9 +1015,13 @@ return {
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   as: "button",
-  hide: itemType === "channel",
+  hide: itemType === "channel" || notSaved,
   onClick: async (e) => {
     e.stopPropagation();
     if (item) {
@@ -1055,13 +1078,18 @@ return {
         displayOrder: 5,
         componentName: "Html",
         props: '''
+const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const note = itemSetting?.P?.note || "";
 const hasNote = note.length > 0;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   as: "div",
-  hide: !hasNote
+  hide: !hasNote || notSaved
 };
 ''',
         css: '''
@@ -1395,9 +1423,14 @@ const itemType = args.contextData.props?.itemType;
 const note = itemSetting?.P?.note || "";
 const hasNote = note.length > 0;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   icon: hasNote ? "carbon:edit" : "carbon:document-add",
   text: hasNote ? "Edit a note" : "Add a note",
+  hide: notSaved,
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.openNoteModal?.(item, note);
@@ -1418,10 +1451,14 @@ return {
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   icon: "carbon:play-filled",
   text: "Play playlist",
-  hide: itemType !== "playlist",
+  hide: itemType !== "playlist" || notSaved,
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.playPlaylist?.(item);
@@ -1444,9 +1481,14 @@ const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
 const isFavourite = itemSetting?.P?.isFavourite || false;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   icon: isFavourite ? "carbon:favorite-filled" : "carbon:favorite",
   text: isFavourite ? "Remove from favourites" : "Add to favourites",
+  hide: notSaved,
   onClick: async (e) => {
     e?.stopPropagation();
     await args.fns.toggleFavourite?.(item);
@@ -1467,10 +1509,14 @@ return {
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   icon: "material-symbols:playlist-add",
   text: "Add to playlist",
-  hide: itemType !== "video",
+  hide: itemType !== "video" || notSaved,
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.openAddToPlaylistModal?.(item);
@@ -1527,9 +1573,16 @@ return {
         componentName: "YTOMenuItem",
         slot: "menu-items",
         props: '''
+const item = args.contextData.props?.item;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   icon: "carbon:edit",
   text: "Edit custom name",
+  hide: notSaved,
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.openCustomNameModal?.(args.contextData.props?.itemData);
@@ -1550,6 +1603,10 @@ return {
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
@@ -1564,7 +1621,7 @@ const canRetry = (itemType === "channel" || itemType === "playlist") &&
 return {
   icon: "carbon:restart",
   text: "Retry Processing",
-  hide: !canRetry,
+  hide: !canRetry || notSaved,
   onClick: async (e) => {
     e?.stopPropagation();
 
@@ -1599,10 +1656,17 @@ return {
         componentName: "YTOMenuItem",
         slot: "menu-items",
         props: '''
+const item = args.contextData.props?.item;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
 return {
   icon: "carbon:trash-can",
   text: "Delete",
   type: "danger",
+  hide: notSaved,
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.deleteItem?.(args.contextData.props?.itemData);

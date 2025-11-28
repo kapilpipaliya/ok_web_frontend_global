@@ -603,6 +603,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             </Show>
             <Show when={gridState.deleteRowId}>
               <DialogWithButtons
+                isLoading={gridState.isDeletingRow}
                 message="Are you sure you want to delete this item?"
                 onCancel={() => setGridState("deleteRowId", null)}
                 onConfirm={onDelete}

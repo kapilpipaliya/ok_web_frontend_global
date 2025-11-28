@@ -2341,7 +2341,7 @@ if (args.fns.isSearchView()) {
 } else if (args.fns.isFavouritesView()) {
   title = "Favourites";
 } else if (args.fns.isExtensionView()) {
-  title = "Current Page Content";
+  title = "Quick Add Channel, Playlist or Video";
 } else if (args.fns.isDetailView()) {
   const data = args.fns.detailData();
   if (data) {

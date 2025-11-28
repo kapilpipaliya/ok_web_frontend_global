@@ -39,6 +39,7 @@ export function getInitialGridState(graph: GraphInterface) {
     hasEditPermission: (() => false) as Accessor<boolean | null | undefined>,
     hasCreatePermission: (() => false) as Accessor<boolean | null | undefined>,
     hasViewPermission: (() => false) as Accessor<boolean | null | undefined>,
+    isDeletingRow: false,
     isLoading: false,
     isLoadingMore: false,
     isNoPermissionCheck: false,

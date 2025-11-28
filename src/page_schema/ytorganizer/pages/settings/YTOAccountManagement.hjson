@@ -72,15 +72,29 @@ const fetchOwnerships = async () => {
 
 // Connect YouTube account (redirect to OAuth)
 const connectAccount = () => {
-  setIsConnecting(true);
-  window.location.href = "/api/auth/youtube/connect";
+  const isInIframe = window.self !== window.top;
+
+  if (isInIframe) {
+    // Open in new tab when in iframe (e.g., extension)
+    window.open("/api/auth/youtube/connect", "_blank");
+  } else {
+    setIsConnecting(true);
+    window.location.href = "/api/auth/youtube/connect";
+  }
 };
 
 // Reconnect a disconnected account
 const reconnectAccount = (ownershipId) => {
-  setIsConnecting(true);
-  // Reconnect uses the same OAuth flow
-  window.location.href = "/api/auth/youtube/connect";
+  const isInIframe = window.self !== window.top;
+
+  if (isInIframe) {
+    // Open in new tab when in iframe (e.g., extension)
+    window.open("/api/auth/youtube/connect", "_blank");
+  } else {
+    setIsConnecting(true);
+    // Reconnect uses the same OAuth flow
+    window.location.href = "/api/auth/youtube/connect";
+  }
 };
 
 // Disconnect an account

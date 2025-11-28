@@ -12,6 +12,7 @@ autofocus;
 export function DialogWithButtons(
   props: Readonly<{
     hasPermission?: boolean;
+    isLoading?: boolean;
     message?: string;
     onCancel?: () => void;
     onConfirm: () => void;
@@ -21,7 +22,7 @@ export function DialogWithButtons(
   }>,
 ) {
   const handleConfirm = () => {
-    if (props.hasPermission ?? true) {
+    if ((props.hasPermission ?? true) && !props.isLoading) {
       props.onConfirm();
     }
   };
@@ -38,10 +39,11 @@ export function DialogWithButtons(
             <As
               as="button"
               css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS]}
+              disabled={props.isLoading}
               onClick={handleConfirm}
               type="button"
             >
-              Confirm
+              {props.isLoading ? "Deleting..." : "Confirm"}
             </As>
           </Show>
           <As
@@ -50,6 +52,7 @@ export function DialogWithButtons(
               setTimeout(() => el.focus(), 200);
             }}
             css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
+            disabled={props.isLoading}
             onClick={props.onCancel}
             type="button"
           >

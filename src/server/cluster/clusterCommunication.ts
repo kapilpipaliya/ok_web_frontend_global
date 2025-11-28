@@ -163,12 +163,13 @@ async function handleClusterMessage(
 async function handleStopWorkersRequest(
   request: StopWorkersRequest,
 ): Promise<void> {
-  const { requestId, subdomain, workerKey } = request;
+  const { requestId, subdomain, workerKey, force } = request;
 
   try {
     const workerInfo = workerKey ? ` worker: ${workerKey}` : " all workers";
+    const forceInfo = force ? " (force)" : "";
     console.log(
-      `[Cluster] Stopping${workerInfo} for subdomain: ${subdomain} (request: ${requestId})`,
+      `[Cluster] Stopping${workerInfo} for subdomain: ${subdomain}${forceInfo} (request: ${requestId})`,
     );
 
     let workersStopped = 0;
@@ -179,7 +180,7 @@ async function handleStopWorkersRequest(
       const worker = subdomainWorkers?.get(workerKey);
 
       if (worker) {
-        await worker.stop();
+        await worker.stop(force);
         subdomainWorkers!.delete(workerKey);
         workersStopped = 1;
 
@@ -190,7 +191,7 @@ async function handleStopWorkersRequest(
       }
     } else {
       // Stop all workers for subdomain
-      await stopWorkersForSubdomain(subdomain);
+      await stopWorkersForSubdomain(subdomain, force);
       workersStopped = 0; // Workers are already stopped, can't count them
     }
 
@@ -386,11 +387,16 @@ async function handleWorkerStatusRequest(
 
 /**
  * Broadcast stop workers command and wait for acknowledgments
+ * @param subdomain - Subdomain key
+ * @param workerKey - Optional specific worker key to stop
+ * @param timeout - Optional timeout in milliseconds
+ * @param force - If true, forces immediate shutdown without waiting for active jobs
  */
 export async function broadcastStopWorkers(
   subdomain: string,
   workerKey?: string,
   timeout?: number,
+  force?: boolean,
 ): Promise<ClusterOperationResult<StopWorkersResponse>> {
   if (!clusterState.coordinator) {
     console.warn(
@@ -400,14 +406,15 @@ export async function broadcastStopWorkers(
   }
 
   const workerInfo = workerKey ? ` worker: ${workerKey}` : " all workers";
+  const forceInfo = force ? " (force)" : "";
   console.log(
-    `[Cluster] Broadcasting stop${workerInfo} command for subdomain: ${subdomain}`,
+    `[Cluster] Broadcasting stop${workerInfo} command for subdomain: ${subdomain}${forceInfo}`,
   );
 
   const result = await clusterState.coordinator.broadcastAndWait<
     StopWorkersRequest,
     StopWorkersResponse
-  >(CLUSTER_CHANNELS.STOP_WORKERS, { subdomain, workerKey }, timeout);
+  >(CLUSTER_CHANNELS.STOP_WORKERS, { subdomain, workerKey, force }, timeout);
 
   console.log(
     `[Cluster] Stop${workerInfo} broadcast completed. Success: ${result.success}, ` +

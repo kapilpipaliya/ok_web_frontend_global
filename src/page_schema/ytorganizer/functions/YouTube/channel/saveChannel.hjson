@@ -39,7 +39,16 @@ const extractChannelId = (url) => {
 
     // Channel ID format: /channel/UCxxx
     if (parts[0] === 'channel') {
-      return { type: 'channelId', value: parts[1] };
+      const channelId = parts[1];
+      // Validate that it's a proper channel ID (starts with UC and is ~24 chars)
+      // If not, it might be a malformed URL - treat as custom URL instead
+      if (channelId.startsWith('UC') && channelId.length >= 20) {
+        return { type: 'channelId', value: channelId };
+      } else {
+        // Malformed /channel/XXX URL where XXX is not a valid ID
+        // Treat it as a custom URL (e.g., /channel/ASKUMARALA -> /c/ASKUMARALA)
+        return { type: 'custom', value: channelId };
+      }
     }
 
     // Legacy user format: /user/username
@@ -95,9 +104,10 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
     // Log API usage: channels.list with forUsername (1 unit) - shared quota
     await args.logSharedAPIUsage(ownershipId, 'channels.list', args.YOUTUBE_API_COSTS['channels.list'], session);
   } else if (channelInfo.type === 'custom') {
-    // Custom URL format (/c/customname) - unfortunately no direct API for this
-    // This format is deprecated by YouTube, suggest user to use @handle instead
-    throw new Error('Custom URL format (/c/) is not supported. Please use the @handle URL format instead (e.g., youtube.com/@channelname)');
+    // Custom URL format (/c/customname) or malformed /channel/ URL
+    // YouTube API doesn't support custom URLs directly
+    const suggestion = channelInfo.value ? `youtube.com/@${channelInfo.value}` : 'youtube.com/@channelname';
+    throw new Error(`Custom URL format is not supported. Please use the @handle URL format instead: ${suggestion}\n\nTo find the correct URL, visit the channel page and copy the URL from the address bar.`);
   }
 
   if (!channelResponse.data.items || channelResponse.data.items.length === 0) {

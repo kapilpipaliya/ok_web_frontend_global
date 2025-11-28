@@ -15,8 +15,8 @@ export async function signIn(
   redirectUrl?: string,
 ) {
   const loginUrl = redirectUrl
-    ? `http://localhost:3001/${API.urls.admin.signIn}?redirectUrl=${encodeURIComponent(redirectUrl)}`
-    : `http://localhost:3001/${API.urls.admin.signIn}`;
+    ? `https://admin.localhost.com:3001/${API.urls.admin.signIn}?redirectUrl=${encodeURIComponent(redirectUrl)}`
+    : `https://admin.localhost.com:3001/${API.urls.admin.signIn}`;
 
   await page.goto(loginUrl);
 
