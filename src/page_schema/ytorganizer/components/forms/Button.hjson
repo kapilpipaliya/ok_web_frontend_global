@@ -1,0 +1,233 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "Button"
+      }
+    },
+    {
+      id: "variant_text",
+      L: "ComponentVariant",
+      P: {
+        key: "text",
+        type: "string",
+        defValue: "Button"
+      }
+    },
+    {
+      id: "variant_type",
+      L: "ComponentVariant",
+      P: {
+        key: "type",
+        type: "string",
+        defValue: "button"
+      }
+    },
+    {
+      id: "variant_variant",
+      L: "ComponentVariant",
+      P: {
+        key: "variant",
+        type: "string",
+        defValue: "primary"
+      }
+    },
+    {
+      id: "variant_variant_primary",
+      L: "ComponentVariantOption",
+      P: {
+        key: "primary",
+        value: "primary",
+        description: "Primary button with brand color"
+      }
+    },
+    {
+      id: "variant_variant_secondary",
+      L: "ComponentVariantOption",
+      P: {
+        key: "secondary",
+        value: "secondary",
+        description: "Secondary button with border"
+      }
+    },
+    {
+      id: "variant_variant_success",
+      L: "ComponentVariantOption",
+      P: {
+        key: "success",
+        value: "success",
+        description: "Success button with green color"
+      }
+    },
+    {
+      id: "variant_variant_danger",
+      L: "ComponentVariantOption",
+      P: {
+        key: "danger",
+        value: "danger",
+        description: "Danger button with red color"
+      }
+    },
+    {
+      id: "variant_disabled",
+      L: "ComponentVariant",
+      P: {
+        key: "disabled",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "variant_full_width",
+      L: "ComponentVariant",
+      P: {
+        key: "fullWidth",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "variant_loading",
+      L: "ComponentVariant",
+      P: {
+        key: "loading",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "variant_on_click",
+      L: "ComponentVariant",
+      P: {
+        key: "onClick",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "button_element",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+// Access props reactively
+const text = args.contextData.props?.text || "Button";
+const type = args.contextData.props?.type || "button";
+const disabled = args.contextData.props?.disabled || args.contextData.props?.loading || false;
+const onClick = args.contextData.props?.onClick || (() => {});
+const loading = args.contextData.props?.loading || false;
+const className = args.contextData.props?.class
+
+return {
+  as: "button",
+  class: className,
+  text: text,
+  type: type,
+  disabled: disabled,
+  onClick: onClick,
+  "aria-busy": loading ? "true" : "false"
+};
+''',
+        css: '''
+// Access props reactively
+const variant = args.contextData.props?.variant || "primary";
+const fullWidth = args.contextData.props?.fullWidth || false;
+
+// Base styles
+let baseStyles = `
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-weight: 500;
+  font-size: ${args.theme.var.fontSize.md};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  border: none;
+  ${fullWidth ? 'width: 100%;' : ''}
+  min-height: ${args.theme.var.touch.minTarget};
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):active {
+    transform: scale(0.95);
+  }
+`;
+
+// Variant-specific styles
+let variantStyles = '';
+
+if (variant === 'primary') {
+  variantStyles = `
+    background: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary_text};
+
+    &:not(:disabled):hover {
+      background: ${args.theme.var.color.primary_dark_200};
+    }
+  `;
+} else if (variant === 'success') {
+  variantStyles = `
+    background: ${args.theme.var.color.success};
+    color: ${args.theme.var.color.success_text};
+
+    &:not(:disabled):hover {
+      background: ${args.theme.var.color.success_dark_200};
+      color: ${args.theme.var.color.success_dark_200_text};
+    }
+  `;
+} else if (variant === 'secondary') {
+  variantStyles = `
+    background: none;
+    color: ${args.theme.var.color.muted};
+    border: 1px solid ${args.theme.var.color.border};
+
+    &:not(:disabled):hover {
+      background: ${args.theme.var.color.background_dark_200};
+      color: ${args.theme.var.color.text};
+    }
+  `;
+} else if (variant === 'danger') {
+  variantStyles = `
+    background: ${args.theme.var.color.background};
+    color: ${args.theme.var.color.error};
+    border: 1px solid ${args.theme.var.color.error};
+
+    &:not(:disabled):hover {
+      background: ${args.theme.var.color.error};
+      color: ${args.theme.var.color.error_text};
+    }
+  `;
+}
+
+return `._id {
+  ${baseStyles}
+  ${variantStyles}
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_text" },
+    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_type" },
+    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_variant" },
+    { id: "e4", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_primary" },
+    { id: "e5", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_secondary" },
+    { id: "e6", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_success" },
+    { id: "e7", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_danger" },
+    { id: "e8", T: "ComponentVariant", S: "component_root", E: "variant_disabled" },
+    { id: "e9", T: "ComponentVariant", S: "component_root", E: "variant_full_width" },
+    { id: "e10", T: "ComponentVariant", S: "component_root", E: "variant_loading" },
+    { id: "e11", T: "ComponentVariant", S: "component_root", E: "variant_on_click" },
+    { id: "e12", T: "Attr", S: "component_root", E: "button_element" }
+  ]
+}

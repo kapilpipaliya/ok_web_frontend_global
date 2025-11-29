@@ -9,6 +9,10 @@ import { HtmlField } from "~/components/fields/HtmlField";
   - Hierarchical Access: Slot names like "1footer" access the parent at level 1, "2footer" at level 2, etc.
   - Context Chain: Each component adds its Children function to the context array, creating a hierarchical chain
   - Backward Compatibility: Regular slot names (without numeric prefix) continue to work as before
+
+  Property naming:
+  - slotName: WHERE this Attr should be placed (which slot it belongs to)
+  - slot: WHAT parent slot content this Slot component should render
   */
 export const SlotField = (props: { class?: string }) => {
   const parentItems = usePageRenderContext();

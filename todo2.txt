@@ -451,19 +451,19 @@ https://merchant.razorpay.com/policy/RdV79YatVmuWqr/contact_us
 
   2. Frontend Pages & Components
 
-  ✅ YTOCheckout.hjson - Complete checkout page
+  ✅ Checkout.hjson - Complete checkout page
   - Plan selection, billing cycle toggle, order summary
   - Razorpay Checkout integration, payment handling
 
-  ✅ YTOSubscription.hjson - Subscription management
+  ✅ Subscription.hjson - Subscription management
   - Current plan display, quota usage with progress bar
   - Billing details, expiry date, upgrade options
 
-  ✅ YTOQuotaWarning.hjson - Quota warning component
+  ✅ QuotaWarning.hjson - Quota warning component
   - Fixed position warning (bottom-right), dismissable
   - Shows quota usage and upgrade prompts
 
-  ✅ YTOLanding.hjson (Updated)
+  ✅ Landing.hjson (Updated)
   - Payment buttons now navigate to checkout
   - Smart routing based on login status
 

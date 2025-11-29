@@ -21,17 +21,8 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { NotFound } from "~/components/404";
 import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
-import { createFunctionArgumentBase } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentBase";
-import { createFunctionArgumentWithValue } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentWithValue";
-import { useToast } from "~/components/styled/modal/Toast";
-import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
-import { useTheme } from "~/lib/theme/ThemeContext";
-import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
-import { useZIndex } from "~/components/fields/ZIndex";
-import { getOwner, createSignal } from "solid-js";
-import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { AuthRequired } from "~/components/auth/AuthRequired";
+import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
 
 import type {
   PageViewWrapperProps,
@@ -46,7 +37,6 @@ import type {
   FetchFormDataResult,
   FetchFormMetaDataResult,
 } from "~/pages/functions/fetchPageData";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 
@@ -72,75 +62,28 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
 
   const [previewStore] = usePreviewContext();
 
-  // Context hooks needed for function arguments
-  const toast = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const zIndex = useZIndex();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const theme = useTheme();
-  const themeToggle = useThemeToggle();
-  const owner = getOwner();
-  const parentItems = usePageRenderContext();
-  const [ref, setRef] = createSignal<HTMLElement | null>(null);
-  const [mounted, setMounted] = createSignal<null | boolean>(null);
-  const [componentName] = createSignal<string>("Html");
-
-  const parentRenderContext = () =>
-    getLastItem(parentItems)?.[0] as
-      | { context: FunctionArgumentType }
-      | undefined;
-  const parentMeta = () => parentRenderContext()?.context.meta;
-
-  // Create a proper function argument for evaluating dynamic props
-  const getFunctionArgument = () => {
-    const meta = metaVertex();
-    if (!meta) return {} as FunctionArgumentType;
-
-    return createFunctionArgumentBase(
-      {
-        data: dataVertex(),
-        meta,
+  // Setup function proxy for page-level functions
+  const { getFunctionArgumentWithValue } = useFunctionProxy({
+    props: {
+      get meta() {
+        return metaVertex();
       },
-      {
-        formVertex: () => formStore() as any,
-        formId: formStore().id,
-        componentName,
-        isNoPermissionCheck: () => props.isNoPermissionCheck,
-        isViewMode: () => false,
-        mounted,
-        parentMeta,
-        ref,
-        setRef,
-        updateValue: () => {},
-        onChange: () => {},
-        hasFullPermission: () => true,
-        hasEditPermission: () => true,
-        hasCreatePermission: () => true,
-        hasViewPermission: () => true,
+      get data() {
+        return dataVertex();
       },
-      {
-        graph,
-        setGraph,
-        toast,
-        searchParams,
-        setSearchParams,
-        zIndex,
-        navigate,
-        location,
-        theme,
-        parentItems,
-        previewStore,
-        themeToggle,
-        owner: owner!,
-        parentRenderContext,
-        functionProxy: {},
-      },
-    );
-  };
-
-  const getFunctionArgumentWithValue = () =>
-    createFunctionArgumentWithValue(getFunctionArgument, () => undefined);
+    },
+    componentName: () => "Html",
+    formVertex: () => formStore() as any,
+    formId: formStore().id,
+    updateValue: () => {},
+    onChange: () => {},
+    isNoPermissionCheck: () => props.isNoPermissionCheck,
+    isViewMode: () => false,
+    hasFullPermission: () => true,
+    hasEditPermission: () => true,
+    hasCreatePermission: () => true,
+    hasViewPermission: () => true,
+  });
 
   // Evaluate dynamic props from metaVertex
   const dynamicProps = () => {

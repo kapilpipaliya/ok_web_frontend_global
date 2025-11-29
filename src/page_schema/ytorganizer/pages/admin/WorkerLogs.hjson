@@ -1,0 +1,908 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "WorkerLogs",
+        url: "/yto/admin/worker-logs",
+        signinRequired: true,
+        fns: '''
+// Filter and refresh state
+const [filterWorker, setFilterWorker] = args.createSignal('all');
+const [filterLevel, setFilterLevel] = args.createSignal('all');
+const [logs, setLogs] = args.createSignal([]);
+const [logsLoading, setLogsLoading] = args.createSignal(false);
+
+// Fetch logs function
+const fetchLogs = async () => {
+  setLogsLoading(true);
+
+  try {
+    const result = await args.fns.executeYTOFunction('getWorkerLogs', {
+      filterWorker: filterWorker(),
+      filterLevel: filterLevel()
+    });
+
+    if (result?.result) {
+      setLogs(result.result);
+    } else {
+      setLogs([]);
+    }
+  } catch (error) {
+    console.error('Error fetching logs:', error);
+    args.showErrorToast('Failed to load worker logs');
+    setLogs([]);
+  } finally {
+    setLogsLoading(false);
+  }
+};
+
+// Refresh logs
+const refreshLogs = () => {
+  fetchLogs();
+};
+
+// Clear all logs
+const clearAllLogs = async () => {
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  if (!rbConfirm) {
+    args.showErrorToast('Confirmation dialog not available');
+    return;
+  }
+
+  const confirmed = await rbConfirm({
+    title: "Clear All Logs",
+    message: "Are you sure you want to delete all worker logs? This action cannot be undone.",
+    confirmText: "Clear Logs",
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const result = await args.fns.executeYTOFunction('clearWorkerLogs', {});
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message || 'All worker logs cleared successfully');
+      refreshLogs();
+    } else {
+      args.showErrorToast(result?.error || result?.result?.error || 'Failed to clear logs');
+    }
+  } catch (error) {
+    console.error('Error clearing logs:', error);
+    args.showErrorToast('An error occurred while clearing logs');
+  }
+};
+
+// Watch for filter changes and reload logs
+args.createEffect(args.on(
+  () => [args.fns.filterWorker(), args.fns.filterLevel()],
+  () => {
+    // Fetch logs when filters change
+    args.fns.fetchLogs();
+  }
+));
+
+return {
+  enabled: true,
+  filterWorker,
+  setFilterWorker,
+  filterLevel,
+  setFilterLevel,
+  logs,
+  setLogs,
+  logsLoading,
+  fetchLogs,
+  refreshLogs,
+  clearAllLogs
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout_base",
+      L: "PageLayout",
+      P: {
+        componentName: "Layout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_layout_content",
+      L: "PageLayout",
+      P: {
+        componentName: "LayoutContent",
+        displayOrder: 2
+      }
+    },
+    {
+      id: "page_layout_admin",
+      L: "PageLayout",
+      P: {
+        componentName: "AdminLayout",
+        displayOrder: 3
+      }
+    },
+    {
+      id: "logs_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "PageTitle",
+        props: '''
+return {
+  text: "Worker Logs"
+};
+'''
+      }
+    },
+    {
+      id: "header_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "refresh_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''
+return {
+  text: "Refresh",
+  variant: "secondary",
+  onClick: args.fns.refreshLogs
+};
+'''
+      }
+    },
+    {
+      id: "clear_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+return {
+  text: "Clear All Logs",
+  variant: "danger",
+  onClick: args.fns.clearAllLogs
+};
+'''
+      }
+    },
+    {
+      id: "filters_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_worker",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 200px;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_worker_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Worker"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_worker_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TomSelect",
+        props: '''
+const filterWorker = args.fns.filterWorker?.();
+
+return {
+  value: filterWorker || 'all',
+  functionName: "getWorkerQueues",
+  valueKey: "value",
+  labelKey: "label",
+  singularName: "worker",
+  pluralName: "workers",
+  placeholder: "Select worker type...",
+  search: false,
+  onChange: (value) => {
+    args.fns.setFilterWorker?.(value);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "filter_level",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 200px;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_level_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Log Level"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_level_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TomSelect",
+        props: '''
+const filterLevel = args.fns.filterLevel?.();
+
+return {
+  value: filterLevel || 'all',
+  options: [
+    { value: "all", label: "All Levels" },
+    { value: "info", label: "Info" },
+    { value: "error", label: "Error" }
+  ],
+  placeholder: "Select log level...",
+  search: false,
+  onChange: (value) => {
+    args.fns.setFilterLevel?.(value);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "logs_data_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+};
+'''
+      }
+    },
+    {
+      id: "logs_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const logs = args.fns.logs?.() || [];
+
+return {
+  as: "div",
+  hide: logs.length === 0
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "log_item_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "logItem",
+        loop: true,
+        props: '''
+const logs = args.fns.logs?.() || [];
+
+return {
+  as: "div",
+  data: logs
+};
+'''
+      }
+    },
+    {
+      id: "log_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const log = args.contextData.logItem;
+const level = log?.P?.level || 'info';
+
+let borderColor = args.theme.var.color.border;
+let bgColor = args.theme.var.color.background_dark_50;
+
+if (level === 'error') {
+  borderColor = args.theme.var.color.error;
+  bgColor = args.theme.var.color.error_light_50;
+}
+
+return `._id {
+  background: ${bgColor};
+  border: 1px solid ${borderColor};
+  border-left: 4px solid ${borderColor};
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "log_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "log_worker_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const log = args.contextData.logItem;
+const workerName = log?.P?.workerName || 'Unknown';
+
+const displayName = workerName === 'processChannelQueue' ? 'Channel Queue'
+  : workerName === 'processPlaylistQueue' ? 'Playlist Queue'
+  : workerName;
+
+return {
+  as: "span",
+  text: displayName
+};
+''',
+        css: '''
+const log = args.contextData.logItem;
+const level = log?.P?.level || 'info';
+
+let color = args.theme.var.color.primary;
+if (level === 'error') {
+  color = args.theme.var.color.error;
+}
+
+return `._id {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${color};
+  padding: 0.25rem 0.75rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "log_level_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const log = args.contextData.logItem;
+const level = log?.P?.level || 'info';
+
+return {
+  as: "span",
+  text: level.toUpperCase()
+};
+''',
+        css: '''
+const log = args.contextData.logItem;
+const level = log?.P?.level || 'info';
+
+let bgColor = args.theme.var.color.info_light_100;
+let textColor = args.theme.var.color.info_light_100_text;
+
+if (level === 'error') {
+  bgColor = args.theme.var.color.error_light_100;
+  textColor = args.theme.var.color.error_light_100_text;
+}
+
+return `._id {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background: ${bgColor};
+  color: ${textColor};
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}`;
+'''
+      }
+    },
+    {
+      id: "log_timestamp",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const log = args.contextData.logItem;
+const createdAt = log?.P?.createdAt;
+
+let timeText = 'Unknown';
+if (createdAt) {
+  try {
+    const date = new Date(createdAt);
+    timeText = date.toLocaleString();
+  } catch (e) {
+    timeText = String(createdAt);
+  }
+}
+
+return {
+  as: "span",
+  text: timeText
+};
+''',
+        css: '''
+const log = args.contextData.logItem;
+const level = log?.P?.level || 'info';
+
+let color = args.theme.var.color.muted;
+if (level === 'error') {
+  color = args.theme.var.color.error_light_50_text;
+}
+
+return `._id {
+  font-size: 0.75rem;
+  color: ${color};
+  opacity: 0.8;
+}`;
+'''
+      }
+    },
+    {
+      id: "log_message",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const log = args.contextData.logItem;
+const message = log?.P?.message || 'No message';
+
+return {
+  as: "p",
+  text: message
+};
+''',
+        css: '''
+const log = args.contextData.logItem;
+const level = log?.P?.level || 'info';
+
+let color = args.theme.var.color.text;
+if (level === 'error') {
+  color = args.theme.var.color.error_light_50_text;
+}
+
+return `._id {
+  margin: 0.5rem 0;
+  font-size: 0.9375rem;
+  color: ${color};
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "log_metadata",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const log = args.contextData.logItem;
+const metadata = log?.P?.metadata;
+
+if (!metadata) {
+  return null;
+}
+
+let metadataObj = {};
+try {
+  metadataObj = JSON.parse(metadata);
+} catch (e) {
+  metadataObj = { raw: metadata };
+}
+
+const metadataStr = JSON.stringify(metadataObj, null, 2);
+
+return {
+  as: "details"
+};
+''',
+        css: '''
+const log = args.contextData.logItem;
+const level = log?.P?.level || 'info';
+
+let bgColor = args.theme.var.color.background_light_100;
+let textColor = args.theme.var.color.muted;
+
+if (level === 'error') {
+  bgColor = args.theme.var.color.error_light_100;
+  textColor = args.theme.var.color.error_light_100_text;
+}
+
+return `._id {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: ${bgColor};
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  color: ${textColor};
+  cursor: pointer;
+}
+
+._id summary {
+  font-weight: 600;
+  user-select: none;
+}
+
+._id pre {
+  margin: 0.5rem 0 0 0;
+  padding: 0.5rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}`;
+'''
+      }
+    },
+    {
+      id: "metadata_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "summary",
+  text: "Metadata"
+};
+'''
+      }
+    },
+    {
+      id: "metadata_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const log = args.contextData.logItem;
+const metadata = log?.P?.metadata;
+
+if (!metadata) {
+  return null;
+}
+
+let metadataObj = {};
+try {
+  metadataObj = JSON.parse(metadata);
+} catch (e) {
+  metadataObj = { raw: metadata };
+}
+
+const metadataStr = JSON.stringify(metadataObj, null, 2);
+
+return {
+  as: "pre",
+  text: metadataStr
+};
+'''
+      }
+    },
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const logs = args.fns.logs?.() || [];
+
+return {
+  as: "div",
+  hide: logs.length > 0
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_50};
+  border: 2px dashed ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 3rem 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:clipboard-text-outline",
+  width: 64,
+  height: 64
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "No logs found"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout_base" },
+    { id: "e1a", T: "PageLayout", S: "page_root", E: "page_layout_content" },
+    { id: "e1b", T: "PageLayout", S: "page_root", E: "page_layout_admin" },
+    { id: "e2", T: "Attr", S: "page_root", E: "logs_container" },
+    { id: "e3", T: "Attr", S: "logs_container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "page_title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "header_actions" },
+    { id: "e6", T: "Attr", S: "header_actions", E: "refresh_button" },
+    { id: "e7", T: "Attr", S: "header_actions", E: "clear_button" },
+    { id: "e8", T: "Attr", S: "logs_container", E: "filters_section" },
+    { id: "e9", T: "Attr", S: "filters_section", E: "filter_worker" },
+    { id: "e10", T: "Attr", S: "filter_worker", E: "filter_worker_label" },
+    { id: "e11", T: "Attr", S: "filter_worker", E: "filter_worker_select" },
+    { id: "e12", T: "Attr", S: "filters_section", E: "filter_level" },
+    { id: "e13", T: "Attr", S: "filter_level", E: "filter_level_label" },
+    { id: "e14", T: "Attr", S: "filter_level", E: "filter_level_select" },
+    { id: "e15", T: "Attr", S: "logs_container", E: "logs_data_container" },
+    { id: "e16", T: "Attr", S: "logs_data_container", E: "logs_list" },
+    { id: "e17", T: "Attr", S: "logs_list", E: "log_item_loop" },
+    { id: "e18", T: "Attr", S: "log_item_loop", E: "log_card" },
+    { id: "e19", T: "Attr", S: "log_card", E: "log_header" },
+    { id: "e20", T: "Attr", S: "log_header", E: "log_worker_name" },
+    { id: "e21", T: "Attr", S: "log_header", E: "log_level_badge" },
+    { id: "e22", T: "Attr", S: "log_header", E: "log_timestamp" },
+    { id: "e23", T: "Attr", S: "log_card", E: "log_message" },
+    { id: "e24", T: "Attr", S: "log_card", E: "log_metadata" },
+    { id: "e25", T: "Attr", S: "log_metadata", E: "metadata_summary" },
+    { id: "e26", T: "Attr", S: "log_metadata", E: "metadata_content" },
+    { id: "e27", T: "Attr", S: "logs_data_container", E: "empty_state" },
+    { id: "e28", T: "Attr", S: "empty_state", E: "empty_icon" },
+    { id: "e29", T: "Attr", S: "empty_state", E: "empty_text" }
+  ]
+}

@@ -1,0 +1,936 @@
+{
+  vertexes: [
+    {
+      id: "checkout_page",
+      L: "Page",
+      P: {
+        key: "Checkout",
+        url: "/checkout",
+        signinRequired: true,
+        fns: '''
+const [orderData, setOrderData] = args.createSignal(null);
+const [isLoading, setIsLoading] = args.createSignal(false);
+const [errorMessage, setErrorMessage] = args.createSignal("");
+const [razorpayLoaded, setRazorpayLoaded] = args.createSignal(false);
+const [selectedPlan, setSelectedPlan] = args.createSignal(args.searchParams?.plan || "basic");
+const [billingCycle, setBillingCycle] = args.createSignal(args.searchParams?.cycle || "monthly");
+
+// Load Razorpay script
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => {
+      setRazorpayLoaded(true);
+      resolve(true);
+    };
+    script.onerror = () => {
+      setErrorMessage("Failed to load payment gateway");
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
+};
+
+// Plan pricing
+const planPrices = {
+  basic: 2.50,
+  pro: 5.00,
+  unlimited: 10.00
+};
+
+const planQuotas = {
+  basic: "50,000 videos",
+  pro: "150,000 videos",
+  unlimited: "Unlimited videos"
+};
+
+// Calculate price
+const calculatePrice = () => {
+  const monthlyPrice = planPrices[selectedPlan()];
+  if (billingCycle() === "annual") {
+    return monthlyPrice * 10; // 10 months (2 months free)
+  }
+  return monthlyPrice;
+};
+
+// Create payment order
+const createOrder = async () => {
+  try {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "createPaymentOrder",
+      contextData: {
+        plan: selectedPlan(),
+        billingCycle: billingCycle()
+      }
+    });
+
+    if (!result.success) {
+      throw new Error(result.message || "Failed to create order");
+    }
+
+    setOrderData(result.data);
+    return result.data;
+  } catch (error) {
+    setErrorMessage(error.message);
+    args.showErrorToast(error.message);
+    return null;
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Initialize payment
+const initiatePayment = async () => {
+  try {
+    // Load Razorpay script
+    const loaded = await loadRazorpayScript();
+    if (!loaded) return;
+
+    // Create order
+    const order = await createOrder();
+    if (!order) return;
+
+    // Razorpay checkout options
+    const options = {
+      key: order.keyId,
+      amount: order.amount,
+      currency: order.currency,
+      name: "YouTube Organizer",
+      description: selectedPlan().charAt(0).toUpperCase() + selectedPlan().slice(1) + " Plan - " + billingCycle(),
+      order_id: order.orderId,
+      handler: async function (response) {
+        try {
+          setIsLoading(true);
+
+          // Verify payment
+          const verifyResult = await args.executeNamedServerFunction({
+            functionName: "verifyPaymentSignature",
+            contextData: {
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature
+            }
+          });
+
+          if (verifyResult.success) {
+            args.showSuccessToast("Payment successful! Your subscription is now active.");
+            setTimeout(() => {
+              args.navigate("/subscription");
+            }, 1500);
+          } else {
+            throw new Error(verifyResult.message || "Payment verification failed");
+          }
+        } catch (error) {
+          args.showErrorToast(error.message);
+          setErrorMessage(error.message);
+        } finally {
+          setIsLoading(false);
+        }
+      },
+      prefill: {
+        name: args.user?.P?.username || "",
+        email: args.user?.P?.email || ""
+      },
+      theme: {
+        color: "#3399cc"
+      },
+      modal: {
+        ondismiss: function() {
+          setIsLoading(false);
+          args.showWarningToast("Payment cancelled");
+        }
+      }
+    };
+
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+
+  } catch (error) {
+    setErrorMessage(error.message);
+    args.showErrorToast(error.message);
+  }
+};
+
+return {
+  enabled: true,
+  selectedPlan,
+  setSelectedPlan,
+  billingCycle,
+  setBillingCycle,
+  calculatePrice,
+  initiatePayment,
+  isLoading,
+  errorMessage,
+  planPrices,
+  planQuotas
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "checkout_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "checkout_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 600px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "checkout_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "checkout_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Complete Your Purchase"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "checkout_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Choose your plan and billing cycle"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.text_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "checkout_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "plan_selector_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Select Plan"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "plan_selector",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "select",
+  value: args.fns.selectedPlan(),
+  onChange: (e) => args.fns.setSelectedPlan(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+}
+
+._id:focus {
+  outline: none;
+  border-color: ${args.theme.var.color.primary};
+  box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+}`;
+'''
+      }
+    },
+    {
+      id: "plan_option_basic",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "basic",
+  text: "Basic - $2.50/month (50,000 videos)"
+};
+'''
+      }
+    },
+    {
+      id: "plan_option_pro",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "pro",
+  text: "Pro - $5.00/month (150,000 videos)"
+};
+'''
+      }
+    },
+    {
+      id: "plan_option_unlimited",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "unlimited",
+  text: "Unlimited - $10.00/month (Unlimited videos)"
+};
+'''
+      }
+    },
+    {
+      id: "billing_cycle_label",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Billing Cycle"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "billing_cycle_selector",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "billing_monthly_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isSelected = args.fns.billingCycle() === "monthly";
+return {
+  as: "button",
+  text: "Monthly",
+  onClick: () => args.fns.setBillingCycle("monthly")
+};
+''',
+        css: '''
+const isSelected = args.fns.billingCycle() === "monthly";
+return `._id {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${isSelected ? args.theme.var.color.primary_light_800 : args.theme.var.color.background};
+  color: ${isSelected ? args.theme.var.color.primary : args.theme.var.color.text};
+  font-weight: ${isSelected ? '600' : '400'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  border-color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.primary_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "billing_annual_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isSelected = args.fns.billingCycle() === "annual";
+return {
+  as: "button",
+  text: "Annual (Save 2 months)",
+  onClick: () => args.fns.setBillingCycle("annual")
+};
+''',
+        css: '''
+const isSelected = args.fns.billingCycle() === "annual";
+return `._id {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${isSelected ? args.theme.var.color.primary_light_800 : args.theme.var.color.background};
+  color: ${isSelected ? args.theme.var.color.primary : args.theme.var.color.text};
+  font-weight: ${isSelected ? '600' : '400'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  border-color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.primary_light_900};
+}`;
+'''
+      }
+    },
+    {
+      id: "order_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_200};
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Order Summary"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_row_plan",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_plan_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Plan"
+};
+'''
+      }
+    },
+    {
+      id: "summary_plan_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const plan = args.fns.selectedPlan();
+return {
+  as: "span",
+  text: plan.charAt(0).toUpperCase() + plan.slice(1)
+};
+'''
+      }
+    },
+    {
+      id: "summary_row_quota",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_quota_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Video Quota"
+};
+'''
+      }
+    },
+    {
+      id: "summary_quota_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: args.fns.planQuotas[args.fns.selectedPlan()]
+};
+'''
+      }
+    },
+    {
+      id: "summary_row_cycle",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  color: ${args.theme.var.color.text_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_cycle_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Billing Cycle"
+};
+'''
+      }
+    },
+    {
+      id: "summary_cycle_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const cycle = args.fns.billingCycle();
+return {
+  as: "span",
+  text: cycle.charAt(0).toUpperCase() + cycle.slice(1)
+};
+'''
+      }
+    },
+    {
+      id: "summary_divider",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  height: 1px;
+  background: ${args.theme.var.color.border};
+  margin: 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_total",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_total_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Total"
+};
+'''
+      }
+    },
+    {
+      id: "summary_total_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "$" + args.fns.calculatePrice().toFixed(2)
+};
+'''
+      }
+    },
+    {
+      id: "error_message",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: args.fns.errorMessage(),
+  hide: () => !args.fns.errorMessage()
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error_light_800};
+  border: 1px solid ${args.theme.var.color.error};
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: ${args.theme.var.color.error};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "pay_button",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: args.fns.isLoading() ? "Processing..." : "Proceed to Payment",
+  disabled: args.fns.isLoading(),
+  onClick: args.fns.initiatePayment
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 1rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover:not(:disabled) {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+._id:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}`;
+'''
+      }
+    },
+    {
+      id: "back_link",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "← Back to Pricing",
+  onClick: () => args.navigate("/")
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  color: ${args.theme.var.color.text_dark_300};
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "checkout_page", E: "checkout_container" },
+    { id: "e2", T: "Attr", S: "checkout_container", E: "checkout_wrapper" },
+    { id: "e3", T: "Attr", S: "checkout_wrapper", E: "checkout_header" },
+    { id: "e4", T: "Attr", S: "checkout_header", E: "checkout_title" },
+    { id: "e5", T: "Attr", S: "checkout_header", E: "checkout_subtitle" },
+    { id: "e6", T: "Attr", S: "checkout_wrapper", E: "checkout_card" },
+    { id: "e7", T: "Attr", S: "checkout_card", E: "plan_selector_label" },
+    { id: "e8", T: "Attr", S: "checkout_card", E: "plan_selector" },
+    { id: "e9", T: "Attr", S: "plan_selector", E: "plan_option_basic" },
+    { id: "e10", T: "Attr", S: "plan_selector", E: "plan_option_pro" },
+    { id: "e11", T: "Attr", S: "plan_selector", E: "plan_option_unlimited" },
+    { id: "e12", T: "Attr", S: "checkout_card", E: "billing_cycle_label" },
+    { id: "e13", T: "Attr", S: "checkout_card", E: "billing_cycle_selector" },
+    { id: "e14", T: "Attr", S: "billing_cycle_selector", E: "billing_monthly_button" },
+    { id: "e15", T: "Attr", S: "billing_cycle_selector", E: "billing_annual_button" },
+    { id: "e16", T: "Attr", S: "checkout_card", E: "order_summary" },
+    { id: "e17", T: "Attr", S: "order_summary", E: "summary_title" },
+    { id: "e18", T: "Attr", S: "order_summary", E: "summary_row_plan" },
+    { id: "e19", T: "Attr", S: "summary_row_plan", E: "summary_plan_label" },
+    { id: "e20", T: "Attr", S: "summary_row_plan", E: "summary_plan_value" },
+    { id: "e21", T: "Attr", S: "order_summary", E: "summary_row_quota" },
+    { id: "e22", T: "Attr", S: "summary_row_quota", E: "summary_quota_label" },
+    { id: "e23", T: "Attr", S: "summary_row_quota", E: "summary_quota_value" },
+    { id: "e24", T: "Attr", S: "order_summary", E: "summary_row_cycle" },
+    { id: "e25", T: "Attr", S: "summary_row_cycle", E: "summary_cycle_label" },
+    { id: "e26", T: "Attr", S: "summary_row_cycle", E: "summary_cycle_value" },
+    { id: "e27", T: "Attr", S: "order_summary", E: "summary_divider" },
+    { id: "e28", T: "Attr", S: "order_summary", E: "summary_total" },
+    { id: "e29", T: "Attr", S: "summary_total", E: "summary_total_label" },
+    { id: "e30", T: "Attr", S: "summary_total", E: "summary_total_value" },
+    { id: "e31", T: "Attr", S: "checkout_card", E: "error_message" },
+    { id: "e32", T: "Attr", S: "checkout_card", E: "pay_button" },
+    { id: "e33", T: "Attr", S: "checkout_card", E: "back_link" }
+  ]
+}

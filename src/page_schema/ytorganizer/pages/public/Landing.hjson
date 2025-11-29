@@ -1,0 +1,2715 @@
+{
+  vertexes: [
+    {
+      id: "landing_page",
+      L: "Page",
+      P: {
+        key: "Landing",
+        url: "/",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "favicon_link",
+      L: "Attr",
+      P: {
+        displayOrder: 0.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "PublicLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "main_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+'''
+      }
+    },
+    {
+      id: "hero_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary} 0%, ${args.theme.var.color.primary_dark_300} 100%);
+  color: ${args.theme.var.color.primary_text};
+  padding: 6rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+._id::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  animation: float 20s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+._id > * {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 4rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "/api/file/download/big_logo_white.png",
+  alt: "YSaar Organizer Logo"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  margin: 0 auto 2rem auto;
+  opacity: 0.9;
+  object-fit: contain;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Organize Your YouTube World"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem 0;
+  color: ${args.theme.var.color.primary_text};
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Manage your favorite YouTube channels, playlists, and videos all in one place. Stay organized, stay focused."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.primary_text};
+  margin: 0 0 2.5rem 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_cta_buttons_container",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_cta_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Start Organizing for Free",
+  onClick: () => {
+    // Track conversion
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
+        'value': 1.0,
+        'currency': 'INR'
+      });
+    }
+    args.navigate('/auth/signup');
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.primary};
+  border: 3px solid ${args.theme.var.color.background};
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.background};
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 255, 255, 0.15);
+  border-color: ${args.theme.var.color.background};
+}
+
+._id:active {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_demo_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Watch Demo",
+  onClick: () => {
+    // Track conversion
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
+        'value': 1.0,
+        'currency': 'INR'
+      });
+    }
+    // Open the demo video
+    const demoVideo = {
+      P: {
+        youtubeId: "sf-i_T4RWek",
+        title: "YSaar Signup Demo"
+      }
+    };
+    args.fns.openPlayer(demoVideo);
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: transparent;
+  color: ${args.theme.var.color.primary_text};
+  border: 3px solid ${args.theme.var.color.background};
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+._id:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+._id:active {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_demo_button_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:play-filled",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "features_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return [
+  `@keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }`,
+  `._id {
+    padding: 4rem 2rem;
+    background: ${args.theme.var.color.background_dark_50};
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @media (max-width: 768px) {
+    ._id {
+      padding: 3rem 1rem;
+    }
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "features_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "features_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Powerful Features"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 3rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 968px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  text-align: center;
+  transition: all 0.2s ease;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+._id:hover {
+  border-color: ${args.theme.var.color.primary};
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:folders",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Channel Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Organize and track all your favorite YouTube channels in one place"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  text-align: center;
+  transition: all 0.2s ease;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+._id:hover {
+  border-color: ${args.theme.var.color.primary};
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:playlist",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Playlist Organization"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Create custom playlists and manage your video collections effortlessly"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  text-align: center;
+  transition: all 0.2s ease;
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+._id:hover {
+  border-color: ${args.theme.var.color.primary};
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:favorite",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Personal Notes & Favorites"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Add notes to videos and mark your favorites for quick access"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "pricing"
+};
+''',
+        css: '''
+return `._id {
+  padding: 6rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Simple, Transparent Pricing"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Choose the plan that fits your needs"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 3rem 0;
+  font-size: 1.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+  align-items: stretch;
+}
+
+._id > * {
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  ._id {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  ._id {
+    gap: 1.25rem;
+    max-width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_cards_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "tier",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: [
+    {
+      name: "Free",
+      priceAmount: "$0",
+      pricePeriod: "",
+      channels: "10,000 videos",
+      features: [
+        "Basic video organization",
+        "Channel tracking",
+        "Manual refresh"
+      ],
+      popular: false,
+      buttonText: "Get Started Free"
+    },
+    {
+      name: "Basic",
+      priceAmount: "$2.50",
+      pricePeriod: "/month",
+      channels: "50,000 videos",
+      features: [
+        "Everything in Free",
+        "Auto-refresh channels",
+        "API access",
+      ],
+      popular: false,
+      buttonText: "Start Basic Plan"
+    },
+    {
+      name: "Pro",
+      priceAmount: "$5.00",
+      pricePeriod: "/month",
+      channels: "150,000 videos",
+      features: [
+        "Everything in Basic",
+        "Priority support",
+        "Custom integrations"
+      ],
+      popular: true,
+      buttonText: "Go Pro"
+    },
+    {
+      name: "Unlimited",
+      priceAmount: "$10.00",
+      pricePeriod: "/month",
+      channels: "Unlimited videos",
+      features: [
+        "Everything in Pro",
+        // "Team collaboration",
+        "Priority processing",
+        "Dedicated support"
+      ],
+      popular: false,
+      buttonText: "Get Unlimited"
+    }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: contents;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+const isPopular = tier?.popular;
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+const tier = args.contextData.tier;
+const isPopular = tier?.popular;
+
+return `._id {
+  width: 100%;
+  background: ${args.theme.var.color.background};
+  border: ${isPopular ? `2px solid ${args.theme.var.color.primary}` : `1px solid ${args.theme.var.color.border}`};
+  border-radius: 1rem;
+  padding: ${isPopular ? '2.5rem 1.75rem' : '2rem 1.5rem'};
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  position: relative;
+  transform: ${isPopular ? 'scale(1.05)' : 'scale(1)'};
+  box-shadow: ${isPopular ? `0 12px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px ${args.theme.var.color.primary}` : '0 2px 8px rgba(0, 0, 0, 0.05)'};
+  z-index: ${isPopular ? '10' : '1'};
+}
+
+._id:hover {
+  transform: ${isPopular ? 'scale(1.05) translateY(-8px)' : 'translateY(-8px)'};
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+  border-color: ${args.theme.var.color.primary};
+}
+
+@media (max-width: 1200px) {
+  ._id {
+    transform: scale(1);
+    padding: 2rem 1.5rem;
+  }
+
+  ._id:hover {
+    transform: translateY(-8px);
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "div",
+  text: "Most Popular",
+  hide: !tier?.popular
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: -12px;
+  right: 1.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "h4",
+  text: tier?.name || ""
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_price",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    justify-content: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_price_amount",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "span",
+  text: tier?.priceAmount || ""
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.primary};
+  line-height: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_price_period",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "span",
+  text: tier?.pricePeriod || ""
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.muted};
+  line-height: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_channels_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "div",
+  text: tier?.channels || ""
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid ${args.theme.var.color.primary_light_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_divider",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  height: 1px;
+  background: ${args.theme.var.color.border};
+  margin: 0.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_features",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        contextName: "feature",
+        loop: true,
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "div",
+  data: tier?.features || []
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    align-items: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_feature_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.375rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_feature_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_feature_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.feature;
+return {
+  as: "span",
+  text: feature || ""
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.9375rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_spacer",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_button",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+const planName = tier?.name?.toLowerCase() || "basic";
+
+return {
+  as: "button",
+  text: tier?.buttonText || "Get Started",
+  onClick: () => {
+    // Track conversion
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
+        'value': 1.0,
+        'currency': 'INR'
+      });
+    }
+
+    if (planName === "free") {
+      // Free plan - just sign up
+      args.navigate('/auth/signup');
+    } else if (args.user) {
+      // User is logged in - go to checkout
+      args.navigate(`/checkout?plan=${planName}&cycle=monthly`);
+    } else {
+      // User not logged in - go to signup with redirect
+      args.navigate(`/auth/signup?redirect=/checkout?plan=${planName}&cycle=monthly`);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+._id:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        contextName: "userStats",
+        serverFunction: '''
+try {
+  // Execute the getUserCount function
+  const result = await args.executeNamedServerFunction({
+    functionName: "getUserCount",
+    contextData: {}
+  });
+
+  if (result?.result?.success) {
+    return result.result.data;
+  }
+
+  return { totalUsers: 0 };
+} catch (error) {
+  console.error("Error loading user count:", error);
+  return { totalUsers: 0 };
+}
+''',
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 4rem 2rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Join Our Growing Community"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  margin-top: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_user_count",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_user_count_number",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const userCount = args.contextData.userStats?.totalUsers || 0;
+return {
+  as: "div",
+  text: `${userCount.toLocaleString()}+`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_user_count_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Active Users"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_rating",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_rating_stars",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "★★★★★"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_rating_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "4.9/5 Rating"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_videos",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_videos_number",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "1M+"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_videos_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Videos Organized"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    // Chrome Extension Section
+    {
+      id: "chrome_extension_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.theme.var.color.background};
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 0.45s both;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "NOW AVAILABLE"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+  border: 2px solid ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Chrome Extension - Save from YouTube"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Save YouTube channels and playlists directly from YouTube.com with one click. No need to copy-paste URLs anymore!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 3rem 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_features_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 3rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 968px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:save",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "One-Click Save"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_1_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Save channels & playlists without leaving YouTube"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  text-align: center;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:dashboard",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Quick Stats"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_2_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "View your saved content stats from the extension popup"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  text-align: center;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:login",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info};
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Auto Login"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_feature_3_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Uses your existing YSaar login - no separate authentication"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  text-align: center;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_cta",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => {
+    // TODO: Replace with Chrome Web Store URL when published
+    // For now, show installation instructions
+    args.showSuccessToast("Chrome Extension coming soon to Chrome Web Store! Contact support for early access.");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+}
+
+._id:active {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chrome_extension_button_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:google-chrome",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "chrome_extension_button_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Add to Chrome"
+};
+'''
+      }
+    },
+    {
+      id: "chrome_extension_note",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Free extension • Works with your YSaar account"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    // Mobile Apps Coming Soon Section
+    {
+      id: "mobile_apps_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.theme.var.color.background_dark_50};
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 0.5s both;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "ANDROID CLOSED TESTING"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  background: ${args.theme.var.color.success_light_100};
+  color: ${args.theme.var.color.success_light_100_text};
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+  border: 2px solid ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "YSaar Android App - Join Beta Testing"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Be among the first to experience YSaar on Android! Join our closed testing program and help shape the future of mobile YouTube organization."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 3rem 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_icons_container",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 3rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_android_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => {
+    window.open("https://play.google.com/apps/testing/com.ysaar.app", "_blank");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.success};
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: ${args.theme.var.color.success_dark_200};
+}
+
+._id:active {
+  transform: translateY(-2px);
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_android_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:android",
+  width: 80,
+  height: 80
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_android_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Join Android Beta"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_ios_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border: 2px dashed ${args.theme.var.color.border};
+  border-radius: 1rem;
+  opacity: 0.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_ios_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:apple",
+  width: 80,
+  height: 80
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  filter: grayscale(100%);
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_ios_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "iOS Coming Soon"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_apps_notify_text",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Test the Android app now and help us improve! iOS version launching soon."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "Attr", S: "landing_page", E: "favicon_link" },
+    { id: "e1", T: "PageLayout", S: "landing_page", E: "page_layout" },
+    { id: "e10", T: "Attr", S: "landing_page", E: "main_content" },
+    { id: "e11", T: "Attr", S: "main_content", E: "hero_section" },
+    { id: "e12", T: "Attr", S: "hero_section", E: "hero_icon" },
+    { id: "e13", T: "Attr", S: "hero_section", E: "hero_title" },
+    { id: "e14", T: "Attr", S: "hero_section", E: "hero_subtitle" },
+    { id: "e15", T: "Attr", S: "hero_section", E: "hero_cta_buttons_container" },
+    { id: "e15a", T: "Attr", S: "hero_cta_buttons_container", E: "hero_cta_button" },
+    { id: "e15b", T: "Attr", S: "hero_cta_buttons_container", E: "hero_demo_button" },
+    { id: "e15c", T: "Attr", S: "hero_demo_button", E: "hero_demo_button_icon" },
+    { id: "e16", T: "Attr", S: "main_content", E: "features_section" },
+    { id: "e17", T: "Attr", S: "features_section", E: "features_container" },
+    { id: "e18", T: "Attr", S: "features_container", E: "features_title" },
+    { id: "e19", T: "Attr", S: "features_container", E: "features_grid" },
+    { id: "e20", T: "Attr", S: "features_grid", E: "feature_1" },
+    { id: "e21", T: "Attr", S: "feature_1", E: "feature_1_icon" },
+    { id: "e22", T: "Attr", S: "feature_1", E: "feature_1_title" },
+    { id: "e23", T: "Attr", S: "feature_1", E: "feature_1_desc" },
+    { id: "e24", T: "Attr", S: "features_grid", E: "feature_2" },
+    { id: "e25", T: "Attr", S: "feature_2", E: "feature_2_icon" },
+    { id: "e26", T: "Attr", S: "feature_2", E: "feature_2_title" },
+    { id: "e27", T: "Attr", S: "feature_2", E: "feature_2_desc" },
+    { id: "e28", T: "Attr", S: "features_grid", E: "feature_3" },
+    { id: "e29", T: "Attr", S: "feature_3", E: "feature_3_icon" },
+    { id: "e30", T: "Attr", S: "feature_3", E: "feature_3_title" },
+    { id: "e31", T: "Attr", S: "feature_3", E: "feature_3_desc" },
+    { id: "e32", T: "Attr", S: "main_content", E: "pricing_section" },
+    { id: "e33", T: "Attr", S: "pricing_section", E: "pricing_title" },
+    { id: "e34", T: "Attr", S: "pricing_section", E: "pricing_subtitle" },
+    { id: "e35", T: "Attr", S: "pricing_section", E: "pricing_grid" },
+    { id: "e36", T: "Attr", S: "pricing_grid", E: "pricing_cards_loop" },
+    { id: "e37", T: "Attr", S: "pricing_cards_loop", E: "pricing_card" },
+    { id: "e38", T: "Attr", S: "pricing_card", E: "pricing_card_badge" },
+    { id: "e39", T: "Attr", S: "pricing_card", E: "pricing_card_title" },
+    { id: "e40", T: "Attr", S: "pricing_card", E: "pricing_card_price" },
+    { id: "e40a", T: "Attr", S: "pricing_card_price", E: "pricing_card_price_amount" },
+    { id: "e40b", T: "Attr", S: "pricing_card_price", E: "pricing_card_price_period" },
+    { id: "e41", T: "Attr", S: "pricing_card", E: "pricing_card_channels_badge" },
+    { id: "e42", T: "Attr", S: "pricing_card", E: "pricing_card_divider" },
+    { id: "e43", T: "Attr", S: "pricing_card", E: "pricing_card_features" },
+    { id: "e43a", T: "Attr", S: "pricing_card_features", E: "pricing_card_feature_item" },
+    { id: "e43b", T: "Attr", S: "pricing_card_feature_item", E: "pricing_card_feature_icon" },
+    { id: "e43c", T: "Attr", S: "pricing_card_feature_item", E: "pricing_card_feature_text" },
+    { id: "e43d", T: "Attr", S: "pricing_card", E: "pricing_card_spacer" },
+    { id: "e44", T: "Attr", S: "pricing_card", E: "pricing_card_button" },
+    { id: "e68", T: "Attr", S: "main_content", E: "stats_section" },
+    { id: "e69", T: "Attr", S: "stats_section", E: "stats_container" },
+    { id: "e70", T: "Attr", S: "stats_container", E: "stats_title" },
+    { id: "e71", T: "Attr", S: "stats_container", E: "stats_grid" },
+    { id: "e72", T: "Attr", S: "stats_grid", E: "stats_user_count" },
+    { id: "e73", T: "Attr", S: "stats_user_count", E: "stats_user_count_number" },
+    { id: "e74", T: "Attr", S: "stats_user_count", E: "stats_user_count_label" },
+    { id: "e75", T: "Attr", S: "stats_grid", E: "stats_rating" },
+    { id: "e76", T: "Attr", S: "stats_rating", E: "stats_rating_stars" },
+    { id: "e77", T: "Attr", S: "stats_rating", E: "stats_rating_text" },
+    { id: "e78", T: "Attr", S: "stats_grid", E: "stats_videos" },
+    { id: "e79", T: "Attr", S: "stats_videos", E: "stats_videos_number" },
+    { id: "e80", T: "Attr", S: "stats_videos", E: "stats_videos_label" },
+
+    // Chrome Extension Section
+    { id: "e81", T: "Attr", S: "main_content", E: "chrome_extension_section" },
+    { id: "e82", T: "Attr", S: "chrome_extension_section", E: "chrome_extension_container" },
+    { id: "e83", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_badge" },
+    { id: "e84", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_title" },
+    { id: "e85", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_subtitle" },
+    { id: "e86", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_features_grid" },
+    { id: "e87", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_1" },
+    { id: "e88", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_icon" },
+    { id: "e89", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_text" },
+    { id: "e90", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_desc" },
+    { id: "e91", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_2" },
+    { id: "e92", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_icon" },
+    { id: "e93", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_text" },
+    { id: "e94", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_desc" },
+    { id: "e95", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_3" },
+    { id: "e96", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_icon" },
+    { id: "e97", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_text" },
+    { id: "e98", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_desc" },
+    { id: "e99", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_cta" },
+    { id: "e100", T: "Attr", S: "chrome_extension_cta", E: "chrome_extension_button" },
+    { id: "e101", T: "Attr", S: "chrome_extension_button", E: "chrome_extension_button_icon" },
+    { id: "e102", T: "Attr", S: "chrome_extension_button", E: "chrome_extension_button_text" },
+    { id: "e103", T: "Attr", S: "chrome_extension_cta", E: "chrome_extension_note" },
+
+    // Mobile Apps Section
+    { id: "e110", T: "Attr", S: "main_content", E: "mobile_apps_section" },
+    { id: "e111", T: "Attr", S: "mobile_apps_section", E: "mobile_apps_container" },
+    { id: "e112", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_badge" },
+    { id: "e113", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_title" },
+    { id: "e114", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_subtitle" },
+    { id: "e115", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_icons_container" },
+    { id: "e116", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_android_container" },
+    { id: "e117", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_icon" },
+    { id: "e118", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_text" },
+    { id: "e119", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_ios_container" },
+    { id: "e120", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_icon" },
+    { id: "e121", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_text" },
+    { id: "e122", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_notify_text" }
+  ]
+}

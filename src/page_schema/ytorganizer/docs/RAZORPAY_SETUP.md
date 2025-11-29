@@ -230,7 +230,7 @@ To test the quota warning component:
    RETURN u
    ```
 
-2. Navigate to any page with the YTOQuotaWarning component
+2. Navigate to any page with the QuotaWarning component
 3. Should see a warning at the bottom right
 
 ---

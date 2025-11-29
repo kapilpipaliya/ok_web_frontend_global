@@ -16,6 +16,8 @@
     "postinstall": "npx playwright install-deps && npx playwright install",
     "s": "git pull && npm i --force && npm run build && npm run start",
     "send-test-email": "dotenv -e .env -- tsx scripts/sendTestEmail.ts admin admin@decodeui.io kapilpipaliya@gmail.com",
+    "clean-redis": "redis-cli -h ${REDIS_HOST:-localhost} -p ${REDIS_PORT:-6379} FLUSHALL",
+    "clean-redis-db": "redis-cli -h ${REDIS_HOST:-localhost} -p ${REDIS_PORT:-6379} FLUSHDB",
     "pm2:start": "git pull && npm i --force && npm run build && pm2 start ecosystem.config.cjs",
     "pm2:stop": "pm2 stop ecosystem.config.cjs",
     "pm2:restart": "pm2 restart ecosystem.config.cjs",

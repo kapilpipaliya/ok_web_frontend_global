@@ -186,11 +186,11 @@ The system supports connecting multiple YouTube accounts per user, with each acc
 
 ### Multi-Ownership Architecture
 
-The application implements a centralized multi-ownership management system through the YTOLayout component:
+The application implements a centralized multi-ownership management system through the Layout component:
 
-#### YTOLayout - Central Ownership Manager
+#### Layout - Central Ownership Manager
 
-**YTOLayout** serves as the main layout wrapper and ownership state manager for the entire application. It provides:
+**Layout** serves as the main layout wrapper and ownership state manager for the entire application. It provides:
 
 **Ownership State Management:**
 - `ownerships` - Array of all connected YouTube accounts for the current user
@@ -210,7 +210,7 @@ The application implements a centralized multi-ownership management system throu
 - Shows which account's quota is currently displayed
 
 **executeYTOFunction Wrapper:**
-All child pages/components access server functions through the `executeYTOFunction` wrapper provided by YTOLayout. This wrapper automatically injects both `impersonatedUserUuid` (for admin) and `ownershipId` (for multi-ownership) into every server function call:
+All child pages/components access server functions through the `executeYTOFunction` wrapper provided by Layout. This wrapper automatically injects both `impersonatedUserUuid` (for admin) and `ownershipId` (for multi-ownership) into every server function call:
 
 ```javascript
 const executeYTOFunction = async (functionName, contextData = {}) => {
@@ -230,7 +230,7 @@ const executeYTOFunction = async (functionName, contextData = {}) => {
 
 **Benefits:**
 - **Zero Page Updates Required**: All child pages automatically work with multi-ownership without code changes
-- **Centralized Logic**: Ownership management in one place (YTOLayout)
+- **Centralized Logic**: Ownership management in one place (Layout)
 - **Admin Support**: Seamlessly works with user impersonation for admin features
 - **Type Safety**: Consistent API across all pages
 
@@ -247,8 +247,8 @@ const result = await args.fns.executeYTOFunction('getChannels', {
 All components follow the YTO prefix naming convention:
 
 #### Layout Components
-- **YTOLayout**: Main layout with bottom navigation and multi-ownership state management
-- **YTOAdminLayout**: Admin section layout with navigation sidebar
+- **Layout**: Main layout with bottom navigation and multi-ownership state management
+- **AdminLayout**: Admin section layout with navigation sidebar
 - **YTOTabBar**: Tab navigation for channel/playlist detail views
 
 #### UI Components
@@ -260,31 +260,31 @@ All components follow the YTO prefix naming convention:
 - **YTOChannelCard**: Channel display card with thumbnail and info
 - **YTOPlaylistCard**: Playlist display card with thumbnail and info
 - **YTOVideoCard**: Video display card with thumbnail and metadata
-- **YTOCard**: Display Youtube Item
-- **YTOYouTubeAttribution**: YouTube branding compliance component with clickable logo
+- **Card**: Display Youtube Item
+- **YouTubeAttribution**: YouTube branding compliance component with clickable logo
 
 **Shared Components:**
-- **YTOButton**: Reusable button component with variants (primary, secondary, danger)
-- **YTOPageTitle**: Consistent page title component
-- **YTOFeedbackModal**: Modal for collecting user feedback
+- **Button**: Reusable button component with variants (primary, secondary, danger)
+- **PageTitle**: Consistent page title component
+- **FeedbackModal**: Modal for collecting user feedback
 
 #### Pages
 
 **YouTube Pages:**
-- **YTOHome**: Dashboard overview of recent activity
+- **Home**: Dashboard overview of recent activity
 - **YTOChannels**: List of user's subscribed channels with add functionality
 - **YTOPlaylists**: List of user's playlists with add functionality
 - **YTOChannelDetail**: Channel details with videos/playlists tabs
 - **YTOPlaylistDetail**: Playlist details with video list
-- **YTOAdminHome**: Admin dashboard with quick links to admin features
-- **YTOQuotaMonitor**: Admin page for monitoring shared API quota (real-time usage, breakdown by ownership, alerts)
+- **AdminHome**: Admin dashboard with quick links to admin features
+- **QuotaMonitor**: Admin page for monitoring shared API quota (real-time usage, breakdown by ownership, alerts)
 
 **Settings Pages:**
-- **YTOSettings**: User settings including YouTube connection, theme, and data management
+- **Settings**: User settings including YouTube connection, theme, and data management
 
 **Legal Pages:**
-- **YTOPrivacy**: Privacy policy page with YouTube API Services disclosures
-- **YTOTerms**: Terms of Service page with comprehensive legal information
+- **Privacy**: Privacy policy page with YouTube API Services disclosures
+- **Terms**: Terms of Service page with comprehensive legal information
 
 ### API Functions
 
@@ -358,7 +358,7 @@ The system tracks YouTube API quota consumption with a shared 10,000 units/day l
 - `RESERVATION_EXPIRY_MS` - Constant: 5 minutes (300,000ms)
 
 **Admin Monitoring:**
-- **YTOQuotaMonitor**: Admin page at `/yto/admin/quota-monitor` for real-time monitoring
+- **QuotaMonitor**: Admin page at `/yto/admin/quota-monitor` for real-time monitoring
 - **Background Workers**: BullMQ worker monitors quota levels every 5 minutes
 - **Email Alerts**: Automatic alerts at 80%, 95%, and 100% thresholds
 - **Usage Analytics**: Historical trends and per-ownership breakdowns
@@ -453,7 +453,7 @@ Server functions have access to:
 
 ### Theme
 
-- **YTOTheme**: Custom theme optimized for video content with high contrast for accessibility
+- **Theme**: Custom theme optimized for video content with high contrast for accessibility
 
 ## Mobile-First Design Principles
 
@@ -574,46 +574,46 @@ Users can set their preferred language through LanguageSetting vertex:
 /src/page_schema/ytorganizer/
 ├── components/
 │   ├── layouts/
-│   │   ├── YTOLayout.hjson              # Main layout with multi-ownership state management
-│   │   ├── YTOAdminLayout.hjson         # Admin section layout with navigation
+│   │   ├── Layout.hjson              # Main layout with multi-ownership state management
+│   │   ├── AdminLayout.hjson         # Admin section layout with navigation
 │   │   └── YTOTabBar.hjson              # Tab navigation component
 │   ├── buttons/
 │   │   ├── YTOFloatingButton.hjson      # Basic floating action button
 │   │   ├── YTOAddChannelButton.hjson    # Channel add button with modal
 │   │   ├── YTOAddPlaylistButton.hjson   # Playlist add button with modal
-│   │   └── YTOButton.hjson              # Reusable button component
+│   │   └── Button.hjson              # Reusable button component
 │   ├── cards/
 │   │   ├── YTOChannelCard.hjson         # YouTube channel display card
 │   │   ├── YTOPlaylistCard.hjson        # YouTube playlist display card
 │   │   ├── YTOVideoCard.hjson           # YouTube video display card
-│   │   ├── YTOCard.hjson                # Generic card component
+│   │   ├── Card.hjson                # Generic card component
 │   ├── shared/
-│   │   ├── YTOYouTubeAttribution.hjson  # YouTube branding compliance
-│   │   ├── YTOPageTitle.hjson           # Page title component
-│   │   └── YTOFeedbackModal.hjson       # User feedback modal
+│   │   ├── YouTubeAttribution.hjson  # YouTube branding compliance
+│   │   ├── PageTitle.hjson           # Page title component
+│   │   └── FeedbackModal.hjson       # User feedback modal
 ├── pages/
 │   ├── main/
-│   │   ├── YTOHome.hjson                # Dashboard/home page
+│   │   ├── Home.hjson                # Dashboard/home page
 │   ├── youtube/
 │   │   ├── YTOChannels.hjson            # YouTube channels list page
 │   │   ├── YTOPlaylists.hjson           # YouTube playlists list page
 │   │   ├── YTOChannelDetail.hjson       # YouTube channel detail with tabs
 │   │   └── YTOPlaylistDetail.hjson      # YouTube playlist detail with videos
 │   ├── settings/
-│   │   ├── YTOSettings.hjson            # User settings and YouTube connection
+│   │   ├── Settings.hjson            # User settings and YouTube connection
 │   ├── legal/
-│   │   ├── YTOPrivacy.hjson             # Privacy policy page
-│   │   ├── YTOTerms.hjson               # Terms of Service page
-│   │   └── YTOOnboarding.hjson          # New user onboarding flow
+│   │   ├── Privacy.hjson             # Privacy policy page
+│   │   ├── Terms.hjson               # Terms of Service page
+│   │   └── Onboarding.hjson          # New user onboarding flow
 │   └── admin/
-│       ├── YTOAdminHome.hjson           # Admin: Dashboard with quick links
-│       ├── YTOQuotaMonitor.hjson        # Admin: Shared quota monitoring
-│       ├── YTOWorkerHealth.hjson        # Admin: Queue/worker health monitoring
-│       ├── YTOWorkerLogs.hjson          # Admin: Worker logs viewer
-│       ├── YTOAdminUsers.hjson          # Admin: User management
-│       └── YTOAPIKeyManagement.hjson    # Admin: API key management
+│       ├── AdminHome.hjson           # Admin: Dashboard with quick links
+│       ├── QuotaMonitor.hjson        # Admin: Shared quota monitoring
+│       ├── WorkerHealth.hjson        # Admin: Queue/worker health monitoring
+│       ├── WorkerLogs.hjson          # Admin: Worker logs viewer
+│       ├── AdminUsers.hjson          # Admin: User management
+│       └── APIKeyManagement.hjson    # Admin: API key management
 ├── themes/
-│   └── YTOTheme.hjson               # Custom theme for video content
+│   └── Theme.hjson               # Custom theme for video content
 ├── functions/
 │   ├── youtube/
 │   │   ├── savePlaylist.hjson           # Save YouTube playlist
@@ -1388,21 +1388,21 @@ The system complies with YouTube's branding guidelines:
 - Links to YouTube ToS and Google Privacy Policy
 
 **Implementation:**
-- `YTOYouTubeAttribution` component on Privacy and Terms pages
+- `YouTubeAttribution` component on Privacy and Terms pages
 - Clickable YouTube logo linking to YouTube.com
 - Required disclosures in Privacy Policy
 - Terms of Service with YouTube API Services section
 
 ### Legal Pages
 
-**Privacy Policy (YTOPrivacy):**
+**Privacy Policy (Privacy):**
 - YouTube API Services disclosures
 - Data collection and usage policies
 - Third-party service integrations
 - User rights and data control
 - Links to YouTube ToS and Google Privacy Policy
 
-**Terms of Service (YTOTerms):**
+**Terms of Service (Terms):**
 - Service description and features
 - YouTube API Services usage terms
 - User responsibilities and acceptable use
@@ -1478,7 +1478,7 @@ This documentation serves as the foundation for implementing the YSaar system an
 - ✅ **Per-Ownership Tracking**: Individual usage tracked by ownership for accountability
 - ✅ **Background Monitoring**: BullMQ worker monitors quota levels every 5 minutes
 - ✅ **Email Alerts**: Automatic alerts at 80%, 95%, and 100% quota thresholds
-- ✅ **YTOQuotaMonitor Page**: Admin page at `/yto/admin/quota-monitor` with live stats
+- ✅ **QuotaMonitor Page**: Admin page at `/yto/admin/quota-monitor` with live stats
 - ✅ **Updated API Functions**: Migrated from per-user to shared quota functions
 - ✅ **Quota Reservation System**: Reserve/release quota to prevent race conditions
 - ✅ **Usage Breakdown**: View quota consumption by ownership in admin panel
@@ -1489,7 +1489,7 @@ This documentation serves as the foundation for implementing the YSaar system an
 - ✅ **Multi-Account Support**: Users can connect multiple YouTube accounts to one application account
 - ✅ **YouTubeOwnership Node**: New graph structure for managing multiple accounts per user
 - ✅ **Ownership Selector**: Dropdown UI to switch between connected YouTube accounts
-- ✅ **Centralized Architecture**: YTOLayout manages ownership state globally
+- ✅ **Centralized Architecture**: Layout manages ownership state globally
 - ✅ **executeYTOFunction Wrapper**: Automatically injects ownershipId into all server function calls
 - ✅ **Updated All Server Functions**: Refactored 69+ backend functions for ownership-based relationships
 - ✅ **Per-Ownership Setting**: Each account maintains separate channel, playlist, and video preferences

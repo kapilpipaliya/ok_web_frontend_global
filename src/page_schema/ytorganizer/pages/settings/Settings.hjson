@@ -1,0 +1,1031 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "Settings",
+        url: "/settings",
+        signinRequired: true,
+        fns: '''
+// Message state for displaying success/error messages in UI
+const [messageState, setMessageState] = args.createStore({
+  type: null, // 'success' or 'error'
+  text: '',
+  visible: false
+});
+
+const showMessage = (type, text) => {
+  setMessageState({ type, text, visible: true });
+  // Auto-hide after 15 seconds
+  setTimeout(() => {
+    setMessageState('visible', false);
+  }, 15000);
+};
+
+const hideMessage = () => {
+  setMessageState('visible', false);
+};
+
+return {
+  enabled: true,
+  messageState,
+  showMessage,
+  hideMessage,
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "Layout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_layout_content",
+      L: "PageLayout",
+      P: {
+        componentName: "LayoutContent",
+        displayOrder: 2
+      }
+    },
+    {
+      id: "setting_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "PageTitle",
+        props: '''
+return {
+  text: "Settings"
+};
+'''
+      }
+    },
+    {
+      id: "page_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Manage your YSaar preferences and data."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0.5rem 0 2rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "message_banner",
+      L: "Attr",
+      P: {
+        displayOrder: 2.5,
+        componentName: "Html",
+        props: '''
+const messageState = args.fns.messageState;
+
+return {
+  as: "div",
+  hide: !messageState?.visible
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+const isError = messageState?.type === 'error';
+
+let bgColor = args.theme.var.color.background_light_100;
+let borderColor = args.theme.var.color.border;
+let textColor = args.theme.var.color.text;
+
+if (isSuccess) {
+  bgColor = args.theme.var.color.success_light_50;
+  borderColor = args.theme.var.color.success;
+  textColor = args.theme.var.color.success_light_50_text;
+} else if (isError) {
+  bgColor = args.theme.var.color.error_light_50;
+  borderColor = args.theme.var.color.error;
+  textColor = args.theme.var.color.error_light_50_text;
+}
+
+return `._id {
+  background: ${bgColor};
+  border: 2px solid ${borderColor};
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "message_icon_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+let iconColor = args.theme.var.color.success;
+
+if (!isSuccess) {
+  iconColor = args.theme.var.color.error;
+}
+
+return `._id {
+  color: ${iconColor};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "message_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+return {
+  as: "icon",
+  icon: isSuccess ? "mdi:check-circle" : "mdi:alert-circle",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "message_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const messageState = args.fns.messageState;
+
+return {
+  as: "p",
+  text: messageState?.text || ""
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+let textColor = args.theme.var.color.success_light_50_text;
+
+if (!isSuccess) {
+  textColor = args.theme.var.color.error_light_50_text;
+}
+
+return `._id {
+  flex: 1;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: ${textColor};
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "message_close_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.fns.hideMessage()
+};
+''',
+        css: '''
+const messageState = args.fns.messageState;
+const isSuccess = messageState?.type === 'success';
+
+let iconColor = args.theme.var.color.success_light_50_text;
+let hoverBg = args.theme.var.color.success_light_100;
+
+if (!isSuccess) {
+  iconColor = args.theme.var.color.error_light_50_text;
+  hoverBg = args.theme.var.color.error_light_100;
+}
+
+return `._id {
+  background: transparent;
+  border: none;
+  color: ${iconColor};
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-family: inherit;
+
+  &:hover {
+    background: ${hoverBg};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "message_close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:close",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "quick_actions_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "quick_actions_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Quick Actions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "quick_actions_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "quick_actions_buttons_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentMode = args.currentMode?.() || "light";
+
+return {
+  as: "div",
+  contextName: "button",
+  loop: true,
+  data: [
+    {
+      text: "Send Feedback",
+      variant: "primary",
+      onClick: () => args.fns.openFeedbackModal()
+    },
+    {
+      text: "Configure Fields",
+      variant: "primary",
+      onClick: () => args.navigate("/settings/card-fields")
+    },
+    {
+      text: currentMode === "dark" ? "🌙 Dark" : "☀️ Light",
+      variant: "primary",
+      onClick: () => args.toggleTheme?.()
+    },
+    {
+      text: "Sign Out",
+      variant: "danger",
+      onClick: () => args.navigate("/auth/logout")
+    }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "quick_action_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''
+const buttonData = args.contextData.button;
+
+return {
+  text: buttonData.text,
+  variant: buttonData.variant,
+  onClick: buttonData.onClick
+};
+'''
+      }
+    },
+    {
+      id: "youtube_connection_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "youtube_connection_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "YouTube Accounts"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "youtube_connection_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "SimpleCard",
+        css: '''
+return `._id {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    display: block;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Switch Account",
+  for: "ownership-selector"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TomSelect",
+        props: '''
+const ownerships = args.fns.ownerships?.() || [];
+const selectedOwnership = args.fns.selectedOwnership?.();
+const selectedOwnershipId = selectedOwnership?.P?.key;
+
+// Transform ownerships into options format for TomSelect
+// Add status indicator for disconnected accounts
+const ownershipOptions = ownerships.map(ownership => {
+  const name = ownership.P.customName || ownership.P.channelName || ownership.P.key;
+  const isConnected = ownership._isConnected;
+  const label = isConnected ? name : `${name} (Disconnected)`;
+
+  return {
+    value: ownership.P.key,
+    label: label
+  };
+});
+
+return {
+  value: selectedOwnershipId || "",
+  options: ownershipOptions,
+  placeholder: "Select YouTube Account...",
+  search: true,
+  onChange: async (ownershipId) => {
+    const ownership = ownerships.find(o => o.P.key === ownershipId);
+    if (ownership) {
+      // Check if account is disconnected
+      if (!ownership._isConnected) {
+        args.showWarningToast("This account is disconnected. Please reconnect it from Account Settings.");
+        return;
+      }
+
+      await args.fns.selectOwnership?.(ownership);
+      // Reload page to refresh all data with new ownership
+      window.location.reload();
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const ownerships = args.fns.ownerships?.() || [];
+const hasAccounts = ownerships.length > 0;
+
+return {
+  as: "div",
+  hide: hasAccounts
+};
+''',
+        css: '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info};
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:info",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  flex-shrink: 0;
+  margin-top: 2px;
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.info_light_100_text};
+  line-height: 1.5;
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_text_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "No YouTube accounts connected. "
+};
+'''
+      }
+    },
+    {
+      id: "ownership_selector_help_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Go to Accounts to connect",
+  href: "/accounts",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/accounts');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "account_management_divider",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  height: 1px;
+  background: ${args.theme.var.color.border};
+  margin: ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "account_management_text",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Manage all your YouTube account connections from the dedicated Accounts page."
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "account_management_button",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Button",
+        props: '''
+return {
+  text: "Manage YouTube Accounts",
+  variant: "primary",
+  onClick: () => args.navigate("/accounts")
+};
+'''
+      }
+    },
+    {
+      id: "data_section",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error_light_50};
+  border: 1px solid ${args.theme.var.color.error_light_300};
+  border-radius: 0.75rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "data_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Data Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.error_light_50_text};
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "data_title_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "data_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Permanently delete all your YSaar data including channels, playlists, and setting. This action cannot be undone."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error_light_50_text};
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "clear_data_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Button",
+        props: '''
+return {
+  text: "Clear All Data",
+  variant: "danger",
+  onClick: async () => {
+    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    if (!rbConfirm) {
+      args.fns.showMessage('error', "Confirmation dialog not available");
+      return;
+    }
+
+    const confirmed = await rbConfirm({
+      title: "Clear All Data",
+      message: "Are you sure you want to delete all your YSaar data including channels, playlists, videos, notes, and favorites? This action cannot be undone!",
+      confirmText: "Delete All Data",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+
+    if (confirmed) {
+      try {
+        const result = await args.fns.executeYTOFunction("clearAllUserData", {});
+
+        if (result?.result?.success) {
+          args.fns.showMessage('success', result.result.message || "All data cleared successfully");
+        } else {
+          args.fns.showMessage('error', result?.result?.message || "Failed to clear data");
+        }
+      } catch (error) {
+        console.error("Error clearing data:", error);
+        args.fns.showMessage('error', "An error occurred while clearing data");
+      }
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "data_separator",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  height: 1px;
+  background: ${args.theme.var.color.error_light_300};
+  margin: 1.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Delete your entire account and all associated data permanently. This will also clear all your YSaar data and cannot be undone."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error_light_50_text};
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_button",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Button",
+        props: '''
+return {
+  text: "Delete Account",
+  variant: "danger",
+  onClick: async () => {
+    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    if (!rbConfirm) {
+      args.fns.showMessage('error', "Confirmation dialog not available");
+      return;
+    }
+
+    const confirmed = await rbConfirm({
+      title: "Delete Account",
+      message: "⚠️ WARNING: This will permanently delete your account and ALL your data including channels, playlists, videos, notes, and favorites. This action CANNOT be undone! Are you absolutely sure?",
+      confirmText: "Delete My Account",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+
+    if (confirmed) {
+      // Double confirmation for account deletion
+      const doubleConfirmed = await rbConfirm({
+        title: "Final Confirmation",
+        message: "This is your last chance! Your account will be permanently deleted. Are you absolutely sure you want to delete your account?",
+        confirmText: "Yes, Delete My Account",
+        cancelText: "Cancel",
+        variant: "danger"
+      });
+
+      if (doubleConfirmed) {
+        try {
+          const result = await args.fns.executeYTOFunction("deleteAccount", {});
+
+          if (result?.result?.success) {
+            args.fns.showMessage('success', result.result.message || "Account deleted successfully");
+
+            // Logout and redirect to home after 2 seconds
+            setTimeout(() => {
+              args.navigate("/auth/logout");
+            }, 2000);
+          } else {
+            args.fns.showMessage('error', result?.result?.message || "Failed to delete account");
+          }
+        } catch (error) {
+          console.error("Error deleting account:", error);
+          args.fns.showMessage('error', "An error occurred while deleting account");
+        }
+      }
+    }
+  }
+};
+'''
+      }
+    },
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e1a", T: "PageLayout", S: "page_root", E: "page_layout_content" },
+    { id: "e2", T: "Attr", S: "page_root", E: "setting_container" },
+    { id: "e3", T: "Attr", S: "setting_container", E: "page_title" },
+    { id: "e4", T: "Attr", S: "setting_container", E: "page_subtitle" },
+    { id: "e4a", T: "Attr", S: "setting_container", E: "message_banner" },
+    { id: "e4b", T: "Attr", S: "message_banner", E: "message_icon_wrapper" },
+    { id: "e4c", T: "Attr", S: "message_icon_wrapper", E: "message_icon" },
+    { id: "e4d", T: "Attr", S: "message_banner", E: "message_text" },
+    { id: "e4e", T: "Attr", S: "message_banner", E: "message_close_button" },
+    { id: "e4f", T: "Attr", S: "message_close_button", E: "message_close_icon" },
+    { id: "e23", T: "Attr", S: "setting_container", E: "quick_actions_section" },
+    { id: "e24", T: "Attr", S: "quick_actions_section", E: "quick_actions_title" },
+    { id: "e25", T: "Attr", S: "quick_actions_section", E: "quick_actions_card" },
+    { id: "e26", T: "Attr", S: "quick_actions_card", E: "quick_actions_buttons_wrapper" },
+    { id: "e27", T: "Attr", S: "quick_actions_buttons_wrapper", E: "quick_action_button" },
+    { id: "e22a", T: "Attr", S: "setting_container", E: "youtube_connection_section" },
+    { id: "e22a1", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_title" },
+    { id: "e22c", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_card" },
+    { id: "e22c1", T: "Attr", S: "youtube_connection_card", E: "ownership_selector_label" },
+    { id: "e22c2", T: "Attr", S: "youtube_connection_card", E: "ownership_selector" },
+    { id: "e22c3", T: "Attr", S: "youtube_connection_card", E: "ownership_selector_help" },
+    { id: "e22c4", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_icon" },
+    { id: "e22c5", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_text" },
+    { id: "e22c6", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_text_content" },
+    { id: "e22c7", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_link" },
+    { id: "e22c8", T: "Attr", S: "youtube_connection_card", E: "account_management_divider" },
+    { id: "e22c9", T: "Attr", S: "youtube_connection_card", E: "account_management_text" },
+    { id: "e22c10", T: "Attr", S: "youtube_connection_card", E: "account_management_button" },
+    { id: "e30", T: "Attr", S: "setting_container", E: "data_section" },
+    { id: "e31", T: "Attr", S: "data_section", E: "data_title" },
+    { id: "e32", T: "Attr", S: "data_title", E: "data_title_icon" },
+    { id: "e33", T: "Attr", S: "data_section", E: "data_description" },
+    { id: "e34", T: "Attr", S: "data_section", E: "clear_data_button" },
+    { id: "e35", T: "Attr", S: "data_section", E: "data_separator" },
+    { id: "e36", T: "Attr", S: "data_section", E: "delete_account_warning" },
+    { id: "e37", T: "Attr", S: "data_section", E: "delete_account_button" }
+  ]
+}

@@ -1,4 +1,5 @@
-import { createMemo } from "solid-js";
+import { createMemo, Switch, Match, onCleanup } from "solid-js";
+import { createStore } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -10,6 +11,14 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { getComponentDefaultValues } from "~/components/fields/component/functions/getComponentDefaultValues";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
+import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
+import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
+import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
+import { HtmlField } from "~/components/fields/HtmlField";
+import {
+  PageRenderContextProvider,
+  type PageRenderObject,
+} from "./context/PageRenderContext";
 
 export interface ComponentWrapperProps {
   metaVertex: Vertex;
@@ -38,6 +47,52 @@ export function ComponentWrapper(props: ComponentWrapperProps) {
     };
   });
 
+  // Setup function proxy for component functions
+  const { functionProxy, getFunctionArgumentWithValue, setRef, setMounted } =
+    useFunctionProxy({
+      props: {
+        get meta() {
+          return props.metaVertex;
+        },
+        get data() {
+          return props.data;
+        },
+      },
+      value: () => props.data,
+      componentName: () => props.metaVertex.P.key as string,
+      isNoPermissionCheck: () => props.isNoPermissionCheck ?? false,
+      isViewMode: () => false,
+      hasFullPermission: () => true,
+      hasEditPermission: () => true,
+      hasCreatePermission: () => true,
+      hasViewPermission: () => true,
+    });
+
+  // Evaluate dynamic props from metaVertex
+  const dynamicProps = createDynamicPropsMemo(
+    {
+      get meta() {
+        return props.metaVertex;
+      },
+    },
+    {
+      graph,
+      getFunctionArgumentWithValue,
+    },
+  );
+
+  // Lifecycle setup
+  useComponentLifecycle({
+    dynamicProps,
+    getFunctionArgumentWithValue,
+    setMounted,
+  });
+
+  onCleanup(() => {
+    setRef(null);
+    setMounted(false);
+  });
+
   const newDataContext = new Proxy(contextData, {
     get(target, key) {
       if (key === "props") {
@@ -50,13 +105,48 @@ export function ComponentWrapper(props: ComponentWrapperProps) {
     },
   });
 
+  // Create PageRenderContext store for this component's entire function argument
+  const componentRenderStore = createStore({
+    get context() {
+      return getFunctionArgumentWithValue();
+    },
+  });
+
+  const MainContent = () => (
+    <PageAttrRender
+      data={props.data}
+      isNoPermissionCheck={props.isNoPermissionCheck!}
+      metaVertex={props.metaVertex}
+    />
+  );
+
   return (
     <DataContext.Provider value={newDataContext}>
-      <PageAttrRender
-        data={props.data}
-        isNoPermissionCheck={props.isNoPermissionCheck!}
-        metaVertex={props.metaVertex}
-      />
+      <PageRenderContextProvider store={componentRenderStore}>
+        <Switch>
+          <Match
+            when={
+              dynamicProps().data ||
+              dynamicProps().expression ||
+              dynamicProps().serverFunction
+            }
+          >
+            <HtmlField
+              data={dynamicProps().data}
+              expression={dynamicProps().expression}
+              serverFunction={dynamicProps().serverFunction}
+              loop={dynamicProps().loop}
+              contextName={dynamicProps().contextName}
+              renderChildren
+            >
+              <MainContent />
+            </HtmlField>
+          </Match>
+          <Match when={true}>
+            <MainContent />
+          </Match>
+        </Switch>
+      </PageRenderContextProvider>
     </DataContext.Provider>
   );
 }

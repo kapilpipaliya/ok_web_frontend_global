@@ -92,7 +92,7 @@ export function createFunctionArgumentBase(
       pathname: string;
       search: string;
       hash: string;
-      query: Record<string, string | string[]>;
+      query: Record<string, string | string[] | undefined>;
       state: Readonly<Partial<unknown>> | null;
       key: string;
     };

@@ -1,0 +1,272 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "TextArea"
+      }
+    },
+    {
+      id: "variant_value",
+      L: "ComponentVariant",
+      P: {
+        key: "value",
+        type: "string",
+        defValue: ""
+      }
+    },
+    {
+      id: "variant_placeholder",
+      L: "ComponentVariant",
+      P: {
+        key: "placeholder",
+        type: "string",
+        defValue: ""
+      }
+    },
+    {
+      id: "variant_required",
+      L: "ComponentVariant",
+      P: {
+        key: "required",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "variant_disabled",
+      L: "ComponentVariant",
+      P: {
+        key: "disabled",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "variant_readonly",
+      L: "ComponentVariant",
+      P: {
+        key: "readOnly",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "variant_rows",
+      L: "ComponentVariant",
+      P: {
+        key: "rows",
+        type: "number",
+        defValue: 4
+      }
+    },
+    {
+      id: "variant_cols",
+      L: "ComponentVariant",
+      P: {
+        key: "cols",
+        type: "number",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_max_length",
+      L: "ComponentVariant",
+      P: {
+        key: "maxLength",
+        type: "number",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_min_length",
+      L: "ComponentVariant",
+      P: {
+        key: "minLength",
+        type: "number",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_resize",
+      L: "ComponentVariant",
+      P: {
+        key: "resize",
+        type: "string",
+        defValue: "vertical"
+      }
+    },
+    {
+      id: "option_resize_none",
+      L: "ComponentVariantOption",
+      P: {
+        key: "none",
+        value: "none",
+        description: "No resize handle"
+      }
+    },
+    {
+      id: "option_resize_both",
+      L: "ComponentVariantOption",
+      P: {
+        key: "both",
+        value: "both",
+        description: "Resize both horizontally and vertically"
+      }
+    },
+    {
+      id: "option_resize_horizontal",
+      L: "ComponentVariantOption",
+      P: {
+        key: "horizontal",
+        value: "horizontal",
+        description: "Resize horizontally only"
+      }
+    },
+    {
+      id: "option_resize_vertical",
+      L: "ComponentVariantOption",
+      P: {
+        key: "vertical",
+        value: "vertical",
+        description: "Resize vertically only"
+      }
+    },
+    {
+      id: "variant_on_change",
+      L: "ComponentVariant",
+      P: {
+        key: "onChange",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_on_blur",
+      L: "ComponentVariant",
+      P: {
+        key: "onBlur",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_on_focus",
+      L: "ComponentVariant",
+      P: {
+        key: "onFocus",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_auto_focus",
+      L: "ComponentVariant",
+      P: {
+        key: "autoFocus",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "textarea_element",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "textarea",
+  value: args.contextData.props?.value || "",
+  placeholder: args.contextData.props?.placeholder || "",
+  required: args.contextData.props?.required || false,
+  disabled: args.contextData.props?.disabled || false,
+  readOnly: args.contextData.props?.readOnly || false,
+  rows: args.contextData.props?.rows || 4,
+  cols: args.contextData.props?.cols || undefined,
+  maxLength: args.contextData.props?.maxLength || undefined,
+  minLength: args.contextData.props?.minLength || undefined,
+  autoFocus: args.contextData.props?.autoFocus || false,
+  onChange: args.contextData.props?.onChange || null,
+  onBlur: args.contextData.props?.onBlur || null,
+  onFocus: args.contextData.props?.onFocus || null
+};
+''',
+        css: '''
+const resize = args.contextData.props?.resize || "vertical";
+
+return `._id {
+  width: 100%;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.md};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all ${args.theme.var.animation.fast} ease;
+  line-height: 1.6;
+  font-family: inherit;
+  resize: ${resize};
+  min-height: calc(${args.theme.var.touch.input} * 2);
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: ${args.theme.var.color.border_dark_200};
+  }
+
+  &:disabled {
+    background: ${args.theme.var.color.background_light_100};
+    opacity: 0.6;
+    cursor: not-allowed;
+    resize: none;
+  }
+
+  &:read-only {
+    background: ${args.theme.var.color.background_light_50};
+    cursor: default;
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+    opacity: 1;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+    font-size: ${args.theme.var.fontSize.md};
+    resize: vertical;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_value" },
+    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_placeholder" },
+    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_required" },
+    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_disabled" },
+    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_readonly" },
+    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_rows" },
+    { id: "e7", T: "ComponentVariant", S: "component_root", E: "variant_cols" },
+    { id: "e8", T: "ComponentVariant", S: "component_root", E: "variant_max_length" },
+    { id: "e9", T: "ComponentVariant", S: "component_root", E: "variant_min_length" },
+    { id: "e10", T: "ComponentVariant", S: "component_root", E: "variant_resize" },
+    { id: "e11", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_none" },
+    { id: "e12", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_both" },
+    { id: "e13", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_horizontal" },
+    { id: "e14", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_vertical" },
+    { id: "e15", T: "ComponentVariant", S: "component_root", E: "variant_on_change" },
+    { id: "e16", T: "ComponentVariant", S: "component_root", E: "variant_on_blur" },
+    { id: "e17", T: "ComponentVariant", S: "component_root", E: "variant_on_focus" },
+    { id: "e18", T: "ComponentVariant", S: "component_root", E: "variant_auto_focus" },
+    { id: "e19", T: "Attr", S: "component_root", E: "textarea_element" }
+  ]
+}

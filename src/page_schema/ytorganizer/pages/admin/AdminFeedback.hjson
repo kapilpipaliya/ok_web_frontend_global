@@ -1,0 +1,2028 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "AdminFeedback",
+        url: "/yto/admin/feedback",
+        signinRequired: true,
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "Layout",
+        displayOrder: 1,
+        description: "YTO layout with navigation"
+      }
+    },
+    {
+      id: "page_layout_content",
+      L: "PageLayout",
+      P: {
+        componentName: "LayoutContent",
+        displayOrder: 2
+      }
+    },
+    {
+      id: "admin_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "AdminLayout",
+        displayOrder: 3,
+        description: "Admin layout wrapper"
+      }
+    },
+    {
+      id: "main_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+// State management
+const [store, setStore] = args.createStore({
+  feedbacks: [],
+  loading: true,
+  error: null,
+  searchQuery: '',
+  selectedFeedbacks: [],
+  sortBy: 'createdAt',
+  sortOrder: 'desc',
+  filterStatus: 'all', // all, pending, reviewed, resolved
+  filterType: 'all', // all, bug, feature, improvement, other
+  currentPage: 1,
+  pageSize: 20,
+  totalCount: 0,
+  totalPages: 0
+});
+
+// Load all feedbacks
+const loadFeedbacks = async (page = store.currentPage) => {
+  setStore('loading', true);
+  setStore('error', null);
+
+  const offset = (page - 1) * store.pageSize;
+
+  const result = await args.fns.executeYTOFunction("getAllFeedbacks", {
+    searchQuery: store.searchQuery,
+    filterStatus: store.filterStatus,
+    filterType: store.filterType,
+    sortBy: store.sortBy,
+    sortOrder: store.sortOrder,
+    limit: store.pageSize,
+    offset: offset
+  });
+
+  if (result.error) {
+    setStore('error', result.error);
+    setStore('loading', false);
+    return;
+  }
+
+  const serverResult = result.result;
+
+  if (serverResult?.success) {
+    setStore('feedbacks', serverResult.data.feedbacks || []);
+    setStore('totalCount', serverResult.data.totalCount || 0);
+    setStore('totalPages', Math.ceil((serverResult.data.totalCount || 0) / store.pageSize));
+    setStore('currentPage', page);
+  } else {
+    setStore('error', serverResult?.message || "Failed to load feedbacks");
+  }
+  setStore('loading', false);
+};
+
+// Get filtered feedbacks
+const getFilteredFeedbacks = () => {
+  return store.feedbacks;
+};
+
+// Toggle feedback selection
+const toggleFeedbackSelection = (feedbackId) => {
+  const selected = store.selectedFeedbacks;
+  if (selected.includes(feedbackId)) {
+    setStore('selectedFeedbacks', selected.filter(id => id !== feedbackId));
+  } else {
+    setStore('selectedFeedbacks', [...selected, feedbackId]);
+  }
+};
+
+// Select all feedbacks
+const selectAllFeedbacks = () => {
+  const filteredFeedbacks = getFilteredFeedbacks();
+  setStore('selectedFeedbacks', filteredFeedbacks.map(f => f.feedback?.id));
+};
+
+// Clear selection
+const clearSelection = () => {
+  setStore('selectedFeedbacks', []);
+};
+
+// Search handler with debounce
+let searchTimeout;
+const handleSearch = (query) => {
+  setStore('searchQuery', query);
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    setStore('currentPage', 1);
+    loadFeedbacks(1);
+  }, 500);
+};
+
+// Sort handler
+const handleSort = (column) => {
+  if (store.sortBy === column) {
+    setStore('sortOrder', store.sortOrder === 'asc' ? 'desc' : 'asc');
+  } else {
+    setStore('sortBy', column);
+    setStore('sortOrder', 'desc');
+  }
+  loadFeedbacks(1);
+};
+
+// Filter handler
+const handleFilterChange = (filterType, value) => {
+  if (filterType === 'status') {
+    setStore('filterStatus', value);
+  } else if (filterType === 'type') {
+    setStore('filterType', value);
+  }
+  setStore('currentPage', 1);
+  loadFeedbacks(1);
+};
+
+// Update feedback status
+const updateFeedbackStatus = async (feedbackId, status) => {
+  try {
+    const result = await args.fns.executeYTOFunction("updateFeedbackStatus", {
+      feedbackId: feedbackId,
+      status: status
+    });
+
+    if (result.error) {
+      args.showErrorToast(result.error);
+      return;
+    }
+
+    const serverResult = result.result;
+
+    if (serverResult?.success) {
+      args.showSuccessToast(serverResult.message || "Feedback status updated");
+      await loadFeedbacks(store.currentPage);
+    } else {
+      args.showErrorToast(serverResult?.message || "Failed to update feedback status");
+    }
+  } catch (error) {
+    args.showErrorToast("Error updating feedback status: " + error.message);
+  }
+};
+
+// Delete feedback handler
+const handleDeleteFeedback = async (feedbackId, username) => {
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  if (!rbConfirm) {
+    args.showErrorToast("Confirmation dialog not available");
+    return;
+  }
+
+  const confirmed = await rbConfirm({
+    title: "Delete Feedback",
+    message: `Are you sure you want to delete this feedback from "${username}"?`,
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const result = await args.fns.executeYTOFunction("deleteFeedback", {
+      feedbackId: feedbackId
+    });
+
+    if (result.error) {
+      args.showErrorToast(result.error);
+      return;
+    }
+
+    const serverResult = result.result;
+
+    if (serverResult?.success) {
+      args.showSuccessToast(serverResult.message || "Feedback deleted successfully");
+      await loadFeedbacks(store.currentPage);
+    } else {
+      args.showErrorToast(serverResult?.message || "Failed to delete feedback");
+    }
+  } catch (error) {
+    args.showErrorToast("Error deleting feedback: " + error.message);
+  }
+};
+
+// Pagination handlers
+const goToPage = (page) => {
+  if (page < 1 || page > store.totalPages) return;
+  loadFeedbacks(page);
+};
+
+const goToNextPage = () => {
+  if (store.currentPage < store.totalPages) {
+    loadFeedbacks(store.currentPage + 1);
+  }
+};
+
+const goToPreviousPage = () => {
+  if (store.currentPage > 1) {
+    loadFeedbacks(store.currentPage - 1);
+  }
+};
+
+// Get visible page numbers
+const getVisiblePages = () => {
+  const pages = [];
+  const totalPages = store.totalPages;
+  const currentPage = store.currentPage;
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    pages.push(1);
+
+    if (currentPage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (currentPage < totalPages - 2) {
+      pages.push('...');
+    }
+
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+  }
+
+  return pages;
+};
+
+// Format date
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'Never';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+  return `${Math.floor(diffDays / 365)}y ago`;
+};
+
+return {
+  store,
+  loadFeedbacks,
+  getFilteredFeedbacks,
+  toggleFeedbackSelection,
+  selectAllFeedbacks,
+  clearSelection,
+  handleSearch,
+  handleSort,
+  handleFilterChange,
+  updateFeedbackStatus,
+  handleDeleteFeedback,
+  goToPage,
+  goToNextPage,
+  goToPreviousPage,
+  getVisiblePages,
+  formatDate
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: args.fns.loadFeedbacks
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 100%;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${args.theme.var.spacing.md};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header_left",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "User Feedback"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize['2xl']};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "page_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const totalCount = args.fns.store.totalCount;
+const currentPage = args.fns.store.currentPage;
+const pageSize = args.fns.store.pageSize;
+const startIndex = (currentPage - 1) * pageSize + 1;
+const endIndex = Math.min(currentPage * pageSize, totalCount);
+
+return {
+  as: "p",
+  text: totalCount > 0 ? `Showing ${startIndex}-${endIndex} of ${totalCount} feedbacks` : `${totalCount} feedbacks`,
+  hide: () => args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "stat",
+        loop: true,
+        fns: '''
+return {
+  getStatsData: () => {
+    const feedbacks = args.fns.store.feedbacks;
+    const pendingFeedbacks = feedbacks.filter(f => f.feedback?.P?.status === 'pending').length;
+    const reviewedFeedbacks = feedbacks.filter(f => f.feedback?.P?.status === 'reviewed').length;
+    const resolvedFeedbacks = feedbacks.filter(f => f.feedback?.P?.status === 'resolved').length;
+    const bugReports = feedbacks.filter(f => f.feedback?.P?.category === 'bug').length;
+
+    return [
+      { label: "Pending", value: pendingFeedbacks, icon: "carbon:pending" },
+      { label: "Reviewed", value: reviewedFeedbacks, icon: "carbon:view" },
+      { label: "Resolved", value: resolvedFeedbacks, icon: "carbon:checkmark" },
+      { label: "Bug Reports", value: bugReports, icon: "carbon:debug" }
+    ];
+  }
+};
+''',
+        props: '''
+return {
+  as: "div",
+  data: args.fns.getStatsData(),
+  hide: () => args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "icon",
+  icon: stat.icon,
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "stat_badge_value",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "span",
+  text: stat.value
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "span",
+  text: ` ${stat.label}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "toolbar_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "search_and_filters_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextInput",
+        props: '''
+return {
+  type: "search",
+  placeholder: "Search by username, email, or message...",
+  value: args.fns.store.searchQuery,
+  leftIcon: "carbon:search",
+  onInput: (e) => {
+    args.fns.handleSearch(e.target.value);
+  }
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 250px;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_status_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TomSelect",
+        props: '''
+return {
+  value: args.fns.store.filterStatus,
+  options: [
+    { value: "all", label: "All Status" },
+    { value: "pending", label: "Pending" },
+    { value: "reviewed", label: "Reviewed" },
+    { value: "resolved", label: "Resolved" }
+  ],
+  placeholder: "Filter by status...",
+  search: false,
+  onChange: (value) => {
+    args.fns.handleFilterChange('status', value);
+  }
+};
+''',
+        css: '''
+return `._id {
+  min-width: 180px;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_type_select",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "TomSelect",
+        props: '''
+return {
+  value: args.fns.store.filterType,
+  options: [
+    { value: "all", label: "All Types" },
+    { value: "bug", label: "Bug Report" },
+    { value: "feature", label: "Feature Request" },
+    { value: "improvement", label: "Improvement" },
+    { value: "other", label: "Other" }
+  ],
+  placeholder: "Filter by type...",
+  search: false,
+  onChange: (value) => {
+    args.fns.handleFilterChange('type', value);
+  }
+};
+''',
+        css: '''
+return `._id {
+  min-width: 180px;
+}`;
+'''
+      }
+    },
+    {
+      id: "bulk_actions_row",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.selectedFeedbacks.length === 0
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.primary_light_100};
+  border: 1px solid ${args.theme.var.color.primary_light_300};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "bulk_actions_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const count = args.fns.store.selectedFeedbacks.length;
+return {
+  as: "span",
+  text: `${count} feedback${count === 1 ? '' : 's'} selected`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_light_100_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "bulk_action_clear",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Clear",
+  onClick: args.fns.clearSelection
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Loading feedbacks...",
+  hide: () => !args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_state",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: args.fns.store.error || "An error occurred",
+  hide: () => !args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.error_light_50_text};
+  background: ${args.theme.var.color.error_light_50};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "table_container",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "table_scroll_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "feedbacks_table",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "table"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "table_head",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "thead"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "table_head_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+'''
+      }
+    },
+    {
+      id: "th_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  width: 40px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_checkbox_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const filteredFeedbacks = args.fns.getFilteredFeedbacks();
+const allSelected = filteredFeedbacks.length > 0 && filteredFeedbacks.every(f => args.fns.store.selectedFeedbacks.includes(f.feedback?.id));
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: allSelected,
+  onChange: () => {
+    if (allSelected) {
+      args.fns.clearSelection();
+    } else {
+      args.fns.selectAllFeedbacks();
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_user",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('username')
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 180px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "th_user_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const sortIcon = args.fns.store.sortBy === 'username'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `User ${sortIcon}`
+};
+'''
+      }
+    },
+    {
+      id: "th_type",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Type"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 120px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_message",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Message"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 300px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_status",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Status"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 100px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_date",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('createdAt')
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 120px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "th_date_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const sortIcon = args.fns.store.sortBy === 'createdAt'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `Submitted ${sortIcon}`
+};
+'''
+      }
+    },
+    {
+      id: "th_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Actions"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 180px;
+}`;
+'''
+      }
+    },
+    {
+      id: "table_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "feedbackData",
+        loop: true,
+        props: '''
+return {
+  as: "tbody",
+  data: args.fns.getFilteredFeedbacks()
+};
+'''
+      }
+    },
+    {
+      id: "table_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const isSelected = args.fns.store.selectedFeedbacks.includes(feedbackData.feedback?.id);
+
+return {
+  as: "tr",
+  "data-selected": isSelected
+};
+''',
+        css: '''
+const feedbackData = args.contextData.feedbackData;
+const isSelected = args.fns.store.selectedFeedbacks.includes(feedbackData.feedback?.id);
+
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+
+  ${isSelected ? `
+    background: ${args.theme.var.color.primary_light_100} !important;
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "td_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_checkbox_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const feedbackId = feedbackData.feedback?.id;
+const isSelected = args.fns.store.selectedFeedbacks.includes(feedbackId);
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: isSelected,
+  onChange: () => args.fns.toggleFeedbackSelection(feedbackId)
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_user",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_user_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "td_user_username",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+return {
+  as: "div",
+  text: feedbackData.user?.P?.username || 'N/A'
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_user_email",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+return {
+  as: "div",
+  text: feedbackData.user?.P?.email || 'N/A'
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_type",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const type = feedbackData.feedback?.P?.category || 'other';
+const typeLabels = {
+  bug: 'Bug Report',
+  feature: 'Feature',
+  improvement: 'Improvement',
+  other: 'Other'
+};
+
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_type_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const type = feedbackData.feedback?.P?.category || 'other';
+const typeLabels = {
+  bug: 'Bug Report',
+  feature: 'Feature',
+  improvement: 'Improvement',
+  other: 'Other'
+};
+
+return {
+  as: "span",
+  text: typeLabels[type] || 'Other'
+};
+''',
+        css: '''
+const feedbackData = args.contextData.feedbackData;
+const type = feedbackData.feedback?.P?.category || 'other';
+
+const colors = {
+  bug: { bg: args.theme.var.color.error_light_100, text: args.theme.var.color.error_light_100_text },
+  feature: { bg: args.theme.var.color.info_light_100, text: args.theme.var.color.info_light_100_text },
+  improvement: { bg: args.theme.var.color.success_light_100, text: args.theme.var.color.success_light_100_text },
+  other: { bg: args.theme.var.color.background_dark_200, text: args.theme.var.color.background_dark_200_text }
+};
+
+const color = colors[type] || colors.other;
+
+return `._id {
+  display: inline-block;
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: ${color.bg};
+  color: ${color.text};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_message",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const message = feedbackData.feedback?.P?.feedback || '';
+const truncated = message.length > 100 ? message.substring(0, 100) + '...' : message;
+
+return {
+  as: "td",
+  text: truncated,
+  title: message
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_status",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_status_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const status = feedbackData.feedback?.P?.status || 'pending';
+const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+
+return {
+  as: "span",
+  text: statusText
+};
+''',
+        css: '''
+const feedbackData = args.contextData.feedbackData;
+const status = feedbackData.feedback?.P?.status || 'pending';
+
+const colors = {
+  new: { bg: args.theme.var.color.warning_light_100, text: args.theme.var.color.warning_light_100_text },
+  reviewed: { bg: args.theme.var.color.info_light_100, text: args.theme.var.color.info_light_100_text },
+  resolved: { bg: args.theme.var.color.success_light_100, text: args.theme.var.color.success_light_100_text }
+};
+
+const color = colors[status] || colors.new;
+
+return `._id {
+  display: inline-block;
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: ${color.bg};
+  color: ${color.text};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_date",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const dateText = args.fns.formatDate(feedbackData.feedback?.P?.createdAt);
+
+return {
+  as: "td",
+  text: dateText
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_actions_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+  justify-content: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "action_mark_reviewed",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const feedbackId = feedbackData.feedback?.id;
+const currentStatus = feedbackData.feedback?.P?.status || 'pending';
+
+return {
+  as: "button",
+  title: "Mark as Reviewed",
+  onClick: () => args.fns.updateFeedbackStatus(feedbackId, 'reviewed'),
+  hide: currentStatus !== 'pending'
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs};
+  background: ${args.theme.var.color.info};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.info_text};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.info_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "action_mark_reviewed_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:view",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "action_mark_resolved",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const feedbackId = feedbackData.feedback?.id;
+const currentStatus = feedbackData.feedback?.P?.status || 'pending';
+
+return {
+  as: "button",
+  title: "Mark as Resolved",
+  onClick: () => args.fns.updateFeedbackStatus(feedbackId, 'resolved'),
+  hide: currentStatus === 'resolved'
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs};
+  background: ${args.theme.var.color.success};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.success_text};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.success_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "action_mark_resolved_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "action_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const feedbackData = args.contextData.feedbackData;
+const feedbackId = feedbackData.feedback?.id;
+const username = feedbackData.user?.P?.username || 'Unknown User';
+
+return {
+  as: "button",
+  title: "Delete Feedback",
+  onClick: () => {
+    args.fns.handleDeleteFeedback(feedbackId, username);
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs};
+  background: ${args.theme.var.color.error};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.error_text};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "action_delete_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:trash-can",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "pagination_container",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error || args.fns.store.totalPages <= 1
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.lg};
+  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const totalCount = args.fns.store.totalCount;
+
+return {
+  as: "div",
+  text: `Page ${currentPage} of ${totalPages} (${totalCount} total feedbacks)`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_buttons",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_prev_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentPage = args.fns.store.currentPage;
+const isDisabled = currentPage <= 1;
+
+return {
+  as: "button",
+  text: "← Previous",
+  onClick: args.fns.goToPreviousPage,
+  disabled: isDisabled
+};
+''',
+        css: '''
+const currentPage = args.fns.store.currentPage;
+const isDisabled = currentPage <= 1;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  opacity: ${isDisabled ? '0.5' : '1'};
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_pages_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "pageNum",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: args.fns.getVisiblePages()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_page_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const pageNum = args.contextData.pageNum;
+const currentPage = args.fns.store.currentPage;
+const isEllipsis = pageNum === '...';
+const isActive = pageNum === currentPage;
+
+return {
+  as: isEllipsis ? "span" : "button",
+  text: pageNum,
+  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  disabled: isActive
+};
+''',
+        css: '''
+const pageNum = args.contextData.pageNum;
+const currentPage = args.fns.store.currentPage;
+const isEllipsis = pageNum === '...';
+const isActive = pageNum === currentPage;
+
+return `._id {
+  min-width: 40px;
+  padding: ${args.theme.var.spacing.sm};
+  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background};
+  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: ${isActive ? '700' : '400'};
+  cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
+  transition: all 0.2s ease;
+  text-align: center;
+
+  ${!isEllipsis && !isActive ? `
+    &:hover {
+      background: ${args.theme.var.color.background_dark_100};
+      border-color: ${args.theme.var.color.primary};
+    }
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_next_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const isDisabled = currentPage >= totalPages;
+
+return {
+  as: "button",
+  text: "Next →",
+  onClick: args.fns.goToNextPage,
+  disabled: isDisabled
+};
+''',
+        css: '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const isDisabled = currentPage >= totalPages;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  opacity: ${isDisabled ? '0.5' : '1'};
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const filteredFeedbacks = args.fns.getFilteredFeedbacks();
+return {
+  as: "div",
+  text: "No feedbacks found matching your filters",
+  hide: () => filteredFeedbacks.length > 0 || args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e_layout_content", T: "PageLayout", S: "page_root", E: "page_layout_content" },
+    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
+    { id: "e2", T: "Attr", S: "page_root", E: "main_container" },
+    { id: "e3", T: "Attr", S: "main_container", E: "header_section" },
+    { id: "e4", T: "Attr", S: "header_section", E: "header_left" },
+    { id: "e5", T: "Attr", S: "header_left", E: "page_title" },
+    { id: "e6", T: "Attr", S: "header_left", E: "page_subtitle" },
+    { id: "e7", T: "Attr", S: "header_section", E: "stats_summary" },
+    { id: "e8", T: "Attr", S: "stats_summary", E: "stat_badge" },
+    { id: "e9", T: "Attr", S: "stat_badge", E: "stat_badge_icon" },
+    { id: "e10", T: "Attr", S: "stat_badge", E: "stat_badge_content" },
+    { id: "e11", T: "Attr", S: "stat_badge_content", E: "stat_badge_value" },
+    { id: "e12", T: "Attr", S: "stat_badge_content", E: "stat_badge_label" },
+    { id: "e13", T: "Attr", S: "main_container", E: "toolbar_section" },
+    { id: "e14", T: "Attr", S: "toolbar_section", E: "search_and_filters_row" },
+    { id: "e15", T: "Attr", S: "search_and_filters_row", E: "search_input" },
+    { id: "e16", T: "Attr", S: "search_and_filters_row", E: "filter_status_select" },
+    { id: "e17", T: "Attr", S: "search_and_filters_row", E: "filter_type_select" },
+    { id: "e18", T: "Attr", S: "toolbar_section", E: "bulk_actions_row" },
+    { id: "e19", T: "Attr", S: "bulk_actions_row", E: "bulk_actions_label" },
+    { id: "e20", T: "Attr", S: "bulk_actions_row", E: "bulk_action_clear" },
+    { id: "e21", T: "Attr", S: "main_container", E: "loading_state" },
+    { id: "e22", T: "Attr", S: "main_container", E: "error_state" },
+    { id: "e23", T: "Attr", S: "main_container", E: "table_container" },
+    { id: "e24", T: "Attr", S: "table_container", E: "table_scroll_wrapper" },
+    { id: "e25", T: "Attr", S: "table_scroll_wrapper", E: "feedbacks_table" },
+    { id: "e26", T: "Attr", S: "feedbacks_table", E: "table_head" },
+    { id: "e27", T: "Attr", S: "table_head", E: "table_head_row" },
+    { id: "e28", T: "Attr", S: "table_head_row", E: "th_checkbox" },
+    { id: "e29", T: "Attr", S: "th_checkbox", E: "th_checkbox_input" },
+    { id: "e30", T: "Attr", S: "table_head_row", E: "th_user" },
+    { id: "e31", T: "Attr", S: "th_user", E: "th_user_content" },
+    { id: "e32", T: "Attr", S: "table_head_row", E: "th_type" },
+    { id: "e33", T: "Attr", S: "table_head_row", E: "th_message" },
+    { id: "e34", T: "Attr", S: "table_head_row", E: "th_status" },
+    { id: "e35", T: "Attr", S: "table_head_row", E: "th_date" },
+    { id: "e36", T: "Attr", S: "th_date", E: "th_date_content" },
+    { id: "e37", T: "Attr", S: "table_head_row", E: "th_actions" },
+    { id: "e38", T: "Attr", S: "feedbacks_table", E: "table_body" },
+    { id: "e39", T: "Attr", S: "table_body", E: "table_row" },
+    { id: "e40", T: "Attr", S: "table_row", E: "td_checkbox" },
+    { id: "e41", T: "Attr", S: "td_checkbox", E: "td_checkbox_input" },
+    { id: "e42", T: "Attr", S: "table_row", E: "td_user" },
+    { id: "e43", T: "Attr", S: "td_user", E: "td_user_container" },
+    { id: "e44", T: "Attr", S: "td_user_container", E: "td_user_username" },
+    { id: "e45", T: "Attr", S: "td_user_container", E: "td_user_email" },
+    { id: "e46", T: "Attr", S: "table_row", E: "td_type" },
+    { id: "e47", T: "Attr", S: "td_type", E: "td_type_badge" },
+    { id: "e48", T: "Attr", S: "table_row", E: "td_message" },
+    { id: "e49", T: "Attr", S: "table_row", E: "td_status" },
+    { id: "e50", T: "Attr", S: "td_status", E: "td_status_badge" },
+    { id: "e51", T: "Attr", S: "table_row", E: "td_date" },
+    { id: "e52", T: "Attr", S: "table_row", E: "td_actions" },
+    { id: "e53", T: "Attr", S: "td_actions", E: "td_actions_container" },
+    { id: "e54", T: "Attr", S: "td_actions_container", E: "action_mark_reviewed" },
+    { id: "e55", T: "Attr", S: "action_mark_reviewed", E: "action_mark_reviewed_icon" },
+    { id: "e56", T: "Attr", S: "td_actions_container", E: "action_mark_resolved" },
+    { id: "e57", T: "Attr", S: "action_mark_resolved", E: "action_mark_resolved_icon" },
+    { id: "e58", T: "Attr", S: "td_actions_container", E: "action_delete" },
+    { id: "e59", T: "Attr", S: "action_delete", E: "action_delete_icon" },
+    { id: "e60", T: "Attr", S: "main_container", E: "pagination_container" },
+    { id: "e61", T: "Attr", S: "pagination_container", E: "pagination_info" },
+    { id: "e62", T: "Attr", S: "pagination_container", E: "pagination_buttons" },
+    { id: "e63", T: "Attr", S: "pagination_buttons", E: "pagination_prev_button" },
+    { id: "e64", T: "Attr", S: "pagination_buttons", E: "pagination_pages_container" },
+    { id: "e65", T: "Attr", S: "pagination_pages_container", E: "pagination_page_button" },
+    { id: "e66", T: "Attr", S: "pagination_buttons", E: "pagination_next_button" },
+    { id: "e67", T: "Attr", S: "main_container", E: "empty_state" }
+  ]
+}

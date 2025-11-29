@@ -66,10 +66,10 @@ A full-stack Razorpay payment integration that enables users to subscribe to dif
 
 #### Payment Pages
 **Files Created**:
-- `src/page_schema/ytorganizer/pages/YTOCheckout.hjson`
-- `src/page_schema/ytorganizer/pages/YTOSubscription.hjson`
+- `src/page_schema/ytorganizer/pages/Checkout.hjson`
+- `src/page_schema/ytorganizer/pages/Subscription.hjson`
 
-**YTOCheckout Features**:
+**Checkout Features**:
 - Plan selection dropdown
 - Billing cycle toggle (Monthly/Annual)
 - Order summary with pricing
@@ -77,7 +77,7 @@ A full-stack Razorpay payment integration that enables users to subscribe to dif
 - Payment success/failure handling
 - Automatic subscription activation
 
-**YTOSubscription Features**:
+**Subscription Features**:
 - Current plan display
 - Video quota usage with progress bar
 - Quota warnings (80%+ usage)
@@ -87,7 +87,7 @@ A full-stack Razorpay payment integration that enables users to subscribe to dif
 
 #### UI Components
 **Files Created**:
-- `src/page_schema/ytorganizer/components/YTOQuotaWarning.hjson`
+- `src/page_schema/ytorganizer/components/QuotaWarning.hjson`
 
 **Features**:
 - Fixed position warning (bottom-right)
@@ -97,7 +97,7 @@ A full-stack Razorpay payment integration that enables users to subscribe to dif
 - Responsive design
 
 **Files Modified**:
-- `src/page_schema/ytorganizer/pages/YTOLanding.hjson`
+- `src/page_schema/ytorganizer/pages/Landing.hjson`
 
 **Changes**:
 - Updated pricing card buttons to navigate to checkout
@@ -307,11 +307,11 @@ src/
     │   ├── getUserSubscription.hjson
     │   └── checkQuotaLimit.hjson
     ├── pages/
-    │   ├── YTOCheckout.hjson (NEW)
-    │   ├── YTOSubscription.hjson (NEW)
-    │   └── YTOLanding.hjson (UPDATED)
+    │   ├── Checkout.hjson (NEW)
+    │   ├── Subscription.hjson (NEW)
+    │   └── Landing.hjson (UPDATED)
     ├── components/
-    │   └── YTOQuotaWarning.hjson (NEW)
+    │   └── QuotaWarning.hjson (NEW)
     └── docs/
         ├── RAZORPAY_SETUP.md
         ├── QUOTA_INTEGRATION.md

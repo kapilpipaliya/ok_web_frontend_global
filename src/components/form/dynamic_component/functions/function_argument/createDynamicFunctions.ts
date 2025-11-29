@@ -9,7 +9,7 @@ import { createMemo, type Accessor, untrack, runWithOwner } from "solid-js";
  */
 export function createDynamicFunctions(
   graph: GraphInterface,
-  meta: () => Vertex,
+  meta: () => Vertex | undefined,
   getFunctionArgumentWithValue: Accessor<FunctionArgumentType>,
   parentRenderContext: () => { context: FunctionArgumentType } | undefined,
   componentName: Accessor<string>,
@@ -51,11 +51,17 @@ export function createDynamicFunctions(
     // Memoize meta functions - only re-evaluate when meta.P.fns changes
     const metaFnsMemo = createMemo(() => {
       const currentMeta = meta();
-      return evaluateFns(currentMeta.P.fns);
+      return currentMeta ? evaluateFns(currentMeta.P.fns) : undefined;
     });
 
     // Memoize component vertex lookup - only when componentName changes
+    // Skip lookup if meta is already a Component vertex to avoid duplicate evaluation
     const componentVertexMemo = createMemo(() => {
+      const currentMeta = meta();
+      // If meta is already a Component vertex, return undefined to skip duplicate evaluation
+      if (currentMeta?.L?.[0] === "Component") {
+        return undefined;
+      }
       const name = componentName();
       return untrack(() =>
         findVertexByLabelAndUniqueId(graph, "Component", "key", name),

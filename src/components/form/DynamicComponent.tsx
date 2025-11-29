@@ -34,6 +34,7 @@ import { createFunctionProxy } from "~/components/form/createFunctionProxy";
 import { useComponentPermissions } from "~/components/form/dynamic_component/hooks/useComponentPermissions";
 import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
 import { useComponentName } from "~/components/form/dynamic_component/hooks/useComponentName";
+import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
 
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { createComponentMemo } from "~/components/form/dynamic_component/functions/component/createComponentMemo";
@@ -42,9 +43,6 @@ import { createDynamicPropsMemo } from "~/components/form/dynamic_component/func
 import { createCssStyleMemo } from "~/components/form/dynamic_component/functions/createCssStyleMemo";
 import { createProcessedTextMemo } from "~/components/form/dynamic_component/functions/createProcessedTextMemo";
 import { createMergedClasses } from "~/components/form/dynamic_component/functions/createMergedClasses";
-import { createFunctionArgumentBase } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentBase";
-import { createFunctionArgumentWithValue } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentWithValue";
-import { createDynamicFunctions } from "~/components/form/dynamic_component/functions/function_argument/createDynamicFunctions";
 import { createValueUpdater } from "~/components/form/dynamic_component/functions/value/createValueUpdater";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { createStore } from "solid-js/store";
@@ -77,28 +75,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
   const formId = useFormContext();
   const formVertex = () =>
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
-  const [ref, setRef] = createSignal<HTMLElement | null>(null);
-  const [mounted, setMounted] = createSignal<null | boolean>(null);
   const [componentName, setComponentName] = createSignal<string>("Html");
-
-  // Context hooks
-  const parentItems = usePageRenderContext();
-  const parentRenderContext = () =>
-    getLastItem(parentItems)?.[0] as
-      | { context: FunctionArgumentType }
-      | undefined;
-  const parentMeta = () => parentRenderContext()?.context.meta;
-  const [previewStore] = usePreviewContext();
-
-  // Additional hooks
-  const toast = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const zIndex = useZIndex();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const theme = useTheme();
-  const themeToggle = useThemeToggle();
-  const owner = getOwner();
 
   // Permission hooks
   const {
@@ -126,78 +103,38 @@ export function DynamicComponent(props: DynamicComponentProps) {
     hasEditPermission,
   });
 
-  // Helper to create function arguments with a given functionProxy
-  // This eliminates duplication between temp and final versions
-  const createFunctionArgumentGetter = (fnProxy: Record<string, unknown>) => {
-    const getFunctionArg = () =>
-      createFunctionArgumentBase(
-        props,
-        {
-          formVertex,
-          formId,
-          componentName: () => componentName(),
-          isNoPermissionCheck,
-          isViewMode: () => isViewMode(),
-          mounted,
-          parentMeta,
-          ref,
-          setRef,
-          updateValue,
-          onChange,
-          hasFullPermission,
-          hasEditPermission,
-          hasCreatePermission,
-          hasViewPermission,
+  // Context hooks
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () =>
+    getLastItem(parentItems)?.[0] as
+      | { context: FunctionArgumentType }
+      | undefined;
+  const [previewStore] = usePreviewContext();
+
+  // Setup function proxy with all necessary context
+  const { functionProxy, getFunctionArgumentWithValue, ref, setRef, mounted, setMounted } =
+    useFunctionProxy({
+      props: {
+        get meta() {
+          return props.meta;
         },
-        {
-          graph,
-          setGraph,
-          toast,
-          searchParams,
-          setSearchParams,
-          zIndex,
-          navigate,
-          location,
-          theme,
-          parentItems,
-          previewStore,
-          themeToggle,
-          owner: owner!,
-          parentRenderContext,
-          functionProxy: fnProxy,
+        get data() {
+          return props.data;
         },
-      );
-
-    return createMemo(() =>
-      createFunctionArgumentWithValue(getFunctionArg, value),
-    );
-  };
-
-  // Create temporary function proxy that falls back to parent context
-  // This breaks circular dependency during dynamicFns initialization
-  const tempFunctionProxy = createFunctionProxy(
-    () => ({}),
-    parentRenderContext,
-  );
-
-  // Create dynamicFns first using temp function arguments
-  const dynamicFns = createDynamicFunctions(
-    graph,
-    () => props.meta,
-    createFunctionArgumentGetter(tempFunctionProxy),
-    parentRenderContext,
-    componentName,
-  );
-
-  // Now create the real function proxy with actual dynamicFns
-  const functionProxy = createFunctionProxy(
-    () => dynamicFns,
-    parentRenderContext,
-  );
-
-  // Create the final function arguments with real functionProxy
-  const getFunctionArgumentWithValue =
-    createFunctionArgumentGetter(functionProxy);
+      },
+      componentName,
+      formVertex,
+      formId,
+      isNoPermissionCheck,
+      isViewMode,
+      value,
+      updateValue,
+      onChange,
+      hasFullPermission,
+      hasEditPermission,
+      hasCreatePermission,
+      hasViewPermission,
+    });
 
   const dynamicProps = createDynamicPropsMemo(props, {
     graph,
@@ -294,7 +231,10 @@ export function DynamicComponent(props: DynamicComponentProps) {
   );
 
   return (
-    <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
+    <ErrorBoundary fallback={(err) => {
+      console.error(err);
+      return <div>Error: {err.message}</div>;
+    }}>
       <Suspense>
         <Show when={cssStyle()} keyed>
           <Style2 cssContent={cssStyle()!} />

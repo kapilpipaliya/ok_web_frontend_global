@@ -1,0 +1,1181 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "AddModal"
+      }
+    },
+    {
+      id: "modal_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+// Form state management
+const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+const [isProcessing, setIsProcessing] = args.createSignal(false);
+const [url, setUrl] = args.createSignal("");
+const [customName, setCustomName] = args.createSignal("");
+const [priority, setPriority] = args.createSignal("normal");
+const [formError, setFormError] = args.createSignal(null);
+
+// Initialize form data
+const initializeFormData = () => {
+  const editMode = args.contextData.props?.editMode || false;
+  const itemData = args.contextData.props?.itemData;
+  const initialUrl = args.contextData.props?.initialUrl;
+
+  if (editMode && itemData) {
+    // Determine actual type from itemData structure
+    let setting;
+    if (itemData.video) {
+      setting = itemData.videoSetting;
+    } else if (itemData.playlist) {
+      setting = itemData.playlistSetting;
+    } else {
+      setting = itemData.channelSetting;
+    }
+    setCustomName(setting?.P?.customName || "");
+  } else {
+    setUrl(initialUrl || "");
+    setCustomName("");
+    setPriority("normal");
+  }
+  setIsSubmitting(false);
+  setIsProcessing(false);
+  setFormError(null);
+};
+
+// Handle form submission
+const handleSave = async () => {
+  const urlValue = url().trim();
+  const contentType = args.contextData.props?.contentType || "channels";
+  const editMode = args.contextData.props?.editMode || false;
+  const itemData = args.contextData.props?.itemData;
+  const onSave = args.contextData.props?.onSave;
+  const onClose = args.contextData.props?.onClose || (() => {});
+
+  // In edit mode, determine actual type from itemData structure
+  let actualType = contentType;
+  if (editMode && itemData) {
+    if (itemData.video) {
+      actualType = "videos";
+    } else if (itemData.playlist) {
+      actualType = "playlists";
+    } else {
+      actualType = "channels";
+    }
+  }
+
+  // Validate required fields for add mode
+  if (!editMode && !urlValue) {
+    setFormError("Please enter a YouTube URL");
+    return;
+  }
+
+  setFormError(null);
+  setIsSubmitting(true);
+
+  try {
+    let result;
+
+    if (editMode) {
+      // Edit mode: update setting
+      let data, youtubeId, functionName;
+
+      if (actualType === "videos") {
+        data = itemData.video;
+        youtubeId = data?.P?.youtubeId;
+        functionName = "updateVideoSetting";
+      } else if (actualType === "playlists") {
+        data = itemData.playlist;
+        youtubeId = data?.P?.youtubeId;
+        functionName = "updatePlaylistSetting";
+      } else {
+        data = itemData.channel?.channel || itemData.channel;
+        youtubeId = data?.P?.youtubeId;
+        functionName = "updateChannelSetting";
+      }
+
+      result = await args.fns.executeYTOFunction(functionName, {
+        youtubeId,
+        customName: customName().trim() || null
+      });
+    } else {
+      // Add mode: create new
+      const functionName = contentType === "playlists" ? "savePlaylist" : "saveChannel";
+      const params = {
+        url: urlValue,
+        name: customName().trim() || null,
+        priority: priority()
+      };
+
+      // If adding a playlist and channelId is provided, link it to the channel
+      if (contentType === "playlists" && args.contextData.props?.channelId) {
+        params.channelId = args.contextData.props.channelId;
+      }
+
+      result = await args.fns.executeYTOFunction(functionName, params);
+    }
+
+    if (result?.error) {
+      const errorMsg = result.error;
+      setFormError(errorMsg);
+    } else if (result?.result?.success) {
+      const action = editMode ? "updated" : "added";
+      const itemTypeName = actualType === "videos" ? "Video" : ((editMode ? actualType : contentType) === "playlists" ? "Playlist" : "Channel");
+      args.showSuccessToast(result.result.message || `${itemTypeName} ${action} successfully`);
+
+      // Call parent callback if provided
+      if (onSave) {
+        onSave({
+          contentType: editMode ? actualType : contentType,
+          url: urlValue,
+          customName: customName().trim() || null,
+          result: result.result.data,
+          editMode
+        });
+      }
+
+      onClose();
+    } else {
+      const errorMsg = result?.result?.message || result?.result?.error || `Failed to ${editMode ? "update" : "add"} item`;
+      setFormError(errorMsg);
+    }
+  } catch (error) {
+    console.error("Error saving:", error);
+    const errorMsg = error?.message || `Failed to ${editMode ? "update" : "add"} item`;
+    setFormError(errorMsg);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+return {
+  isSubmitting,
+  isProcessing,
+  url,
+  setUrl,
+  customName,
+  setCustomName,
+  priority,
+  setPriority,
+  formError,
+  setFormError,
+  handleSave,
+  initializeFormData
+};
+''',
+        props: '''
+const isOpen = args.contextData.props?.isOpen || false;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onMount: () => {
+    args.fns.initializeFormData();
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: stretch;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation()
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    animation: slideUpMobile 0.3s ease;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const contentType = args.contextData.props?.contentType || "channels";
+const editMode = args.contextData.props?.editMode || false;
+const itemData = args.contextData.props?.itemData;
+const isProcessing = args.fns.isProcessing();
+
+// In edit mode, determine type from itemData structure
+let actualType = contentType;
+if (editMode && itemData) {
+  if (itemData.video) {
+    actualType = "videos";
+  } else if (itemData.playlist) {
+    actualType = "playlists";
+  } else {
+    actualType = "channels";
+  }
+}
+
+let title;
+if (isProcessing) {
+  const itemTypeName = contentType === "playlists" ? "Playlist" : "Channel";
+  title = `${itemTypeName} Processing`;
+} else {
+  title = editMode
+    ? (actualType === "videos" ? "Edit Video Setting" : (actualType === "playlists" ? "Edit Playlist Setting" : "Edit Channel Setting"))
+    : (contentType === "playlists" ? "Add Playlist" : "Add Channel");
+}
+
+return {
+  as: "h2",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "playlist_name_display",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const editMode = args.contextData.props?.editMode || false;
+const itemData = args.contextData.props?.itemData;
+const isProcessing = args.fns.isProcessing();
+
+if (!editMode || !itemData || isProcessing) {
+  return { as: "div", hide: true };
+}
+
+// Determine actual item type from itemData structure
+let itemType, data;
+if (itemData.video) {
+  itemType = "Video";
+  data = itemData.video;
+} else if (itemData.playlist) {
+  itemType = "Playlist";
+  data = itemData.playlist;
+} else {
+  itemType = "Channel";
+  data = itemData.channel?.channel || itemData.channel;
+}
+
+const itemName = data?.P?.title || "";
+
+return {
+  as: "div",
+  text: `YouTube ${itemType}: ${itemName}`
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.375rem;
+  border-left: 3px solid ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "close_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const onClose = args.contextData.props?.onClose || (() => {});
+
+return {
+  as: "button",
+  onClick: onClose,
+  "aria-label": "Close modal"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "modal_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  flex: 1;
+  overflow: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "processing_message",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: !args.fns.isProcessing()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "processing_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "LoadingSpinner",
+        props: '''
+return {
+  size: "lg",
+  color: "primary"
+};
+'''
+      }
+    },
+    {
+      id: "processing_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Processing in Background"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "processing_text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const contentType = args.contextData.props?.contentType || "channels";
+const itemType = contentType === "playlists" ? "playlist" : "channel";
+
+return {
+  as: "p",
+  text: `Your ${itemType} is being processed. This may take 5-10 minutes depending on the size. Please wait until processed. The ${itemType} will appear in your list once complete.`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "form_element",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "form",
+  hide: args.fns.isProcessing(),
+  onSubmit: (e) => {
+    e.preventDefault();
+    args.fns.handleSave();
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert",
+      L: "Attr",
+      P: {
+        displayOrder: 0,
+        componentName: "Html",
+        props: '''
+const error = args.fns.formError();
+
+return {
+  as: "div",
+  hide: !error
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: ${args.theme.var.color.error_light_50};
+  border: 2px solid ${args.theme.var.color.error_light_200};
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error_light_50_text};
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Error"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.error_light_50_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_message",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const error = args.fns.formError();
+
+return {
+  as: "p",
+  text: error || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.error_light_50_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_close",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.fns.setFormError(null),
+  "aria-label": "Dismiss error"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.error};
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error_light_100};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "url_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const editMode = args.contextData.props?.editMode || false;
+
+return {
+  as: "div",
+  hide: editMode  // Hide URL field in edit mode
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "url_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const contentType = args.contextData.props?.contentType || "channels";
+const label = contentType === "playlists" ? "Playlist URL *" : "Channel URL *";
+
+return {
+  as: "label",
+  text: label
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "url_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TextInput",
+        props: '''
+const contentType = args.contextData.props?.contentType || "channels";
+const placeholder = contentType === "playlists"
+  ? "https://www.youtube.com/playlist?list=..."
+  : "https://www.youtube.com/@handle or https://www.youtube.com/channel/...";
+
+return {
+  placeholder,
+  value: args.fns.url(),
+  onInput: (e) => args.fns.setUrl(e.target.value),
+  required: true,
+  disabled: args.fns.isSubmitting()
+};
+'''
+      }
+    },
+    {
+      id: "name_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "name_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Custom Name (Optional)"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "name_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TextInput",
+        props: '''
+const editMode = args.contextData.props?.editMode || false;
+
+return {
+  placeholder: "Enter a custom name",
+  value: args.fns.customName(),
+  onInput: (e) => args.fns.setCustomName(e.target.value),
+  disabled: args.fns.isSubmitting(),
+  onMount: () => {
+    if (editMode) {
+      // Focus the input when modal opens in edit mode
+      setTimeout(() => args.ref()?.focus(), 100);
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "priority_field",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const editMode = args.contextData.props?.editMode || false;
+
+return {
+  as: "div",
+  hide: editMode  // Hide priority field in edit mode
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_label_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Priority"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_help_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const contentType = args.contextData.props?.contentType || "channels";
+const itemType = contentType === "playlists" ? "playlist" : "channel";
+
+return {
+  as: "p",
+  text: `Higher priority ${itemType}s are processed first. Priority is automatically removed once processing completes.`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TomSelect",
+        props: '''
+return {
+  value: args.fns.priority(),
+  options: [
+    { value: "high", label: "High Priority" },
+    { value: "normal", label: "Normal Priority" },
+    { value: "low", label: "Low Priority" }
+  ],
+  valueKey: "value",
+  labelKey: "label",
+  singularName: "priority",
+  pluralName: "priorities",
+  placeholder: "Select priority...",
+  search: false,
+  onChange: (value) => {
+    args.fns.setPriority(value);
+  },
+  disabled: args.fns.isSubmitting()
+};
+'''
+      }
+    },
+    {
+      id: "time_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const editMode = args.contextData.props?.editMode || false;
+const contentType = args.contextData.props?.contentType || "channels";
+
+const itemType = contentType === "playlists" ? "playlist" : "channel";
+
+return {
+  as: "div",
+  hide: editMode  // Only show in add mode
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: ${args.theme.var.color.warning_light_100};
+  border: 1px solid ${args.theme.var.color.warning_light_300};
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "warning_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning};
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "warning_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const contentType = args.contextData.props?.contentType || "channels";
+const itemType = contentType === "playlists" ? "playlist" : "channel";
+
+return {
+  as: "p",
+  text: `Processing may take 5-10 minutes depending on the size of the ${itemType}. Please wait until processed.`
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_footer",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer",
+  hide: args.fns.isProcessing()
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column-reverse;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cancel_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Button",
+        props: '''
+const onClose = args.contextData.props?.onClose || (() => {});
+
+return {
+  text: "Cancel",
+  variant: "secondary",
+  onClick: onClose,
+  disabled: args.fns.isSubmitting()
+};
+'''
+      }
+    },
+    {
+      id: "save_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Button",
+        props: '''
+const isSubmitting = args.fns.isSubmitting();
+const editMode = args.contextData.props?.editMode || false;
+
+const buttonText = isSubmitting
+  ? (editMode ? "Updating..." : "Saving...")
+  : (editMode ? "Update" : "Save");
+
+return {
+  text: buttonText,
+  variant: "primary",
+  onClick: args.fns.handleSave,
+  disabled: isSubmitting
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "component_root", E: "modal_overlay" },
+    { id: "e2", T: "Attr", S: "modal_overlay", E: "modal_container" },
+    { id: "e3", T: "Attr", S: "modal_container", E: "modal_header" },
+    { id: "e4", T: "Attr", S: "modal_header", E: "modal_title" },
+    { id: "e4a", T: "Attr", S: "modal_header", E: "playlist_name_display" },
+    { id: "e5", T: "Attr", S: "modal_header", E: "close_button" },
+    { id: "e6", T: "Attr", S: "close_button", E: "close_icon" },
+    { id: "e7", T: "Attr", S: "modal_container", E: "modal_body" },
+    { id: "e7a", T: "Attr", S: "modal_body", E: "processing_message" },
+    { id: "e7b", T: "Attr", S: "processing_message", E: "processing_spinner" },
+    { id: "e7c", T: "Attr", S: "processing_message", E: "processing_title" },
+    { id: "e7d", T: "Attr", S: "processing_message", E: "processing_text" },
+    { id: "e8", T: "Attr", S: "modal_body", E: "form_element" },
+    { id: "e8a", T: "Attr", S: "form_element", E: "error_alert" },
+    { id: "e8b", T: "Attr", S: "error_alert", E: "error_alert_icon" },
+    { id: "e8c", T: "Attr", S: "error_alert", E: "error_alert_content" },
+    { id: "e8d", T: "Attr", S: "error_alert_content", E: "error_alert_title" },
+    { id: "e8e", T: "Attr", S: "error_alert_content", E: "error_alert_message" },
+    { id: "e8f", T: "Attr", S: "error_alert", E: "error_alert_close" },
+    { id: "e8g", T: "Attr", S: "error_alert_close", E: "error_alert_close_icon" },
+    { id: "e9", T: "Attr", S: "form_element", E: "url_field" },
+    { id: "e10", T: "Attr", S: "url_field", E: "url_label" },
+    { id: "e11", T: "Attr", S: "url_field", E: "url_input" },
+    { id: "e12", T: "Attr", S: "form_element", E: "name_field" },
+    { id: "e13", T: "Attr", S: "name_field", E: "name_label" },
+    { id: "e14", T: "Attr", S: "name_field", E: "name_input" },
+    { id: "e14_priority", T: "Attr", S: "form_element", E: "priority_field" },
+    { id: "e14_priority_label", T: "Attr", S: "priority_field", E: "priority_label" },
+    { id: "e14_priority_label_text", T: "Attr", S: "priority_label", E: "priority_label_text" },
+    { id: "e14_priority_help_text", T: "Attr", S: "priority_label", E: "priority_help_text" },
+    { id: "e14_priority_select", T: "Attr", S: "priority_field", E: "priority_select" },
+    { id: "e14a", T: "Attr", S: "form_element", E: "time_warning" },
+    { id: "e14b", T: "Attr", S: "time_warning", E: "warning_icon" },
+    { id: "e14c", T: "Attr", S: "time_warning", E: "warning_text" },
+    { id: "e15", T: "Attr", S: "modal_container", E: "modal_footer" },
+    { id: "e16", T: "Attr", S: "modal_footer", E: "cancel_button" },
+    { id: "e17", T: "Attr", S: "modal_footer", E: "save_button" }
+  ]
+}

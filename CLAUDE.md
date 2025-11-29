@@ -229,7 +229,8 @@ Components and pages are defined using hjson files with the following structure:
         props: string,         // Function body returning props object
         css: string,          // Function body returning CSS styles
         fns: string,          // Optional: Function definitions
-        slot: string          // Optional: Slot name when used inside a component
+        slotName: string,     // Optional: WHERE this Attr should be placed (which slot it belongs to)
+        slot: string    // Optional: For Slot components - WHAT parent slot content to render (e.g., "1children" for level 1 parent's children)
       }
     }
   ],
@@ -478,6 +479,8 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
 - `fns`: Function body string - JavaScript functions for dynamic properties
 - `props`: Function body string - Dynamic properties returning key-value pairs
 - `css`: Function body string - CSS styling with `._id` selector for current element (returns string or array of strings)
+- `slotName`: string - WHERE this Attr should be placed (which slot it belongs to, e.g., "footer", "sidebar")
+- `slot`: string - For Slot components: WHAT parent slot content to render (e.g., "children", "1children". "1children" renders level 1 parent's children slot)
 
 **Component Types:**
 
@@ -487,7 +490,10 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
    - For icons: requires `icon`, `height`, `width` properties
 
 2. **Slot Component**:
-   - `name`: string - Slot name (default: 'children')
+   - `slot`: string - WHAT parent slot content to render
+     - Regular slot names: "children", "footer", "header"
+     - Hierarchical slots: "1children" (level 1 parent), "2footer" (level 2 parent), etc.
+   - `slotName`: string - WHERE this Slot component should be placed (which slot it belongs to)
 
 **Function Arguments Available:**
 The `fns`, `props`, and `css` functions have access to `args` object containing:

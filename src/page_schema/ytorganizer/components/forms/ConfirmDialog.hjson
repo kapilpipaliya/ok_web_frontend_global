@@ -1,0 +1,573 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "ConfirmDialog"
+      }
+    },
+    {
+      id: "variant_is_open",
+      L: "ComponentVariant",
+      P: {
+        key: "isOpen",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "variant_title",
+      L: "ComponentVariant",
+      P: {
+        key: "title",
+        type: "string",
+        defValue: "Confirm Action"
+      }
+    },
+    {
+      id: "variant_message",
+      L: "ComponentVariant",
+      P: {
+        key: "message",
+        type: "string",
+        defValue: "Are you sure you want to proceed?"
+      }
+    },
+    {
+      id: "variant_confirm_text",
+      L: "ComponentVariant",
+      P: {
+        key: "confirmText",
+        type: "string",
+        defValue: "Confirm"
+      }
+    },
+    {
+      id: "variant_cancel_text",
+      L: "ComponentVariant",
+      P: {
+        key: "cancelText",
+        type: "string",
+        defValue: "Cancel"
+      }
+    },
+    {
+      id: "variant_variant",
+      L: "ComponentVariant",
+      P: {
+        key: "variant",
+        type: "string",
+        defValue: "danger"
+      }
+    },
+    {
+      id: "option_danger",
+      L: "ComponentVariantOption",
+      P: {
+        key: "danger",
+        value: "danger",
+        description: "Red confirmation button for destructive actions"
+      }
+    },
+    {
+      id: "option_primary",
+      L: "ComponentVariantOption",
+      P: {
+        key: "primary",
+        value: "primary",
+        description: "Primary colored confirmation button"
+      }
+    },
+    {
+      id: "option_warning",
+      L: "ComponentVariantOption",
+      P: {
+        key: "warning",
+        value: "warning",
+        description: "Warning colored confirmation button"
+      }
+    },
+    {
+      id: "variant_on_confirm",
+      L: "ComponentVariant",
+      P: {
+        key: "onConfirm",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_on_cancel",
+      L: "ComponentVariant",
+      P: {
+        key: "onCancel",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_loading",
+      L: "ComponentVariant",
+      P: {
+        key: "loading",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "dialog_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isOpen = args.contextData.props?.isOpen || false;
+const onCancel = args.contextData.props?.onCancel;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget && onCancel) {
+      onCancel();
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: ${args.theme.var.zIndex.modal};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.md};
+  animation: fadeIn ${args.theme.var.animation.fast} ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.sm};
+    align-items: flex-end;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "dialog_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: (e) => {
+    e.stopPropagation();
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn ${args.theme.var.animation.normal} ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    animation: slideUp ${args.theme.var.animation.normal} ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "dialog_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "dialog_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const variant = args.contextData.props?.variant || "danger";
+
+const iconConfig = {
+  danger: {
+    icon: "carbon:warning-filled",
+    color: args.theme.var.color.error
+  },
+  warning: {
+    icon: "carbon:warning-alt-filled",
+    color: args.theme.var.color.warning
+  },
+  primary: {
+    icon: "carbon:help-filled",
+    color: args.theme.var.color.primary
+  }
+};
+
+const config = iconConfig[variant] || iconConfig.danger;
+
+return {
+  as: "icon",
+  icon: config.icon,
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+const variant = args.contextData.props?.variant || "danger";
+
+const iconConfig = {
+  danger: args.theme.var.color.error,
+  warning: args.theme.var.color.warning,
+  primary: args.theme.var.color.primary
+};
+
+const iconColor = iconConfig[variant] || iconConfig.danger;
+
+return `._id {
+  color: ${iconColor};
+  margin-bottom: ${args.theme.var.spacing.sm};
+  display: block;
+}`;
+'''
+      }
+    },
+    {
+      id: "dialog_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const title = args.contextData.props?.title || "Confirm Action";
+
+return {
+  as: "h2",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "dialog_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  padding-top: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "dialog_message",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const message = args.contextData.props?.message || "Are you sure you want to proceed?";
+
+return {
+  as: "p",
+  text: message
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.md};
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-line;
+}`;
+'''
+      }
+    },
+    {
+      id: "dialog_footer",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl};
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column-reverse;
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cancel_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const cancelText = args.contextData.props?.cancelText || "Cancel";
+const onCancel = args.contextData.props?.onCancel;
+const loading = args.contextData.props?.loading || false;
+
+return {
+  as: "button",
+  type: "button",
+  text: cancelText,
+  disabled: loading,
+  onClick: () => {
+    if (onCancel && !loading) {
+      onCancel();
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  min-height: ${args.theme.var.touch.button};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 500;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  flex: 1;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.border_dark_200};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+    font-size: ${args.theme.var.fontSize.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "confirm_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const confirmText = args.contextData.props?.confirmText || "Confirm";
+const onConfirm = args.contextData.props?.onConfirm;
+const loading = args.contextData.props?.loading || false;
+
+return {
+  as: "button",
+  type: "button",
+  text: loading ? "Please wait..." : confirmText,
+  disabled: loading,
+  onClick: async () => {
+    if (onConfirm && !loading) {
+      await onConfirm();
+    }
+  }
+};
+''',
+        css: '''
+const variant = args.contextData.props?.variant || "danger";
+
+const variantStyles = {
+  danger: {
+    background: args.theme.var.color.error,
+    backgroundHover: args.theme.var.color.error_dark_200,
+    text: args.theme.var.color.error_text,
+    focus: args.theme.var.color.error_light_200
+  },
+  warning: {
+    background: args.theme.var.color.warning,
+    backgroundHover: args.theme.var.color.warning_dark_200,
+    text: args.theme.var.color.warning_text,
+    focus: args.theme.var.color.warning_light_200
+  },
+  primary: {
+    background: args.theme.var.color.primary,
+    backgroundHover: args.theme.var.color.primary_dark_200,
+    text: args.theme.var.color.primary_text,
+    focus: args.theme.var.color.primary_light_200
+  }
+};
+
+const style = variantStyles[variant] || variantStyles.danger;
+
+return `._id {
+  min-height: ${args.theme.var.touch.button};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${style.background};
+  color: ${style.text};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  flex: 1;
+
+  &:hover:not(:disabled) {
+    background: ${style.backgroundHover};
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px ${style.focus};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+    font-size: ${args.theme.var.fontSize.md};
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_is_open" },
+    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_title" },
+    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_message" },
+    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_confirm_text" },
+    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_cancel_text" },
+    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_variant" },
+    { id: "e7", T: "ComponentVariantOption", S: "variant_variant", E: "option_danger" },
+    { id: "e8", T: "ComponentVariantOption", S: "variant_variant", E: "option_primary" },
+    { id: "e9", T: "ComponentVariantOption", S: "variant_variant", E: "option_warning" },
+    { id: "e10", T: "ComponentVariant", S: "component_root", E: "variant_on_confirm" },
+    { id: "e11", T: "ComponentVariant", S: "component_root", E: "variant_on_cancel" },
+    { id: "e12", T: "ComponentVariant", S: "component_root", E: "variant_loading" },
+    { id: "e13", T: "Attr", S: "component_root", E: "dialog_overlay" },
+    { id: "e14", T: "Attr", S: "dialog_overlay", E: "dialog_container" },
+    { id: "e15", T: "Attr", S: "dialog_container", E: "dialog_header" },
+    { id: "e16", T: "Attr", S: "dialog_header", E: "dialog_icon" },
+    { id: "e17", T: "Attr", S: "dialog_header", E: "dialog_title" },
+    { id: "e18", T: "Attr", S: "dialog_container", E: "dialog_body" },
+    { id: "e19", T: "Attr", S: "dialog_body", E: "dialog_message" },
+    { id: "e20", T: "Attr", S: "dialog_container", E: "dialog_footer" },
+    { id: "e21", T: "Attr", S: "dialog_footer", E: "cancel_button" },
+    { id: "e22", T: "Attr", S: "dialog_footer", E: "confirm_button" }
+  ]
+}

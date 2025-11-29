@@ -1,0 +1,237 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "VirtualList"
+      }
+    },
+    {
+      id: "variant_items",
+      L: "ComponentVariant",
+      P: {
+        key: "items",
+        type: "array",
+        defValue: []
+      }
+    },
+    {
+      id: "variant_itemHeight",
+      L: "ComponentVariant",
+      P: {
+        key: "itemHeight",
+        type: "number",
+        defValue: 90
+      }
+    },
+    {
+      id: "variant_overscan",
+      L: "ComponentVariant",
+      P: {
+        key: "overscan",
+        type: "number",
+        defValue: 5
+      }
+    },
+    {
+      id: "variant_onScroll",
+      L: "ComponentVariant",
+      P: {
+        key: "onScroll",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_containerClass",
+      L: "ComponentVariant",
+      P: {
+        key: "containerClass",
+        type: "string",
+        defValue: ""
+      }
+    },
+    {
+      id: "attr_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+// Get props from context
+const items = args.contextData.props?.items || [];
+const itemHeight = args.contextData.props?.itemHeight || 90;
+const overscan = args.contextData.props?.overscan || 5;
+const onScrollCallback = args.contextData.props?.onScroll;
+
+// Virtualization state
+const [scrollTop, setScrollTop] = args.createSignal(0);
+const [scrollElement, setScrollElement] = args.createSignal(null);
+
+// Calculate visible range
+const getVisibleRange = () => {
+  const el = scrollElement();
+  const scroll = scrollTop();
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+
+  // Use default container height if element not yet available
+  const containerHeight = el?.clientHeight || 600;
+
+  const startIndex = Math.max(0, Math.floor(scroll / height) - overscan);
+  const endIndex = Math.min(
+    items.length - 1,
+    Math.ceil((scroll + containerHeight) / height) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+// Get virtual items to render
+const getVirtualItems = () => {
+  const { start, end } = getVisibleRange();
+  const virtualItems = [];
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+
+  for (let i = start; i <= end; i++) {
+    virtualItems.push({
+      index: i,
+      start: i * height,
+      size: height
+    });
+  }
+
+  return virtualItems;
+};
+
+// Total height of all items
+const getTotalSize = () => {
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+  return items.length * height;
+};
+
+// Handle scroll
+const handleScroll = (e) => {
+  setScrollTop(e.target.scrollTop);
+
+  // Call custom onScroll callback if provided
+  if (onScrollCallback) {
+    onScrollCallback(e);
+  }
+};
+
+return {
+  scrollTop,
+  setScrollTop,
+  scrollElement,
+  setScrollElement,
+  getVisibleRange,
+  getVirtualItems,
+  getTotalSize,
+  handleScroll,
+  items
+};
+''',
+        props: '''
+const containerClass = args.contextData.props?.class || "";
+
+return {
+  as: "div",
+  class: containerClass,
+  ref: args.fns.setScrollElement,
+  onScroll: args.fns.handleScroll
+};
+'''
+      }
+    },
+    {
+      id: "attr_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  width: 100%;
+  height: ${args.fns.getTotalSize()}px;
+}`;
+'''
+      }
+    },
+    {
+      id: "attr_items_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "virtualItem",
+        loop: true,
+        props: '''
+return {
+  data: args.fns.getVirtualItems()
+};
+'''
+      }
+    },
+    {
+      id: "attr_item_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "item",
+        props: '''
+const virtualItem = args.contextData.virtualItem;
+const item = args.fns.items[virtualItem.index];
+
+return {
+  as: "div",
+  data: {
+    item: item,
+    virtualItem: virtualItem,
+    index: virtualItem.index
+  }
+};
+''',
+        css: '''
+const virtualItem = args.contextData.virtualItem;
+
+return `._id {
+  position: absolute;
+  top: ${virtualItem.start}px;
+  left: 0;
+  width: 100%;
+  height: ${virtualItem.size}px;
+}`;
+'''
+      }
+    },
+    {
+      id: "attr_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        slot: "children"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_items" },
+    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_itemHeight" },
+    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_overscan" },
+    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_onScroll" },
+    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_containerClass" },
+    { id: "e6", T: "Attr", S: "component_root", E: "attr_root" },
+    { id: "e7", T: "Attr", S: "attr_root", E: "attr_content" },
+    { id: "e8", T: "Attr", S: "attr_content", E: "attr_items_loop" },
+    { id: "e9", T: "Attr", S: "attr_items_loop", E: "attr_item_wrapper" },
+    { id: "e10", T: "Attr", S: "attr_item_wrapper", E: "attr_slot" }
+  ]
+}

@@ -34,6 +34,7 @@ import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getC
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 import type { JSX } from "solid-js";
 
+// Component Field just render PageAttrRender, it render Children Attr of Component, there will be one root Attr where we define fns, its run inside <DynamicComponent/> so it will work with nested functions too.
 export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
@@ -99,13 +100,18 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
   const ComponentWrapper = () => {
     const contextData = useDataContext() || {};
 
-    const propsMemo = createMemo(() => {
-      const defaultValues = getComponentDefaultValues(
+    // Memoize component default values to avoid recalculation
+    const defaultValuesMemo = createMemo(() =>
+      getComponentDefaultValues(
         getCompVertex()!,
         graph,
         setGraph,
-      );
-      return { ...defaultValues, ...removeUndefinedProperties(otherProps) };
+      )
+    );
+
+    // Merge defaults with props once
+    const propsMemo = createMemo(() => {
+      return { ...defaultValuesMemo(), ...removeUndefinedProperties(otherProps) };
     });
 
     const valuesProxy = new Proxy(
@@ -122,16 +128,13 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
           if (key === "context") {
             return parentRenderContext()?.context;
           }
+          // Check props first
           const propValue = props[key as keyof typeof props];
           if (propValue !== undefined && propValue !== null) {
             return propValue;
           }
-          const defaultValues = getComponentDefaultValues(
-            getCompVertex()!,
-            graph,
-            setGraph,
-          );
-          return defaultValues[key as keyof typeof defaultValues];
+          // Use memoized defaults instead of recalculating
+          return defaultValuesMemo()[key as keyof ReturnType<typeof defaultValuesMemo>];
         },
         ownKeys() {
           return Reflect.ownKeys(propsMemo());
@@ -171,14 +174,15 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
     );
   };
 
-  const Children = (props: { slot: string; class?: string }) => {
-    const currentSlotComponents = useContext(SlotContext) || [];
+  // Get parent children components from SlotContext once
+  const parentSlotComponents = useContext(SlotContext) || [];
 
+  const Children = (props: { slot: string; class?: string }) => {
     const slotFilter = (vertex: Vertex) => {
       if (props.slot) {
-        return vertex.P.slot === props.slot;
+        return vertex.P.slotName === props.slot;
       }
-      return !vertex.P.slot;
+      return !vertex.P.slotName;
     };
 
     // Check if slot name includes level indicator (e.g., "1footer")
@@ -192,11 +196,10 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
             const level = parseInt(levelStr, 10);
 
             // Use the parent slot component at the specified level
+            // Level 1 = immediate parent (most recent), Level 2 = grandparent, etc.
             const SlotComponentParent =
-              level > 0 && level <= currentSlotComponents.length
-                ? currentSlotComponents[
-                    currentSlotComponents.length - level - 1
-                  ]
+              level > 0 && level <= parentSlotComponents.length
+                ? parentSlotComponents[parentSlotComponents.length - level]
                 : (null as unknown as SlotContextType);
 
             return (
@@ -226,9 +229,6 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
   };
 
   const Content = () => {
-    // Get parent children components from SlotContext
-    const parentSlotComponents = useContext(SlotContext) || [];
-
     if (componentData()?.graph) {
       setGraphData(graph, setGraph, componentData()!.graph!, {
         skipExisting: true,

@@ -1,0 +1,408 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "Layout",
+        fns: '''
+// Check if user is admin
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some(edgeId => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+// Impersonation state management
+const [impersonatedUser, setImpersonatedUser] = args.createSignal(null);
+
+// Check if running in iframe (initialized on mount to avoid hydration issues)
+const [isInIframe, setIsInIframe] = args.createSignal(false);
+
+// Load impersonation state from sessionStorage (client-side only)
+// This is called from onMount to avoid SSR/hydration mismatch
+const loadImpersonationState = () => {
+  const storedImpersonation = sessionStorage.getItem('yto_impersonatedUser');
+  if (storedImpersonation) {
+    try {
+      setImpersonatedUser(JSON.parse(storedImpersonation));
+    } catch (e) {
+      // Ignore parsing errors
+    }
+  }
+};
+
+// Exit impersonation
+const exitImpersonation = async () => {
+  const impersonated = impersonatedUser();
+  if (!impersonated) return;
+
+  const result = await args.executeNamedServerFunction({
+    functionName: "clearImpersonation",
+    contextData: { impersonatedUserUuid: impersonated.P.uuid }
+  });
+
+  setImpersonatedUser(null);
+  sessionStorage.removeItem('yto_impersonatedUser');
+  args.showSuccessToast("Stopped viewing as user");
+
+  // Reload current page to refresh data
+  window.location.reload();
+};
+
+// Get impersonatedUserUuid for contextData
+const getImpersonatedUserUuid = () => {
+  const impersonated = impersonatedUser();
+  return impersonated?.P?.uuid || null;
+};
+
+// Keep Awake wrapper functions
+const keepAwake = async () => {
+  await args.KeepAwake.keepAwake();
+};
+
+const allowSleep = async () => {
+  await args.KeepAwake.allowSleep();
+};
+
+const isSupported = async () => {
+  const result = await args.KeepAwake.isSupported();
+  return result.isSupported;
+};
+
+const isKeptAwake = async () => {
+  const result = await args.KeepAwake.isKeptAwake();
+  return result.isKeptAwake;
+};
+
+// Keep Awake management
+const enableKeepAwake = async () => {
+  try {
+    const supported = await isSupported();
+    if (!supported) return;
+
+    const alreadyAwake = await isKeptAwake();
+    if (alreadyAwake) return;
+
+    await keepAwake();
+    console.log('Keep Awake enabled');
+  } catch (error) {
+    console.error('Error enabling Keep Awake:', error);
+  }
+};
+
+const disableKeepAwake = async () => {
+  try {
+    const supported = await isSupported();
+    if (!supported) return;
+
+    const awake = await isKeptAwake();
+    if (!awake) return;
+
+    await allowSleep();
+    console.log('Keep Awake disabled');
+  } catch (error) {
+    console.error('Error disabling Keep Awake:', error);
+  }
+};
+
+// Video player state management
+const [playerState, setPlayerState] = args.createSignal("closed"); // closed, minimized, maximized
+const [currentVideo, setCurrentVideo] = args.createSignal(null);
+
+// Player position and size state
+const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
+const [playerSize, setPlayerSize] = args.createStore({ width: 400, height: 250 });
+
+// Video queue state
+const [videoQueue, setVideoQueue] = args.createSignal([]);
+
+// Play video in the player
+const playVideo = async (video) => {
+  setCurrentVideo(video);
+  setPlayerState("minimized");
+  await enableKeepAwake();
+};
+
+// Add video to queue
+const addToQueue = (video) => {
+  const queue = videoQueue();
+  const videoId = video?.P?.youtubeId;
+
+  // Check if video already in queue
+  const alreadyInQueue = queue.some(v => v?.P?.youtubeId === videoId);
+  if (alreadyInQueue) {
+    args.showWarningToast("Video already in queue");
+    return;
+  }
+
+  setVideoQueue([...queue, video]);
+  args.showSuccessToast("Added to queue");
+};
+
+// Play next video from queue
+const playNext = () => {
+  const queue = videoQueue();
+  if (queue.length === 0) {
+    // Don't close player when queue is empty, just keep current video
+    // setPlayerState("closed");
+    // setCurrentVideo(null);
+    return;
+  }
+
+  const nextVideo = queue[0];
+  setCurrentVideo(nextVideo);
+  setVideoQueue(queue.slice(1));
+};
+
+// Remove video from queue
+const removeFromQueue = (index) => {
+  const queue = videoQueue();
+  setVideoQueue([...queue.slice(0, index), ...queue.slice(index + 1)]);
+};
+
+// Clear entire queue
+const clearQueue = () => {
+  setVideoQueue([]);
+  args.showSuccessToast("Queue cleared");
+};
+
+// Queue modal state
+const [isQueueModalOpen, setIsQueueModalOpen] = args.createSignal(false);
+
+const openQueueModal = () => {
+  setIsQueueModalOpen(true);
+};
+
+const closeQueueModal = () => {
+  setIsQueueModalOpen(false);
+};
+
+// Toggle player state
+const togglePlayerState = () => {
+  const current = playerState();
+  if (current === "minimized") {
+    setPlayerState("maximized");
+  } else if (current === "maximized") {
+    setPlayerState("minimized");
+  }
+};
+
+// Close player
+const closePlayer = async () => {
+  setPlayerState("closed");
+  setCurrentVideo(null);
+  await disableKeepAwake();
+};
+
+// Feedback modal state management
+const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);
+
+const openFeedbackModal = () => {
+  setIsFeedbackModalOpen(true);
+};
+
+const closeFeedbackModal = () => {
+  setIsFeedbackModalOpen(false);
+};
+
+const submitFeedback = async (data) => {
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "saveFeedback",
+      contextData: data
+    });
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message || "Feedback submitted successfully");
+      return result.result;
+    } else {
+      args.showErrorToast(result?.result?.message || "Failed to submit feedback");
+      return result?.result;
+    }
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    args.showErrorToast("An error occurred while submitting feedback");
+    return { success: false };
+  }
+};
+
+// Common function to open YouTube URL in same tab (for extension)
+const openYouTubeInParentTab = (url) => {
+  if (!url) return;
+
+  // Send message to extension if in iframe context
+  if (window.parent !== window) {
+    // We're in an iframe (extension modal or popup)
+    window.parent.postMessage({
+      type: 'OPEN_IN_SAME_TAB',
+      url: url
+    }, '*');
+  } else if (window.opener && window.opener.postMessage) {
+    // We're in a popup window
+    window.opener.postMessage({
+      type: 'OPEN_IN_SAME_TAB',
+      url: url
+    }, '*');
+  } else {
+    // Fallback to regular navigation
+    window.location.href = url;
+  }
+};
+
+return {
+  checkAdminRole,
+  impersonatedUser,
+  exitImpersonation,
+  getImpersonatedUserUuid,
+  loadImpersonationState,
+  isInIframe,
+  setIsInIframe,
+  keepAwake,
+  allowSleep,
+  isSupported,
+  isKeptAwake,
+  enableKeepAwake,
+  disableKeepAwake,
+  playerState,
+  currentVideo,
+  playVideo,
+  togglePlayerState,
+  closePlayer,
+  playerPosition,
+  setPlayerPosition,
+  playerSize,
+  setPlayerSize,
+  videoQueue,
+  setVideoQueue,
+  addToQueue,
+  playNext,
+  removeFromQueue,
+  clearQueue,
+  isQueueModalOpen,
+  openQueueModal,
+  closeQueueModal,
+  isFeedbackModalOpen,
+  openFeedbackModal,
+  closeFeedbackModal,
+  submitFeedback,
+  openYouTubeInParentTab
+};
+''',
+        props: '''
+return {
+  onMount: async () => {
+    if (typeof window !== 'undefined') {
+      args.fns.setIsInIframe?.(window.self !== window.top);
+    }
+
+    // Load saved impersonation state from sessionStorage
+    args.fns.loadImpersonationState?.();
+  }
+};
+'''
+      }
+    },
+    {
+      id: "layout_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "ConfirmProvider"
+      }
+    },
+    {
+      id: "favicon_link",
+      L: "Attr",
+      P: {
+        displayOrder: 0.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    },
+    {
+      id: "slot_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        slot: "1children"
+      }
+    },
+    {
+      id: "video_player",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "VideoPlayer",
+        props: '''
+return {
+  playerState: args.fns.playerState,
+  currentVideo: args.fns.currentVideo,
+  togglePlayerState: args.fns.togglePlayerState,
+  closePlayer: args.fns.closePlayer,
+  playerPosition: args.fns.playerPosition,
+  setPlayerPosition: args.fns.setPlayerPosition,
+  playerSize: args.fns.playerSize,
+  setPlayerSize: args.fns.setPlayerSize,
+  videoQueue: args.fns.videoQueue,
+  playNext: args.fns.playNext,
+  removeFromQueue: args.fns.removeFromQueue,
+  clearQueue: args.fns.clearQueue,
+  openQueueModal: args.fns.openQueueModal
+};
+'''
+      }
+    },
+    {
+      id: "queue_modal",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "QueueModal",
+        props: '''
+return {
+  isOpen: args.fns.isQueueModalOpen,
+  onClose: args.fns.closeQueueModal,
+  videoQueue: args.fns.videoQueue,
+  playVideo: args.fns.playVideo,
+  removeFromQueue: args.fns.removeFromQueue,
+  clearQueue: args.fns.clearQueue
+};
+'''
+      }
+    },
+    {
+      id: "feedback_modal",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "FeedbackModal",
+        props: '''
+return {
+  isOpen: args.fns.isFeedbackModalOpen,
+  onClose: args.fns.closeFeedbackModal,
+  onSubmit: args.fns.submitFeedback
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e_component", T: "Attr", S: "component_root", E: "layout_root" },
+    { id: "e0", T: "Attr", S: "layout_root", E: "favicon_link" },
+    { id: "e1", T: "Attr", S: "layout_root", E: "slot_content" },
+    { id: "e60", T: "Attr", S: "layout_root", E: "video_player" },
+    { id: "e61", T: "Attr", S: "layout_root", E: "queue_modal" },
+    { id: "e63", T: "Attr", S: "layout_root", E: "feedback_modal" }
+  ]
+}

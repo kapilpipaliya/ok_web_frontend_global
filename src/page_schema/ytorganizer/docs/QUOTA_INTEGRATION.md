@@ -164,12 +164,12 @@ onClick: async () => {
 ### 4. Add Quota Warning Component to Pages
 
 **Recommended Pages**:
-- YTOContent.hjson (main content management page)
-- YTOAdminHome.hjson (admin dashboard)
+- Content.hjson (main content management page)
+- AdminHome.hjson (admin dashboard)
 
 **How to Add**:
 
-Add the YTOQuotaWarning component to the page:
+Add the QuotaWarning component to the page:
 
 ```hjson
 {
@@ -177,7 +177,7 @@ Add the YTOQuotaWarning component to the page:
   L: "Attr",
   P: {
     displayOrder: 999, # High display order to render last
-    componentName: "YTOQuotaWarning"
+    componentName: "QuotaWarning"
   }
 }
 ```
@@ -334,7 +334,7 @@ ORDER BY percentageUsed DESC
 ### User Clicks "Upgrade" from Quota Warning
 
 ```javascript
-// In YTOQuotaWarning component
+// In QuotaWarning component
 onClick: () => {
   const currentPlan = args.fns.quotaData()?.currentPlan || "free";
   const suggestedPlan = args.fns.quotaData()?.suggestedPlan || "basic";

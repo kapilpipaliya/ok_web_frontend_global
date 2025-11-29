@@ -1,0 +1,240 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "LoadingSpinner"
+      }
+    },
+    {
+      id: "variant_size",
+      L: "ComponentVariant",
+      P: {
+        key: "size",
+        type: "string",
+        defValue: "medium"
+      }
+    },
+    {
+      id: "size_small",
+      L: "ComponentVariantOption",
+      P: {
+        key: "small",
+        value: "small",
+        description: "Small spinner (24px)"
+      }
+    },
+    {
+      id: "size_medium",
+      L: "ComponentVariantOption",
+      P: {
+        key: "medium",
+        value: "medium",
+        description: "Medium spinner (48px)"
+      }
+    },
+    {
+      id: "size_large",
+      L: "ComponentVariantOption",
+      P: {
+        key: "large",
+        value: "large",
+        description: "Large spinner (64px)"
+      }
+    },
+    {
+      id: "variant_color",
+      L: "ComponentVariant",
+      P: {
+        key: "color",
+        type: "string",
+        defValue: "primary"
+      }
+    },
+    {
+      id: "color_primary",
+      L: "ComponentVariantOption",
+      P: {
+        key: "primary",
+        value: "primary",
+        description: "Primary theme color"
+      }
+    },
+    {
+      id: "color_muted",
+      L: "ComponentVariantOption",
+      P: {
+        key: "muted",
+        value: "muted",
+        description: "Muted theme color"
+      }
+    },
+    {
+      id: "color_white",
+      L: "ComponentVariantOption",
+      P: {
+        key: "white",
+        value: "white",
+        description: "White color"
+      }
+    },
+    {
+      id: "variant_text",
+      L: "ComponentVariant",
+      P: {
+        key: "text",
+        type: "string",
+        defValue: ""
+      }
+    },
+    {
+      id: "spinner_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+// Get variant props with defaults
+const size = args.contextData.props?.size || "medium";
+const color = args.contextData.props?.color || "primary";
+const text = args.contextData.props?.text || "";
+
+return {
+  as: "div",
+  "aria-label": text || "Loading...",
+  role: "status"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "spinner_element",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+// Get variant props with defaults
+const size = args.contextData.props?.size || "medium";
+const color = args.contextData.props?.color || "primary";
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+// Get variant props with defaults
+const size = args.contextData.props?.size || "medium";
+const color = args.contextData.props?.color || "primary";
+
+// Size configurations
+const sizeConfig = {
+  small: { diameter: 24, borderWidth: 2 },
+  medium: { diameter: 48, borderWidth: 4 },
+  large: { diameter: 64, borderWidth: 6 }
+};
+
+const config = sizeConfig[size] || sizeConfig.medium;
+
+// Color configurations
+const colorConfig = {
+  primary: {
+    border: args.theme.var.color.background_light_300,
+    accent: args.theme.var.color.primary
+  },
+  muted: {
+    border: args.theme.var.color.background_light_200,
+    accent: args.theme.var.color.muted
+  },
+  white: {
+    border: "rgba(255, 255, 255, 0.3)",
+    accent: "rgba(255, 255, 255, 0.9)"
+  }
+};
+
+const colors = colorConfig[color] || colorConfig.primary;
+
+return `._id {
+  /* Spinner styling */
+  width: ${config.diameter}px;
+  height: ${config.diameter}px;
+  border: ${config.borderWidth}px solid ${colors.border};
+  border-top: ${config.borderWidth}px solid ${colors.accent};
+  border-radius: 50%;
+
+  /* Animation */
+  animation: ytoSpinnerRotate 1s linear infinite;
+
+  /* Accessibility */
+  display: inline-block;
+}
+
+/* Keyframe animation for spinner rotation */
+@keyframes ytoSpinnerRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  ._id {
+    animation-duration: 2s;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "spinner_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+// Get variant props with defaults
+const text = args.contextData.props?.text || "";
+
+return {
+  as: "div",
+  text: text,
+  hide: () => !text || text.trim() === ""
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.md};
+  text-align: center;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_size" },
+    { id: "e2", T: "ComponentVariantOption", S: "variant_size", E: "size_small" },
+    { id: "e3", T: "ComponentVariantOption", S: "variant_size", E: "size_medium" },
+    { id: "e4", T: "ComponentVariantOption", S: "variant_size", E: "size_large" },
+    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_color" },
+    { id: "e6", T: "ComponentVariantOption", S: "variant_color", E: "color_primary" },
+    { id: "e7", T: "ComponentVariantOption", S: "variant_color", E: "color_muted" },
+    { id: "e8", T: "ComponentVariantOption", S: "variant_color", E: "color_white" },
+    { id: "e9", T: "ComponentVariant", S: "component_root", E: "variant_text" },
+    { id: "e10", T: "Attr", S: "component_root", E: "spinner_container" },
+    { id: "e11", T: "Attr", S: "spinner_container", E: "spinner_element" },
+    { id: "e12", T: "Attr", S: "spinner_container", E: "spinner_text" }
+  ]
+}

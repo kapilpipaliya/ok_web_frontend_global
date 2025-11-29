@@ -1,0 +1,309 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "CookieBanner",
+        description: "GDPR-compliant cookie consent banner with fixed position at bottom"
+      }
+    },
+    {
+      id: "cookie_banner_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+return {
+  acceptCookies: () => {
+    localStorage.setItem('cookie_consent_accepted', 'true');
+    args.fns.setHasCookieConsent(true);
+  }
+};
+''',
+        props: '''
+// Get cookie consent state from parent layout
+const hasCookieConsent = args.fns.hasCookieConsent?.() || false;
+
+return {
+  as: "div",
+  hide: hasCookieConsent
+};
+''',
+        css: '''
+return [
+  `@keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }`,
+  `._id {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background: ${args.theme.var.color.background_dark_200};
+    border-top: 1px solid ${args.theme.var.color.border};
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.4s ease-out;
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "cookie_banner_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cookie_banner_message",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cookie_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:cookie",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "cookie_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.background_dark_200_text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cookie_text_main",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "We use cookies to remember your settings, maintain your session, and help us understand how the app is used. "
+};
+'''
+      }
+    },
+    {
+      id: "cookie_text_privacy_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Learn more in our Privacy Policy",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/privacy');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "cookie_text_period",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "."
+};
+'''
+      }
+    },
+    {
+      id: "cookie_banner_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cookie_accept_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Accept Cookies",
+  onClick: args.fns.acceptCookies
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  color: ${args.theme.var.color.primary_dark_200_text};
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+    padding: 0.75rem 1rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    // Component to root
+    { id: "e1", T: "Attr", S: "component_root", E: "cookie_banner_container" },
+    { id: "e2", T: "Attr", S: "cookie_banner_container", E: "cookie_banner_content" },
+    { id: "e3", T: "Attr", S: "cookie_banner_content", E: "cookie_banner_message" },
+    { id: "e4", T: "Attr", S: "cookie_banner_message", E: "cookie_icon" },
+    { id: "e5", T: "Attr", S: "cookie_banner_message", E: "cookie_text" },
+    { id: "e6", T: "Attr", S: "cookie_text", E: "cookie_text_main" },
+    { id: "e7", T: "Attr", S: "cookie_text", E: "cookie_text_privacy_link" },
+    { id: "e8", T: "Attr", S: "cookie_text", E: "cookie_text_period" },
+    { id: "e9", T: "Attr", S: "cookie_banner_content", E: "cookie_banner_actions" },
+    { id: "e10", T: "Attr", S: "cookie_banner_actions", E: "cookie_accept_button" }
+  ]
+}

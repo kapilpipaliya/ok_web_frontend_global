@@ -1,0 +1,377 @@
+{
+  vertexes: [
+    {
+      id: "quota_warning_component",
+      L: "Component",
+      P: {
+        key: "QuotaWarning"
+      }
+    },
+    {
+      id: "quota_warning_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+const [quotaData, setQuotaData] = args.createSignal(null);
+const [isLoading, setIsLoading] = args.createSignal(false);
+const [showWarning, setShowWarning] = args.createSignal(false);
+
+// Check quota
+const checkQuota = async () => {
+  try {
+    setIsLoading(true);
+    const response = await args.executeNamedServerFunction({
+      functionName: "getUserSubscription",
+      contextData: {}
+    });
+
+    if (response.error) {
+      console.error("Error checking quota:", response.error);
+    } else if (response.result?.success && response.result?.data) {
+      setQuotaData(response.result.data);
+      // Show warning if approaching or over limit
+      setShowWarning(response.result.data.isApproachingLimit || response.result.data.isOverLimit);
+    }
+  } catch (error) {
+    console.error("Error checking quota:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Dismiss warning
+const dismissWarning = () => {
+  setShowWarning(false);
+};
+
+return {
+  quotaData,
+  isLoading,
+  showWarning,
+  dismissWarning,
+  checkQuota
+};
+''',
+        props: '''
+return {
+  as: "div",
+  hide: () => !args.fns.showWarning(),
+  onMount: args.fns.checkQuota
+};
+''',
+        css: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+return `._id {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  max-width: 400px;
+  background: ${isOverLimit ? args.theme.var.color.error_light_800 : args.theme.var.color.warning_light_800};
+  border: 1px solid ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "warning_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "warning_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+return {
+  as: "div",
+  text: isOverLimit ? "⚠️ Quota Limit Reached" : "⚠️ Approaching Quota Limit"
+};
+''',
+        css: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+return `._id {
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "warning_close_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "×",
+  onClick: args.fns.dismissWarning
+};
+''',
+        css: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+return `._id {
+  background: transparent;
+  border: none;
+  color: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning_dark_300};
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+._id:hover {
+  opacity: 0.7;
+}`;
+'''
+      }
+    },
+    {
+      id: "warning_message",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+const used = (data?.videoQuotaUsed || 0).toLocaleString();
+const limit = (data?.videoQuotaLimit || 0).toLocaleString();
+const percentage = data?.quotaPercentage || 0;
+
+const message = isOverLimit
+  ? `You've used ${used} of ${limit} videos (${percentage}%). Upgrade your plan to add more videos.`
+  : `You've used ${used} of ${limit} videos (${percentage}%). Consider upgrading soon.`;
+
+return {
+  as: "p",
+  text: message
+};
+''',
+        css: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+return `._id {
+  font-size: 0.875rem;
+  color: ${isOverLimit ? args.theme.var.color.error_dark_300 : args.theme.var.color.warning_dark_300};
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_progress_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 0.5rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_progress_fill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const data = args.fns.quotaData();
+const percentage = Math.min(data?.quotaPercentage || 0, 100);
+const isOverLimit = data?.isOverLimit || false;
+return `._id {
+  width: ${percentage}%;
+  height: 100%;
+  background: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  transition: width 0.3s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "warning_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "upgrade_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Upgrade Plan",
+  onClick: () => {
+    args.navigate("/checkout");
+    args.fns.dismissWarning();
+  }
+};
+''',
+        css: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+return `._id {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  color: ${isOverLimit ? args.theme.var.color.error_text : args.theme.var.color.warning_text};
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}`;
+'''
+      }
+    },
+    {
+      id: "view_details_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "View Details",
+  onClick: () => {
+    args.navigate("/subscription");
+    args.fns.dismissWarning();
+  }
+};
+''',
+        css: '''
+const data = args.fns.quotaData();
+const isOverLimit = data?.isOverLimit || false;
+return `._id {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  color: ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning_dark_300};
+  border: 1px solid ${isOverLimit ? args.theme.var.color.error : args.theme.var.color.warning};
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  background: rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "quota_warning_component", E: "quota_warning_root" },
+    { id: "e2", T: "Attr", S: "quota_warning_root", E: "warning_header" },
+    { id: "e3", T: "Attr", S: "warning_header", E: "warning_title" },
+    { id: "e4", T: "Attr", S: "warning_header", E: "warning_close_button" },
+    { id: "e5", T: "Attr", S: "quota_warning_root", E: "warning_message" },
+    { id: "e6", T: "Attr", S: "quota_warning_root", E: "quota_progress_bar" },
+    { id: "e7", T: "Attr", S: "quota_progress_bar", E: "quota_progress_fill" },
+    { id: "e8", T: "Attr", S: "quota_warning_root", E: "warning_actions" },
+    { id: "e9", T: "Attr", S: "warning_actions", E: "upgrade_button" },
+    { id: "e10", T: "Attr", S: "warning_actions", E: "view_details_button" }
+  ]
+}

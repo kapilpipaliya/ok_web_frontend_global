@@ -1,0 +1,823 @@
+{
+  vertexes: [
+    {
+      id: "subscription_page",
+      L: "Page",
+      P: {
+        key: "Subscription",
+        url: "/subscription",
+        signinRequired: true,
+        fns: '''
+const [subscriptionData, setSubscriptionData] = args.createSignal(null);
+const [isLoading, setIsLoading] = args.createSignal(true);
+
+// Load subscription data
+const loadSubscriptionData = async () => {
+  try {
+    setIsLoading(true);
+    const response = await args.executeNamedServerFunction({
+      functionName: "getUserSubscription",
+      contextData: {}
+    });
+
+    // Check for errors in the response itself
+    if (response.error) {
+      args.showErrorToast(response.error);
+    } else if (response.result?.success) {
+      // Access the nested result
+      setSubscriptionData(response.result.data);
+    } else {
+      args.showErrorToast(response.result?.message || "Failed to load subscription");
+    }
+  } catch (error) {
+    args.showErrorToast(error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Format date
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+};
+
+// Get plan color
+const getPlanColor = (plan) => {
+  const colors = {
+    free: args.theme.var.color.text_dark_400,
+    basic: args.theme.var.color.info,
+    pro: args.theme.var.color.primary,
+    unlimited: args.theme.var.color.success
+  };
+  return colors[plan] || args.theme.var.color.text;
+};
+
+return {
+  enabled: true,
+  subscriptionData,
+  isLoading,
+  loadSubscriptionData,
+  formatDate,
+  getPlanColor
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  onMount: args.fns.loadSubscriptionData
+};
+'''
+      }
+    },
+    {
+      id: "subscription_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "subscription_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 900px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "subscription_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "subscription_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Subscription Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "back_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "← Back to Dashboard",
+  onClick: () => args.navigate("/home")
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.background_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Loading subscription details...",
+  hide: () => !args.fns.isLoading()
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 3rem;
+  color: ${args.theme.var.color.text_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "content_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.isLoading()
+};
+'''
+      }
+    },
+    {
+      id: "current_plan_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "plan_card_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "plan_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "plan_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Current Plan"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_dark_300};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "plan_name",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.fns.subscriptionData();
+const plan = data?.currentPlan || "free";
+return {
+  as: "div",
+  text: plan.charAt(0).toUpperCase() + plan.slice(1) + " Plan"
+};
+''',
+        css: '''
+const data = args.fns.subscriptionData();
+const plan = data?.currentPlan || "free";
+const planColor = args.fns.getPlanColor(plan);
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${planColor};
+}`;
+'''
+      }
+    },
+    {
+      id: "status_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.fns.subscriptionData();
+const status = data?.subscriptionStatus || "none";
+const statusText = status === "active" ? "Active" : status.charAt(0).toUpperCase() + status.slice(1);
+return {
+  as: "div",
+  text: statusText
+};
+''',
+        css: '''
+const data = args.fns.subscriptionData();
+const status = data?.subscriptionStatus || "none";
+const isActive = status === "active";
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${isActive ? args.theme.var.color.success_light_800 : args.theme.var.color.background_dark_200};
+  color: ${isActive ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Video Quota Usage"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_numbers",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.fns.subscriptionData();
+const used = (data?.videoQuotaUsed || 0).toLocaleString();
+const limit = (data?.videoQuotaLimit || 0).toLocaleString();
+return {
+  as: "div",
+  text: `${used} / ${limit} videos`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_bar_bg",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 1rem;
+  background: ${args.theme.var.color.background_dark_200};
+  border-radius: 0.5rem;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_bar_fill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const data = args.fns.subscriptionData();
+const percentage = data?.quotaPercentage || 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const data = args.fns.subscriptionData();
+const percentage = data?.quotaPercentage || 0;
+const isHigh = percentage >= 80;
+const barColor = isHigh ? args.theme.var.color.warning : args.theme.var.color.primary;
+return `._id {
+  width: ${percentage}%;
+  height: 100%;
+  background: ${barColor};
+  transition: width 0.3s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "quota_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const data = args.fns.subscriptionData();
+return {
+  as: "div",
+  text: "⚠️ You're approaching your quota limit. Consider upgrading your plan.",
+  hide: () => !data?.isApproachingLimit
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.warning_light_800};
+  border-left: 4px solid ${args.theme.var.color.warning};
+  border-radius: 0.25rem;
+  color: ${args.theme.var.color.warning_dark_300};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "subscription_details",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "detail_billing",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "billing_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Billing Cycle"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_dark_300};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "billing_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.fns.subscriptionData();
+const cycle = data?.subscription?.billingCycle || "N/A";
+return {
+  as: "div",
+  text: cycle === "N/A" ? "N/A" : cycle.charAt(0).toUpperCase() + cycle.slice(1)
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "detail_expiry",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "expiry_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Expires On"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_dark_300};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "expiry_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.fns.subscriptionData();
+return {
+  as: "div",
+  text: args.fns.formatDate(data?.subscriptionExpiryDate)
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "actions_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "actions_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Upgrade Your Plan"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "actions_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Get more videos, advanced features, and priority support."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_dark_300};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "upgrade_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "View Plans",
+  onClick: () => args.navigate("/")
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-1px);
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "subscription_page", E: "subscription_container" },
+    { id: "e2", T: "Attr", S: "subscription_container", E: "subscription_wrapper" },
+    { id: "e3", T: "Attr", S: "subscription_wrapper", E: "subscription_header" },
+    { id: "e4", T: "Attr", S: "subscription_header", E: "subscription_title" },
+    { id: "e5", T: "Attr", S: "subscription_header", E: "back_button" },
+    { id: "e6", T: "Attr", S: "subscription_wrapper", E: "loading_state" },
+    { id: "e7", T: "Attr", S: "subscription_wrapper", E: "content_wrapper" },
+    { id: "e8", T: "Attr", S: "content_wrapper", E: "current_plan_card" },
+    { id: "e9", T: "Attr", S: "current_plan_card", E: "plan_card_header" },
+    { id: "e10", T: "Attr", S: "plan_card_header", E: "plan_info" },
+    { id: "e11", T: "Attr", S: "plan_info", E: "plan_label" },
+    { id: "e12", T: "Attr", S: "plan_info", E: "plan_name" },
+    { id: "e13", T: "Attr", S: "plan_card_header", E: "status_badge" },
+    { id: "e14", T: "Attr", S: "current_plan_card", E: "quota_section" },
+    { id: "e15", T: "Attr", S: "quota_section", E: "quota_header" },
+    { id: "e16", T: "Attr", S: "quota_header", E: "quota_label" },
+    { id: "e17", T: "Attr", S: "quota_header", E: "quota_numbers" },
+    { id: "e18", T: "Attr", S: "quota_section", E: "quota_bar_bg" },
+    { id: "e19", T: "Attr", S: "quota_bar_bg", E: "quota_bar_fill" },
+    { id: "e20", T: "Attr", S: "quota_section", E: "quota_warning" },
+    { id: "e21", T: "Attr", S: "current_plan_card", E: "subscription_details" },
+    { id: "e22", T: "Attr", S: "subscription_details", E: "detail_billing" },
+    { id: "e23", T: "Attr", S: "detail_billing", E: "billing_label" },
+    { id: "e24", T: "Attr", S: "detail_billing", E: "billing_value" },
+    { id: "e25", T: "Attr", S: "subscription_details", E: "detail_expiry" },
+    { id: "e26", T: "Attr", S: "detail_expiry", E: "expiry_label" },
+    { id: "e27", T: "Attr", S: "detail_expiry", E: "expiry_value" },
+    { id: "e28", T: "Attr", S: "content_wrapper", E: "actions_card" },
+    { id: "e29", T: "Attr", S: "actions_card", E: "actions_title" },
+    { id: "e30", T: "Attr", S: "actions_card", E: "actions_description" },
+    { id: "e31", T: "Attr", S: "actions_card", E: "upgrade_button" }
+  ]
+}
