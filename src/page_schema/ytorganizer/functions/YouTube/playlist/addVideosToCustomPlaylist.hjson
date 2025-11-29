@@ -1,0 +1,167 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "addVideosToCustomPlaylist",
+        description: "Add multiple videos to a custom playlist",
+        body: '''
+try {
+  // Extract input parameters
+  const { playlistId, videoIds, ownershipId } = args.contextData;
+
+  if (!playlistId) {
+    throw new Error("Playlist ID is required");
+  }
+
+  if (!videoIds || !Array.isArray(videoIds) || videoIds.length === 0) {
+    throw new Error("Video IDs array is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
+  // Get current authenticated user
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
+  // Verify playlist exists for this ownership and is custom
+  const playlistSettingCheck = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    WHERE p.isCustom = true
+    RETURN ps, p
+  `, { ownershipId, playlistId });
+
+  if (playlistSettingCheck.records.length === 0) {
+    throw new Error("Custom playlist not found for this ownership");
+  }
+
+  const playlistSetting = args.convertNodeToJson(playlistSettingCheck.records[0].get('ps'));
+  const playlist = args.convertNodeToJson(playlistSettingCheck.records[0].get('p'));
+
+  // Get current max position for this ownership's playlist
+  const maxPositionResult = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (ps)-[r:PlaylistSettingVideo]->(v:Video)
+    RETURN COALESCE(MAX(r.position), -1) as maxPosition
+  `, { ownershipId, playlistId });
+
+  const maxPositionRaw = maxPositionResult.records[0].get('maxPosition');
+  let currentPosition = maxPositionRaw ? (typeof maxPositionRaw.toNumber === 'function' ? maxPositionRaw.toNumber() : Number(maxPositionRaw)) : -1;
+
+  // Add each video to the playlist
+  let addedCount = 0;
+  let skippedCount = 0;
+
+  for (const videoId of videoIds) {
+    currentPosition++;
+
+    // Check if video exists in database
+    const videoCheck = await args.session.run(`
+      MATCH (v:Video {youtubeId: $videoId})
+      RETURN v
+    `, { videoId });
+
+    if (videoCheck.records.length === 0) {
+      console.warn(`Video ${videoId} not found in database, skipping`);
+      skippedCount++;
+      continue;
+    }
+
+    // Check if video already exists in this ownership's playlist
+    const existsCheck = await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      MATCH (ps)-[:PlaylistSettingVideo]->(v:Video {youtubeId: $videoId})
+      RETURN v
+    `, { ownershipId, playlistId, videoId });
+
+    if (existsCheck.records.length > 0) {
+      console.warn(`Video ${videoId} already in playlist for this ownership, skipping`);
+      skippedCount++;
+      continue;
+    }
+
+    // Add video to playlist via PlaylistSetting (per-ownership)
+    // Position is stored on the relationship edge
+    await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      MATCH (v:Video {youtubeId: $videoId})
+      CREATE (ps)-[r:PlaylistSettingVideo {
+        position: $position,
+        playlistIndex: $position,
+        addedAt: datetime(),
+        createdAt: datetime(),
+        updatedAt: datetime()
+      }]->(v)
+    `, {
+      ownershipId,
+      playlistId,
+      videoId,
+      position: currentPosition
+    });
+
+    addedCount++;
+  }
+
+  // Update playlist setting item count
+  await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    SET ps.itemCount = COALESCE(ps.itemCount, 0) + $addedCount,
+        ps.updatedAt = datetime()
+  `, { ownershipId, playlistId, addedCount });
+
+  return {
+    success: true,
+    message: `Added ${addedCount} video(s) to playlist "${playlist.P.title}"`,
+    data: {
+      playlist,
+      addedCount,
+      skippedCount: videoIds.length - addedCount
+    }
+  };
+
+} catch (error) {
+  console.error("Error adding videos to custom playlist:", error);
+
+  let userMessage = "Failed to add videos to playlist. Please try again.";
+
+  if (error.message.includes("Playlist ID is required")) {
+    userMessage = "Playlist ID is required.";
+  } else if (error.message.includes("Custom playlist not found")) {
+    userMessage = "Custom playlist not found.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to add videos to a playlist.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "AddVideosError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

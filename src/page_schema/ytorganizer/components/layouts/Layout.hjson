@@ -237,6 +237,7 @@ const [playerSize, setPlayerSize] = args.createStore({ width: 400, height: 250 }
 // Video queue state
 const [videoQueue, setVideoQueue] = args.createSignal([]);
 const [queueLoading, setQueueLoading] = args.createSignal(false);
+const [queueOperationLoading, setQueueOperationLoading] = args.createSignal(false);
 
 // Get ownership ID helper
 const getOwnershipId = () => {
@@ -286,27 +287,33 @@ const addToQueue = async (video) => {
 
   // Optimistic update
   setVideoQueue([...queue, video]);
-  args.showSuccessToast("Added to queue");
 
   // Save to database
   const ownershipId = getOwnershipId();
   if (ownershipId && args.user) {
+    setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("addVideoToQueue", { video });
 
       if (result?.result?.success) {
         // Update with server response to ensure consistency
         setVideoQueue(result.result.data || [...queue, video]);
+        args.showSuccessToast("Added to queue");
       } else {
         // Rollback on error
         setVideoQueue(queue);
-        args.showErrorToast(result?.result?.message || "Failed to save to queue");
+        args.showErrorToast(result?.result?.message || "Failed to add to queue");
       }
     } catch (error) {
       // Rollback on error
       setVideoQueue(queue);
+      args.showErrorToast("Failed to add to queue");
       console.error("Error saving to queue:", error);
+    } finally {
+      setQueueOperationLoading(false);
     }
+  } else {
+    args.showSuccessToast("Added to queue");
   }
 };
 
@@ -354,12 +361,14 @@ const removeFromQueue = async (index) => {
   // Save to database
   const ownershipId = getOwnershipId();
   if (ownershipId && args.user) {
+    setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("removeVideoFromQueue", { position: index });
 
       if (result?.result?.success) {
         // Update with server response to ensure consistency
         setVideoQueue(result.result.data || newQueue);
+        args.showSuccessToast("Removed from queue");
       } else {
         // Rollback on error
         setVideoQueue(queue);
@@ -368,8 +377,13 @@ const removeFromQueue = async (index) => {
     } catch (error) {
       // Rollback on error
       setVideoQueue(queue);
+      args.showErrorToast("Failed to remove from queue");
       console.error("Error removing from queue:", error);
+    } finally {
+      setQueueOperationLoading(false);
     }
+  } else {
+    args.showSuccessToast("Removed from queue");
   }
 };
 
@@ -379,15 +393,17 @@ const clearQueue = async () => {
 
   // Optimistic update
   setVideoQueue([]);
-  args.showSuccessToast("Queue cleared");
 
   // Save to database
   const ownershipId = getOwnershipId();
   if (ownershipId && args.user) {
+    setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("clearVideoQueue");
 
-      if (!result?.result?.success) {
+      if (result?.result?.success) {
+        args.showSuccessToast("Queue cleared");
+      } else {
         // Rollback on error
         setVideoQueue(previousQueue);
         args.showErrorToast(result?.result?.message || "Failed to clear queue");
@@ -395,8 +411,13 @@ const clearQueue = async () => {
     } catch (error) {
       // Rollback on error
       setVideoQueue(previousQueue);
+      args.showErrorToast("Failed to clear queue");
       console.error("Error clearing queue:", error);
+    } finally {
+      setQueueOperationLoading(false);
     }
+  } else {
+    args.showSuccessToast("Queue cleared");
   }
 };
 
@@ -423,12 +444,14 @@ const reorderQueue = async (fromIndex, toIndex) => {
   // Save to database
   const ownershipId = getOwnershipId();
   if (ownershipId && args.user) {
+    setQueueOperationLoading(true);
     try {
       const result = await executeYTOFunction("reorderVideoQueue", { fromPosition: fromIndex, toPosition: toIndex });
 
       if (result?.result?.success) {
         // Update with server response to ensure consistency
         setVideoQueue(result.result.data || newQueue);
+        args.showSuccessToast("Queue reordered");
       } else {
         // Rollback on error
         setVideoQueue(queue);
@@ -437,9 +460,13 @@ const reorderQueue = async (fromIndex, toIndex) => {
     } catch (error) {
       // Rollback on error
       setVideoQueue(queue);
-      console.error("Error reordering queue:", error);
       args.showErrorToast("Failed to reorder queue");
+      console.error("Error reordering queue:", error);
+    } finally {
+      setQueueOperationLoading(false);
     }
+  } else {
+    args.showSuccessToast("Queue reordered");
   }
 };
 
@@ -564,6 +591,7 @@ return {
   videoQueue,
   setVideoQueue,
   queueLoading,
+  queueOperationLoading,
   getOwnershipId,
   loadQueueFromDatabase,
   addToQueue,
@@ -671,10 +699,13 @@ return {
   isOpen: args.fns.isQueueModalOpen,
   onClose: args.fns.closeQueueModal,
   videoQueue: args.fns.videoQueue,
+  setVideoQueue: args.fns.setVideoQueue,
   playVideo: args.fns.playVideo,
   removeFromQueue: args.fns.removeFromQueue,
   clearQueue: args.fns.clearQueue,
-  reorderQueue: args.fns.reorderQueue
+  reorderQueue: args.fns.reorderQueue,
+  getOwnershipId: args.fns.getOwnershipId,
+  executeYTOFunction: args.fns.executeYTOFunction
 };
 '''
       }

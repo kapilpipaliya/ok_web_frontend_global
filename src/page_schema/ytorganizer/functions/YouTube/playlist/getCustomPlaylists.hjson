@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getCustomPlaylists",
+        description: "Get all custom playlists for a YouTube ownership",
+        body: '''
+try {
+  // Extract input parameters
+  const { ownershipId } = args.contextData;
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
+  // Get current authenticated user
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+  }
+
+  // Get all custom playlists for this ownership
+  const playlistsResult = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+    WHERE p.isCustom = true
+    RETURN p, ps
+    ORDER BY p.createdAt DESC
+  `, { ownershipId });
+
+  const playlists = playlistsResult.records.map(record => {
+    return {
+      playlist: args.convertNodeToJson(record.get('p')),
+      playlistSetting: args.convertNodeToJson(record.get('ps'))
+    };
+  });
+
+  return {
+    success: true,
+    message: `Found ${playlists.length} custom playlist(s)`,
+    data: playlists
+  };
+
+} catch (error) {
+  console.error("Error getting custom playlists:", error);
+
+  return {
+    success: false,
+    message: error.message || "Failed to get custom playlists",
+    error: {
+      type: error.name || "GetCustomPlaylistsError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

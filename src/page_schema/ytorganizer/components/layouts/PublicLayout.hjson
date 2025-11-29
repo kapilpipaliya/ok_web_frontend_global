@@ -336,6 +336,14 @@ const navLinks = [
     }
   },
   {
+    id: "contact",
+    text: "Contact",
+    onClick: (e) => {
+      e.preventDefault();
+      args.navigate('/contact');
+    }
+  },
+  {
     id: "privacy",
     text: "Privacy",
     onClick: (e) => {
@@ -739,7 +747,10 @@ return `._id {
 return {
   as: "a",
   text: "Contact",
-  href: "mailto:support@ysaar.com"
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/contact');
+  }
 };
 ''',
         css: '''
@@ -747,6 +758,7 @@ return `._id {
   color: ${args.theme.var.color.text};
   text-decoration: none;
   transition: color 0.2s ease;
+  cursor: pointer;
 }
 
 ._id:hover {

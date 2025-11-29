@@ -1,0 +1,1793 @@
+{
+  vertexes: [
+    {
+      id: "admin_contact_submissions_page",
+      L: "Page",
+      P: {
+        key: "AdminContactSubmissions",
+        url: "/yto/admin/contact-submissions",
+        signinRequired: true,
+        title: "Contact Submissions - Admin - YSaar",
+        description: "View and manage contact form submissions",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "favicon_link",
+      L: "Attr",
+      P: {
+        displayOrder: 0.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "Layout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_layout_content",
+      L: "PageLayout",
+      P: {
+        componentName: "LayoutContent",
+        displayOrder: 2
+      }
+    },
+    {
+      id: "admin_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "AdminLayout",
+        displayOrder: 3
+      }
+    },
+    {
+      id: "main_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+// State management
+const [store, setStore] = args.createStore({
+  submissions: [],
+  loading: true,
+  tableLoading: false,
+  error: null,
+  searchQuery: '',
+  selectedSubmissions: [],
+  filterStatus: 'all', // all, new, read, responded, closed
+  currentPage: 1,
+  pageSize: 20,
+  totalCount: 0,
+  totalPages: 0
+});
+
+// Load submissions
+const loadSubmissions = async (page = store.currentPage, isRefresh = false) => {
+  // Use tableLoading for refreshes to avoid hiding the whole page
+  if (isRefresh) {
+    setStore('tableLoading', true);
+  } else {
+    setStore('loading', true);
+  }
+  setStore('error', null);
+
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: 'getContactSubmissions',
+      contextData: {}
+    });
+
+    const result = response.result;
+
+    if (result.success) {
+      let submissions = result.data.submissions || [];
+
+      // Apply search filter
+      if (store.searchQuery) {
+        const query = store.searchQuery.toLowerCase();
+        submissions = submissions.filter(sub =>
+          sub.P.name?.toLowerCase().includes(query) ||
+          sub.P.email?.toLowerCase().includes(query) ||
+          sub.P.message?.toLowerCase().includes(query)
+        );
+      }
+
+      // Apply status filter
+      if (store.filterStatus !== 'all') {
+        submissions = submissions.filter(sub =>
+          (sub.P.status || 'new') === store.filterStatus
+        );
+      }
+
+      const totalCount = submissions.length;
+      const totalPages = Math.ceil(totalCount / store.pageSize);
+      const offset = (page - 1) * store.pageSize;
+      const paginatedSubmissions = submissions.slice(offset, offset + store.pageSize);
+
+      setStore('submissions', paginatedSubmissions);
+      setStore('totalCount', totalCount);
+      setStore('totalPages', totalPages);
+      setStore('currentPage', page);
+    } else {
+      setStore('error', result.error || 'Failed to load submissions');
+    }
+  } catch (error) {
+    console.error('Load submissions error:', error);
+    setStore('error', 'An error occurred while loading submissions');
+  } finally {
+    setStore('loading', false);
+    setStore('tableLoading', false);
+  }
+};
+
+// Update submission status
+const updateStatus = async (submissionVertex, newStatus) => {
+  setStore('tableLoading', true);
+
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: 'updateContactStatus',
+      contextData: {
+        contactId: submissionVertex.id,
+        status: newStatus
+      }
+    });
+
+    const result = response.result;
+
+    if (result.success) {
+      args.showSuccessToast(`Status updated to ${newStatus}`);
+      await loadSubmissions(store.currentPage, true);
+    } else {
+      console.error('Update status failed:', result.error);
+      args.showErrorToast(result.error || 'Failed to update status');
+    }
+  } catch (error) {
+    console.error('Update status error:', error);
+    args.showErrorToast('An error occurred while updating status');
+  } finally {
+    setStore('tableLoading', false);
+  }
+};
+
+// Format date
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+  return `${Math.floor(diffDays / 365)}y ago`;
+};
+
+// Get status color
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'new': return args.theme.var.color.primary;
+    case 'read': return args.theme.var.color.info;
+    case 'responded': return args.theme.var.color.success;
+    case 'closed': return args.theme.var.color.muted;
+    default: return args.theme.var.color.text;
+  }
+};
+
+// Search handler with debounce
+let searchTimeout;
+const handleSearch = (query) => {
+  setStore('searchQuery', query);
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    setStore('currentPage', 1);
+    loadSubmissions(1, true);
+  }, 500);
+};
+
+// Filter handler
+const handleFilterChange = (status) => {
+  setStore('filterStatus', status);
+  setStore('currentPage', 1);
+  loadSubmissions(1, true);
+};
+
+// Pagination handlers
+const goToPage = (page) => {
+  if (page < 1 || page > store.totalPages) return;
+  loadSubmissions(page, true);
+};
+
+const goToNextPage = () => {
+  if (store.currentPage < store.totalPages) {
+    loadSubmissions(store.currentPage + 1, true);
+  }
+};
+
+const goToPreviousPage = () => {
+  if (store.currentPage > 1) {
+    loadSubmissions(store.currentPage - 1, true);
+  }
+};
+
+// Get visible page numbers
+const getVisiblePages = () => {
+  const pages = [];
+  const totalPages = store.totalPages;
+  const currentPage = store.currentPage;
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    pages.push(1);
+
+    if (currentPage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (currentPage < totalPages - 2) {
+      pages.push('...');
+    }
+
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+  }
+
+  return pages;
+};
+
+// Toggle selection
+const toggleSelection = (submissionId) => {
+  const selected = store.selectedSubmissions;
+  if (selected.includes(submissionId)) {
+    setStore('selectedSubmissions', selected.filter(id => id !== submissionId));
+  } else {
+    setStore('selectedSubmissions', [...selected, submissionId]);
+  }
+};
+
+// Select all
+const selectAll = () => {
+  setStore('selectedSubmissions', store.submissions.map(sub => sub.id));
+};
+
+// Clear selection
+const clearSelection = () => {
+  setStore('selectedSubmissions', []);
+};
+
+return {
+  store,
+  loadSubmissions,
+  updateStatus,
+  formatDate,
+  getStatusColor,
+  handleSearch,
+  handleFilterChange,
+  goToPage,
+  goToNextPage,
+  goToPreviousPage,
+  getVisiblePages,
+  toggleSelection,
+  selectAll,
+  clearSelection
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: args.fns.loadSubmissions
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 100%;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    // Header Section
+    {
+      id: "header_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${args.theme.var.spacing.md};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header_left",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Contact Submissions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize['2xl']};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "page_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const totalCount = args.fns.store.totalCount;
+const currentPage = args.fns.store.currentPage;
+const pageSize = args.fns.store.pageSize;
+const startIndex = (currentPage - 1) * pageSize + 1;
+const endIndex = Math.min(currentPage * pageSize, totalCount);
+
+return {
+  as: "p",
+  text: totalCount > 0 ? `Showing ${startIndex}-${endIndex} of ${totalCount} submissions` : `${totalCount} submissions`,
+  hide: () => args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    // Stats Summary
+    {
+      id: "stats_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "stat",
+        loop: true,
+        fns: '''
+return {
+  getStatsData: () => {
+    const submissions = args.fns.store.submissions;
+    const newCount = submissions.filter(sub => (sub.P.status || 'new') === 'new').length;
+    const readCount = submissions.filter(sub => sub.P.status === 'read').length;
+    const respondedCount = submissions.filter(sub => sub.P.status === 'responded').length;
+    const closedCount = submissions.filter(sub => sub.P.status === 'closed').length;
+
+    return [
+      { label: "New", value: newCount, icon: "carbon:email-new", color: "primary" },
+      { label: "Read", value: readCount, icon: "carbon:email", color: "info" },
+      { label: "Responded", value: respondedCount, icon: "carbon:checkmark", color: "success" },
+      { label: "Closed", value: closedCount, icon: "carbon:close", color: "muted" }
+    ];
+  }
+};
+''',
+        props: '''
+return {
+  as: "div",
+  data: args.fns.getStatsData(),
+  hide: () => args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "icon",
+  icon: stat.icon,
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+const stat = args.contextData.stat;
+return `._id {
+  color: ${args.theme.var.color[stat.color]};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "stat_badge_value",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "span",
+  text: stat.value
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_badge_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "span",
+  text: ` ${stat.label}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    // Toolbar Section
+    {
+      id: "toolbar_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "search_and_filters_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TextInput",
+        props: '''
+return {
+  type: "search",
+  placeholder: "Search by name, email, or message...",
+  value: args.fns.store.searchQuery,
+  leftIcon: "carbon:search",
+  onInput: (e) => {
+    args.fns.handleSearch(e.target.value);
+  }
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 250px;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_status_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "TomSelect",
+        props: '''
+return {
+  value: args.fns.store.filterStatus,
+  options: [
+    { value: "all", label: "All Status" },
+    { value: "new", label: "New" },
+    { value: "read", label: "Read" },
+    { value: "responded", label: "Responded" },
+    { value: "closed", label: "Closed" }
+  ],
+  placeholder: "Filter by status...",
+  search: false,
+  onChange: (value) => {
+    args.fns.handleFilterChange(value);
+  }
+};
+''',
+        css: '''
+return `._id {
+  min-width: 200px;
+}`;
+'''
+      }
+    },
+    // Bulk Actions Row
+    {
+      id: "bulk_actions_row",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.selectedSubmissions.length === 0
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.primary_light_100};
+  border: 1px solid ${args.theme.var.color.primary_light_300};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "bulk_actions_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const count = args.fns.store.selectedSubmissions.length;
+return {
+  as: "span",
+  text: `${count} submission${count === 1 ? '' : 's'} selected`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_light_100_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "bulk_action_clear",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Clear",
+  onClick: args.fns.clearSelection
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+      }
+    },
+    // Loading State
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Loading submissions...",
+  hide: () => !args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    // Error State
+    {
+      id: "error_state",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: args.fns.store.error || "An error occurred",
+  hide: () => !args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.error_light_50_text};
+  background: ${args.theme.var.color.error_light_50};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    // Table Container
+    {
+      id: "table_container",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  overflow: hidden;
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "table_loading_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => !args.fns.store.tableLoading
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: ${args.theme.var.borderRadius.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "table_loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "LoadingSpinner",
+        props: '''
+return {
+  size: "md"
+};
+'''
+      }
+    },
+    {
+      id: "table_scroll_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "submissions_table",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "table"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+      }
+    },
+    // Table Head
+    {
+      id: "table_head",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "thead"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "table_head_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+'''
+      }
+    },
+    {
+      id: "th_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  width: 40px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_checkbox_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submissions = args.fns.store.submissions;
+const allSelected = submissions.length > 0 && submissions.every(sub => args.fns.store.selectedSubmissions.includes(sub.id));
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: allSelected,
+  onChange: () => {
+    if (allSelected) {
+      args.fns.clearSelection();
+    } else {
+      args.fns.selectAll();
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_name",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Contact"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 200px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_message",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Message"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 300px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_status",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Status"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 120px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_submitted",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Submitted"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 110px;
+}`;
+'''
+      }
+    },
+    {
+      id: "th_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Actions"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 200px;
+}`;
+'''
+      }
+    },
+    // Table Body
+    {
+      id: "table_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "submission",
+        loop: true,
+        props: '''
+return {
+  as: "tbody",
+  data: args.fns.store.submissions
+};
+'''
+      }
+    },
+    {
+      id: "table_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
+
+return {
+  as: "tr",
+  "data-selected": isSelected
+};
+''',
+        css: '''
+const submission = args.contextData.submission;
+const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
+
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+
+  ${isSelected ? `
+    background: ${args.theme.var.color.primary_light_100} !important;
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "td_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_checkbox_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: isSelected,
+  onChange: () => args.fns.toggleSelection(submission.id)
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_contact",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_contact_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+return {
+  as: "div",
+  text: submission.P.name || 'N/A'
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_contact_email",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+return {
+  as: "div",
+  text: submission.P.email || 'N/A'
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_message",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+const message = submission.P.message || '';
+const truncated = message.length > 100 ? message.substring(0, 100) + '...' : message;
+
+return {
+  as: "td",
+  text: truncated,
+  title: message
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_status",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_status_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+const status = submission.P.status || 'new';
+const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+
+return {
+  as: "span",
+  text: statusText
+};
+''',
+        css: '''
+const submission = args.contextData.submission;
+const status = submission.P.status || 'new';
+
+const colors = {
+  new: { bg: args.theme.var.color.primary_light_100, text: args.theme.var.color.primary_light_100_text },
+  read: { bg: args.theme.var.color.info_light_100, text: args.theme.var.color.info_light_100_text },
+  responded: { bg: args.theme.var.color.success_light_100, text: args.theme.var.color.success_light_100_text },
+  closed: { bg: args.theme.var.color.background_dark_200, text: args.theme.var.color.background_dark_200_text }
+};
+
+const color = colors[status] || colors.new;
+
+return `._id {
+  display: inline-block;
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: ${color.bg};
+  color: ${color.text};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+  text-transform: capitalize;
+}`;
+'''
+      }
+    },
+    {
+      id: "td_submitted",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+const submittedText = args.fns.formatDate(submission.P.submittedAt);
+
+return {
+  as: "td",
+  text: submittedText
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "td_actions_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "statusOption",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: ['new', 'read', 'responded', 'closed']
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+  justify-content: center;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "status_action_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submission = args.contextData.submission;
+const status = args.contextData.statusOption;
+const isCurrentStatus = (submission.P.status || 'new') === status;
+const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+
+return {
+  as: "button",
+  text: statusText,
+  disabled: isCurrentStatus,
+  onClick: (e) => {
+    e.stopPropagation();
+    if (!isCurrentStatus) {
+      args.fns.updateStatus(submission, status);
+    }
+  }
+};
+''',
+        css: '''
+const submission = args.contextData.submission;
+const status = args.contextData.statusOption;
+const isCurrentStatus = (submission.P.status || 'new') === status;
+
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+  background: ${isCurrentStatus ? args.fns.getStatusColor(status) : args.theme.var.color.background};
+  color: ${isCurrentStatus ? 'white' : args.theme.var.color.text};
+  border: 1px solid ${isCurrentStatus ? args.fns.getStatusColor(status) : args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  cursor: ${isCurrentStatus ? 'not-allowed' : 'pointer'};
+  opacity: ${isCurrentStatus ? '0.7' : '1'};
+  text-transform: capitalize;
+  transition: all 0.2s ease;
+
+  ${!isCurrentStatus ? `
+    &:hover {
+      background: ${args.theme.var.color.background_dark_100};
+      border-color: ${args.fns.getStatusColor(status)};
+    }
+  ` : ''}
+}`;
+'''
+      }
+    },
+    // Pagination
+    {
+      id: "pagination_container",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error || args.fns.store.totalPages <= 1
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.lg};
+  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const totalCount = args.fns.store.totalCount;
+
+return {
+  as: "div",
+  text: `Page ${currentPage} of ${totalPages} (${totalCount} total)`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_buttons",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_prev_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentPage = args.fns.store.currentPage;
+const isDisabled = currentPage <= 1;
+
+return {
+  as: "button",
+  text: "← Previous",
+  onClick: args.fns.goToPreviousPage,
+  disabled: isDisabled
+};
+''',
+        css: '''
+const currentPage = args.fns.store.currentPage;
+const isDisabled = currentPage <= 1;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  opacity: ${isDisabled ? '0.5' : '1'};
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_pages_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "pageNum",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: args.fns.getVisiblePages()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_page_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const pageNum = args.contextData.pageNum;
+const currentPage = args.fns.store.currentPage;
+const isEllipsis = pageNum === '...';
+const isActive = pageNum === currentPage;
+
+return {
+  as: isEllipsis ? "span" : "button",
+  text: pageNum,
+  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  disabled: isActive
+};
+''',
+        css: '''
+const pageNum = args.contextData.pageNum;
+const currentPage = args.fns.store.currentPage;
+const isEllipsis = pageNum === '...';
+const isActive = pageNum === currentPage;
+
+return `._id {
+  min-width: 40px;
+  padding: ${args.theme.var.spacing.sm};
+  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background};
+  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: ${isActive ? '700' : '400'};
+  cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
+  transition: all 0.2s ease;
+  text-align: center;
+
+  ${!isEllipsis && !isActive ? `
+    &:hover {
+      background: ${args.theme.var.color.background_dark_100};
+      border-color: ${args.theme.var.color.primary};
+    }
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "pagination_next_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const isDisabled = currentPage >= totalPages;
+
+return {
+  as: "button",
+  text: "Next →",
+  onClick: args.fns.goToNextPage,
+  disabled: isDisabled
+};
+''',
+        css: '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const isDisabled = currentPage >= totalPages;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  opacity: ${isDisabled ? '0.5' : '1'};
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    // Empty State
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const submissions = args.fns.store.submissions;
+return {
+  as: "div",
+  text: "No submissions found matching your filters",
+  hide: () => submissions.length > 0 || args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    // Root structure
+    { id: "e1", T: "Attr", S: "admin_contact_submissions_page", E: "favicon_link" },
+    { id: "e2", T: "PageLayout", S: "admin_contact_submissions_page", E: "page_layout" },
+    { id: "e2b", T: "PageLayout", S: "admin_contact_submissions_page", E: "page_layout_content" },
+    { id: "e2c", T: "PageLayout", S: "admin_contact_submissions_page", E: "admin_layout" },
+    { id: "e3", T: "Attr", S: "admin_contact_submissions_page", E: "main_container" },
+
+    // Header
+    { id: "e4", T: "Attr", S: "main_container", E: "header_section" },
+    { id: "e5", T: "Attr", S: "header_section", E: "header_left" },
+    { id: "e6", T: "Attr", S: "header_left", E: "page_title" },
+    { id: "e7", T: "Attr", S: "header_left", E: "page_subtitle" },
+    { id: "e8", T: "Attr", S: "header_section", E: "stats_summary" },
+
+    // Stats
+    { id: "e9", T: "Attr", S: "stats_summary", E: "stat_badge" },
+    { id: "e10", T: "Attr", S: "stat_badge", E: "stat_badge_icon" },
+    { id: "e11", T: "Attr", S: "stat_badge", E: "stat_badge_content" },
+    { id: "e12", T: "Attr", S: "stat_badge_content", E: "stat_badge_value" },
+    { id: "e13", T: "Attr", S: "stat_badge_content", E: "stat_badge_label" },
+
+    // Toolbar
+    { id: "e14", T: "Attr", S: "main_container", E: "toolbar_section" },
+    { id: "e15", T: "Attr", S: "toolbar_section", E: "search_and_filters_row" },
+    { id: "e16", T: "Attr", S: "search_and_filters_row", E: "search_input" },
+    { id: "e17", T: "Attr", S: "search_and_filters_row", E: "filter_status_select" },
+    { id: "e18", T: "Attr", S: "toolbar_section", E: "bulk_actions_row" },
+    { id: "e19", T: "Attr", S: "bulk_actions_row", E: "bulk_actions_label" },
+    { id: "e20", T: "Attr", S: "bulk_actions_row", E: "bulk_action_clear" },
+
+    // States
+    { id: "e21", T: "Attr", S: "main_container", E: "loading_state" },
+    { id: "e22", T: "Attr", S: "main_container", E: "error_state" },
+
+    // Table
+    { id: "e23", T: "Attr", S: "main_container", E: "table_container" },
+    { id: "e23a", T: "Attr", S: "table_container", E: "table_loading_overlay" },
+    { id: "e23b", T: "Attr", S: "table_loading_overlay", E: "table_loading_spinner" },
+    { id: "e24", T: "Attr", S: "table_container", E: "table_scroll_wrapper" },
+    { id: "e25", T: "Attr", S: "table_scroll_wrapper", E: "submissions_table" },
+    { id: "e26", T: "Attr", S: "submissions_table", E: "table_head" },
+    { id: "e27", T: "Attr", S: "table_head", E: "table_head_row" },
+
+    // Table headers
+    { id: "e28", T: "Attr", S: "table_head_row", E: "th_checkbox" },
+    { id: "e29", T: "Attr", S: "th_checkbox", E: "th_checkbox_input" },
+    { id: "e30", T: "Attr", S: "table_head_row", E: "th_name" },
+    { id: "e31", T: "Attr", S: "table_head_row", E: "th_message" },
+    { id: "e32", T: "Attr", S: "table_head_row", E: "th_status" },
+    { id: "e33", T: "Attr", S: "table_head_row", E: "th_submitted" },
+    { id: "e34", T: "Attr", S: "table_head_row", E: "th_actions" },
+
+    // Table body
+    { id: "e35", T: "Attr", S: "submissions_table", E: "table_body" },
+    { id: "e36", T: "Attr", S: "table_body", E: "table_row" },
+
+    // Table row cells
+    { id: "e37", T: "Attr", S: "table_row", E: "td_checkbox" },
+    { id: "e38", T: "Attr", S: "td_checkbox", E: "td_checkbox_input" },
+    { id: "e39", T: "Attr", S: "table_row", E: "td_contact" },
+    { id: "e40", T: "Attr", S: "td_contact", E: "td_contact_name" },
+    { id: "e41", T: "Attr", S: "td_contact", E: "td_contact_email" },
+    { id: "e42", T: "Attr", S: "table_row", E: "td_message" },
+    { id: "e43", T: "Attr", S: "table_row", E: "td_status" },
+    { id: "e44", T: "Attr", S: "td_status", E: "td_status_badge" },
+    { id: "e45", T: "Attr", S: "table_row", E: "td_submitted" },
+    { id: "e46", T: "Attr", S: "table_row", E: "td_actions" },
+    { id: "e47", T: "Attr", S: "td_actions", E: "td_actions_container" },
+    { id: "e48", T: "Attr", S: "td_actions_container", E: "status_action_button" },
+
+    // Pagination
+    { id: "e49", T: "Attr", S: "main_container", E: "pagination_container" },
+    { id: "e50", T: "Attr", S: "pagination_container", E: "pagination_info" },
+    { id: "e51", T: "Attr", S: "pagination_container", E: "pagination_buttons" },
+    { id: "e52", T: "Attr", S: "pagination_buttons", E: "pagination_prev_button" },
+    { id: "e53", T: "Attr", S: "pagination_buttons", E: "pagination_pages_container" },
+    { id: "e54", T: "Attr", S: "pagination_pages_container", E: "pagination_page_button" },
+    { id: "e55", T: "Attr", S: "pagination_buttons", E: "pagination_next_button" },
+
+    // Empty state
+    { id: "e56", T: "Attr", S: "main_container", E: "empty_state" }
+  ]
+}

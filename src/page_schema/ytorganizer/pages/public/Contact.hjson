@@ -118,8 +118,32 @@ return `._id {
   font-size: 1.1rem;
   line-height: 1.6;
   color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "contact_owner_info",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "YSaar (KAPIL MULJIBHAI PIPALIYA)"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
   margin-bottom: 3rem;
   text-align: center;
+  font-weight: 600;
 }`;
 '''
       }
@@ -574,26 +598,27 @@ return {
     // Main content
     { id: "e4", T: "Attr", S: "contact_main", E: "contact_title" },
     { id: "e5", T: "Attr", S: "contact_main", E: "contact_subtitle" },
-    { id: "e6", T: "Attr", S: "contact_main", E: "contact_form" },
-    { id: "e7", T: "Attr", S: "contact_main", E: "alternative_contact" },
+    { id: "e6", T: "Attr", S: "contact_main", E: "contact_owner_info" },
+    { id: "e7", T: "Attr", S: "contact_main", E: "contact_form" },
+    { id: "e8", T: "Attr", S: "contact_main", E: "alternative_contact" },
 
     // Form fields
-    { id: "e8", T: "Attr", S: "contact_form", E: "name_field_group" },
-    { id: "e9", T: "Attr", S: "name_field_group", E: "name_label" },
-    { id: "e10", T: "Attr", S: "name_field_group", E: "name_input" },
+    { id: "e9", T: "Attr", S: "contact_form", E: "name_field_group" },
+    { id: "e10", T: "Attr", S: "name_field_group", E: "name_label" },
+    { id: "e11", T: "Attr", S: "name_field_group", E: "name_input" },
 
-    { id: "e11", T: "Attr", S: "contact_form", E: "email_field_group" },
-    { id: "e12", T: "Attr", S: "email_field_group", E: "email_label" },
-    { id: "e13", T: "Attr", S: "email_field_group", E: "email_input" },
+    { id: "e12", T: "Attr", S: "contact_form", E: "email_field_group" },
+    { id: "e13", T: "Attr", S: "email_field_group", E: "email_label" },
+    { id: "e14", T: "Attr", S: "email_field_group", E: "email_input" },
 
-    { id: "e14", T: "Attr", S: "contact_form", E: "message_field_group" },
-    { id: "e15", T: "Attr", S: "message_field_group", E: "message_label" },
-    { id: "e16", T: "Attr", S: "message_field_group", E: "message_textarea" },
+    { id: "e15", T: "Attr", S: "contact_form", E: "message_field_group" },
+    { id: "e16", T: "Attr", S: "message_field_group", E: "message_label" },
+    { id: "e17", T: "Attr", S: "message_field_group", E: "message_textarea" },
 
-    { id: "e17", T: "Attr", S: "contact_form", E: "submit_button" },
+    { id: "e18", T: "Attr", S: "contact_form", E: "submit_button" },
 
     // Alternative contact
-    { id: "e18", T: "Attr", S: "alternative_contact", E: "alternative_contact_title" },
-    { id: "e19", T: "Attr", S: "alternative_contact", E: "email_contact_info" }
+    { id: "e19", T: "Attr", S: "alternative_contact", E: "alternative_contact_title" },
+    { id: "e20", T: "Attr", S: "alternative_contact", E: "email_contact_info" }
   ]
 }
