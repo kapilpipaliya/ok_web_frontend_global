@@ -62,9 +62,8 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
   // Helper to create function arguments with a given functionProxy
   const createFunctionArgumentGetter = (fnProxy: Record<string, unknown>) => {
     const getFunctionArg = () => {
-      const metaVertex = options.props.meta;
-      if (!metaVertex) return {} as FunctionArgumentType;
-
+      // Continue even if meta is undefined - provide maximum possible result
+      // Access props reactively so changes are tracked
       return createFunctionArgumentBase(
         options.props as { meta: Vertex; data?: Vertex},
         {

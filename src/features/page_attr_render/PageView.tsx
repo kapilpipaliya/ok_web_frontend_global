@@ -3,19 +3,10 @@ import {
   Match,
   Show,
   Switch,
-  getOwner,
   createSignal,
-  onCleanup,
+  onCleanup, createEffect, createComputed,
 } from "solid-js";
 import { createStore } from "solid-js/store";
-import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/styled/modal/Toast";
-import { useZIndex } from "~/components/fields/ZIndex";
-import { useTheme } from "~/lib/theme/ThemeContext";
-import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
-import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
-import { useDataContext } from "~/features/page_attr_render/context/DataContext";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
@@ -23,13 +14,10 @@ import {
   usePreviewContext,
   type PreviewStoreObject,
 } from "~/features/page_designer/context/PreviewContext";
-import { DataContext } from "~/features/page_attr_render/context/DataContext";
 import {
   PageRenderContextProvider,
   type PageRenderObject,
 } from "./context/PageRenderContext";
-import { createFunctionProxy } from "~/components/form/createFunctionProxy";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -38,10 +26,8 @@ import { evalExpression } from "~/lib/expression_eval";
 import { ComponentWrapper } from "./ComponentWrapper";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
-import { createFunctionArgumentWithValue } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentWithValue";
-import { createFunctionArgumentBase } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentBase";
-import { createDynamicFunctions } from "~/components/form/dynamic_component/functions/function_argument/createDynamicFunctions";
 import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
+import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
 import { HtmlField } from "~/components/fields/HtmlField";
 import { DataInternal } from "~/components/fields/data/DataInternal";
 
@@ -210,103 +196,33 @@ export function PageView(
   };
 
   const MainContentDataWrapper = () => {
-    // Context hooks needed for function arguments
-    const toast = useToast();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const zIndex = useZIndex();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const theme = useTheme();
-    const themeToggle = useThemeToggle();
-    const owner = getOwner();
-    const parentItems = usePageRenderContext();
-    const contextData = useDataContext() || {};
-    const [ref, setRef] = createSignal<HTMLElement | null>(null);
-    const [mounted, setMounted] = createSignal<null | boolean>(null);
+    const [graph] = useGraph();
     const [componentName] = createSignal<string>("Html");
 
-    const parentRenderContext = () =>
-      getLastItem(parentItems)?.[0] as
-        | { context: FunctionArgumentType }
-        | undefined;
-    const parentMeta = () => parentRenderContext()?.context.meta;
-
-    // Helper to create function arguments with a given functionProxy
-    const createFunctionArgumentGetter = (fnProxy: Record<string, unknown>) => {
-      const getFunctionArg = () => {
-        const meta = props.metaVertex;
-        if (!meta) return {} as FunctionArgumentType;
-
-        return createFunctionArgumentBase(
-          {
-            data: props.data,
-            meta,
+    // Use the centralized function proxy hook
+    const { functionProxy, getFunctionArgumentWithValue, setRef, setMounted } =
+      useFunctionProxy({
+        // props is not a proxy!
+        props: {
+          get meta() {
+            return props.metaVertex;
           },
-          {
-            formVertex: () => ({}) as any,
-            formId: "page-view",
-            componentName,
-            isNoPermissionCheck: () => props.isNoPermissionCheck,
-            isViewMode: () => false,
-            mounted,
-            parentMeta,
-            ref,
-            setRef,
-            updateValue: () => {},
-            onChange: () => {},
-            hasFullPermission: () => true,
-            hasEditPermission: () => true,
-            hasCreatePermission: () => true,
-            hasViewPermission: () => true,
+          get data() {
+            return props.data;
           },
-          {
-            graph,
-            setGraph,
-            toast,
-            searchParams,
-            setSearchParams,
-            zIndex,
-            navigate,
-            location,
-            theme,
-            parentItems,
-            previewStore: previewStore2,
-            themeToggle,
-            owner: owner!,
-            parentRenderContext,
-            functionProxy: fnProxy,
-          },
-        );
-      };
-
-      return () =>
-        createFunctionArgumentWithValue(getFunctionArg, () => undefined);
-    };
-
-    // Create temporary function proxy that falls back to parent context
-    const tempFunctionProxy = createFunctionProxy(
-      () => ({}),
-      parentRenderContext,
-    );
-
-    // Create dynamic functions using temp function arguments
-    const dynamicFns = createDynamicFunctions(
-      graph,
-      () => props.metaVertex,
-      createMemo(createFunctionArgumentGetter(tempFunctionProxy)),
-      parentRenderContext,
-      componentName,
-    );
-
-    // Create the real function proxy with actual dynamicFns
-    const functionProxy = createFunctionProxy(
-      () => dynamicFns,
-      parentRenderContext,
-    );
-
-    // Create final function arguments with real functionProxy
-    const getFunctionArgumentWithValue =
-      createFunctionArgumentGetter(functionProxy);
+        },
+        componentName,
+        formId: "page-view",
+        isNoPermissionCheck: () => props.isNoPermissionCheck ?? false,
+        isViewMode: () => false,
+        value: () => undefined,
+        updateValue: () => {},
+        onChange: () => {},
+        hasFullPermission: () => props.hasFullPermission ?? true,
+        hasEditPermission: () => props.hasEditPermission ?? true,
+        hasCreatePermission: () => props.hasCreatePermission ?? true,
+        hasViewPermission: () => props.hasViewPermission ?? true,
+      });
 
     // Evaluate dynamic props from metaVertex
     const dynamicProps = createDynamicPropsMemo(

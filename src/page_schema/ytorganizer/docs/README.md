@@ -31,6 +31,7 @@ The system uses a multi-ownership architecture where each user can connect multi
 (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
 (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
+(YouTubeOwnership)-[:YouTubeOwnershipVideoQueue]->(VideoQueue {position, addedAt})-[:VideoQueueVideo]->(Video)
 
 (Setting {type: 'oauth'})-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
 (Setting {type: 'oauth'})-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
@@ -150,6 +151,11 @@ The system supports connecting multiple YouTube accounts per user, with each acc
   - `category`: Feedback category ('general', 'bug', 'feature', 'improvement', 'other')
   - `status`: Feedback status (default: 'pending')
   - `createdAt`: Timestamp
+- **VideoQueue**: Video player queue entries (per ownership)
+  - `key`: Unique identifier (`video_queue_${ownershipId}_${videoId}_${timestamp}`)
+  - `position`: Integer order in queue (0, 1, 2, etc.)
+  - `addedAt`: Timestamp when video was added to queue
+  - `createdAt`, `updatedAt`: Timestamps
 - **YouTubeToken**: OAuth 2.0 tokens for YouTube API access
   - `key`: Unique identifier (`youtube_token_${userId}`)
   - `accessToken`: Encrypted OAuth access token
@@ -201,6 +207,19 @@ The application implements a centralized multi-ownership management system throu
 - `fetchOwnerships()` - Retrieves all connected accounts and auto-selects primary or first account
 - `selectOwnership(ownership)` - Switches active account, updates lastSelected, refreshes quota
 - `getSelectedOwnershipId()` - Helper to get current ownershipId
+
+**Video Queue Management:**
+- `videoQueue` - Signal containing array of queued videos (persisted in database)
+- `queueLoading` - Loading state for queue operations
+- `loadQueueFromDatabase()` - Loads queue from database for current ownership
+- `addToQueue(video)` - Adds video to queue with database persistence
+- `removeFromQueue(index)` - Removes video from queue with database persistence
+- `clearQueue()` - Clears entire queue with database persistence
+- `reorderQueue(fromIndex, toIndex)` - Reorders videos in queue with database persistence
+- `playNext()` - Plays next video from queue and updates database
+- Queue persists across page reloads and browser restarts
+- Each ownership has an independent queue
+- Videos can be reordered using move up/down buttons in the Queue Modal
 
 **Ownership Selector UI:**
 - Dropdown in left navigation showing all connected YouTube accounts
@@ -267,6 +286,7 @@ All components follow the YTO prefix naming convention:
 - **Button**: Reusable button component with variants (primary, secondary, danger)
 - **PageTitle**: Consistent page title component
 - **FeedbackModal**: Modal for collecting user feedback
+- **VirtualList**: High-performance virtual scrolling component for rendering large lists
 
 #### Pages
 
@@ -574,7 +594,7 @@ Users can set their preferred language through LanguageSetting vertex:
 /src/page_schema/ytorganizer/
 ├── components/
 │   ├── layouts/
-│   │   ├── Layout.hjson              # Main layout with multi-ownership state management
+│   │   ├── Layout.hjson              # Main layout with multi-ownership state and queue management
 │   │   ├── AdminLayout.hjson         # Admin section layout with navigation
 │   │   └── YTOTabBar.hjson              # Tab navigation component
 │   ├── buttons/
@@ -587,10 +607,14 @@ Users can set their preferred language through LanguageSetting vertex:
 │   │   ├── YTOPlaylistCard.hjson        # YouTube playlist display card
 │   │   ├── YTOVideoCard.hjson           # YouTube video display card
 │   │   ├── Card.hjson                # Generic card component
-│   ├── shared/
+│   ├── ui/
 │   │   ├── YouTubeAttribution.hjson  # YouTube branding compliance
 │   │   ├── PageTitle.hjson           # Page title component
-│   │   └── FeedbackModal.hjson       # User feedback modal
+│   │   ├── FeedbackModal.hjson       # User feedback modal
+│   │   ├── VirtualList.hjson         # High-performance virtual scrolling component
+│   │   ├── ProcessingStatus.hjson    # Processing status indicator
+│   │   ├── LoadingSpinner.hjson      # Loading spinner component
+│   │   └── ... (other UI components)
 ├── pages/
 │   ├── main/
 │   │   ├── Home.hjson                # Dashboard/home page
@@ -622,6 +646,13 @@ Users can set their preferred language through LanguageSetting vertex:
 │   │   ├── getPlaylistsWithVideoCount.hjson # Get playlists with video counts
 │   │   ├── getYouTubeOwnerships.hjson   # Get all connected YouTube accounts
 │   │   ├── updateOwnershipLastSelected.hjson # Track ownership selection
+│   │   ├── queue/
+│   │   │   ├── loadVideoQueue.hjson     # Load queue from database
+│   │   │   ├── saveVideoQueue.hjson     # Save entire queue to database
+│   │   │   ├── addVideoToQueue.hjson    # Add video to queue
+│   │   │   ├── removeVideoFromQueue.hjson # Remove video from queue
+│   │   │   ├── clearVideoQueue.hjson    # Clear entire queue
+│   │   │   └── reorderVideoQueue.hjson  # Reorder video positions in queue
 │   │   └── ... (60+ YouTube functions) # All updated for shared quota architecture
 │   └── admin/
 │       ├── getSharedQuotaStatus.hjson   # Get shared quota status
@@ -690,6 +721,22 @@ Users can set their preferred language through LanguageSetting vertex:
 3. **Custom Video Ordering**: In playlist view, drag and drop videos to reorder. Custom order is saved to PlaylistSetting vertex
 4. **Sort Modes**: Switch between 'custom', 'date', 'title', 'index' (original YouTube order). Custom order persists across sessions for each ownership
 
+### Video Queue Management
+1. **Add to Queue**: Click the queue button on any video to add it to your playback queue
+2. **Queue Persistence**: Queue is automatically saved to database and persists across sessions
+3. **Per-Ownership Queues**: Each YouTube account has its own independent queue
+4. **Queue Operations**:
+   - **View Queue**: Click queue button in video player to see all queued videos
+   - **Play from Queue**: Click "Play now" in queue modal to jump to any video
+   - **Remove from Queue**: Click remove button to remove specific videos
+   - **Reorder Queue**: Use move up/down arrow buttons to change video order in queue
+   - **Clear Queue**: Use "Clear All" button to empty entire queue
+   - **Auto-play**: Videos automatically play next when current video ends
+5. **Queue Loading**: Queue is loaded from database when:
+   - Page loads or refreshes
+   - User switches between YouTube accounts
+   - User logs in
+
 ## Component Architecture
 
 ### Add Button Components
@@ -731,6 +778,263 @@ The system uses specialized add button components that encapsulate both the floa
 - **Reusability**: Can be used across different pages
 - **Consistency**: Standardized form behavior and validation
 - **Maintainability**: Changes to add functionality isolated to specific components
+
+### VirtualList Component
+
+The **VirtualList** component provides high-performance virtual scrolling for rendering large lists efficiently. It only renders items that are visible in the viewport plus an overscan buffer, dramatically improving performance for lists with thousands of items.
+
+**Features:**
+- **Virtual Scrolling**: Only renders visible items + overscan
+- **Fixed Item Heights**: Optimized for consistent item sizes
+- **Scroll Management**: Automatic scroll position tracking
+- **Flexible Rendering**: Child components define item rendering
+- **Customizable**: Configurable item height, overscan, and container styling
+
+**Component Variants:**
+- `items`: Array of items to render (default: `[]`)
+- `itemHeight`: Height of each item in pixels (default: `90`)
+- `overscan`: Number of items to render outside viewport (default: `5`)
+- `onScroll`: Custom scroll event handler (optional)
+- `containerClass`: CSS class for container element (optional)
+
+**Usage Pattern:**
+
+The VirtualList component uses a child-based rendering pattern where you define Attr components as children to specify how items should be rendered:
+
+```hjson
+{
+  vertexes: [
+    {
+      id: "list_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "VirtualList",
+        props: '''
+// Filtered items from parent context
+const filteredItems = args.fns.filteredItems();
+
+return {
+  items: filteredItems,
+  itemHeight: 90,
+  overscan: 5,
+  containerClass: "my-custom-list"
+};
+'''
+      }
+    },
+    {
+      id: "item_renderer",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        slotName: "children",
+        props: '''
+// VirtualList provides item context with {item, virtualItem, index}
+const itemContext = args.contextData.item;
+const itemData = itemContext.item;
+
+// Access your item data (e.g., channel, playlist, video)
+const channel = itemData.channel;
+const channelSetting = itemData.channelSetting;
+
+return {
+  as: "div",
+  onClick: () => handleItemClick(itemData)
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_100};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "item_thumbnail",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const itemContext = args.contextData.item;
+const itemData = itemContext.item;
+const channel = itemData.channel;
+
+return {
+  as: "img",
+  src: channel?.P?.thumbnailHigh || channel?.P?.thumbnailMedium || "",
+  alt: channel?.P?.title || "Channel thumbnail"
+};
+''',
+        css: '''
+return `._id {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "item_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const itemContext = args.contextData.item;
+const itemData = itemContext.item;
+const channel = itemData.channel;
+const channelSetting = itemData.channelSetting;
+
+const title = channelSetting?.P?.customName || channel?.P?.title || "Unknown";
+const subtitle = `${channel?.P?.videoCount || 0} videos`;
+
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "item_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const itemContext = args.contextData.item;
+const itemData = itemContext.item;
+const channel = itemData.channel;
+const channelSetting = itemData.channelSetting;
+
+const title = channelSetting?.P?.customName || channel?.P?.title || "Unknown";
+
+return {
+  as: "div",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "item_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const itemContext = args.contextData.item;
+const itemData = itemContext.item;
+const channel = itemData.channel;
+
+const subtitle = `${channel?.P?.videoCount || 0} videos`;
+
+return {
+  as: "div",
+  text: subtitle
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "list_container", E: "item_renderer" },
+    { id: "e2", T: "Attr", S: "item_renderer", E: "item_thumbnail" },
+    { id: "e3", T: "Attr", S: "item_renderer", E: "item_info" },
+    { id: "e4", T: "Attr", S: "item_info", E: "item_title" },
+    { id: "e5", T: "Attr", S: "item_info", E: "item_subtitle" }
+  ]
+}
+```
+
+**How It Works:**
+
+1. **VirtualList** component manages:
+   - Scroll position tracking via `scrollTop` signal
+   - Visible range calculation based on viewport size and item height
+   - Virtual items array containing only visible items with their positions
+   - Total container height calculation
+
+2. **Context Data** provided to children via `args.contextData.item`:
+   - `item`: The actual data item from the array
+   - `virtualItem`: Object with `{ index, start, size }` for positioning
+   - `index`: The item's index in the array
+
+3. **Child Components** define rendering:
+   - Use `slotName: "children"` to render inside VirtualList's Slot
+   - Access item data via `args.contextData.item.item`
+   - Access positioning info via `args.contextData.item.virtualItem`
+   - Define custom layout and styling
+
+**Performance Benefits:**
+- Renders only ~10-20 items for a viewport showing 6-8 items (with overscan of 5)
+- Handles lists of 1000+ items without performance degradation
+- Smooth scrolling experience even on mobile devices
+- Minimal memory footprint compared to rendering all items
+
+**Advanced Usage:**
+
+Custom scroll handler:
+```javascript
+props: '''
+return {
+  items: myItems,
+  itemHeight: 100,
+  onScroll: (e) => {
+    // Custom scroll logic
+    const scrollPercentage = (e.target.scrollTop / (e.target.scrollHeight - e.target.clientHeight)) * 100;
+    if (scrollPercentage > 80) {
+      // Load more items when nearing bottom
+      loadMoreItems();
+    }
+  }
+};
+'''
+```
+
+Dynamic item height (use function):
+```javascript
+props: '''
+return {
+  items: myItems,
+  itemHeight: () => {
+    // Return dynamic height based on state
+    return args.fns.isCompactMode() ? 60 : 90;
+  }
+};
+'''
+```
+
+**File Location:**
+`/src/page_schema/ytorganizer/components/ui/VirtualList.hjson`
 
 ## Development Guidelines
 
@@ -1460,7 +1764,24 @@ This documentation serves as the foundation for implementing the YSaar system an
 
 ## Recent Updates
 
-### Version 3.2 - Corrected Schema Architecture (Current)
+### Version 3.3 - Video Queue Persistence (Current)
+- ✅ **Database-Backed Queue**: Video player queue now persists in database
+- ✅ **VideoQueue Vertex**: New graph node for storing queue entries
+- ✅ **Per-Ownership Queues**: Each YouTube account has independent queue
+- ✅ **Queue Functions**: Six server functions for queue management
+  - `loadVideoQueue` - Load queue from database
+  - `saveVideoQueue` - Save entire queue (bulk operation)
+  - `addVideoToQueue` - Add single video with duplicate checking
+  - `removeVideoFromQueue` - Remove video and reorder positions
+  - `clearVideoQueue` - Clear entire queue
+  - `reorderVideoQueue` - Change video position in queue with automatic reordering
+- ✅ **Queue Reordering UI**: Move up/down buttons in Queue Modal for easy reordering
+- ✅ **Optimistic Updates**: Instant UI feedback with database sync
+- ✅ **Auto-Reload**: Queue loads on page refresh and ownership switch
+- ✅ **Error Handling**: Rollback on database errors with toast notifications
+- ✅ **Session Persistence**: Queue survives browser restarts
+
+### Version 3.2 - Corrected Schema Architecture
 - ✅ **Per-Ownership Playlist Membership**: Changed from global `(Playlist)-[:PlaylistVideo]->(Video)` to per-ownership `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)`
 - ✅ **Global Video Setting**: VideoSetting remain at ownership level for global properties (watched, notes, favourites)
 - ✅ **Independent Playlist Management**: Videos can be removed from individual playlists without affecting other playlists

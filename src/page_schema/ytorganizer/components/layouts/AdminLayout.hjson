@@ -94,6 +94,14 @@ return {
                 pathCheck: (pathname) => pathname === "/yto/admin/feedback"
               },
               {
+                id: "contact_submissions",
+                href: "/yto/admin/contact-submissions",
+                label: "Contact Submissions",
+                icon: "carbon:email",
+                title: "View and manage contact form submissions",
+                pathCheck: (pathname) => pathname === "/yto/admin/contact-submissions"
+              },
+              {
                 id: "api_keys",
                 href: "/yto/admin/api-keys",
                 label: "API Keys",

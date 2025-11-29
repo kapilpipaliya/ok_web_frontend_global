@@ -8,15 +8,15 @@
         props: '''
 return {
   onMount: async () => {
-    // Load saved ownership state from sessionStorage
-    args.fns.loadOwnershipState();
-
     // Load sidebar state from database
     await args.fns.loadSidebarState();
 
-    // Fetch ownerships (will auto-select first one if none selected)
-    // This will trigger fetchQuotaUsage() and loadCardFieldSetting() via selectOwnership()
-    await args.fns.fetchOwnerships();
+    // Refresh quota usage and card field setting for current ownership
+    // Ownership is already loaded by parent Layout component
+    if (args.fns.getSelectedOwnershipId?.()) {
+      await args.fns.fetchQuotaUsage();
+      await args.fns.loadCardFieldSetting();
+    }
 
     // Refresh quota usage every 5 minutes
     const quotaInterval = setInterval(() => {
@@ -205,11 +205,6 @@ const mobileNavigationItems = args.createMemo(() => {
   });
 });
 
-// YouTube Ownership state management (multi-account support)
-const [ownerships, setOwnerships] = args.createSignal([]);
-const [selectedOwnership, setSelectedOwnership] = args.createSignal(null);
-const [ownershipsLoading, setOwnershipsLoading] = args.createSignal(false);
-
 // Quota usage state management
 const [quotaUsage, setQuotaUsage] = args.createSignal(null);
 const [quotaLoading, setQuotaLoading] = args.createSignal(false);
@@ -221,130 +216,28 @@ const [cardFieldSetting, setCardFieldSetting] = args.createSignal();
 const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = args.createSignal(false);
 const [playlistModalVideo, setPlaylistModalVideo] = args.createSignal(null);
 
-// Get selected ownershipId for contextData
-const getSelectedOwnershipId = () => {
-  const ownership = selectedOwnership();
-  return ownership?.P?.key || null;
-};
-
-// Get impersonatedUserUuid for contextData
-const getImpersonatedUserUuid = () => {
-  const impersonated = args.fns.impersonatedUser?.();
-  return impersonated?.P?.uuid || null;
-};
-
-// Wrapper for executeNamedServerFunction that automatically includes impersonatedUserUuid and ownershipId
-const executeYTOFunction = async (functionName, contextData = {}) => {
-  const impersonatedUserUuid = getImpersonatedUserUuid();
-  const ownershipId = getSelectedOwnershipId();
-
-  return await args.executeNamedServerFunction({
-    functionName,
-    contextData: {
-      ...contextData,
-      // Only add impersonatedUserUuid if it exists (admin is impersonating)
-      ...(impersonatedUserUuid ? { impersonatedUserUuid } : {}),
-      // Add ownershipId if selected (required for most operations)
-      ...(ownershipId ? { ownershipId } : {})
-    }
-  });
-};
-
-// Fetch all YouTube ownerships for the user (including disconnected)
-const fetchOwnerships = async () => {
-  setOwnershipsLoading(true);
-  try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "getAllYouTubeOwnerships",
-      contextData: {}
-    });
-
-    if (result?.result?.success && result?.result?.data) {
-      // Extract ownership objects and connection status
-      const ownershipsData = result.result.data;
-      const ownershipsList = ownershipsData.map(item => ({
-        ...item.ownership,
-        _isConnected: item.isConnected // Store connection status
-      }));
-      setOwnerships(ownershipsList);
-
-      // If no ownership is selected and we have ownerships, select the first connected one
-      // or first in list if no connected ownerships
-      if (!selectedOwnership() && ownershipsList.length > 0) {
-        const connectedOwnerships = ownershipsList.filter(o => o._isConnected);
-        const primaryOwnership = connectedOwnerships.find(o => o.P.isPrimary);
-        const defaultOwnership = primaryOwnership || connectedOwnerships[0] || ownershipsList[0];
-        await selectOwnership(defaultOwnership);
-      } else if (selectedOwnership()) {
-        // If an ownership is already selected (from sessionStorage),
-        // verify it still exists in the fetched list
-        const currentOwnershipId = selectedOwnership().P.key;
-        const stillExists = ownershipsList.find(o => o.P.key === currentOwnershipId);
-
-        if (!stillExists && ownershipsList.length > 0) {
-          // Selected ownership no longer exists, select first available connected ownership
-          const connectedOwnerships = ownershipsList.filter(o => o._isConnected);
-          const primaryOwnership = connectedOwnerships.find(o => o.P.isPrimary);
-          const defaultOwnership = primaryOwnership || connectedOwnerships[0] || ownershipsList[0];
-          await selectOwnership(defaultOwnership);
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching ownerships:', error);
-    args.showErrorToast('Failed to load YouTube accounts');
-  } finally {
-    setOwnershipsLoading(false);
-  }
-};
-
-// Select a YouTube ownership (account)
+// Ownership management functions are automatically available from parent Layout via args.fns
+// Just create a wrapper for selectOwnership to also refresh quota and card settings
 const selectOwnership = async (ownership) => {
-  if (!ownership) return;
-
-  setSelectedOwnership(ownership);
-
-  // Save to sessionStorage
-  sessionStorage.setItem('yto_selectedOwnership', JSON.stringify(ownership));
-
-  // Update lastSelected on server
-  try {
-    await args.executeNamedServerFunction({
-      functionName: "updateOwnershipLastSelected",
-      contextData: { ownershipId: ownership.P.key }
-    });
-  } catch (error) {
-    console.error('Error updating ownership lastSelected:', error);
-  }
+  // Call parent's selectOwnership (which handles selection and queue loading)
+  await args.fns.selectOwnership?.(ownership);
 
   // Refresh data for the new ownership
   await fetchQuotaUsage();
   await loadCardFieldSetting();
 };
 
-// Load ownership state from sessionStorage
-const loadOwnershipState = () => {
-  const storedOwnership = sessionStorage.getItem('yto_selectedOwnership');
-  if (storedOwnership) {
-    try {
-      const ownership = JSON.parse(storedOwnership);
-      setSelectedOwnership(ownership);
-    } catch (e) {
-      // Ignore parsing errors
-    }
-  }
-};
 
 // Fetch shared quota usage from server (10k units/day shared across all ownerships)
 const fetchQuotaUsage = async () => {
   // Don't fetch if no ownership selected
-  if (!getSelectedOwnershipId()) {
+  if (!args.fns.getSelectedOwnershipId?.()) {
     return;
   }
 
   setQuotaLoading(true);
   try {
-    const result = await executeYTOFunction('getSharedQuotaStatus', {});
+    const result = await args.fns.executeYTOFunction?.('getSharedQuotaStatus', {});
     if (result?.result?.data) {
       setQuotaUsage(result.result.data);
     }
@@ -399,7 +292,7 @@ const getQuotaUsagePercentage = () => {
 // Load card field setting from user setting
 const loadCardFieldSetting = async () => {
   try {
-    const result = await executeYTOFunction('getYTOUserSetting', {});
+    const result = await args.fns.executeYTOFunction?.('getYTOUserSetting', {});
     if (result?.result?.success && result?.result?.data?.setting) {
       const setting = result.result.data.setting;
       if (setting.P.cardFieldSetting) {
@@ -434,7 +327,7 @@ const saveCardFieldSetting = async (newSetting) => {
     setCardFieldSetting(validated);
 
     // Save to backend
-    const result = await executeYTOFunction('saveYTOUserSetting', {
+    const result = await args.fns.executeYTOFunction?.('saveYTOUserSetting', {
       setting: {
         cardFieldSetting: validated
       }
@@ -463,7 +356,7 @@ const playPlaylist = async (playlist) => {
     }
 
     // Get playlist videos
-    const result = await executeYTOFunction("getPlaylistVideos", { playlistId });
+    const result = await args.fns.executeYTOFunction?.("getPlaylistVideos", { playlistId });
 
     if (result?.result?.success && result?.result?.data?.videos) {
       const videos = result.result.data.videos;
@@ -507,7 +400,7 @@ const addPlaylistToQueue = async (playlist) => {
     }
 
     // Get playlist videos
-    const result = await executeYTOFunction("getPlaylistVideos", { playlistId });
+    const result = await args.fns.executeYTOFunction?.("getPlaylistVideos", { playlistId });
 
     if (result?.result?.success && result?.result?.data?.videos) {
       const videos = result.result.data.videos;
@@ -554,7 +447,7 @@ const addPlaylistToQueue = async (playlist) => {
 // Add video to playlists
 const addVideoToPlaylists = async (data) => {
   try {
-    const result = await executeYTOFunction("addVideoToPlaylists", data);
+    const result = await args.fns.executeYTOFunction?.("addVideoToPlaylists", data);
 
     if (result?.result?.success) {
       args.showSuccessToast(result.result.message);
@@ -710,20 +603,17 @@ const loadSidebarState = async () => {
 };
 
 return {
+  // Navigation
   navigationSections,
   setNavigationSections,
   mobileNavigationItems,
+  // Sidebar
   isSidebarCollapsed,
   toggleSidebar,
   loadSidebarState,
-  ownerships,
-  selectedOwnership,
-  ownershipsLoading,
-  fetchOwnerships,
+  // Ownership management wrapper (delegates to parent Layout via args.fns)
   selectOwnership,
-  loadOwnershipState,
-  getSelectedOwnershipId,
-  executeYTOFunction,
+  // Quota
   quotaUsage,
   quotaLoading,
   fetchQuotaUsage,
@@ -731,16 +621,20 @@ return {
   isAtQuotaLimit,
   getQuotaResetTime,
   getQuotaUsagePercentage,
+  // Card fields
   cardFieldSetting,
   loadCardFieldSetting,
   saveCardFieldSetting,
+  // Playlist actions
   playPlaylist,
   addPlaylistToQueue,
+  // Add to playlist modal
   isAddToPlaylistModalOpen,
   playlistModalVideo,
   openAddToPlaylistModal,
   closeAddToPlaylistModal,
   addVideoToPlaylists,
+  // Utilities
   getStatusInfo,
   getPriorityInfo
 };

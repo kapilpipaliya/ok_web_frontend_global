@@ -222,6 +222,16 @@ return {
       enabled: true
     },
     {
+      title: "Contact Submissions",
+      description: "View and manage contact form submissions. Review messages from users, update submission status, and respond to inquiries.",
+      icon: "carbon:email",
+      iconBg: "primary_light_100",
+      hoverBorder: "primary",
+      link: "/yto/admin/contact-submissions",
+      linkText: "View Submissions",
+      enabled: true
+    },
+    {
       title: "Global Settings",
       description: "Configure system-wide settings, themes, and application preferences. Manage global configuration options.",
       icon: "carbon:settings",

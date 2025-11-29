@@ -31,8 +31,10 @@ return {
 };
 ''',
         props: '''
+const containerClass = args.contextData.props?.class || "";
 return {
-  as: "div"
+  as: "div",
+  class: containerClass,
 };
 ''',
         css: '''

@@ -1,0 +1,159 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "reorderVideoQueue",
+        description: "Change the position of a video in the queue by moving it from one position to another",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession(args.request);
+  if (!actualUser) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+  // Get ownershipId, fromPosition, and toPosition from contextData
+  const { ownershipId, fromPosition, toPosition } = args.contextData;
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
+  if (fromPosition === undefined || fromPosition === null || fromPosition < 0) {
+    throw new Error("Valid fromPosition is required");
+  }
+
+  if (toPosition === undefined || toPosition === null || toPosition < 0) {
+    throw new Error("Valid toPosition is required");
+  }
+
+  if (fromPosition === toPosition) {
+    // No change needed, just return current queue
+    const queueResult = await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
+      RETURN v
+      ORDER BY vq.position ASC
+    `, {
+      ownershipId
+    });
+
+    const queue = queueResult.records.map(record => {
+      return args.convertNodeToJson(record.get('v'));
+    });
+
+    return {
+      success: true,
+      message: "No change needed",
+      data: queue
+    };
+  }
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, {
+    userUuid: user.P.uuid,
+    ownershipId
+  });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("YouTube ownership not found or access denied");
+  }
+
+  // Reorder logic using temporary position to avoid conflicts:
+  // 1. Move video at fromPosition to temporary position (-1)
+  // 2. Shift other videos to fill the gap
+  // 3. Move video from temporary position to toPosition
+
+  const tempPosition = -1;
+
+  // Step 1: Move video at fromPosition to temporary position
+  await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+    WHERE vq.position = $fromPosition
+    SET vq.position = $tempPosition, vq.updatedAt = datetime()
+  `, {
+    ownershipId,
+    fromPosition,
+    tempPosition
+  });
+
+  // Step 2: Shift other videos
+  if (fromPosition < toPosition) {
+    // Moving down: shift videos between fromPosition+1 and toPosition down by 1
+    await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+      WHERE vq.position > $fromPosition AND vq.position <= $toPosition
+      SET vq.position = vq.position - 1, vq.updatedAt = datetime()
+    `, {
+      ownershipId,
+      fromPosition,
+      toPosition
+    });
+  } else {
+    // Moving up: shift videos between toPosition and fromPosition-1 up by 1
+    await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+      WHERE vq.position >= $toPosition AND vq.position < $fromPosition
+      SET vq.position = vq.position + 1, vq.updatedAt = datetime()
+    `, {
+      ownershipId,
+      fromPosition,
+      toPosition
+    });
+  }
+
+  // Step 3: Move video from temporary position to final position
+  await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+    WHERE vq.position = $tempPosition
+    SET vq.position = $toPosition, vq.updatedAt = datetime()
+  `, {
+    ownershipId,
+    tempPosition,
+    toPosition
+  });
+
+  // Return updated queue
+  const queueResult = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
+    RETURN v
+    ORDER BY vq.position ASC
+  `, {
+    ownershipId
+  });
+
+  const queue = queueResult.records.map(record => {
+    return args.convertNodeToJson(record.get('v'));
+  });
+
+  return {
+    success: true,
+    message: "Queue reordered",
+    data: queue
+  };
+
+} catch (error) {
+  console.error("Error reordering video queue:", error);
+
+  return {
+    success: false,
+    message: error.message || "Failed to reorder video queue",
+    error: {
+      type: error.name || "ReorderQueueError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

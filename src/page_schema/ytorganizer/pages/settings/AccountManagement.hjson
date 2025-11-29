@@ -140,15 +140,6 @@ const disconnectAccount = async (ownershipId, channelName) => {
   }
 };
 
-// Load ownerships on mount
-args.runWithOwner(() => {
-  args.createEffect(() => {
-    if (args.mounted()) {
-      fetchOwnerships();
-    }
-  });
-});
-
 return {
   enabled: true,
   ownerships,
@@ -170,6 +161,7 @@ return {
   isNoPermissionCheck: true,
   onMount: () => {
     args.fns.handleOAuthCallback?.();
+    args.fns.fetchOwnerships();
   }
 };
 '''

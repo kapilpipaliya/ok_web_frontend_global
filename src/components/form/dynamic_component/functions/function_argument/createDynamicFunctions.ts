@@ -44,8 +44,13 @@ export function createDynamicFunctions(
         return undefined;
       };
 
-      // If owner is available, run within that context; otherwise run directly
-      return owner ? runWithOwner(owner, evaluate) : evaluate();
+      // If owner is available, run within that context; otherwise throw error
+      if (!owner) {
+        const error = "Owner context is required but not found in function arguments."
+        console.error(error, args);
+        throw new Error(error);
+      }
+      return runWithOwner(owner, evaluate);
     };
 
     // Memoize meta functions - only re-evaluate when meta.P.fns changes

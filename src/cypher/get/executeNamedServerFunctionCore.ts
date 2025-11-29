@@ -69,6 +69,38 @@ export interface NamedServerFunctionRequest {
  * @param request - Function name and context data to pass to the function
  * @param context - Execution context with nodes, relationships, and optional session
  * @returns ServerResult with function execution result or error
+ *
+ * @example Success Response
+ * ```javascript
+ * {
+ *   result: {
+ *     success: true,
+ *     data: { ... }
+ *   },
+ *   graph: {
+ *     edges: {},
+ *     vertexes: {}
+ *   }
+ * }
+ * ```
+ *
+ * @example Error Response
+ * ```javascript
+ * {
+ *   error: "Failed to execute function 'functionName': Error message",
+ *   errorType: "DatabaseConnectionError" // Optional, type of error
+ * }
+ * ```
+ *
+ * Note: When calling from client code, access the actual result via `response.result`:
+ * ```javascript
+ * const response = await args.executeNamedServerFunction({
+ *   functionName: 'myFunction',
+ *   contextData: { ... }
+ * });
+ * const result = response.result; // Access the actual function return value
+ * if (result.success) { ... }
+ * ```
  */
 export async function executeNamedServerFunctionCore(
   request: NamedServerFunctionRequest,

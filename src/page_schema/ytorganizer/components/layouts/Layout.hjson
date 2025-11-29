@@ -53,11 +53,128 @@ const exitImpersonation = async () => {
   window.location.reload();
 };
 
+// YouTube Ownership state management (multi-account support)
+const [ownerships, setOwnerships] = args.createSignal([]);
+const [selectedOwnership, setSelectedOwnership] = args.createSignal(null);
+const [ownershipsLoading, setOwnershipsLoading] = args.createSignal(false);
+
+// Get selected ownershipId for contextData
+const getSelectedOwnershipId = () => {
+  const ownership = selectedOwnership();
+  return ownership?.P?.key || null;
+};
+
 // Get impersonatedUserUuid for contextData
 const getImpersonatedUserUuid = () => {
   const impersonated = impersonatedUser();
   return impersonated?.P?.uuid || null;
 };
+
+// Wrapper for executeNamedServerFunction that automatically includes impersonatedUserUuid and ownershipId
+const executeYTOFunction = async (functionName, contextData = {}) => {
+  const impersonatedUserUuid = getImpersonatedUserUuid();
+  const ownershipId = getSelectedOwnershipId();
+
+  return await args.executeNamedServerFunction({
+    functionName,
+    contextData: {
+      ...contextData,
+      // Only add impersonatedUserUuid if it exists (admin is impersonating)
+      ...(impersonatedUserUuid ? { impersonatedUserUuid } : {}),
+      // Add ownershipId if selected (required for most operations)
+      ...(ownershipId ? { ownershipId } : {})
+    }
+  });
+};
+
+// Fetch all YouTube ownerships for the user
+const fetchOwnerships = async () => {
+  setOwnershipsLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getAllYouTubeOwnerships",
+      contextData: {}
+    });
+
+    if (result?.result?.success && result?.result?.data) {
+      // Extract ownership objects and connection status
+      const ownershipsData = result.result.data;
+      const ownershipsList = ownershipsData.map(item => ({
+        ...item.ownership,
+        _isConnected: item.isConnected // Store connection status
+      }));
+      setOwnerships(ownershipsList);
+
+      // If no ownership is selected and we have ownerships, select the first connected one
+      if (!selectedOwnership() && ownershipsList.length > 0) {
+        const connectedOwnerships = ownershipsList.filter(o => o._isConnected);
+        const primaryOwnership = connectedOwnerships.find(o => o.P.isPrimary);
+        const defaultOwnership = primaryOwnership || connectedOwnerships[0] || ownershipsList[0];
+        await selectOwnership(defaultOwnership);
+      } else if (selectedOwnership()) {
+        // If an ownership is already selected (from sessionStorage),
+        // verify it still exists in the fetched list
+        const currentOwnershipId = selectedOwnership().P.key;
+        const stillExists = ownershipsList.find(o => o.P.key === currentOwnershipId);
+
+        if (!stillExists && ownershipsList.length > 0) {
+          // Selected ownership no longer exists, select first available connected ownership
+          const connectedOwnerships = ownershipsList.filter(o => o._isConnected);
+          const primaryOwnership = connectedOwnerships.find(o => o.P.isPrimary);
+          const defaultOwnership = primaryOwnership || connectedOwnerships[0] || ownershipsList[0];
+          await selectOwnership(defaultOwnership);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching ownerships:', error);
+    args.showErrorToast('Failed to load YouTube accounts');
+  } finally {
+    setOwnershipsLoading(false);
+  }
+};
+
+// Select a YouTube ownership (account)
+const selectOwnership = async (ownership) => {
+  if (!ownership) return;
+
+  setSelectedOwnership(ownership);
+
+  // Save to sessionStorage
+  sessionStorage.setItem('yto_selectedOwnership', JSON.stringify(ownership));
+
+  // Update lastSelected on server
+  try {
+    await args.executeNamedServerFunction({
+      functionName: "updateOwnershipLastSelected",
+      contextData: { ownershipId: ownership.P.key }
+    });
+  } catch (error) {
+    console.error('Error updating ownership lastSelected:', error);
+  }
+
+  // Queue will be loaded automatically by the createEffect below
+};
+
+// Load ownership state from sessionStorage
+const loadOwnershipState = () => {
+  const storedOwnership = sessionStorage.getItem('yto_selectedOwnership');
+  if (storedOwnership) {
+    try {
+      const ownership = JSON.parse(storedOwnership);
+      setSelectedOwnership(ownership);
+    } catch (e) {
+      // Ignore parsing errors
+    }
+  }
+};
+
+// Automatically load queue when ownership changes
+args.createEffect(args.on(selectedOwnership, async (ownership) => {
+  if (ownership && args.user) {
+    await loadQueueFromDatabase();
+  }
+}, { defer: true }));
 
 // Keep Awake wrapper functions
 const keepAwake = async () => {
@@ -119,16 +236,44 @@ const [playerSize, setPlayerSize] = args.createStore({ width: 400, height: 250 }
 
 // Video queue state
 const [videoQueue, setVideoQueue] = args.createSignal([]);
+const [queueLoading, setQueueLoading] = args.createSignal(false);
+
+// Get ownership ID helper
+const getOwnershipId = () => {
+  return getSelectedOwnershipId();
+};
+
+// Load queue from database
+const loadQueueFromDatabase = async () => {
+  const ownershipId = getOwnershipId();
+  if (!ownershipId || !args.user) return;
+
+  setQueueLoading(true);
+  try {
+    const result = await executeYTOFunction("loadVideoQueue");
+
+    if (result?.result?.success) {
+      setVideoQueue(result.result.data || []);
+    }
+  } catch (error) {
+    console.error("Error loading queue from database:", error);
+  } finally {
+    setQueueLoading(false);
+  }
+};
 
 // Play video in the player
 const playVideo = async (video) => {
   setCurrentVideo(video);
   setPlayerState("minimized");
   await enableKeepAwake();
+
+  // Add video to queue if not already in queue
+  await addToQueue(video);
 };
 
 // Add video to queue
-const addToQueue = (video) => {
+const addToQueue = async (video) => {
   const queue = videoQueue();
   const videoId = video?.P?.youtubeId;
 
@@ -139,12 +284,34 @@ const addToQueue = (video) => {
     return;
   }
 
+  // Optimistic update
   setVideoQueue([...queue, video]);
   args.showSuccessToast("Added to queue");
+
+  // Save to database
+  const ownershipId = getOwnershipId();
+  if (ownershipId && args.user) {
+    try {
+      const result = await executeYTOFunction("addVideoToQueue", { video });
+
+      if (result?.result?.success) {
+        // Update with server response to ensure consistency
+        setVideoQueue(result.result.data || [...queue, video]);
+      } else {
+        // Rollback on error
+        setVideoQueue(queue);
+        args.showErrorToast(result?.result?.message || "Failed to save to queue");
+      }
+    } catch (error) {
+      // Rollback on error
+      setVideoQueue(queue);
+      console.error("Error saving to queue:", error);
+    }
+  }
 };
 
 // Play next video from queue
-const playNext = () => {
+const playNext = async () => {
   const queue = videoQueue();
   if (queue.length === 0) {
     // Don't close player when queue is empty, just keep current video
@@ -154,20 +321,126 @@ const playNext = () => {
   }
 
   const nextVideo = queue[0];
+  const newQueue = queue.slice(1);
+
+  // Optimistic update
   setCurrentVideo(nextVideo);
-  setVideoQueue(queue.slice(1));
+  setVideoQueue(newQueue);
+
+  // Save to database (remove first video)
+  const ownershipId = getOwnershipId();
+  if (ownershipId && args.user) {
+    try {
+      const result = await executeYTOFunction("removeVideoFromQueue", { position: 0 });
+
+      if (result?.result?.success) {
+        // Update with server response to ensure consistency
+        setVideoQueue(result.result.data || newQueue);
+      }
+    } catch (error) {
+      console.error("Error updating queue in database:", error);
+    }
+  }
 };
 
 // Remove video from queue
-const removeFromQueue = (index) => {
+const removeFromQueue = async (index) => {
   const queue = videoQueue();
-  setVideoQueue([...queue.slice(0, index), ...queue.slice(index + 1)]);
+  const newQueue = [...queue.slice(0, index), ...queue.slice(index + 1)];
+
+  // Optimistic update
+  setVideoQueue(newQueue);
+
+  // Save to database
+  const ownershipId = getOwnershipId();
+  if (ownershipId && args.user) {
+    try {
+      const result = await executeYTOFunction("removeVideoFromQueue", { position: index });
+
+      if (result?.result?.success) {
+        // Update with server response to ensure consistency
+        setVideoQueue(result.result.data || newQueue);
+      } else {
+        // Rollback on error
+        setVideoQueue(queue);
+        args.showErrorToast(result?.result?.message || "Failed to remove from queue");
+      }
+    } catch (error) {
+      // Rollback on error
+      setVideoQueue(queue);
+      console.error("Error removing from queue:", error);
+    }
+  }
 };
 
 // Clear entire queue
-const clearQueue = () => {
+const clearQueue = async () => {
+  const previousQueue = videoQueue();
+
+  // Optimistic update
   setVideoQueue([]);
   args.showSuccessToast("Queue cleared");
+
+  // Save to database
+  const ownershipId = getOwnershipId();
+  if (ownershipId && args.user) {
+    try {
+      const result = await executeYTOFunction("clearVideoQueue");
+
+      if (!result?.result?.success) {
+        // Rollback on error
+        setVideoQueue(previousQueue);
+        args.showErrorToast(result?.result?.message || "Failed to clear queue");
+      }
+    } catch (error) {
+      // Rollback on error
+      setVideoQueue(previousQueue);
+      console.error("Error clearing queue:", error);
+    }
+  }
+};
+
+// Reorder video in queue
+const reorderQueue = async (fromIndex, toIndex) => {
+  const queue = videoQueue();
+
+  // Validate indices
+  if (fromIndex < 0 || fromIndex >= queue.length || toIndex < 0 || toIndex >= queue.length) {
+    args.showErrorToast("Invalid queue position");
+    return;
+  }
+
+  if (fromIndex === toIndex) {
+    return; // No change needed
+  }
+
+  // Optimistic update - reorder the array
+  const newQueue = [...queue];
+  const [movedVideo] = newQueue.splice(fromIndex, 1);
+  newQueue.splice(toIndex, 0, movedVideo);
+  setVideoQueue(newQueue);
+
+  // Save to database
+  const ownershipId = getOwnershipId();
+  if (ownershipId && args.user) {
+    try {
+      const result = await executeYTOFunction("reorderVideoQueue", { fromPosition: fromIndex, toPosition: toIndex });
+
+      if (result?.result?.success) {
+        // Update with server response to ensure consistency
+        setVideoQueue(result.result.data || newQueue);
+      } else {
+        // Rollback on error
+        setVideoQueue(queue);
+        args.showErrorToast(result?.result?.message || "Failed to reorder queue");
+      }
+    } catch (error) {
+      // Rollback on error
+      setVideoQueue(queue);
+      console.error("Error reordering queue:", error);
+      args.showErrorToast("Failed to reorder queue");
+    }
+  }
 };
 
 // Queue modal state
@@ -261,12 +534,23 @@ return {
   loadImpersonationState,
   isInIframe,
   setIsInIframe,
+  // Ownership management
+  ownerships,
+  selectedOwnership,
+  ownershipsLoading,
+  getSelectedOwnershipId,
+  executeYTOFunction,
+  fetchOwnerships,
+  selectOwnership,
+  loadOwnershipState,
+  // Keep Awake
   keepAwake,
   allowSleep,
   isSupported,
   isKeptAwake,
   enableKeepAwake,
   disableKeepAwake,
+  // Video player
   playerState,
   currentVideo,
   playVideo,
@@ -276,19 +560,26 @@ return {
   setPlayerPosition,
   playerSize,
   setPlayerSize,
+  // Video queue
   videoQueue,
   setVideoQueue,
+  queueLoading,
+  getOwnershipId,
+  loadQueueFromDatabase,
   addToQueue,
   playNext,
   removeFromQueue,
   clearQueue,
+  reorderQueue,
   isQueueModalOpen,
   openQueueModal,
   closeQueueModal,
+  // Feedback
   isFeedbackModalOpen,
   openFeedbackModal,
   closeFeedbackModal,
   submitFeedback,
+  // Utilities
   openYouTubeInParentTab
 };
 ''',
@@ -301,6 +592,12 @@ return {
 
     // Load saved impersonation state from sessionStorage
     args.fns.loadImpersonationState?.();
+
+    // Load saved ownership state from sessionStorage
+    args.fns.loadOwnershipState?.();
+
+    // Fetch ownerships (will auto-select and load queue)
+    await args.fns.fetchOwnerships?.();
   }
 };
 '''
@@ -376,7 +673,8 @@ return {
   videoQueue: args.fns.videoQueue,
   playVideo: args.fns.playVideo,
   removeFromQueue: args.fns.removeFromQueue,
-  clearQueue: args.fns.clearQueue
+  clearQueue: args.fns.clearQueue,
+  reorderQueue: args.fns.reorderQueue
 };
 '''
       }

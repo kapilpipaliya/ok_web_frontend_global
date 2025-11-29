@@ -59,11 +59,11 @@
         displayOrder: 1,
         componentName: "Html",
         fns: '''
-// Get props from context
-const items = args.contextData.props?.items || [];
-const itemHeight = args.contextData.props?.itemHeight || 90;
-const overscan = args.contextData.props?.overscan || 5;
-const onScrollCallback = args.contextData.props?.onScroll;
+// Get props from context reactively
+const getItems = () => args.contextData.props?.items || [];
+const getItemHeight = () => args.contextData.props?.itemHeight || 90;
+const getOverscan = () => args.contextData.props?.overscan || 5;
+const getOnScrollCallback = () => args.contextData.props?.onScroll;
 
 // Virtualization state
 const [scrollTop, setScrollTop] = args.createSignal(0);
@@ -73,6 +73,9 @@ const [scrollElement, setScrollElement] = args.createSignal(null);
 const getVisibleRange = () => {
   const el = scrollElement();
   const scroll = scrollTop();
+  const items = getItems();
+  const itemHeight = getItemHeight();
+  const overscan = getOverscan();
   const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
 
   // Use default container height if element not yet available
@@ -91,6 +94,7 @@ const getVisibleRange = () => {
 const getVirtualItems = () => {
   const { start, end } = getVisibleRange();
   const virtualItems = [];
+  const itemHeight = getItemHeight();
   const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
 
   for (let i = start; i <= end; i++) {
@@ -106,6 +110,8 @@ const getVirtualItems = () => {
 
 // Total height of all items
 const getTotalSize = () => {
+  const items = getItems();
+  const itemHeight = getItemHeight();
   const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
   return items.length * height;
 };
@@ -115,6 +121,7 @@ const handleScroll = (e) => {
   setScrollTop(e.target.scrollTop);
 
   // Call custom onScroll callback if provided
+  const onScrollCallback = getOnScrollCallback();
   if (onScrollCallback) {
     onScrollCallback(e);
   }
@@ -129,7 +136,7 @@ return {
   getVirtualItems,
   getTotalSize,
   handleScroll,
-  items
+  getItems
 };
 ''',
         props: '''
@@ -188,7 +195,7 @@ return {
         contextName: "item",
         props: '''
 const virtualItem = args.contextData.virtualItem;
-const item = args.fns.items[virtualItem.index];
+const item = args.fns.getItems()[virtualItem.index];
 
 return {
   as: "div",

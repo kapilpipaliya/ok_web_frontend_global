@@ -334,7 +334,7 @@ return {
       }
     },
     {
-      id: "queue_item",
+      id: "queue_item_wrapper",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -346,17 +346,18 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_100};
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.5rem;
   padding: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
+    background: ${args.theme.var.color.background_light_50};
+    border-color: ${args.theme.var.color.primary_light_200};
   }
 }`;
 '''
@@ -380,8 +381,8 @@ return {
 return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -389,40 +390,44 @@ return `._id {
   font-size: 0.875rem;
   font-weight: 600;
   flex-shrink: 0;
+  margin-top: 0.25rem;
 }`;
 '''
       }
     },
     {
-      id: "queue_item_thumbnail",
+      id: "queue_item_card",
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Html",
+        componentName: "Card",
         props: '''
 const item = args.contextData.loopItem;
 const video = item?.video;
-const thumbnailUrl = video?.P?.thumbnail || "";
 
 return {
-  as: "div",
-  style: thumbnailUrl ? `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` : ""
+  item: video,
+  itemType: "video",
+  itemSetting: null
 };
 ''',
         css: '''
 return `._id {
-  width: 80px;
-  height: 45px;
-  background-color: ${args.theme.var.color.background_light_300};
-  border-radius: 0.375rem;
-  flex-shrink: 0;
-  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  border: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+
+  &:hover {
+    background: transparent !important;
+  }
 }`;
 '''
       }
     },
     {
-      id: "queue_item_info",
+      id: "queue_item_actions",
       L: "Attr",
       P: {
         displayOrder: 3,
@@ -434,86 +439,10 @@ return {
 ''',
         css: '''
 return `._id {
-  flex: 1;
-  min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "queue_item_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.loopItem;
-const video = item?.video;
-const title = video?.P?.title || "Untitled Video";
-
-return {
-  as: "div",
-  text: title
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}`;
-'''
-      }
-    },
-    {
-      id: "queue_item_channel",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.loopItem;
-const video = item?.video;
-const channelTitle = video?.P?.channelTitle || "Unknown Channel";
-
-return {
-  as: "div",
-  text: channelTitle
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}`;
-'''
-      }
-    },
-    {
-      id: "queue_item_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  gap: 0.25rem;
+  gap: 0.375rem;
   flex-shrink: 0;
+  margin-top: 0.25rem;
 }`;
 '''
       }
@@ -548,15 +477,18 @@ return `._id {
   color: ${args.theme.var.color.primary_text};
   border: none;
   border-radius: 0.375rem;
-  padding: 0.5rem;
+  padding: 0.375rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease;F
+  width: 32px;
+  height: 32px;
 
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
+    transform: scale(1.05);
   }
 }`;
 '''
@@ -579,10 +511,147 @@ return {
       }
     },
     {
-      id: "queue_item_remove_button",
+      id: "queue_item_move_up_button",
       L: "Attr",
       P: {
         displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.loopItem;
+const queue = args.contextData.props?.videoQueue?.() || [];
+const reorderQueue = args.contextData.props?.reorderQueue;
+const isFirst = item?.index === 0;
+
+return {
+  as: "button",
+  onClick: () => {
+    if (item && typeof item.index !== 'undefined' && !isFirst) {
+      reorderQueue?.(item.index, item.index - 1);
+    }
+  },
+  disabled: isFirst,
+  "aria-label": "Move up",
+  title: "Move up"
+};
+''',
+        css: '''
+const item = args.contextData.loopItem;
+const isFirst = item?.index === 0;
+
+return `._id {
+  background: ${args.theme.var.color.background_light_300};
+  color: ${args.theme.var.color.text};
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  cursor: ${isFirst ? 'not-allowed' : 'pointer'};
+  opacity: ${isFirst ? '0.5' : '1'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary_text};
+    transform: scale(1.05);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_item_move_up_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-up",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "queue_item_move_down_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.loopItem;
+const queue = args.contextData.props?.videoQueue?.() || [];
+const reorderQueue = args.contextData.props?.reorderQueue;
+const isLast = item?.index === queue.length - 1;
+
+return {
+  as: "button",
+  onClick: () => {
+    if (item && typeof item.index !== 'undefined' && !isLast) {
+      reorderQueue?.(item.index, item.index + 1);
+    }
+  },
+  disabled: isLast,
+  "aria-label": "Move down",
+  title: "Move down"
+};
+''',
+        css: '''
+const item = args.contextData.loopItem;
+const queue = args.contextData.props?.videoQueue?.() || [];
+const isLast = item?.index === queue.length - 1;
+
+return `._id {
+  background: ${args.theme.var.color.background_light_300};
+  color: ${args.theme.var.color.text};
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  cursor: ${isLast ? 'not-allowed' : 'pointer'};
+  opacity: ${isLast ? '0.5' : '1'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary_text};
+    transform: scale(1.05);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_item_move_down_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-down",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "queue_item_remove_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
         componentName: "Html",
         props: '''
 const item = args.contextData.loopItem;
@@ -601,20 +670,23 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_200};
+  background: ${args.theme.var.color.background_light_300};
   color: ${args.theme.var.color.text};
   border: none;
   border-radius: 0.375rem;
-  padding: 0.5rem;
+  padding: 0.375rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
 
   &:hover {
     background: ${args.theme.var.color.error};
     color: ${args.theme.var.color.error_text};
+    transform: scale(1.05);
   }
 }`;
 '''
@@ -732,19 +804,20 @@ return `._id {
     { id: "e11", T: "Attr", S: "queue_empty_state", E: "empty_text" },
     { id: "e12", T: "Attr", S: "queue_list", E: "queue_items_container" },
     { id: "e13", T: "Attr", S: "queue_items_container", E: "queue_items_loop" },
-    { id: "e14", T: "Attr", S: "queue_items_loop", E: "queue_item" },
-    { id: "e15", T: "Attr", S: "queue_item", E: "queue_item_number" },
-    { id: "e16", T: "Attr", S: "queue_item", E: "queue_item_thumbnail" },
-    { id: "e17", T: "Attr", S: "queue_item", E: "queue_item_info" },
-    { id: "e18", T: "Attr", S: "queue_item_info", E: "queue_item_title" },
-    { id: "e19", T: "Attr", S: "queue_item_info", E: "queue_item_channel" },
-    { id: "e20", T: "Attr", S: "queue_item", E: "queue_item_actions" },
+    { id: "e14", T: "Attr", S: "queue_items_loop", E: "queue_item_wrapper" },
+    { id: "e15", T: "Attr", S: "queue_item_wrapper", E: "queue_item_number" },
+    { id: "e16", T: "Attr", S: "queue_item_wrapper", E: "queue_item_card" },
+    { id: "e17", T: "Attr", S: "queue_item_wrapper", E: "queue_item_actions" },
     { id: "e21", T: "Attr", S: "queue_item_actions", E: "queue_item_play_button" },
     { id: "e22", T: "Attr", S: "queue_item_play_button", E: "queue_item_play_icon" },
-    { id: "e23", T: "Attr", S: "queue_item_actions", E: "queue_item_remove_button" },
-    { id: "e24", T: "Attr", S: "queue_item_remove_button", E: "queue_item_remove_icon" },
-    { id: "e25", T: "Attr", S: "modal_container", E: "modal_footer" },
-    { id: "e26", T: "Attr", S: "modal_footer", E: "modal_footer_info" },
-    { id: "e27", T: "Attr", S: "modal_footer", E: "modal_footer_clear_button" }
+    { id: "e23", T: "Attr", S: "queue_item_actions", E: "queue_item_move_up_button" },
+    { id: "e24", T: "Attr", S: "queue_item_move_up_button", E: "queue_item_move_up_icon" },
+    { id: "e25", T: "Attr", S: "queue_item_actions", E: "queue_item_move_down_button" },
+    { id: "e26", T: "Attr", S: "queue_item_move_down_button", E: "queue_item_move_down_icon" },
+    { id: "e27", T: "Attr", S: "queue_item_actions", E: "queue_item_remove_button" },
+    { id: "e28", T: "Attr", S: "queue_item_remove_button", E: "queue_item_remove_icon" },
+    { id: "e29", T: "Attr", S: "modal_container", E: "modal_footer" },
+    { id: "e30", T: "Attr", S: "modal_footer", E: "modal_footer_info" },
+    { id: "e31", T: "Attr", S: "modal_footer", E: "modal_footer_clear_button" }
   ]
 }

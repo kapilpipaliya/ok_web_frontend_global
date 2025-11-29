@@ -1,0 +1,73 @@
+{
+  vertexes: [
+    {
+      id: "get_contact_submissions_function",
+      L: "Function",
+      P: {
+        key: "getContactSubmissions",
+        description: "Retrieves all contact form submissions from database",
+        body: '''
+// This function runs on the server
+// It has access to args object with:
+// - args.contextData: Request parameters
+// - args.session: Current neo4j Database session
+// - args.getUserFromSession: Function to get current authenticated user
+
+// Get current user
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    error: "User session not found"
+  };
+}
+
+// Verify admin role
+const adminCheck = await args.session.run(
+  `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
+   RETURN u`,
+  { userId: actualUser.P.uuid }
+);
+
+if (adminCheck.records.length === 0) {
+  return {
+    success: false,
+    error: "Unauthorized: Admin access required"
+  };
+}
+
+try {
+  // Get all contact submissions, ordered by submission date (newest first)
+  const query = `
+    MATCH (c:ContactSubmission)
+    RETURN c
+    ORDER BY c.submittedAt DESC
+  `;
+
+  const result = await args.session.run(query);
+
+  const submissions = result.records.map(record => {
+    const node = record.get('c');
+    return args.convertNodeToJson(node);
+  });
+
+  return {
+    success: true,
+    data: {
+      submissions: submissions,
+      count: submissions.length
+    }
+  };
+} catch (error) {
+  console.error("Error fetching contact submissions:", error);
+  return {
+    success: false,
+    error: "Failed to load contact submissions"
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

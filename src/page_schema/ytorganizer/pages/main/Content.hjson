@@ -1013,7 +1013,7 @@ args.createEffect(
       const detailSortChanged = currentDetailSort !== prevDetailSort;
       const searchSortChanged = currentSearchSort !== prevSearchSort;
       const favouritesSortChanged = currentFavouritesSort !== prevFavouritesSort;
-      const ownershipChanged = currentOwnership !== prevOwnership;
+      const ownershipChanged = currentOwnership !== prevOwnership || currentOwnershipsLoading !== prevOwnershipsLoading;
       const pageContentChanged = currentPageContent !== prevPageContent;
 
       // Reset scroll positions if URL params changed
@@ -2844,7 +2844,6 @@ return {
   as: "div",
   hide: args.fns.loading() || !hasItems
 };
-'''
 '''
       }
     },

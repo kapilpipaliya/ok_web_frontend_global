@@ -1,0 +1,133 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "addVideoToQueue",
+        description: "Add a single video to the end of the queue",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession(args.request);
+  if (!actualUser) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Get effective user (handles admin impersonation)
+  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+  // Get ownershipId and video from contextData
+  const { ownershipId, video } = args.contextData;
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  }
+
+  if (!video || !video.P || !video.P.youtubeId) {
+    throw new Error("Valid video object is required");
+  }
+
+  const videoId = video.P.youtubeId;
+
+  // Verify ownership belongs to user
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, {
+    userUuid: user.P.uuid,
+    ownershipId
+  });
+
+  if (ownershipCheck.records.length === 0) {
+    throw new Error("YouTube ownership not found or access denied");
+  }
+
+  // Check if video already exists in queue
+  const duplicateCheck = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video {youtubeId: $videoId})
+    RETURN vq
+  `, {
+    ownershipId,
+    videoId
+  });
+
+  if (duplicateCheck.records.length > 0) {
+    return {
+      success: false,
+      message: "Video already in queue",
+      error: {
+        type: "DuplicateError",
+        details: "This video is already in your queue"
+      }
+    };
+  }
+
+  // Get current max position
+  const maxPositionResult = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+    RETURN MAX(vq.position) as maxPosition
+  `, {
+    ownershipId
+  });
+
+  const maxPosition = maxPositionResult.records[0]?.get('maxPosition');
+  const newPosition = maxPosition !== null && maxPosition !== undefined ? maxPosition + 1 : 0;
+
+  // Create VideoQueue node and relationships
+  await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (v:Video {youtubeId: $videoId})
+    CREATE (vq:VideoQueue {
+      key: $key,
+      position: $position,
+      addedAt: datetime(),
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    CREATE (o)-[:YouTubeOwnershipVideoQueue]->(vq)
+    CREATE (vq)-[:VideoQueueVideo]->(v)
+  `, {
+    ownershipId,
+    videoId,
+    key: `video_queue_${ownershipId}_${videoId}_${Date.now()}`,
+    position: newPosition
+  });
+
+  // Return updated queue
+  const queueResult = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
+    RETURN v
+    ORDER BY vq.position ASC
+  `, {
+    ownershipId
+  });
+
+  const queue = queueResult.records.map(record => {
+    return args.convertNodeToJson(record.get('v'));
+  });
+
+  return {
+    success: true,
+    message: "Added to queue",
+    data: queue
+  };
+
+} catch (error) {
+  console.error("Error adding video to queue:", error);
+
+  return {
+    success: false,
+    message: error.message || "Failed to add video to queue",
+    error: {
+      type: error.name || "AddToQueueError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
