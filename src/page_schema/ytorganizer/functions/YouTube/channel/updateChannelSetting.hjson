@@ -38,18 +38,40 @@ try {
   }
 
   // Step 1: Update ChannelSetting for specific ownership
+  // NEW SCHEMA v4.0: Create setting on-demand if custom name is provided
+  const channelSettingKey = `channel_setting_${youtubeId}_${ownershipId}`;
+
   const updateQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $youtubeId})
-    SET cs.customName = $customName,
-        cs.updatedAt = datetime()
-    RETURN c.youtubeId as youtubeId
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+
+    // Create or update ChannelSetting only if custom name is provided
+    CALL apoc.do.when(
+      $customName IS NOT NULL,
+      '
+        MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $settingKey})
+        ON CREATE SET cs.createdAt = datetime()
+        MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
+        SET cs.customName = $customName, cs.updatedAt = datetime()
+        RETURN c.youtubeId as youtubeId
+      ',
+      '
+        OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+        WITH c, cs
+        WHERE cs IS NOT NULL
+        DELETE cs
+        RETURN c.youtubeId as youtubeId
+      ',
+      {c: c, o: o, customName: $customName, settingKey: $settingKey}
+    ) YIELD value
+    RETURN value.youtubeId as youtubeId
   `;
 
   const updateResult = await args.session.run(updateQuery, {
     ownershipId,
     youtubeId,
-    customName: customName || null
+    customName: customName || null,
+    settingKey: channelSettingKey
   });
 
   if (updateResult.records.length === 0) {

@@ -174,7 +174,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "left",
+        slotName: "left",
         props: '''
 return {
   as: "a",
@@ -223,7 +223,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 const categoryData = args.contextData.modals?.categoryData?.();
 const category = categoryData?.category;
@@ -241,7 +241,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "right",
+        slotName: "right",
         props: '''
 return {
   as: "button",

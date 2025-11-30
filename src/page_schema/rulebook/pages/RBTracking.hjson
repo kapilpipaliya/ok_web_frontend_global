@@ -294,7 +294,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 const selectedDate = args.contextData?.trackingData?.selectedDate;
 const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
@@ -315,7 +315,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "subtitle",
+        slotName: "subtitle",
         props: '''
 const selectedDate = args.contextData?.trackingData?.selectedDate;
 const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
@@ -352,7 +352,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "right",
+        slotName: "right",
         props: '''
 const selectedDate = args.contextData?.trackingData?.selectedDate;
 const setSelectedDate = args.contextData?.trackingData?.setSelectedDate;

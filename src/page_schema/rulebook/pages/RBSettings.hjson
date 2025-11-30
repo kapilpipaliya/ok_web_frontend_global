@@ -66,7 +66,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 return {
   text: "Settings"

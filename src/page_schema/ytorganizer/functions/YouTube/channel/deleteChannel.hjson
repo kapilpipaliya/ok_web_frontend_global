@@ -80,9 +80,9 @@ try {
 
     if (items === 'all' || items === 'allInContext') {
       // Get all channel IDs for this ownership
+      // NEW SCHEMA v4.0: Direct ownership
       const allChannelsResult = await args.session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-              -[:ChannelSettingChannel]->(c:Channel)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
         RETURN c.youtubeId as channelId
       `, { ownershipId });
 
@@ -101,11 +101,12 @@ try {
         const state = await job.getState();
 
         if (state === 'active') {
-          // Get channel title for better error message
+          // Get channel title for better error message (verify ownership)
+          // NEW SCHEMA v4.0: Verify ownership before accessing channel
           const channelResult = await args.session.run(`
-            MATCH (c:Channel {youtubeId: $channelId})
+            MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
             RETURN c.title as title
-          `, { channelId });
+          `, { ownershipId, channelId });
 
           const title = channelResult.records[0]?.get('title') || channelId;
           activeJobs.push({ channelId, title, jobId });
@@ -202,57 +203,79 @@ try {
     // Continue with channel deletion even if playlist deletion fails
   }
 
-  // Step 4: Delete this ownership's ChannelSetting
+  // Step 4 & 5 COMBINED: Delete ownership relationships and orphaned channels atomically
+  // NEW SCHEMA v4.0: With duplicate channels per ownership, we track specific channel instances
+  // Benefits: No global search, atomic operation, safer
   let queryParams = { ownershipId };
-  let channelFilter = '';
+  let channelMatchClause = '';
 
-  if (items !== 'all' && items !== 'allInContext') {
+  if (items === 'all' || items === 'allInContext') {
+    // Match all channels for this ownership
+    channelMatchClause = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipChannel]->(c:Channel)
+    `;
+  } else {
     queryParams.channelIds = channelIds;
-    channelFilter = 'WHERE c.youtubeId IN $channelIds';
+    // Match specific channels by youtubeId for this ownership
+    channelMatchClause = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipChannel]->(c:Channel)
+      WHERE c.youtubeId IN $channelIds
+    `;
   }
 
-  const deleteChannelSettingQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
-    ${channelFilter}
-    DETACH DELETE cs
-    RETURN count(cs) as deletedChannelSetting
+  const deleteQuery = `
+    ${channelMatchClause}
+
+    // Collect channel info before deletion
+    WITH o, c, ownershipRel, elementId(c) as channelNodeId
+
+    // Delete optional ChannelSetting if it exists
+    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+
+    // Delete setting and ownership relationship
+    DETACH DELETE cs, ownershipRel
+
+    // Return the channel instance ID for orphan check
+    RETURN collect(DISTINCT channelNodeId) as channelIds, count(DISTINCT c) as deletedOwnershipLinks
   `;
 
-  const channelSettingResult = await args.session.run(deleteChannelSettingQuery, queryParams);
+  const deleteResult = await args.session.run(deleteQuery, queryParams);
 
-  const deletedCSRaw = channelSettingResult.records[0]?.get('deletedChannelSetting');
-  const deletedChannelSetting = deletedCSRaw ? (typeof deletedCSRaw.toNumber === 'function' ? deletedCSRaw.toNumber() : Number(deletedCSRaw)) : 0;
+  const deletedLinksRaw = deleteResult.records[0]?.get('deletedOwnershipLinks');
+  const deletedOwnershipLinks = deletedLinksRaw ? (typeof deletedLinksRaw.toNumber === 'function' ? deletedLinksRaw.toNumber() : Number(deletedLinksRaw)) : 0;
 
-  if (deletedChannelSetting === 0) {
+  if (deletedOwnershipLinks === 0) {
     throw new Error("Channels not found or already deleted");
   }
 
-  // Step 5: Delete orphan Channel nodes (no ownership references them)
-  let channelMatchPattern = '';
+  // Get the Neo4j internal IDs of channels we deleted ownership from
+  const channelNodeIds = deleteResult.records[0]?.get('channelIds') || [];
 
-  if (items === 'all' || items === 'allInContext') {
-    channelMatchPattern = 'MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)\n    WITH DISTINCT c';
-  } else {
-    channelMatchPattern = 'MATCH (c:Channel)\n    WHERE c.youtubeId IN $channelIds';
-  }
-
+  // Step 5: Delete ONLY the specific channel instances that are now orphaned
+  // NEW SCHEMA v4.0: No global search - only check the specific instances from Step 4
   const deleteOrphanChannelsQuery = `
-    ${channelMatchPattern}
+    MATCH (c:Channel)
+    WHERE elementId(c) IN $channelNodeIds
 
-    // Check if any ownership has a ChannelSetting for this channel
-    OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(anyCS:ChannelSetting)-[:ChannelSettingChannel]->(c)
+    // DEFENSIVE: Only delete if NO ownership references this channel instance
+    // This ensures we don't delete channels that are still owned by other ownerships
+    OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipChannel]->(c)
 
     WITH c, count(anyO) as ownershipCount
     WHERE ownershipCount = 0
 
     // No ownership references this channel, safe to delete
-    // Channel-[:ChannelPlaylist]->Playlist relationships will be deleted by DETACH DELETE
+    // First remove all Channel-[:ChannelPlaylist]->Playlist relationships
+    OPTIONAL MATCH (c)-[r:ChannelPlaylist]->(p:Playlist)
+    DELETE r
+
+    // Then delete the channel node
+    WITH c
     DETACH DELETE c
     RETURN count(c) as deletedChannels
   `;
 
-  const channelResult = await args.session.run(deleteOrphanChannelsQuery, queryParams);
+  const channelResult = await args.session.run(deleteOrphanChannelsQuery, { channelNodeIds });
 
   const deletedCRaw = channelResult.records[0]?.get('deletedChannels');
   const deletedChannels = deletedCRaw ? (typeof deletedCRaw.toNumber === 'function' ? deletedCRaw.toNumber() : Number(deletedCRaw)) : 0;
@@ -260,7 +283,7 @@ try {
   let message;
   const isAll = items === 'all';
   const isAllInContext = items === 'allInContext';
-  const totalProcessed = deletedChannelSetting + deletedChannels;
+  const totalProcessed = deletedOwnershipLinks + deletedChannels;
 
   if (isAll || isAllInContext) {
     // For channels, both 'all' and 'allInContext' have the same behavior

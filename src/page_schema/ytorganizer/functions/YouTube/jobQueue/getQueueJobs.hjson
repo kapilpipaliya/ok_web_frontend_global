@@ -54,18 +54,33 @@ try {
     };
   }
 
-  // Collect all unique IDs for batch fetching
-  const channelIds = [];
-  const playlistIds = [];
+  // Collect all unique ownership-specific resource pairs for batch fetching
+  // NEW SCHEMA v4.0: Must match both youtubeId AND ownershipId
+  const channelRequests = [];  // Array of {ownershipId, channelId}
+  const playlistRequests = [];  // Array of {ownershipId, playlistId}
   const userUuids = [];
 
   for (const job of jobs) {
     if (job.data) {
-      if (job.data.channelId && !channelIds.includes(job.data.channelId)) {
-        channelIds.push(job.data.channelId);
+      // Collect channel requests with ownership
+      if (job.data.channelId && job.data.ownershipId) {
+        const key = `${job.data.ownershipId}:${job.data.channelId}`;
+        if (!channelRequests.find(r => `${r.ownershipId}:${r.channelId}` === key)) {
+          channelRequests.push({
+            ownershipId: job.data.ownershipId,
+            channelId: job.data.channelId
+          });
+        }
       }
-      if (job.data.playlistId && !playlistIds.includes(job.data.playlistId)) {
-        playlistIds.push(job.data.playlistId);
+      // Collect playlist requests with ownership
+      if (job.data.playlistId && job.data.ownershipId) {
+        const key = `${job.data.ownershipId}:${job.data.playlistId}`;
+        if (!playlistRequests.find(r => `${r.ownershipId}:${r.playlistId}` === key)) {
+          playlistRequests.push({
+            ownershipId: job.data.ownershipId,
+            playlistId: job.data.playlistId
+          });
+        }
       }
       if (job.data.userUuid && !userUuids.includes(job.data.userUuid)) {
         userUuids.push(job.data.userUuid);
@@ -73,34 +88,46 @@ try {
     }
   }
 
-  // Batch fetch channel names
+  // Batch fetch channel names with ownership verification
+  // Map key format: "ownershipId:channelId" -> channel title
   const channelNameMap = {};
-  if (channelIds.length > 0) {
+  if (channelRequests.length > 0) {
     try {
+      // Build UNWIND query for batch processing with ownership verification
       const channelResult = await args.session.run(
-        'MATCH (c:Channel) WHERE c.youtubeId IN $channelIds RETURN c',
-        { channelIds }
+        `UNWIND $channelRequests AS req
+         MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: req.channelId})
+         RETURN req.ownershipId as ownershipId, c`,
+        { channelRequests }
       );
       for (const record of channelResult.records) {
+        const ownershipId = record.get('ownershipId');
         const channel = args.convertNodeToJson(record.get('c'));
-        channelNameMap[channel.P.youtubeId] = channel.P.title;
+        const key = `${ownershipId}:${channel.P.youtubeId}`;
+        channelNameMap[key] = channel.P.title;
       }
     } catch (err) {
       console.error('Error batch fetching channel names:', err);
     }
   }
 
-  // Batch fetch playlist names
+  // Batch fetch playlist names with ownership verification
+  // Map key format: "ownershipId:playlistId" -> playlist title
   const playlistNameMap = {};
-  if (playlistIds.length > 0) {
+  if (playlistRequests.length > 0) {
     try {
+      // Build UNWIND query for batch processing with ownership verification
       const playlistResult = await args.session.run(
-        'MATCH (p:Playlist) WHERE p.youtubeId IN $playlistIds RETURN p',
-        { playlistIds }
+        `UNWIND $playlistRequests AS req
+         MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: req.playlistId})
+         RETURN req.ownershipId as ownershipId, p`,
+        { playlistRequests }
       );
       for (const record of playlistResult.records) {
+        const ownershipId = record.get('ownershipId');
         const playlist = args.convertNodeToJson(record.get('p'));
-        playlistNameMap[playlist.P.youtubeId] = playlist.P.title;
+        const key = `${ownershipId}:${playlist.P.youtubeId}`;
+        playlistNameMap[key] = playlist.P.title;
       }
     } catch (err) {
       console.error('Error batch fetching playlist names:', err);
@@ -162,13 +189,18 @@ try {
       if (job.data.channelId) {
         jobData.channelId = job.data.channelId;
         jobData.itemType = 'channel';
-        jobData.channelName = channelNameMap[job.data.channelId] || null;
+        // Use composite key with ownership for lookup
+        const channelKey = `${job.data.ownershipId}:${job.data.channelId}`;
+        jobData.channelName = channelNameMap[channelKey] || null;
       }
       if (job.data.playlistId) {
         jobData.playlistId = job.data.playlistId;
         jobData.itemType = 'playlist';
-        jobData.playlistName = playlistNameMap[job.data.playlistId] || null;
+        // Use composite key with ownership for lookup
+        const playlistKey = `${job.data.ownershipId}:${job.data.playlistId}`;
+        jobData.playlistName = playlistNameMap[playlistKey] || null;
       }
+      jobData.ownershipId = job.data.ownershipId || null;
       jobData.userId = job.data.userId || null;
       jobData.userUuid = job.data.userUuid || null;
       jobData.customName = job.data.customName || null;

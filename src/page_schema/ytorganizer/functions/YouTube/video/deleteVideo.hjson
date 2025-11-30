@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "deleteVideo",
-        description: "Deletes videos (array, 'all', or 'allInContext') from specific playlists by removing PlaylistSetting->VideoSetting relationships, then cleaning up orphan VideoSetting and Videos. 'allInContext' deletes all videos in the context playlists. With the new schema, videos are owned by playlists, not ownerships.",
+        description: "Deletes videos (array, 'all', or 'allInContext') from playlists using global Playlist->Video relationships. NEW SCHEMA v4.0: Removes Playlist->Video relationships, then cleans up orphan Videos and optional VideoSettings. 'allInContext' deletes all videos in the context playlists.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -77,104 +77,97 @@ try {
     }
   }
 
-  // CORRECTED SCHEMA - Step 1: Delete PlaylistSetting->Video relationships
+  // Step 1: Collect video IDs and delete Playlist->Video relationships atomically
+  // NEW SCHEMA v4.0: With duplicate videos per ownership, track specific video instances
   let queryParams = { ownershipId };
-  let relationshipFilter = '';
+  let relationshipMatchClause = '';
 
   if (videos === 'all') {
-    // Delete all video relationships from all playlists for this ownership
-    relationshipFilter = '';
+    // Delete all video relationships from all playlists owned by this ownership
+    relationshipMatchClause = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+      MATCH (p)-[r:PlaylistVideo]->(v:Video)
+    `;
   } else if (videos === 'allInContext') {
     // Delete all video relationships from specific playlists
     queryParams.playlistIds = playlistIds;
-    relationshipFilter = 'WHERE p.youtubeId IN $playlistIds';
+    relationshipMatchClause = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+      WHERE p.youtubeId IN $playlistIds
+      MATCH (p)-[r:PlaylistVideo]->(v:Video)
+    `;
   } else {
     // Delete specific videos from specific playlists
     queryParams.playlistIds = playlistIds;
     queryParams.videoIds = videoIds;
-    relationshipFilter = 'WHERE p.youtubeId IN $playlistIds AND v.youtubeId IN $videoIds';
+    relationshipMatchClause = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+      WHERE p.youtubeId IN $playlistIds
+      MATCH (p)-[r:PlaylistVideo]->(v:Video)
+      WHERE v.youtubeId IN $videoIds
+    `;
   }
 
+  // Collect video node IDs BEFORE deleting relationships
   const deleteRelationshipsQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-          -[:PlaylistSettingPlaylist]->(p:Playlist)
-    MATCH (ps)-[r:PlaylistSettingVideo]->(v:Video)
-    ${relationshipFilter}
+    ${relationshipMatchClause}
+
+    // Collect video info before deletion
+    WITH r, v, elementId(v) as videoNodeId
+
+    // Delete the relationship
     DELETE r
-    RETURN count(r) as deletedRelationships
+
+    // Return video IDs for orphan check
+    RETURN collect(DISTINCT videoNodeId) as videoIds, count(r) as deletedRelationships
   `;
 
   const relResult = await args.session.run(deleteRelationshipsQuery, queryParams);
   const deletedRelRaw = relResult.records[0]?.get('deletedRelationships');
   const deletedRelationships = deletedRelRaw ? (typeof deletedRelRaw.toNumber === 'function' ? deletedRelRaw.toNumber() : Number(deletedRelRaw)) : 0;
 
-  // CORRECTED SCHEMA - Step 2: Delete orphan Videos (not referenced by any PlaylistSetting)
-  let videoFilter = '';
-  if (videos === 'all') {
-    // Check all videos
-    videoFilter = 'MATCH (v:Video)';
-  } else if (videos === 'allInContext') {
-    // Check videos that were in the context playlists
-    videoFilter = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(tempPS:PlaylistSetting)
-            -[:PlaylistSettingPlaylist]->(tempP:Playlist)
-      WHERE tempP.youtubeId IN $playlistIds
-      MATCH (tempPS)-[:PlaylistSettingVideo]->(tempV:Video)
-      WITH DISTINCT tempV.youtubeId as videoId
-      MATCH (v:Video {youtubeId: videoId})
-    `;
-  } else {
-    // Check specific videos
-    videoFilter = 'MATCH (v:Video) WHERE v.youtubeId IN $videoIds';
-  }
+  // Get the Neo4j internal IDs of videos we deleted relationships from
+  const videoNodeIds = relResult.records[0]?.get('videoIds') || [];
 
+  // Step 2: Delete ONLY the specific video instances that are now orphaned
+  // NEW SCHEMA v4.0: No global search - only check the specific video instances from Step 1
+  // Only check if playlists in THIS ownership still reference them (not global check)
   const deleteOrphanVideosQuery = `
-    ${videoFilter}
+    MATCH (v:Video)
+    WHERE elementId(v) IN $videoNodeIds
 
-    // Check if any PlaylistSetting still references this Video
-    OPTIONAL MATCH (anyPS:PlaylistSetting)-[:PlaylistSettingVideo]->(v)
+    // DEFENSIVE: Only delete if NO playlist from THIS ownership references this video
+    // NEW SCHEMA v4.0: Videos are ownership-specific, so only check this ownership's playlists
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    OPTIONAL MATCH (o)-[:YouTubeOwnershipPlaylist]->(anyP:Playlist)-[:PlaylistVideo]->(v)
 
-    WITH v, count(anyPS) as psCount
-    WHERE psCount = 0
+    WITH v, count(anyP) as playlistCount
+    WHERE playlistCount = 0
 
-    // No PlaylistSetting references this Video, safe to delete
+    // No playlist in this ownership references this video, safe to delete
     DETACH DELETE v
     RETURN count(v) as deletedVideos
   `;
 
-  const vResult = await args.session.run(deleteOrphanVideosQuery, queryParams);
+  const vResult = await args.session.run(deleteOrphanVideosQuery, { videoNodeIds, ownershipId });
   const deletedVRaw = vResult.records[0]?.get('deletedVideos');
   const deletedVideos = deletedVRaw ? (typeof deletedVRaw.toNumber === 'function' ? deletedVRaw.toNumber() : Number(deletedVRaw)) : 0;
 
-  // CORRECTED SCHEMA - Step 3: Delete orphan VideoSetting (not referenced by any Video)
-  // This happens when a video is deleted from all playlists
-  let videoSettingFilter = '';
-  if (videos === 'all' || videos === 'allInContext') {
-    // Check VideoSetting for this ownership
-    videoSettingFilter = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
-    `;
-  } else {
-    // Check VideoSetting for specific videos
-    videoSettingFilter = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
-      WHERE v.youtubeId IN $videoIds
-    `;
-  }
-
+  // Step 3: Delete orphan VideoSettings where video was deleted in Step 2
+  // NEW SCHEMA v4.0: VideoSettings are optional and only exist if user added custom data
   const deleteOrphanVideoSettingQuery = `
-    ${videoSettingFilter}
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)
+    OPTIONAL MATCH (vs)-[:VideoVideoSetting]->(v:Video)
 
-    // Check if the video still exists
+    // Delete settings where video no longer exists (was deleted in Step 2)
     WITH vs, v
-    WHERE NOT EXISTS((v)<-[:PlaylistSettingVideo]-(:PlaylistSetting))
+    WHERE v IS NULL
 
-    // Video has no playlist references, delete its setting
     DETACH DELETE vs
     RETURN count(vs) as deletedVideoSetting
   `;
 
-  const vsResult = await args.session.run(deleteOrphanVideoSettingQuery, queryParams);
+  const vsResult = await args.session.run(deleteOrphanVideoSettingQuery, { ownershipId });
   const deletedVSRaw = vsResult.records[0]?.get('deletedVideoSetting');
   const deletedVideoSetting = deletedVSRaw ? (typeof deletedVSRaw.toNumber === 'function' ? deletedVSRaw.toNumber() : Number(deletedVSRaw)) : 0;
 

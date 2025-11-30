@@ -32,10 +32,11 @@ try {
   // Get effective user (handles admin impersonation)
   const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
-  // Verify user has access to this playlist through ownership
+  // NEW SCHEMA v4.0: Verify user has access to this playlist through direct ownership
   const playlistAccessQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     RETURN p, ps, o
   `;
 
@@ -50,7 +51,8 @@ try {
   }
 
   const playlist = args.convertNodeToJson(playlistAccessResult.records[0].get('p'));
-  const playlistSetting = args.convertNodeToJson(playlistAccessResult.records[0].get('ps'));
+  const playlistSettingNode = playlistAccessResult.records[0].get('ps');
+  const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
 
   // Normalize input to array of items (either URLs or video IDs)
   let items = [];
@@ -81,16 +83,19 @@ try {
 
       // Get video data based on type
       if (item.type === 'id') {
-        // Check if video exists in database
+        // Check if video exists in database and is owned by this ownership
         const videoCheckQuery = `
-          MATCH (v:Video {youtubeId: $videoId})
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
           RETURN v
         `;
 
-        const videoCheckResult = await args.session.run(videoCheckQuery, { videoId: item.value });
+        const videoCheckResult = await args.session.run(videoCheckQuery, {
+          ownershipId,
+          videoId: item.value
+        });
 
         if (videoCheckResult.records.length === 0) {
-          errors.push({ value: item.value, message: "Video not found in database" });
+          errors.push({ value: item.value, message: "Video not found in your collection. Please add it via URL first." });
           continue;
         }
 
@@ -121,11 +126,10 @@ try {
 
       const videoId = video.P.youtubeId;
 
-      // CORRECTED SCHEMA: Check if video is already in this ownership's playlist
+      // NEW SCHEMA v4.0: Check if video is already in this playlist (verify ownership)
       const existingVideoQuery = `
-        MATCH (o:YouTubeOwnership {key: $ownershipId})
-        MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-        MATCH (ps)-[:PlaylistSettingVideo]->(v:Video {youtubeId: $videoId})
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (p)-[:PlaylistVideo]->(v:Video {youtubeId: $videoId})
         RETURN v
       `;
 
@@ -140,59 +144,51 @@ try {
         continue;
       }
 
-      // CORRECTED SCHEMA: Get current video count for position
+      // NEW SCHEMA v4.0: Get current video count for position (verify ownership)
       const countQuery = `
-        MATCH (o:YouTubeOwnership {key: $ownershipId})
-        MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-        MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
-        RETURN COUNT(v) as videoCount
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        OPTIONAL MATCH (p)-[r:PlaylistVideo]->(v:Video)
+        RETURN COALESCE(MAX(r.position), -1) as maxPosition
       `;
 
       const countResult = await args.session.run(countQuery, {
         ownershipId,
         playlistId: playlistId
       });
-      const videoCountValue = countResult.records[0].get('videoCount');
-      const currentCount = videoCountValue.low || videoCountValue || 0;
-      const newPosition = currentCount + results.length;
+      const maxPosValue = countResult.records[0].get('maxPosition');
+      const maxPosition = maxPosValue ? (typeof maxPosValue.toNumber === 'function' ? maxPosValue.toNumber() : Number(maxPosValue)) : -1;
+      const newPosition = maxPosition + 1 + results.length;
 
-      // CORRECTED SCHEMA:
-      // 1. Create ownership-level VideoSetting (global setting)
-      // 2. Create PlaylistSetting->Video relationship (playlist membership)
+      // NEW SCHEMA v4.0:
+      // 1. Create ownership relationship to video
+      // 2. Create global Playlist->Video relationship
+      // Note: VideoSetting is NOT created here - only when user adds custom data
 
-      const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;
-
-      // Step 1: Create/update ownership-level VideoSetting
-      await args.session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})
-        MATCH (v:Video {youtubeId: $videoId})
-        MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-        ON CREATE SET
-          vs.key = $videoSettingKey,
-          vs.createdAt = datetime(),
-          vs.watched = false,
-          vs.note = null,
-          vs.isFavourite = false
-        SET
-          vs.updatedAt = datetime()
+      // Step 1: Verify video ownership (defensive check)
+      // Video should already be owned since we checked earlier, but verify again
+      const videoOwnershipCheck = await args.session.run(`
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
+        RETURN v
       `, {
         ownershipId,
-        videoId: videoId,
-        videoSettingKey
+        videoId: videoId
       });
 
-      // Step 2: Create PlaylistSetting->Video relationship
+      if (videoOwnershipCheck.records.length === 0) {
+        throw new Error(`Video not found in your collection. This should not happen.`);
+      }
+
+      // Step 2: Create global Playlist->Video relationship (verify ownership for both playlist and video)
       await args.session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-        MATCH (v:Video {youtubeId: $videoId})
-        MERGE (ps)-[r:PlaylistSettingVideo]->(v)
-        ON CREATE SET
-          r.createdAt = datetime(),
-          r.position = $position,
-          r.playlistIndex = $position
-        SET
-          r.updatedAt = datetime()
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
+        CREATE (p)-[r:PlaylistVideo {
+          position: $position,
+          playlistIndex: $position,
+          addedAt: datetime(),
+          createdAt: datetime(),
+          updatedAt: datetime()
+        }]->(v)
       `, {
         ownershipId,
         playlistId: playlistId,
@@ -210,43 +206,51 @@ try {
     }
   }
 
-  // Update playlist metadata if any videos were added
+  // NEW SCHEMA v4.0: Update playlist metadata if any videos were added
   if (results.length > 0) {
-    // Get current customOrder array
-    const currentOrder = playlistSetting.P.customOrder || [];
-
-    // Add new video IDs to customOrder
-    const addedVideoIds = results.map(r => r.video.P.youtubeId);
-    const newOrder = [...currentOrder, ...addedVideoIds];
-
-    // Check if playlist was empty before adding
-    const wasEmpty = currentOrder.length === 0;
-
-    // Update PlaylistSetting with itemCount, thumbnail, and customOrder
-    const updatePlaylistSettingQuery = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
-      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-      SET
-        ps.customOrder = $customOrder,
-        ps.itemCount = $itemCount,
-        ${wasEmpty ? 'ps.thumbnail = $thumbnail,' : ''}
-        ps.updatedAt = datetime()
-      RETURN ps
-    `;
-
-    const updateParams = {
+    // Update global Playlist vertex itemCount (verify ownership)
+    await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      SET p.itemCount = COALESCE(p.itemCount, 0) + $addedCount,
+          p.updatedAt = datetime()
+    `, {
       ownershipId,
       playlistId: playlistId,
-      customOrder: newOrder,
-      itemCount: newOrder.length
-    };
+      addedCount: results.length
+    });
 
-    // Set thumbnail to first video's thumbnail if playlist was empty
-    if (wasEmpty && results[0]) {
-      updateParams.thumbnail = results[0].video.P.thumbnail || results[0].video.P.thumbnailUrl || "";
+    // Also update PlaylistSetting if it exists (for custom playlists or if user has settings)
+    if (playlistSetting) {
+      const currentOrder = playlistSetting.P.customOrder || [];
+      const addedVideoIds = results.map(r => r.video.P.youtubeId);
+      const newOrder = [...currentOrder, ...addedVideoIds];
+      const wasEmpty = currentOrder.length === 0;
+
+      const updatePlaylistSettingQuery = `
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+        SET
+          ps.customOrder = $customOrder,
+          ps.itemCount = $itemCount,
+          ${wasEmpty ? 'ps.thumbnail = $thumbnail,' : ''}
+          ps.updatedAt = datetime()
+        RETURN ps
+      `;
+
+      const updateParams = {
+        ownershipId,
+        playlistId: playlistId,
+        customOrder: newOrder,
+        itemCount: newOrder.length
+      };
+
+      // Set thumbnail to first video's thumbnail if playlist was empty
+      if (wasEmpty && results[0]) {
+        updateParams.thumbnail = results[0].video.P.thumbnail || results[0].video.P.thumbnailUrl || "";
+      }
+
+      await args.session.run(updatePlaylistSettingQuery, updateParams);
     }
-
-    await args.session.run(updatePlaylistSettingQuery, updateParams);
   }
 
   const successCount = results.length;

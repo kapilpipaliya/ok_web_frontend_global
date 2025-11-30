@@ -5,14 +5,18 @@
       L: "Function",
       P: {
         key: "getChannelContents",
-        description: "Fetches a single channel's playlists for the current user. Supports multi-ownership model with optional ownership filtering.",
+        description: "Fetches a single channel's playlists for the current user. Requires ownershipId to determine which playlists to return.",
         body: '''
 try {
-  // Extract channel ID, optional ownership filter, and sort from request parameters
-  const { channelId, ownershipId = null, sortBy = "position_asc" } = args.contextData;
+  // Extract channel ID, ownership ID, and sort from request parameters
+  const { channelId, ownershipId, sortBy = "position_asc" } = args.contextData;
 
   if (!channelId) {
     throw new Error("Channel ID is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Get current authenticated user from session
@@ -54,14 +58,21 @@ try {
   const channel = channelData.channel;
   const channelSetting = channelData.channelSetting;
 
-  // Get playlist IDs from this channel
+  // NEW SCHEMA v4.0: Get playlist IDs from this channel that are owned by user's ownership
+  // Only return playlists that the user owns through their ownership
+  // IMPORTANT: Always verify channel ownership before accessing channel's playlists
   const getPlaylistIdsQuery = `
-    MATCH (c:Channel {youtubeId: $channelId})-[:ChannelPlaylist]->(p:Playlist)
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p)
     RETURN p.youtubeId as playlistId
   `;
 
   const playlistIdsResult = await args.session.run(getPlaylistIdsQuery, {
-    channelId
+    userUuid: user.P.uuid,
+    channelId,
+    ownershipId
   });
 
   const channelPlaylistIds = playlistIdsResult.records.map(record => record.get('playlistId'));
@@ -98,7 +109,7 @@ try {
         userSavedPlaylists: playlists.length  // All returned playlists are user-saved
       },
       userId: user.id,
-      ownershipId  // Include ownership context if filtered
+      ownershipId
     },
     message: `Found ${playlists.length} saved playlist${playlists.length !== 1 ? 's' : ''} in channel`
   };

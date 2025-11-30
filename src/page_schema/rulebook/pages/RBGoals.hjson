@@ -140,7 +140,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 return {
   text: "🎯 Goals & Achievements"
@@ -657,7 +657,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const goalItem = args.contextData?.goalCard;
 
@@ -705,7 +705,7 @@ return {
       P: {
         displayOrder: 2,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const goalItem = args.contextData?.goalCard;
 const goal = goalItem?.goal;
@@ -734,7 +734,7 @@ return {
       P: {
         displayOrder: 3,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const goalItem = args.contextData?.goalCard;
 
@@ -777,7 +777,7 @@ return {
       P: {
         displayOrder: 4,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const goalItem = args.contextData?.goalCard;
 const goal = goalItem?.goal;
@@ -834,7 +834,7 @@ return {
       P: {
         displayOrder: 5,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const goalItem = args.contextData?.goalCard;
 const goal = goalItem?.goal;

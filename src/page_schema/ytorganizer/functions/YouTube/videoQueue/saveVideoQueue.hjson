@@ -58,9 +58,9 @@ try {
     }
 
     // Create VideoQueue node and relationships
-    await args.session.run(`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
-      MATCH (v:Video {youtubeId: $videoId})
+    // NEW SCHEMA v4.0: Verify ownership before accessing video
+    const createResult = await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
       CREATE (vq:VideoQueue {
         key: $key,
         position: $position,
@@ -70,12 +70,18 @@ try {
       })
       CREATE (o)-[:YouTubeOwnershipVideoQueue]->(vq)
       CREATE (vq)-[:VideoQueueVideo]->(v)
+      RETURN vq
     `, {
       ownershipId,
       videoId,
       key: `video_queue_${ownershipId}_${videoId}_${i}`,
       position: i
     });
+
+    if (createResult.records.length === 0) {
+      console.warn(`Skipping video at position ${i} - not found in your collection`);
+      continue;
+    }
   }
 
   return {

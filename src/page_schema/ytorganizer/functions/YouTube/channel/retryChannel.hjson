@@ -80,10 +80,11 @@ try {
   }
 
   // Check if channel exists and get its current status
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   const checkResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
     RETURN c, cs
   `, { userUuid: user.P.uuid, ownershipId, channelId });
 
@@ -96,10 +97,10 @@ try {
 
   const channelSettingNode = checkResult.records[0].get('cs');
   const channelNode = checkResult.records[0].get('c');
-  const channelSetting = args.convertNodeToJson(channelSettingNode);
+  const channelSetting = channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null;
   const channel = args.convertNodeToJson(channelNode);
 
-  const currentStatus = channelSetting.P.status;
+  const currentStatus = channelSetting?.P?.status;
 
   // Prevent retry of channels that are already queued or processing
   if (currentStatus === 'queued' || currentStatus === 'processing') {
@@ -115,24 +116,36 @@ try {
 
   // Reset channel status to queued
   // This clears error state and resets progress counters
+  // NEW SCHEMA v4.0: Create setting if it doesn't exist
+  const channelSettingKey = `channel_setting_${channelId}_${ownershipId}`;
+
   await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+
+    MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $channelSettingKey})
+    ON CREATE SET cs.createdAt = datetime()
+    MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
+
     SET cs.status = 'queued',
         cs.progress = 0,
         cs.processedPlaylists = 0,
         cs.error = null,
         cs.queuedAt = datetime(),
         cs.updatedAt = datetime()
-  `, { ownershipId, channelId });
+  `, { ownershipId, channelId, channelSettingKey });
 
-  // Also reset all playlist setting for this channel to queued
+  // Also reset all playlist settings for this channel to queued
   // This ensures playlists are re-processed even if some were completed before
+  // NEW SCHEMA v4.0: Direct ownership + global playlist membership
   await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
     MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p)
+
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+    WITH p, ps, o
+    WHERE ps IS NOT NULL
+
     SET ps.status = 'queued',
         ps.progress = 0,
         ps.processedVideos = 0,

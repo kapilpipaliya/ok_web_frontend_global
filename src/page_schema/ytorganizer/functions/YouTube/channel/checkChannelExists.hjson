@@ -35,10 +35,12 @@ try {
   if (isHandle) {
     // Check if channel exists by customUrl (handle)
     // Note: customUrl is stored with @ prefix and lowercase, so we need case-insensitive comparison
+    // NEW SCHEMA v4.0: Direct ownership + optional settings
     const handleQuery = `
       MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-      MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+      MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
       WHERE toLower(c.customUrl) = toLower($handle) OR toLower(c.customUrl) = toLower($handleWithAt)
+      OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
       RETURN c, cs
       LIMIT 1
     `;
@@ -72,9 +74,11 @@ try {
   }
 
   // Check if channel exists for this ownership by channel ID
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   const query = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $youtubeId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
     RETURN c, cs
     LIMIT 1
   `;

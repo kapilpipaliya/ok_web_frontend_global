@@ -141,7 +141,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 return {
   text: "Reports & Analytics"
@@ -155,7 +155,7 @@ return {
       P: {
         displayOrder: 2,
         componentName: "Html",
-        slot: "right",
+        slotName: "right",
         props: '''
 const exportData = () => {
   const data = args.contextData?.reportsPageContext?.reportsData?.();

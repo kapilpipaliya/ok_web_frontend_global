@@ -1576,15 +1576,19 @@ return {
         slotName: "menu-items",
         props: '''
 const item = args.contextData.props?.item;
+const hideMenuItems = args.contextData.props?.hideMenuItems || [];
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
 const notSaved = isExtensionItem && !item?.P?.extensionExists;
 
+// Hide if specified in hideMenuItems prop
+const isHidden = hideMenuItems.includes("editName");
+
 return {
   icon: "carbon:edit",
   text: "Edit custom name",
-  hide: notSaved,
+  hide: notSaved || isHidden,
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.openCustomNameModal?.(args.contextData.props?.itemData);
@@ -1604,6 +1608,7 @@ return {
         props: '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
+const hideMenuItems = args.contextData.props?.hideMenuItems || [];
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
@@ -1620,10 +1625,13 @@ const ownershipId = args.fns.getSelectedOwnershipId?.();
 const canRetry = (itemType === "channel" || itemType === "playlist") &&
                  (status === "failed" || status === "completed_with_errors");
 
+// Hide if specified in hideMenuItems prop
+const isHidden = hideMenuItems.includes("retry");
+
 return {
   icon: "carbon:restart",
   text: "Retry Processing",
-  hide: !canRetry || notSaved,
+  hide: !canRetry || notSaved || isHidden,
   onClick: async (e) => {
     e?.stopPropagation();
 
@@ -1659,16 +1667,20 @@ return {
         slotName: "menu-items",
         props: '''
 const item = args.contextData.props?.item;
+const hideMenuItems = args.contextData.props?.hideMenuItems || [];
 
 // Check if this is an unsaved extension item
 const isExtensionItem = item?.P?.extensionExists !== undefined;
 const notSaved = isExtensionItem && !item?.P?.extensionExists;
 
+// Hide if specified in hideMenuItems prop
+const isHidden = hideMenuItems.includes("delete");
+
 return {
   icon: "carbon:trash-can",
   text: "Delete",
   type: "danger",
-  hide: notSaved,
+  hide: notSaved || isHidden,
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.deleteItem?.(args.contextData.props?.itemData);

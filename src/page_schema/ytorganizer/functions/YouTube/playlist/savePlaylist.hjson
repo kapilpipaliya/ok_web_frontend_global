@@ -123,13 +123,14 @@ try {
   }
 
   // DUPLICATE JOB PREVENTION: Check if this playlist is already queued or processing for this ownership
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   // Prevents multiple concurrent jobs for the same playlist which would waste API quota
   // and potentially cause data inconsistencies
   // REFRESH MODE: If refresh=true, skip this check to allow re-processing completed playlists
   if (!refresh) {
     const existingPlaylistResult = await args.session.run(`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-            -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
       WHERE ps.status IN ['queued', 'processing']
       RETURN p.youtubeId as playlistId, ps.status as status, p.title as title
     `, { ownershipId, playlistId });
@@ -202,11 +203,11 @@ try {
   // Use write transaction for atomicity - prevents race conditions
   const { playlist, playlistSetting } = await args.session.executeWrite(async (tx) => {
     // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
-    // This check happens within the transaction to ensure no race condition
+    // NEW SCHEMA v4.0: This check happens within the transaction to ensure no race condition
     if (!refresh) {
       const existingPlaylistInTx = await tx.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
         // WHERE ps.status IN ['queued', 'processing']
         RETURN p.youtubeId as playlistId, ps.status as status, p.title as title
       `, { ownershipId, playlistId });
@@ -220,11 +221,14 @@ try {
       }
     }
 
-    // STEP 1: Create or update the main Playlist vertex with basic metadata
-    const playlistKey = `playlist_${playlistId}`;
+    // STEP 1 & 2: Create ownership-specific playlist instance and direct ownership relationship
+    // NEW SCHEMA v4.0: Each ownership has its own playlist instances (duplicate resources per ownership)
+    // This ensures complete data isolation between different YouTube accounts
+    const playlistKey = `playlist_${playlistId}_${ownershipId}`;
 
     const mergePlaylistQuery = `
-      MERGE (p:Playlist {youtubeId: $playlistId})
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MERGE (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
       ON CREATE SET
         p.key = $key,
         p.youtubeId = $playlistId,
@@ -243,7 +247,8 @@ try {
       RETURN p
     `;
 
-    await tx.run(mergePlaylistQuery, {
+    const playlistResult = await tx.run(mergePlaylistQuery, {
+      ownershipId,
       key: playlistKey,
       playlistId,
       title: playlistData.snippet.title,
@@ -260,16 +265,19 @@ try {
       publishedAt: playlistData.snippet.publishedAt
     });
 
-    // STEP 2: Create ownership-specific PlaylistSetting with status tracking
-    const playlistSettingKey = `playlist_setting_${ownershipId}_${playlistId}`;
+    // STEP 3: Create PlaylistSetting for status tracking and user preferences
+    // Settings are created for ALL playlists to track processing status
+    const playlistSettingKey = `playlist_setting_${playlistId}_${ownershipId}`;
 
-    const mergePlaylistSettingQuery = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
-      MATCH (p:Playlist {youtubeId: $playlistId})
-      MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    const playlistSettingResult = await tx.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+
+      MERGE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {key: $playlistSettingKey})
       ON CREATE SET
-        ps.key = $playlistSettingKey,
         ps.createdAt = datetime()
+
+      MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps)
+
       SET
         ps.customName = $customName,
         ps.sortBy = 'index',
@@ -284,10 +292,9 @@ try {
         ps.queuedAt = datetime(),
         ps.lastUpdated = datetime(),
         ps.updatedAt = datetime()
-      RETURN ps, p
-    `;
 
-    const playlistSettingResult = await tx.run(mergePlaylistSettingQuery, {
+      RETURN ps, p
+    `, {
       ownershipId,
       playlistId,
       playlistSettingKey,
@@ -301,15 +308,20 @@ try {
     const playlistSettingVertex = args.convertNodeToJson(playlistSettingNode);
     const playlistVertex = args.convertNodeToJson(playlistNode);
 
-    // If playlist is part of a channel, create the relationship
-    // (Validation already done earlier before any database operations)
-    if (channelId) {
+    // Create Channel->Playlist relationship using channel ID from YouTube API
+    // This represents YouTube's data model (which channel owns the playlist)
+    const apiChannelId = playlistVertex.P.channelId;
+    if (apiChannelId) {
       const channelPlaylistQuery = `
-        MATCH (c:Channel {youtubeId: $channelId})
-        MATCH (p:Playlist {youtubeId: $playlistId})
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        MERGE (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $apiChannelId})
+        ON CREATE SET
+          c.key = 'channel_' + $apiChannelId + '_' + $ownershipId,
+          c.youtubeId = $apiChannelId,
+          c.createdAt = datetime()
         MERGE (c)-[:ChannelPlaylist]->(p)
       `;
-      await tx.run(channelPlaylistQuery, { channelId, playlistId });
+      await tx.run(channelPlaylistQuery, { ownershipId, playlistId, apiChannelId });
     }
 
     return { playlist: playlistVertex, playlistSetting: playlistSettingVertex };

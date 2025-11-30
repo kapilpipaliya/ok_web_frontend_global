@@ -41,10 +41,10 @@ try {
   const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
 
   // Check if the playlist exists and ownership has access to it
-  // Following the correct schema: (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+  // NEW SCHEMA v4.0: Direct ownership + optional settings (verify ownership first)
   const playlistQuery = `
-    MATCH (p:Playlist {youtubeId: $playlistId})
-    OPTIONAL MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     RETURN p, ps
   `;
 
@@ -54,7 +54,7 @@ try {
   });
 
   if (playlistResult.records.length === 0) {
-    throw new Error("Playlist not found");
+    throw new Error("Playlist not found or you don't have access to it");
   }
 
   const record = playlistResult.records[0];
@@ -72,34 +72,32 @@ try {
     };
   }
 
-  // Reset the playlist setting to default values instead of deleting
-  // This maintains the relationship structure and follows the same pattern as savePlaylist
-  const resetQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-    SET ps.customName = null,
-        ps.customOrder = null,
-        ps.sortBy = 'index',
-        ps.showThumbnails = true,
-        ps.viewMode = 'list',
-        ps.lastUpdated = datetime(),
-        ps.updatedAt = datetime()
-    RETURN ps
+  // Delete the PlaylistSetting instead of resetting
+  // NEW SCHEMA v4.0: Settings are optional and should be deleted if no longer needed
+  const deleteQuery = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+    WITH ps
+    WHERE ps IS NOT NULL
+    DETACH DELETE ps
+    RETURN count(ps) as deletedCount
   `;
 
-  const resetResult = await args.session.run(resetQuery, {
+  const deleteResult = await args.session.run(deleteQuery, {
     playlistId: playlistId,
     ownershipId
   });
 
-  const wasReset = resetResult.records.length > 0;
+  const deletedCountRaw = deleteResult.records[0]?.get('deletedCount');
+  const deletedCount = deletedCountRaw ? (typeof deletedCountRaw.toNumber === 'function' ? deletedCountRaw.toNumber() : Number(deletedCountRaw)) : 0;
 
   return {
     success: true,
-    message: wasReset ? "Playlist setting have been reset to defaults" : "No user setting found for this playlist",
+    message: deletedCount > 0 ? "Playlist setting have been cleared" : "No user setting found for this playlist",
     data: {
       playlistId: playlistId,
-      settingCleared: wasReset,
-      resetCount: wasReset ? 1 : 0
+      settingCleared: deletedCount > 0,
+      deletedCount: deletedCount
     }
   };
 

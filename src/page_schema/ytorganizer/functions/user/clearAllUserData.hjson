@@ -56,7 +56,9 @@ try {
     userToClear = currentUser;
   }
 
-  // Step 1: Delete all ownership channel setting and relationships
+  // NEW SCHEMA v4.0: Delete all ownership relationships and optional settings
+
+  // Step 1: Delete all channel settings for this ownership
   const deleteChannelSettingQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
@@ -67,7 +69,7 @@ try {
     userUuid: userToClear.P.uuid
   });
 
-  // Step 2: Delete all ownership playlist setting and relationships
+  // Step 2: Delete all playlist settings for this ownership
   const deletePlaylistSettingQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
@@ -78,7 +80,7 @@ try {
     userUuid: userToClear.P.uuid
   });
 
-  // Step 3: Delete all ownership video setting and relationships
+  // Step 3: Delete all video settings for this ownership
   const deleteVideoSettingQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)
@@ -89,10 +91,25 @@ try {
     userUuid: userToClear.P.uuid
   });
 
+  // Step 4: Delete all direct ownership relationships (keeps the content, just removes user's ownership)
+  const deleteOwnershipRelQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+    OPTIONAL MATCH (o)-[cr:YouTubeOwnershipChannel]->(:Channel)
+    OPTIONAL MATCH (o)-[pr:YouTubeOwnershipPlaylist]->(:Playlist)
+    OPTIONAL MATCH (o)-[vr:YouTubeOwnershipVideo]->(:Video)
+    DELETE cr, pr, vr
+    RETURN count(cr) + count(pr) + count(vr) as deletedRelationships
+  `;
+
+  const ownershipRelResult = await args.session.run(deleteOwnershipRelQuery, {
+    userUuid: userToClear.P.uuid
+  });
+
   // Get statistics for the response
   const channelSettingDeleted = channelSettingResult.summary.counters.updates().nodesDeleted || 0;
   const playlistSettingDeleted = playlistSettingResult.summary.counters.updates().nodesDeleted || 0;
   const videoSettingDeleted = videoSettingResult.summary.counters.updates().nodesDeleted || 0;
+  const ownershipRelDeleted = ownershipRelResult.records[0]?.get('deletedRelationships') || 0;
 
   const username = userToClear.P.username || 'User';
   const message = isAdminClear
@@ -106,7 +123,8 @@ try {
       channelSettingDeleted,
       playlistSettingDeleted,
       videoSettingDeleted,
-      totalItemDeleted: channelSettingDeleted + playlistSettingDeleted + videoSettingDeleted,
+      ownershipRelationshipsDeleted: ownershipRelDeleted,
+      totalItemDeleted: channelSettingDeleted + playlistSettingDeleted + videoSettingDeleted + ownershipRelDeleted,
       userId: userToClear.id,
       username: username,
       clearedAt: new Date().toISOString()

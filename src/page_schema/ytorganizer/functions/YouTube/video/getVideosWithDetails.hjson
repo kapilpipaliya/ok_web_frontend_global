@@ -12,7 +12,7 @@
  *
  * Parameters (via args.contextData):
  * - userUuid: string (required) - User UUID
- * - ownershipId: string (optional) - Filter by specific YouTube ownership. If omitted, aggregates across all ownerships
+ * - ownershipId: string (required) - YouTube ownership ID to filter videos by
  * - videoIds: string[] (optional) - Filter by specific video IDs
  * - playlistId: string (optional) - Filter videos by specific playlist ID
  * - statusFilter: string[] (optional) - Filter by status values (e.g., ['watched', 'unwatched'])
@@ -34,7 +34,7 @@
 try {
   const {
     userUuid,
-    ownershipId = null,
+    ownershipId,
     videoIds = [],
     playlistId = null,
     statusFilter = [],
@@ -51,6 +51,10 @@ try {
 
   if (!userUuid) {
     throw new Error("User UUID is required");
+  }
+
+  if (!ownershipId) {
+    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
   }
 
   // Build WHERE clause for video IDs if provided
@@ -95,26 +99,26 @@ try {
   }
 
   // Build ownership matching clause
-  const ownershipMatchClause = ownershipId
-    ? 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})'
-    : 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)';
+  // NEW SCHEMA v4.0: Always verify ownership
+  const ownershipMatchClause = 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})';
 
   // Build video matching clause based on whether playlistId is provided
-  // When playlistId is provided: Match through PlaylistSetting->Video (videos in that playlist)
-  // When playlistId is null: Match through VideoSetting->Video (all videos for this ownership)
+  // NEW SCHEMA v4.0: Global playlist membership + optional video settings
   let videoMatchClause;
 
   if (playlistId) {
-    // Match videos through playlist
+    // Match videos through global Playlist->Video relationship
     videoMatchClause = `
-      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-      MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
-      OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+      MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      MATCH (p)-[:PlaylistVideo]->(v:Video)
+      // Optional VideoSetting (only exists if user has notes/favorites/etc.)
+      OPTIONAL MATCH (v)-[:VideoVideoSetting]->(vs:VideoSetting)<-[:YouTubeOwnershipVideoSetting]-(o)
     `;
   } else {
-    // Match videos through VideoSetting (only videos belonging to this ownership)
+    // Match videos that have settings for this ownership
+    // (Videos without settings won't appear here - only those with notes/favorites/watched status)
     videoMatchClause = `
-      MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+      MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)<-[:VideoVideoSetting]-(v:Video)
     `;
   }
 

@@ -68,7 +68,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "center",
+        slotName: "center",
         props: '''
 return {
   as: "h1",
@@ -97,7 +97,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "subtitle",
+        slotName: "subtitle",
         props: '''
 return {
   as: "p",

@@ -167,13 +167,12 @@ try {
   }
 
   // DUPLICATE JOB PREVENTION: Check if this channel is already queued or processing for this ownership
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   // For handles and usernames, we can't check by ID yet, so we'll check after fetching
   if (!refresh && channelInfo.type === 'channelId') {
     const existingChannelResult = await args.session.run(`
-      MATCH (c:Channel {youtubeId: $channelId})
-      WITH c
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-            -[:ChannelSettingChannel]->(c)
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+      OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
       WHERE cs.status IN ['queued', 'processing']
       RETURN c.youtubeId as channelId, cs.status as status, c.title as title
     `, { ownershipId, channelId: channelInfo.value });
@@ -223,13 +222,11 @@ try {
   // Use write transaction for atomicity - prevents race conditions
   await args.session.executeWrite(async (tx) => {
     // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
-    // This check happens after we know the actual channelId
+    // NEW SCHEMA v4.0: This check happens after we know the actual channelId
     if (!refresh) {
       const existingChannelInTx = await tx.run(`
-        MATCH (c:Channel {youtubeId: $channelId})
-        WITH c
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-              -[:ChannelSettingChannel]->(c)
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+        OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
         // WHERE cs.status IN ['queued', 'processing']
         RETURN c.youtubeId as channelId, cs.status as status, c.title as title
       `, { ownershipId, channelId: channelData.id });
@@ -243,11 +240,14 @@ try {
       }
     }
 
-    // STEP 1: Create or update the main Channel vertex with basic metadata
-    const channelKey = `channel_${channelData.id}`;
+    // STEP 1 & 2: Create ownership-specific channel instance and direct ownership relationship
+    // NEW SCHEMA v4.0: Each ownership has its own channel instances (duplicate resources per ownership)
+    // This ensures complete data isolation between different YouTube accounts
+    const channelKey = `channel_${channelData.id}_${ownershipId}`;
 
     const mergeChannelQuery = `
-      MERGE (c:Channel {youtubeId: $channelId})
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MERGE (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
       ON CREATE SET
         c.key = $key,
         c.youtubeId = $channelId,
@@ -267,7 +267,8 @@ try {
       RETURN c
     `;
 
-    await tx.run(mergeChannelQuery, {
+    const channelResult = await tx.run(mergeChannelQuery, {
+      ownershipId,
       key: channelKey,
       channelId: channelData.id,
       title: channelData.snippet.title,
@@ -284,16 +285,20 @@ try {
       publishedAt: channelData.snippet.publishedAt
     });
 
-    // STEP 2: Create ownership-specific ChannelSetting with status tracking
-    const channelSettingKey = `channel_setting_${ownershipId}_${channelData.id}`;
+    // STEP 3: Create ChannelSetting for status tracking and user preferences
+    // Settings are created for ALL channels to track processing status
+    const channelSettingKey = `channel_setting_${channelData.id}_${ownershipId}`;
 
-    const mergeChannelSettingQuery = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
-      MATCH (c:Channel {youtubeId: $channelId})
-      MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
+    // Combine the ownership and channel matches in one query
+    const channelSettingResult = await tx.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+
+      MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $channelSettingKey})
       ON CREATE SET
-        cs.key = $channelSettingKey,
         cs.createdAt = datetime()
+
+      MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
+
       SET
         cs.customName = $customName,
         cs.notifications = true,
@@ -308,10 +313,9 @@ try {
         cs.error = null,
         cs.queuedAt = datetime(),
         cs.updatedAt = datetime()
-      RETURN cs
-    `;
 
-    await tx.run(mergeChannelSettingQuery, {
+      RETURN cs
+    `, {
       ownershipId,
       channelId: channelData.id,
       channelSettingKey,

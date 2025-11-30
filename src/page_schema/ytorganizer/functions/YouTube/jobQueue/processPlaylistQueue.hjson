@@ -150,10 +150,11 @@ if (args.contextData.action === 'start') {
     // Check if this is a special playlist (LL, WL, UU, FL, HL)
     // Special playlists have their channel ID appended to make them unique
     // We need to extract the original 2-char ID for YouTube API calls
+    // NEW SCHEMA v4.0: Verify ownership before accessing playlist
     const playlistResult = await session.run(`
-      MATCH (p:Playlist {youtubeId: $playlistId})
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
       RETURN p.originalPlaylistId as originalId
-    `, { playlistId });
+    `, { ownershipId, playlistId });
 
     const originalPlaylistId = playlistResult.records[0]?.get('originalId');
 
@@ -355,9 +356,11 @@ if (args.contextData.action === 'start') {
         const favoriteCount = videoDetails?.statistics?.favoriteCount ? parseInt(videoDetails.statistics.favoriteCount) : 0;
         const commentCount = videoDetails?.statistics?.commentCount ? parseInt(videoDetails.statistics.commentCount) : 0;
 
-        // Save video with ALL available details from YouTube API
+        // Save ownership-specific video with ALL available details from YouTube API
+        // NEW SCHEMA v4.0: Each ownership has its own video instances (duplicate resources per ownership)
         await session.run(`
-          MERGE (v:Video {youtubeId: $videoId})
+          MATCH (o:YouTubeOwnership {key: $ownershipId})
+          MERGE (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
           ON CREATE SET
             v.key = $key,
             v.createdAt = datetime()
@@ -392,8 +395,9 @@ if (args.contextData.action === 'start') {
             v.commentCount = $commentCount,
             v.updatedAt = datetime()
         `, {
+          ownershipId,
           videoId,
-          key: `video_${videoId}`,
+          key: `video_${videoId}_${ownershipId}`,
           title: video.snippet?.title || '',
           description: video.snippet?.description || '',
           channelId: video.snippet?.channelId || channelId || '',
@@ -430,10 +434,9 @@ if (args.contextData.action === 'start') {
 
         const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;
 
-        // Step 1: Create/update ownership-level VideoSetting
+        // Step 1: Create/update ownership-level VideoSetting (verify video ownership)
         await session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})
-          MATCH (v:Video {youtubeId: $videoId})
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
           MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
           ON CREATE SET
             vs.key = $videoSettingKey,
@@ -449,11 +452,11 @@ if (args.contextData.action === 'start') {
           videoSettingKey
         });
 
-        // Step 2: Create PlaylistSetting->Video relationship (playlist membership)
+        // Step 2: Create PlaylistSetting->Video relationship (playlist membership, verify video ownership)
         await session.run(`
           MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
                 -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-          MATCH (v:Video {youtubeId: $videoId})
+          MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
           MERGE (ps)-[r:PlaylistSettingVideo]->(v)
           ON CREATE SET
             r.createdAt = datetime(),

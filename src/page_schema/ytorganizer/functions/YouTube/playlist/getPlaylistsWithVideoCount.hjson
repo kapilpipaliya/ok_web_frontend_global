@@ -99,15 +99,21 @@ try {
     : 'MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)';
 
   // Cypher query to fetch playlists with video counts through ownership
+  // NEW SCHEMA v4.0: Direct ownership + optional settings + global playlist membership
   const query = `
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
-    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-    WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
-    OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
 
-    // CORRECTED SCHEMA: Count videos through PlaylistSetting->Video
-    OPTIONAL MATCH (ps)-[:PlaylistSettingVideo]->(v:Video)
+    // Optional PlaylistSetting (only exists if user has custom preferences)
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+
+    WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
+    // NEW SCHEMA v4.0: Verify channel ownership for defensive safety
+    OPTIONAL MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)-[:ChannelPlaylist]->(p)
+
+    // Count videos through global Playlist->Video relationship
+    OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
 
     WITH p, ps, c, o, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
 

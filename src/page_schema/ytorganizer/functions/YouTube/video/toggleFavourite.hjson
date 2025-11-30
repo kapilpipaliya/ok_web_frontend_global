@@ -56,51 +56,50 @@ try {
     throw new Error("Item ID not found");
   }
 
-  // Determine the correct node label and relationship for ownership-based model
-  let nodeLabel, settingLabel, ownershipRelation, settingRelation, itemRelation;
+  // NEW SCHEMA v4.0: Direct ownership with optional settings
+  // Settings are created on-demand when users favorite items
+  let nodeLabel, settingLabel, settingKey;
 
   if (itemType === "video") {
     nodeLabel = "Video";
     settingLabel = "VideoSetting";
-    ownershipRelation = "YouTubeOwnershipVideoSetting";
-    settingRelation = "VideoSettingVideo";
-    itemRelation = "VideoSettingVideo";
+    settingKey = `video_setting_${itemId}_${ownershipId}`;
   } else if (itemType === "channel") {
     nodeLabel = "Channel";
     settingLabel = "ChannelSetting";
-    ownershipRelation = "YouTubeOwnershipChannelSetting";
-    settingRelation = "ChannelSettingChannel";
-    itemRelation = "ChannelSettingChannel";
+    settingKey = `channel_setting_${itemId}_${ownershipId}`;
   } else {
     nodeLabel = "Playlist";
     settingLabel = "PlaylistSetting";
-    ownershipRelation = "YouTubeOwnershipPlaylistSetting";
-    settingRelation = "PlaylistSettingPlaylist";
-    itemRelation = "PlaylistSettingPlaylist";
+    settingKey = `playlist_setting_${itemId}_${ownershipId}`;
   }
 
   // Query to toggle favourite status for specific ownership
+  // NEW SCHEMA v4.0: Direct ownership + on-demand setting creation
   const query = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (item:${nodeLabel} {youtubeId: $itemId})
-    MERGE (o)-[:${ownershipRelation}]->(setting:${settingLabel})-[:${itemRelation}]->(item)
+    MATCH (o)-[:YouTubeOwnership${nodeLabel}]->(item:${nodeLabel} {youtubeId: $itemId})
+
+    MERGE (item)-[:${nodeLabel}${settingLabel}]->(setting:${settingLabel} {key: $settingKey})
     ON CREATE SET
-      setting.isFavourite = true,
-      setting.favouritedAt = datetime(),
       setting.createdAt = datetime()
-    ON MATCH SET
+    MERGE (o)-[:YouTubeOwnership${settingLabel}]->(setting)
+
+    SET
       setting.isFavourite = COALESCE(NOT setting.isFavourite, true),
       setting.favouritedAt = CASE
         WHEN COALESCE(NOT setting.isFavourite, true) = true THEN datetime()
         ELSE null
-      END
+      END,
+      setting.updatedAt = datetime()
     RETURN setting, item
   `;
 
   // Execute the query
   const result = await args.session.run(query, {
     ownershipId: ownershipId,
-    itemId: itemId
+    itemId: itemId,
+    settingKey: settingKey
   });
 
   if (result.records.length === 0) {

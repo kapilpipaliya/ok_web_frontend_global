@@ -299,9 +299,16 @@ if (args.contextData.action === 'start') {
         for (const playlist of allPlaylists) {
         if (!playlist.id) continue;
 
-        // Save playlist metadata first
+        // Save playlist metadata, create channel-playlist relationship, and create ownership setting
+        // NEW SCHEMA v4.0: Each ownership has its own playlist instances (no global playlists)
+        const playlistSettingKey = `playlist_setting_${ownershipId}_${playlist.id}`;
         await session.run(`
-          MERGE (p:Playlist {youtubeId: $playlistId})
+          // Get ownership and channel (verify ownership)
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+
+          // Create or update playlist for this ownership
+          // Each ownership has separate playlist instances with the same youtubeId
+          MERGE (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
           ON CREATE SET
             p.key = $key,
             p.createdAt = datetime()
@@ -313,36 +320,15 @@ if (args.contextData.action === 'start') {
             p.thumbnailHigh = $thumbnailHigh,
             p.thumbnailStandard = $thumbnailStandard,
             p.thumbnailMaxres = $thumbnailMaxres,
+            p.status = $status,
             p.channelId = $channelId,
             p.itemCount = $itemCount,
             p.updatedAt = datetime()
-        `, {
-          playlistId: playlist.id,
-          key: `playlist_${playlist.id}`,
-          title: playlist.snippet?.title || '',
-          description: playlist.snippet?.description || '',
-          thumbnailDefault: playlist.snippet?.thumbnails?.default?.url || null,
-          thumbnailMedium: playlist.snippet?.thumbnails?.medium?.url || null,
-          thumbnailHigh: playlist.snippet?.thumbnails?.high?.url || null,
-          thumbnailStandard: playlist.snippet?.thumbnails?.standard?.url || null,
-          thumbnailMaxres: playlist.snippet?.thumbnails?.maxres?.url || null,
-          channelId,
-          itemCount: playlist.contentDetails?.itemCount || 0
-        });
 
-        // Create channel-playlist relationship
-        await session.run(`
-          MATCH (c:Channel {youtubeId: $channelId})
-          MATCH (p:Playlist {youtubeId: $playlistId})
+          // Create channel-playlist relationship
           MERGE (c)-[:ChannelPlaylist]->(p)
-        `, { channelId, playlistId: playlist.id });
 
-        // Create ownership playlist setting and mark as queued
-        // Inherit priority from parent channel
-        const playlistSettingKey = `playlist_setting_${ownershipId}_${playlist.id}`;
-        await session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})
-          MATCH (p:Playlist {youtubeId: $playlistId})
+          // Create ownership playlist setting and mark as queued
           MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
           ON CREATE SET
             ps.key = $playlistSettingKey,
@@ -360,7 +346,18 @@ if (args.contextData.action === 'start') {
             ps.updatedAt = datetime()
         `, {
           ownershipId,
+          channelId,
           playlistId: playlist.id,
+          key: `playlist_${playlist.id}`,
+          title: playlist.snippet?.title || '',
+          description: playlist.snippet?.description || '',
+          thumbnailDefault: playlist.snippet?.thumbnails?.default?.url || null,
+          thumbnailMedium: playlist.snippet?.thumbnails?.medium?.url || null,
+          thumbnailHigh: playlist.snippet?.thumbnails?.high?.url || null,
+          thumbnailStandard: playlist.snippet?.thumbnails?.standard?.url || null,
+          thumbnailMaxres: playlist.snippet?.thumbnails?.maxres?.url || null,
+          status: playlist.status?.privacyStatus || null,
+          itemCount: playlist.contentDetails?.itemCount || 0, // for uploads playlist contentDetails is not returned.
           playlistSettingKey,
           priority
         });

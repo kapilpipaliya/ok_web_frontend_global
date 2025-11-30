@@ -74,10 +74,22 @@ try {
   const maxPosition = maxPositionResult.records[0]?.get('maxPosition');
   const newPosition = maxPosition !== null && maxPosition !== undefined ? maxPosition + 1 : 0;
 
+  // Verify video belongs to this ownership before adding to queue
+  const videoOwnershipCheck = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
+    RETURN v
+  `, {
+    ownershipId,
+    videoId
+  });
+
+  if (videoOwnershipCheck.records.length === 0) {
+    throw new Error("Video not found in your collection. Please add it first.");
+  }
+
   // Create VideoQueue node and relationships
   await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (v:Video {youtubeId: $videoId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
     CREATE (vq:VideoQueue {
       key: $key,
       position: $position,

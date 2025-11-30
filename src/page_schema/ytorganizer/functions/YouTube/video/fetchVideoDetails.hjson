@@ -101,30 +101,32 @@ try {
     throw new Error("Invalid YouTube video URL. Please provide a valid video URL.");
   }
 
-  // Check if video already exists in database
-  const existingVideoQuery = `
-    MATCH (v:Video {youtubeId: $videoId})
+  // NEW SCHEMA v4.0: Check if this ownership already owns the video
+  const ownedVideoQuery = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
     RETURN v
   `;
 
-  const existingVideoResult = await args.session.run(existingVideoQuery, {
+  const ownedVideoResult = await args.session.run(ownedVideoQuery, {
+    ownershipId,
     videoId
   });
 
   let video;
   let isNewVideo = false;
 
-  if (existingVideoResult.records.length > 0) {
-    // Video already exists, use existing data
-    video = args.convertNodeToJson(existingVideoResult.records[0].get('v'));
+  if (ownedVideoResult.records.length > 0) {
+    // Video already owned by this ownership
+    video = args.convertNodeToJson(ownedVideoResult.records[0].get('v'));
   } else {
-    // Video doesn't exist, fetch from YouTube API and save
+    // Video not owned by this ownership, fetch from YouTube API and save
     const youtubeVideo = await fetchVideoFromYouTube(videoId);
 
     const videoKey = `video_${videoId}`;
 
-    // Create new Video vertex
+    // Create new Video vertex and ownership relationship in one query
     const createVideoQuery = `
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
       CREATE (v:Video {
         key: $key,
         youtubeId: $videoId,
@@ -141,10 +143,12 @@ try {
         createdAt: datetime(),
         updatedAt: datetime()
       })
+      CREATE (o)-[:YouTubeOwnershipVideo]->(v)
       RETURN v
     `;
 
     const createVideoResult = await args.session.run(createVideoQuery, {
+      ownershipId,
       key: videoKey,
       videoId: videoId,
       title: youtubeVideo.snippet.title,
@@ -165,39 +169,28 @@ try {
     isNewVideo = true;
   }
 
-  // Create ownership-specific VideoSetting if it doesn't exist
-  const videoSettingKey = `video_setting_${ownershipId}_${videoId}`;
-
-  const mergeVideoSettingQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (v:Video {youtubeId: $videoId})
-    MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-    ON CREATE SET
-      vs.key = $videoSettingKey,
-      vs.createdAt = datetime()
-    SET
-      vs.watched = false,
-      vs.note = null,
-      vs.customPosition = null,
-      vs.addedAt = datetime(),
-      vs.updatedAt = datetime()
+  // Check if optional VideoSetting exists for this ownership
+  const videoSettingQuery = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)
+    MATCH (vs)-[:VideoVideoSetting]->(v:Video {youtubeId: $videoId})
     RETURN vs
   `;
 
-  const videoSettingResult = await args.session.run(mergeVideoSettingQuery, {
+  const videoSettingResult = await args.session.run(videoSettingQuery, {
     ownershipId,
-    videoId: videoId,
-    videoSettingKey
+    videoId: videoId
   });
 
-  const videoSetting = args.convertNodeToJson(videoSettingResult.records[0].get('vs'));
+  const videoSetting = videoSettingResult.records.length > 0
+    ? args.convertNodeToJson(videoSettingResult.records[0].get('vs'))
+    : null;
 
   return {
     success: true,
     message: isNewVideo ? `Video "${video.P.title}" fetched and saved successfully!` : `Video "${video.P.title}" found in database.`,
     data: {
       video: video,
-      videoSetting: videoSetting,
+      videoSetting: videoSetting,  // May be null if user hasn't added custom data
       isNewVideo: isNewVideo,
       videoId: videoId,
       userId: user.id

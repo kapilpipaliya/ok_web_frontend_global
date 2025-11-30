@@ -23,24 +23,27 @@ if (adminCheck.records.length === 0) {
   throw new Error("Unauthorized: Admin role required");
 }
 
-// Query all users with YTO statistics (aggregated across all ownerships)
+// NEW SCHEMA v4.0: Query all users with YTO statistics (direct ownership + optional settings)
 const dataQuery = `
   MATCH (u:User)
   WHERE $searchQuery IS NULL OR u.username CONTAINS $searchQuery OR u.email CONTAINS $searchQuery
   OPTIONAL MATCH (u)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-  OPTIONAL MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
-  OPTIONAL MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-  OPTIONAL MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+  OPTIONAL MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+  OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+  OPTIONAL MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+  OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+  OPTIONAL MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video)
+  OPTIONAL MATCH (v)-[:VideoVideoSetting]->(vs:VideoSetting)<-[:YouTubeOwnershipVideoSetting]-(o)
   WITH u,
-       count(DISTINCT cs) as channelCount,
-       count(DISTINCT ps) as playlistCount,
-       count(DISTINCT vs) as videoCount,
+       count(DISTINCT c) as channelCount,
+       count(DISTINCT p) as playlistCount,
+       count(DISTINCT v) as videoCount,
        count(DISTINCT CASE WHEN cs.isFavourite = true THEN cs END) as favoriteChannelCount,
        count(DISTINCT CASE WHEN ps.isFavourite = true THEN ps END) as favoritePlaylistCount,
        count(DISTINCT CASE WHEN vs.isFavourite = true THEN vs END) as favoriteVideoCount,
-       max(cs.createdAt) as lastChannelAdded,
-       max(ps.createdAt) as lastPlaylistAdded,
-       max(vs.updatedAt) as lastVideoActivity
+       max(c.createdAt) as lastChannelAdded,
+       max(p.createdAt) as lastPlaylistAdded,
+       max(v.updatedAt) as lastVideoActivity
   RETURN u,
          channelCount,
          playlistCount,

@@ -27,17 +27,51 @@ The system uses a multi-ownership architecture where each user can connect multi
 ### YouTube Schema
 ```
 (User)-[:UserYouTubeOwnership]->(YouTubeOwnership)
-(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)
-(YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
-(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
-(YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken {accessToken, refreshToken, expiresAt, scope})
-(YouTubeOwnership)-[:YouTubeOwnershipVideoQueue]->(VideoQueue {position, addedAt})-[:VideoQueueVideo]->(Video)
+
+########################################
+# OWNERSHIP → MAIN ENTITIES (DIRECT)
+########################################
+
+(YouTubeOwnership)-[:YouTubeOwnershipChannel]->(Channel)
+(YouTubeOwnership)-[:YouTubeOwnershipPlaylist]->(Playlist)
+(YouTubeOwnership)-[:YouTubeOwnershipToken]->(YouTubeToken)
+(YouTubeOwnership)-[:YouTubeOwnershipVideoQueue]->(VideoQueue)
+
+########################################
+# ENTITY RELATIONSHIPS
+########################################
+
+(Channel)-[:ChannelPlaylist]->(Playlist)
+(Playlist)-[:PlaylistVideo]->(Video)
+(VideoQueue)-[:VideoQueueVideo]->(Video)
+
+########################################
+# SETTINGS (OPTIONAL END NODES)
+# - Attached to main entities
+# - Created only when user performs specific actions
+# - Used for user preferences and customizations
+########################################
+
+(Channel)-[:ChannelChannelSetting]->(ChannelSetting)
+(Playlist)-[:PlaylistPlaylistSetting]->(PlaylistSetting)
+(Video)-[:VideoVideoSetting]->(VideoSetting)
+
+########################################
+# OWNERSHIP → SETTING LINKS
+# - Optional per-owner overrides
+# - Used for ownership-specific customizations
+########################################
+
+(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)
+(YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)
+(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)
+
+########################################
+# SHARED QUOTA TRACKING
+########################################
 
 (Setting {type: 'oauth'})-[:SharedAPIUsage]->(SharedAPIUsage {date, totalCost, callCount, operations, effectiveRemaining, activeReservations})
 (Setting {type: 'oauth'})-[:OwnershipAPIUsage]->(OwnershipAPIUsage {ownershipId, date, totalCost, callCount, operations})
-
-(Channel)-[:ChannelPlaylist]->(Playlist)
-(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)
 ```
 
 ### Shared Schema
@@ -52,11 +86,16 @@ The system uses a multi-ownership architecture where each user can connect multi
 - **Multi-Ownership**: Users can connect multiple YouTube accounts, each represented by a YouTubeOwnership node
 - **Shared Quota**: All users share a single 10,000 units/day API quota pool at the Google Cloud Project level
 - **Priority-Based Allocation**: Quota reservations support priority levels for fair resource distribution
-- **Separate Setting**: Each ownership maintains its own channel, playlist, and video preferences
+- **Direct Ownership**: YouTubeOwnership has direct relationships to main entities (Channel, Playlist) via `YouTubeOwnershipChannel` and `YouTubeOwnershipPlaylist`
 - **Ownership Switching**: Users can switch between connected accounts via dropdown selector
 - **Videos via Playlists**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
-- **Per-Ownership Playlist Membership**: Video membership in playlists is managed through `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)` relationships, allowing independent playlist management per ownership
-- **Global Video Setting**: VideoSetting (watched, notes, favourites) are stored at the ownership level via `(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)`, applying globally across all playlists for that ownership
+- **Global Playlist Membership**: Video membership in playlists is managed through `(Playlist)-[:PlaylistVideo]->(Video)` relationships, making playlist content global (not per-ownership)
+- **Optional Settings**: Settings (ChannelSetting, PlaylistSetting, VideoSetting) are optional end nodes created only when user performs specific actions (add note, favorite, etc.)
+- **Settings Architecture**:
+  - Settings attach to main entities: `(Channel)-[:ChannelChannelSetting]->(ChannelSetting)`, `(Playlist)-[:PlaylistPlaylistSetting]->(PlaylistSetting)`, `(Video)-[:VideoVideoSetting]->(VideoSetting)`
+  - Ownership can link to settings for per-owner overrides: `(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)`
+  - Settings store user preferences: watched status, notes, favorites, custom names, etc.
+- **Setting Sharing**: Settings can be shared across ownerships or be ownership-specific based on the presence of ownership links
 
 ### OAuth 2.0 Authentication & Multi-Ownership
 
@@ -102,13 +141,16 @@ The system supports connecting multiple YouTube accounts per user, with each acc
 - **LanguageSetting**: User's language preferences for translations
   - `language`: Language code ('en' for English, 'hi' for Hindi, 'gu' for Gujarati)
   - `isDefault`: Boolean indicating if this is the user's default language
-- **ChannelSetting**: User-specific channel preferences and settings
-  - `key`: Unique identifier (`channel_setting_${userId}_${channelId}`)
+- **ChannelSetting**: Optional user-specific channel preferences (created on-demand)
+  - `key`: Unique identifier (`channel_setting_${channelId}_${ownershipId}` or `channel_setting_${channelId}` for global)
   - `customName`: User's custom name for the channel
   - `notifications`: Boolean for notification preferences
   - `autoDownload`: Boolean for automatic video downloading
   - `priority`: Channel priority level ('low', 'normal', 'high')
+  - `isFavourite`: Boolean indicating if channel is favorited
+  - `status`: Processing status ('pending', 'processing', 'completed', 'failed')
   - `createdAt`, `updatedAt`: Timestamps
+  - **Note**: Created only when user performs specific actions (favorite, custom name, etc.)
 - **Channel**: YouTube channel information (fetched via API)
   - `key`: Unique identifier (`channel_${youtubeId}`)
   - `youtubeId`: YouTube channel ID
@@ -118,13 +160,16 @@ The system supports connecting multiple YouTube accounts per user, with each acc
   - `videoCount`, `viewCount`, `subscriberCount`: Channel statistics
   - `uploadsPlaylistId`: YouTube playlist ID containing all channel uploads
   - `publishedAt`, `createdAt`, `updatedAt`: Timestamps
-- **PlaylistSetting**: User-specific playlist preferences and custom ordering
-  - `key`: Unique identifier (`playlist_setting_${userId}_${playlistId}`)
+- **PlaylistSetting**: Optional user-specific playlist preferences (created on-demand)
+  - `key`: Unique identifier (`playlist_setting_${playlistId}_${ownershipId}` or `playlist_setting_${playlistId}` for global)
   - `customName`: User's custom name for the playlist
   - `customOrder`: Array of video IDs in user's preferred order
   - `sortBy`: Sort preference ('custom', 'date', 'title', 'index')
   - `displayPreferences`: User's display settings for the playlist (thumbnails, view mode)
+  - `isFavourite`: Boolean indicating if playlist is favorited
+  - `status`: Processing status ('pending', 'processing', 'completed', 'failed')
   - `lastUpdated`, `createdAt`, `updatedAt`: Timestamps
+  - **Note**: Created only when user performs specific actions (favorite, custom name, etc.)
 - **Playlist**: YouTube playlist information (fetched via API)
   - `key`: Unique identifier (`playlist_${youtubeId}`)
   - `youtubeId`: YouTube playlist ID
@@ -139,13 +184,14 @@ The system supports connecting multiple YouTube accounts per user, with each acc
   - `channelTitle`, `channelId`: Channel information
   - `publishedAt`, `createdAt`, `updatedAt`: Timestamps
   - `updatedCount`: Number of times video data was refreshed
-- **VideoSetting**: Ownership-specific video preferences (global across all playlists)
-  - `key`: Unique identifier (`video_setting_${ownershipId}_${videoId}`)
+- **VideoSetting**: Optional ownership-specific video preferences (created on-demand)
+  - `key`: Unique identifier (`video_setting_${videoId}_${ownershipId}` or `video_setting_${videoId}` for global)
   - `watched`: Boolean indicating if user has watched the video (applies to all playlists)
   - `note`: User's personal notes about the video (applies to all playlists)
   - `isFavourite`: Boolean indicating if video is marked as favorite (applies to all playlists)
   - `customName`: Custom name for the video (applies to all playlists)
   - `createdAt`, `updatedAt`: Timestamps
+  - **Note**: Created only when user performs specific actions (add note, favorite, mark watched, etc.)
 - **Feedback**: User feedback submissions
   - `feedback`: Feedback text (max 1000 characters)
   - `category`: Feedback category ('general', 'bug', 'feature', 'improvement', 'other')
@@ -716,9 +762,12 @@ Users can set their preferred language through LanguageSetting vertex:
 4. Swipe or tap for navigation within lists
 
 ### Video Management
-1. **Playlist Membership**: Videos can be added/removed from individual playlists independently via `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)` relationships
-2. **Global Settings**: Marking a video as watched, adding notes, or favoriting applies to all playlists where the video appears (stored in ownership-level VideoSetting)
-3. **Custom Video Ordering**: In playlist view, drag and drop videos to reorder. Custom order is saved to PlaylistSetting vertex
+1. **Playlist Membership**: Videos belong to playlists globally via `(Playlist)-[:PlaylistVideo]->(Video)` relationships. All ownerships see the same videos in a playlist.
+2. **Global Settings**: Video settings (watched status, notes, favorites) are created on-demand when user performs actions:
+   - Stored via `(Video)-[:VideoVideoSetting]->(VideoSetting)` and `(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)`
+   - Settings are optional and created only when needed (add note, mark watched, favorite, etc.)
+   - Can be shared across ownerships or ownership-specific based on links
+3. **Custom Video Ordering**: In playlist view, drag and drop videos to reorder. Custom order is saved to optional PlaylistSetting vertex
 4. **Sort Modes**: Switch between 'custom', 'date', 'title', 'index' (original YouTube order). Custom order persists across sessions for each ownership
 
 ### Video Queue Management
@@ -1058,6 +1107,288 @@ return {
   - Search: `carbon:search`
   - Menu: `carbon:menu`
 
+### Security Guidelines
+
+#### Ownership Verification Rule (CRITICAL)
+
+**Never access resources globally - always verify ownership first.**
+
+This is the most important security principle in the YTO codebase. Every database query that accesses channels, playlists, or videos MUST verify ownership before accessing the resource.
+
+**Why This Matters:**
+- Prevents users from accessing resources they don't own
+- Stops potential data leaks across different YouTube accounts
+- Ensures multi-ownership isolation
+- Protects against unauthorized modifications
+
+**Pattern to Follow:**
+
+❌ **WRONG - Global Access:**
+```javascript
+// BAD: Accessing playlist without ownership verification
+const result = await args.session.run(`
+  MATCH (p:Playlist {youtubeId: $playlistId})
+  RETURN p
+`, { playlistId });
+```
+
+✅ **CORRECT - Ownership-Verified Access:**
+```javascript
+// GOOD: Always verify ownership first
+const result = await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+  RETURN p
+`, { ownershipId, playlistId });
+```
+
+**Apply to All Resources:**
+
+- **Channels**: `MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})`
+- **Playlists**: `MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})`
+- **Videos**: Verify through playlist ownership when accessing videos in a playlist context
+- **Settings**: Always match through ownership relationships
+
+**Defensive Programming:**
+- Verify ownership in EVERY query, even if already checked earlier in the function
+- Never assume a resource exists or is accessible
+- Always use the provided `ownershipId` parameter
+- Throw clear error messages when ownership verification fails
+
+**Example from Real Function:**
+```javascript
+// In deletePlaylist.hjson - even when checking active jobs, verify ownership
+const playlistResult = await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+  RETURN p.title as title
+`, { ownershipId, playlistId });
+```
+
+#### Duplicate Resources Per Ownership (CRITICAL)
+
+**Each ownership has its own instances of playlists, videos, and channels - no global sharing.**
+
+To ensure complete data isolation between different YouTube accounts, the system creates duplicate resource instances (Playlist, Video, and Channel vertices) for each ownership, even when they have the same `youtubeId`.
+
+**Status: ✅ All Global Access Patterns Fixed (2025-01-XX)**
+
+A comprehensive audit was conducted across the entire ytorganizer codebase. All global access patterns have been eliminated. The following files were fixed:
+1. `addVideosToCustomPlaylist.hjson` - Video ownership verification
+2. `createCustomPlaylist.hjson` - Atomic playlist creation with ownership
+3. `processPlaylistQueue.hjson` - Video MERGE, VideoSetting, and PlaylistSetting relationships
+4. `addVideoToPlaylist.hjson` - Playlist and video ownership verification
+5. `savePlaylist.hjson` - Playlist and channel ownership-specific creation
+6. `saveChannel.hjson` - Channel ownership-specific creation
+7. `getChannelContents.hjson` - Channel ownership verification
+8. `deleteVideo.hjson` - Fixed relationship deletion timing and ownership-scoped orphan check using elementId
+9. `deletePlaylist.hjson` - Fixed global playlist search using elementId to track specific instances
+10. `deleteChannel.hjson` - Fixed global channel search using elementId to track specific instances
+11. `getQueueJobs.hjson` - Fixed global channel/playlist lookups, now uses composite keys with ownership verification
+12. `retryPlaylist.hjson` - Fixed global channel/playlist access when finding channel for retry
+13. `getPlaylistsWithVideoCount.hjson` - Added defensive channel ownership verification
+
+**Why This Matters:**
+- Complete data isolation between different YouTube accounts
+- Prevents cross-ownership data access vulnerabilities (security-critical)
+- Allows ownership-specific metadata and settings
+- Ensures ownership deletion doesn't affect other ownerships' data
+- No possibility of accidentally accessing another user's resources
+
+**The Golden Rule:**
+
+> **NEVER access channels, playlists, or videos globally. ALWAYS verify ownership first.**
+
+**Creating Ownership-Specific Resources:**
+
+❌ **WRONG - Global Resource Access:**
+```javascript
+// BAD: Accesses global video - SECURITY VULNERABILITY
+MATCH (v:Video {youtubeId: $videoId})
+RETURN v
+
+// BAD: Creates global playlist - can be accessed by any ownership
+MERGE (p:Playlist {youtubeId: $playlistId})
+ON CREATE SET p.title = $title
+
+// BAD: Global channel access
+MATCH (c:Channel {youtubeId: $channelId})
+RETURN c
+```
+
+✅ **CORRECT - Ownership-First Access:**
+```javascript
+// GOOD: Verifies video ownership before access
+MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
+RETURN v
+
+// GOOD: Creates ownership-specific playlist instance
+MATCH (o:YouTubeOwnership {key: $ownershipId})
+MERGE (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+ON CREATE SET
+  p.key = $key,
+  p.title = $title,
+  p.createdAt = datetime()
+
+// GOOD: Verifies channel ownership
+MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+RETURN c
+```
+
+**Ownership-Specific Resource Patterns:**
+
+All resources must use ownership-scoped MERGE/MATCH:
+
+- **Videos**: `MERGE (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})`
+  - Key format: `video_${videoId}_${ownershipId}`
+- **Playlists**: `MERGE (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})`
+  - Key format: `playlist_${playlistId}_${ownershipId}`
+- **Channels**: `MERGE (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})`
+  - Key format: `channel_${channelId}_${ownershipId}`
+
+**Key Points:**
+- The `MERGE` on the relationship ensures ownership-scoped lookup
+- Multiple ownerships can have separate instances with the same `youtubeId`
+- Each instance stores its own metadata (title, description, etc.)
+- Deleting an ownership only removes its resource instances, not others
+- **Resource keys must include ownershipId** to ensure uniqueness
+
+**Complete Examples:**
+
+```javascript
+// Example 1: Creating ownership-specific playlist (savePlaylist.hjson)
+MATCH (o:YouTubeOwnership {key: $ownershipId})
+MERGE (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+ON CREATE SET
+  p.key = $key,  // playlist_${playlistId}_${ownershipId}
+  p.youtubeId = $playlistId,
+  p.createdAt = datetime()
+SET
+  p.title = $title,
+  p.description = $description,
+  p.updatedAt = datetime()
+RETURN p
+```
+
+```javascript
+// Example 2: Creating ownership-specific video (processPlaylistQueue.hjson)
+MATCH (o:YouTubeOwnership {key: $ownershipId})
+MERGE (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
+ON CREATE SET
+  v.key = $key,  // video_${videoId}_${ownershipId}
+  v.createdAt = datetime()
+SET
+  v.title = $title,
+  v.description = $description,
+  v.channelId = $channelId,
+  v.duration = $duration,
+  v.updatedAt = datetime()
+```
+
+```javascript
+// Example 3: Creating ownership-specific channel (saveChannel.hjson)
+MATCH (o:YouTubeOwnership {key: $ownershipId})
+MERGE (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+ON CREATE SET
+  c.key = $key,  // channel_${channelId}_${ownershipId}
+  c.youtubeId = $channelId,
+  c.createdAt = datetime()
+SET
+  c.title = $title,
+  c.description = $description,
+  c.subscriberCount = $subscriberCount,
+  c.updatedAt = datetime()
+```
+
+```javascript
+// Example 4: Accessing with ownership verification (addVideoToPlaylist.hjson)
+// Both playlist AND video must be verified
+MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
+CREATE (p)-[r:PlaylistVideo {
+  position: $position,
+  addedAt: datetime()
+}]->(v)
+```
+
+```javascript
+// Example 5: Deleting ownership-specific resources (deleteChannel.hjson, deletePlaylist.hjson, deleteVideo.hjson)
+// CRITICAL: Use elementId to track specific instances, avoid global searches
+
+// Step 1: Delete ownership relationship and collect specific node IDs
+MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipChannel]->(c:Channel)
+WHERE c.youtubeId IN $channelIds
+
+// Collect channel info BEFORE deletion
+WITH o, c, ownershipRel, elementId(c) as channelNodeId
+
+// Delete optional ChannelSetting
+OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+DETACH DELETE cs, ownershipRel
+
+// Return the specific channel instance IDs
+RETURN collect(DISTINCT channelNodeId) as channelIds
+
+// Step 2: Delete ONLY specific orphaned instances (no global search)
+MATCH (c:Channel)
+WHERE elementId(c) IN $channelNodeIds  // Use collected IDs, not youtubeId!
+
+// Check if THIS instance is orphaned
+OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipChannel]->(c)
+WITH c, count(anyO) as ownershipCount
+WHERE ownershipCount = 0
+
+DETACH DELETE c
+```
+
+```javascript
+// Example 6: Batch fetching with ownership verification (getQueueJobs.hjson)
+// CRITICAL: When fetching multiple resources, must verify ownership for each
+// Jobs store both youtubeId AND ownershipId - must match both!
+
+// Step 1: Collect ownership-specific requests
+const channelRequests = [];  // Array of {ownershipId, channelId}
+for (const job of jobs) {
+  if (job.data.channelId && job.data.ownershipId) {
+    channelRequests.push({
+      ownershipId: job.data.ownershipId,
+      channelId: job.data.channelId
+    });
+  }
+}
+
+// Step 2: Batch fetch with ownership verification using UNWIND
+const channelResult = await args.session.run(
+  `UNWIND $channelRequests AS req
+   MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: req.channelId})
+   RETURN req.ownershipId as ownershipId, c`,
+  { channelRequests }
+);
+
+// Step 3: Store in map with composite key "ownershipId:channelId"
+const channelNameMap = {};
+for (const record of channelResult.records) {
+  const ownershipId = record.get('ownershipId');
+  const channel = args.convertNodeToJson(record.get('c'));
+  const key = `${ownershipId}:${channel.P.youtubeId}`;
+  channelNameMap[key] = channel.P.title;
+}
+
+// Step 4: Lookup using composite key
+const channelKey = `${job.data.ownershipId}:${job.data.channelId}`;
+const channelName = channelNameMap[channelKey] || null;
+```
+
+**Verification Checklist:**
+
+Before deploying any new function, verify:
+- ✅ No `MATCH (v:Video {youtubeId:` patterns (must include ownership)
+- ✅ No `MATCH (p:Playlist {youtubeId:` patterns (must include ownership)
+- ✅ No `MATCH (c:Channel {youtubeId:` patterns (must include ownership)
+- ✅ No `MERGE (v:Video {youtubeId:` patterns (must use relationship MERGE)
+- ✅ No `MERGE (p:Playlist {youtubeId:` patterns (must use relationship MERGE)
+- ✅ No `MERGE (c:Channel {youtubeId:` patterns (must use relationship MERGE)
+- ✅ All resource keys include `${ownershipId}` suffix
+- ✅ All queries start with `MATCH (o:YouTubeOwnership {key: $ownershipId})`
+
 ### API Integration
 - Cache API responses to minimize requests
 - Handle API rate limits gracefully
@@ -1271,17 +1602,26 @@ try {
         c.publishedAt = datetime($publishedAt), c.updatedAt = datetime()
   \`, { /* channel properties including uploadsPlaylistId */ });
 
-  // STEP 2: Create user-specific ChannelSetting
+  // STEP 2: Create ownership -> channel relationship
   await args.session.run(\`
-    MATCH (u:User {uuid: $userUuid})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (c:Channel {youtubeId: $channelId})
-    MERGE (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
-    ON CREATE SET cs.key = $channelSettingKey, cs.createdAt = datetime()
-    SET cs.customName = $customName, cs.notifications = true,
-        cs.autoDownload = false, cs.priority = 'normal', cs.updatedAt = datetime()
-  \`, { /* channel setting properties */ });
+    MERGE (o)-[:YouTubeOwnershipChannel]->(c)
+  \`, { ownershipId, channelId });
 
-  // STEP 3: Process all channel playlists using existing savePlaylist function
+  // STEP 3: Create optional ChannelSetting if customName provided
+  if (customName) {
+    await args.session.run(\`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (c:Channel {youtubeId: $channelId})
+      MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $channelSettingKey})
+      ON CREATE SET cs.createdAt = datetime()
+      MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
+      SET cs.customName = $customName, cs.updatedAt = datetime()
+    \`, { ownershipId, channelId, channelSettingKey, customName });
+  }
+
+  // STEP 4: Process all channel playlists using existing savePlaylist function
   for (const playlist of channelData.playlists) {
     const playlistUrl = \`https://www.youtube.com/playlist?list=\${playlist.id}\`;
     const result = await args.executeNamedServerFunction({
@@ -1328,10 +1668,13 @@ try {
 - **Complete Channel Coverage**: Fetches ALL playlists from the channel
 - **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
 - **Comprehensive Relationships**:
-  - `(User)-[:UserChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)`
+  - `(YouTubeOwnership)-[:YouTubeOwnershipChannel]->(Channel)` - Direct ownership
+  - `(Channel)-[:ChannelChannelSetting]->(ChannelSetting)` - Optional settings
+  - `(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)` - Ownership-specific settings
   - `(Channel)-[:ChannelPlaylist]->(Playlist)` for all channel playlists
   - Videos accessible through playlists only (no direct Channel->Video relationships)
 - **Uploads Playlist ID**: Stores `uploadsPlaylistId` in Channel node for accessing all channel videos
+- **Optional Settings**: ChannelSetting created only when user provides custom name or preferences
 - **URL Format Support**: Handles /@handle, /channel/ID, /c/custom, /user/username formats
 - **Unlimited Pagination**: Fetches ALL content without artificial limits
 - **Reuses Existing Functions**: Leverages savePlaylist function for playlist processing
@@ -1427,23 +1770,33 @@ try {
     itemCount: playlistData.contentDetails?.itemCount
   });
 
-  // Create user-specific PlaylistSetting
+  // Create ownership -> playlist relationship
   await args.session.run(\`
-    MATCH (u:User) WHERE elementId(u) = $userId
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
     MATCH (p:Playlist {youtubeId: $playlistId})
-    MERGE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-    ON CREATE SET ps.key = $playlistSettingKey, ps.createdAt = datetime()
-    SET ps.customName = $customName, ps.customOrder = $customOrder,
-        ps.sortBy = 'index', ps.displayPreferences = {
-          showThumbnails: true, viewMode: 'list'
-        }, ps.updatedAt = datetime()
-  \`, {
-    userId: user.id,
-    playlistId,
-    playlistSettingKey: \`playlist_setting_\${user.id}_\${playlistId}\`,
-    customName: name,
-    customOrder: allVideos.map(v => v.contentDetails.videoId)
-  });
+    MERGE (o)-[:YouTubeOwnershipPlaylist]->(p)
+  \`, { ownershipId, playlistId });
+
+  // Create optional PlaylistSetting if customName or preferences provided
+  if (customName || customOrder) {
+    await args.session.run(\`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (p:Playlist {youtubeId: $playlistId})
+      MERGE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {key: $playlistSettingKey})
+      ON CREATE SET ps.createdAt = datetime()
+      MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps)
+      SET ps.customName = $customName, ps.customOrder = $customOrder,
+          ps.sortBy = 'index', ps.displayPreferences = {
+            showThumbnails: true, viewMode: 'list'
+          }, ps.updatedAt = datetime()
+    \`, {
+      ownershipId,
+      playlistId,
+      playlistSettingKey: \`playlist_setting_\${playlistId}_\${ownershipId}\`,
+      customName,
+      customOrder: allVideos.map(v => v.contentDetails.videoId)
+    });
+  }
 
   // Process each video
   for (const video of allVideos) {
@@ -1464,34 +1817,21 @@ try {
       channelId: video.snippet.channelId
     });
 
-    // Create ownership-level VideoSetting (global settings: watched, notes, favourites)
+    // Create Playlist -> Video relationship (global playlist membership with position)
     await args.session.run(\`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
+      MATCH (p:Playlist {youtubeId: $playlistId})
       MATCH (v:Video {youtubeId: $videoId})
-      MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-      ON CREATE SET vs.key = $videoSettingKey, vs.createdAt = datetime(),
-          vs.watched = false, vs.note = null, vs.isFavourite = false
-      SET vs.updatedAt = datetime()
-    \`, {
-      ownershipId,
-      videoId: video.contentDetails.videoId,
-      videoSettingKey: \`video_setting_\${ownershipId}_\${video.contentDetails.videoId}\`
-    });
-
-    // Create PlaylistSetting -> Video relationship (playlist membership with position)
-    await args.session.run(\`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})
-      MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (ps)-[r:PlaylistSettingVideo]->(v)
+      MERGE (p)-[r:PlaylistVideo]->(v)
       ON CREATE SET r.createdAt = datetime(), r.position = $position, r.playlistIndex = $position
       SET r.updatedAt = datetime()
     \`, {
-      ownershipId,
       playlistId,
       videoId: video.contentDetails.videoId,
       position: video.snippet.position
     });
+
+    // NOTE: VideoSetting is NOT created here - it's created on-demand when user performs actions
+    // (e.g., add note, mark favorite, mark watched)
   }
 
   return {
@@ -1532,12 +1872,15 @@ try {
 
 **Key Database Structure Features:**
 - **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
-- **Proper Relationships**: Follows (YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
-- **Global Video Setting**: Creates (YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video) for ownership-wide preferences
-- **Playlist Membership**: Uses (PlaylistSetting)-[:PlaylistSettingVideo]->(Video) relationships with position stored on edge
-- **Per-Ownership Privacy**: Each ownership has independent playlist and video settings
+- **Proper Relationships**:
+  - `(YouTubeOwnership)-[:YouTubeOwnershipPlaylist]->(Playlist)` - Direct ownership
+  - `(Playlist)-[:PlaylistPlaylistSetting]->(PlaylistSetting)` - Optional settings
+  - `(YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)` - Ownership-specific settings
+- **Global Playlist Membership**: Uses `(Playlist)-[:PlaylistVideo]->(Video)` relationships with position stored on edge
+- **On-Demand Settings**: PlaylistSetting created only when user provides custom name or preferences
+- **On-Demand Video Settings**: VideoSetting NOT created during playlist save - created later when user performs actions (add note, favorite, mark watched)
 - **Data Separation**: Global YouTube data separate from user preferences
-- **Flexible Deletion**: Videos can be removed from individual playlists without affecting other playlists or global settings
+- **Global Videos**: All videos in a playlist are visible across all ownerships (no per-ownership video membership)
 
 **Component Integration:**
 ```javascript
@@ -1764,7 +2107,25 @@ This documentation serves as the foundation for implementing the YSaar system an
 
 ## Recent Updates
 
-### Version 3.3 - Video Queue Persistence (Current)
+### Version 4.0 - Simplified Schema Architecture (Current)
+- 🚧 **Direct Ownership Relationships**: Changed from `(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)` to `(YouTubeOwnership)-[:YouTubeOwnershipChannel]->(Channel)`
+- 🚧 **Optional Settings**: Settings (ChannelSetting, PlaylistSetting, VideoSetting) are now optional end nodes created only when user performs specific actions
+- 🚧 **Settings Architecture**:
+  - `(Channel)-[:ChannelChannelSetting]->(ChannelSetting)` - Settings attach to main entities
+  - `(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)` - Ownership can link for per-owner overrides
+- 🚧 **Global Playlist Membership**: Changed from per-ownership `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)` to global `(Playlist)-[:PlaylistVideo]->(Video)`
+- 🚧 **Video Settings On-Demand**: VideoSetting nodes created only when user adds notes, favorites, or marks watched (not during playlist/channel save)
+- 🚧 **Simplified Queries**: Cleaner query patterns with direct ownership relationships
+- 🚧 **Migration Required**: Existing data requires migration from v3.x to v4.0 schema
+- 🚧 **Breaking Changes**: All server functions updated for new relationship patterns
+- 🚧 **Key Benefits**:
+  - Reduced database complexity (fewer intermediate nodes)
+  - Improved query performance (fewer relationship hops)
+  - More intuitive schema structure
+  - Settings created only when needed (storage optimization)
+  - Global playlist content visibility across ownerships
+
+### Version 3.3 - Video Queue Persistence
 - ✅ **Database-Backed Queue**: Video player queue now persists in database
 - ✅ **VideoQueue Vertex**: New graph node for storing queue entries
 - ✅ **Per-Ownership Queues**: Each YouTube account has independent queue
@@ -1781,16 +2142,17 @@ This documentation serves as the foundation for implementing the YSaar system an
 - ✅ **Error Handling**: Rollback on database errors with toast notifications
 - ✅ **Session Persistence**: Queue survives browser restarts
 
-### Version 3.2 - Corrected Schema Architecture
-- ✅ **Per-Ownership Playlist Membership**: Changed from global `(Playlist)-[:PlaylistVideo]->(Video)` to per-ownership `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)`
+### Version 3.2 - Corrected Schema Architecture (DEPRECATED in v4.0)
+- ✅ **Per-Ownership Playlist Membership**: Changed from global `(Playlist)-[:PlaylistVideo]->(Video)` to per-ownership `(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)` (Reverted in v4.0)
 - ✅ **Global Video Setting**: VideoSetting remain at ownership level for global properties (watched, notes, favourites)
 - ✅ **Independent Playlist Management**: Videos can be removed from individual playlists without affecting other playlists
-- ✅ **Position on Relationship**: Video position/playlistIndex stored on `PlaylistSettingVideo` relationship edge
+- ✅ **Position on Relationship**: Video position/playlistIndex stored on `PlaylistSettingVideo` relationship edge (Changed to `PlaylistVideo` in v4.0)
 - ✅ **Simplified Frontend**: No `playlistId` required for video settings operations (notes, favourites, watched status)
 - ✅ **Updated Delete Operations**: Enhanced deleteVideo, deletePlaylist functions with proper orphan cleanup
 - ✅ **Updated Query Functions**: Modified getVideosWithDetails, getChannelsWithVideoCount, getPlaylistsWithVideoCount for new schema
 - ✅ **Updated Helper Functions**: Modified addVideoToPlaylist, saveNote, toggleFavourite, updateVideoSetting
 - ✅ **Better UX**: Marking video as "watched" or adding notes applies globally across all playlists
+- ⚠️ **Note**: This version was superseded by v4.0 which simplified the schema further
 
 ### Version 3.1 - Shared Quota Architecture
 - ✅ **Shared Quota Pool**: Changed from per-ownership to shared 10,000 units/day across all users

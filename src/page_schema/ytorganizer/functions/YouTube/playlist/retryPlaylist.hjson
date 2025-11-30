@@ -80,10 +80,11 @@ try {
   }
 
   // Check if playlist exists and get its current status
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   const checkResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-          -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     RETURN p, ps
   `, { userUuid: user.P.uuid, ownershipId, playlistId });
 
@@ -96,10 +97,10 @@ try {
 
   const playlistSettingNode = checkResult.records[0].get('ps');
   const playlistNode = checkResult.records[0].get('p');
-  const playlistSetting = args.convertNodeToJson(playlistSettingNode);
+  const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
   const playlist = args.convertNodeToJson(playlistNode);
 
-  const currentStatus = playlistSetting.P.status;
+  const currentStatus = playlistSetting?.P?.status;
 
   // Prevent retry of playlists that are already queued or processing
   if (currentStatus === 'queued' || currentStatus === 'processing') {
@@ -114,11 +115,13 @@ try {
   }
 
   // Get channel ID if this playlist is part of a channel
+  // NEW SCHEMA v4.0: Verify both channel and playlist ownership
   const channelResult = await args.session.run(`
-    MATCH (c:Channel)-[:ChannelPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    OPTIONAL MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)-[:ChannelPlaylist]->(p)
     RETURN c.youtubeId as channelId
     LIMIT 1
-  `, { playlistId });
+  `, { ownershipId, playlistId });
 
   const channelId = channelResult.records.length > 0
     ? channelResult.records[0].get('channelId')
@@ -126,16 +129,23 @@ try {
 
   // Reset playlist status to queued
   // This clears error state and resets progress counters
+  // NEW SCHEMA v4.0: Create setting if it doesn't exist
+  const playlistSettingKey = `playlist_setting_${playlistId}_${ownershipId}`;
+
   await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-          -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+
+    MERGE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {key: $playlistSettingKey})
+    ON CREATE SET ps.createdAt = datetime()
+    MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps)
+
     SET ps.status = 'queued',
         ps.progress = 0,
         ps.processedVideos = 0,
         ps.error = null,
         ps.queuedAt = datetime(),
         ps.updatedAt = datetime()
-  `, { ownershipId, playlistId });
+  `, { ownershipId, playlistId, playlistSettingKey });
 
   // Re-add playlist to processing queue
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });

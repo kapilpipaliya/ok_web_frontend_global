@@ -35,9 +35,11 @@ try {
   }
 
   // Get all custom playlists for this ownership
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   const playlistsResult = await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
     WHERE p.isCustom = true
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     RETURN p, ps
     ORDER BY p.createdAt DESC
   `, { ownershipId });

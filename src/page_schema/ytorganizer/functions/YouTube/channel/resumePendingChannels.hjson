@@ -20,19 +20,21 @@ try {
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 
   // Get all paused/pending_quota channels across all ownerships
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   const channelsResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-          -[:ChannelSettingChannel]->(c:Channel)
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
     WHERE cs.status IN ['paused', 'pending_quota']
     RETURN c.youtubeId as channelId, cs.priority as priority, cs.key as settingKey, o.key as ownershipId
   `, { userUuid: user.P.uuid });
 
   // Get all paused/pending_quota playlists across all ownerships
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   const playlistsResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-          -[:PlaylistSettingPlaylist]->(p:Playlist)
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     WHERE ps.status IN ['paused', 'pending_quota']
     RETURN p.youtubeId as playlistId, ps.priority as priority, ps.key as settingKey, o.key as ownershipId
   `, { userUuid: user.P.uuid });
@@ -78,9 +80,11 @@ try {
         });
 
         // Update status to queued
+        // NEW SCHEMA v4.0: Update optional settings
         await args.session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+          OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+          WHERE cs IS NOT NULL
           SET cs.status = 'queued',
               cs.error = null,
               cs.pausedAt = null,
@@ -133,9 +137,11 @@ try {
         });
 
         // Update status to queued
+        // NEW SCHEMA v4.0: Update optional settings
         await args.session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+          WHERE ps IS NOT NULL
           SET ps.status = 'queued',
               ps.error = null,
               ps.pausedAt = null,

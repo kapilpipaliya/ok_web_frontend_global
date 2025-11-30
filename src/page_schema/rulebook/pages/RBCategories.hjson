@@ -145,7 +145,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "left",
+        slotName: "left",
         props: '''
 return {
   as: "a",
@@ -203,7 +203,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 return {
   text: "Categories"
@@ -217,7 +217,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBButton",
-        slot: "right",
+        slotName: "right",
         props: '''
 return {
   text: "Add Category",
@@ -605,7 +605,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const categoryData = args.contextData.categoryLoop;
 const { setShowCategoryModal, setModalMode, setSelectedCategory } = args.contextData.categoryModal || {};
@@ -631,7 +631,7 @@ return {
       P: {
         displayOrder: 2,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const categoryData = args.contextData.categoryLoop;
 const category = categoryData?.category;
@@ -655,7 +655,7 @@ return {
       P: {
         displayOrder: 3,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 return {
   isDivider: true
@@ -669,7 +669,7 @@ return {
       P: {
         displayOrder: 4,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const categoryData = args.contextData.categoryLoop;
 const category = categoryData?.category;

@@ -131,7 +131,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "left",
+        slotName: "left",
         props: '''
 return {
   as: "a",
@@ -221,7 +221,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 const goalData = args.fns.goalData?.()?.goal;
 
@@ -237,7 +237,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "subtitle",
+        slotName: "subtitle",
         props: '''
 const goalData = args.fns.goalData?.()?.goal;
 const statusText = goalData?.P?.isCompleted ? "Completed" : "Active";
@@ -266,7 +266,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "right",
+        slotName: "right",
         props: '''
 const [showMenu, setShowMenu] = args.createSignal(false);
 

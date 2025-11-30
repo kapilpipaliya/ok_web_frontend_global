@@ -80,17 +80,17 @@ const favoriteVideos = videosResult.result?.success
   ? videosResult.result.data
   : [];
 
-// Get total videos count (across all ownerships or filtered by ownershipId)
+// NEW SCHEMA v4.0: Get total videos count (direct ownership, not through settings)
 const totalVideosQuery = ownershipId
   ? `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(:VideoSetting)-[:VideoSettingVideo]->(:Video)
-    RETURN count(*) as totalVideos
+    MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video)
+    RETURN count(DISTINCT v) as totalVideos
   `
   : `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(:VideoSetting)-[:VideoSettingVideo]->(:Video)
-    RETURN count(*) as totalVideos
+    MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video)
+    RETURN count(DISTINCT v) as totalVideos
   `;
 
 const totalVideosResult = await args.session.run(totalVideosQuery, {

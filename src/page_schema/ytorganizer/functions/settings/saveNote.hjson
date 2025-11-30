@@ -56,41 +56,39 @@ try {
     throw new Error("Item ID not found");
   }
 
-  // Determine the correct node label and relationship
-  let nodeLabel, settingLabel, ownershipRelation, settingRelation, itemRelation;
+  // NEW SCHEMA v4.0: Direct ownership with optional settings
+  // Settings are created on-demand when users add notes
+  let nodeLabel, settingLabel, settingKey;
 
   if (itemType === "video") {
     nodeLabel = "Video";
     settingLabel = "VideoSetting";
-    ownershipRelation = "YouTubeOwnershipVideoSetting";
-    settingRelation = "VideoSettingVideo";
-    itemRelation = "VideoSettingVideo";
+    settingKey = `video_setting_${itemId}_${ownershipId}`;
   } else if (itemType === "channel") {
     nodeLabel = "Channel";
     settingLabel = "ChannelSetting";
-    ownershipRelation = "YouTubeOwnershipChannelSetting";
-    settingRelation = "ChannelSettingChannel";
-    itemRelation = "ChannelSettingChannel";
+    settingKey = `channel_setting_${itemId}_${ownershipId}`;
   } else {
     nodeLabel = "Playlist";
     settingLabel = "PlaylistSetting";
-    ownershipRelation = "YouTubeOwnershipPlaylistSetting";
-    settingRelation = "PlaylistSettingPlaylist";
-    itemRelation = "PlaylistSettingPlaylist";
+    settingKey = `playlist_setting_${itemId}_${ownershipId}`;
   }
 
   // Query to create or update the setting node with note
+  // NEW SCHEMA v4.0: Direct ownership + on-demand setting creation
   const query = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (item:${nodeLabel} {youtubeId: $itemId})
-    MERGE (o)-[:${ownershipRelation}]->(setting:${settingLabel})-[:${itemRelation}]->(item)
+    MATCH (o)-[:YouTubeOwnership${nodeLabel}]->(item:${nodeLabel} {youtubeId: $itemId})
+
+    MERGE (item)-[:${nodeLabel}${settingLabel}]->(setting:${settingLabel} {key: $settingKey})
     ON CREATE SET
+      setting.createdAt = datetime()
+    MERGE (o)-[:YouTubeOwnership${settingLabel}]->(setting)
+
+    SET
       setting.note = $note,
       setting.noteUpdatedAt = datetime(),
-      setting.createdAt = datetime()
-    ON MATCH SET
-      setting.note = $note,
-      setting.noteUpdatedAt = datetime()
+      setting.updatedAt = datetime()
     RETURN setting, item
   `;
 
@@ -98,11 +96,12 @@ try {
   const result = await args.session.run(query, {
     ownershipId,
     itemId: itemId,
-    note: note || ""
+    note: note || "",
+    settingKey: settingKey
   });
 
   if (result.records.length === 0) {
-    throw new Error(`${itemType} not found`);
+    throw new Error(`${itemType} not found for this ownership`);
   }
 
   // Fetch updated data with video counts using helper functions

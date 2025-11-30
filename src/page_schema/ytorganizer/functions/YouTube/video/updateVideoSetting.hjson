@@ -37,23 +37,29 @@ try {
     throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
   }
 
-  // Update VideoSetting for specific ownership
+  // NEW SCHEMA v4.0: Create or update VideoSetting
+  // VideoSettings store custom data (notes, favorites, custom names)
+  const videoSettingKey = `video_setting_${youtubeId}_${ownershipId}`;
+
   const updateQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video {youtubeId: $youtubeId})
-    SET vs.customName = $customName,
-        vs.updatedAt = datetime()
-    RETURN vs
+    MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $youtubeId})
+    MERGE (v)-[:VideoVideoSetting]->(vs:VideoSetting {key: $settingKey})
+    ON CREATE SET vs.createdAt = datetime()
+    MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs)
+    SET vs.customName = $customName, vs.updatedAt = datetime()
+    RETURN v.youtubeId as youtubeId
   `;
 
   const updateResult = await args.session.run(updateQuery, {
     ownershipId,
     youtubeId,
-    customName: customName || null
+    customName: customName || null,
+    settingKey: videoSettingKey
   });
 
   if (updateResult.records.length === 0) {
-    throw new Error("Video not found");
+    throw new Error("Video not found for this ownership");
   }
 
   // Fetch updated video data with details using helper function

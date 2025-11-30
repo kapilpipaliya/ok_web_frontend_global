@@ -329,7 +329,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 const currentTime = new Date();
 const hour = currentTime.getHours();
@@ -349,7 +349,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "subtitle",
+        slotName: "subtitle",
         props: '''
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long',

@@ -28,9 +28,11 @@ try {
   const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
   // Check if playlist exists for this ownership
+  // NEW SCHEMA v4.0: Direct ownership + optional settings
   const result = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $youtubeId})
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $youtubeId})
+    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     RETURN p, ps
     LIMIT 1
   `, {

@@ -255,7 +255,7 @@ return `._id {
       P: {
         displayOrder: 1
         componentName: "RBPageTitle"
-        slot: "center"
+        slotName: "center"
         props: '''
 return {
   text: "🔥 Streak Analytics"
@@ -269,7 +269,7 @@ return {
       P: {
         displayOrder: 2
         componentName: "Html"
-        slot: "center"
+        slotName: "center"
         props: '''
 return {
   as: "p",

@@ -39,8 +39,16 @@ try {
   }
 
   // Update the playlist setting with new sort preference for specific ownership
+  // NEW SCHEMA v4.0: Create setting on-demand
+  const playlistSettingKey = `playlist_setting_${playlistId}_${ownershipId}`;
+
   const updateQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+
+    MERGE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {key: $settingKey})
+    ON CREATE SET ps.createdAt = datetime()
+    MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps)
+
     SET ps.sortBy = $sortBy,
         ps.customOrder = $customOrder,
         ps.lastUpdated = datetime(),
@@ -51,6 +59,7 @@ try {
   const updateResult = await args.session.run(updateQuery, {
     playlistId: playlistId,
     ownershipId: ownershipId,
+    settingKey: playlistSettingKey,
     sortBy: sortBy,
     customOrder: customOrder
   });

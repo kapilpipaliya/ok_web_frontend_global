@@ -235,7 +235,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "left",
+        slotName: "left",
         props: '''
 return {
   as: "a",
@@ -293,7 +293,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBPageTitle",
-        slot: "center",
+        slotName: "center",
         props: '''
 return {
   text: "Rules"
@@ -307,7 +307,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBButton",
-        slot: "right",
+        slotName: "right",
         props: '''
 return {
   text: "Add Rule",
@@ -328,7 +328,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        slot: "below",
+        slotName: "below",
         props: '''
 return {
   as: "div"
@@ -1043,7 +1043,7 @@ return {
       P: {
         displayOrder: 1,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const ruleData = args.contextData.categoryRules;
 const rule = ruleData?.rule;
@@ -1084,7 +1084,7 @@ return {
       P: {
         displayOrder: 2,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const ruleData = args.contextData.categoryRules;
 const rule = ruleData?.rule;
@@ -1108,7 +1108,7 @@ return {
       P: {
         displayOrder: 3,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 return {
   isDivider: true
@@ -1122,7 +1122,7 @@ return {
       P: {
         displayOrder: 4,
         componentName: "RBMenuItem",
-        slot: "menu-items",
+        slotName: "menu-items",
         props: '''
 const ruleData = args.contextData.categoryRules;
 const rule = ruleData?.rule;
