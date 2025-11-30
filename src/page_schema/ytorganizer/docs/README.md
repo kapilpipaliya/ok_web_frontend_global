@@ -502,7 +502,6 @@ await logAPIUsage(ownershipId, 'channels.list', 1, args.session);
   - Fetches complete playlist metadata and all videos with pagination
   - Creates user-specific playlist and video settings
   - Implements proper database structure: (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
-  - Creates VideoSetting for each video: (User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
   - Handles playlist-video relationships: (Playlist)-[:PlaylistVideo]->(Video)
   - Uses `args.getUserFromSession()` for user authentication
   - Comprehensive error handling for YouTube API issues

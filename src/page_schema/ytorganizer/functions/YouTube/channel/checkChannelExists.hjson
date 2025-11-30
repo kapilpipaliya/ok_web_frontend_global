@@ -55,12 +55,15 @@ try {
     const handleResult = await args.session.run(handleQuery, handleParams);
 
     if (handleResult.records.length > 0) {
+      // Handle optional ChannelSetting (might be null if user hasn't customized)
+      const record = handleResult.records[0];
+      const channelSettingNode = record.get('cs');
       return {
         success: true,
         exists: true,
         data: {
-          channel: args.convertNodeToJson(handleResult.records[0].get('c')),
-          channelSetting: args.convertNodeToJson(handleResult.records[0].get('cs'))
+          channel: args.convertNodeToJson(record.get('c')),
+          channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
         }
       };
     }
@@ -93,13 +96,21 @@ try {
 
   const exists = result.records.length > 0;
 
+  // Handle optional ChannelSetting (might be null if user hasn't customized)
+  let data = null;
+  if (exists) {
+    const record = result.records[0];
+    const channelSettingNode = record.get('cs');
+    data = {
+      channel: args.convertNodeToJson(record.get('c')),
+      channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
+    };
+  }
+
   return {
     success: true,
     exists,
-    data: exists ? {
-      channel: args.convertNodeToJson(result.records[0].get('c')),
-      channelSetting: args.convertNodeToJson(result.records[0].get('cs'))
-    } : null
+    data
   };
 
 } catch (error) {

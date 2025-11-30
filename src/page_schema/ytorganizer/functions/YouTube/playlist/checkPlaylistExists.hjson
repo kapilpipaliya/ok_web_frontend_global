@@ -43,13 +43,21 @@ try {
 
   const exists = result.records.length > 0;
 
+  // Handle optional PlaylistSetting (might be null if user hasn't customized)
+  let data = null;
+  if (exists) {
+    const record = result.records[0];
+    const playlistSettingNode = record.get('ps');
+    data = {
+      playlist: args.convertNodeToJson(record.get('p')),
+      playlistSetting: playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null
+    };
+  }
+
   return {
     success: true,
     exists,
-    data: exists ? {
-      playlist: args.convertNodeToJson(result.records[0].get('p')),
-      playlistSetting: args.convertNodeToJson(result.records[0].get('ps'))
-    } : null
+    data
   };
 
 } catch (error) {

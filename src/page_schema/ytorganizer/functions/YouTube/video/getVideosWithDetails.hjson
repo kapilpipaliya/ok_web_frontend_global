@@ -113,6 +113,8 @@ try {
       MATCH (p)-[:PlaylistVideo]->(v:Video)
       // Optional VideoSetting (only exists if user has notes/favorites/etc.)
       OPTIONAL MATCH (v)-[:VideoVideoSetting]->(vs:VideoSetting)<-[:YouTubeOwnershipVideoSetting]-(o)
+      // Optional PlaylistSetting (only exists if user has customized playlist)
+      OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     `;
   } else {
     // Match videos that have settings for this ownership
@@ -158,9 +160,13 @@ try {
 
   // Convert results to JSON format
   const videos = result.records.map(record => {
+    // Handle optional VideoSetting (might be null if user hasn't customized)
+    const videoSettingNode = record.get('vs');
+    const videoSetting = videoSettingNode ? args.convertNodeToJson(videoSettingNode) : null;
+
     const videoData = {
       video: args.convertNodeToJson(record.get('v')),
-      videoSetting: args.convertNodeToJson(record.get('vs'))
+      videoSetting
     };
 
     // Add playlist information if requested AND playlistId was provided

@@ -54,9 +54,10 @@ try {
     ? 'AND c.youtubeId IN $channelIds'
     : '';
 
-  // Build WHERE clause for status filter if provided
+  // Build WHERE clause for queue status filter if provided
+  // NEW ARCHITECTURE: Queue status on Channel vertex
   const statusFilterClause = statusFilter.length > 0
-    ? 'AND cs.status IN $statusFilter'
+    ? 'AND c.queueStatus IN $statusFilter'
     : '';
 
   // Build WHERE clause for favourite filter if provided
@@ -133,16 +134,17 @@ try {
 
   // Convert results to JSON format
   const channels = result.records.map(record => {
-    const channelSetting = args.convertNodeToJson(record.get('cs'));
+    // Handle optional ChannelSetting (might be null if user hasn't customized)
+    const channelSettingNode = record.get('cs');
+    const channelSetting = channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null;
     const videoCount = record.get('videoCount');
+    const channel = args.convertNodeToJson(record.get('c'));
 
-    // Add ownership-specific video count to channel setting
-    if (channelSetting && channelSetting.P) {
-      channelSetting.P.videoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
-    }
+    // Add ownership-specific video count to channel setting if it exists
+    channel.P.videoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
 
     return {
-      channel: args.convertNodeToJson(record.get('c')),
+      channel,
       channelSetting: channelSetting
     };
   });

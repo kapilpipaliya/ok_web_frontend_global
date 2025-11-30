@@ -284,15 +284,6 @@ A web app that lets you import your YouTube subscriptions/playlists and organize
 
 4. **Quota Reservation System** - Implemented a priority-based quota reservation to handle concurrent API calls gracefully across all users.
 
-**Graph Schema Example:**
-```
-(User)-[:UserYouTubeOwnership]->(YouTubeOwnership)
-(YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)
-(YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
-(PlaylistSetting)-[:PlaylistSettingVideo]->(Video)
-(YouTubeOwnership)-[:YouTubeOwnershipVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
-```
-
 **Use Cases:**
 - Students organizing lecture series across courses
 - Researchers tracking educational videos by topic

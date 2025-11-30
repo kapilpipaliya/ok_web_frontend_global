@@ -249,7 +249,7 @@ try {
     // Collect playlist info before deletion
     WITH o, p, ownershipRel, elementId(p) as playlistNodeId
 
-    // Delete optional PlaylistSetting if it exists
+    // Delete optional PlaylistSetting if it exists (created on-demand when user customizes)
     OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
 
     // Delete setting and ownership relationship

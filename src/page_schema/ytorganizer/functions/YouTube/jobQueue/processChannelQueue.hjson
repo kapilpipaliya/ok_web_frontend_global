@@ -51,14 +51,13 @@ if (args.contextData.action === 'start') {
   try {
     const channelQueue = helpers.result.data.createChannelQueue(args);
 
-    // Get all channels with status 'queued' through ownership
+    // Get all channels with queueStatus 'queued' through ownership
     const queuedChannels = await args.session.run(`
       MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-      MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-            -[:ChannelSettingChannel]->(c:Channel)
-      WHERE cs.status = 'queued'
-      RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId, cs.priority as priority, cs.queuedAt as queuedAt
-      ORDER BY cs.priority DESC, cs.queuedAt ASC
+      MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+      WHERE c.queueStatus = 'queued'
+      RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId, c.priority as priority, c.queuedAt as queuedAt
+      ORDER BY c.priority DESC, c.queuedAt ASC
     `);
 
     let addedCount = 0;
@@ -177,11 +176,10 @@ if (args.contextData.action === 'start') {
 
         // Mark channel as pending_quota
         await session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-          SET cs.status = 'pending_quota',
-              cs.error = 'Daily API quota exhausted. Will resume tomorrow.',
-              cs.updatedAt = datetime()
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+          SET c.queueStatus = 'pending_quota',
+              c.error = 'Daily API quota exhausted. Will resume tomorrow.',
+              c.updatedAt = datetime()
         `, { ownershipId, channelId });
 
         await session.close();
@@ -194,14 +192,13 @@ if (args.contextData.action === 'start') {
 
     try {
 
-      // Update status to processing
+      // Update queueStatus to processing
       await session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-              -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-        SET cs.status = 'processing',
-            cs.progress = 0,
-            cs.updatedAt = datetime()
-        RETURN cs
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+        SET c.queueStatus = 'processing',
+            c.progress = 0,
+            c.updatedAt = datetime()
+        RETURN c
       `, { ownershipId, channelId });
 
       // Get authenticated YouTube client for this ownership's OAuth
@@ -211,12 +208,11 @@ if (args.contextData.action === 'start') {
       } catch (error) {
         // Handle OAuth errors - mark channel as failed
         await session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-          SET cs.status = 'failed',
-              cs.error = $error,
-              cs.priority = null,
-              cs.updatedAt = datetime()
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+          SET c.queueStatus = 'failed',
+              c.error = $error,
+              c.priority = null,
+              c.updatedAt = datetime()
         `, {
           ownershipId,
           channelId,
@@ -283,12 +279,11 @@ if (args.contextData.action === 'start') {
 
       // Update total counts
       await session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-              -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-        SET cs.totalPlaylists = $totalPlaylists,
-            cs.processedPlaylists = 0,
-            cs.updatedAt = datetime()
-        RETURN cs
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+        SET c.totalPlaylists = $totalPlaylists,
+            c.processedPlaylists = 0,
+            c.updatedAt = datetime()
+        RETURN c
       `, { ownershipId, channelId, totalPlaylists });
 
       // Create a queue for playlist processing
@@ -299,9 +294,9 @@ if (args.contextData.action === 'start') {
         for (const playlist of allPlaylists) {
         if (!playlist.id) continue;
 
-        // Save playlist metadata, create channel-playlist relationship, and create ownership setting
+        // Save playlist metadata, create channel-playlist relationship, and set queue status
         // NEW SCHEMA v4.0: Each ownership has its own playlist instances (no global playlists)
-        const playlistSettingKey = `playlist_setting_${ownershipId}_${playlist.id}`;
+        // Queue tracking on Playlist, user customization on PlaylistSetting (created on-demand)
         await session.run(`
           // Get ownership and channel (verify ownership)
           MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
@@ -323,27 +318,16 @@ if (args.contextData.action === 'start') {
             p.status = $status,
             p.channelId = $channelId,
             p.itemCount = $itemCount,
+            p.queueStatus = 'queued',
+            p.progress = 0,
+            p.totalVideos = 0,
+            p.processedVideos = 0,
+            p.priority = $priority,
+            p.queuedAt = datetime(),
             p.updatedAt = datetime()
 
           // Create channel-playlist relationship
           MERGE (c)-[:ChannelPlaylist]->(p)
-
-          // Create ownership playlist setting and mark as queued
-          MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-          ON CREATE SET
-            ps.key = $playlistSettingKey,
-            ps.createdAt = datetime()
-          SET
-            ps.status = 'queued',
-            ps.progress = 0,
-            ps.totalVideos = 0,
-            ps.processedVideos = 0,
-            ps.sortBy = 'index',
-            ps.showThumbnails = true,
-            ps.viewMode = 'list',
-            ps.priority = $priority,
-            ps.queuedAt = datetime(),
-            ps.updatedAt = datetime()
         `, {
           ownershipId,
           channelId,
@@ -358,7 +342,6 @@ if (args.contextData.action === 'start') {
           thumbnailMaxres: playlist.snippet?.thumbnails?.maxres?.url || null,
           status: playlist.status?.privacyStatus || null,
           itemCount: playlist.contentDetails?.itemCount || 0, // for uploads playlist contentDetails is not returned.
-          playlistSettingKey,
           priority
         });
 
@@ -408,13 +391,12 @@ if (args.contextData.action === 'start') {
       // - Database connection issues
       // Without this, the channel would stay in 'processing' state indefinitely
       await session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-              -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-        SET cs.status = 'failed',
-            cs.error = $error,
-            cs.priority = null,
-            cs.progress = 0,
-            cs.updatedAt = datetime()
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+        SET c.queueStatus = 'failed',
+            c.error = $error,
+            c.priority = null,
+            c.progress = 0,
+            c.updatedAt = datetime()
       `, { ownershipId, channelId, error: error.message });
 
       throw error;

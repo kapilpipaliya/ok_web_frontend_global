@@ -1301,14 +1301,14 @@ const toggleFavourite = async (item) => {
 
 // Unified helper: Infer item type from data structure
 const inferItemType = (data) => {
-  if (data.channel && data.channelSetting) {
-    return { type: 'channel', item: data.channel, setting: data.channelSetting };
+  if (data.video) {
+    return { type: 'video', item: data.video, setting: data.videoSetting };
   }
-  if (data.playlist && data.playlistSetting) {
+  if (data.playlist) {
     return { type: 'playlist', item: data.playlist, setting: data.playlistSetting };
   }
-  if (data.video && data.videoSetting) {
-    return { type: 'video', item: data.video, setting: data.videoSetting };
+  if (data.channel) {
+    return { type: 'channel', item: data.channel, setting: data.channelSetting };
   }
   return null;
 };
@@ -1475,7 +1475,7 @@ const updateLocalItemSetting = (updatedData) => {
   updateAllViews(itemInfo);
 };
 
-// Polling state for all items (to track processing status and other metadata)
+// Polling state for all items (to track processing queueStatus and other metadata)
 const [processingStatuses, setProcessingStatuses] = args.createSignal({
   channels: {},
   playlists: {}
@@ -1654,7 +1654,7 @@ const collectVisibleIdsFromData = () => {
   return { channelIds, playlistIds };
 };
 
-// Poll for processing status updates
+// Poll for processing queueStatus updates
 const pollProcessingStatus = async () => {
   // Skip if already polling
   if (isPolling()) {
@@ -1709,7 +1709,7 @@ const pollProcessingStatus = async () => {
       }
     }
   } catch (error) {
-    console.error('Error polling processing status:', error);
+    console.error('Error polling processing queueStatus:', error);
   } finally {
     setIsPolling(false);
   }
@@ -1740,30 +1740,31 @@ const stopPolling = () => {
   setIsPolling(false);
 };
 
-// Watch for processing status changes and start/stop polling as needed
+// Watch for processing queueStatus changes and start/stop polling as needed
 args.createEffect(
   args.on([processingStatuses, pollingInterval], () => {
     const statuses = processingStatuses();
 
-    // Check if any items are actually being processed (queued or processing status)
+    // Check if any items are actually being processed (queued or processing queueStatus)
     let hasActiveProcessing = false;
 
     // Check channels
     for (const channelId in statuses.channels) {
       const item = statuses.channels[channelId];
-      const status = item.channelSetting?.P?.status;
-      if (status === 'queued' || status === 'processing') {
+      const queueStatus = item.channel?.P?.queueStatus;
+      if (queueStatus === 'queued' || queueStatus === 'processing') {
         hasActiveProcessing = true;
         break;
       }
     }
 
     // Check playlists if no active channel processing found
+    // NEW ARCHITECTURE: Queue queueStatus on Playlist vertex
     if (!hasActiveProcessing) {
       for (const playlistId in statuses.playlists) {
         const item = statuses.playlists[playlistId];
-        const status = item.playlistSetting?.P?.status;
-        if (status === 'queued' || status === 'processing') {
+        const queueStatus = item.playlist?.P?.queueStatus;
+        if (queueStatus === 'queued' || queueStatus === 'processing') {
           hasActiveProcessing = true;
           break;
         }
@@ -1795,45 +1796,45 @@ args.createEffect(
   })
 );
 
-// Get processing status for a specific channel
+// Get processing queueStatus for a specific channel
 const getChannelProcessingStatus = (channelId) => {
   return processingStatuses().channels[channelId] || null;
 };
 
-// Get processing status for a specific playlist
+// Get processing queueStatus for a specific playlist
 const getPlaylistProcessingStatus = (playlistId) => {
   return processingStatuses().playlists[playlistId] || null;
 };
 
-// Format processing status with detailed information
+// Format processing queueStatus with detailed information
 const formatProcessingStatus = (processingStatus, itemType) => {
   if (!processingStatus) {
     return null;
   }
 
-  // Try to extract setting from different possible structures
-  let setting = null;
+  // NEW ARCHITECTURE: Extract main item (queue tracking is on Channel/Playlist vertex)
+  let item = null;
   if (itemType === "playlist") {
-    setting = processingStatus.playlistSetting;
+    item = processingStatus.playlist;
   } else if (itemType === "channel") {
-    setting = processingStatus.channelSetting;
+    item = processingStatus.channel;
   }
 
-  // If no setting found, return null
-  if (!setting) {
+  // If no item found, return null
+  if (!item || !item.P) {
     return null;
   }
 
-  const props = setting.P;
+  const props = item.P;
 
-  // Check if we have a valid status
-  const status = props.status;
-  if (!status) {
+  // Check if we have a valid queueStatus
+  const queueStatus = props.queueStatus;
+  if (!queueStatus) {
     return null;
   }
 
-  // Only format if status is queued or processing
-  if (status !== 'queued' && status !== 'processing') {
+  // Only format if queueStatus is queued or processing
+  if (queueStatus !== 'queued' && queueStatus !== 'processing') {
     return null;
   }
 
@@ -1854,10 +1855,10 @@ const formatProcessingStatus = (processingStatus, itemType) => {
     details = `${processedVideos}/${totalVideos} videos`;
   }
 
-  // Return formatted status
+  // Return formatted queueStatus
   return {
     ...processingStatus,
-    status,
+    queueStatus,
     progress,
     details
   };
@@ -2146,33 +2147,34 @@ if (!processingData) {
 }
 
 // Extract data from vertex format
-const setting = contentType === "playlists"
-  ? processingData.playlistSetting
-  : processingData.channelSetting;
+// NEW ARCHITECTURE: Queue tracking on main vertex (Channel/Playlist)
+const item = contentType === "playlists"
+  ? processingData.playlist
+  : processingData.channel;
 
-if (!setting || !setting.P) {
+if (!item || !item.P) {
   return { hide: true };
 }
 
 let details = '';
 if (contentType === "channels") {
-  const processedPlaylists = setting.P.processedPlaylists || 0;
-  const totalPlaylists = setting.P.totalPlaylists || 0;
-  const processedVideos = setting.P.processedVideos || 0;
-  const totalVideos = setting.P.totalVideos || 0;
+  const processedPlaylists = item.P.processedPlaylists || 0;
+  const totalPlaylists = item.P.totalPlaylists || 0;
+  const processedVideos = item.P.processedVideos || 0;
+  const totalVideos = item.P.totalVideos || 0;
   details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
 } else {
-  const processedVideos = setting.P.processedVideos || 0;
-  const totalVideos = setting.P.totalVideos || 0;
+  const processedVideos = item.P.processedVideos || 0;
+  const totalVideos = item.P.totalVideos || 0;
   details = `${processedVideos}/${totalVideos} videos`;
 }
 
 return {
-  status: setting.P.status,
-  progress: setting.P.progress || 0,
+  queueStatus: item.P.queueStatus,
+  progress: item.P.progress || 0,
   type: contentType === "playlists" ? "playlist" : "channel",
   details,
-  error: setting.P.error || ''
+  error: item.P.error || ''
 };
 '''
       }
@@ -2964,14 +2966,14 @@ if (isListView) {
   const resultType = itemData.resultType;
   item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
   itemId = item?.P?.youtubeId;
-  // Extension items don't have processing status
+  // Extension items don't have processing queueStatus
   processingStatus = null;
   itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
   itemType = resultType;
   showTypeBadge = true;
 }
 
-// Format processing status with detailed information
+// Format processing queueStatus with detailed information
 processingStatus = args.fns.formatProcessingStatus(processingStatus, itemType);
 
 return {

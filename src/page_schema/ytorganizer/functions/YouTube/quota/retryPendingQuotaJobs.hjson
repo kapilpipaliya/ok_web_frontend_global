@@ -12,26 +12,26 @@ try {
 
   // Get all ownerships with pending_quota channels, sorted by ownership priority (higher = more important)
   // This ensures higher-priority ownerships get their quota allocation first after midnight reset
+  // NEW ARCHITECTURE: Queue status on Channel vertex
   const channelsResult = await args.session.run(`
     MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-          -[:ChannelSettingChannel]->(c:Channel)
-    WHERE cs.status = 'pending_quota'
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+    WHERE c.queueStatus = 'pending_quota'
     RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, c.youtubeId as channelId,
-           cs.priority as priority, COALESCE(o.priority, 0) as ownershipPriority
-    ORDER BY ownershipPriority DESC, cs.priority DESC
+           c.priority as priority, COALESCE(o.priority, 0) as ownershipPriority
+    ORDER BY ownershipPriority DESC, c.priority DESC
   `);
 
   // Get all ownerships with pending_quota playlists, sorted by ownership priority (higher = more important)
   // This ensures higher-priority ownerships get their quota allocation first after midnight reset
+  // NEW ARCHITECTURE: Queue status on Playlist vertex
   const playlistsResult = await args.session.run(`
     MATCH (u:User)-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-          -[:PlaylistSettingPlaylist]->(p:Playlist)
-    WHERE ps.status = 'pending_quota'
+    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+    WHERE p.queueStatus = 'pending_quota'
     RETURN u.uuid as userUuid, u.id as userId, o.key as ownershipId, p.youtubeId as playlistId,
-           ps.priority as priority, COALESCE(o.priority, 0) as ownershipPriority
-    ORDER BY ownershipPriority DESC, ps.priority DESC
+           p.priority as priority, COALESCE(o.priority, 0) as ownershipPriority
+    ORDER BY ownershipPriority DESC, p.priority DESC
   `);
 
   let channelsRetried = 0;
@@ -73,13 +73,13 @@ try {
         });
 
         // Update status back to queued
+        // NEW ARCHITECTURE: Update queue status on Channel vertex
         await args.session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-          SET cs.status = 'queued',
-              cs.error = null,
-              cs.queuedAt = datetime(),
-              cs.updatedAt = datetime()
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+          SET c.queueStatus = 'queued',
+              c.error = null,
+              c.queuedAt = datetime(),
+              c.updatedAt = datetime()
         `, { ownershipId, channelId });
 
         channelsRetried++;
@@ -125,13 +125,13 @@ try {
         });
 
         // Update status back to queued
+        // NEW ARCHITECTURE: Update queue status on Playlist vertex
         await args.session.run(`
-          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-          SET ps.status = 'queued',
-              ps.error = null,
-              ps.queuedAt = datetime(),
-              ps.updatedAt = datetime()
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          SET p.queueStatus = 'queued',
+              p.error = null,
+              p.queuedAt = datetime(),
+              p.updatedAt = datetime()
         `, { ownershipId, playlistId });
 
         playlistsRetried++;

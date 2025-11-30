@@ -123,16 +123,15 @@ try {
   }
 
   // DUPLICATE JOB PREVENTION: Check if this playlist is already queued or processing for this ownership
-  // NEW SCHEMA v4.0: Direct ownership + optional settings
+  // NEW ARCHITECTURE: Status stored directly on Playlist vertex
   // Prevents multiple concurrent jobs for the same playlist which would waste API quota
   // and potentially cause data inconsistencies
   // REFRESH MODE: If refresh=true, skip this check to allow re-processing completed playlists
   if (!refresh) {
     const existingPlaylistResult = await args.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
-      OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-      WHERE ps.status IN ['queued', 'processing']
-      RETURN p.youtubeId as playlistId, ps.status as status, p.title as title
+      WHERE p.queueStatus IN ['queued', 'processing']
+      RETURN p.youtubeId as playlistId, p.queueStatus as status, p.title as title
     `, { ownershipId, playlistId });
 
     if (existingPlaylistResult.records.length > 0) {
@@ -201,15 +200,14 @@ try {
   }
 
   // Use write transaction for atomicity - prevents race conditions
-  const { playlist, playlistSetting } = await args.session.executeWrite(async (tx) => {
+  const { playlist } = await args.session.executeWrite(async (tx) => {
     // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
-    // NEW SCHEMA v4.0: This check happens within the transaction to ensure no race condition
+    // NEW ARCHITECTURE: Status stored directly on Playlist vertex
     if (!refresh) {
       const existingPlaylistInTx = await tx.run(`
         MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
-        OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-        // WHERE ps.status IN ['queued', 'processing']
-        RETURN p.youtubeId as playlistId, ps.status as status, p.title as title
+        WHERE p.queueStatus IN ['queued', 'processing']
+        RETURN p.youtubeId as playlistId, p.queueStatus as status, p.title as title
       `, { ownershipId, playlistId });
 
       if (existingPlaylistInTx.records.length > 0) {
@@ -217,7 +215,7 @@ try {
         const status = record.get('status');
         const title = record.get('title');
 
-        throw new Error(`Playlist "${title}" is already ${status} for this YouTube account.`); //  Please wait for it to complete before adding again.
+        throw new Error(`Playlist "${title}" is already ${status} for this YouTube account.`);
       }
     }
 
@@ -265,47 +263,30 @@ try {
       publishedAt: playlistData.snippet.publishedAt
     });
 
-    // STEP 3: Create PlaylistSetting for status tracking and user preferences
-    // Settings are created for ALL playlists to track processing status
-    const playlistSettingKey = `playlist_setting_${playlistId}_${ownershipId}`;
-
-    const playlistSettingResult = await tx.run(`
+    // STEP 3: Update Playlist with queue tracking properties
+    // NEW ARCHITECTURE: Queue tracking on Playlist, user customization on PlaylistSetting (created on-demand)
+    const updatePlaylistResult = await tx.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
 
-      MERGE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {key: $playlistSettingKey})
-      ON CREATE SET
-        ps.createdAt = datetime()
-
-      MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps)
-
       SET
-        ps.customName = $customName,
-        ps.sortBy = 'index',
-        ps.showThumbnails = true,
-        ps.viewMode = 'list',
-        ps.priority = $priority,
-        ps.status = 'queued',
-        ps.progress = 0,
-        ps.totalVideos = 0,
-        ps.processedVideos = 0,
-        ps.error = null,
-        ps.queuedAt = datetime(),
-        ps.lastUpdated = datetime(),
-        ps.updatedAt = datetime()
+        p.priority = $priority,
+        p.queueStatus = 'queued',
+        p.progress = 0,
+        p.totalVideos = 0,
+        p.processedVideos = 0,
+        p.error = null,
+        p.queuedAt = datetime(),
+        p.lastUpdated = datetime()
 
-      RETURN ps, p
+      RETURN p
     `, {
       ownershipId,
       playlistId,
-      playlistSettingKey,
-      customName: name || null,
       priority: playlistPriority
     });
 
-    // Extract the PlaylistSetting and Playlist vertices from the result
-    const playlistSettingNode = playlistSettingResult.records[0].get('ps');
-    const playlistNode = playlistSettingResult.records[0].get('p');
-    const playlistSettingVertex = args.convertNodeToJson(playlistSettingNode);
+    // Extract the Playlist vertex from the result
+    const playlistNode = updatePlaylistResult.records[0].get('p');
     const playlistVertex = args.convertNodeToJson(playlistNode);
 
     // Create Channel->Playlist relationship using channel ID from YouTube API
@@ -324,7 +305,7 @@ try {
       await tx.run(channelPlaylistQuery, { ownershipId, playlistId, apiChannelId });
     }
 
-    return { playlist: playlistVertex, playlistSetting: playlistSettingVertex };
+    return { playlist: playlistVertex };
   });
 
   // STEP 3: Add to background processing queue using BullMQ
@@ -344,7 +325,6 @@ try {
       userId: user.id,
       userUuid: user.P.uuid,
       ownershipId: ownershipId,  // Required for multi-ownership support
-      customName: name || null,
       channelId: channelId || null,
       priority: playlistPriority
     }, {
@@ -361,8 +341,7 @@ try {
       ? `Playlist "${playlistData.snippet.title}" has been queued for refresh. All videos will be re-fetched from YouTube.`
       : `Playlist "${playlistData.snippet.title}" has been queued for processing. This may take a few minutes.`,
     data: {
-      playlist: playlist,  // Playlist vertex
-      playlistSetting: playlistSetting  // PlaylistSetting vertex
+      playlist: playlist  // Playlist vertex with settings
     }
   };
 

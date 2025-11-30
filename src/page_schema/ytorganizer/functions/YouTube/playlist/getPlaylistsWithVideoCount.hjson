@@ -54,9 +54,10 @@ try {
     ? 'AND p.youtubeId IN $playlistIds'
     : '';
 
-  // Build WHERE clause for status filter if provided
+  // Build WHERE clause for queue status filter if provided
+  // NEW ARCHITECTURE: Queue status on Playlist vertex
   const statusFilterClause = statusFilter.length > 0
-    ? 'AND ps.status IN $statusFilter'
+    ? 'AND p.queueStatus IN $statusFilter'
     : '';
 
   // Build WHERE clause for favourite filter if provided
@@ -104,11 +105,11 @@ try {
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+    WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
 
     // Optional PlaylistSetting (only exists if user has custom preferences)
     OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
 
-    WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     // NEW SCHEMA v4.0: Verify channel ownership for defensive safety
     OPTIONAL MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)-[:ChannelPlaylist]->(p)
 
@@ -134,17 +135,16 @@ try {
 
   // Convert results to JSON format
   const playlists = result.records.map((record) => {
-    const playlistSetting = args.convertNodeToJson(record.get('ps'));
+    // Handle optional PlaylistSetting (might be null if user hasn't customized)
+    const playlistSettingNode = record.get('ps');
+    const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
     const videoCount = record.get('videoCount');
     const ownership = args.convertNodeToJson(record.get('o'));
-
-    // Add ownership-specific video count to playlist setting
-    if (playlistSetting && playlistSetting.P) {
-      playlistSetting.P.videoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
-    }
+    const playlist = args.convertNodeToJson(record.get('p'));
+    playlist.P.itemCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
 
     return {
-      playlist: args.convertNodeToJson(record.get('p')),
+      playlist,
       playlistSetting,
       channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null,
       ownership

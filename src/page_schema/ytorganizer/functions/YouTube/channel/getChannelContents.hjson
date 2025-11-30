@@ -59,13 +59,11 @@ try {
   const channelSetting = channelData.channelSetting;
 
   // NEW SCHEMA v4.0: Get playlist IDs from this channel that are owned by user's ownership
-  // Only return playlists that the user owns through their ownership
-  // IMPORTANT: Always verify channel ownership before accessing channel's playlists
+  // Only return playlists that belong to this channel AND are owned by the user's ownership
   const getPlaylistIdsQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
-    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p)
+    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)<-[:YouTubeOwnershipPlaylist]-(o)
     RETURN p.youtubeId as playlistId
   `;
 
@@ -79,17 +77,17 @@ try {
 
   let playlists = [];
 
-  // Use helper function to get only user-saved playlists from this channel
+  // Use helper function to get playlists with full sorting support
   if (channelPlaylistIds.length > 0) {
     const playlistsResult = await args.executeNamedServerFunction({
       functionName: "getPlaylistsWithVideoCount",
       contextData: {
         userUuid: user.P.uuid,
-        ownershipId,  // Optional: filter by specific ownership
+        ownershipId,
         playlistIds: channelPlaylistIds,
         orderBy,
         orderDirection,
-        secondaryOrderBy  // Pass secondary sort for multi-field sorting
+        secondaryOrderBy
       }
     });
 

@@ -167,14 +167,13 @@ try {
   }
 
   // DUPLICATE JOB PREVENTION: Check if this channel is already queued or processing for this ownership
-  // NEW SCHEMA v4.0: Direct ownership + optional settings
+  // NEW ARCHITECTURE: Status stored directly on Channel vertex
   // For handles and usernames, we can't check by ID yet, so we'll check after fetching
   if (!refresh && channelInfo.type === 'channelId') {
     const existingChannelResult = await args.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
-      OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-      WHERE cs.status IN ['queued', 'processing']
-      RETURN c.youtubeId as channelId, cs.status as status, c.title as title
+      WHERE c.queueStatus IN ['queued', 'processing']
+      RETURN c.youtubeId as channelId, c.queueStatus as status, c.title as title
     `, { ownershipId, channelId: channelInfo.value });
 
     if (existingChannelResult.records.length > 0) {
@@ -226,9 +225,8 @@ try {
     if (!refresh) {
       const existingChannelInTx = await tx.run(`
         MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
-        OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-        // WHERE cs.status IN ['queued', 'processing']
-        RETURN c.youtubeId as channelId, cs.status as status, c.title as title
+        WHERE c.queueStatus IN ['queued', 'processing']
+        RETURN c.youtubeId as channelId, c.queueStatus as status, c.title as title
       `, { ownershipId, channelId: channelData.id });
 
       if (existingChannelInTx.records.length > 0) {
@@ -236,11 +234,11 @@ try {
         const status = record.get('status');
         const title = record.get('title');
 
-        throw new Error(`Channel "${title}" is already ${status} for this YouTube account.`); // Please wait for it to complete before adding again.
+        throw new Error(`Channel "${title}" is already ${status} for this YouTube account.`);
       }
     }
 
-    // STEP 1 & 2: Create ownership-specific channel instance and direct ownership relationship
+    // STEP 1-3: Create ownership-specific channel instance with metadata and queue tracking in single query
     // NEW SCHEMA v4.0: Each ownership has its own channel instances (duplicate resources per ownership)
     // This ensures complete data isolation between different YouTube accounts
     const channelKey = `channel_${channelData.id}_${ownershipId}`;
@@ -263,7 +261,16 @@ try {
         c.subscriberCount = $subscriberCount,
         c.uploadsPlaylistId = $uploadsPlaylistId,
         c.publishedAt = datetime($publishedAt),
-        c.updatedAt = datetime()
+        c.updatedAt = datetime(),
+        c.priority = $priority,
+        c.queueStatus = 'queued',
+        c.progress = 0,
+        c.totalPlaylists = 0,
+        c.processedPlaylists = 0,
+        c.totalVideos = 0,
+        c.processedVideos = 0,
+        c.error = null,
+        c.queuedAt = datetime()
       RETURN c
     `;
 
@@ -282,49 +289,12 @@ try {
       viewCount: parseInt(channelData.statistics?.viewCount || "0"),
       subscriberCount: parseInt(channelData.statistics?.subscriberCount || "0"),
       uploadsPlaylistId: channelData.contentDetails?.relatedPlaylists?.uploads || "",
-      publishedAt: channelData.snippet.publishedAt
-    });
-
-    // STEP 3: Create ChannelSetting for status tracking and user preferences
-    // Settings are created for ALL channels to track processing status
-    const channelSettingKey = `channel_setting_${channelData.id}_${ownershipId}`;
-
-    // Combine the ownership and channel matches in one query
-    const channelSettingResult = await tx.run(`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
-
-      MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $channelSettingKey})
-      ON CREATE SET
-        cs.createdAt = datetime()
-
-      MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
-
-      SET
-        cs.customName = $customName,
-        cs.notifications = true,
-        cs.autoDownload = false,
-        cs.priority = $priority,
-        cs.status = 'queued',
-        cs.progress = 0,
-        cs.totalPlaylists = 0,
-        cs.processedPlaylists = 0,
-        cs.totalVideos = 0,
-        cs.processedVideos = 0,
-        cs.error = null,
-        cs.queuedAt = datetime(),
-        cs.updatedAt = datetime()
-
-      RETURN cs
-    `, {
-      ownershipId,
-      channelId: channelData.id,
-      channelSettingKey,
-      customName: name || null,
+      publishedAt: channelData.snippet.publishedAt,
       priority: channelPriority
     });
   });
 
-  // STEP 3: Add to background processing queue using BullMQ
+  // STEP 4: Add to background processing queue using BullMQ
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
   const channelQueue = helpers.result.data.createChannelQueue(args);
 
@@ -338,7 +308,6 @@ try {
       userId: user.id,
       userUuid: user.P.uuid,
       ownershipId: ownershipId,  // Required for multi-ownership support
-      customName: name || null,
       priority: channelPriority
     }, {
       priority: jobPriority  // Override default priority
@@ -356,8 +325,7 @@ try {
     data: {
       channelId: channelData.id,
       title: channelData.snippet.title,
-      customName: name,
-      status: 'queued',
+      queueStatus: 'queued',
       progress: 0,
       subscriberCount: channelData.statistics?.subscriberCount,
       videoCount: channelData.statistics?.videoCount,

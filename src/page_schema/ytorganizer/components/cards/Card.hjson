@@ -16,14 +16,14 @@
         fns: '''
 // Common function to get effective setting (prefers live polling data over stale itemSetting)
 const getEffectiveSetting = () => {
-  const itemSetting = args.contextData.props?.itemSetting;
+  const item = args.contextData.props?.item;
   const itemType = args.contextData.props?.itemType;
   const processingStatus = args.contextData.props?.processingStatus;
-
-  // Prefer processing status setting (live updates from polling) over itemSetting (stale data)
-  return (itemType === "channel" && processingStatus?.channelSetting) ||
-         (itemType === "playlist" && processingStatus?.playlistSetting) ||
-         itemSetting;
+debugger
+  // Prefer processing queueStatus (live updates from polling) over item (stale data)
+  return (itemType === "playlist" && processingStatus?.playlist) ||
+         (itemType === "channel" && processingStatus?.channel) ||
+         item;
 };
 
 return {
@@ -473,28 +473,28 @@ if (isExtensionItem) {
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
-// Get status from effective setting
-const status = effectiveSetting?.P?.status;
+// Get queueStatus from effective setting
+const queueStatus = effectiveSetting?.P?.queueStatus;
 
-// Hide for videos (they don't have processing status)
+// Hide for videos (they don't have processing queueStatus)
 if (itemType === "video") {
   return { hide: true };
 }
 
-// Hide if no status
-if (!status) {
+// Hide if no queueStatus
+if (!queueStatus) {
   return { hide: true };
 }
 
-// Hide if status is "completed" (only show non-completed statuses)
-if (status === "completed") {
+// Hide if queueStatus is "completed" (only show non-completed statuses)
+if (queueStatus === "completed") {
   return { hide: true };
 }
 
-// Get status info from constants
-const statusInfo = args.fns.getStatusInfo?.(status);
+// Get queueStatus info from constants
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
 
-// Only show if we have valid status info
+// Only show if we have valid queueStatus info
 if (!statusInfo) {
   return { hide: true };
 }
@@ -513,7 +513,6 @@ const borderColor = colorMap[statusInfo.color] || args.theme.var.color.info;
 
 return {
   as: "div",
-  "data-status": status,
   "data-color": statusInfo.color
 };
 ''',
@@ -521,8 +520,8 @@ return {
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
-const status = effectiveSetting?.P?.status;
-const statusInfo = args.fns.getStatusInfo?.(status);
+const queueStatus = effectiveSetting?.P?.queueStatus;
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
 
 // Map color names to theme colors
 const colorMap = {
@@ -582,12 +581,12 @@ return `._id {
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
-const status = effectiveSetting?.P?.status;
+const queueStatus = effectiveSetting?.P?.queueStatus;
 
-// Get status info from constants
-const statusInfo = args.fns.getStatusInfo?.(status);
+// Get queueStatus info from constants
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
 
-// Use icon from status info, fallback to time icon
+// Use icon from queueStatus info, fallback to time icon
 const iconName = statusInfo?.icon || 'carbon:time';
 
 return {
@@ -614,33 +613,33 @@ return `._id {
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
-// Get status and progress from effective setting
-const status = effectiveSetting?.P?.status || '';
+// Get queueStatus and progress from effective setting
+const queueStatus = effectiveSetting?.P?.queueStatus || '';
 const progress = effectiveSetting?.P?.progress || 0;
 const processedCount = effectiveSetting?.P?.processedPlaylists || effectiveSetting?.P?.processedVideos || 0;
 const totalCount = effectiveSetting?.P?.totalPlaylists || effectiveSetting?.P?.totalVideos || 0;
 
-// Get status info from constants
-const statusInfo = args.fns.getStatusInfo?.(status);
+// Get queueStatus info from constants
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
 
 let statusText = '';
 
 if (statusInfo) {
-  // Use label from status info
+  // Use label from queueStatus info
   statusText = statusInfo.label;
 
-  // Add progress percentage for processing status
-  if (status === 'processing' && progress > 0) {
+  // Add progress percentage for processing queueStatus
+  if (queueStatus === 'processing' && progress > 0) {
     statusText += ` ${progress}%`;
   }
 
   // Add processed/total counts if available
-  if (status === 'processing' && totalCount > 0) {
+  if (queueStatus === 'processing' && totalCount > 0) {
     statusText += ` (${processedCount}/${totalCount})`;
   }
 } else {
-  // Fallback to basic status display
-  statusText = status || 'Unknown';
+  // Fallback to basic queueStatus display
+  statusText = queueStatus || 'Unknown';
 }
 
 return {
@@ -666,12 +665,12 @@ return `._id {
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
-// Get status and error from effective setting
-const status = effectiveSetting?.P?.status || '';
+// Get queueStatus and error from effective setting
+const queueStatus = effectiveSetting?.P?.queueStatus || '';
 const error = effectiveSetting?.P?.error || '';
 
-// Only show error for failed or completed_with_errors status
-if ((status !== 'failed' && status !== 'completed_with_errors') || !error) {
+// Only show error for failed or completed_with_errors queueStatus
+if ((queueStatus !== 'failed' && queueStatus !== 'completed_with_errors') || !error) {
   return { hide: true };
 }
 
@@ -896,7 +895,7 @@ let metaText = "";
 
 if (itemType === "channel") {
   const subscriberCount = item?.P?.subscriberCount || 0;
-  const videoCount = itemSetting?.P?.videoCount ?? 0;
+  const videoCount = item?.P?.videoCount ?? 0;
 
   let parts = [];
   if (subscriberCount >= 1000000) {
@@ -913,7 +912,7 @@ if (itemType === "channel") {
   }
   metaText = parts.join(' • ');
 } else if (itemType === "playlist") {
-  const videoCount = item?.P?.itemCount ?? itemSetting?.P?.itemCount ?? 0;
+  const videoCount = item?.P?.itemCount ?? 0;
   const channelTitle = item?.P?.channelTitle || "";
 
   // Don't show video count for extension items
@@ -1208,7 +1207,7 @@ const formatValue = (field) => {
     value = itemSetting?.P?.itemCount ?? item?.P?.itemCount ?? 0;
   } else if (field === "videoCount") {
     // For channels: use videoCount from setting
-    value = itemSetting?.P?.videoCount;
+    value = item?.P?.videoCount;
   } else {
     // All other fields come directly from the item (YouTube API fields)
     value = item?.P?.[field];
@@ -1617,13 +1616,13 @@ const notSaved = isExtensionItem && !item?.P?.extensionExists;
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
-const status = effectiveSetting?.P?.status;
+const queueStatus = effectiveSetting?.P?.queueStatus;
 const youtubeId = item?.P?.youtubeId;
 const ownershipId = args.fns.getSelectedOwnershipId?.();
 
-// Only show for channels and playlists with failed or completed_with_errors status
+// Only show for channels and playlists with failed or completed_with_errors queueStatus
 const canRetry = (itemType === "channel" || itemType === "playlist") &&
-                 (status === "failed" || status === "completed_with_errors");
+                 (queueStatus === "failed" || queueStatus === "completed_with_errors");
 
 // Hide if specified in hideMenuItems prop
 const isHidden = hideMenuItems.includes("retry");

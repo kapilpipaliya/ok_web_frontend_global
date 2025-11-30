@@ -172,7 +172,7 @@ try {
   // Check if optional VideoSetting exists for this ownership
   const videoSettingQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)
-    MATCH (vs)-[:VideoVideoSetting]->(v:Video {youtubeId: $videoId})
+    MATCH (v:Video {youtubeId: $videoId})-[:VideoVideoSetting]->(vs)
     RETURN vs
   `;
 

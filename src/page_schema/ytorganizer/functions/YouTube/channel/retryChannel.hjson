@@ -79,8 +79,8 @@ try {
     };
   }
 
-  // Check if channel exists and get its current status
-  // NEW SCHEMA v4.0: Direct ownership + optional settings
+  // Check if channel exists and get its current queue status
+  // NEW ARCHITECTURE: Queue tracking on Channel, user customization on ChannelSetting (optional)
   const checkResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
@@ -100,7 +100,7 @@ try {
   const channelSetting = channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null;
   const channel = args.convertNodeToJson(channelNode);
 
-  const currentStatus = channelSetting?.P?.status;
+  const currentStatus = channel.P.queueStatus;
 
   // Prevent retry of channels that are already queued or processing
   if (currentStatus === 'queued' || currentStatus === 'processing') {
@@ -117,41 +117,33 @@ try {
   // Reset channel status to queued
   // This clears error state and resets progress counters
   // NEW SCHEMA v4.0: Create setting if it doesn't exist
-  const channelSettingKey = `channel_setting_${channelId}_${ownershipId}`;
-
+  // Reset channel queue status
+  // NEW ARCHITECTURE: Queue tracking on Channel vertex directly
   await args.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
 
-    MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $channelSettingKey})
-    ON CREATE SET cs.createdAt = datetime()
-    MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
+    SET c.queueStatus = 'queued',
+        c.progress = 0,
+        c.processedPlaylists = 0,
+        c.error = null,
+        c.queuedAt = datetime(),
+        c.updatedAt = datetime()
+  `, { ownershipId, channelId });
 
-    SET cs.status = 'queued',
-        cs.progress = 0,
-        cs.processedPlaylists = 0,
-        cs.error = null,
-        cs.queuedAt = datetime(),
-        cs.updatedAt = datetime()
-  `, { ownershipId, channelId, channelSettingKey });
-
-  // Also reset all playlist settings for this channel to queued
+  // Also reset all playlists for this channel to queued
   // This ensures playlists are re-processed even if some were completed before
-  // NEW SCHEMA v4.0: Direct ownership + global playlist membership
+  // NEW ARCHITECTURE: Queue tracking on Playlist vertex directly
   await args.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
     MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p)
 
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-    WITH p, ps, o
-    WHERE ps IS NOT NULL
-
-    SET ps.status = 'queued',
-        ps.progress = 0,
-        ps.processedVideos = 0,
-        ps.error = null,
-        ps.queuedAt = datetime(),
-        ps.updatedAt = datetime()
+    SET p.queueStatus = 'queued',
+        p.progress = 0,
+        p.processedVideos = 0,
+        p.error = null,
+        p.queuedAt = datetime(),
+        p.updatedAt = datetime()
   `, { ownershipId, channelId });
 
   // Re-add channel to processing queue
@@ -159,8 +151,8 @@ try {
   const channelQueue = helpers.result.data.createChannelQueue(args);
 
   try {
-    // Get priority and convert to job priority number
-    const priority = channelSetting.P.priority || 'normal';
+    // Get priority from Channel (queue tracking property)
+    const priority = channel.P.priority || 'normal';
     const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
     // Generate unique job ID with ownership context
@@ -186,7 +178,6 @@ try {
       userId: user.id,
       userUuid: user.P.uuid,
       ownershipId,  // Required for multi-ownership support
-      customName: channelSetting.P.customName || null,
       priority
     }, {
       priority: jobPriority  // Override default priority

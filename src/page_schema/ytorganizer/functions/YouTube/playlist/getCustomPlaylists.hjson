@@ -45,9 +45,13 @@ try {
   `, { ownershipId });
 
   const playlists = playlistsResult.records.map(record => {
+    // Handle optional PlaylistSetting (might be null if user hasn't customized)
+    const playlistSettingNode = record.get('ps');
+    const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
+
     return {
       playlist: args.convertNodeToJson(record.get('p')),
-      playlistSetting: args.convertNodeToJson(record.get('ps'))
+      playlistSetting
     };
   });
 

@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "deleteVideo",
-        description: "Deletes videos (array, 'all', or 'allInContext') from playlists using global Playlist->Video relationships. NEW SCHEMA v4.0: Removes Playlist->Video relationships, then cleans up orphan Videos and optional VideoSettings. 'allInContext' deletes all videos in the context playlists.",
+        description: "Deletes videos (array, 'all', or 'allInContext') from playlists using Playlist->Video relationships. NEW SCHEMA v4.0: Removes Playlist->Video relationships, then cleans up orphan Videos and optional VideoSettings (created on-demand). 'allInContext' deletes all videos in the context playlists.",
         body: '''
 try {
   // Get current authenticated user from session
@@ -157,7 +157,7 @@ try {
   // NEW SCHEMA v4.0: VideoSettings are optional and only exist if user added custom data
   const deleteOrphanVideoSettingQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)
-    OPTIONAL MATCH (vs)-[:VideoVideoSetting]->(v:Video)
+    OPTIONAL MATCH (v:Video)-[:VideoVideoSetting]->(vs)
 
     // Delete settings where video no longer exists (was deleted in Step 2)
     WITH vs, v

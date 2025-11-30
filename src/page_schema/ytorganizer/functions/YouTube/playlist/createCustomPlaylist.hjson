@@ -47,14 +47,13 @@ try {
   const customPlaylistId = `custom_${timestamp}_${randomString}`;
 
   // Step 1 & 2: Create playlist with ownership relationship in one atomic query
-  // NEW SCHEMA v4.0: Create ownership-specific custom playlist
+  // NEW ARCHITECTURE: Playlist only contains metadata, user customization goes on PlaylistSetting (created on-demand)
   const playlistKey = `playlist_${customPlaylistId}_${ownershipId}`;
-  const playlistSettingKey = `playlist_setting_${customPlaylistId}_${ownershipId}`;
 
   const createPlaylistWithOwnershipQuery = `
     MATCH (o:YouTubeOwnership {key: $ownershipId})
 
-    // Create playlist
+    // Create playlist with metadata only (no user customization defaults)
     CREATE (p:Playlist {
       key: $key,
       youtubeId: $playlistId,
@@ -72,47 +71,26 @@ try {
     // Create ownership relationship
     CREATE (o)-[:YouTubeOwnershipPlaylist]->(p)
 
-    // Create PlaylistSetting for custom playlist management
-    CREATE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {
-      key: $playlistSettingKey,
-      customName: $customName,
-      notifications: true,
-      autoDownload: false,
-      sortBy: 'custom',
-      showThumbnails: true,
-      viewMode: 'list',
-      isCustom: true,
-      customOrder: [],
-      itemCount: 0,
-      createdAt: datetime(),
-      updatedAt: datetime()
-    })
-    CREATE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps)
-
-    RETURN p, ps
+    RETURN p
   `;
 
   const result = await args.session.run(createPlaylistWithOwnershipQuery, {
     ownershipId,
     key: playlistKey,
     playlistId: customPlaylistId,
-    playlistSettingKey,
     title: name.trim(),
     description: description?.trim() || "",
     thumbnail: "", // Custom playlists start with no thumbnail
-    userId: user.id,
-    customName: null // Use original name for custom playlists
+    userId: user.id
   });
 
   const playlist = args.convertNodeToJson(result.records[0].get('p'));
-  const playlistSetting = args.convertNodeToJson(result.records[0].get('ps'));
 
   return {
     success: true,
     message: `Custom playlist "${name}" created successfully!`,
     data: {
       playlist,
-      playlistSetting,
       ownership,
       playlistId: customPlaylistId,
       userId: user.id,

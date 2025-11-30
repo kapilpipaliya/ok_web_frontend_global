@@ -229,7 +229,7 @@ try {
     // Collect channel info before deletion
     WITH o, c, ownershipRel, elementId(c) as channelNodeId
 
-    // Delete optional ChannelSetting if it exists
+    // Delete optional ChannelSetting if it exists (created on-demand when user customizes)
     OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
 
     // Delete setting and ownership relationship

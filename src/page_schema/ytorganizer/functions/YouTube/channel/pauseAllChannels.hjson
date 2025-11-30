@@ -20,22 +20,20 @@ try {
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 
   // Get all channels that will be paused across all ownerships (need IDs before updating status)
-  // NEW SCHEMA v4.0: Direct ownership + optional settings
+  // NEW ARCHITECTURE: Queue status on Channel vertex
   const channelsToDelete = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
-    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-    WHERE cs.status IN ['queued', 'processing']
+    WHERE c.queueStatus IN ['queued', 'processing']
     RETURN c.youtubeId as channelId, o.key as ownershipId
   `, { userUuid: user.P.uuid });
 
   // Get all playlists that will be paused across all ownerships
-  // NEW SCHEMA v4.0: Direct ownership + optional settings
+  // NEW ARCHITECTURE: Queue status on Playlist vertex
   const playlistsToDelete = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-    WHERE ps.status IN ['queued', 'processing']
+    WHERE p.queueStatus IN ['queued', 'processing']
     RETURN p.youtubeId as playlistId, o.key as ownershipId
   `, { userUuid: user.P.uuid });
 
@@ -101,27 +99,25 @@ try {
   }
 
   // Now update database status to paused across all ownerships
-  // NEW SCHEMA v4.0: Update optional settings
+  // NEW ARCHITECTURE: Update queue status on Channel vertex
   const result = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
-    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-    WHERE cs.status IN ['queued', 'processing']
-    SET cs.status = 'paused',
-        cs.pausedAt = datetime(),
-        cs.updatedAt = datetime()
-    RETURN count(cs) as pausedCount
+    WHERE c.queueStatus IN ['queued', 'processing']
+    SET c.queueStatus = 'paused',
+        c.pausedAt = datetime(),
+        c.updatedAt = datetime()
+    RETURN count(c) as pausedCount
   `, { userUuid: user.P.uuid });
 
   const playlistResult = await args.session.run(`
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-    WHERE ps.status IN ['queued', 'processing']
-    SET ps.status = 'paused',
-        ps.pausedAt = datetime(),
-        ps.updatedAt = datetime()
-    RETURN count(ps) as pausedCount
+    WHERE p.queueStatus IN ['queued', 'processing']
+    SET p.queueStatus = 'paused',
+        p.pausedAt = datetime(),
+        p.updatedAt = datetime()
+    RETURN count(p) as pausedCount
   `, { userUuid: user.P.uuid });
 
   const channelsPaused = result.records[0]?.get('pausedCount') || 0;

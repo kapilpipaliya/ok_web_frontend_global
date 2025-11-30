@@ -65,19 +65,18 @@ if (args.contextData.action === 'start') {
 
       // Find stale channel jobs
       // A channel is stale if:
-      // - Status is 'processing'
+      // - queueStatus is 'processing'
       // - updatedAt is older than 2 hours
+      // NEW ARCHITECTURE: Queue status on Channel vertex
       const staleChannelsResult = await session.run(`
-        MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)
-        WHERE cs.status = 'processing'
-          AND datetime(cs.updatedAt) < datetime($cutoffTime)
-        SET cs.status = 'failed',
-            cs.error = $errorMessage,
-            cs.priority = null,
-            cs.updatedAt = datetime()
-        WITH cs, o
-        MATCH (cs)-[:ChannelSettingChannel]->(c:Channel)
-        RETURN count(cs) as count, collect(c.title) as titles
+        MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipChannel]->(c:Channel)
+        WHERE c.queueStatus = 'processing'
+          AND datetime(c.updatedAt) < datetime($cutoffTime)
+        SET c.queueStatus = 'failed',
+            c.error = $errorMessage,
+            c.priority = null,
+            c.updatedAt = datetime()
+        RETURN count(c) as count, collect(c.title) as titles
       `, {
         cutoffTime: cutoffIsoString,
         errorMessage: `Processing timeout - job exceeded ${STALE_TIMEOUT_HOURS} hour limit. Marked as failed by stale job cleanup. Please retry.`
@@ -97,19 +96,18 @@ if (args.contextData.action === 'start') {
 
       // Find stale playlist jobs
       // A playlist is stale if:
-      // - Status is 'processing'
+      // - queueStatus is 'processing'
       // - updatedAt is older than 2 hours
+      // NEW ARCHITECTURE: Queue status on Playlist vertex
       const stalePlaylistsResult = await session.run(`
-        MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-        WHERE ps.status = 'processing'
-          AND datetime(ps.updatedAt) < datetime($cutoffTime)
-        SET ps.status = 'failed',
-            ps.error = $errorMessage,
-            ps.priority = null,
-            ps.updatedAt = datetime()
-        WITH ps, o
-        MATCH (ps)-[:PlaylistSettingPlaylist]->(p:Playlist)
-        RETURN count(ps) as count, collect(p.title) as titles
+        MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+        WHERE p.queueStatus = 'processing'
+          AND datetime(p.updatedAt) < datetime($cutoffTime)
+        SET p.queueStatus = 'failed',
+            p.error = $errorMessage,
+            p.priority = null,
+            p.updatedAt = datetime()
+        RETURN count(p) as count, collect(p.title) as titles
       `, {
         cutoffTime: cutoffIsoString,
         errorMessage: `Processing timeout - job exceeded ${STALE_TIMEOUT_HOURS} hour limit. Marked as failed by stale job cleanup. Please retry.`
@@ -129,23 +127,22 @@ if (args.contextData.action === 'start') {
 
       // If any stale jobs were found, update parent channel progress
       // This ensures channel status is accurate even when playlists time out
+      // NEW ARCHITECTURE: Queue status on vertices directly
       if (stalePlaylistCount > 0) {
         // Find all channels that had stale playlists and update their progress
         await session.run(`
-          MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipPlaylistSetting]->(ps:PlaylistSetting)
-                -[:PlaylistSettingPlaylist]->(p:Playlist)<-[:ChannelPlaylist]-(c:Channel)
-          WHERE ps.status = 'failed' AND ps.error CONTAINS 'timeout'
-          WITH o, c, count(ps) as failedCount
-          MATCH (o)-[:YouTubeOwnershipChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
-          WHERE cs.status = 'processing'
-          WITH cs, c, failedCount,
-               cs.totalPlaylists as totalPlaylists,
-               cs.processedPlaylists as processedPlaylists
+          MATCH (o:YouTubeOwnership)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+          WHERE p.queueStatus = 'failed' AND p.error CONTAINS 'timeout'
+          MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)-[:ChannelPlaylist]->(p)
+          WHERE c.queueStatus = 'processing'
+          WITH c, count(p) as failedCount,
+               c.totalPlaylists as totalPlaylists,
+               c.processedPlaylists as processedPlaylists
           WHERE processedPlaylists >= totalPlaylists
-          SET cs.status = 'completed_with_errors',
-              cs.error = 'Some playlists failed due to timeout',
-              cs.progress = 100,
-              cs.updatedAt = datetime()
+          SET c.queueStatus = 'completed_with_errors',
+              c.error = 'Some playlists failed due to timeout',
+              c.progress = 100,
+              c.updatedAt = datetime()
         `);
       }
 

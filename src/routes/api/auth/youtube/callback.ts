@@ -2,13 +2,11 @@
  * YouTube OAuth Callback Endpoint - Multi-Ownership Support
  *
  * Handles the callback from Google after user authorizes.
- * Exchanges authorization code for tokens, stores them securely,
- * and triggers auto-fetch of all channels owned by the YouTube account.
+ * Exchanges authorization code for tokens and stores them securely.
  */
 
 import { handleYouTubeCallback } from "~/lib/youtube/youtubeOAuth";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { createRedirectResponse } from "~/lib/api/server/capacitorRedirect";
 import type { APIEvent } from "@solidjs/start/server";
 
@@ -78,38 +76,8 @@ export async function GET(event: APIEvent) {
       );
     }
 
-    // Trigger auto-fetch of all channels for this ownership
-    const ownershipId = result.ownership?.id || stateData.ownershipId;
-    const channelName = result.ownership?.channelName || "YouTube account";
-
-    // Fetch channels in the background
-    try {
-      const fetchResult = await executeNamedServerFunction(
-        {
-          functionName: "autoFetchOwnershipChannels",
-          contextData: { ownershipId },
-        },
-        {
-          request: event.request,
-          dbSession,
-        },
-      );
-
-      if (fetchResult.result?.success) {
-        console.log(
-          `Auto-fetched ${fetchResult.result.channelCount} channels for ${channelName}`,
-        );
-      } else {
-        console.error(
-          `Failed to auto-fetch channels for ${channelName}:`,
-          fetchResult.result?.error,
-        );
-      }
-    } catch (error) {
-      console.error(`Error during auto-fetch for ${channelName}:`, error);
-    }
-
     // Determine success message based on whether it's an update or new connection
+    const channelName = result.ownership?.channelName || "YouTube account";
     let successMessage: string;
     if (result.isUpdate && result.wasRevoked) {
       successMessage = `${channelName} reconnected successfully!`;

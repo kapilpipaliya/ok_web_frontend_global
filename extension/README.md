@@ -97,7 +97,7 @@ Extension Popup (iframe)
     ↓
  ysaar.com/home
     ↓
-Full YSaar Application with YTOLayout
+Full YSaar Application with Layout
     ↓
 Complete App Features Available
 ```
@@ -177,7 +177,7 @@ User opens extension popup
     ↓
 popup.html loads iframe from ysaar.com/home
     ↓
-Full YSaar application loads with YTOLayout
+Full YSaar application loads with Layout
     ↓
 User can navigate entire app in popup
     ↓
@@ -256,7 +256,7 @@ extension/
 
 **To modify the popup:**
 - The popup loads the full YSaar home page
-- Any changes to the home page or YTOLayout will reflect in the popup
+- Any changes to the home page or Layout will reflect in the popup
 - No separate extension-specific page needed
 
 **To modify quick-add form:**

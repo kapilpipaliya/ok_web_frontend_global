@@ -100,7 +100,7 @@ try {
   const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
   const playlist = args.convertNodeToJson(playlistNode);
 
-  const currentStatus = playlistSetting?.P?.status;
+  const currentStatus = playlist.P.queueStatus;
 
   // Prevent retry of playlists that are already queued or processing
   if (currentStatus === 'queued' || currentStatus === 'processing') {
@@ -127,25 +127,19 @@ try {
     ? channelResult.records[0].get('channelId')
     : null;
 
-  // Reset playlist status to queued
+  // Reset playlist queue status
   // This clears error state and resets progress counters
-  // NEW SCHEMA v4.0: Create setting if it doesn't exist
-  const playlistSettingKey = `playlist_setting_${playlistId}_${ownershipId}`;
-
+  // NEW ARCHITECTURE: Queue tracking on Playlist vertex directly
   await args.session.run(`
     MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
 
-    MERGE (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting {key: $playlistSettingKey})
-    ON CREATE SET ps.createdAt = datetime()
-    MERGE (o)-[:YouTubeOwnershipPlaylistSetting]->(ps)
-
-    SET ps.status = 'queued',
-        ps.progress = 0,
-        ps.processedVideos = 0,
-        ps.error = null,
-        ps.queuedAt = datetime(),
-        ps.updatedAt = datetime()
-  `, { ownershipId, playlistId, playlistSettingKey });
+    SET p.queueStatus = 'queued',
+        p.progress = 0,
+        p.processedVideos = 0,
+        p.error = null,
+        p.queuedAt = datetime(),
+        p.updatedAt = datetime()
+  `, { ownershipId, playlistId });
 
   // Re-add playlist to processing queue
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
@@ -153,7 +147,7 @@ try {
 
   try {
     // Get priority and convert to job priority number
-    const priority = playlistSetting.P.priority || 'normal';
+    const priority = playlist.P.priority || 'normal';
     const jobPriority = priority === 'high' ? 1 : priority === 'low' ? 3 : 2;
 
     // Generate unique job ID with ownership context
@@ -179,7 +173,6 @@ try {
       userId: user.id,
       userUuid: user.P.uuid,
       ownershipId,  // Required for multi-ownership support
-      customName: playlistSetting.P.customName || null,
       channelId: channelId,
       priority
     }, {
