@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getPlaylistsWithVideoCount",
-        description: "Helper function to fetch playlists with video counts for a user. Supports multi-ownership model with optional ownership filtering.",
-        body: '''
+        description: Helper function to fetch playlists with video counts for a user. Supports multi-ownership model with optional ownership filtering.
+        body:
+          '''
 /**
  * Get Playlists with Video Counts - Multi-Ownership Support
  *
@@ -169,8 +169,9 @@ try {
   };
 }
 '''
+        key: getPlaylistsWithVideoCount
       }
     }
-  ],
+  ]
   edges: []
 }

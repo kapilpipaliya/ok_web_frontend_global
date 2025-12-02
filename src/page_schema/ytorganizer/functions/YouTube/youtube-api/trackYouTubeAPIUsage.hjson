@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "track_youtube_api_usage",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "trackYouTubeAPIUsage",
-        description: "Increment the usage count for a YouTube API key",
-        body: '''
+        description: Increment the usage count for a YouTube API key
+        body:
+          '''
 try {
   const { keyId, cost = 1 } = args.contextData;
 
@@ -51,8 +51,9 @@ try {
   };
 }
 '''
+        key: trackYouTubeAPIUsage
       }
     }
-  ],
+  ]
   edges: []
 }

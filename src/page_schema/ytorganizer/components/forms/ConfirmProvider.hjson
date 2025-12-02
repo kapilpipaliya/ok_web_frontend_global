@@ -1,20 +1,26 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "ConfirmProvider"
+        key: ConfirmProvider
       }
-    },
+    }
     {
-      id: "provider_container",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "confirmContext",
-        fns: '''
+        contextName: confirmContext
+        css:
+          '''
+return `._id {
+  position: relative;
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 // Global confirmation dialog state
 const [isConfirmDialogOpen, setIsConfirmDialogOpen] = args.createSignal(false);
 const [confirmDialogConfig, setConfirmDialogConfig] = args.createStore({
@@ -165,8 +171,10 @@ return {
   setIsNavigating,
   navigateTo
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   data: {
@@ -176,30 +184,26 @@ return {
     rbConfirm: args.fns.rbConfirm
   }
 };
-''',
-        css: '''
-return `._id {
-  position: relative;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "children_slot",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot",
-        name: "confirmProvider"
+        name: confirmProvider
+        displayOrder: 1
+        componentName: Slot
       }
-    },
+    }
     {
-      id: "confirm_dialog",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "ConfirmDialog",
-        props: '''
+        displayOrder: 2
+        componentName: ConfirmDialog
+        props:
+          '''
 const isOpen = args.fns.isConfirmDialogOpen?.();
 const config = args.fns.confirmDialogConfig || {};
 
@@ -217,10 +221,25 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "provider_container" },
-    { id: "e2", T: "Attr", S: "provider_container", E: "children_slot" },
-    { id: "e3", T: "Attr", S: "provider_container", E: "confirm_dialog" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
   ]
 }

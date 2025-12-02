@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "background_retry_pending_quota_worker",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "backgroundRetryPendingQuota",
-        description: "Background worker that automatically retries pending_quota jobs at midnight Pacific Time every day",
-        body: '''
+        description: Background worker that automatically retries pending_quota jobs at midnight Pacific Time every day
+        body:
+          '''
 // This is a background worker function that runs on a schedule
 if (args.contextData.action === 'start') {
   // Helper function to log messages to database
@@ -196,8 +196,9 @@ if (args.contextData.action === 'start') {
   }
 }
 '''
+        key: backgroundRetryPendingQuota
       }
     }
-  ],
+  ]
   edges: []
 }

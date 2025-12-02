@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_user_count_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getUserCount",
-        description: "Gets the total count of users using YSaar",
-        body: '''
+        description: Gets the total count of users using YSaar
+        body:
+          '''
 try {
   // Query to count unique users who have YouTube ownerships (connected accounts)
   const query = `
@@ -45,8 +45,9 @@ try {
   };
 }
 '''
+        key: getUserCount
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "process_playlist_queue_worker",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "processPlaylistQueue",
-        description: "Background worker that processes playlists by fetching all videos",
-        body: '''
+        description: Background worker that processes playlists by fetching all videos
+        body:
+          '''
 // This is a background worker function that processes playlists
 if (args.contextData.action === 'start') {
   // Helper function to log messages to database
@@ -746,8 +746,9 @@ if (args.contextData.action === 'start') {
   }
 }
 '''
+        key: processPlaylistQueue
       }
     }
-  ],
+  ]
   edges: []
 }

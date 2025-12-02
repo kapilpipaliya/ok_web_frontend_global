@@ -1,21 +1,30 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "PublicLayout",
-        description: "Common layout for public YTO pages (landing, privacy, terms)"
+        description: Common layout for public YTO pages (landing, privacy, terms)
+        key: PublicLayout
       }
-    },
-    // Root container
+    }
     {
-      id: "layout_root",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 // Global state for cookie consent
 const [hasCookieConsent, setHasCookieConsent] = args.createSignal(false);
 
@@ -165,8 +174,10 @@ return {
   closeFeedbackModal,
   submitFeedback
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
     onMount: () => {
@@ -198,31 +209,15 @@ return {
       }
     }
 };
-''',
-        css: '''
-return `._id {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-}`;
 '''
       }
-    },
-    // Header Section
+    }
     {
-      id: "header",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "header"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_dark_100};
   border-bottom: 1px solid ${args.theme.var.color.border};
@@ -239,20 +234,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "header_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "header"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
@@ -261,21 +258,22 @@ return `._id {
   align-items: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "header_logo_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  onClick: () => args.navigate('/')
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -283,22 +281,23 @@ return `._id {
   cursor: pointer;
 }`;
 '''
-      }
-    },
-    {
-      id: "header_logo",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "img",
-  src: "/api/file/downloadCompanyRectangularLogo",
-  alt: "Ysaar Logo"
+  as: "div",
+  onClick: () => args.navigate('/')
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   height: 60px;
   object-fit: contain;
@@ -310,15 +309,39 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanyRectangularLogo",
+  alt: "Ysaar Logo"
+};
+'''
       }
-    },
+    }
     {
-      id: "header_nav",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    gap: 1rem;
+  }
+}`;
+'''
+        displayOrder: 2
+        fns:
+          '''
 // Define navigation links data
 const navLinks = [
   {
@@ -372,64 +395,45 @@ const navLinks = [
 return {
   navLinks
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "nav"
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    gap: 1rem;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "nav_links_loop",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "navLink",
-        loop: true,
-        props: '''
-return {
-  as: "div",
-  data: args.fns.navLinks
-};
-''',
-        css: '''
+        contextName: navLink
+        css:
+          '''
 return `._id {
   display: contents;
 }`;
 '''
-      }
-    },
-    {
-      id: "nav_link_item",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const link = args.contextData.navLink;
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "a",
-  text: link.text,
-  href: link.href,
-  onClick: link.onClick
+  as: "div",
+  data: args.fns.navLinks
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   text-decoration: none;
@@ -448,22 +452,26 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "nav_get_started_button",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const link = args.contextData.navLink;
 return {
-  as: "button",
-  text: "Get Started",
-  onClick: () => args.navigate('/auth/signup')
+  as: "a",
+  text: link.text,
+  href: link.href,
+  onClick: link.onClick
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -493,53 +501,58 @@ return `._id {
 }
 `;
 '''
-      }
-    },
-    // Main content slot
-    {
-      id: "main_content",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "main"
+  as: "button",
+  text: "Get Started",
+  onClick: () => args.navigate('/auth/signup')
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
       }
-    },
+    }
     {
-      id: "content_slot",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot",
-        props: '''
+        displayOrder: 1
+        componentName: Slot
+        props:
+          '''
 return {
   name: "children"
 };
 '''
       }
-    },
-    // Footer Section
+    }
     {
-      id: "footer_section",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "footer"
-};
-''',
-        css: '''
+        css:
+          '''
 const hasCookieConsent = args.fns.hasCookieConsent?.();
 
 return `._id {
@@ -557,20 +570,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "footer_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "footer"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
@@ -587,82 +602,90 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "footer_logo_section",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "footer_logo",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "img",
-  src: "/api/file/downloadCompanySquareLogo",
-  alt: "Ysaar Logo"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 32px;
   height: 32px;
   object-fit: contain;
 }`;
 '''
-      }
-    },
-    {
-      id: "footer_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "© 2025 Ysaar. All rights reserved."
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Ysaar Logo"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    {
-      id: "footer_links",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "nav"
+  as: "p",
+  text: "© 2025 Ysaar. All rights reserved."
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 2rem;
@@ -675,15 +698,37 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "nav"
+};
+'''
       }
-    },
+    }
     {
-      id: "footer_privacy_link",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "a",
   text: "Privacy Policy",
@@ -692,8 +737,15 @@ return {
     args.navigate('/privacy');
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   text-decoration: none;
@@ -705,15 +757,10 @@ return `._id {
   color: ${args.theme.var.color.primary};
 }`;
 '''
-      }
-    },
-    {
-      id: "footer_terms_link",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "a",
   text: "Terms of Service",
@@ -722,8 +769,15 @@ return {
     args.navigate('/terms');
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   text-decoration: none;
@@ -735,15 +789,10 @@ return `._id {
   color: ${args.theme.var.color.primary};
 }`;
 '''
-      }
-    },
-    {
-      id: "footer_contact_link",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "a",
   text: "Contact",
@@ -752,37 +801,15 @@ return {
     args.navigate('/contact');
   }
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  text-decoration: none;
-  transition: color 0.2s ease;
-  cursor: pointer;
-}
-
-._id:hover {
-  color: ${args.theme.var.color.primary};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "footer_feedback_link",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  text: "Send Feedback",
-  onClick: () => {
-    args.fns.openFeedbackModal();
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   background: transparent;
@@ -799,39 +826,52 @@ return `._id {
   color: ${args.theme.var.color.primary};
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Send Feedback",
+  onClick: () => {
+    args.fns.openFeedbackModal();
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "footer_youtube_attribution",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "YouTubeAttribution",
-        props: '''
+        displayOrder: 3
+        componentName: YouTubeAttribution
+        props:
+          '''
 return {};
 '''
       }
-    },
-    // Cookie Consent Banner
+    }
     {
-      id: "cookie_banner",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "CookieBanner",
-        props: '''
+        displayOrder: 4
+        componentName: CookieBanner
+        props:
+          '''
 return {};
 '''
       }
-    },
-    // Video Player
+    }
     {
-      id: "video_player",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "VideoPlayer",
-        props: '''
+        displayOrder: 5
+        componentName: VideoPlayer
+        props:
+          '''
 return {
   playerState: args.fns.playerState,
   currentVideo: args.fns.currentVideo,
@@ -847,15 +887,15 @@ return {
 };
 '''
       }
-    },
-    // Feedback Modal
+    }
     {
-      id: "feedback_modal",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 6,
-        componentName: "FeedbackModal",
-        props: '''
+        displayOrder: 6
+        componentName: FeedbackModal
+        props:
+          '''
 return {
   isOpen: args.fns.isFeedbackModalOpen,
   onClose: args.fns.closeFeedbackModal,
@@ -865,45 +905,157 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    // Component to root
-    { id: "e1", T: "Attr", S: "component_root", E: "layout_root" },
-
-    // Root to header
-    { id: "e2", T: "Attr", S: "layout_root", E: "header" },
-    { id: "e3", T: "Attr", S: "header", E: "header_content" },
-    { id: "e4", T: "Attr", S: "header_content", E: "header_logo_wrapper" },
-    { id: "e5", T: "Attr", S: "header_logo_wrapper", E: "header_logo" },
-    { id: "e7", T: "Attr", S: "header_content", E: "header_nav" },
-    { id: "e8", T: "Attr", S: "header_nav", E: "nav_links_loop" },
-    { id: "e8a", T: "Attr", S: "nav_links_loop", E: "nav_link_item" },
-    { id: "e10", T: "Attr", S: "header_nav", E: "nav_get_started_button" },
-
-    // Root to main content
-    { id: "e11", T: "Attr", S: "layout_root", E: "main_content" },
-    { id: "e12", T: "Attr", S: "main_content", E: "content_slot" },
-
-    // Root to footer
-    { id: "e13", T: "Attr", S: "layout_root", E: "footer_section" },
-    { id: "e14", T: "Attr", S: "footer_section", E: "footer_container" },
-    { id: "e15", T: "Attr", S: "footer_container", E: "footer_logo_section" },
-    { id: "e16", T: "Attr", S: "footer_logo_section", E: "footer_logo" },
-    { id: "e17", T: "Attr", S: "footer_logo_section", E: "footer_text" },
-    { id: "e18", T: "Attr", S: "footer_container", E: "footer_links" },
-    { id: "e19", T: "Attr", S: "footer_links", E: "footer_privacy_link" },
-    { id: "e20", T: "Attr", S: "footer_links", E: "footer_terms_link" },
-    { id: "e21", T: "Attr", S: "footer_links", E: "footer_contact_link" },
-    { id: "e21a", T: "Attr", S: "footer_links", E: "footer_feedback_link" },
-    { id: "e22", T: "Attr", S: "footer_container", E: "footer_youtube_attribution" },
-
-    // Root to cookie banner
-    { id: "e23", T: "Attr", S: "layout_root", E: "cookie_banner" },
-
-    // Root to video player
-    { id: "e24", T: "Attr", S: "layout_root", E: "video_player" },
-
-    // Root to feedback modal
-    { id: "e25", T: "Attr", S: "layout_root", E: "feedback_modal" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "24"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "26"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "25"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "14"
+      E: "23"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "14"
+      E: "18"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "18"
+      E: "21"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "18"
+      E: "22"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "8"
+      E: "9"
+    }
   ]
 }

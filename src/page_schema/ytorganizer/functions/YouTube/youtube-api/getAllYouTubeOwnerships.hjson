@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root"
-      L: "Function"
+      id: "1"
+      L: Function
       P: {
-        key: "getAllYouTubeOwnerships"
-        description: "Get all YouTube ownerships for a user (including disconnected/revoked)"
-        body: '''
+        description: Get all YouTube ownerships for a user (including disconnected/revoked)
+        body:
+          '''
 // Get current authenticated user from session
 const actualUser = await args.getUserFromSession(args.request);
 if (!actualUser) {
@@ -53,6 +53,7 @@ return {
   data: ownerships
 };
 '''
+        key: getAllYouTubeOwnerships
       }
     }
   ]

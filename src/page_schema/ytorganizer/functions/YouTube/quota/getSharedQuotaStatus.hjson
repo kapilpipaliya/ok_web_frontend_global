@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_shared_quota_status_function"
-      L: "Function"
+      id: "1"
+      L: Function
       P: {
-        key: "getSharedQuotaStatus"
-        description: "Get current shared YouTube API quota status for all ownerships (10k units/day shared across entire Google Cloud Project)"
-        body: '''
+        description: Get current shared YouTube API quota status for all ownerships (10k units/day shared across entire Google Cloud Project)
+        body:
+          '''
 try {
   // Get overall shared quota status
   const usage = await args.getTodaySharedAPIUsage(args.session);
@@ -108,6 +108,7 @@ try {
   };
 }
 '''
+        key: getSharedQuotaStatus
       }
     }
   ]

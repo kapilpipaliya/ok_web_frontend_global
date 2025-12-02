@@ -1,19 +1,42 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "NoteModal"
+        key: NoteModal
       }
-    },
+    }
     {
-      id: "modal_overlay",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 const [note, setNote] = args.createSignal("");
 const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 
@@ -56,8 +79,10 @@ return {
   initializeNote,
   handleSave
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 const isOpen = args.contextData.props?.isOpen;
 const getIsOpen = isOpen?.() || false;
 const onClose = args.contextData.props?.onClose;
@@ -74,44 +99,15 @@ return {
     args.fns.initializeNote();
   }
 };
-''',
-        css: '''
-return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "modal_container",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  onClick: (e) => e.stopPropagation()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
@@ -134,20 +130,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "modal_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  onClick: (e) => e.stopPropagation()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -156,15 +155,34 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "modal_title",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  text-transform: capitalize;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const existingNote = args.contextData.props?.existingNote || "";
 const hasNote = existingNote.length > 0;
@@ -186,34 +204,15 @@ return {
   as: "h2",
   text: title
 };
-''',
-        css: '''
-return `._id {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0;
-  text-transform: capitalize;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "close_button",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const onClose = args.contextData.props?.onClose;
-
-return {
-  as: "button",
-  onClick: onClose,
-  "aria-label": "Close modal"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -232,15 +231,28 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "button",
+  onClick: onClose,
+  "aria-label": "Close modal"
+};
+'''
       }
-    },
+    }
     {
-      id: "close_icon",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:close",
@@ -249,33 +261,44 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "modal_body",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem;
   flex: 1;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "form_element",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "form",
   onSubmit: (e) => {
@@ -283,75 +306,60 @@ return {
     args.fns.handleSave();
   }
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "note_field",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "note_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "label",
-  text: "Note"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   font-weight: 500;
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "note_textarea",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "textarea",
-  value: args.fns.note(),
-  onInput: (e) => args.fns.setNote(e.target.value),
-  placeholder: "Add your note here (max 500 characters)...",
-  rows: 5,
-  maxlength: 500,
-  disabled: args.fns.isSubmitting()
+  as: "label",
+  text: "Note"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: 0.75rem;
@@ -376,15 +384,38 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "textarea",
+  value: args.fns.note(),
+  onInput: (e) => args.fns.setNote(e.target.value),
+  placeholder: "Add your note here (max 500 characters)...",
+  rows: 5,
+  maxlength: 500,
+  disabled: args.fns.isSubmitting()
+};
+'''
       }
-    },
+    }
     {
-      id: "char_count",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  text-align: right;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const charCount = args.fns.note().length;
 const maxChars = 500;
 
@@ -392,28 +423,15 @@ return {
   as: "div",
   text: `${charCount}/${maxChars} characters`
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
-  text-align: right;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "modal_footer",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem;
   border-top: 1px solid ${args.theme.var.color.border};
@@ -422,15 +440,24 @@ return `._id {
   justify-content: flex-end;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "cancel_button",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const onClose = args.contextData.props?.onClose;
 
 return {
@@ -441,14 +468,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "save_button",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const isSubmitting = args.fns.isSubmitting();
 
 return {
@@ -460,22 +488,97 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "modal_overlay" },
-    { id: "e2", T: "Attr", S: "modal_overlay", E: "modal_container" },
-    { id: "e3", T: "Attr", S: "modal_container", E: "modal_header" },
-    { id: "e4", T: "Attr", S: "modal_header", E: "modal_title" },
-    { id: "e5", T: "Attr", S: "modal_header", E: "close_button" },
-    { id: "e6", T: "Attr", S: "close_button", E: "close_icon" },
-    { id: "e7", T: "Attr", S: "modal_container", E: "modal_body" },
-    { id: "e8", T: "Attr", S: "modal_body", E: "form_element" },
-    { id: "e9", T: "Attr", S: "form_element", E: "note_field" },
-    { id: "e10", T: "Attr", S: "note_field", E: "note_label" },
-    { id: "e11", T: "Attr", S: "note_field", E: "note_textarea" },
-    { id: "e12", T: "Attr", S: "note_field", E: "char_count" },
-    { id: "e13", T: "Attr", S: "modal_container", E: "modal_footer" },
-    { id: "e14", T: "Attr", S: "modal_footer", E: "cancel_button" },
-    { id: "e15", T: "Attr", S: "modal_footer", E: "save_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "14"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "13"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "10"
+      E: "11"
+    }
   ]
 }

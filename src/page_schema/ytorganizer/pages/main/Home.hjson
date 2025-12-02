@@ -1,47 +1,48 @@
 {
   vertexes: [
     {
-      id: "page_root",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "Home",
-        url: "/home",
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        key: Home
+        url: /home
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout",
+        css:
+          '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
+}`;
+'''
         displayOrder: 1
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "data_context",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        fns:
+          '''
 const [isDashboardLoading, setIsDashboardLoading] = args.createSignal(true);
 const [dashboardError, setDashboardError] = args.createSignal(null);
 const [channelsCount, setChannelsCount] = args.createSignal(0);
@@ -143,60 +144,43 @@ return {
   fetchDashboardData,
   onMount
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   onMount: args.fns.onMount
 };
-''',
-        css: '''
-return `._id {
-  padding: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 1rem;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "page_content",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   min-height: 200px;
 }`;
 '''
-      }
-    },
-    {
-      id: "loading_state",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: () => !args.fns.isDashboardLoading?.()
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -206,15 +190,25 @@ return `._id {
   text-align: center;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.isDashboardLoading?.()
+};
+'''
       }
-    },
+    }
     {
-      id: "loading_spinner",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "LoadingSpinner",
-        props: '''
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
 return {
   size: "medium",
   color: "primary",
@@ -222,20 +216,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "error_state",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: () => !args.fns.dashboardError?.()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -249,43 +236,47 @@ return `._id {
   margin: 1.5rem 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.dashboardError?.()
+};
+'''
       }
-    },
+    }
     {
-      id: "error_icon",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.error_light_100_text};
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:warning",
   width: 48,
   height: 48
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.error_light_100_text};
-  margin-bottom: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "error_title",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h3",
-  text: "Unable to Load Dashboard"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.error_light_100_text};
   font-size: 1.25rem;
@@ -293,38 +284,50 @@ return `._id {
   margin: 0 0 0.5rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "error_message",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const dashboardError = args.fns.dashboardError?.();
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: dashboardError || "An unexpected error occurred"
+  as: "h3",
+  text: "Unable to Load Dashboard"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.error_light_100_text};
   margin: 0 0 1.5rem 0;
   max-width: 400px;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const dashboardError = args.fns.dashboardError?.();
+
+return {
+  as: "p",
+  text: dashboardError || "An unexpected error occurred"
+};
+'''
       }
-    },
+    }
     {
-      id: "error_retry_button",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Button",
-        props: '''
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''
 return {
   text: "Try Again",
   variant: "danger",
@@ -332,60 +335,65 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "no_accounts_message",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "NoAccountsMessage",
-        props: '''
+        displayOrder: 3
+        componentName: NoAccountsMessage
+        props:
+          '''
 return {
   hide: () => !args.fns.hasNoAccounts?.()
 };
 '''
       }
-    },
+    }
     {
-      id: "main_content",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   hide: () => args.fns.isDashboardLoading?.() || args.fns.dashboardError?.() || args.fns.hasNoAccounts?.()
 };
 '''
       }
-    },
+    }
     {
-      id: "page_header",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   text-align: center;
   margin-bottom: 2rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "page_title",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "PageTitle",
-        props: '''
+        displayOrder: 1
+        componentName: PageTitle
+        props:
+          '''
 const currentTime = new Date();
 const hour = currentTime.getHours();
 let greeting = "Good Evening";
@@ -397,40 +405,36 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "page_subtitle",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Manage your YouTube channels and playlists"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   color: ${args.theme.var.color.muted};
   margin: 0.5rem 0 0 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "section"
+  as: "p",
+  text: "Manage your YouTube channels and playlists"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -438,17 +442,32 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section"
+};
+'''
       }
-    },
+    }
     {
-      id: "stats_loop",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "stat",
-        loop: true,
-        props: '''
+        contextName: stat
+        css:
+          '''
+return `._id {
+  display: contents;
+}`;
+'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const channelsCount = args.fns.channelsCount?.() || 0;
 const playlistsCount = args.fns.playlistsCount?.() || 0;
 const videosCount = args.fns.videosCount?.() || 0;
@@ -481,34 +500,15 @@ return {
     }
   ]
 };
-''',
-        css: '''
-return `._id {
-  display: contents;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "stat_card",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const stat = args.contextData.stat;
-const hasLink = !!stat.href;
-
-return {
-  as: hasLink ? "a" : "div",
-  href: hasLink ? stat.href : undefined,
-  onClick: hasLink ? (e) => {
-    e.preventDefault();
-    args.navigate(stat.href);
-  } : undefined
-};
-''',
-        css: '''
+        css:
+          '''
 const stat = args.contextData.stat;
 const hasLink = !!stat.href;
 
@@ -533,20 +533,30 @@ return `._id {
   ` : ''}
 }`;
 '''
-      }
-    },
-    {
-      id: "stat_card_icon_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const stat = args.contextData.stat;
+const hasLink = !!stat.href;
+
 return {
-  as: "div"
+  as: hasLink ? "a" : "div",
+  href: hasLink ? stat.href : undefined,
+  onClick: hasLink ? (e) => {
+    e.preventDefault();
+    args.navigate(stat.href);
+  } : undefined
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 48px;
   height: 48px;
@@ -559,15 +569,24 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "stat_card_icon",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const stat = args.contextData.stat;
 
 return {
@@ -578,40 +597,33 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "stat_card_content",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
 }`;
 '''
-      }
-    },
-    {
-      id: "stat_card_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const stat = args.contextData.stat;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: stat.label
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
@@ -620,15 +632,35 @@ return `._id {
   letter-spacing: 0.5px;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const stat = args.contextData.stat;
+
+return {
+  as: "div",
+  text: stat.label
+};
+'''
       }
-    },
+    }
     {
-      id: "stat_card_value",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const stat = args.contextData.stat;
 const displayText = stat.countText || stat.count.toLocaleString();
 
@@ -636,41 +668,170 @@ return {
   as: "div",
   text: displayText
 };
-''',
-        css: '''
-return `._id {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-}`;
 '''
       }
     }
-  ],
+    {
+      id: "24"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+    {
+      id: "25"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
-    { id: "e1a", T: "PageLayout", S: "page_root", E: "page_layout_content" },
-    { id: "e2", T: "Attr", S: "page_root", E: "data_context" },
-    { id: "e3", T: "Attr", S: "data_context", E: "page_content" },
-    { id: "e4", T: "Attr", S: "page_content", E: "loading_state" },
-    { id: "e5", T: "Attr", S: "loading_state", E: "loading_spinner" },
-    { id: "e6", T: "Attr", S: "page_content", E: "error_state" },
-    { id: "e7", T: "Attr", S: "error_state", E: "error_icon" },
-    { id: "e8", T: "Attr", S: "error_state", E: "error_title" },
-    { id: "e9", T: "Attr", S: "error_state", E: "error_message" },
-    { id: "e10", T: "Attr", S: "error_state", E: "error_retry_button" },
-    { id: "e10a", T: "Attr", S: "page_content", E: "no_accounts_message" },
-    { id: "e11", T: "Attr", S: "page_content", E: "main_content" },
-    { id: "e12", T: "Attr", S: "main_content", E: "page_header" },
-    { id: "e13", T: "Attr", S: "page_header", E: "page_title" },
-    { id: "e14", T: "Attr", S: "page_header", E: "page_subtitle" },
-    { id: "e15", T: "Attr", S: "main_content", E: "stats_grid" },
-    { id: "e16", T: "Attr", S: "stats_grid", E: "stats_loop" },
-    { id: "e17", T: "Attr", S: "stats_loop", E: "stat_card" },
-    { id: "e18", T: "Attr", S: "stat_card", E: "stat_card_icon_wrapper" },
-    { id: "e19", T: "Attr", S: "stat_card_icon_wrapper", E: "stat_card_icon" },
-    { id: "e20", T: "Attr", S: "stat_card", E: "stat_card_content" },
-    { id: "e21", T: "Attr", S: "stat_card_content", E: "stat_card_label" },
-    { id: "e22", T: "Attr", S: "stat_card_content", E: "stat_card_value" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "12"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "11"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "18"
+      E: "21"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "21"
+      E: "23"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e23
+      T: PageLayout
+      S: "1"
+      E: "24"
+    }
+    {
+      id: e24
+      T: PageLayout
+      S: "1"
+      E: "25"
+    }
   ]
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getChannelsWithVideoCount",
-        description: "Helper function to fetch channels with video counts for a user. Supports multi-ownership model with optional ownership filtering.",
-        body: '''
+        description: Helper function to fetch channels with video counts for a user. Supports multi-ownership model with optional ownership filtering.
+        body:
+          '''
 /**
  * Get Channels with Video Counts - Multi-Ownership Support
  *
@@ -167,8 +167,9 @@ try {
   };
 }
 '''
+        key: getChannelsWithVideoCount
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "save_playlist_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "savePlaylist",
-        description: "Fetches basic playlist metadata using per-ownership OAuth and queues background processing for videos. Supports multi-ownership model where each YouTube account has separate quota.",
-        body: '''
+        description: Fetches basic playlist metadata using per-ownership OAuth and queues background processing for videos. Supports multi-ownership model where each YouTube account has separate quota.
+        body:
+          '''
 /**
  * Extract playlist ID from various YouTube URL formats
  * Playlist ID is always in the 'list' query parameter
@@ -377,8 +377,9 @@ try {
   };
 }
 '''
+        key: savePlaylist
       }
     }
-  ],
+  ]
   edges: []
 }

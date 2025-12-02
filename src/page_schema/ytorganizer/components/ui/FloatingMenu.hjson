@@ -1,73 +1,26 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "FloatingMenu"
+        key: FloatingMenu
       }
-    },
+    }
     {
-      id: "variant_placement",
-      L: "ComponentVariant",
+      id: "2"
+      L: Attr
       P: {
-        key: "placement",
-        type: "string",
-        defValue: "bottom-end"
-      }
-    },
-    {
-      id: "placement_option_bottom_end",
-      L: "ComponentVariantOption",
-      P: {
-        key: "bottom-end",
-        value: "bottom-end",
-        description: "Bottom end placement"
-      }
-    },
-    {
-      id: "placement_option_bottom_start",
-      L: "ComponentVariantOption",
-      P: {
-        key: "bottom-start",
-        value: "bottom-start",
-        description: "Bottom start placement"
-      }
-    },
-    {
-      id: "placement_option_top_end",
-      L: "ComponentVariantOption",
-      P: {
-        key: "top-end",
-        value: "top-end",
-        description: "Top end placement"
-      }
-    },
-    {
-      id: "placement_option_top_start",
-      L: "ComponentVariantOption",
-      P: {
-        key: "top-start",
-        value: "top-start",
-        description: "Top start placement"
-      }
-    },
-    {
-      id: "variant_triggerIcon",
-      L: "ComponentVariant",
-      P: {
-        key: "triggerIcon",
-        type: "string",
-        defValue: "carbon:overflow-menu-vertical"
-      }
-    },
-    {
-      id: "menu_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  position: relative;
+  display: inline-block;
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 // Menu state management
 const [isMenuOpen, setIsMenuOpen] = args.createSignal(false);
 const [triggerRef, setTriggerRef] = args.createSignal(null);
@@ -177,39 +130,23 @@ return {
   setupFloatingUI,
   onMount
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   onMount: args.fns.onMount
 };
-''',
-        css: '''
-return `._id {
-  position: relative;
-  display: inline-block;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "menu_trigger",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
-
-return {
-  as: "button",
-  "aria-label": "Open menu",
-  "aria-expanded": args.fns.isMenuOpen?.() || false,
-  onClick: args.fns.toggleMenu,
-  ref: args.fns.setTriggerRef
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -235,15 +172,30 @@ return `._id {
   outline-offset: 2px;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
+
+return {
+  as: "button",
+  "aria-label": "Open menu",
+  "aria-expanded": args.fns.isMenuOpen?.() || false,
+  onClick: args.fns.toggleMenu,
+  ref: args.fns.setTriggerRef
+};
+'''
       }
-    },
+    }
     {
-      id: "trigger_icon",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu-vertical";
 
 return {
@@ -254,34 +206,27 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_portal",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "portal"
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_container",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: !args.fns.isMenuOpen?.(),
-  ref: args.fns.setMenuRef
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: fixed;
   z-index: 1000;
@@ -305,16 +250,27 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.isMenuOpen?.(),
+  ref: args.fns.setMenuRef
+};
+'''
       }
-    },
+    }
     {
-      id: "menu_content",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot",
-        slot: "menu-items",
-        props: '''
+        displayOrder: 1
+        slot: menu-items
+        componentName: Slot
+        props:
+          '''
 // Provide closeMenu function to menu items
 return {
   contextName: "floatingMenuContext",
@@ -325,19 +281,133 @@ return {
 '''
       }
     }
-  ],
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: triggerIcon
+        defValue: carbon:overflow-menu-vertical
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: bottom-end
+        key: placement
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Bottom end placement
+        value: bottom-end
+        key: bottom-end
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Top start placement
+        value: top-start
+        key: top-start
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Top end placement
+        value: top-end
+        key: top-end
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Bottom start placement
+        value: bottom-start
+        key: bottom-start
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_placement" },
-    { id: "e2", T: "ComponentVariantOption", S: "variant_placement", E: "placement_option_bottom_end" },
-    { id: "e3", T: "ComponentVariantOption", S: "variant_placement", E: "placement_option_bottom_start" },
-    { id: "e4", T: "ComponentVariantOption", S: "variant_placement", E: "placement_option_top_end" },
-    { id: "e5", T: "ComponentVariantOption", S: "variant_placement", E: "placement_option_top_start" },
-    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_triggerIcon" },
-    { id: "e7", T: "Attr", S: "component_root", E: "menu_wrapper" },
-    { id: "e8", T: "Attr", S: "menu_wrapper", E: "menu_trigger" },
-    { id: "e9", T: "Attr", S: "menu_trigger", E: "trigger_icon" },
-    { id: "e10", T: "Attr", S: "menu_wrapper", E: "menu_portal" },
-    { id: "e11", T: "Attr", S: "menu_portal", E: "menu_container" },
-    { id: "e12", T: "Attr", S: "menu_container", E: "menu_content" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e9
+      T: ComponentVariantOption
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "9"
+      E: "13"
+    }
   ]
 }

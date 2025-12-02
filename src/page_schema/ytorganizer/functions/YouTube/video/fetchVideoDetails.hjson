@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "fetch_video_details_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "fetchVideoDetails",
-        description: "Fetches video details from YouTube API and saves to database if it doesn't exist",
-        body: '''
+        description: Fetches video details from YouTube API and saves to database if it doesn't exist
+        body:
+          '''
 /**
  * Extract video ID from various YouTube URL formats
  */
@@ -230,8 +230,9 @@ try {
   };
 }
 '''
+        key: fetchVideoDetails
       }
     }
-  ],
+  ]
   edges: []
 }

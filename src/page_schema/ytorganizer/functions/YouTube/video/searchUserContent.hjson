@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "search_user_content_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "searchUserContent",
-        description: "Search across user's channels, playlists, and videos with optional filters",
-        body: '''
+        description: Search across user's channels, playlists, and videos with optional filters
+        body:
+          '''
 try {
   // Extract search parameters from request
   const { query, type, isRegex = false, ownershipId, sortBy = "relevance" } = args.contextData;
@@ -202,8 +202,9 @@ try {
   };
 }
 '''
+        key: searchUserContent
       }
     }
-  ],
+  ]
   edges: []
 }

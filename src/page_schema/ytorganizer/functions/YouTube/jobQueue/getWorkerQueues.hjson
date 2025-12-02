@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_worker_queues_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getWorkerQueues",
-        description: "Fetches list of unique worker queue names from logs",
-        body: '''
+        description: Fetches list of unique worker queue names from logs
+        body:
+          '''
 // Fetch unique worker queue names from WorkerLog nodes
 
 try {
@@ -51,8 +51,9 @@ try {
   ];
 }
 '''
+        key: getWorkerQueues
       }
     }
-  ],
+  ]
   edges: []
 }

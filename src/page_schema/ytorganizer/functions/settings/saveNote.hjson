@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "save_note_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "saveNote",
-        description: "Saves or updates a note for a video, channel, or playlist",
-        body: '''
+        description: Saves or updates a note for a video, channel, or playlist
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -185,8 +185,9 @@ try {
   };
 }
 '''
+        key: saveNote
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_user_playlists_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getUserPlaylists",
-        description: "Fetches all playlists saved by the current user with their custom setting. Supports multi-ownership model with optional ownership filtering.",
-        body: '''
+        description: Fetches all playlists saved by the current user with their custom setting. Supports multi-ownership model with optional ownership filtering.
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -87,8 +87,9 @@ try {
   };
 }
 '''
+        key: getUserPlaylists
       }
     }
-  ],
+  ]
   edges: []
 }

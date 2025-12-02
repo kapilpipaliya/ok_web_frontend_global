@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getCustomPlaylists",
-        description: "Get all custom playlists for a YouTube ownership",
-        body: '''
+        description: Get all custom playlists for a YouTube ownership
+        body:
+          '''
 try {
   // Extract input parameters
   const { ownershipId } = args.contextData;
@@ -74,8 +74,9 @@ try {
   };
 }
 '''
+        key: getCustomPlaylists
       }
     }
-  ],
+  ]
   edges: []
 }

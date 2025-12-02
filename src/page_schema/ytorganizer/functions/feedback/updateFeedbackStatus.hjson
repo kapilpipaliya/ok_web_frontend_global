@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "updateFeedbackStatus",
-        description: "Updates the status of a feedback submission",
-        body: '''
+        description: Updates the status of a feedback submission
+        body:
+          '''
 const { feedbackId, status } = args.contextData;
 
 // Validate inputs
@@ -50,8 +50,9 @@ return {
   data: args.convertNodeToJson(feedbackNode)
 };
 '''
+        key: updateFeedbackStatus
       }
     }
-  ],
+  ]
   edges: []
 }

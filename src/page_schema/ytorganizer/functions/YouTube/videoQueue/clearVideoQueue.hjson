@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "clearVideoQueue",
-        description: "Clear the entire video queue for the current ownership",
-        body: '''
+        description: Clear the entire video queue for the current ownership
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession(args.request);
@@ -68,8 +68,9 @@ try {
   };
 }
 '''
+        key: clearVideoQueue
       }
     }
-  ],
+  ]
   edges: []
 }

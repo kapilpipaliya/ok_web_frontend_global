@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "manual_retry_pending_quota_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "manualRetryPendingQuota",
-        description: "Manually trigger retry of all pending_quota jobs (for testing/immediate use)",
-        body: '''
+        description: Manually trigger retry of all pending_quota jobs (for testing/immediate use)
+        body:
+          '''
 /**
  * Manual Trigger for Pending Quota Retry
  *
@@ -63,8 +63,9 @@ try {
   };
 }
 '''
+        key: manualRetryPendingQuota
       }
     }
-  ],
+  ]
   edges: []
 }

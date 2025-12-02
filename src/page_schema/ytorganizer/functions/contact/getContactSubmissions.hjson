@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_contact_submissions_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getContactSubmissions",
-        description: "Retrieves all contact form submissions from database",
-        body: '''
+        description: Retrieves all contact form submissions from database
+        body:
+          '''
 // This function runs on the server
 // It has access to args object with:
 // - args.contextData: Request parameters
@@ -66,8 +66,9 @@ try {
   };
 }
 '''
+        key: getContactSubmissions
       }
     }
-  ],
+  ]
   edges: []
 }

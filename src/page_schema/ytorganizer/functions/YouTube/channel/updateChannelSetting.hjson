@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "update_channel_setting_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "updateChannelSetting",
-        description: "Updates channel setting like custom name. Supports multi-ownership model - requires ownershipId.",
-        body: '''
+        description: Updates channel setting like custom name. Supports multi-ownership model - requires ownershipId.
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -123,8 +123,9 @@ try {
   };
 }
 '''
+        key: updateChannelSetting
       }
     }
-  ],
+  ]
   edges: []
 }

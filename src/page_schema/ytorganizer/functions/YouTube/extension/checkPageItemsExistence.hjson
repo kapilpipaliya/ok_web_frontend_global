@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "checkPageItemsExistence",
-        description: "Checks if channels, playlists, and videos from extension page exist in user's collection",
-        body: '''
+        description: Checks if channels, playlists, and videos from extension page exist in user's collection
+        body:
+          '''
 const { channels = [], playlists = [], videos = [] } = args.contextData;
 
 // Get current authenticated user from session
@@ -222,8 +222,9 @@ return {
   }
 };
 '''
+        key: checkPageItemsExistence
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "assetlinks_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "assetlinks",
-        description: "Returns Android App Links Digital Asset Links JSON for app deep linking verification",
-        body: '''
+        description: Returns Android App Links Digital Asset Links JSON for app deep linking verification
+        body:
+          '''
 // Return the Digital Asset Links JSON for Android App Links
 // This allows the Android app to handle URLs from the website domain
 return [
@@ -22,8 +22,9 @@ return [
   }
 ];
 '''
+        key: assetlinks
       }
     }
-  ],
+  ]
   edges: []
 }

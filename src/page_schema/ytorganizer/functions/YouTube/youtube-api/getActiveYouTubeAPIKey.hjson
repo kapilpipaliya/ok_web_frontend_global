@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_active_youtube_api_key",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getActiveYouTubeAPIKey",
-        description: "Get the currently active YouTube API key based on usage limits and rotation",
-        body: '''
+        description: Get the currently active YouTube API key based on usage limits and rotation
+        body:
+          '''
 try {
   // Get current date for daily reset
   const today = new Date().toISOString().split('T')[0];
@@ -91,8 +91,9 @@ try {
   };
 }
 '''
+        key: getActiveYouTubeAPIKey
       }
     }
-  ],
+  ]
   edges: []
 }

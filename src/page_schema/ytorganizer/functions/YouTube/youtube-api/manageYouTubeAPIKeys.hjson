@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "manage_youtube_api_keys",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "manageYouTubeAPIKeys",
-        description: "Add, remove, update, or list YouTube API keys",
-        body: '''
+        description: Add, remove, update, or list YouTube API keys
+        body:
+          '''
 try {
   const { action, apiKey, keyId, name, dailyLimit, priority, isActive } = args.contextData;
 
@@ -177,8 +177,9 @@ try {
   };
 }
 '''
+        key: manageYouTubeAPIKeys
       }
     }
-  ],
+  ]
   edges: []
 }

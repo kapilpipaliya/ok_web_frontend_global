@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "clearImpersonation",
-        description: "Stop impersonating a user (admin only)",
-        body: '''
+        description: Stop impersonating a user (admin only)
+        body:
+          '''
 const actualUser = await args.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found");
@@ -31,8 +31,9 @@ return {
   message: "Stopped viewing as user"
 };
 '''
+        key: clearImpersonation
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,13 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_all_processing_status_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        // Note: This function is not used anymore now
-        key: "getAllProcessingStatus",
-        description: "Get processing status for all channels and playlists for current user",
-        body: '''
+        description: Get processing status for all channels and playlists for current user
+        body:
+          '''
 try {
   // Get current authenticated user
   const user = await args.getUserFromSession();
@@ -58,8 +57,9 @@ try {
   };
 }
 '''
+        key: getAllProcessingStatus
       }
     }
-  ],
+  ]
   edges: []
 }

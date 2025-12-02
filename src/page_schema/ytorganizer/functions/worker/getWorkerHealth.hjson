@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_worker_health_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getWorkerHealth",
-        description: "Get health status and job counts for YSaar workers",
-        body: '''
+        description: Get health status and job counts for YSaar workers
+        body:
+          '''
 /**
  * Worker Health Check
  *
@@ -99,8 +99,9 @@ try {
   };
 }
 '''
+        key: getWorkerHealth
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "delete_channel_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "deleteChannel",
-        description: "Deletes channels (array, 'all', or 'allInContext') from a specific ownership. Prevents deletion of channels with active jobs to avoid orphaned playlist jobs. Removes pending BullMQ jobs, calls deletePlaylist for all playlists, then cleans up orphan channel nodes. For channels, 'allInContext' behaves like 'all' (deletes all channels for the ownership). Supports multi-ownership model, batch processing, and special keywords.",
-        body: '''
+        description: Deletes channels (array, 'all', or 'allInContext') from a specific ownership. Prevents deletion of channels with active jobs to avoid orphaned playlist jobs. Removes pending BullMQ jobs, calls deletePlaylist for all playlists, then cleans up orphan channel nodes. For channels, 'allInContext' behaves like 'all' (deletes all channels for the ownership). Supports multi-ownership model, batch processing, and special keywords.
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -338,8 +338,9 @@ try {
   };
 }
 '''
+        key: deleteChannel
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,13 +1,12 @@
 {
   vertexes: [
     {
-      id: "page_root",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "APIKeyManagement",
-        url: "/yto/admin/api-keys",
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        fns:
+          '''
 // State management
 const [apiKeys, setApiKeys] = args.createSignal([]);
 const [loading, setLoading] = args.createSignal(true);
@@ -290,53 +289,24 @@ return {
   getUsagePercentage,
   getStatusColor
 };
-''',
-        props: '''
+'''
+        url: /yto/admin/api-keys
+        key: APIKeyManagement
+        props:
+          '''
 return {
   isNoPermissionCheck: true,
   onMount: args.fns.loadAPIKeys
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout",
-        displayOrder: 1,
-        description: "YTO layout with navigation"
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "admin_layout",
-      L: "PageLayout",
-      P: {
-        componentName: "AdminLayout",
-        displayOrder: 3,
-        description: "Admin layout wrapper"
-      }
-    },
-    {
-      id: "header_section",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: space-between;
@@ -350,21 +320,22 @@ return `._id {
   margin-right: auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: "YouTube API Key Management"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.title};
   font-weight: 600;
@@ -372,34 +343,46 @@ return `._id {
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "header_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "h1",
+  text: "YouTube API Key Management"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.sm};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "reset_button",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 return {
   text: "Reset Counts",
   variant: "secondary",
@@ -407,14 +390,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "add_button",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 return {
   text: "Add API Key",
   variant: "primary",
@@ -422,36 +406,47 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "loading_state",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Loading API keys...",
-  hide: !args.fns.loading()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
   color: ${args.theme.var.color.muted};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Loading API keys...",
+  hide: !args.fns.loading()
+};
+'''
       }
-    },
+    }
     {
-      id: "api_keys_list",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  padding: 0 ${args.theme.var.spacing.md};
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   contextName: "apiKey",
@@ -459,28 +454,15 @@ return {
   data: args.fns.apiKeys(),
   hide: args.fns.loading()
 };
-''',
-        css: '''
-return `._id {
-  padding: 0 ${args.theme.var.spacing.md};
-  max-width: 1200px;
-  margin: 0 auto;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "api_key_card",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
@@ -494,20 +476,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "card_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: space-between;
@@ -516,41 +500,43 @@ return `._id {
   gap: ${args.theme.var.spacing.md};
 }`;
 '''
-      }
-    },
-    {
-      id: "card_info",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
   min-width: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "key_name",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const apiKey = args.contextData.apiKey;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: apiKey.P.name || 'Unnamed Key'
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.lg};
   font-weight: 600;
@@ -558,55 +544,70 @@ return `._id {
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "key_priority",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const apiKey = args.contextData.apiKey;
 return {
-  as: "span",
-  text: `Priority: ${apiKey.P.priority || 100}`
+  as: "h3",
+  text: apiKey.P.name || 'Unnamed Key'
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.xs};
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    {
-      id: "card_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const apiKey = args.contextData.apiKey;
 return {
-  as: "div"
+  as: "span",
+  text: `Priority: ${apiKey.P.priority || 100}`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.xs};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "toggle_active_button",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const apiKey = args.contextData.apiKey;
 const isActive = apiKey.P.isActive;
 return {
@@ -616,14 +617,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "remove_button",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const apiKey = args.contextData.apiKey;
 return {
   text: "Remove",
@@ -632,46 +634,33 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "usage_stats",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''
-      }
-    },
-    {
-      id: "usage_text",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const apiKey = args.contextData.apiKey;
-const current = apiKey.P.currentCount || 0;
-const limit = apiKey.P.dailyLimit || 10000;
-const percentage = args.fns.getUsagePercentage(current, limit);
-const isActive = apiKey.P.isActive;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: `${current.toLocaleString()} / ${limit.toLocaleString()} calls (${percentage}%)`,
-  "data-percentage": percentage,
-  "data-active": isActive
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 const apiKey = args.contextData.apiKey;
 const current = apiKey.P.currentCount || 0;
 const limit = apiKey.P.dailyLimit || 10000;
@@ -686,20 +675,31 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
-      }
-    },
-    {
-      id: "progress_bar",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const apiKey = args.contextData.apiKey;
+const current = apiKey.P.currentCount || 0;
+const limit = apiKey.P.dailyLimit || 10000;
+const percentage = args.fns.getUsagePercentage(current, limit);
+const isActive = apiKey.P.isActive;
+
 return {
-  as: "div"
+  as: "div",
+  text: `${current.toLocaleString()} / ${limit.toLocaleString()} calls (${percentage}%)`,
+  "data-percentage": percentage,
+  "data-active": isActive
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   height: 8px;
   background: ${args.theme.var.color.background_light_200};
@@ -707,15 +707,31 @@ return `._id {
   overflow: hidden;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "progress_fill",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  height: 100%;
+  transition: width ${args.theme.var.animation.slow} ease;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const apiKey = args.contextData.apiKey;
 const current = apiKey.P.currentCount || 0;
 const limit = apiKey.P.dailyLimit || 10000;
@@ -727,27 +743,15 @@ return {
   as: "div",
   style: `width: ${percentage}%; background: ${statusColor}`
 };
-''',
-        css: '''
-return `._id {
-  height: 100%;
-  transition: width ${args.theme.var.animation.slow} ease;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "key_metadata",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -756,15 +760,24 @@ return `._id {
   color: ${args.theme.var.color.muted};
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "reset_date",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const apiKey = args.contextData.apiKey;
 return {
   as: "div",
@@ -772,14 +785,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "last_used",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const apiKey = args.contextData.apiKey;
 return {
   as: "div",
@@ -787,23 +801,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "status",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const apiKey = args.contextData.apiKey;
-const isActive = apiKey.P.isActive;
-return {
-  as: "div",
-  text: `Status: ${isActive ? 'Active' : 'Disabled'}`,
-  "data-active": isActive
-};
-''',
-        css: '''
+        css:
+          '''
 const apiKey = args.contextData.apiKey;
 const isActive = apiKey.P.isActive;
 return `._id {
@@ -811,39 +815,41 @@ return `._id {
   color: ${isActive ? args.theme.var.color.success : args.theme.var.color.error};
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const apiKey = args.contextData.apiKey;
+const isActive = apiKey.P.isActive;
+return {
+  as: "div",
+  text: `Status: ${isActive ? 'Active' : 'Disabled'}`,
+  "data-active": isActive
+};
+'''
       }
-    },
+    }
     {
-      id: "add_modal",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "portal",
   hide: !args.fns.isAddModalOpen()
 };
 '''
       }
-    },
+    }
     {
-      id: "modal_overlay",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  onClick: () => {
-    args.fns.setIsAddModalOpen(false);
-    args.fns.setImportMode('single');
-    args.fns.setBulkImportText('');
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: fixed;
   inset: 0;
@@ -855,21 +861,27 @@ return `._id {
   padding: ${args.theme.var.spacing.md};
 }`;
 '''
-      }
-    },
-    {
-      id: "modal_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  onClick: (e) => e.stopPropagation()
+  onClick: () => {
+    args.fns.setIsAddModalOpen(false);
+    args.fns.setImportMode('single');
+    args.fns.setBulkImportText('');
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border-radius: ${args.theme.var.borderRadius.lg};
@@ -879,21 +891,23 @@ return `._id {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }`;
 '''
-      }
-    },
-    {
-      id: "modal_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Add YouTube API Key"
+  as: "div",
+  onClick: (e) => e.stopPropagation()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.xl};
   font-weight: 600;
@@ -901,20 +915,23 @@ return `._id {
   margin: 0 0 ${args.theme.var.spacing.lg} 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "mode_tabs",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "h2",
+  text: "Add YouTube API Key"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.sm};
@@ -922,15 +939,24 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "single_tab",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const isActive = args.fns.importMode() === 'single';
 return {
   text: "Single Key",
@@ -939,14 +965,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "bulk_tab",
-      L: "Attr",
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const isActive = args.fns.importMode() === 'bulk';
 return {
   text: "Bulk Import",
@@ -955,28 +982,38 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "single_form_container",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   hide: args.fns.importMode() !== 'single'
 };
 '''
       }
-    },
+    }
     {
-      id: "modal_form",
-      L: "Attr",
+      id: "33"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "form",
   onSubmit: (e) => {
@@ -984,42 +1021,29 @@ return {
     args.fns.handleAddAPIKey();
   }
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "api_key_field",
-      L: "Attr",
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "api_key_label",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  text: "API Key *"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: block;
   font-size: ${args.theme.var.fontSize.sm};
@@ -1028,15 +1052,43 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "API Key *"
+};
+'''
       }
-    },
+    }
     {
-      id: "api_key_input",
-      L: "Attr",
+      id: "36"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  padding: ${args.theme.var.spacing.sm};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  background: ${args.theme.var.color.background};
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "text",
@@ -1045,8 +1097,54 @@ return {
   onInput: (e) => args.fns.setFormData('apiKey', e.target.value),
   required: true
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Name"
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: ${args.theme.var.spacing.sm};
@@ -1063,51 +1161,10 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "name_field",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "name_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  text: "Name"
-};
-''',
-        css: '''
-return `._id {
-  display: block;
-  font-size: ${args.theme.var.fontSize.sm};
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
-}`;
-'''
-      }
-    },
-    {
-      id: "name_input",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "text",
@@ -1115,8 +1172,54 @@ return {
   value: args.fns.formData.name,
   onInput: (e) => args.fns.setFormData('name', e.target.value)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Daily Limit"
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: ${args.theme.var.spacing.sm};
@@ -1133,51 +1236,10 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "limit_field",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "limit_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  text: "Daily Limit"
-};
-''',
-        css: '''
-return `._id {
-  display: block;
-  font-size: ${args.theme.var.fontSize.sm};
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: ${args.theme.var.spacing.xs};
-}`;
-'''
-      }
-    },
-    {
-      id: "limit_input",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "number",
@@ -1186,52 +1248,29 @@ return {
   onInput: (e) => args.fns.setFormData('dailyLimit', parseInt(e.target.value) || 10000),
   min: 1
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  padding: ${args.theme.var.spacing.sm};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.text};
-  background: ${args.theme.var.color.background};
-  box-sizing: border-box;
-
-  &:focus {
-    outline: none;
-    border-color: ${args.theme.var.color.primary};
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "priority_field",
-      L: "Attr",
+      id: "43"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "priority_label",
-      L: "Attr",
+      id: "44"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  text: "Priority (lower = higher priority)"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: block;
   font-size: ${args.theme.var.fontSize.sm};
@@ -1240,25 +1279,23 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
-      }
-    },
-    {
-      id: "priority_input",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "input",
-  type: "number",
-  placeholder: "100",
-  value: args.fns.formData.priority,
-  onInput: (e) => args.fns.setFormData('priority', parseInt(e.target.value) || 100),
-  min: 0
+  as: "label",
+  text: "Priority (lower = higher priority)"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: ${args.theme.var.spacing.sm};
@@ -1275,50 +1312,77 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  type: "number",
+  placeholder: "100",
+  value: args.fns.formData.priority,
+  onInput: (e) => args.fns.setFormData('priority', parseInt(e.target.value) || 100),
+  min: 0
+};
+'''
       }
-    },
+    }
     {
-      id: "bulk_form_container",
-      L: "Attr",
+      id: "46"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   hide: args.fns.importMode() !== 'bulk'
 };
 '''
       }
-    },
+    }
     {
-      id: "bulk_import_description",
-      L: "Attr",
+      id: "47"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Paste API keys below. You can use line-separated keys or JSON format."
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.muted};
   font-size: ${args.theme.var.fontSize.sm};
   margin-bottom: ${args.theme.var.spacing.md};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Paste API keys below. You can use line-separated keys or JSON format."
+};
+'''
       }
-    },
+    }
     {
-      id: "bulk_import_example",
-      L: "Attr",
+      id: "48"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.md};
+
+  summary {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "details",
   innerHTML: `
@@ -1339,34 +1403,15 @@ AIzaSyGHI789...</pre>
     </div>
   `
 };
-''',
-        css: '''
-return `._id {
-  margin-bottom: ${args.theme.var.spacing.md};
-
-  summary {
-    font-size: ${args.theme.var.fontSize.sm};
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bulk_import_textarea",
-      L: "Attr",
+      id: "49"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "textarea",
-  value: args.fns.bulkImportText(),
-  onInput: (e) => args.fns.setBulkImportText(e.target.value),
-  placeholder: "Paste API keys here...",
-  rows: 10
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: ${args.theme.var.spacing.sm};
@@ -1384,20 +1429,26 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "bulk_import_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "textarea",
+  value: args.fns.bulkImportText(),
+  onInput: (e) => args.fns.setBulkImportText(e.target.value),
+  placeholder: "Paste API keys here...",
+  rows: 10
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.sm};
@@ -1405,15 +1456,24 @@ return `._id {
   margin-top: ${args.theme.var.spacing.md};
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "bulk_cancel_button",
-      L: "Attr",
+      id: "51"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 return {
   text: "Cancel",
   variant: "secondary",
@@ -1426,14 +1486,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "bulk_import_button",
-      L: "Attr",
+      id: "52"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 return {
   text: "Import Keys",
   variant: "primary",
@@ -1442,20 +1503,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "modal_actions",
-      L: "Attr",
+      id: "53"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.importMode() !== 'single'
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.sm};
@@ -1463,15 +1517,25 @@ return `._id {
   margin-top: ${args.theme.var.spacing.md};
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: args.fns.importMode() !== 'single'
+};
+'''
       }
-    },
+    }
     {
-      id: "cancel_button",
-      L: "Attr",
+      id: "54"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 return {
   text: "Cancel",
   variant: "secondary",
@@ -1484,14 +1548,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "submit_button",
-      L: "Attr",
+      id: "55"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 return {
   text: "Add Key",
   variant: "primary",
@@ -1500,64 +1565,375 @@ return {
 '''
       }
     }
-  ],
+    {
+      id: "56"
+      L: PageLayout
+      P: {
+        displayOrder: 3
+        description: Admin layout wrapper
+        componentName: AdminLayout
+      }
+    }
+    {
+      id: "57"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+    {
+      id: "58"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
-    { id: "e_layout_content", T: "PageLayout", S: "page_root", E: "page_layout_content" },
-    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
-    { id: "e2", T: "Attr", S: "page_root", E: "header_section" },
-    { id: "e3", T: "Attr", S: "header_section", E: "title" },
-    { id: "e4", T: "Attr", S: "header_section", E: "header_actions" },
-    { id: "e5", T: "Attr", S: "header_actions", E: "reset_button" },
-    { id: "e6", T: "Attr", S: "header_actions", E: "add_button" },
-    { id: "e7", T: "Attr", S: "page_root", E: "loading_state" },
-    { id: "e8", T: "Attr", S: "page_root", E: "api_keys_list" },
-    { id: "e10", T: "Attr", S: "api_keys_list", E: "api_key_card" },
-    { id: "e11", T: "Attr", S: "api_key_card", E: "card_header" },
-    { id: "e12", T: "Attr", S: "card_header", E: "card_info" },
-    { id: "e13", T: "Attr", S: "card_info", E: "key_name" },
-    { id: "e14", T: "Attr", S: "card_info", E: "key_priority" },
-    { id: "e15", T: "Attr", S: "card_header", E: "card_actions" },
-    { id: "e16", T: "Attr", S: "card_actions", E: "toggle_active_button" },
-    { id: "e17", T: "Attr", S: "card_actions", E: "remove_button" },
-    { id: "e18", T: "Attr", S: "api_key_card", E: "usage_stats" },
-    { id: "e19", T: "Attr", S: "usage_stats", E: "usage_text" },
-    { id: "e20", T: "Attr", S: "usage_stats", E: "progress_bar" },
-    { id: "e21", T: "Attr", S: "progress_bar", E: "progress_fill" },
-    { id: "e22", T: "Attr", S: "api_key_card", E: "key_metadata" },
-    { id: "e23", T: "Attr", S: "key_metadata", E: "reset_date" },
-    { id: "e24", T: "Attr", S: "key_metadata", E: "last_used" },
-    { id: "e25", T: "Attr", S: "key_metadata", E: "status" },
-    { id: "e26", T: "Attr", S: "page_root", E: "add_modal" },
-    { id: "e27", T: "Attr", S: "add_modal", E: "modal_overlay" },
-    { id: "e28", T: "Attr", S: "modal_overlay", E: "modal_content" },
-    { id: "e29", T: "Attr", S: "modal_content", E: "modal_title" },
-    { id: "e30", T: "Attr", S: "modal_content", E: "mode_tabs" },
-    { id: "e30a", T: "Attr", S: "mode_tabs", E: "single_tab" },
-    { id: "e30b", T: "Attr", S: "mode_tabs", E: "bulk_tab" },
-    { id: "e30c", T: "Attr", S: "modal_content", E: "single_form_container" },
-    { id: "e30d", T: "Attr", S: "single_form_container", E: "modal_form" },
-    { id: "e30e", T: "Attr", S: "modal_content", E: "bulk_form_container" },
-    { id: "e30f", T: "Attr", S: "bulk_form_container", E: "bulk_import_description" },
-    { id: "e30g", T: "Attr", S: "bulk_form_container", E: "bulk_import_example" },
-    { id: "e30h", T: "Attr", S: "bulk_form_container", E: "bulk_import_textarea" },
-    { id: "e30i", T: "Attr", S: "bulk_form_container", E: "bulk_import_actions" },
-    { id: "e30i1", T: "Attr", S: "bulk_import_actions", E: "bulk_cancel_button" },
-    { id: "e30i2", T: "Attr", S: "bulk_import_actions", E: "bulk_import_button" },
-    { id: "e30j", T: "Attr", S: "modal_content", E: "modal_actions" },
-    { id: "e31", T: "Attr", S: "modal_form", E: "api_key_field" },
-    { id: "e32", T: "Attr", S: "api_key_field", E: "api_key_label" },
-    { id: "e33", T: "Attr", S: "api_key_field", E: "api_key_input" },
-    { id: "e34", T: "Attr", S: "modal_form", E: "name_field" },
-    { id: "e35", T: "Attr", S: "name_field", E: "name_label" },
-    { id: "e36", T: "Attr", S: "name_field", E: "name_input" },
-    { id: "e37", T: "Attr", S: "modal_form", E: "limit_field" },
-    { id: "e38", T: "Attr", S: "limit_field", E: "limit_label" },
-    { id: "e39", T: "Attr", S: "limit_field", E: "limit_input" },
-    { id: "e40", T: "Attr", S: "modal_form", E: "priority_field" },
-    { id: "e41", T: "Attr", S: "priority_field", E: "priority_label" },
-    { id: "e42", T: "Attr", S: "priority_field", E: "priority_input" },
-    { id: "e44", T: "Attr", S: "modal_actions", E: "cancel_button" },
-    { id: "e45", T: "Attr", S: "modal_actions", E: "submit_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "1"
+      E: "25"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "21"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "17"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "10"
+      E: "14"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "21"
+      E: "24"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "21"
+      E: "23"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "27"
+      E: "46"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "27"
+      E: "32"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "27"
+      E: "53"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "27"
+      E: "29"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "46"
+      E: "48"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "46"
+      E: "49"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "46"
+      E: "50"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "53"
+      E: "54"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "53"
+      E: "55"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "29"
+      E: "31"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "50"
+      E: "51"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "50"
+      E: "52"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "33"
+      E: "43"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "33"
+      E: "37"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "33"
+      E: "40"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "34"
+      E: "36"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "43"
+      E: "45"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "37"
+      E: "39"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "40"
+      E: "42"
+    }
+    {
+      id: e55
+      T: PageLayout
+      S: "1"
+      E: "56"
+    }
+    {
+      id: e56
+      T: PageLayout
+      S: "1"
+      E: "57"
+    }
+    {
+      id: e57
+      T: PageLayout
+      S: "1"
+      E: "58"
+    }
   ]
 }

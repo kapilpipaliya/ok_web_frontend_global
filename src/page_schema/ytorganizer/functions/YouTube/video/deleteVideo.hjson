@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "delete_video_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "deleteVideo",
-        description: "Deletes videos (array, 'all', or 'allInContext') from playlists using Playlist->Video relationships. NEW SCHEMA v4.0: Removes Playlist->Video relationships, then cleans up orphan Videos and optional VideoSettings (created on-demand). 'allInContext' deletes all videos in the context playlists.",
-        body: '''
+        description: Deletes videos (array, 'all', or 'allInContext') from playlists using Playlist->Video relationships. NEW SCHEMA v4.0: Removes Playlist->Video relationships, then cleans up orphan Videos and optional VideoSettings (created on-demand). 'allInContext' deletes all videos in the context playlists.
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -243,8 +243,9 @@ try {
   };
 }
 '''
+        key: deleteVideo
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "retry_channel_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "retryChannel",
-        description: "Retry a failed or stuck channel processing job",
-        body: '''
+        description: Retry a failed or stuck channel processing job
+        body:
+          '''
 /**
  * Retry Channel Processing
  *
@@ -224,8 +224,9 @@ try {
   };
 }
 '''
+        key: retryChannel
       }
     }
-  ],
+  ]
   edges: []
 }

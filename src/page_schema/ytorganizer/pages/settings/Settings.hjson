@@ -1,13 +1,12 @@
 {
   vertexes: [
     {
-      id: "page_root",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "Settings",
-        url: "/settings",
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        fns:
+          '''
 // Message state for displaying success/error messages in UI
 const [messageState, setMessageState] = args.createStore({
   type: null, // 'success' or 'error'
@@ -33,42 +32,23 @@ return {
   showMessage,
   hideMessage,
 };
-''',
-        props: '''
+'''
+        url: /settings
+        key: Settings
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout",
-        displayOrder: 1
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "setting_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem;
   max-width: 1200px;
@@ -81,57 +61,59 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "page_title",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "PageTitle",
-        props: '''
+        displayOrder: 1
+        componentName: PageTitle
+        props:
+          '''
 return {
   text: "Settings"
 };
 '''
       }
-    },
+    }
     {
-      id: "page_subtitle",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Manage your YSaar preferences and data."
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   color: ${args.theme.var.color.muted};
   margin: 0.5rem 0 2rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "message_banner",
-      L: "Attr",
-      P: {
-        displayOrder: 2.5,
-        componentName: "Html",
-        props: '''
-const messageState = args.fns.messageState;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: !messageState?.visible
+  as: "p",
+  text: "Manage your YSaar preferences and data."
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isSuccess = messageState?.type === 'success';
 const isError = messageState?.type === 'error';
@@ -174,20 +156,25 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "message_icon_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2.5
+        componentName: Html
+        props:
+          '''
+const messageState = args.fns.messageState;
+
 return {
-  as: "div"
+  as: "div",
+  hide: !messageState?.visible
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isSuccess = messageState?.type === 'success';
 
@@ -205,15 +192,24 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "message_icon",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const messageState = args.fns.messageState;
 const isSuccess = messageState?.type === 'success';
 
@@ -225,22 +221,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "message_text",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const messageState = args.fns.messageState;
-
-return {
-  as: "p",
-  text: messageState?.text || ""
-};
-''',
-        css: '''
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isSuccess = messageState?.type === 'success';
 
@@ -259,21 +246,25 @@ return `._id {
   line-height: 1.5;
 }`;
 '''
-      }
-    },
-    {
-      id: "message_close_button",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const messageState = args.fns.messageState;
+
 return {
-  as: "button",
-  onClick: () => args.fns.hideMessage()
+  as: "p",
+  text: messageState?.text || ""
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isSuccess = messageState?.type === 'success';
 
@@ -308,15 +299,25 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: () => args.fns.hideMessage()
+};
+'''
       }
-    },
+    }
     {
-      id: "message_close_icon",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "mdi:close",
@@ -325,38 +326,33 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "quick_actions_section",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "quick_actions_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Quick Actions"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
@@ -364,20 +360,23 @@ return `._id {
   margin: 0 0 1rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "quick_actions_card",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "h2",
+  text: "Quick Actions"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_dark_50};
   border: 1px solid ${args.theme.var.color.border};
@@ -388,15 +387,32 @@ return `._id {
   gap: 0.75rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "quick_actions_buttons_wrapper",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const currentMode = args.currentMode?.() || "light";
 
 return {
@@ -426,23 +442,17 @@ return {
     }
   ]
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "quick_action_button",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const buttonData = args.contextData.button;
 
 return {
@@ -452,38 +462,33 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "youtube_connection_section",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "youtube_connection_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "YouTube Accounts"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
@@ -491,30 +496,31 @@ return `._id {
   margin: 0 0 1rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "youtube_connection_card",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "SimpleCard"
-      }
-    },
-    {
-      id: "ownership_selector_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "label",
-  text: "Switch Account",
-  for: "ownership-selector"
+  as: "h2",
+  text: "YouTube Accounts"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SimpleCard
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: block;
   font-size: ${args.theme.var.fontSize.sm};
@@ -523,15 +529,26 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.sm};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Switch Account",
+  for: "ownership-selector"
+};
+'''
       }
-    },
+    }
     {
-      id: "ownership_selector",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TomSelect",
-        props: '''
+        displayOrder: 2
+        componentName: TomSelect
+        props:
+          '''
 const ownerships = args.fns.ownerships?.() || [];
 const selectedOwnership = args.fns.selectedOwnership?.();
 const selectedOwnershipId = selectedOwnership?.P?.key;
@@ -571,23 +588,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "ownership_selector_help",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const ownerships = args.fns.ownerships?.() || [];
-const hasAccounts = ownerships.length > 0;
-
-return {
-  as: "div",
-  hide: hasAccounts
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-top: ${args.theme.var.spacing.sm};
   padding: ${args.theme.var.spacing.md};
@@ -599,43 +606,51 @@ return `._id {
   gap: ${args.theme.var.spacing.sm};
 }`;
 '''
-      }
-    },
-    {
-      id: "ownership_selector_help_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const ownerships = args.fns.ownerships?.() || [];
+const hasAccounts = ownerships.length > 0;
+
 return {
-  as: "icon",
-  icon: "ph:info",
-  width: 16,
-  height: 16
+  as: "div",
+  hide: hasAccounts
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.info_light_100_text};
   flex-shrink: 0;
   margin-top: 2px;
 }`;
 '''
-      }
-    },
-    {
-      id: "ownership_selector_help_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p"
+  as: "icon",
+  icon: "ph:info",
+  width: 16,
+  height: 16
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: ${args.theme.var.fontSize.sm};
@@ -644,40 +659,37 @@ return `._id {
   flex: 1;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p"
+};
+'''
       }
-    },
+    }
     {
-      id: "ownership_selector_help_text_content",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "No YouTube accounts connected. "
 };
 '''
       }
-    },
+    }
     {
-      id: "ownership_selector_help_link",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "a",
-  text: "Go to Accounts to connect",
-  href: "/accounts",
-  onClick: (e) => {
-    e.preventDefault();
-    args.navigate('/accounts');
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.info_light_100_text};
   text-decoration: underline;
@@ -689,56 +701,75 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "account_management_divider",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "a",
+  text: "Go to Accounts to connect",
+  href: "/accounts",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/accounts');
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   height: 1px;
   background: ${args.theme.var.color.border};
   margin: ${args.theme.var.spacing.lg} 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "account_management_text",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Manage all your YouTube account connections from the dedicated Accounts page."
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.sm};
   color: ${args.theme.var.color.muted};
   margin: 0 0 ${args.theme.var.spacing.md} 0;
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Manage all your YouTube account connections from the dedicated Accounts page."
+};
+'''
       }
-    },
+    }
     {
-      id: "account_management_button",
-      L: "Attr",
+      id: "28"
+      L: Attr
       P: {
-        displayOrder: 6,
-        componentName: "Button",
-        props: '''
+        displayOrder: 6
+        componentName: Button
+        props:
+          '''
 return {
   text: "Manage YouTube Accounts",
   variant: "primary",
@@ -746,19 +777,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "data_section",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.error_light_50};
   border: 1px solid ${args.theme.var.color.error_light_300};
@@ -767,21 +792,22 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "data_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Data Management"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
@@ -792,15 +818,25 @@ return `._id {
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Data Management"
+};
+'''
       }
-    },
+    }
     {
-      id: "data_title_icon",
-      L: "Attr",
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:warning",
@@ -809,35 +845,38 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "data_description",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Permanently delete all your YSaar data including channels, playlists, and setting. This action cannot be undone."
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.error_light_50_text};
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Permanently delete all your YSaar data including channels, playlists, and setting. This action cannot be undone."
+};
+'''
       }
-    },
+    }
     {
-      id: "clear_data_button",
-      L: "Attr",
+      id: "33"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Button",
-        props: '''
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
 return {
   text: "Clear All Data",
   variant: "danger",
@@ -874,40 +913,35 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "data_separator",
-      L: "Attr",
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   height: 1px;
   background: ${args.theme.var.color.error_light_300};
   margin: 1.5rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "delete_account_warning",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Delete your entire account and all associated data permanently. This will also clear all your YSaar data and cannot be undone."
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.error_light_50_text};
   margin: 0 0 1.5rem 0;
@@ -915,15 +949,25 @@ return `._id {
   font-weight: 600;
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Delete your entire account and all associated data permanently. This will also clear all your YSaar data and cannot be undone."
+};
+'''
       }
-    },
+    }
     {
-      id: "delete_account_button",
-      L: "Attr",
+      id: "36"
+      L: Attr
       P: {
-        displayOrder: 6,
-        componentName: "Button",
-        props: '''
+        displayOrder: 6
+        componentName: Button
+        props:
+          '''
 return {
   text: "Delete Account",
   variant: "danger",
@@ -976,45 +1020,246 @@ return {
 };
 '''
       }
-    },
-  ],
+    }
+    {
+      id: "37"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "38"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
-    { id: "e1a", T: "PageLayout", S: "page_root", E: "page_layout_content" },
-    { id: "e2", T: "Attr", S: "page_root", E: "setting_container" },
-    { id: "e3", T: "Attr", S: "setting_container", E: "page_title" },
-    { id: "e4", T: "Attr", S: "setting_container", E: "page_subtitle" },
-    { id: "e4a", T: "Attr", S: "setting_container", E: "message_banner" },
-    { id: "e4b", T: "Attr", S: "message_banner", E: "message_icon_wrapper" },
-    { id: "e4c", T: "Attr", S: "message_icon_wrapper", E: "message_icon" },
-    { id: "e4d", T: "Attr", S: "message_banner", E: "message_text" },
-    { id: "e4e", T: "Attr", S: "message_banner", E: "message_close_button" },
-    { id: "e4f", T: "Attr", S: "message_close_button", E: "message_close_icon" },
-    { id: "e23", T: "Attr", S: "setting_container", E: "quick_actions_section" },
-    { id: "e24", T: "Attr", S: "quick_actions_section", E: "quick_actions_title" },
-    { id: "e25", T: "Attr", S: "quick_actions_section", E: "quick_actions_card" },
-    { id: "e26", T: "Attr", S: "quick_actions_card", E: "quick_actions_buttons_wrapper" },
-    { id: "e27", T: "Attr", S: "quick_actions_buttons_wrapper", E: "quick_action_button" },
-    { id: "e22a", T: "Attr", S: "setting_container", E: "youtube_connection_section" },
-    { id: "e22a1", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_title" },
-    { id: "e22c", T: "Attr", S: "youtube_connection_section", E: "youtube_connection_card" },
-    { id: "e22c1", T: "Attr", S: "youtube_connection_card", E: "ownership_selector_label" },
-    { id: "e22c2", T: "Attr", S: "youtube_connection_card", E: "ownership_selector" },
-    { id: "e22c3", T: "Attr", S: "youtube_connection_card", E: "ownership_selector_help" },
-    { id: "e22c4", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_icon" },
-    { id: "e22c5", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_text" },
-    { id: "e22c6", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_text_content" },
-    { id: "e22c7", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_link" },
-    { id: "e22c8", T: "Attr", S: "youtube_connection_card", E: "account_management_divider" },
-    { id: "e22c9", T: "Attr", S: "youtube_connection_card", E: "account_management_text" },
-    { id: "e22c10", T: "Attr", S: "youtube_connection_card", E: "account_management_button" },
-    { id: "e30", T: "Attr", S: "setting_container", E: "data_section" },
-    { id: "e31", T: "Attr", S: "data_section", E: "data_title" },
-    { id: "e32", T: "Attr", S: "data_title", E: "data_title_icon" },
-    { id: "e33", T: "Attr", S: "data_section", E: "data_description" },
-    { id: "e34", T: "Attr", S: "data_section", E: "clear_data_button" },
-    { id: "e35", T: "Attr", S: "data_section", E: "data_separator" },
-    { id: "e36", T: "Attr", S: "data_section", E: "delete_account_warning" },
-    { id: "e37", T: "Attr", S: "data_section", E: "delete_account_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "16"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "29"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "29"
+      E: "32"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "29"
+      E: "34"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "29"
+      E: "33"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "29"
+      E: "35"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "29"
+      E: "36"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "18"
+      E: "21"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "18"
+      E: "26"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "18"
+      E: "27"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "18"
+      E: "28"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "21"
+      E: "23"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e36
+      T: PageLayout
+      S: "1"
+      E: "37"
+    }
+    {
+      id: e37
+      T: PageLayout
+      S: "1"
+      E: "38"
+    }
   ]
 }

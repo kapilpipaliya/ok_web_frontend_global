@@ -1,34 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "QueueModal"
+        key: QueueModal
       }
-    },
-    {
-      id: "modal_overlay",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const getIsOpen = args.contextData.props?.isOpen;
-const isOpen = getIsOpen?.() || false;
-const onClose = args.contextData.props?.onClose;
-
-return {
-  as: "div",
-  hide: !isOpen,
-  onClick: (e) => {
-    if (e.target === e.currentTarget) {
-      onClose?.();
     }
-  }
-};
-''',
-        css: '''
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: fixed;
   top: 0;
@@ -50,15 +34,58 @@ return `._id {
   to { opacity: 1; }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const getIsOpen = args.contextData.props?.isOpen;
+const isOpen = getIsOpen?.() || false;
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      onClose?.();
+    }
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "modal_container",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 const [searchTerm, setSearchTerm] = args.createSignal("");
 const [selectedVideos, setSelectedVideos] = args.createSignal(new Set());
 const [showPlaylistSelector, setShowPlaylistSelector] = args.createSignal(false);
@@ -229,51 +256,23 @@ return {
   showCreateNew,
   setShowCreateNew
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   onClick: (e) => e.stopPropagation()
 };
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: 0.75rem;
-  width: 100%;
-  max-width: 600px;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "modal_header",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -282,23 +281,22 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
-      }
-    },
-    {
-      id: "modal_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const queue = args.contextData.props?.videoQueue?.() || [];
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: `Video Queue (${queue.length})`
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
@@ -306,24 +304,25 @@ return `._id {
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "modal_close_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const onClose = args.contextData.props?.onClose;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
-  as: "button",
-  onClick: onClose,
-  "aria-label": "Close modal"
+  as: "h2",
+  text: `Video Queue (${queue.length})`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -342,15 +341,28 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "button",
+  onClick: onClose,
+  "aria-label": "Close modal"
+};
+'''
       }
-    },
+    }
     {
-      id: "modal_close_icon",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:close",
@@ -359,19 +371,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "modal_body",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   overflow: hidden;
@@ -379,49 +385,46 @@ return `._id {
   flex-direction: column;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_search_container",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   hide: queue.length === 0
 };
-''',
-        css: '''
-return `._id {
-  padding: 1rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "queue_search_input",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const searchTerm = args.fns.searchTerm?.() || "";
-const setSearchTerm = args.fns.setSearchTerm;
-
-return {
-  as: "input",
-  type: "text",
-  placeholder: "Search videos in queue...",
-  value: searchTerm,
-  onInput: (e) => setSearchTerm?.(e.target.value)
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: 0.625rem 1rem;
@@ -443,24 +446,29 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "bulk_actions_container",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
-const queue = args.contextData.props?.videoQueue?.() || [];
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const searchTerm = args.fns.searchTerm?.() || "";
+const setSearchTerm = args.fns.setSearchTerm;
 
 return {
-  as: "div",
-  hide: queue.length === 0
+  as: "input",
+  type: "text",
+  placeholder: "Search videos in queue...",
+  value: searchTerm,
+  onInput: (e) => setSearchTerm?.(e.target.value)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -470,15 +478,36 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const selectedVideos = args.fns.selectedVideos?.() || new Set();
+const queue = args.contextData.props?.videoQueue?.() || [];
+
+return {
+  as: "div",
+  hide: queue.length === 0
+};
+'''
       }
-    },
+    }
     {
-      id: "bulk_select_all_checkbox",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 1.125rem;
+  height: 1.125rem;
+  cursor: pointer;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const selectedVideos = args.fns.selectedVideos?.() || new Set();
 const queue = args.contextData.props?.videoQueue?.() || [];
 const allSelected = queue.length > 0 && selectedVideos.size === queue.length;
@@ -497,46 +526,60 @@ return {
     }
   }
 };
-''',
-        css: '''
-return `._id {
-  width: 1.125rem;
-  height: 1.125rem;
-  cursor: pointer;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "bulk_actions_text",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const selectedVideos = args.fns.selectedVideos?.() || new Set();
-
-return {
-  as: "span",
-  text: selectedVideos.size > 0 ? `${selectedVideos.size} selected` : "Select videos"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.text};
   flex: 1;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const selectedVideos = args.fns.selectedVideos?.() || new Set();
+
+return {
+  as: "span",
+  text: selectedVideos.size > 0 ? `${selectedVideos.size} selected` : "Select videos"
+};
+'''
       }
-    },
+    }
     {
-      id: "bulk_remove_button",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_text};
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error_dark_200};
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const selectedVideos = args.fns.selectedVideos?.() || new Set();
 
 return {
@@ -595,12 +638,19 @@ return {
   },
   text: "Remove"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.error};
-  color: ${args.theme.var.color.error_text};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
   border: none;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -609,19 +659,14 @@ return `._id {
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${args.theme.var.color.error_dark_200};
+    background: ${args.theme.var.color.primary_dark_200};
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "bulk_move_top_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 const selectedVideos = args.fns.selectedVideos?.() || new Set();
 
 return {
@@ -648,163 +693,159 @@ return {
   },
   text: "Move to Top"
 };
-''',
-        css: '''
-return `._id {
-  padding: 0.5rem 1rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "queue_list_wrapper",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   overflow: auto;
   padding: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_list",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_empty_state",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const queue = args.contextData.props?.videoQueue?.() || [];
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: queue.length > 0
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: 3rem 1rem;
   color: ${args.theme.var.color.muted};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const queue = args.contextData.props?.videoQueue?.() || [];
+
+return {
+  as: "div",
+  hide: queue.length > 0
+};
+'''
       }
-    },
+    }
     {
-      id: "empty_icon",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:playlist",
   width: 48,
   height: 48
 };
-''',
-        css: '''
-return `._id {
-  opacity: 0.5;
-  margin-bottom: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "empty_text",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "No videos in queue"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_items_container",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const queue = args.contextData.props?.videoQueue?.() || [];
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: queue.length === 0
+  as: "p",
+  text: "No videos in queue"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const queue = args.contextData.props?.videoQueue?.() || [];
+
+return {
+  as: "div",
+  hide: queue.length === 0
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_items_loop",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "loopItem",
-        loop: true,
-        props: '''
+        contextName: loopItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const queue = args.contextData.props?.videoQueue?.() || [];
 const searchTerm = args.fns.searchTerm?.() || "";
 
@@ -832,19 +873,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "queue_item_wrapper",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: flex-start;
@@ -861,15 +896,34 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_item_checkbox",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 1.125rem;
+  height: 1.125rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.loopItem;
 const video = item?.video;
 const videoId = video?.P?.youtubeId;
@@ -885,33 +939,15 @@ return {
     args.fns.toggleVideoSelection?.(videoId);
   }
 };
-''',
-        css: '''
-return `._id {
-  width: 1.125rem;
-  height: 1.125rem;
-  cursor: pointer;
-  margin-top: 0.5rem;
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "queue_item_number",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.loopItem;
-
-return {
-  as: "div",
-  text: `${(item?.index ?? 0) + 1}`
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -927,26 +963,25 @@ return `._id {
   margin-top: 0.25rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_item_card",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Card",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.loopItem;
-const video = item?.video;
 
 return {
-  item: video,
-  itemType: "video",
-  itemSetting: null,
-  hideMenuItems: ["editName", "retry", "delete"]
+  as: "div",
+  text: `${(item?.index ?? 0) + 1}`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
   min-width: 0;
@@ -959,20 +994,28 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_item_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Card
+        props:
+          '''
+const item = args.contextData.loopItem;
+const video = item?.video;
+
 return {
-  as: "div"
+  item: video,
+  itemType: "video",
+  itemSetting: null,
+  hideMenuItems: ["editName", "retry", "delete"]
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 0.375rem;
@@ -980,33 +1023,22 @@ return `._id {
   margin-top: 0.25rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_item_play_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.loopItem;
-const video = item?.video;
-const playVideo = args.contextData.props?.playVideo;
-const onClose = args.contextData.props?.onClose;
-
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  onClick: () => {
-    if (video) {
-      playVideo?.(video);
-      onClose?.();
-    }
-  },
-  "aria-label": "Play video",
-  title: "Play now"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -1027,15 +1059,37 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.loopItem;
+const video = item?.video;
+const playVideo = args.contextData.props?.playVideo;
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "button",
+  onClick: () => {
+    if (video) {
+      playVideo?.(video);
+      onClose?.();
+    }
+  },
+  "aria-label": "Play video",
+  title: "Play now"
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_item_play_icon",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:play",
@@ -1044,32 +1098,13 @@ return {
 };
 '''
       }
-    },
-    {
-      id: "queue_item_move_up_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
-const reorderQueue = args.contextData.props?.reorderQueue;
-const isFirst = item?.index === 0;
-
-return {
-  as: "button",
-  onClick: () => {
-    if (item && typeof item.index !== 'undefined' && !isFirst) {
-      reorderQueue?.(item.index, item.index - 1);
     }
-  },
-  disabled: isFirst,
-  "aria-label": "Move up",
-  title: "Move up"
-};
-''',
-        css: '''
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
 const item = args.contextData.loopItem;
 const isFirst = item?.index === 0;
 
@@ -1095,15 +1130,37 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.loopItem;
+const queue = args.contextData.props?.videoQueue?.() || [];
+const reorderQueue = args.contextData.props?.reorderQueue;
+const isFirst = item?.index === 0;
+
+return {
+  as: "button",
+  onClick: () => {
+    if (item && typeof item.index !== 'undefined' && !isFirst) {
+      reorderQueue?.(item.index, item.index - 1);
+    }
+  },
+  disabled: isFirst,
+  "aria-label": "Move up",
+  title: "Move up"
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_item_move_up_icon",
-      L: "Attr",
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:arrow-up",
@@ -1112,32 +1169,13 @@ return {
 };
 '''
       }
-    },
-    {
-      id: "queue_item_move_down_button",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.loopItem;
-const queue = args.contextData.props?.videoQueue?.() || [];
-const reorderQueue = args.contextData.props?.reorderQueue;
-const isLast = item?.index === queue.length - 1;
-
-return {
-  as: "button",
-  onClick: () => {
-    if (item && typeof item.index !== 'undefined' && !isLast) {
-      reorderQueue?.(item.index, item.index + 1);
     }
-  },
-  disabled: isLast,
-  "aria-label": "Move down",
-  title: "Move down"
-};
-''',
-        css: '''
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
 const item = args.contextData.loopItem;
 const queue = args.contextData.props?.videoQueue?.() || [];
 const isLast = item?.index === queue.length - 1;
@@ -1164,15 +1202,37 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.loopItem;
+const queue = args.contextData.props?.videoQueue?.() || [];
+const reorderQueue = args.contextData.props?.reorderQueue;
+const isLast = item?.index === queue.length - 1;
+
+return {
+  as: "button",
+  onClick: () => {
+    if (item && typeof item.index !== 'undefined' && !isLast) {
+      reorderQueue?.(item.index, item.index + 1);
+    }
+  },
+  disabled: isLast,
+  "aria-label": "Move down",
+  title: "Move down"
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_item_move_down_icon",
-      L: "Attr",
+      id: "33"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:arrow-down",
@@ -1181,29 +1241,13 @@ return {
 };
 '''
       }
-    },
-    {
-      id: "queue_item_remove_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.loopItem;
-const removeFromQueue = args.contextData.props?.removeFromQueue;
-
-return {
-  as: "button",
-  onClick: () => {
-    if (item && typeof item.index !== 'undefined') {
-      removeFromQueue?.(item.index);
     }
-  },
-  "aria-label": "Remove from queue",
-  title: "Remove"
-};
-''',
-        css: '''
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_light_300};
   color: ${args.theme.var.color.text};
@@ -1225,15 +1269,34 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.loopItem;
+const removeFromQueue = args.contextData.props?.removeFromQueue;
+
+return {
+  as: "button",
+  onClick: () => {
+    if (item && typeof item.index !== 'undefined') {
+      removeFromQueue?.(item.index);
+    }
+  },
+  "aria-label": "Remove from queue",
+  title: "Remove"
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_item_remove_icon",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:trash-can",
@@ -1242,22 +1305,757 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "modal_footer",
-      L: "Attr",
+      id: "36"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const queue = args.contextData.props?.videoQueue?.() || [];
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 1rem;
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+const showPlaylistSelector = args.fns.showPlaylistSelector?.() || false;
 
 return {
   as: "div",
-  hide: queue.length === 0
+  hide: !showPlaylistSelector,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.fns.setShowPlaylistSelector?.(false);
+    }
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Save Queue to Playlist"
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: ${args.theme.var.color.muted};
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: () => args.fns.setShowPlaylistSelector?.(false)
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: "24",
+  height: "24"
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  overflow: auto;
+  padding: 1.5rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
+const showCreateNew = args.fns.showCreateNew?.() || false;
+
+return `._id {
+  background: none;
+  border: none;
+  border-bottom: 2px solid ${!showCreateNew ? args.theme.var.color.primary : 'transparent'};
+  color: ${!showCreateNew ? args.theme.var.color.primary : args.theme.var.color.muted};
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showCreateNew = args.fns.showCreateNew?.() || false;
+
+return {
+  as: "button",
+  onClick: () => args.fns.setShowCreateNew?.(false),
+  text: "Add to Existing"
+};
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''
+const showCreateNew = args.fns.showCreateNew?.() || false;
+
+return `._id {
+  background: none;
+  border: none;
+  border-bottom: 2px solid ${showCreateNew ? args.theme.var.color.primary : 'transparent'};
+  color: ${showCreateNew ? args.theme.var.color.primary : args.theme.var.color.muted};
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const showCreateNew = args.fns.showCreateNew?.() || false;
+
+return {
+  as: "button",
+  onClick: () => args.fns.setShowCreateNew?.(true),
+  text: "Create New"
+};
+'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const showCreateNew = args.fns.showCreateNew?.() || false;
+
+return {
+  as: "div",
+  hide: showCreateNew
+};
+'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: 2rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const playlistsLoading = args.fns.playlistsLoading?.() || false;
+
+return {
+  as: "div",
+  hide: !playlistsLoading,
+  text: "Loading playlists..."
+};
+'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: 2rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const playlistsLoading = args.fns.playlistsLoading?.() || false;
+const customPlaylists = args.fns.customPlaylists?.() || [];
+
+return {
+  as: "div",
+  hide: playlistsLoading || customPlaylists.length > 0,
+  text: "No custom playlists found. Create a new one to get started."
+};
+'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        contextName: playlistItem
+        loop: true
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const playlistsLoading = args.fns.playlistsLoading?.() || false;
+const customPlaylists = args.fns.customPlaylists?.() || [];
+
+return {
+  hide: playlistsLoading || customPlaylists.length === 0,
+  data: customPlaylists
+};
+'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        css:
+          '''
+const item = args.contextData.playlistItem;
+const playlist = item?.playlist;
+const playlistId = playlist?.P?.youtubeId;
+const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+const isSelected = selectedPlaylistId === playlistId;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: ${isSelected ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    background: ${args.theme.var.color.primary_light_100};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.playlistItem;
+const playlist = item?.playlist;
+const playlistId = playlist?.P?.youtubeId;
+const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+const isSelected = selectedPlaylistId === playlistId;
+
+return {
+  as: "label",
+  onClick: () => args.fns.setSelectedPlaylistId?.(playlistId)
+};
+'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.playlistItem;
+const playlist = item?.playlist;
+const playlistId = playlist?.P?.youtubeId;
+const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+
+return {
+  as: "input",
+  type: "radio",
+  name: "playlist_selector",
+  checked: selectedPlaylistId === playlistId,
+  onChange: () => args.fns.setSelectedPlaylistId?.(playlistId)
+};
+'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.playlistItem;
+const playlist = item?.playlist;
+
+return {
+  as: "div",
+  text: playlist?.P?.title || "Untitled"
+};
+'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.playlistItem;
+const playlist = item?.playlist;
+const itemCount = playlist?.P?.itemCount || 0;
+
+return {
+  as: "div",
+  text: `${itemCount} video${itemCount !== 1 ? 's' : ''}`
+};
+'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const showCreateNew = args.fns.showCreateNew?.() || false;
+
+return {
+  as: "div",
+  hide: !showCreateNew
+};
+'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Playlist Name"
+};
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const newPlaylistName = args.fns.newPlaylistName?.() || "";
+
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Enter playlist name...",
+  value: newPlaylistName,
+  onInput: (e) => args.fns.setNewPlaylistName?.(e.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1.5rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0.625rem 1.25rem;
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_300};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: () => args.fns.setShowPlaylistSelector?.(false),
+  text: "Cancel"
+};
+'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0.625rem 1.25rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const showCreateNew = args.fns.showCreateNew?.() || false;
+const savingToPlaylist = args.fns.savingToPlaylist?.() || false;
+const newPlaylistName = args.fns.newPlaylistName?.() || "";
+const selectedPlaylistId = args.fns.selectedPlaylistId?.();
+
+const isDisabled = savingToPlaylist || (showCreateNew ? !newPlaylistName.trim() : !selectedPlaylistId);
+
+return {
+  as: "button",
+  disabled: isDisabled,
+  onClick: async () => {
+    if (isDisabled) return;
+
+    if (showCreateNew) {
+      await args.fns.saveToNewPlaylist?.(newPlaylistName.trim());
+    } else {
+      await args.fns.saveToExistingPlaylist?.(selectedPlaylistId);
+    }
+  },
+  text: savingToPlaylist ? "Saving..." : "Save"
+};
+'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 1rem 1.5rem;
   border-top: 1px solid ${args.theme.var.color.border};
@@ -1266,56 +2064,90 @@ return `._id {
   align-items: center;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const queue = args.contextData.props?.videoQueue?.() || [];
+
+return {
+  as: "div",
+  hide: queue.length === 0
+};
+'''
       }
-    },
+    }
     {
-      id: "modal_footer_info",
-      L: "Attr",
+      id: "62"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const queue = args.contextData.props?.videoQueue?.() || [];
 
 return {
   as: "div",
   text: `${queue.length} video${queue.length !== 1 ? 's' : ''} in queue`
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "modal_footer_actions",
-      L: "Attr",
+      id: "63"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "modal_footer_save_button",
-      L: "Attr",
+      id: "64"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const queue = args.contextData.props?.videoQueue?.() || [];
 const savingToPlaylist = args.fns.savingToPlaylist?.() || false;
 
@@ -1347,42 +2179,15 @@ return {
   },
   text: savingToPlaylist ? "Saving..." : "Save as Playlist"
 };
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  border-radius: 0.375rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "modal_footer_clear_button",
-      L: "Attr",
+      id: "65"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const clearQueue = args.contextData.props?.clearQueue;
-
-return {
-  as: "button",
-  onClick: clearQueue,
-  text: "Clear All"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.error};
   color: ${args.theme.var.color.error_text};
@@ -1399,769 +2204,405 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "playlist_selector_overlay",
-      L: "Attr",
-      P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
-const showPlaylistSelector = args.fns.showPlaylistSelector?.() || false;
-
-return {
-  as: "div",
-  hide: !showPlaylistSelector,
-  onClick: (e) => {
-    if (e.target === e.currentTarget) {
-      args.fns.setShowPlaylistSelector?.(false);
-    }
-  }
-};
-''',
-        css: '''
-return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10001;
-  padding: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  onClick: (e) => e.stopPropagation()
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border-radius: 0.75rem;
-  max-width: 500px;
-  width: 100%;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  padding: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h2",
-  text: "Save Queue to Playlist"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_close",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => args.fns.setShowPlaylistSelector?.(false)
-};
-''',
-        css: '''
-return `._id {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: ${args.theme.var.color.muted};
-  padding: 0;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.375rem;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_close_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:close",
-  width: "24",
-  height: "24"
-};
-'''
-      }
-    },
-    {
-      id: "playlist_selector_body",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  overflow: auto;
-  padding: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_tabs",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_tab_existing",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const clearQueue = args.contextData.props?.clearQueue;
 
 return {
   as: "button",
-  onClick: () => args.fns.setShowCreateNew?.(false),
-  text: "Add to Existing"
+  onClick: clearQueue,
+  text: "Clear All"
 };
-''',
-        css: '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
-
-return `._id {
-  background: none;
-  border: none;
-  border-bottom: 2px solid ${!showCreateNew ? args.theme.var.color.primary : 'transparent'};
-  color: ${!showCreateNew ? args.theme.var.color.primary : args.theme.var.color.muted};
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: ${args.theme.var.color.primary};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_tab_create",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
-
-return {
-  as: "button",
-  onClick: () => args.fns.setShowCreateNew?.(true),
-  text: "Create New"
-};
-''',
-        css: '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
-
-return `._id {
-  background: none;
-  border: none;
-  border-bottom: 2px solid ${showCreateNew ? args.theme.var.color.primary : 'transparent'};
-  color: ${showCreateNew ? args.theme.var.color.primary : args.theme.var.color.muted};
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    color: ${args.theme.var.color.primary};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_existing_content",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
-
-return {
-  as: "div",
-  hide: showCreateNew
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_existing_loading",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const playlistsLoading = args.fns.playlistsLoading?.() || false;
-
-return {
-  as: "div",
-  hide: !playlistsLoading,
-  text: "Loading playlists..."
-};
-''',
-        css: '''
-return `._id {
-  text-align: center;
-  padding: 2rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_existing_empty",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const playlistsLoading = args.fns.playlistsLoading?.() || false;
-const customPlaylists = args.fns.customPlaylists?.() || [];
-
-return {
-  as: "div",
-  hide: playlistsLoading || customPlaylists.length > 0,
-  text: "No custom playlists found. Create a new one to get started."
-};
-''',
-        css: '''
-return `._id {
-  text-align: center;
-  padding: 2rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_existing_list",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        contextName: "playlistItem",
-        loop: true,
-        props: '''
-const playlistsLoading = args.fns.playlistsLoading?.() || false;
-const customPlaylists = args.fns.customPlaylists?.() || [];
-
-return {
-  hide: playlistsLoading || customPlaylists.length === 0,
-  data: customPlaylists
-};
-'''
-      }
-    },
-    {
-      id: "playlist_item_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.playlistItem;
-const playlist = item?.playlist;
-const playlistId = playlist?.P?.youtubeId;
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
-const isSelected = selectedPlaylistId === playlistId;
-
-return {
-  as: "label",
-  onClick: () => args.fns.setSelectedPlaylistId?.(playlistId)
-};
-''',
-        css: '''
-const item = args.contextData.playlistItem;
-const playlist = item?.playlist;
-const playlistId = playlist?.P?.youtubeId;
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
-const isSelected = selectedPlaylistId === playlistId;
-
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: ${isSelected ? args.theme.var.color.primary_light_100 : args.theme.var.color.background};
-
-  &:hover {
-    border-color: ${args.theme.var.color.primary};
-    background: ${args.theme.var.color.primary_light_100};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_item_radio",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.playlistItem;
-const playlist = item?.playlist;
-const playlistId = playlist?.P?.youtubeId;
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
-
-return {
-  as: "input",
-  type: "radio",
-  name: "playlist_selector",
-  checked: selectedPlaylistId === playlistId,
-  onChange: () => args.fns.setSelectedPlaylistId?.(playlistId)
-};
-''',
-        css: '''
-return `._id {
-  width: 1.25rem;
-  height: 1.25rem;
-  cursor: pointer;
-  flex-shrink: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_item_info",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  min-width: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_item_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.playlistItem;
-const playlist = item?.playlist;
-
-return {
-  as: "div",
-  text: playlist?.P?.title || "Untitled"
-};
-''',
-        css: '''
-return `._id {
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin-bottom: 0.25rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_item_count",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.playlistItem;
-const playlist = item?.playlist;
-const itemCount = playlist?.P?.itemCount || 0;
-
-return {
-  as: "div",
-  text: `${itemCount} video${itemCount !== 1 ? 's' : ''}`
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_create_content",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
-
-return {
-  as: "div",
-  hide: !showCreateNew
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_create_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  text: "Playlist Name"
-};
-''',
-        css: '''
-return `._id {
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_create_input",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const newPlaylistName = args.fns.newPlaylistName?.() || "";
-
-return {
-  as: "input",
-  type: "text",
-  placeholder: "Enter playlist name...",
-  value: newPlaylistName,
-  onInput: (e) => args.fns.setNewPlaylistName?.(e.target.value)
-};
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  font-size: 1rem;
-  outline: none;
-  transition: all 0.2s ease;
-
-  &:focus {
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
-  }
-
-  &::placeholder {
-    color: ${args.theme.var.color.muted};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_footer",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  padding: 1.5rem;
-  border-top: 1px solid ${args.theme.var.color.border};
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_cancel",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => args.fns.setShowPlaylistSelector?.(false),
-  text: "Cancel"
-};
-''',
-        css: '''
-return `._id {
-  padding: 0.625rem 1.25rem;
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_300};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "playlist_selector_save",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const showCreateNew = args.fns.showCreateNew?.() || false;
-const savingToPlaylist = args.fns.savingToPlaylist?.() || false;
-const newPlaylistName = args.fns.newPlaylistName?.() || "";
-const selectedPlaylistId = args.fns.selectedPlaylistId?.();
-
-const isDisabled = savingToPlaylist || (showCreateNew ? !newPlaylistName.trim() : !selectedPlaylistId);
-
-return {
-  as: "button",
-  disabled: isDisabled,
-  onClick: async () => {
-    if (isDisabled) return;
-
-    if (showCreateNew) {
-      await args.fns.saveToNewPlaylist?.(newPlaylistName.trim());
-    } else {
-      await args.fns.saveToExistingPlaylist?.(selectedPlaylistId);
-    }
-  },
-  text: savingToPlaylist ? "Saving..." : "Save"
-};
-''',
-        css: '''
-return `._id {
-  padding: 0.625rem 1.25rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_dark_200};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}`;
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "modal_overlay" },
-    { id: "e2", T: "Attr", S: "modal_overlay", E: "modal_container" },
-    { id: "e3", T: "Attr", S: "modal_container", E: "modal_header" },
-    { id: "e4", T: "Attr", S: "modal_header", E: "modal_title" },
-    { id: "e5", T: "Attr", S: "modal_header", E: "modal_close_button" },
-    { id: "e6", T: "Attr", S: "modal_close_button", E: "modal_close_icon" },
-    { id: "e7", T: "Attr", S: "modal_container", E: "modal_body" },
-    { id: "e8_search", T: "Attr", S: "modal_body", E: "queue_search_container" },
-    { id: "e8_search_input", T: "Attr", S: "queue_search_container", E: "queue_search_input" },
-    { id: "e8_bulk", T: "Attr", S: "modal_body", E: "bulk_actions_container" },
-    { id: "e8_bulk_checkbox", T: "Attr", S: "bulk_actions_container", E: "bulk_select_all_checkbox" },
-    { id: "e8_bulk_text", T: "Attr", S: "bulk_actions_container", E: "bulk_actions_text" },
-    { id: "e8_bulk_remove", T: "Attr", S: "bulk_actions_container", E: "bulk_remove_button" },
-    { id: "e8_bulk_move_top", T: "Attr", S: "bulk_actions_container", E: "bulk_move_top_button" },
-    { id: "e8_wrapper", T: "Attr", S: "modal_body", E: "queue_list_wrapper" },
-    { id: "e8", T: "Attr", S: "queue_list_wrapper", E: "queue_list" },
-    { id: "e9", T: "Attr", S: "queue_list", E: "queue_empty_state" },
-    { id: "e10", T: "Attr", S: "queue_empty_state", E: "empty_icon" },
-    { id: "e11", T: "Attr", S: "queue_empty_state", E: "empty_text" },
-    { id: "e12", T: "Attr", S: "queue_list", E: "queue_items_container" },
-    { id: "e13", T: "Attr", S: "queue_items_container", E: "queue_items_loop" },
-    { id: "e14", T: "Attr", S: "queue_items_loop", E: "queue_item_wrapper" },
-    { id: "e14_checkbox", T: "Attr", S: "queue_item_wrapper", E: "queue_item_checkbox" },
-    { id: "e15", T: "Attr", S: "queue_item_wrapper", E: "queue_item_number" },
-    { id: "e16", T: "Attr", S: "queue_item_wrapper", E: "queue_item_card" },
-    { id: "e17", T: "Attr", S: "queue_item_wrapper", E: "queue_item_actions" },
-    { id: "e21", T: "Attr", S: "queue_item_actions", E: "queue_item_play_button" },
-    { id: "e22", T: "Attr", S: "queue_item_play_button", E: "queue_item_play_icon" },
-    { id: "e23", T: "Attr", S: "queue_item_actions", E: "queue_item_move_up_button" },
-    { id: "e24", T: "Attr", S: "queue_item_move_up_button", E: "queue_item_move_up_icon" },
-    { id: "e25", T: "Attr", S: "queue_item_actions", E: "queue_item_move_down_button" },
-    { id: "e26", T: "Attr", S: "queue_item_move_down_button", E: "queue_item_move_down_icon" },
-    { id: "e27", T: "Attr", S: "queue_item_actions", E: "queue_item_remove_button" },
-    { id: "e28", T: "Attr", S: "queue_item_remove_button", E: "queue_item_remove_icon" },
-    { id: "e29", T: "Attr", S: "modal_container", E: "modal_footer" },
-    { id: "e30", T: "Attr", S: "modal_footer", E: "modal_footer_info" },
-    { id: "e31", T: "Attr", S: "modal_footer", E: "modal_footer_actions" },
-    { id: "e32", T: "Attr", S: "modal_footer_actions", E: "modal_footer_save_button" },
-    { id: "e33", T: "Attr", S: "modal_footer_actions", E: "modal_footer_clear_button" },
-    { id: "e34", T: "Attr", S: "modal_body", E: "playlist_selector_overlay" },
-    { id: "e35", T: "Attr", S: "playlist_selector_overlay", E: "playlist_selector_container" },
-    { id: "e36", T: "Attr", S: "playlist_selector_container", E: "playlist_selector_header" },
-    { id: "e37", T: "Attr", S: "playlist_selector_header", E: "playlist_selector_title" },
-    { id: "e38", T: "Attr", S: "playlist_selector_header", E: "playlist_selector_close" },
-    { id: "e39", T: "Attr", S: "playlist_selector_close", E: "playlist_selector_close_icon" },
-    { id: "e40", T: "Attr", S: "playlist_selector_container", E: "playlist_selector_body" },
-    { id: "e41", T: "Attr", S: "playlist_selector_body", E: "playlist_selector_tabs" },
-    { id: "e42", T: "Attr", S: "playlist_selector_tabs", E: "playlist_tab_existing" },
-    { id: "e43", T: "Attr", S: "playlist_selector_tabs", E: "playlist_tab_create" },
-    { id: "e44", T: "Attr", S: "playlist_selector_body", E: "playlist_existing_content" },
-    { id: "e45", T: "Attr", S: "playlist_existing_content", E: "playlist_existing_loading" },
-    { id: "e46", T: "Attr", S: "playlist_existing_content", E: "playlist_existing_empty" },
-    { id: "e47", T: "Attr", S: "playlist_existing_content", E: "playlist_existing_list" },
-    { id: "e48", T: "Attr", S: "playlist_existing_list", E: "playlist_item_wrapper" },
-    { id: "e49", T: "Attr", S: "playlist_item_wrapper", E: "playlist_item_radio" },
-    { id: "e50", T: "Attr", S: "playlist_item_wrapper", E: "playlist_item_info" },
-    { id: "e51", T: "Attr", S: "playlist_item_info", E: "playlist_item_title" },
-    { id: "e52", T: "Attr", S: "playlist_item_info", E: "playlist_item_count" },
-    { id: "e53", T: "Attr", S: "playlist_selector_body", E: "playlist_create_content" },
-    { id: "e54", T: "Attr", S: "playlist_create_content", E: "playlist_create_label" },
-    { id: "e55", T: "Attr", S: "playlist_create_content", E: "playlist_create_input" },
-    { id: "e56", T: "Attr", S: "playlist_selector_container", E: "playlist_selector_footer" },
-    { id: "e57", T: "Attr", S: "playlist_selector_footer", E: "playlist_selector_cancel" },
-    { id: "e58", T: "Attr", S: "playlist_selector_footer", E: "playlist_selector_save" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "61"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "61"
+      E: "63"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "61"
+      E: "62"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "16"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "36"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "63"
+      E: "65"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "63"
+      E: "64"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "11"
+      E: "15"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "17"
+      E: "21"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "37"
+      E: "42"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "37"
+      E: "58"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "38"
+      E: "40"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "38"
+      E: "39"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "42"
+      E: "46"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "42"
+      E: "55"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "42"
+      E: "43"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "58"
+      E: "60"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "58"
+      E: "59"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "46"
+      E: "48"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "46"
+      E: "49"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "55"
+      E: "57"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "55"
+      E: "56"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "43"
+      E: "45"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "23"
+      E: "26"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "49"
+      E: "50"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "27"
+      E: "32"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "27"
+      E: "30"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "27"
+      E: "34"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "50"
+      E: "52"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "50"
+      E: "51"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "52"
+      E: "54"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "52"
+      E: "53"
+    }
   ]
 }

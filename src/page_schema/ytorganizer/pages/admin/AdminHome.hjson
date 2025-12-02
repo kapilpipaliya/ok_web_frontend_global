@@ -1,64 +1,33 @@
 {
   vertexes: [
     {
-      id: "page_root",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "AdminHome",
-        url: "/yto/admin",
-        signinRequired: true,
-        description: "Admin dashboard home page with links to all admin sections",
-        fns: '''
+        signinRequired: true
+        description: Admin dashboard home page with links to all admin sections
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        url: /yto/admin
+        key: AdminHome
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout",
-        displayOrder: 1,
-        description: "YTO layout with navigation"
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "admin_layout",
-      L: "PageLayout",
-      P: {
-        componentName: "AdminLayout",
-        displayOrder: 3,
-        description: "Admin layout wrapper"
-      }
-    },
-    {
-      id: "container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        description: "Main container for admin dashboard",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem;
   max-width: 1200px;
@@ -70,40 +39,44 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "page_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        description: Main container for admin dashboard
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   margin-bottom: 3rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "page_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: "Admin Dashboard"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
@@ -115,37 +88,62 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "page_subtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Manage system settings, monitor workers, and oversee user accounts"
+  as: "h1",
+  text: "Admin Dashboard"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   color: ${args.theme.var.color.muted};
   margin: 0.5rem 0 0 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Manage system settings, monitor workers, and oversee user accounts"
+};
+'''
       }
-    },
+    }
     {
-      id: "admin_sections_grid",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        description: "Grid layout for admin section cards with loop",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+        displayOrder: 2
+        description: Grid layout for admin section cards with loop
+        componentName: Html
+        props:
+          '''
 return {
   as: "section",
   contextName: "adminSection",
@@ -255,47 +253,15 @@ return {
     }
   ]
 };
-''',
-        css: '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-}`;
 '''
       }
-    },
-    {
-      id: "section_card",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        description: "Admin section card",
-        props: '''
-const section = args.contextData.adminSection;
-
-return {
-  as: section.enabled ? "a" : "div",
-  href: section.enabled ? section.link : undefined,
-  target: section.openInNewTab ? "_blank" : undefined,
-  rel: section.openInNewTab ? "noopener noreferrer" : undefined,
-  onClick: section.enabled ? ((e) => {
-    if (section.openInNewTab) {
-      // Let the browser handle the new tab opening
-      return;
     }
-    e.preventDefault();
-    args.navigate(section.link);
-  }) : undefined
-};
-''',
-        css: '''
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 const section = args.contextData.adminSection;
 
 return `._id {
@@ -322,40 +288,58 @@ return `._id {
   ` : ''}
 }`;
 '''
-      }
-    },
-    {
-      id: "card_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        description: Admin section card
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.adminSection;
+
 return {
-  as: "div"
+  as: section.enabled ? "a" : "div",
+  href: section.enabled ? section.link : undefined,
+  target: section.openInNewTab ? "_blank" : undefined,
+  rel: section.openInNewTab ? "noopener noreferrer" : undefined,
+  onClick: section.enabled ? ((e) => {
+    if (section.openInNewTab) {
+      // Let the browser handle the new tab opening
+      return;
+    }
+    e.preventDefault();
+    args.navigate(section.link);
+  }) : undefined
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
   gap: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "icon_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 const section = args.contextData.adminSection;
 const iconBgColor = args.theme.var.color[section.iconBg];
 const textColor = args.theme.var.color[section.iconBg + '_text'];
@@ -372,15 +356,24 @@ return `._id {
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "card_icon",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.adminSection;
 
 return {
@@ -391,22 +384,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "card_title",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const section = args.contextData.adminSection;
-
-return {
-  as: "h3",
-  text: section.title
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
@@ -414,23 +398,25 @@ return `._id {
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "card_description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.adminSection;
 
 return {
-  as: "p",
-  text: section.description
+  as: "h3",
+  text: section.title
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.muted};
   margin: 0;
@@ -438,23 +424,25 @@ return `._id {
   font-size: 0.9375rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "card_action",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.adminSection;
 
 return {
-  as: "div",
-  text: section.linkText
+  as: "p",
+  text: section.description
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 const section = args.contextData.adminSection;
 const actionColor = section.enabled
   ? args.theme.var.color[section.hoverBorder]
@@ -477,24 +465,136 @@ return `._id {
   ` : ''}
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.adminSection;
+
+return {
+  as: "div",
+  text: section.linkText
+};
+'''
       }
     }
-  ],
+    {
+      id: "14"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+    {
+      id: "15"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
+      }
+    }
+    {
+      id: "16"
+      L: PageLayout
+      P: {
+        displayOrder: 3
+        description: Admin layout wrapper
+        componentName: AdminLayout
+      }
+    }
+  ]
   edges: [
-    { id: "e_layout", T: "PageLayout", S: "page_root", E: "page_layout" },
-    { id: "e_layout_content", T: "PageLayout", S: "page_root", E: "page_layout_content" },
-    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
-    { id: "e1", T: "Attr", S: "page_root", E: "container" },
-    { id: "e2", T: "Attr", S: "container", E: "page_header" },
-    { id: "e3", T: "Attr", S: "page_header", E: "page_title" },
-    { id: "e4", T: "Attr", S: "page_header", E: "page_subtitle" },
-    { id: "e5", T: "Attr", S: "container", E: "admin_sections_grid" },
-    { id: "e6", T: "Attr", S: "admin_sections_grid", E: "section_card" },
-    { id: "e7", T: "Attr", S: "section_card", E: "card_header" },
-    { id: "e8", T: "Attr", S: "card_header", E: "icon_wrapper" },
-    { id: "e9", T: "Attr", S: "icon_wrapper", E: "card_icon" },
-    { id: "e10", T: "Attr", S: "card_header", E: "card_title" },
-    { id: "e11", T: "Attr", S: "section_card", E: "card_description" },
-    { id: "e12", T: "Attr", S: "section_card", E: "card_action" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "12"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "13"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e13
+      T: PageLayout
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e14
+      T: PageLayout
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e15
+      T: PageLayout
+      S: "1"
+      E: "16"
+    }
   ]
 }

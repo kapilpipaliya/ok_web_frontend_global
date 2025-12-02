@@ -1,13 +1,12 @@
 {
   vertexes: [
     {
-      id: "page_root"
-      L: "Page"
+      id: "1"
+      L: Page
       P: {
-        key: "AccountManagement"
-        url: "/accounts"
         signinRequired: true
-        fns: '''
+        fns:
+          '''
 // State for ownerships
 const [ownerships, setOwnerships] = args.createSignal([]);
 const [isLoading, setIsLoading] = args.createSignal(true);
@@ -155,8 +154,11 @@ return {
   hideMessage,
   handleOAuthCallback
 };
-''',
-        props: '''
+'''
+        url: /accounts
+        key: AccountManagement
+        props:
+          '''
 return {
   isNoPermissionCheck: true,
   onMount: () => {
@@ -168,36 +170,11 @@ return {
       }
     }
     {
-      id: "page_layout"
-      L: "PageLayout"
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout"
-        displayOrder: 1
-        description: "YTO layout with navigation"
-      }
-    }
-    {
-      id: "page_layout_content"
-      L: "PageLayout"
-      P: {
-        componentName: "LayoutContent"
-        displayOrder: 2
-      }
-    }
-
-    // Main container
-    {
-      id: "main_container"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "div"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
@@ -208,43 +185,42 @@ return `._id {
   }
 }`;
 '''
-      }
-    }
-
-    // Page header
-    {
-      id: "page_header"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-bottom: ${args.theme.var.spacing.xl};
 }`;
 '''
-      }
-    }
-
-    // Page title
-    {
-      id: "page_title"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: "YouTube Channels"
+  as: "div"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.title};
   font-weight: 700;
@@ -256,23 +232,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    }
-
-    // Page description
-    {
-      id: "page_description"
-      L: "Attr"
-      P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Connect at least one YouTube channel to get started. If you have multiple brand accounts under one Google account, connect each channel separately to access all of them."
+  as: "h1",
+  text: "YouTube Channels"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.md};
   color: ${args.theme.var.color.muted};
@@ -283,25 +259,104 @@ return `._id {
   }
 }`;
 '''
-      }
-    }
-
-    // Message banner
-    {
-      id: "message_banner"
-      L: "Attr"
-      P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
-const messageState = args.fns.messageState;
-
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: !messageState?.visible
+  as: "p",
+  text: "Connect at least one YouTube channel to get started. If you have multiple brand accounts under one Google account, connect each channel separately to access all of them."
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.sm};
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  flex-shrink: 0;
+  margin-top: 2px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:info",
+  width: "20px",
+  height: "20px"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.info_light_100_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.5;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isError = messageState?.type === 'error';
 
@@ -333,17 +388,38 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const messageState = args.fns.messageState;
+
+return {
+  as: "div",
+  hide: !messageState?.visible
+};
+'''
       }
     }
-
-    // Message icon
     {
-      id: "message_icon"
-      L: "Attr"
+      id: "10"
+      L: Attr
       P: {
+        css:
+          '''
+const messageState = args.fns.messageState;
+const isError = messageState?.type === 'error';
+
+return `._id {
+  color: ${isError ? args.theme.var.color.error_light_100_text : args.theme.var.color.success_light_100_text};
+  flex-shrink: 0;
+  margin-top: 2px;
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const messageState = args.fns.messageState;
 const isError = messageState?.type === 'error';
 
@@ -354,55 +430,34 @@ return {
   height: "24px"
 };
 '''
-        css: '''
-const messageState = args.fns.messageState;
-const isError = messageState?.type === 'error';
-
-return `._id {
-  color: ${isError ? args.theme.var.color.error_light_100_text : args.theme.var.color.success_light_100_text};
-  flex-shrink: 0;
-  margin-top: 2px;
-}`;
-'''
       }
     }
-
-    // Message content
     {
-      id: "message_content"
-      L: "Attr"
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "div"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
 }`;
 '''
-      }
-    }
-
-    // Message text
-    {
-      id: "message_text"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-const messageState = args.fns.messageState;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: messageState?.text || ""
+  as: "div"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isError = messageState?.type === 'error';
 
@@ -417,25 +472,25 @@ return `._id {
   }
 }`;
 '''
-      }
-    }
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const messageState = args.fns.messageState;
 
-    // Close button
-    {
-      id: "message_close_button"
-      L: "Attr"
-      P: {
-        displayOrder: 3
-        componentName: "Html"
-        props: '''
 return {
-  as: "button",
-  type: "button",
-  "aria-label": "Close message",
-  onClick: args.fns.hideMessage
+  as: "p",
+  text: messageState?.text || ""
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isError = messageState?.type === 'error';
 
@@ -461,17 +516,27 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  "aria-label": "Close message",
+  onClick: args.fns.hideMessage
+};
+'''
       }
     }
-
-    // Close icon
     {
-      id: "message_close_icon"
-      L: "Attr"
+      id: "14"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "ph:x",
@@ -481,96 +546,20 @@ return {
 '''
       }
     }
-
-    // Info box for brand accounts
     {
-      id: "info_box"
-      L: "Attr"
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "div"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
-  display: flex;
-  gap: ${args.theme.var.spacing.md};
-  align-items: flex-start;
-
-  @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
-    gap: ${args.theme.var.spacing.sm};
-  }
+  margin-bottom: ${args.theme.var.spacing.xl};
 }`;
 '''
-      }
-    }
-
-    // Info icon
-    {
-      id: "info_icon"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "icon",
-  icon: "ph:info",
-  width: "20px",
-  height: "20px"
-};
-'''
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
-  flex-shrink: 0;
-  margin-top: 2px;
-}`;
-'''
-      }
-    }
-
-    // Info text
-    {
-      id: "info_text"
-      L: "Attr"
-      P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "p",
-  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
-};
-'''
-        css: '''
-return `._id {
-  margin: 0;
-  color: ${args.theme.var.color.info_light_100_text};
-  font-size: ${args.theme.var.fontSize.sm};
-  line-height: 1.5;
-}`;
-'''
-      }
-    }
-
-    // Add account button (top)
-    {
-      id: "add_account_button_top"
-      L: "Attr"
-      P: {
         displayOrder: 3
-        componentName: "Button"
-        props: '''
+        componentName: Button
+        props:
+          '''
 const isConnecting = args.fns.isConnecting?.();
 
 return {
@@ -579,23 +568,26 @@ return {
   onClick: args.fns.connectAccount,
   disabled: isConnecting
 };
-''',
-        css: '''
-return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
-}`;
 '''
       }
     }
-
-    // Loading state
     {
-      id: "loading_state"
-      L: "Attr"
+      id: "16"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xxl};
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.lg};
+}`;
+'''
         displayOrder: 4
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const isLoading = args.fns.isLoading?.();
 
 return {
@@ -604,25 +596,144 @@ return {
   hide: !isLoading
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xxl};
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.lg};
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 2px dashed ${args.theme.var.color.border};
 }`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.isLoading?.();
+const ownerships = args.fns.ownerships?.() || [];
+const hasAccounts = ownerships.length > 0;
+
+return {
+  as: "div",
+  hide: isLoading || hasAccounts
+};
 '''
       }
     }
-
-    // Table container
     {
-      id: "table_container"
-      L: "Attr"
+      id: "18"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:youtube-logo",
+  width: 64,
+  height: 64
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h3",
+  text: "No YouTube Channels Connected"
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Connect your YouTube channels to start organizing your content. Each channel requires a separate connection."
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''
+const isConnecting = args.fns.isConnecting?.();
+
+return {
+  text: isConnecting ? "Connecting..." : "Connect YouTube Channel",
+  variant: "primary",
+  onClick: args.fns.connectAccount,
+  disabled: isConnecting
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  overflow-x: auto;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+}`;
+'''
         displayOrder: 5
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const isLoading = args.fns.isLoading?.();
 const ownerships = args.fns.ownerships?.() || [];
 
@@ -631,89 +742,95 @@ return {
   hide: isLoading || ownerships.length === 0
 };
 '''
-        css: '''
-return `._id {
-  overflow-x: auto;
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-}`;
-'''
       }
     }
-
-    // Table element
     {
-      id: "accounts_table"
-      L: "Attr"
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "table"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   width: 100%;
   border-collapse: collapse;
   font-size: ${args.theme.var.fontSize.sm};
 }`;
 '''
-      }
-    }
-
-    // Table head
-    {
-      id: "table_head"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
-  as: "thead"
+  as: "table"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_dark_100};
   border-bottom: 2px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "thead"
+};
+'''
       }
     }
-
-    // Table head row
     {
-      id: "table_head_row"
-      L: "Attr"
+      id: "25"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "tr"
 };
 '''
       }
     }
-
-    // Header: Channel Name
     {
-      id: "th_channel_name"
-      L: "Attr"
+      id: "26"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  text-align: left;
+  padding: ${args.theme.var.spacing.md};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
   text: "Channel Name"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: left;
   padding: ${args.theme.var.spacing.md};
@@ -721,23 +838,23 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    }
-
-    // Header: Custom Name
-    {
-      id: "th_custom_name"
-      L: "Attr"
-      P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
   text: "Custom Name"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: left;
   padding: ${args.theme.var.spacing.md};
@@ -745,47 +862,47 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    }
-
-    // Header: Channel ID
-    {
-      id: "th_channel_id"
-      L: "Attr"
-      P: {
         displayOrder: 3
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
   text: "Channel ID"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  text-align: left;
+  text-align: center;
   padding: ${args.theme.var.spacing.md};
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    }
-
-    // Header: Status
-    {
-      id: "th_status"
-      L: "Attr"
-      P: {
         displayOrder: 4
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
   text: "Status"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.md};
@@ -793,47 +910,23 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    }
-
-    // Header: Primary
-    {
-      id: "th_primary"
-      L: "Attr"
-      P: {
         displayOrder: 5
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
   text: "Primary"
 };
 '''
-        css: '''
-return `._id {
-  text-align: center;
-  padding: ${args.theme.var.spacing.md};
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
       }
     }
-
-    // Header: Last Activity
     {
-      id: "th_last_activity"
-      L: "Attr"
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 6
-        componentName: "Html"
-        props: '''
-return {
-  as: "th",
-  text: "Last Activity"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   text-align: left;
   padding: ${args.theme.var.spacing.md};
@@ -841,23 +934,23 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    }
-
-    // Header: Actions
-    {
-      id: "th_actions"
-      L: "Attr"
-      P: {
-        displayOrder: 7
-        componentName: "Html"
-        props: '''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
-  text: "Actions"
+  text: "Last Activity"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.md};
@@ -866,19 +959,27 @@ return `._id {
   width: 200px;
 }`;
 '''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  text: "Actions"
+};
+'''
       }
     }
-
-    // Table body
     {
-      id: "table_body"
-      L: "Attr"
+      id: "33"
+      L: Attr
       P: {
-        displayOrder: 2
-        componentName: "Html"
-        contextName: "account"
+        contextName: account
         loop: true
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const ownerships = args.fns.ownerships?.() || [];
 
 return {
@@ -888,20 +989,12 @@ return {
 '''
       }
     }
-
-    // Table row (for each account)
     {
-      id: "table_row"
-      L: "Attr"
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "tr"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
   transition: background ${args.theme.var.animation.fast} ease;
@@ -915,17 +1008,32 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "tr"
+};
+'''
       }
     }
-
-    // TD: Channel Name
     {
-      id: "td_channel_name"
-      L: "Attr"
+      id: "35"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const account = args.contextData?.account;
 const ownership = account?.ownership;
 const channelName = ownership?.P?.channelName || "Unknown Channel";
@@ -935,24 +1043,23 @@ return {
   text: channelName
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.text};
-  font-weight: 500;
 }`;
 '''
-      }
-    }
-
-    // TD: Custom Name
-    {
-      id: "td_custom_name"
-      L: "Attr"
-      P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const account = args.contextData?.account;
 const ownership = account?.ownership;
 const customName = ownership?.P?.customName || "-";
@@ -962,23 +1069,25 @@ return {
   text: customName
 };
 '''
-        css: '''
-return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
-}`;
-'''
       }
     }
-
-    // TD: Channel ID
     {
-      id: "td_channel_id"
-      L: "Attr"
+      id: "37"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.muted};
+  font-family: monospace;
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
         displayOrder: 3
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const account = args.contextData?.account;
 const ownership = account?.ownership;
 const channelId = ownership?.P?.channelId || "";
@@ -988,55 +1097,35 @@ return {
   text: channelId
 };
 '''
-        css: '''
-return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.muted};
-  font-family: monospace;
-  font-size: ${args.theme.var.fontSize.xs};
-}`;
-'''
       }
     }
-
-    // TD: Status Badge
     {
-      id: "td_status"
-      L: "Attr"
+      id: "38"
+      L: Attr
       P: {
-        displayOrder: 4
-        componentName: "Html"
-        props: '''
-return {
-  as: "td"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: center;
 }`;
 '''
-      }
-    }
-
-    // Status badge inside td
-    {
-      id: "status_badge"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-const account = args.contextData?.account;
-const isConnected = account?.isConnected;
-
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: isConnected ? "Connected" : "Disconnected"
+  as: "td"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
 const account = args.contextData?.account;
 const isConnected = account?.isConnected;
 
@@ -1056,17 +1145,36 @@ return `._id {
   `}
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const account = args.contextData?.account;
+const isConnected = account?.isConnected;
+
+return {
+  as: "span",
+  text: isConnected ? "Connected" : "Disconnected"
+};
+'''
       }
     }
-
-    // TD: Primary
     {
-      id: "td_primary"
-      L: "Attr"
+      id: "40"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-size: ${args.theme.var.fontSize.lg};
+}`;
+'''
         displayOrder: 5
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const account = args.contextData?.account;
 const ownership = account?.ownership;
 const isPrimary = ownership?.P?.isPrimary;
@@ -1076,24 +1184,25 @@ return {
   text: isPrimary ? "⭐" : ""
 };
 '''
-        css: '''
-return `._id {
-  padding: ${args.theme.var.spacing.md};
-  text-align: center;
-  font-size: ${args.theme.var.fontSize.lg};
-}`;
-'''
       }
     }
-
-    // TD: Last Activity
     {
-      id: "td_last_activity"
-      L: "Attr"
+      id: "41"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.xs};
+  white-space: nowrap;
+}`;
+'''
         displayOrder: 6
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const account = args.contextData?.account;
 const isConnected = account?.isConnected;
 const token = account?.token;
@@ -1117,68 +1226,59 @@ return {
   text: activityText
 };
 '''
-        css: '''
-return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.xs};
-  white-space: nowrap;
-}`;
-'''
       }
     }
-
-    // TD: Actions
     {
-      id: "td_actions"
-      L: "Attr"
+      id: "42"
+      L: Attr
       P: {
-        displayOrder: 7
-        componentName: "Html"
-        props: '''
-return {
-  as: "td"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: center;
 }`;
 '''
-      }
-    }
-
-    // Action buttons container
-    {
-      id: "action_buttons"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "td"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.sm};
   justify-content: center;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
     }
-
-    // Reconnect button (for disconnected accounts)
     {
-      id: "reconnect_button"
-      L: "Attr"
+      id: "44"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Button"
-        props: '''
+        componentName: Button
+        props:
+          '''
 const account = args.contextData?.account;
 const isConnected = account?.isConnected;
 const isConnecting = args.fns.isConnecting?.();
@@ -1193,15 +1293,14 @@ return {
 '''
       }
     }
-
-    // Disconnect button (for connected accounts)
     {
-      id: "disconnect_button"
-      L: "Attr"
+      id: "45"
+      L: Attr
       P: {
         displayOrder: 2
-        componentName: "Button"
-        props: '''
+        componentName: Button
+        props:
+          '''
 const account = args.contextData?.account;
 const ownership = account?.ownership;
 const ownershipId = ownership?.P?.key;
@@ -1220,174 +1319,300 @@ return {
 '''
       }
     }
-
-    // Empty state (no accounts)
     {
-      id: "empty_state"
-      L: "Attr"
-      P: {
-        displayOrder: 5
-        componentName: "Html"
-        props: '''
-const isLoading = args.fns.isLoading?.();
-const ownerships = args.fns.ownerships?.() || [];
-const hasAccounts = ownerships.length > 0;
-
-return {
-  as: "div",
-  hide: isLoading || hasAccounts
-};
-'''
-        css: '''
-return `._id {
-  text-align: center;
-  padding: ${args.theme.var.spacing.xxl};
-  background: ${args.theme.var.color.background_dark_50};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 2px dashed ${args.theme.var.color.border};
-}`;
-'''
-      }
-    }
-
-    // Empty state icon
-    {
-      id: "empty_state_icon"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "icon",
-  icon: "ph:youtube-logo",
-  width: 64,
-  height: 64
-};
-'''
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: ${args.theme.var.spacing.md};
-}`;
-'''
-      }
-    }
-
-    // Empty state title
-    {
-      id: "empty_state_title"
-      L: "Attr"
+      id: "46"
+      L: PageLayout
       P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "h3",
-  text: "No YouTube Channels Connected"
-};
-'''
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
-}`;
-'''
+        componentName: LayoutContent
       }
     }
-
-    // Empty state description
     {
-      id: "empty_state_description"
-      L: "Attr"
+      id: "47"
+      L: PageLayout
       P: {
-        displayOrder: 3
-        componentName: "Html"
-        props: '''
-return {
-  as: "p",
-  text: "Connect your YouTube channels to start organizing your content. Each channel requires a separate connection."
-};
-'''
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
-}`;
-'''
-      }
-    }
-
-    // Empty state button
-    {
-      id: "empty_state_button"
-      L: "Attr"
-      P: {
-        displayOrder: 4
-        componentName: "Button"
-        props: '''
-const isConnecting = args.fns.isConnecting?.();
-
-return {
-  text: isConnecting ? "Connecting..." : "Connect YouTube Channel",
-  variant: "primary",
-  onClick: args.fns.connectAccount,
-  disabled: isConnecting
-};
-'''
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
       }
     }
   ]
-
   edges: [
-    { id: "e_layout", T: "PageLayout", S: "page_root", E: "page_layout" }
-    { id: "e_layout_content", T: "PageLayout", S: "page_root", E: "page_layout_content" }
-    { id: "e1", T: "Attr", S: "page_root", E: "main_container" }
-    { id: "e2", T: "Attr", S: "main_container", E: "page_header" }
-    { id: "e3", T: "Attr", S: "page_header", E: "page_title" }
-    { id: "e4", T: "Attr", S: "page_header", E: "page_description" }
-    { id: "e4_1", T: "Attr", S: "main_container", E: "message_banner" }
-    { id: "e4_2", T: "Attr", S: "message_banner", E: "message_icon" }
-    { id: "e4_3", T: "Attr", S: "message_banner", E: "message_content" }
-    { id: "e4_4", T: "Attr", S: "message_content", E: "message_text" }
-    { id: "e4_5", T: "Attr", S: "message_banner", E: "message_close_button" }
-    { id: "e4_6", T: "Attr", S: "message_close_button", E: "message_close_icon" }
-    { id: "e4_7", T: "Attr", S: "main_container", E: "info_box" }
-    { id: "e4_8", T: "Attr", S: "info_box", E: "info_icon" }
-    { id: "e4_9", T: "Attr", S: "info_box", E: "info_text" }
-    { id: "e5", T: "Attr", S: "main_container", E: "add_account_button_top" }
-    { id: "e6", T: "Attr", S: "main_container", E: "loading_state" }
-    { id: "e7", T: "Attr", S: "main_container", E: "table_container" }
-    { id: "e8", T: "Attr", S: "table_container", E: "accounts_table" }
-    { id: "e9", T: "Attr", S: "accounts_table", E: "table_head" }
-    { id: "e10", T: "Attr", S: "table_head", E: "table_head_row" }
-    { id: "e11", T: "Attr", S: "table_head_row", E: "th_channel_name" }
-    { id: "e12", T: "Attr", S: "table_head_row", E: "th_custom_name" }
-    { id: "e13", T: "Attr", S: "table_head_row", E: "th_channel_id" }
-    { id: "e14", T: "Attr", S: "table_head_row", E: "th_status" }
-    { id: "e15", T: "Attr", S: "table_head_row", E: "th_primary" }
-    { id: "e16", T: "Attr", S: "table_head_row", E: "th_last_activity" }
-    { id: "e17", T: "Attr", S: "table_head_row", E: "th_actions" }
-    { id: "e18", T: "Attr", S: "accounts_table", E: "table_body" }
-    { id: "e19", T: "Attr", S: "table_body", E: "table_row" }
-    { id: "e20", T: "Attr", S: "table_row", E: "td_channel_name" }
-    { id: "e21", T: "Attr", S: "table_row", E: "td_custom_name" }
-    { id: "e22", T: "Attr", S: "table_row", E: "td_channel_id" }
-    { id: "e23", T: "Attr", S: "table_row", E: "td_status" }
-    { id: "e24", T: "Attr", S: "td_status", E: "status_badge" }
-    { id: "e25", T: "Attr", S: "table_row", E: "td_primary" }
-    { id: "e26", T: "Attr", S: "table_row", E: "td_last_activity" }
-    { id: "e27", T: "Attr", S: "table_row", E: "td_actions" }
-    { id: "e28", T: "Attr", S: "td_actions", E: "action_buttons" }
-    { id: "e29", T: "Attr", S: "action_buttons", E: "reconnect_button" }
-    { id: "e30", T: "Attr", S: "action_buttons", E: "disconnect_button" }
-    { id: "e31", T: "Attr", S: "main_container", E: "empty_state" }
-    { id: "e32", T: "Attr", S: "empty_state", E: "empty_state_icon" }
-    { id: "e33", T: "Attr", S: "empty_state", E: "empty_state_title" }
-    { id: "e34", T: "Attr", S: "empty_state", E: "empty_state_description" }
-    { id: "e35", T: "Attr", S: "empty_state", E: "empty_state_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "15"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "17"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "16"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "22"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "17"
+      E: "21"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "17"
+      E: "20"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "9"
+      E: "13"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "23"
+      E: "33"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "34"
+      E: "40"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "34"
+      E: "36"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "34"
+      E: "38"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "34"
+      E: "41"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "34"
+      E: "37"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "34"
+      E: "42"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "25"
+      E: "29"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "25"
+      E: "32"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "25"
+      E: "28"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "25"
+      E: "30"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "25"
+      E: "31"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "38"
+      E: "39"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "42"
+      E: "43"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "43"
+      E: "45"
+    }
+    {
+      id: e45
+      T: PageLayout
+      S: "1"
+      E: "46"
+    }
+    {
+      id: e46
+      T: PageLayout
+      S: "1"
+      E: "47"
+    }
   ]
 }

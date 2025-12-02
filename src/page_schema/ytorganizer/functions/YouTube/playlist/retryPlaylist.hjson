@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "retry_playlist_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "retryPlaylist",
-        description: "Retry a failed or stuck playlist processing job",
-        body: '''
+        description: Retry a failed or stuck playlist processing job
+        body:
+          '''
 /**
  * Retry Playlist Processing
  *
@@ -221,8 +221,9 @@ try {
   };
 }
 '''
+        key: retryPlaylist
       }
     }
-  ],
+  ]
   edges: []
 }

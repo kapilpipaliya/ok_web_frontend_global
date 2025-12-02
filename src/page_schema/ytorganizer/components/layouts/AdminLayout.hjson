@@ -1,28 +1,36 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "AdminLayout",
-        description: "Admin layout wrapper that renders children slot"
+        description: Admin layout wrapper that renders children slot
+        key: AdminLayout
       }
-    },
+    }
     {
-      id: "root",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        description: "Admin layout container",
-        fns: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        description: Admin layout container
+        fns:
+          '''
 if (!args.fns.checkAdminRole()) {
   args.navigate('/home');
   args.showErrorToast("Admin access required");
   return {};
 }
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   onMount: () => {
@@ -136,27 +144,32 @@ return {
     }
   }
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "children_slot",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot",
-        description: "Renders the page content",
-        slot: "children"
+        displayOrder: 1
+        description: Renders the page content
+        componentName: Slot
+        slot: children
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "root" },
-    { id: "e2", T: "Attr", S: "root", E: "children_slot" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
   ]
 }

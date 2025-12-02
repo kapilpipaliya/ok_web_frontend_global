@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "manual_refresh_tokens_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "manualRefreshTokens",
-        description: "Manually trigger refresh of YouTube OAuth tokens that are expiring (for testing/immediate use)",
-        body: '''
+        description: Manually trigger refresh of YouTube OAuth tokens that are expiring (for testing/immediate use)
+        body:
+          '''
 /**
  * Manual Trigger for Token Refresh
  *
@@ -145,8 +145,9 @@ try {
   };
 }
 '''
+        key: manualRefreshTokens
       }
     }
-  ],
+  ]
   edges: []
 }

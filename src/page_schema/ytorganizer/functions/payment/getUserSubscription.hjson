@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getUserSubscription",
-        description: "Get current user's active subscription details and quota usage",
-        body: '''
+        description: Get current user's active subscription details and quota usage
+        body:
+          '''
 try {
   // Get authenticated user
   const user = await args.getUserFromSession();
@@ -87,8 +87,9 @@ try {
   };
 }
 '''
+        key: getUserSubscription
       }
     }
-  ],
+  ]
   edges: []
 }

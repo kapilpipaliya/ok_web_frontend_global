@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "delete_account_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "deleteAccount",
-        description: "Deletes user account by first clearing all user data and then deleting the user",
-        body: '''
+        description: Deletes user account by first clearing all user data and then deleting the user
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -115,8 +115,9 @@ try {
   };
 }
 '''
+        key: deleteAccount
       }
     }
-  ],
+  ]
   edges: []
 }

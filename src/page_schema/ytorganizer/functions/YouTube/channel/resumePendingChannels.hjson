@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "resume_pending_channels_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "resumePendingChannels",
-        description: "Resume all paused/pending_quota channels and playlists for a user",
-        body: '''
+        description: Resume all paused/pending_quota channels and playlists for a user
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -171,8 +171,9 @@ try {
   };
 }
 '''
+        key: resumePendingChannels
       }
     }
-  ],
+  ]
   edges: []
 }

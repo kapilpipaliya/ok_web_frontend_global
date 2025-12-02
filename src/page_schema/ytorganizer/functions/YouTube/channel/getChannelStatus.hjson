@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_channel_status_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getChannelStatus",
-        description: "Get processing status for a specific channel",
-        body: '''
+        description: Get processing status for a specific channel
+        body:
+          '''
 try {
   const { channelId, ownershipId } = args.contextData;
 
@@ -60,8 +60,9 @@ try {
   };
 }
 '''
+        key: getChannelStatus
       }
     }
-  ],
+  ]
   edges: []
 }

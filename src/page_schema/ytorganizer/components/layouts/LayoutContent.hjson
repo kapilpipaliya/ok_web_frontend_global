@@ -1,36 +1,11 @@
 {
   vertexes: [
     {
-      id: "content_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "LayoutContent",
-        props: '''
-return {
-  onMount: async () => {
-    // Load sidebar state from database
-    await args.fns.loadSidebarState();
-
-    // Refresh quota usage and card field setting for current ownership
-    // Ownership is already loaded by parent Layout component
-    if (args.fns.getSelectedOwnershipId?.()) {
-      await args.fns.fetchQuotaUsage();
-      await args.fns.loadCardFieldSetting();
-    }
-
-    // Refresh quota usage every 5 minutes
-    const quotaInterval = setInterval(() => {
-      args.fns.fetchQuotaUsage();
-    }, 5 * 60 * 1000);
-
-    // Cleanup on unmount
-    return () => {
-      clearInterval(quotaInterval);
-    };
-  }
-};
-''',
-        fns: '''
+        fns:
+          '''
 // Define navigation items for both desktop and mobile menus
 // Using createSignal for reactive state management
 const navigationSectionsData = [
@@ -639,39 +614,56 @@ return {
   getPriorityInfo
 };
 '''
+        key: LayoutContent
+        props:
+          '''
+return {
+  onMount: async () => {
+    // Load sidebar state from database
+    await args.fns.loadSidebarState();
+
+    // Refresh quota usage and card field setting for current ownership
+    // Ownership is already loaded by parent Layout component
+    if (args.fns.getSelectedOwnershipId?.()) {
+      await args.fns.fetchQuotaUsage();
+      await args.fns.loadCardFieldSetting();
+    }
+
+    // Refresh quota usage every 5 minutes
+    const quotaInterval = setInterval(() => {
+      args.fns.fetchQuotaUsage();
+    }, 5 * 60 * 1000);
+
+    // Cleanup on unmount
+    return () => {
+      clearInterval(quotaInterval);
+    };
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "impersonation_banner",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 0,
-        componentName: "ImpersonationBanner",
-        props: '''
+        displayOrder: 0
+        componentName: ImpersonationBanner
+        props:
+          '''
 return {
   impersonatedUser: args.fns.impersonatedUser(),
   onExitImpersonation: args.fns.exitImpersonation
 };
 '''
       }
-    },
+    }
     {
-      id: "quota_warning_banner",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 0.6,
-        componentName: "Html",
-        props: '''
-const isApproaching = args.fns.isApproachingQuotaLimit?.();
-const isAtLimit = args.fns.isAtQuotaLimit?.();
-const showBanner = isApproaching || isAtLimit;
-
-return {
-  as: "div",
-  hide: !showBanner
-};
-''',
-        css: '''
+        css:
+          '''
 const isAtLimit = args.fns.isAtQuotaLimit?.();
 
 return `._id {
@@ -691,20 +683,27 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "quota_warning_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const isApproaching = args.fns.isApproachingQuotaLimit?.();
+const isAtLimit = args.fns.isAtQuotaLimit?.();
+const showBanner = isApproaching || isAtLimit;
+
 return {
-  as: "div"
+  as: "div",
+  hide: !showBanner
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -712,15 +711,30 @@ return `._id {
   flex: 1;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "quota_warning_icon",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const isAtLimit = args.fns.isAtQuotaLimit?.();
 
 return {
@@ -729,41 +743,47 @@ return {
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "quota_warning_text_container",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.xs};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "quota_warning_title",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 600;
+  display: block;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const isAtLimit = args.fns.isAtQuotaLimit?.();
 const percentage = args.fns.getQuotaUsagePercentage?.();
 
@@ -773,23 +793,25 @@ return {
     ? `YouTube API Quota Limit Reached (${percentage}%)`
     : `YouTube API Quota Warning (${percentage}%)`
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  font-weight: 600;
-  display: block;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "quota_warning_message",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  opacity: 0.95;
+  line-height: 1.5;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const isAtLimit = args.fns.isAtQuotaLimit?.();
 const resetTime = args.fns.getQuotaResetTime?.();
 const usage = args.fns.quotaUsage?.();
@@ -803,41 +825,15 @@ return {
     ? `Shared YouTube API quota nearly exhausted (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units, ${remaining} remaining). All users share this 10k daily quota. Adding channels and playlists is temporarily disabled. Resets in ${resetTime}.`
     : `Approaching shared YouTube API quota limit (${usedQuota.toLocaleString()}/${dailyLimit.toLocaleString()} units used). All users share this 10k daily quota. Resets in ${resetTime}.`
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  opacity: 0.95;
-  line-height: 1.5;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "quota_warning_dismiss",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        fns: '''
-const [isDismissed, setIsDismissed] = args.createSignal(false);
-
-return {
-  isDismissed,
-  dismissBanner: () => setIsDismissed(true)
-};
-''',
-        props: '''
-const isDismissed = args.fns.isDismissed?.();
-
-return {
-  as: "button",
-  text: "Dismiss",
-  onClick: args.fns.dismissBanner,
-  hide: isDismissed
-};
-''',
-        css: '''
+        css:
+          '''
 const isAtLimit = args.fns.isAtQuotaLimit?.();
 
 return `._id {
@@ -861,20 +857,36 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "layout_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        fns:
+          '''
+const [isDismissed, setIsDismissed] = args.createSignal(false);
+
 return {
-  as: "div"
+  isDismissed,
+  dismissBanner: () => setIsDismissed(true)
 };
-''',
-        css: '''
+'''
+        componentName: Html
+        props:
+          '''
+const isDismissed = args.fns.isDismissed?.();
+
+return {
+  as: "button",
+  text: "Dismiss",
+  onClick: args.fns.dismissBanner,
+  hide: isDismissed
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   min-height: 100vh;
   height: 100vh;
@@ -893,134 +905,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "main_content",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "main"
-};
-''',
-        css: '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-const sidebarWidth = isCollapsed ? '72px' : '240px';
-
-return `._id {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
-  -webkit-overflow-scrolling: touch;
-}
-
-@media (min-width: 768px) {
-  ._id {
-    margin-left: ${sidebarWidth};
-    transition: margin-left ${args.theme.var.animation?.normal || '300ms'} ease;
-    overflow: hidden;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "slot_main",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Slot",
-        slot: "children"
-      }
-    },
-    {
-      id: "navigation_overlay",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-// Get navigation state from ConfirmProvider context
-// This controls when the overlay should be visible
-const isNavigating = args.fns.isNavigating?.();
-
-return {
-  as: "div",
-  style: {
-    // Show overlay during navigation, hide when complete
-    // Uses flex to center the loading spinner
-    display: isNavigating ? 'flex' : 'none'
-  }
-};
-''',
-        css: '''
-return `._id {
-  /* Full-screen overlay positioning */
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  /* Match theme background for seamless appearance */
-  background: ${args.theme.var.color.background};
-
-  /* Position spinner at top instead of center */
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: ${args.theme.var.spacing.xxl};
-
-  /* High z-index to appear above all content */
-  z-index: 1;
-
-  /* Start invisible and fade in smoothly */
-  opacity: 0;
-  animation: fadeIn 0.2s ease-out forwards;
-}
-
-/* Smooth fade-in animation for overlay appearance */
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "navigation_spinner",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "LoadingSpinner",
-        props: '''
-return {
-  size: "medium",
-  color: "primary"
+  as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "left_nav",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "nav"
-};
-''',
-        css: '''
+        css:
+          '''
 const isCollapsed = args.fns.isSidebarCollapsed?.();
 const sidebarWidth = isCollapsed ? '72px' : '240px';
 
@@ -1045,22 +945,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "sidebar_border_toggle",
-      L: "Attr",
-      P: {
-        displayOrder: 0.5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  onClick: args.fns.toggleSidebar,
-  title: args.fns.isSidebarCollapsed?.() ? "Expand sidebar" : "Collapse sidebar"
+  as: "nav"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0;
@@ -1085,20 +985,24 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "sidebar_content_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  onClick: args.fns.toggleSidebar,
+  title: args.fns.isSidebarCollapsed?.() ? "Expand sidebar" : "Collapse sidebar"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 const isCollapsed = args.fns.isSidebarCollapsed?.();
 const sidebarPadding = isCollapsed ? `${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}` : `${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}`;
 
@@ -1110,22 +1014,22 @@ return `._id {
   padding: ${sidebarPadding};
 }`;
 '''
-      }
-    },
-    {
-      id: "left_nav_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 const isCollapsed = args.fns.isSidebarCollapsed?.();
 
 return `._id {
@@ -1135,42 +1039,46 @@ return `._id {
   display: ${isCollapsed ? 'none' : 'block'};
 }`;
 '''
-      }
-    },
-    {
-      id: "left_nav_logo",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
 return {
-  as: "a",
-  href: "/home"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: block;
   width: 100%;
 }`;
 '''
-      }
-    },
-    {
-      id: "left_nav_logo_img",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "img",
-  src: "/api/file/downloadCompanyRectangularLogo",
-  alt: "YSaar"
+  as: "a",
+  href: "/home"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   height: 60px;
   width: auto;
@@ -1178,23 +1086,24 @@ return `._id {
   object-position: left center;
 }`;
 '''
-      }
-    },
-    {
-      id: "collapsed_logo",
-      L: "Attr",
-      P: {
-        displayOrder: 1.3,
-        componentName: "Html",
-        props: '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: !isCollapsed
+  as: "img",
+  src: "/api/file/downloadCompanyRectangularLogo",
+  alt: "YSaar"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: center;
@@ -1204,23 +1113,25 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
-      }
-    },
-    {
-      id: "collapsed_logo_img",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1.3
+        componentName: Html
+        props:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
 return {
-  as: "img",
-  src: "/api/file/downloadCompanySquareLogo",
-  alt: "Logo",
-  onClick: () => args.navigate?.('/home')
+  as: "div",
+  hide: !isCollapsed
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 40px;
   height: 40px;
@@ -1228,15 +1139,35 @@ return `._id {
   cursor: pointer;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Logo",
+  onClick: () => args.navigate?.('/home')
+};
+'''
       }
-    },
+    }
     {
-      id: "ownership_selector_container",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 1.5,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.md};
+  padding-bottom: ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1.5
+        componentName: Html
+        props:
+          '''
 const ownerships = args.fns.ownerships?.() || [];
 const showSelector = ownerships.length > 0;
 const isCollapsed = args.fns.isSidebarCollapsed?.();
@@ -1245,30 +1176,15 @@ return {
   as: "div",
   hide: !showSelector || isCollapsed
 };
-''',
-        css: '''
-return `._id {
-  margin-top: ${args.theme.var.spacing.md};
-  padding-bottom: ${args.theme.var.spacing.md};
-  border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "ownership_selector_label",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  text: "Youtube Account",
-  for: "ownership-selector"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: block;
   font-size: ${args.theme.var.fontSize.xs};
@@ -1279,15 +1195,26 @@ return `._id {
   margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Youtube Account",
+  for: "ownership-selector"
+};
+'''
       }
-    },
+    }
     {
-      id: "ownership_selector",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TomSelect",
-        props: '''
+        displayOrder: 2
+        componentName: TomSelect
+        props:
+          '''
 const ownerships = args.fns.ownerships?.() || [];
 const selectedOwnership = args.fns.selectedOwnership?.();
 const selectedOwnershipId = selectedOwnership?.P?.key;
@@ -1327,23 +1254,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "ownership_selector_help",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const ownerships = args.fns.ownerships?.() || [];
-const hasAccounts = ownerships.length > 0;
-
-return {
-  as: "div",
-  hide: hasAccounts
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-top: ${args.theme.var.spacing.xs};
   padding: ${args.theme.var.spacing.sm};
@@ -1355,43 +1272,51 @@ return `._id {
   gap: ${args.theme.var.spacing.sm};
 }`;
 '''
-      }
-    },
-    {
-      id: "ownership_selector_help_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const ownerships = args.fns.ownerships?.() || [];
+const hasAccounts = ownerships.length > 0;
+
 return {
-  as: "icon",
-  icon: "ph:info",
-  width: 16,
-  height: 16
+  as: "div",
+  hide: hasAccounts
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.info_light_100_text};
   flex-shrink: 0;
   margin-top: 2px;
 }`;
 '''
-      }
-    },
-    {
-      id: "ownership_selector_help_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p"
+  as: "icon",
+  icon: "ph:info",
+  width: 16,
+  height: 16
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: ${args.theme.var.fontSize.xs};
@@ -1400,40 +1325,37 @@ return `._id {
   flex: 1;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p"
+};
+'''
       }
-    },
+    }
     {
-      id: "ownership_selector_help_text_content",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "No YouTube accounts connected. "
 };
 '''
       }
-    },
+    }
     {
-      id: "ownership_selector_help_link",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "a",
-  text: "Go to Accounts to connect",
-  href: "/accounts",
-  onClick: (e) => {
-    e.preventDefault();
-    args.navigate('/accounts');
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.info_light_100_text};
   text-decoration: underline;
@@ -1445,20 +1367,28 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "left_nav_menu",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "a",
+  text: "Go to Accounts to connect",
+  href: "/accounts",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/accounts');
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -1466,159 +1396,48 @@ return `._id {
   flex: 1;
 }`;
 '''
-      }
-    },
-    {
-      id: "sidebar_footer",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        contextName: navSection
+        css:
+          '''
 return `._id {
-  margin-top: auto;
-  padding-top: ${args.theme.var.spacing.md};
-  border-top: 1px solid ${args.theme.var.color.border};
-  display: flex;
-  flex-direction: column;
-  gap: ${args.theme.var.spacing.sm};
+  display: contents;
 }`;
 '''
-      }
-    },
-    {
-      id: "feedback_button_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-
-return {
-  as: "div",
-  hide: isCollapsed
-};
-'''
-      }
-    },
-    {
-      id: "feedback_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => {
-    args.fns.openFeedbackModal();
-  },
-  title: "Send Feedback"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: ${args.theme.var.spacing.md};
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border-radius: ${args.theme.var.borderRadius.md};
-  background: transparent;
-  color: ${args.theme.var.color.text};
-  text-decoration: none;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-  font-family: inherit;
-  font-size: inherit;
-  transition: all ${args.theme.var.animation.fast} ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.primary};
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "feedback_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:chat",
-  width: 20,
-  height: 20
-};
-'''
-      }
-    },
-    {
-      id: "feedback_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Send Feedback"
-};
-''',
-        css: '''
-return `._id {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}`;
-'''
-      }
-    },
-    {
-      id: "nav_sections_loop",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "navSection",
-        loop: true,
-        props: '''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const sections = args.fns.navigationSections();
 return {
   as: "div",
   data: sections
 };
-''',
-        css: '''
-return `._id {
-  display: contents;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "nav_section",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.navSection;
 const hasBorder = section.hasBorder;
 return {
@@ -1626,25 +1445,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "nav_section_title",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const section = args.contextData.navSection;
-const title = section.title;
-const isCollapsed = args.fns.isSidebarCollapsed?.();
-
-return {
-  as: "h3",
-  text: title,
-  hide: !title || isCollapsed
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.sm};
   font-weight: 600;
@@ -1655,21 +1462,28 @@ return `._id {
   padding: 0 ${args.theme.var.spacing.md};
 }`;
 '''
-      }
-    },
-    {
-      id: "nav_section_list",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.navSection;
+const title = section.title;
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
 return {
-  as: "ul"
+  as: "h3",
+  text: title,
+  hide: !title || isCollapsed
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
 const section = args.contextData.navSection;
 const hasBorder = section.hasBorder;
 return `._id {
@@ -1682,62 +1496,48 @@ return `._id {
   ${hasBorder ? `padding-top: ${args.theme.var.spacing.md}; border-top: 1px solid ${args.theme.var.color.border};` : ''}
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.navSection;
+return {
+  as: "ul"
+};
+'''
       }
-    },
+    }
     {
-      id: "nav_items_loop",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "navItem",
-        loop: true,
-        props: '''
+        contextName: navItem
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.navSection;
 const items = section.items;
 return {
   as: "li",
   data: items
 };
-''',
-        css: '''
-return `._id {
-  margin: 0;
-}`;
 '''
       }
-    },
-    {
-      id: "nav_item_link",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.navItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
-const isButton = item.isButton;
-const isDanger = item.isDanger;
-const openInNewTab = item.openInNewTab;
-
-return {
-  as: isButton ? "button" : "a",
-  href: !isButton ? item.href : undefined,
-  target: openInNewTab ? "_blank" : undefined,
-  rel: openInNewTab ? "noopener noreferrer" : undefined,
-  "aria-label": item.label,
-  title: item.title,
-  onClick: (e) => {
-    if (openInNewTab) {
-      // Let the browser handle the new tab opening
-      return;
     }
-    e.preventDefault();
-    args.fns.navigateTo?.(item.href);
-  }
-};
-''',
-        css: '''
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
 const item = args.contextData.navItem;
 const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
 const isButton = item.isButton;
@@ -1777,15 +1577,43 @@ return `._id {
   ` : ''}
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.navItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const isButton = item.isButton;
+const isDanger = item.isDanger;
+const openInNewTab = item.openInNewTab;
+
+return {
+  as: isButton ? "button" : "a",
+  href: !isButton ? item.href : undefined,
+  target: openInNewTab ? "_blank" : undefined,
+  rel: openInNewTab ? "noopener noreferrer" : undefined,
+  "aria-label": item.label,
+  title: item.title,
+  onClick: (e) => {
+    if (openInNewTab) {
+      // Let the browser handle the new tab opening
+      return;
+    }
+    e.preventDefault();
+    args.fns.navigateTo?.(item.href);
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "nav_item_icon",
-      L: "Attr",
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.navItem;
 return {
   as: "icon",
@@ -1795,21 +1623,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "nav_item_text",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.navItem;
-return {
-  as: "span",
-  text: item.label
-};
-''',
-        css: '''
+        css:
+          '''
 const isCollapsed = args.fns.isSidebarCollapsed?.();
 
 return `._id {
@@ -1819,20 +1639,273 @@ return `._id {
   text-overflow: ellipsis;
 }`;
 '''
-      }
-    },
-    {
-      id: "bottom_nav",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.navItem;
 return {
-  as: "nav"
+  as: "span",
+  text: item.label
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-top: auto;
+  padding-top: ${args.theme.var.spacing.md};
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "div",
+  hide: isCollapsed
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: () => {
+    args.fns.openFeedbackModal();
+  },
+  title: "Send Feedback"
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:chat",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Send Feedback"
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+const sidebarWidth = isCollapsed ? '72px' : '240px';
+
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+  ._id {
+    margin-left: ${sidebarWidth};
+    transition: margin-left ${args.theme.var.animation?.normal || '300ms'} ease;
+    overflow: hidden;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: children
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  /* Full-screen overlay positioning */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* Match theme background for seamless appearance */
+  background: ${args.theme.var.color.background};
+
+  /* Position spinner at top instead of center */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: ${args.theme.var.spacing.xxl};
+
+  /* High z-index to appear above all content */
+  z-index: 1;
+
+  /* Start invisible and fade in smoothly */
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Smooth fade-in animation for overlay appearance */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+// Get navigation state from ConfirmProvider context
+// This controls when the overlay should be visible
+const isNavigating = args.fns.isNavigating?.();
+
+return {
+  as: "div",
+  style: {
+    // Show overlay during navigation, hide when complete
+    // Uses flex to center the loading spinner
+    display: isNavigating ? 'flex' : 'none'
+  }
+};
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   height: 72px;
   background: ${args.theme.var.color.background};
@@ -1866,73 +1939,61 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "nav"
+};
+'''
       }
-    },
+    }
     {
-      id: "nav_slider_container",
-      L: "Attr",
+      id: "46"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   className: "slider-container"
 };
 '''
       }
-    },
+    }
     {
-      id: "mobile_nav_loop",
-      L: "Attr",
+      id: "47"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "mobileNavItem",
-        loop: true,
-        props: '''
+        contextName: mobileNavItem
+        css:
+          '''
+return `._id {
+  display: contents;
+}`;
+'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const items = args.fns.mobileNavigationItems();
 return {
   as: "div",
   data: items
 };
-''',
-        css: '''
-return `._id {
-  display: contents;
-}`;
 '''
       }
-    },
-    {
-      id: "mobile_nav_item",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.mobileNavItem;
-const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
-const openInNewTab = item.openInNewTab;
-
-return {
-  as: "a",
-  href: item.href,
-  target: openInNewTab ? "_blank" : undefined,
-  rel: openInNewTab ? "noopener noreferrer" : undefined,
-  "aria-label": item.label,
-  title: item.title,
-  onClick: (e) => {
-    if (openInNewTab) {
-      // Let the browser handle the new tab opening
-      return;
     }
-    e.preventDefault();
-    args.fns.navigateTo?.(item.href);
-  }
-};
-''',
-        css: '''
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''
 const item = args.contextData.mobileNavItem;
 const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
 
@@ -1962,15 +2023,41 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const openInNewTab = item.openInNewTab;
+
+return {
+  as: "a",
+  href: item.href,
+  target: openInNewTab ? "_blank" : undefined,
+  rel: openInNewTab ? "noopener noreferrer" : undefined,
+  "aria-label": item.label,
+  title: item.title,
+  onClick: (e) => {
+    if (openInNewTab) {
+      // Let the browser handle the new tab opening
+      return;
+    }
+    e.preventDefault();
+    args.fns.navigateTo?.(item.href);
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "mobile_nav_icon",
-      L: "Attr",
+      id: "49"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.mobileNavItem;
 const iconSize = item.iconSize || 24;
 return {
@@ -1981,36 +2068,39 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "mobile_nav_text",
-      L: "Attr",
+      id: "50"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.mobileNavItem;
-return {
-  as: "span",
-  text: item.label
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.xs};
   font-weight: 500;
   text-align: center;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.mobileNavItem;
+return {
+  as: "span",
+  text: item.label
+};
+'''
       }
-    },
+    }
     {
-      id: "playlist_modal",
-      L: "Attr",
+      id: "51"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "AddToPlaylistModal",
-        props: '''
+        displayOrder: 4
+        componentName: AddToPlaylistModal
+        props:
+          '''
 return {
   isOpen: args.fns.isAddToPlaylistModalOpen,
   onClose: args.fns.closeAddToPlaylistModal,
@@ -2021,57 +2111,307 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e0b", T: "Attr", S: "content_root", E: "impersonation_banner" },
-    { id: "e0c", T: "Attr", S: "content_root", E: "quota_warning_banner" },
-    { id: "e0c1", T: "Attr", S: "quota_warning_banner", E: "quota_warning_content" },
-    { id: "e0c2", T: "Attr", S: "quota_warning_content", E: "quota_warning_icon" },
-    { id: "e0c3", T: "Attr", S: "quota_warning_content", E: "quota_warning_text_container" },
-    { id: "e0c4", T: "Attr", S: "quota_warning_text_container", E: "quota_warning_title" },
-    { id: "e0c5", T: "Attr", S: "quota_warning_text_container", E: "quota_warning_message" },
-    { id: "e0c6", T: "Attr", S: "quota_warning_banner", E: "quota_warning_dismiss" },
-    { id: "e1", T: "Attr", S: "content_root", E: "layout_container" },
-    { id: "e2", T: "Attr", S: "layout_container", E: "main_content" },
-    { id: "e3", T: "Attr", S: "main_content", E: "slot_main" },
-    { id: "e3b", T: "Attr", S: "main_content", E: "navigation_overlay" },
-    { id: "e3c", T: "Attr", S: "navigation_overlay", E: "navigation_spinner" },
-    { id: "e4", T: "Attr", S: "layout_container", E: "left_nav" },
-    { id: "e4a", T: "Attr", S: "left_nav", E: "sidebar_border_toggle" },
-    { id: "e4c", T: "Attr", S: "left_nav", E: "sidebar_content_wrapper" },
-    { id: "e5", T: "Attr", S: "sidebar_content_wrapper", E: "left_nav_header" },
-    { id: "e5a", T: "Attr", S: "sidebar_content_wrapper", E: "collapsed_logo" },
-    { id: "e5b", T: "Attr", S: "collapsed_logo", E: "collapsed_logo_img" },
-    { id: "e6", T: "Attr", S: "left_nav_header", E: "left_nav_logo" },
-    { id: "e6b", T: "Attr", S: "left_nav_logo", E: "left_nav_logo_img" },
-    { id: "e6c", T: "Attr", S: "sidebar_content_wrapper", E: "ownership_selector_container" },
-    { id: "e6d", T: "Attr", S: "ownership_selector_container", E: "ownership_selector_label" },
-    { id: "e6e", T: "Attr", S: "ownership_selector_container", E: "ownership_selector" },
-    { id: "e6f", T: "Attr", S: "ownership_selector_container", E: "ownership_selector_help" },
-    { id: "e6g", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_icon" },
-    { id: "e6h", T: "Attr", S: "ownership_selector_help", E: "ownership_selector_help_text" },
-    { id: "e6i", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_text_content" },
-    { id: "e6j", T: "Attr", S: "ownership_selector_help_text", E: "ownership_selector_help_link" },
-    { id: "e7", T: "Attr", S: "sidebar_content_wrapper", E: "left_nav_menu" },
-    { id: "e7a", T: "Attr", S: "sidebar_content_wrapper", E: "sidebar_footer" },
-    { id: "e7b", T: "Attr", S: "sidebar_footer", E: "feedback_button_container" },
-    { id: "e7c", T: "Attr", S: "feedback_button_container", E: "feedback_button" },
-    { id: "e7d", T: "Attr", S: "feedback_button", E: "feedback_icon" },
-    { id: "e7e", T: "Attr", S: "feedback_button", E: "feedback_text" },
-    { id: "e8", T: "Attr", S: "left_nav_menu", E: "nav_sections_loop" },
-    { id: "e9", T: "Attr", S: "nav_sections_loop", E: "nav_section" },
-    { id: "e10", T: "Attr", S: "nav_section", E: "nav_section_title" },
-    { id: "e11", T: "Attr", S: "nav_section", E: "nav_section_list" },
-    { id: "e12", T: "Attr", S: "nav_section_list", E: "nav_items_loop" },
-    { id: "e13", T: "Attr", S: "nav_items_loop", E: "nav_item_link" },
-    { id: "e14", T: "Attr", S: "nav_item_link", E: "nav_item_icon" },
-    { id: "e15", T: "Attr", S: "nav_item_link", E: "nav_item_text" },
-    { id: "e50", T: "Attr", S: "layout_container", E: "bottom_nav" },
-    { id: "e51", T: "Attr", S: "bottom_nav", E: "nav_slider_container" },
-    { id: "e52", T: "Attr", S: "nav_slider_container", E: "mobile_nav_loop" },
-    { id: "e53", T: "Attr", S: "mobile_nav_loop", E: "mobile_nav_item" },
-    { id: "e54", T: "Attr", S: "mobile_nav_item", E: "mobile_nav_icon" },
-    { id: "e55", T: "Attr", S: "mobile_nav_item", E: "mobile_nav_text" },
-    { id: "e60", T: "Attr", S: "content_root", E: "playlist_modal" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "1"
+      E: "51"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "10"
+      E: "45"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "10"
+      E: "41"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "45"
+      E: "46"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "41"
+      E: "43"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "13"
+      E: "36"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "13"
+      E: "27"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "13"
+      E: "19"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "13"
+      E: "17"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "47"
+      E: "48"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "19"
+      E: "22"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "48"
+      E: "50"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "48"
+      E: "49"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "38"
+      E: "40"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "38"
+      E: "39"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "29"
+      E: "31"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "24"
+      E: "26"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "33"
+      E: "35"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "33"
+      E: "34"
+    }
   ]
 }

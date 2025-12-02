@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "reorderVideoQueue",
-        description: "Change the position of a video in the queue by moving it from one position to another",
-        body: '''
+        description: Change the position of a video in the queue by moving it from one position to another
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession(args.request);
@@ -152,8 +152,9 @@ try {
   };
 }
 '''
+        key: reorderVideoQueue
       }
     }
-  ],
+  ]
   edges: []
 }

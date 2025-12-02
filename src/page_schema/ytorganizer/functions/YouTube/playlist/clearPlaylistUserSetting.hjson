@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "clear_playlist_user_setting_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "clearPlaylistUserSetting",
-        description: "Clears all user-specific setting for a playlist including custom name, sort preferences, and display preferences",
-        body: '''
+        description: Clears all user-specific setting for a playlist including custom name, sort preferences, and display preferences
+        body:
+          '''
 // Get the playlist ID and ownershipId from the context
 const { playlistId, ownershipId } = args.contextData;
 
@@ -106,8 +106,9 @@ try {
   throw new Error(`Failed to clear playlist setting: ${error.message}`);
 }
 '''
+        key: clearPlaylistUserSetting
       }
     }
-  ],
+  ]
   edges: []
 }

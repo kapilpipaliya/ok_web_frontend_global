@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "update_contact_status_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "updateContactStatus",
-        description: "Updates the status of a contact form submission",
-        body: '''
+        description: Updates the status of a contact form submission
+        body:
+          '''
 // This function runs on the server
 // It has access to args object with:
 // - args.contextData: Request parameters (contactId, status)
@@ -95,8 +95,9 @@ try {
   };
 }
 '''
+        key: updateContactStatus
       }
     }
-  ],
+  ]
   edges: []
 }

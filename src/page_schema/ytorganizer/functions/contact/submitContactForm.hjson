@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "submit_contact_form_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "submitContactForm",
-        description: "Saves contact form submission to database",
-        body: '''
+        description: Saves contact form submission to database
+        body:
+          '''
 // This function runs on the server
 // It has access to args object with:
 // - args.contextData: Request parameters (name, email, message)
@@ -89,8 +89,9 @@ try {
   };
 }
 '''
+        key: submitContactForm
       }
     }
-  ],
+  ]
   edges: []
 }

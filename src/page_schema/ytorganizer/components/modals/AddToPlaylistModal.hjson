@@ -1,34 +1,43 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "AddToPlaylistModal"
+        key: AddToPlaylistModal
       }
-    },
+    }
     {
-      id: "modal_overlay",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "playlistsData",
-        serverFunction: '''
-try {
-  const result = await args.fns.executeYTOFunction("getUserPlaylists", {});
-
-  if (result?.result?.success && result?.result?.data) {
-    return result.result.data;
-  }
-
-  return { playlists: [] };
-} catch (error) {
-  console.error("Error loading playlists:", error);
-  return { playlists: [] };
+        contextName: playlistsData
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
 }
-''',
-        fns: '''
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 const [selectedPlaylists, setSelectedPlaylists] = args.createSignal([]);
 const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 
@@ -82,8 +91,25 @@ return {
   isSubmitting,
   handleSave
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        serverFunction:
+          '''
+try {
+  const result = await args.fns.executeYTOFunction("getUserPlaylists", {});
+
+  if (result?.result?.success && result?.result?.data) {
+    return result.result.data;
+  }
+
+  return { playlists: [] };
+} catch (error) {
+  console.error("Error loading playlists:", error);
+  return { playlists: [] };
+}
+'''
+        props:
+          '''
 const isOpen = args.contextData.props?.isOpen;
 const getIsOpen = isOpen?.() || false;
 const onClose = args.contextData.props?.onClose;
@@ -97,44 +123,15 @@ return {
     }
   }
 };
-''',
-        css: '''
-return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "modal_container",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  onClick: (e) => e.stopPropagation()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 0.75rem;
@@ -158,20 +155,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "modal_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  onClick: (e) => e.stopPropagation()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -180,21 +180,22 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
-      }
-    },
-    {
-      id: "modal_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Add to Playlist"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
@@ -202,24 +203,23 @@ return `._id {
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "close_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const onClose = args.contextData.props?.onClose;
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  onClick: onClose,
-  "aria-label": "Close modal"
+  as: "h2",
+  text: "Add to Playlist"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -238,15 +238,28 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "button",
+  onClick: onClose,
+  "aria-label": "Close modal"
+};
+'''
       }
-    },
+    }
     {
-      id: "close_icon",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:close",
@@ -255,56 +268,61 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "modal_body",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem;
   flex: 1;
   overflow: auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "playlists_list",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "playlists_loop",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "playlistItem",
-        loop: true,
-        props: '''
+        contextName: playlistItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const playlists = args.contextData.playlistsData?.playlists || [];
 
 return {
@@ -312,25 +330,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "playlist_item",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.playlistItem;
-const playlist = item?.playlist;
-const playlistId = playlist?.P?.youtubeId || "";
-const isSelected = args.fns.selectedPlaylists().includes(playlistId);
-
-return {
-  as: "label",
-  class: isSelected ? "selected" : ""
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -353,15 +359,39 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.playlistItem;
+const playlist = item?.playlist;
+const playlistId = playlist?.P?.youtubeId || "";
+const isSelected = args.fns.selectedPlaylists().includes(playlistId);
+
+return {
+  as: "label",
+  class: isSelected ? "selected" : ""
+};
+'''
       }
-    },
+    }
     {
-      id: "playlist_checkbox",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
 const playlistId = playlist?.P?.youtubeId || "";
@@ -373,43 +403,48 @@ return {
   checked: isSelected,
   onChange: () => args.fns.togglePlaylist(playlistId)
 };
-''',
-        css: '''
-return `._id {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "playlist_info",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   min-width: 0;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "playlist_title",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  word-break: break-word;
+  overflow-wrap: break-word;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
 const playlistSetting = item?.playlistSetting;
@@ -420,30 +455,15 @@ return {
   as: "div",
   text: title
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  word-break: break-word;
-  overflow-wrap: break-word;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "modal_footer",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem;
   border-top: 1px solid ${args.theme.var.color.border};
@@ -452,15 +472,24 @@ return `._id {
   justify-content: flex-end;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "cancel_button",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const onClose = args.contextData.props?.onClose;
 
 return {
@@ -471,14 +500,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "save_button",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const isSubmitting = args.fns.isSubmitting();
 const selectedCount = args.fns.selectedPlaylists().length;
 
@@ -491,23 +521,103 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "modal_overlay" },
-    { id: "e2", T: "Attr", S: "modal_overlay", E: "modal_container" },
-    { id: "e3", T: "Attr", S: "modal_container", E: "modal_header" },
-    { id: "e4", T: "Attr", S: "modal_header", E: "modal_title" },
-    { id: "e5", T: "Attr", S: "modal_header", E: "close_button" },
-    { id: "e6", T: "Attr", S: "close_button", E: "close_icon" },
-    { id: "e7", T: "Attr", S: "modal_container", E: "modal_body" },
-    { id: "e8", T: "Attr", S: "modal_body", E: "playlists_list" },
-    { id: "e9", T: "Attr", S: "playlists_list", E: "playlists_loop" },
-    { id: "e10", T: "Attr", S: "playlists_loop", E: "playlist_item" },
-    { id: "e11", T: "Attr", S: "playlist_item", E: "playlist_checkbox" },
-    { id: "e12", T: "Attr", S: "playlist_item", E: "playlist_info" },
-    { id: "e13", T: "Attr", S: "playlist_info", E: "playlist_title" },
-    { id: "e14", T: "Attr", S: "modal_container", E: "modal_footer" },
-    { id: "e15", T: "Attr", S: "modal_footer", E: "cancel_button" },
-    { id: "e16", T: "Attr", S: "modal_footer", E: "save_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "15"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "14"
+    }
   ]
 }

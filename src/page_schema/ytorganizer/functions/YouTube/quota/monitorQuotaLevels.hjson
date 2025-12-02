@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "monitor_quota_levels_function"
-      L: "Function"
+      id: "1"
+      L: Function
       P: {
-        key: "monitorQuotaLevels"
-        description: "Background worker that monitors shared quota levels and sends email alerts when thresholds are reached"
-        body: '''
+        description: Background worker that monitors shared quota levels and sends email alerts when thresholds are reached
+        body:
+          '''
 // This background worker checks quota levels every 5 minutes and sends alerts
 if (args.contextData.action === 'start') {
   console.log('[Quota Monitor] Starting quota level monitoring worker');
@@ -113,6 +113,7 @@ if (args.contextData.action === 'start') {
   };
 }
 '''
+        key: monitorQuotaLevels
       }
     }
   ]

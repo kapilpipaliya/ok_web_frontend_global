@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "toggle_favourite_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "toggleFavourite",
-        description: "Toggles favourite status for a video, channel, or playlist. Supports multi-ownership model - requires ownershipId.",
-        body: '''
+        description: Toggles favourite status for a video, channel, or playlist. Supports multi-ownership model - requires ownershipId.
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -181,8 +181,9 @@ try {
   };
 }
 '''
+        key: toggleFavourite
       }
     }
-  ],
+  ]
   edges: []
 }

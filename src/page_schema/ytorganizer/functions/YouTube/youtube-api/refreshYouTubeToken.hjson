@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "refresh_youtube_token_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "refreshYouTubeToken",
-        description: "Refreshes YouTube OAuth access token for a user using their refresh token",
-        body: '''
+        description: Refreshes YouTube OAuth access token for a user using their refresh token
+        body:
+          '''
 /**
  * Refresh YouTube OAuth Token
  *
@@ -226,8 +226,9 @@ try {
   };
 }
 '''
+        key: refreshYouTubeToken
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,30 +1,33 @@
 {
   vertexes: [
     {
-      id: "landing_page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "Landing",
-        url: "/",
-        fns: '''
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        key: Landing
+        url: /
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "favicon_link",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 0.5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
 return {
   as: "link",
   rel: "icon",
@@ -32,40 +35,27 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "3"
+      L: Attr
       P: {
-        componentName: "PublicLayout",
         displayOrder: 1
-      }
-    },
-    {
-      id: "main_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "main"
 };
 '''
       }
-    },
+    }
     {
-      id: "hero_section",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: linear-gradient(135deg, ${args.theme.var.color.primary} 0%, ${args.theme.var.color.primary_dark_300} 100%);
   color: ${args.theme.var.color.primary_text};
@@ -103,22 +93,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "hero_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "img",
-  src: "/api/file/download/big_logo_white.png",
-  alt: "YSaar Organizer Logo"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: block;
   margin: 0 auto 2rem auto;
@@ -126,21 +116,24 @@ return `._id {
   object-fit: contain;
 }`;
 '''
-      }
-    },
-    {
-      id: "hero_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Organize Your YouTube World"
+  as: "img",
+  src: "/api/file/download/big_logo_white.png",
+  alt: "YSaar Organizer Logo"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 3.5rem;
   font-weight: 800;
@@ -163,21 +156,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "hero_subtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Manage your favorite YouTube channels, playlists, and videos all in one place. Stay organized, stay focused."
+  as: "h2",
+  text: "Organize Your YouTube World"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   color: ${args.theme.var.color.primary_text};
@@ -196,20 +191,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "hero_cta_buttons_container",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Manage your favorite YouTube channels, playlists, and videos all in one place. Stay organized, stay focused."
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
@@ -225,32 +223,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "hero_cta_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  text: "Start Organizing for Free",
-  onClick: () => {
-    // Track conversion
-    if (window.gtag) {
-      window.gtag('event', 'conversion', {
-        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
-        'value': 1.0,
-        'currency': 'INR'
-      });
-    }
-    args.navigate('/auth/signup');
-  }
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.primary};
@@ -286,18 +274,13 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "hero_demo_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "button",
-  text: "Watch Demo",
+  text: "Start Organizing for Free",
   onClick: () => {
     // Track conversion
     if (window.gtag) {
@@ -307,18 +290,18 @@ return {
         'currency': 'INR'
       });
     }
-    // Open the demo video
-    const demoVideo = {
-      P: {
-        youtubeId: "sf-i_T4RWek",
-        title: "YSaar Signup Demo"
-      }
-    };
-    args.fns.openPlayer(demoVideo);
+    args.navigate('/auth/signup');
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: transparent;
   color: ${args.theme.var.color.primary_text};
@@ -356,15 +339,43 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "hero_demo_button_icon",
-      L: "Attr",
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Watch Demo",
+  onClick: () => {
+    // Track conversion
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17540558480/GTy6CIjJkMIbEJDd_qtB',
+        'value': 1.0,
+        'currency': 'INR'
+      });
+    }
+    // Open the demo video
+    const demoVideo = {
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        youtubeId: "sf-i_T4RWek",
+        title: "YSaar Signup Demo"
+      }
+    };
+    args.fns.openPlayer(demoVideo);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:play-filled",
@@ -373,19 +384,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "features_section",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
+        css:
+          '''
 return [
   `@keyframes fadeInUp {
     from {
@@ -410,40 +415,43 @@ return [
   }`
 ];
 '''
-      }
-    },
-    {
-      id: "features_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "features_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: "Powerful Features"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
@@ -457,20 +465,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "features_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "h3",
+  text: "Powerful Features"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -484,20 +495,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "feature_1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   padding: 2rem;
@@ -514,84 +527,92 @@ return `._id {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "feature_1_icon",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:folders",
   width: 48,
   height: 48
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  margin-bottom: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "feature_1_title",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h4",
-  text: "Channel Management"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "feature_1_desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Organize and track all your favorite YouTube channels in one place"
+  as: "h4",
+  text: "Channel Management"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.muted};
   margin: 0;
   line-height: 1.6;
 }`;
 '''
-      }
-    },
-    {
-      id: "feature_2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Organize and track all your favorite YouTube channels in one place"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   padding: 2rem;
@@ -608,84 +629,92 @@ return `._id {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "feature_2_icon",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:playlist",
   width: 48,
   height: 48
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.success};
-  margin-bottom: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "feature_2_title",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h4",
-  text: "Playlist Organization"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "feature_2_desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Create custom playlists and manage your video collections effortlessly"
+  as: "h4",
+  text: "Playlist Organization"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.muted};
   margin: 0;
   line-height: 1.6;
 }`;
 '''
-      }
-    },
-    {
-      id: "feature_3",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Create custom playlists and manage your video collections effortlessly"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   padding: 2rem;
@@ -702,85 +731,92 @@ return `._id {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "feature_3_icon",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  margin-bottom: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:favorite",
   width: 48,
   height: 48
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.error};
-  margin-bottom: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "feature_3_title",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h4",
-  text: "Personal Notes & Favorites"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "feature_3_desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Add notes to videos and mark your favorites for quick access"
+  as: "h4",
+  text: "Personal Notes & Favorites"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.muted};
   margin: 0;
   line-height: 1.6;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_section",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "section",
-  id: "pricing"
+  as: "p",
+  text: "Add notes to videos and mark your favorites for quick access"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 6rem 2rem;
   max-width: 1200px;
@@ -794,21 +830,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: "Simple, Transparent Pricing"
+  as: "section",
+  id: "pricing"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
@@ -822,21 +860,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_subtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Choose the plan that fits your needs"
+  as: "h3",
+  text: "Simple, Transparent Pricing"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   color: ${args.theme.var.color.muted};
@@ -844,20 +884,23 @@ return `._id {
   font-size: 1.125rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Choose the plan that fits your needs"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -895,17 +938,32 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "pricing_cards_loop",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "tier",
-        loop: true,
-        props: '''
+        contextName: tier
+        css:
+          '''
+return `._id {
+  display: contents;
+}`;
+'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   data: [
@@ -964,29 +1022,15 @@ return {
     }
   ]
 };
-''',
-        css: '''
-return `._id {
-  display: contents;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "pricing_card",
-      L: "Attr",
+      id: "33"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const tier = args.contextData.tier;
-const isPopular = tier?.popular;
-
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 const tier = args.contextData.tier;
 const isPopular = tier?.popular;
 
@@ -1030,23 +1074,25 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_badge",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const tier = args.contextData.tier;
+const isPopular = tier?.popular;
+
 return {
-  as: "div",
-  text: "Most Popular",
-  hide: !tier?.popular
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: -12px;
@@ -1061,22 +1107,25 @@ return `._id {
   letter-spacing: 0.5px;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const tier = args.contextData.tier;
 return {
-  as: "h4",
-  text: tier?.name || ""
+  as: "div",
+  text: "Most Popular",
+  hide: !tier?.popular
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.5rem;
   font-weight: 700;
@@ -1090,20 +1139,24 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_price",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const tier = args.contextData.tier;
 return {
-  as: "div"
+  as: "h4",
+  text: tier?.name || ""
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: baseline;
@@ -1117,22 +1170,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_price_amount",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const tier = args.contextData.tier;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: tier?.priceAmount || ""
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 800;
@@ -1140,22 +1193,24 @@ return `._id {
   line-height: 1;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_price_period",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const tier = args.contextData.tier;
 return {
   as: "span",
-  text: tier?.pricePeriod || ""
+  text: tier?.priceAmount || ""
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   font-weight: 500;
@@ -1163,22 +1218,24 @@ return `._id {
   line-height: 1;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_channels_badge",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const tier = args.contextData.tier;
 return {
-  as: "div",
-  text: tier?.channels || ""
+  as: "span",
+  text: tier?.pricePeriod || ""
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.primary_light_100};
   color: ${args.theme.var.color.primary_light_100_text};
@@ -1190,44 +1247,47 @@ return `._id {
   border: 1px solid ${args.theme.var.color.primary_light_200};
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_divider",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const tier = args.contextData.tier;
 return {
-  as: "div"
+  as: "div",
+  text: tier?.channels || ""
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   height: 1px;
   background: ${args.theme.var.color.border};
   margin: 0.5rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_features",
-      L: "Attr",
-      P: {
-        displayOrder: 6,
-        componentName: "Html",
-        contextName: "feature",
-        loop: true,
-        props: '''
-const tier = args.contextData.tier;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  data: tier?.features || []
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        contextName: feature
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -1240,20 +1300,25 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_feature_item",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        loop: true
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+const tier = args.contextData.tier;
 return {
-  as: "div"
+  as: "div",
+  data: tier?.features || []
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: flex-start;
@@ -1261,78 +1326,121 @@ return `._id {
   padding: 0.375rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_feature_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "icon",
-  icon: "carbon:checkmark-filled",
-  width: 20,
-  height: 20
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.primary};
   flex-shrink: 0;
   margin-top: 0.125rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_feature_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const feature = args.contextData.feature;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: feature || ""
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 20,
+  height: 20
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 0.9375rem;
   color: ${args.theme.var.color.text};
   line-height: 1.5;
 }`;
 '''
-      }
-    },
-    {
-      id: "pricing_card_spacer",
-      L: "Attr",
-      P: {
-        displayOrder: 7,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const feature = args.contextData.feature;
 return {
-  as: "div"
+  as: "span",
+  text: feature || ""
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
 }`;
 '''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "pricing_card_button",
-      L: "Attr",
+      id: "46"
+      L: Attr
       P: {
-        displayOrder: 8,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+._id:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}`;
+'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
 const tier = args.contextData.tier;
 const planName = tier?.name?.toLowerCase() || "basic";
 
@@ -1361,44 +1469,34 @@ return {
     }
   }
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-._id:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}`;
 '''
       }
-    },
+    }
     {
-      id: "stats_section",
-      L: "Attr",
+      id: "47"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        contextName: "userStats",
-        serverFunction: '''
+        contextName: userStats
+        css:
+          '''
+return `._id {
+  padding: 4rem 2rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        serverFunction:
+          '''
 try {
   // Execute the getUserCount function
   const result = await args.executeNamedServerFunction({
@@ -1415,61 +1513,42 @@ try {
   console.error("Error loading user count:", error);
   return { totalUsers: 0 };
 }
-''',
-        props: '''
+'''
+        props:
+          '''
 return {
   as: "section"
 };
-''',
-        css: '''
-return `._id {
-  padding: 4rem 2rem;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  text-align: center;
-  animation: fadeInUp 0.8s ease-out 0.4s both;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 3rem 1rem;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "stats_container",
-      L: "Attr",
+      id: "48"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: "Join Our Growing Community"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2rem;
   font-weight: 700;
@@ -1482,20 +1561,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "h3",
+  text: "Join Our Growing Community"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1513,40 +1595,42 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_user_count",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_user_count_number",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const userCount = args.contextData.userStats?.totalUsers || 0;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: `${userCount.toLocaleString()}+`
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 3rem;
   font-weight: 800;
@@ -1560,59 +1644,66 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_user_count_label",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const userCount = args.contextData.userStats?.totalUsers || 0;
 return {
   as: "div",
-  text: "Active Users"
+  text: `${userCount.toLocaleString()}+`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   opacity: 0.9;
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_rating",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  text: "Active Users"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_rating_stars",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: "★★★★★"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2rem;
   line-height: 1;
@@ -1626,59 +1717,65 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_rating_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  text: "4.9/5 Rating"
+  text: "★★★★★"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   opacity: 0.9;
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_videos",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  text: "4.9/5 Rating"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_videos_number",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: "1M+"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 3rem;
   font-weight: 800;
@@ -1692,41 +1789,45 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "stats_videos_label",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  text: "Videos Organized"
+  text: "1M+"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   opacity: 0.9;
 }`;
 '''
-      }
-    },
-    // Chrome Extension Section
-    {
-      id: "chrome_extension_section",
-      L: "Attr",
-      P: {
-        displayOrder: 4.5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "section"
+  as: "div",
+  text: "Videos Organized"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 5rem 2rem;
   background: ${args.theme.var.color.background};
@@ -1740,40 +1841,43 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4.5
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_badge",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: "NOW AVAILABLE"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: inline-block;
   background: ${args.theme.var.color.primary_light_100};
@@ -1787,21 +1891,23 @@ return `._id {
   border: 2px solid ${args.theme.var.color.primary};
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: "Chrome Extension - Save from YouTube"
+  as: "div",
+  text: "NOW AVAILABLE"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
@@ -1815,21 +1921,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_subtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Save YouTube channels and playlists directly from YouTube.com with one click. No need to copy-paste URLs anymore!"
+  as: "h3",
+  text: "Chrome Extension - Save from YouTube"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "64"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   color: ${args.theme.var.color.muted};
@@ -1847,20 +1955,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_features_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Save YouTube channels and playlists directly from YouTube.com with one click. No need to copy-paste URLs anymore!"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "65"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1878,20 +1989,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_feature_1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "66"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -1903,42 +2016,45 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "chrome_extension_feature_1_icon",
-      L: "Attr",
+      id: "67"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:save",
   width: 40,
   height: 40
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "chrome_extension_feature_1_text",
-      L: "Attr",
+      id: "68"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "One-Click Save"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   font-weight: 600;
@@ -1946,21 +2062,23 @@ return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_feature_1_desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  text: "Save channels & playlists without leaving YouTube"
+  text: "One-Click Save"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "69"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
@@ -1968,20 +2086,23 @@ return `._id {
   line-height: 1.5;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_feature_2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  text: "Save channels & playlists without leaving YouTube"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "70"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -1993,42 +2114,45 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "chrome_extension_feature_2_icon",
-      L: "Attr",
+      id: "71"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:dashboard",
   width: 40,
   height: 40
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.success};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "chrome_extension_feature_2_text",
-      L: "Attr",
+      id: "72"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Quick Stats"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   font-weight: 600;
@@ -2036,21 +2160,23 @@ return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_feature_2_desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  text: "View your saved content stats from the extension popup"
+  text: "Quick Stats"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "73"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
@@ -2058,20 +2184,23 @@ return `._id {
   line-height: 1.5;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_feature_3",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  text: "View your saved content stats from the extension popup"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "74"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -2083,42 +2212,45 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "chrome_extension_feature_3_icon",
-      L: "Attr",
+      id: "75"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.info};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:login",
   width: 40,
   height: 40
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.info};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "chrome_extension_feature_3_text",
-      L: "Attr",
+      id: "76"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Auto Login"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   font-weight: 600;
@@ -2126,21 +2258,23 @@ return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_feature_3_desc",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  text: "Uses your existing YSaar login - no separate authentication"
+  text: "Auto Login"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "77"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
@@ -2148,20 +2282,23 @@ return `._id {
   line-height: 1.5;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_cta",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  text: "Uses your existing YSaar login - no separate authentication"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "78"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -2169,25 +2306,22 @@ return `._id {
   gap: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "chrome_extension_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  onClick: () => {
-    // TODO: Replace with Chrome Web Store URL when published
-    // For now, show installation instructions
-    args.showSuccessToast("Chrome Extension coming soon to Chrome Web Store! Contact support for early access.");
-  }
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "79"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -2221,15 +2355,29 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: () => {
+    // TODO: Replace with Chrome Web Store URL when published
+    // For now, show installation instructions
+    args.showSuccessToast("Chrome Extension coming soon to Chrome Web Store! Contact support for early access.");
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "chrome_extension_button_icon",
-      L: "Attr",
+      id: "80"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "mdi:google-chrome",
@@ -2238,55 +2386,51 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "chrome_extension_button_text",
-      L: "Attr",
+      id: "81"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "Add to Chrome"
 };
 '''
       }
-    },
+    }
     {
-      id: "chrome_extension_note",
-      L: "Attr",
+      id: "82"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Free extension • Works with your YSaar account"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
   margin: 0;
 }`;
 '''
-      }
-    },
-    // Mobile Apps Coming Soon Section
-    {
-      id: "mobile_apps_section",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "section"
+  as: "p",
+  text: "Free extension • Works with your YSaar account"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "83"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 5rem 2rem;
   background: ${args.theme.var.color.background_dark_50};
@@ -2300,40 +2444,43 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "84"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_badge",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: "ANDROID CLOSED TESTING"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "85"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: inline-block;
   background: ${args.theme.var.color.success_light_100};
@@ -2347,21 +2494,23 @@ return `._id {
   border: 2px solid ${args.theme.var.color.success};
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: "YSaar Android App - Join Beta Testing"
+  as: "div",
+  text: "ANDROID CLOSED TESTING"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "86"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
@@ -2375,21 +2524,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_subtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Be among the first to experience YSaar on Android! Join our closed testing program and help shape the future of mobile YouTube organization."
+  as: "h3",
+  text: "YSaar Android App - Join Beta Testing"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "87"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   color: ${args.theme.var.color.muted};
@@ -2407,20 +2558,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_icons_container",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Be among the first to experience YSaar on Android! Join our closed testing program and help shape the future of mobile YouTube organization."
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "88"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 3rem;
@@ -2435,23 +2589,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_android_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  onClick: () => {
-    window.open("https://play.google.com/apps/testing/com.ysaar.app", "_blank");
-  }
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "89"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -2476,62 +2629,71 @@ return `._id {
   transform: translateY(-2px);
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: () => {
+    window.open("https://play.google.com/apps/testing/com.ysaar.app", "_blank");
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "mobile_apps_android_icon",
-      L: "Attr",
+      id: "90"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "mdi:android",
   width: 80,
   height: 80
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.success};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "mobile_apps_android_text",
-      L: "Attr",
+      id: "91"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Join Android Beta"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_ios_container",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  text: "Join Android Beta"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "92"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -2544,172 +2706,665 @@ return `._id {
   opacity: 0.6;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "mobile_apps_ios_icon",
-      L: "Attr",
+      id: "93"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  filter: grayscale(100%);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "mdi:apple",
   width: 80,
   height: 80
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  filter: grayscale(100%);
-}`;
 '''
       }
-    },
+    }
     {
-      id: "mobile_apps_ios_text",
-      L: "Attr",
+      id: "94"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "iOS Coming Soon"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   font-weight: 700;
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    {
-      id: "mobile_apps_notify_text",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Test the Android app now and help us improve! iOS version launching soon."
+  as: "div",
+  text: "iOS Coming Soon"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "95"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   color: ${args.theme.var.color.muted};
   margin: 0;
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Test the Android app now and help us improve! iOS version launching soon."
+};
+'''
       }
     }
-  ],
+    {
+      id: "96"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: PublicLayout
+      }
+    }
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "landing_page", E: "favicon_link" },
-    { id: "e1", T: "PageLayout", S: "landing_page", E: "page_layout" },
-    { id: "e10", T: "Attr", S: "landing_page", E: "main_content" },
-    { id: "e11", T: "Attr", S: "main_content", E: "hero_section" },
-    { id: "e12", T: "Attr", S: "hero_section", E: "hero_icon" },
-    { id: "e13", T: "Attr", S: "hero_section", E: "hero_title" },
-    { id: "e14", T: "Attr", S: "hero_section", E: "hero_subtitle" },
-    { id: "e15", T: "Attr", S: "hero_section", E: "hero_cta_buttons_container" },
-    { id: "e15a", T: "Attr", S: "hero_cta_buttons_container", E: "hero_cta_button" },
-    { id: "e15b", T: "Attr", S: "hero_cta_buttons_container", E: "hero_demo_button" },
-    { id: "e15c", T: "Attr", S: "hero_demo_button", E: "hero_demo_button_icon" },
-    { id: "e16", T: "Attr", S: "main_content", E: "features_section" },
-    { id: "e17", T: "Attr", S: "features_section", E: "features_container" },
-    { id: "e18", T: "Attr", S: "features_container", E: "features_title" },
-    { id: "e19", T: "Attr", S: "features_container", E: "features_grid" },
-    { id: "e20", T: "Attr", S: "features_grid", E: "feature_1" },
-    { id: "e21", T: "Attr", S: "feature_1", E: "feature_1_icon" },
-    { id: "e22", T: "Attr", S: "feature_1", E: "feature_1_title" },
-    { id: "e23", T: "Attr", S: "feature_1", E: "feature_1_desc" },
-    { id: "e24", T: "Attr", S: "features_grid", E: "feature_2" },
-    { id: "e25", T: "Attr", S: "feature_2", E: "feature_2_icon" },
-    { id: "e26", T: "Attr", S: "feature_2", E: "feature_2_title" },
-    { id: "e27", T: "Attr", S: "feature_2", E: "feature_2_desc" },
-    { id: "e28", T: "Attr", S: "features_grid", E: "feature_3" },
-    { id: "e29", T: "Attr", S: "feature_3", E: "feature_3_icon" },
-    { id: "e30", T: "Attr", S: "feature_3", E: "feature_3_title" },
-    { id: "e31", T: "Attr", S: "feature_3", E: "feature_3_desc" },
-    { id: "e32", T: "Attr", S: "main_content", E: "pricing_section" },
-    { id: "e33", T: "Attr", S: "pricing_section", E: "pricing_title" },
-    { id: "e34", T: "Attr", S: "pricing_section", E: "pricing_subtitle" },
-    { id: "e35", T: "Attr", S: "pricing_section", E: "pricing_grid" },
-    { id: "e36", T: "Attr", S: "pricing_grid", E: "pricing_cards_loop" },
-    { id: "e37", T: "Attr", S: "pricing_cards_loop", E: "pricing_card" },
-    { id: "e38", T: "Attr", S: "pricing_card", E: "pricing_card_badge" },
-    { id: "e39", T: "Attr", S: "pricing_card", E: "pricing_card_title" },
-    { id: "e40", T: "Attr", S: "pricing_card", E: "pricing_card_price" },
-    { id: "e40a", T: "Attr", S: "pricing_card_price", E: "pricing_card_price_amount" },
-    { id: "e40b", T: "Attr", S: "pricing_card_price", E: "pricing_card_price_period" },
-    { id: "e41", T: "Attr", S: "pricing_card", E: "pricing_card_channels_badge" },
-    { id: "e42", T: "Attr", S: "pricing_card", E: "pricing_card_divider" },
-    { id: "e43", T: "Attr", S: "pricing_card", E: "pricing_card_features" },
-    { id: "e43a", T: "Attr", S: "pricing_card_features", E: "pricing_card_feature_item" },
-    { id: "e43b", T: "Attr", S: "pricing_card_feature_item", E: "pricing_card_feature_icon" },
-    { id: "e43c", T: "Attr", S: "pricing_card_feature_item", E: "pricing_card_feature_text" },
-    { id: "e43d", T: "Attr", S: "pricing_card", E: "pricing_card_spacer" },
-    { id: "e44", T: "Attr", S: "pricing_card", E: "pricing_card_button" },
-    { id: "e68", T: "Attr", S: "main_content", E: "stats_section" },
-    { id: "e69", T: "Attr", S: "stats_section", E: "stats_container" },
-    { id: "e70", T: "Attr", S: "stats_container", E: "stats_title" },
-    { id: "e71", T: "Attr", S: "stats_container", E: "stats_grid" },
-    { id: "e72", T: "Attr", S: "stats_grid", E: "stats_user_count" },
-    { id: "e73", T: "Attr", S: "stats_user_count", E: "stats_user_count_number" },
-    { id: "e74", T: "Attr", S: "stats_user_count", E: "stats_user_count_label" },
-    { id: "e75", T: "Attr", S: "stats_grid", E: "stats_rating" },
-    { id: "e76", T: "Attr", S: "stats_rating", E: "stats_rating_stars" },
-    { id: "e77", T: "Attr", S: "stats_rating", E: "stats_rating_text" },
-    { id: "e78", T: "Attr", S: "stats_grid", E: "stats_videos" },
-    { id: "e79", T: "Attr", S: "stats_videos", E: "stats_videos_number" },
-    { id: "e80", T: "Attr", S: "stats_videos", E: "stats_videos_label" },
-
-    // Chrome Extension Section
-    { id: "e81", T: "Attr", S: "main_content", E: "chrome_extension_section" },
-    { id: "e82", T: "Attr", S: "chrome_extension_section", E: "chrome_extension_container" },
-    { id: "e83", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_badge" },
-    { id: "e84", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_title" },
-    { id: "e85", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_subtitle" },
-    { id: "e86", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_features_grid" },
-    { id: "e87", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_1" },
-    { id: "e88", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_icon" },
-    { id: "e89", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_text" },
-    { id: "e90", T: "Attr", S: "chrome_extension_feature_1", E: "chrome_extension_feature_1_desc" },
-    { id: "e91", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_2" },
-    { id: "e92", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_icon" },
-    { id: "e93", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_text" },
-    { id: "e94", T: "Attr", S: "chrome_extension_feature_2", E: "chrome_extension_feature_2_desc" },
-    { id: "e95", T: "Attr", S: "chrome_extension_features_grid", E: "chrome_extension_feature_3" },
-    { id: "e96", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_icon" },
-    { id: "e97", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_text" },
-    { id: "e98", T: "Attr", S: "chrome_extension_feature_3", E: "chrome_extension_feature_3_desc" },
-    { id: "e99", T: "Attr", S: "chrome_extension_container", E: "chrome_extension_cta" },
-    { id: "e100", T: "Attr", S: "chrome_extension_cta", E: "chrome_extension_button" },
-    { id: "e101", T: "Attr", S: "chrome_extension_button", E: "chrome_extension_button_icon" },
-    { id: "e102", T: "Attr", S: "chrome_extension_button", E: "chrome_extension_button_text" },
-    { id: "e103", T: "Attr", S: "chrome_extension_cta", E: "chrome_extension_note" },
-
-    // Mobile Apps Section
-    { id: "e110", T: "Attr", S: "main_content", E: "mobile_apps_section" },
-    { id: "e111", T: "Attr", S: "mobile_apps_section", E: "mobile_apps_container" },
-    { id: "e112", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_badge" },
-    { id: "e113", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_title" },
-    { id: "e114", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_subtitle" },
-    { id: "e115", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_icons_container" },
-    { id: "e116", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_android_container" },
-    { id: "e117", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_icon" },
-    { id: "e118", T: "Attr", S: "mobile_apps_android_container", E: "mobile_apps_android_text" },
-    { id: "e119", T: "Attr", S: "mobile_apps_icons_container", E: "mobile_apps_ios_container" },
-    { id: "e120", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_icon" },
-    { id: "e121", T: "Attr", S: "mobile_apps_ios_container", E: "mobile_apps_ios_text" },
-    { id: "e122", T: "Attr", S: "mobile_apps_container", E: "mobile_apps_notify_text" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "47"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "60"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "83"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "12"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "28"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "47"
+      E: "48"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "60"
+      E: "61"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "83"
+      E: "84"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "28"
+      E: "30"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "28"
+      E: "31"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "48"
+      E: "49"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "48"
+      E: "50"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "61"
+      E: "64"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "61"
+      E: "62"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "61"
+      E: "78"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "61"
+      E: "63"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "61"
+      E: "65"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "84"
+      E: "85"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "84"
+      E: "95"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "84"
+      E: "87"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "84"
+      E: "86"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "84"
+      E: "88"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "50"
+      E: "57"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "50"
+      E: "54"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "50"
+      E: "51"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "78"
+      E: "82"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "78"
+      E: "79"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "65"
+      E: "70"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "65"
+      E: "74"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "65"
+      E: "66"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "88"
+      E: "92"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "88"
+      E: "89"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "15"
+      E: "24"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "15"
+      E: "20"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "57"
+      E: "59"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "57"
+      E: "58"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "54"
+      E: "55"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "54"
+      E: "56"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "51"
+      E: "52"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "51"
+      E: "53"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "79"
+      E: "80"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "79"
+      E: "81"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "70"
+      E: "73"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "70"
+      E: "71"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "70"
+      E: "72"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "74"
+      E: "75"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "74"
+      E: "77"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "74"
+      E: "76"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "66"
+      E: "68"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "66"
+      E: "69"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "66"
+      E: "67"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "92"
+      E: "93"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "92"
+      E: "94"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "89"
+      E: "90"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "89"
+      E: "91"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "24"
+      E: "26"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "24"
+      E: "27"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e78
+      T: Attr
+      S: "16"
+      E: "19"
+    }
+    {
+      id: e79
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e80
+      T: Attr
+      S: "20"
+      E: "22"
+    }
+    {
+      id: e81
+      T: Attr
+      S: "20"
+      E: "23"
+    }
+    {
+      id: e82
+      T: Attr
+      S: "33"
+      E: "41"
+    }
+    {
+      id: e83
+      T: Attr
+      S: "33"
+      E: "46"
+    }
+    {
+      id: e84
+      T: Attr
+      S: "33"
+      E: "40"
+    }
+    {
+      id: e85
+      T: Attr
+      S: "33"
+      E: "35"
+    }
+    {
+      id: e86
+      T: Attr
+      S: "33"
+      E: "45"
+    }
+    {
+      id: e87
+      T: Attr
+      S: "33"
+      E: "36"
+    }
+    {
+      id: e88
+      T: Attr
+      S: "33"
+      E: "39"
+    }
+    {
+      id: e89
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e90
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e91
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e92
+      T: Attr
+      S: "36"
+      E: "38"
+    }
+    {
+      id: e93
+      T: Attr
+      S: "42"
+      E: "43"
+    }
+    {
+      id: e94
+      T: Attr
+      S: "42"
+      E: "44"
+    }
+    {
+      id: e95
+      T: PageLayout
+      S: "1"
+      E: "96"
+    }
   ]
 }

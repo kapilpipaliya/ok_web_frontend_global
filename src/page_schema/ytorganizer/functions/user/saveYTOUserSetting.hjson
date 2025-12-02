@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "save_yto_user_setting_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "saveYTOUserSetting",
-        description: "Saves YouTube Organizer user setting (sort preferences, view modes, etc.)",
-        body: '''
+        description: Saves YouTube Organizer user setting (sort preferences, view modes, etc.)
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -160,8 +160,9 @@ try {
   };
 }
 '''
+        key: saveYTOUserSetting
       }
     }
-  ],
+  ]
   edges: []
 }

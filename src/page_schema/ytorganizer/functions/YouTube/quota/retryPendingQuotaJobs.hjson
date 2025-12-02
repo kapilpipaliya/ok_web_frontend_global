@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "retry_pending_quota_jobs_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "retryPendingQuotaJobs",
-        description: "Scheduled function to retry all pending_quota jobs (run at midnight UTC)",
-        body: '''
+        description: Scheduled function to retry all pending_quota jobs (run at midnight UTC)
+        body:
+          '''
 try {
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
 
@@ -165,8 +165,9 @@ try {
   };
 }
 '''
+        key: retryPendingQuotaJobs
       }
     }
-  ],
+  ]
   edges: []
 }

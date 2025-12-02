@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getAllYTOUsers",
-        description: "Get all users with their YTO statistics (channels, playlists, videos counts)",
-        body: '''
+        description: Get all users with their YTO statistics (channels, playlists, videos counts)
+        body:
+          '''
 const actualUser = await args.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found");
@@ -138,8 +138,9 @@ return {
   message: `Found ${users.length} of ${totalCount} users`
 };
 '''
+        key: getAllYTOUsers
       }
     }
-  ],
+  ]
   edges: []
 }

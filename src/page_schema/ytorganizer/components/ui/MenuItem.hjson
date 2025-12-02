@@ -1,95 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "MenuItem"
+        key: MenuItem
       }
-    },
+    }
     {
-      id: "variant_type",
-      L: "ComponentVariant",
+      id: "2"
+      L: Attr
       P: {
-        key: "type",
-        type: "string",
-        defValue: "default"
-      }
-    },
-    {
-      id: "type_option_default",
-      L: "ComponentVariantOption",
-      P: {
-        key: "default",
-        value: "default",
-        description: "Default menu item"
-      }
-    },
-    {
-      id: "type_option_danger",
-      L: "ComponentVariantOption",
-      P: {
-        key: "danger",
-        value: "danger",
-        description: "Danger menu item (red)"
-      }
-    },
-    {
-      id: "variant_icon",
-      L: "ComponentVariant",
-      P: {
-        key: "icon",
-        type: "string",
-        defValue: ""
-      }
-    },
-    {
-      id: "variant_text",
-      L: "ComponentVariant",
-      P: {
-        key: "text",
-        type: "string",
-        defValue: "Menu Item"
-      }
-    },
-    {
-      id: "menu_item",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const text = args.contextData.props?.text || "Menu Item";
-const onClick = args.contextData.props?.onClick;
-const href = args.contextData.props?.href;
-const type = args.contextData.props?.type || "default";
-const isDivider = args.contextData.props?.isDivider;
-
-// If it's a divider, render a simple div
-if (isDivider) {
-  return {
-    as: "div"
-  };
-}
-
-// If href is provided, render as link
-if (href) {
-  return {
-    as: "a",
-    href: href,
-    onClick: onClick,
-    role: "menuitem"
-  };
-}
-
-// Default: render as button
-return {
-  as: "button",
-  onClick: onClick,
-  role: "menuitem"
-};
-''',
-        css: '''
+        css:
+          '''
 const type = args.contextData.props?.type || "default";
 const isDivider = args.contextData.props?.isDivider;
 
@@ -131,15 +54,50 @@ return `._id {
   outline-offset: -2px;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const text = args.contextData.props?.text || "Menu Item";
+const onClick = args.contextData.props?.onClick;
+const href = args.contextData.props?.href;
+const type = args.contextData.props?.type || "default";
+const isDivider = args.contextData.props?.isDivider;
+
+// If it's a divider, render a simple div
+if (isDivider) {
+  return {
+    as: "div"
+  };
+}
+
+// If href is provided, render as link
+if (href) {
+  return {
+    as: "a",
+    href: href,
+    onClick: onClick,
+    role: "menuitem"
+  };
+}
+
+// Default: render as button
+return {
+  as: "button",
+  onClick: onClick,
+  role: "menuitem"
+};
+'''
       }
-    },
+    }
     {
-      id: "item_icon",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const icon = args.contextData.props?.icon;
 const isDivider = args.contextData.props?.isDivider;
 
@@ -156,14 +114,21 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "item_text",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  flex: 1;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const text = args.contextData.props?.text || "Menu Item";
 const isDivider = args.contextData.props?.isDivider;
 
@@ -176,23 +141,103 @@ return {
   as: "span",
   text: text
 };
-''',
-        css: '''
-return `._id {
-  flex: 1;
-}`;
 '''
       }
     }
-  ],
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: default
+        key: type
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariantOption
+      P: {
+        description: Danger menu item (red)
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariantOption
+      P: {
+        description: Default menu item
+        value: default
+        key: default
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Menu Item
+        key: text
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: icon
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_type" },
-    { id: "e2", T: "ComponentVariantOption", S: "variant_type", E: "type_option_default" },
-    { id: "e3", T: "ComponentVariantOption", S: "variant_type", E: "type_option_danger" },
-    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_icon" },
-    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_text" },
-    { id: "e6", T: "Attr", S: "component_root", E: "menu_item" },
-    { id: "e7", T: "Attr", S: "menu_item", E: "item_icon" },
-    { id: "e8", T: "Attr", S: "menu_item", E: "item_text" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e7
+      T: ComponentVariantOption
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: ComponentVariantOption
+      S: "5"
+      E: "7"
+    }
   ]
 }

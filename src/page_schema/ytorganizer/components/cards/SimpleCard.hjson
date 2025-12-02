@@ -1,109 +1,19 @@
 {
   vertexes: [
     {
-      id: "component_root"
-      L: "Component"
+      id: "1"
+      L: Component
       P: {
-        key: "SimpleCard"
-        description: "Simple card component for displaying content with optional header"
-      }
-    }
-
-    // Variant: variant (visual style)
-    {
-      id: "variant_variant"
-      L: "ComponentVariant"
-      P: {
-        key: "variant"
-        type: "string"
-        defValue: "default"
+        description: Simple card component for displaying content with optional header
+        key: SimpleCard
       }
     }
     {
-      id: "variant_option_default"
-      L: "ComponentVariantOption"
+      id: "2"
+      L: Attr
       P: {
-        key: "default"
-        value: "default"
-        description: "Default card style with standard background and border"
-      }
-    }
-    {
-      id: "variant_option_error"
-      L: "ComponentVariantOption"
-      P: {
-        key: "error"
-        value: "error"
-        description: "Error state with red border and light red background"
-      }
-    }
-    {
-      id: "variant_option_warning"
-      L: "ComponentVariantOption"
-      P: {
-        key: "warning"
-        value: "warning"
-        description: "Warning state with yellow border and light yellow background"
-      }
-    }
-    {
-      id: "variant_option_success"
-      L: "ComponentVariantOption"
-      P: {
-        key: "success"
-        value: "success"
-        description: "Success state with green border and light green background"
-      }
-    }
-
-    // Variant: noPadding (remove padding from card)
-    {
-      id: "variant_no_padding"
-      L: "ComponentVariant"
-      P: {
-        key: "noPadding"
-        type: "boolean"
-        defValue: false
-      }
-    }
-
-    // Variant: title (card title text)
-    {
-      id: "variant_title"
-      L: "ComponentVariant"
-      P: {
-        key: "title"
-        type: "string"
-        defValue: ""
-      }
-    }
-
-    // Variant: icon (iconify icon name)
-    {
-      id: "variant_icon"
-      L: "ComponentVariant"
-      P: {
-        key: "icon"
-        type: "string"
-        defValue: ""
-      }
-    }
-
-    // Main card container
-    {
-      id: "card_container"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-const className = args.contextData.props?.class;
-return {
-  as: "div",
-  class: className
-};
-'''
-        css: '''
+        css:
+          '''
 const variant = args.contextData.props?.variant || "default";
 const noPadding = args.contextData.props?.noPadding || false;
 
@@ -133,27 +43,24 @@ return `._id {
   }
 }`;
 '''
-      }
-    }
-
-    // Header container (only show if title or icon provided)
-    {
-      id: "card_header"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
-const title = args.contextData.props?.title || "";
-const icon = args.contextData.props?.icon || "";
-const noPadding = args.contextData.props?.noPadding || false;
-
+        componentName: Html
+        props:
+          '''
+const className = args.contextData.props?.class;
 return {
   as: "div",
-  hide: !title && !icon
+  class: className
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 const noPadding = args.contextData.props?.noPadding || false;
 
 return `._id {
@@ -164,17 +71,36 @@ return `._id {
   ${noPadding ? `padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.lg} 0 ${args.theme.var.spacing.lg};` : ''}
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const title = args.contextData.props?.title || "";
+const icon = args.contextData.props?.icon || "";
+const noPadding = args.contextData.props?.noPadding || false;
+
+return {
+  as: "div",
+  hide: !title && !icon
+};
+'''
       }
     }
-
-    // Icon
     {
-      id: "card_icon"
-      L: "Attr"
+      id: "4"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const icon = args.contextData.props?.icon || "";
 
 return {
@@ -185,23 +111,25 @@ return {
   hide: !icon
 };
 '''
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  flex-shrink: 0;
-}`;
-'''
       }
     }
-
-    // Title
     {
-      id: "card_title"
-      L: "Attr"
+      id: "5"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const title = args.contextData.props?.title || "";
 
 return {
@@ -210,57 +138,182 @@ return {
   hide: !title
 };
 '''
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0;
-}`;
-'''
       }
     }
-
-    // Content slot
     {
-      id: "card_content"
-      L: "Attr"
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2
-        componentName: "Slot"
-        props: '''
-const noPadding = args.contextData.props?.noPadding || false;
-
-return {
-};
-'''
-        css: '''
+        css:
+          '''
 const noPadding = args.contextData.props?.noPadding || false;
 
 return `._id {
   ${noPadding ? `padding: ${args.theme.var.spacing.lg};` : ''}
 }`;
 '''
+        displayOrder: 2
+        componentName: Slot
+        props:
+          '''
+const noPadding = args.contextData.props?.noPadding || false;
+
+return {
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: default
+        key: variant
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
+      P: {
+        description: Success state with green border and light green background
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        description: Error state with red border and light red background
+        value: error
+        key: error
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Default card style with standard background and border
+        value: default
+        key: default
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Warning state with yellow border and light yellow background
+        value: warning
+        key: warning
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: icon
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: noPadding
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: title
       }
     }
   ]
-
   edges: [
-    // Component variants
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_variant" }
-    { id: "e2", T: "ComponentVariantOption", S: "variant_variant", E: "variant_option_default" }
-    { id: "e3", T: "ComponentVariantOption", S: "variant_variant", E: "variant_option_error" }
-    { id: "e4", T: "ComponentVariantOption", S: "variant_variant", E: "variant_option_warning" }
-    { id: "e5", T: "ComponentVariantOption", S: "variant_variant", E: "variant_option_success" }
-    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_no_padding" }
-    { id: "e7", T: "ComponentVariant", S: "component_root", E: "variant_title" }
-    { id: "e8", T: "ComponentVariant", S: "component_root", E: "variant_icon" }
-
-    // Component structure
-    { id: "e9", T: "Attr", S: "component_root", E: "card_container" }
-    { id: "e10", T: "Attr", S: "card_container", E: "card_header" }
-    { id: "e11", T: "Attr", S: "card_header", E: "card_icon" }
-    { id: "e12", T: "Attr", S: "card_header", E: "card_title" }
-    { id: "e13", T: "Attr", S: "card_container", E: "card_content" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e13
+      T: ComponentVariantOption
+      S: "7"
+      E: "11"
+    }
   ]
 }

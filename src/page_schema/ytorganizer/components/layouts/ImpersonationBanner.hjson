@@ -1,31 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "ImpersonationBanner"
+        key: ImpersonationBanner
       }
-    },
+    }
     {
-      id: "banner_container",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const impersonatedUser = args.contextData.props?.impersonatedUser;
-const onExitImpersonation = args.contextData.props?.onExitImpersonation;
-
-if (!impersonatedUser) {
-  return { as: "div", hide: true };
-}
-
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 100%;
   z-index: 100;
@@ -46,20 +33,29 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "message_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const impersonatedUser = args.contextData.props?.impersonatedUser;
+const onExitImpersonation = args.contextData.props?.onExitImpersonation;
+
+if (!impersonatedUser) {
+  return { as: "div", hide: true };
+}
+
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -72,45 +68,45 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "warning_icon",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:warning-alt",
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "message_text",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const impersonatedUser = args.contextData.props?.impersonatedUser;
-const username = impersonatedUser?.P?.username || "User";
-const email = impersonatedUser?.P?.email || "";
-
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-weight: 500;
   font-size: ${args.theme.var.fontSize.md};
@@ -120,15 +116,34 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const impersonatedUser = args.contextData.props?.impersonatedUser;
+const username = impersonatedUser?.P?.username || "User";
+const email = impersonatedUser?.P?.email || "";
+
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "message_main",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: block;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const impersonatedUser = args.contextData.props?.impersonatedUser;
 const username = impersonatedUser?.P?.username || "User";
 
@@ -136,30 +151,15 @@ return {
   as: "span",
   text: `Admin Mode: Viewing as ${username}`
 };
-''',
-        css: '''
-return `._id {
-  display: block;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "message_email",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const impersonatedUser = args.contextData.props?.impersonatedUser;
-const email = impersonatedUser?.P?.email || "";
-
-return {
-  as: "span",
-  text: `(${email})`
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: block;
   font-size: ${args.theme.var.fontSize.sm};
@@ -171,20 +171,26 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "actions_container",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const impersonatedUser = args.contextData.props?.impersonatedUser;
+const email = impersonatedUser?.P?.email || "";
+
 return {
-  as: "div"
+  as: "span",
+  text: `(${email})`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.sm};
@@ -195,28 +201,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "exit_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const onExitImpersonation = args.contextData.props?.onExitImpersonation;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  text: "Exit Admin View",
-  onClick: () => {
-    if (onExitImpersonation) {
-      onExitImpersonation();
-    }
-  }
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
   background: ${args.theme.var.color.background};
@@ -245,24 +245,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "manage_users_link",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const onExitImpersonation = args.contextData.props?.onExitImpersonation;
+
 return {
   as: "button",
-  text: "Manage Users",
+  text: "Exit Admin View",
   onClick: () => {
-    args.navigate('/yto/admin/users');
+    if (onExitImpersonation) {
+      onExitImpersonation();
+    }
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
   background: transparent;
@@ -286,18 +292,75 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Manage Users",
+  onClick: () => {
+    args.navigate('/yto/admin/users');
+  }
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "banner_container" },
-    { id: "e2", T: "Attr", S: "banner_container", E: "message_container" },
-    { id: "e3", T: "Attr", S: "message_container", E: "warning_icon" },
-    { id: "e4", T: "Attr", S: "message_container", E: "message_text" },
-    { id: "e5", T: "Attr", S: "message_text", E: "message_main" },
-    { id: "e6", T: "Attr", S: "message_text", E: "message_email" },
-    { id: "e7", T: "Attr", S: "banner_container", E: "actions_container" },
-    { id: "e8", T: "Attr", S: "actions_container", E: "exit_button" },
-    { id: "e9", T: "Attr", S: "actions_container", E: "manage_users_link" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "6"
+    }
   ]
 }

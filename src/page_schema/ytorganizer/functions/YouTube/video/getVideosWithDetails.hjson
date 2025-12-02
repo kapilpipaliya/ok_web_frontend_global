@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getVideosWithDetails",
-        description: "Helper function to fetch videos with details for a user. Supports filtering by videoIds, statusFilter, and custom ordering (orderBy, orderDirection)",
-        body: '''
+        description: Helper function to fetch videos with details for a user. Supports filtering by videoIds, statusFilter, and custom ordering (orderBy, orderDirection)
+        body:
+          '''
 /**
  * Get Videos with Details
  *
@@ -204,8 +204,9 @@ try {
   };
 }
 '''
+        key: getVideosWithDetails
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root"
-      L: "Function"
+      id: "1"
+      L: Function
       P: {
-        key: "getYouTubeOwnerships"
-        description: "Get all YouTube ownerships for a user"
-        body: '''
+        description: Get all YouTube ownerships for a user
+        body:
+          '''
 // Get user from session
 const user = await args.getUserFromSession(args.request);
 if (!user) {
@@ -35,6 +35,7 @@ return {
   data: ownerships
 };
 '''
+        key: getYouTubeOwnerships
       }
     }
   ]

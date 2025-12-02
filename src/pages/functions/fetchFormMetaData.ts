@@ -55,11 +55,37 @@ export async function fetchFormMetaData(
     return { error: "404" };
   }
 
+  for (const [, vertex] of Object.entries(data.graph?.vertexes || {})) {
+    delete vertex.P.createdAt;
+    delete vertex.P.updatedAt;
+  }
+  for (const [, edge] of Object.entries(data.graph?.edges || {})) {
+    delete edge.P.createdAt;
+    delete edge.P.updatedAt;
+    if (Object.keys(edge.P).length === 0) {
+      delete edge.P;
+    }
+  }
+
   if (skipComponentData) {
     return { data };
   }
 
   const componentDataResults = await fetchComponentDataFromGraph(data);
+
+  for (const componentData of componentDataResults) {
+    for (const [, vertex] of Object.entries(componentData.graph?.vertexes || {})) {
+      delete vertex.P.createdAt;
+      delete vertex.P.updatedAt;
+    }
+    for (const [, edge] of Object.entries(componentData.graph?.edges || {})) {
+      delete edge.P.createdAt;
+      delete edge.P.updatedAt;
+      if (Object.keys(edge.P).length === 0) {
+        delete edge.P;
+      }
+    }
+  }
 
   return { data, componentData: componentDataResults };
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "migrateSchemaV3toV4",
-        description: "Migrates YouTube Organizer schema from v3.x to v4.0. Transforms old setting-based relationships to new direct ownership relationships with optional settings.",
-        body: '''
+        description: Migrates YouTube Organizer schema from v3.x to v4.0. Transforms old setting-based relationships to new direct ownership relationships with optional settings.
+        body:
+          '''
 /**
  * Schema Migration: v3.x → v4.0
  *
@@ -405,8 +405,9 @@ try {
   };
 }
 '''
+        key: migrateSchemaV3toV4
       }
     }
-  ],
+  ]
   edges: []
 }

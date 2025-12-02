@@ -1,32 +1,78 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "VideoPlayer"
+        key: VideoPlayer
       }
-    },
+    }
     {
-      id: "portal_wrapper",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "portal"
 };
 '''
       }
-    },
+    }
     {
-      id: "video_player_container",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+const getPlayerState = args.contextData.props?.playerState;
+const state = getPlayerState?.() || "closed";
+const isMinimized = state === "minimized";
+const isMaximized = state === "maximized";
+
+return `._id {
+  position: fixed;
+  z-index: 99;
+  background: ${args.theme.var.color.background_dark_900};
+  border-radius: ${isMinimized ? '0.5rem' : '0'};
+  box-shadow: ${isMinimized ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'};
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-radius 0.3s ease;
+}
+
+._id[data-state="minimized"] {
+  bottom: ${args.theme.var.spacing.lg};
+  right: ${args.theme.var.spacing.lg};
+  width: 480px;
+  height: 270px;
+  min-width: 480px;
+  min-height: 270px;
+}
+
+._id[data-state="maximized"] {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0;
+  bottom: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+@media (max-width: 768px) {
+  ._id[data-state="minimized"] {
+    /* Remove min-width/min-height constraints on mobile */
+    min-width: unset;
+    min-height: unset;
+    /* Max width ensures player never exceeds screen */
+    max-width: calc(100vw - 16px);
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 // State to track if resize is active
 const [isResizing, setIsResizing] = args.createSignal(false);
 
@@ -261,8 +307,10 @@ return {
   getResponsiveValues,
   constrainPlayerPosition
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 const currentState = getPlayerState?.() || "closed";
 const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
@@ -319,60 +367,34 @@ return {
     window.removeEventListener('orientationchange', handleResize);
   }
 };
-''',
-        css: '''
-const getPlayerState = args.contextData.props?.playerState;
-const state = getPlayerState?.() || "closed";
-const isMinimized = state === "minimized";
-const isMaximized = state === "maximized";
-
-return `._id {
-  position: fixed;
-  z-index: 99;
-  background: ${args.theme.var.color.background_dark_900};
-  border-radius: ${isMinimized ? '0.5rem' : '0'};
-  box-shadow: ${isMinimized ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'};
-  overflow: hidden;
-  transition: box-shadow 0.3s ease, border-radius 0.3s ease;
-}
-
-._id[data-state="minimized"] {
-  bottom: ${args.theme.var.spacing.lg};
-  right: ${args.theme.var.spacing.lg};
-  width: 480px;
-  height: 270px;
-  min-width: 480px;
-  min-height: 270px;
-}
-
-._id[data-state="maximized"] {
-  top: 0 !important;
-  left: 0 !important;
-  right: 0;
-  bottom: 0;
-  width: 100vw !important;
-  height: 100vh !important;
-}
-
-@media (max-width: 768px) {
-  ._id[data-state="minimized"] {
-    /* Remove min-width/min-height constraints on mobile */
-    min-width: unset;
-    min-height: unset;
-    /* Max width ensures player never exceeds screen */
-    max-width: calc(100vw - 16px);
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "player_header",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+const getPlayerState = args.contextData.props?.playerState;
+const state = getPlayerState?.() || "closed";
+
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_dark_800};
+  border-bottom: 1px solid ${args.theme.var.color.background_dark_700};
+  cursor: ${state === "minimized" ? 'move' : 'default'};
+  user-select: none;
+  touch-action: ${state === "minimized" ? 'none' : 'auto'};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 let lastClickTime = 0;
 let hasDragged = false;
 
@@ -479,37 +501,15 @@ return {
   onMouseDown: handleMouseDown,
   onTouchStart: handleTouchStart
 };
-''',
-        css: '''
-const getPlayerState = args.contextData.props?.playerState;
-const state = getPlayerState?.() || "closed";
-
-return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  background: ${args.theme.var.color.background_dark_800};
-  border-bottom: 1px solid ${args.theme.var.color.background_dark_700};
-  cursor: ${state === "minimized" ? 'move' : 'default'};
-  user-select: none;
-  touch-action: ${state === "minimized" ? 'none' : 'auto'};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "player_title_container",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -518,47 +518,46 @@ return `._id {
   min-width: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "youtube_logo",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: #FF0000;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "mdi:youtube",
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  color: #FF0000;
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "player_title",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const getCurrentVideo = args.contextData.props?.currentVideo;
-const video = getCurrentVideo?.();
-const title = video?.P?.title || "YouTube Video";
-
-return {
-  as: "h3",
-  text: title
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.sm};
   font-weight: 500;
@@ -571,50 +570,49 @@ return `._id {
   min-width: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "player_controls",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const getCurrentVideo = args.contextData.props?.currentVideo;
+const video = getCurrentVideo?.();
+const title = video?.P?.title || "YouTube Video";
+
 return {
-  as: "div"
+  as: "h3",
+  text: title
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
 }`;
 '''
-      }
-    },
-    {
-      id: "player_next_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const getVideoQueue = args.contextData.props?.videoQueue;
-const queue = getVideoQueue?.() || [];
-const playNext = args.contextData.props?.playNext;
-const hasNext = queue.length > 0;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  onClick: playNext,
-  "aria-label": "Play next video",
-  title: `Next (${queue.length} in queue)`,
-  disabled: !hasNext,
-  hide: !hasNext
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -637,15 +635,34 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const getVideoQueue = args.contextData.props?.videoQueue;
+const queue = getVideoQueue?.() || [];
+const playNext = args.contextData.props?.playNext;
+const hasNext = queue.length > 0;
+
+return {
+  as: "button",
+  onClick: playNext,
+  "aria-label": "Play next video",
+  title: `Next (${queue.length} in queue)`,
+  disabled: !hasNext,
+  hide: !hasNext
+};
+'''
       }
-    },
+    }
     {
-      id: "player_next_icon",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:skip-forward",
@@ -654,28 +671,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "player_queue_button",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const getVideoQueue = args.contextData.props?.videoQueue;
-const queue = getVideoQueue?.() || [];
-const hasQueue = queue.length > 0;
-const openQueueModal = args.contextData.props?.openQueueModal;
-
-return {
-  as: "button",
-  onClick: openQueueModal,
-  "aria-label": "Manage queue",
-  title: `Queue (${queue.length})`,
-  hide: !hasQueue
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -693,15 +695,33 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const getVideoQueue = args.contextData.props?.videoQueue;
+const queue = getVideoQueue?.() || [];
+const hasQueue = queue.length > 0;
+const openQueueModal = args.contextData.props?.openQueueModal;
+
+return {
+  as: "button",
+  onClick: openQueueModal,
+  "aria-label": "Manage queue",
+  title: `Queue (${queue.length})`,
+  hide: !hasQueue
+};
+'''
       }
-    },
+    }
     {
-      id: "player_queue_icon",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:list",
@@ -710,36 +730,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "watch_on_youtube_button",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        // YouTube TOS Required: Provide a link for users to watch the video on YouTube.com
-        // This button fulfills the requirement to allow users to access the video on YouTube's platform
-        props: '''
-const getCurrentVideo = args.contextData.props?.currentVideo;
-const video = getCurrentVideo?.();
-const youtubeId = video?.P?.youtubeId || "";
-const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
-
-return {
-  as: "a",
-  href: youtubeUrl,
-  target: "_blank",
-  rel: "noopener",
-  "aria-label": "Watch on YouTube",
-  title: "Watch on YouTube",
-  onClick: (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    args.fns.openYouTubeInParentTab(youtubeUrl);
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: #FF0000;
   border: none;
@@ -761,15 +758,39 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const getCurrentVideo = args.contextData.props?.currentVideo;
+const video = getCurrentVideo?.();
+const youtubeId = video?.P?.youtubeId || "";
+const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
+
+return {
+  as: "a",
+  href: youtubeUrl,
+  target: "_blank",
+  rel: "noopener",
+  "aria-label": "Watch on YouTube",
+  title: "Watch on YouTube",
+  onClick: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    args.fns.openYouTubeInParentTab(youtubeUrl);
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "watch_on_youtube_icon",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:launch",
@@ -778,48 +799,36 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "watch_on_youtube_text",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "YouTube"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   @media (max-width: 768px) {
     display: none;
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "player_toggle_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-const getPlayerState = args.contextData.props?.playerState;
-const state = getPlayerState?.() || "closed";
-const isMinimized = state === "minimized";
-const togglePlayerState = args.contextData.props?.togglePlayerState;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  onClick: togglePlayerState,
-  "aria-label": isMinimized ? "Maximize player" : "Minimize player",
-  title: isMinimized ? "Maximize" : "Minimize"
+  as: "span",
+  text: "YouTube"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -837,15 +846,32 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const getPlayerState = args.contextData.props?.playerState;
+const state = getPlayerState?.() || "closed";
+const isMinimized = state === "minimized";
+const togglePlayerState = args.contextData.props?.togglePlayerState;
+
+return {
+  as: "button",
+  onClick: togglePlayerState,
+  "aria-label": isMinimized ? "Maximize player" : "Minimize player",
+  title: isMinimized ? "Maximize" : "Minimize"
+};
+'''
       }
-    },
+    }
     {
-      id: "player_toggle_icon",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 const state = getPlayerState?.() || "closed";
 const isMinimized = state === "minimized";
@@ -858,24 +884,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "player_close_button",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
-const closePlayer = args.contextData.props?.closePlayer;
-
-return {
-  as: "button",
-  onClick: closePlayer,
-  "aria-label": "Close player",
-  title: "Close"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: none;
   border: none;
@@ -893,15 +908,29 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const closePlayer = args.contextData.props?.closePlayer;
+
+return {
+  as: "button",
+  onClick: closePlayer,
+  "aria-label": "Close player",
+  title: "Close"
+};
+'''
       }
-    },
+    }
     {
-      id: "player_close_icon",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:close",
@@ -910,14 +939,23 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "player_video_container",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  height: calc(100% - 48px);
+  background: ${args.theme.var.color.background_dark_900};
+  position: relative;
+}`;
+'''
+        displayOrder: 2
+        fns:
+          '''
 // Create reactive store for player state
 const [playerState, setPlayerState] = args.createStore({
   player: null,
@@ -974,29 +1012,30 @@ return {
     }
   }
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  height: calc(100% - 48px);
-  background: ${args.theme.var.color.background_dark_900};
-  position: relative;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "player_iframe",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  height: 100%;
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
 // Watch for video changes and update player without changing iframe src
 args.createEffect(() => {
   const getCurrentVideo = args.untrack(() => args.contextData.props?.currentVideo);
@@ -1018,8 +1057,10 @@ args.createEffect(() => {
 });
 
 return {};
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 const getCurrentVideo = args.contextData.props?.currentVideo;
 const video = getCurrentVideo?.();
 const youtubeId = video?.P?.youtubeId || "";
@@ -1103,35 +1144,79 @@ return {
     args.fns.playerState.setPlayer(null);
   }
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  height: 100%;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "resize_handle_se",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const getPlayerState = args.contextData.props?.playerState;
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background_dark_900};
+  z-index: 10;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.playerState.isLoading;
+const isPlayerReady = args.fns.playerState.isPlayerReady;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('se'),
-  onTouchStart: args.fns.createTouchResizeHandler('se'),
-  hide: () => {
-    const state = getPlayerState?.();
-    return state !== "minimized";
-  }
+  hide: () => !isLoading && isPlayerReady
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+return [
+  `@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }`,
+  `._id {
+    width: 40px;
+    height: 40px;
+    border: 4px solid ${args.theme.var.color.background_dark_700};
+    border-top: 4px solid ${args.theme.var.color.primary};
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }`
+];
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   bottom: 0;
@@ -1159,28 +1244,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "resize_handle_e",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('e'),
-  onTouchStart: args.fns.createTouchResizeHandler('e'),
+  onMouseDown: args.fns.createResizeHandler('se'),
+  onTouchStart: args.fns.createTouchResizeHandler('se'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 20px;
@@ -1196,28 +1283,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "resize_handle_s",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('s'),
-  onTouchStart: args.fns.createTouchResizeHandler('s'),
+  onMouseDown: args.fns.createResizeHandler('e'),
+  onTouchStart: args.fns.createTouchResizeHandler('e'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   bottom: 0;
@@ -1233,28 +1322,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "resize_handle_w",
-      L: "Attr",
-      P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('w'),
-  onTouchStart: args.fns.createTouchResizeHandler('w'),
+  onMouseDown: args.fns.createResizeHandler('s'),
+  onTouchStart: args.fns.createTouchResizeHandler('s'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 20px;
@@ -1270,28 +1361,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "resize_handle_n",
-      L: "Attr",
-      P: {
-        displayOrder: 7,
-        componentName: "Html",
-        props: '''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('n'),
-  onTouchStart: args.fns.createTouchResizeHandler('n'),
+  onMouseDown: args.fns.createResizeHandler('w'),
+  onTouchStart: args.fns.createTouchResizeHandler('w'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0;
@@ -1307,28 +1400,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "resize_handle_ne",
-      L: "Attr",
-      P: {
-        displayOrder: 8,
-        componentName: "Html",
-        props: '''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('ne'),
-  onTouchStart: args.fns.createTouchResizeHandler('ne'),
+  onMouseDown: args.fns.createResizeHandler('n'),
+  onTouchStart: args.fns.createTouchResizeHandler('n'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0;
@@ -1356,28 +1451,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "resize_handle_nw",
-      L: "Attr",
-      P: {
-        displayOrder: 9,
-        componentName: "Html",
-        props: '''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('nw'),
-  onTouchStart: args.fns.createTouchResizeHandler('nw'),
+  onMouseDown: args.fns.createResizeHandler('ne'),
+  onTouchStart: args.fns.createTouchResizeHandler('ne'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0;
@@ -1405,28 +1502,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "resize_handle_sw",
-      L: "Attr",
-      P: {
-        displayOrder: 10,
-        componentName: "Html",
-        props: '''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''
 const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  onMouseDown: args.fns.createResizeHandler('sw'),
-  onTouchStart: args.fns.createTouchResizeHandler('sw'),
+  onMouseDown: args.fns.createResizeHandler('nw'),
+  onTouchStart: args.fns.createTouchResizeHandler('nw'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   bottom: 0;
@@ -1454,83 +1553,30 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "loading_indicator",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const isLoading = args.fns.playerState.isLoading;
-const isPlayerReady = args.fns.playerState.isPlayerReady;
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+const getPlayerState = args.contextData.props?.playerState;
 
 return {
   as: "div",
-  hide: () => !isLoading && isPlayerReady
+  onMouseDown: args.fns.createResizeHandler('sw'),
+  onTouchStart: args.fns.createTouchResizeHandler('sw'),
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
 };
-''',
-        css: '''
-return `._id {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${args.theme.var.color.background_dark_900};
-  z-index: 10;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "loading_spinner",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return [
-  `@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }`,
-  `._id {
-    width: 40px;
-    height: 40px;
-    border: 4px solid ${args.theme.var.color.background_dark_700};
-    border-top: 4px solid ${args.theme.var.color.primary};
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }`
-];
-'''
-      }
-    },
-    {
-      id: "resize_overlay",
-      L: "Attr",
-      P: {
-        displayOrder: 11,
-        componentName: "Html",
-        props: '''
-const isResizing = args.fns.isResizing;
-
-return {
-  as: "div",
-  hide: () => !isResizing()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0;
@@ -1542,40 +1588,206 @@ return `._id {
   background: transparent;
 }`;
 '''
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''
+const isResizing = args.fns.isResizing;
+
+return {
+  as: "div",
+  hide: () => !isResizing()
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e0", T: "Attr", S: "component_root", E: "portal_wrapper" },
-    { id: "e1", T: "Attr", S: "portal_wrapper", E: "video_player_container" },
-    { id: "e2", T: "Attr", S: "video_player_container", E: "player_header" },
-    { id: "e3", T: "Attr", S: "player_header", E: "player_title_container" },
-    { id: "e3a", T: "Attr", S: "player_title_container", E: "youtube_logo" },
-    { id: "e3b", T: "Attr", S: "player_title_container", E: "player_title" },
-    { id: "e4", T: "Attr", S: "player_header", E: "player_controls" },
-    { id: "e5", T: "Attr", S: "player_controls", E: "player_next_button" },
-    { id: "e6", T: "Attr", S: "player_next_button", E: "player_next_icon" },
-    { id: "e6a", T: "Attr", S: "player_controls", E: "player_queue_button" },
-    { id: "e6b", T: "Attr", S: "player_queue_button", E: "player_queue_icon" },
-    { id: "e6c", T: "Attr", S: "player_controls", E: "watch_on_youtube_button" },
-    { id: "e6d", T: "Attr", S: "watch_on_youtube_button", E: "watch_on_youtube_icon" },
-    { id: "e6e", T: "Attr", S: "watch_on_youtube_button", E: "watch_on_youtube_text" },
-    { id: "e7", T: "Attr", S: "player_controls", E: "player_toggle_button" },
-    { id: "e8", T: "Attr", S: "player_toggle_button", E: "player_toggle_icon" },
-    { id: "e9", T: "Attr", S: "player_controls", E: "player_close_button" },
-    { id: "e10", T: "Attr", S: "player_close_button", E: "player_close_icon" },
-    { id: "e11", T: "Attr", S: "video_player_container", E: "player_video_container" },
-    { id: "e12", T: "Attr", S: "player_video_container", E: "player_iframe" },
-    { id: "e12a", T: "Attr", S: "player_video_container", E: "loading_indicator" },
-    { id: "e12b", T: "Attr", S: "loading_indicator", E: "loading_spinner" },
-    { id: "e13", T: "Attr", S: "video_player_container", E: "resize_handle_se" },
-    { id: "e14", T: "Attr", S: "video_player_container", E: "resize_handle_e" },
-    { id: "e15", T: "Attr", S: "video_player_container", E: "resize_handle_s" },
-    { id: "e16", T: "Attr", S: "video_player_container", E: "resize_handle_w" },
-    { id: "e17", T: "Attr", S: "video_player_container", E: "resize_handle_n" },
-    { id: "e18", T: "Attr", S: "video_player_container", E: "resize_handle_ne" },
-    { id: "e19", T: "Attr", S: "video_player_container", E: "resize_handle_nw" },
-    { id: "e20", T: "Attr", S: "video_player_container", E: "resize_handle_sw" },
-    { id: "e21", T: "Attr", S: "video_player_container", E: "resize_overlay" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "20"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "25"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "24"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "30"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "32"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "26"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "29"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "31"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "3"
+      E: "28"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "3"
+      E: "27"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "20"
+      E: "22"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "8"
+      E: "16"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "8"
+      E: "13"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "8"
+      E: "18"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "11"
+      E: "12"
+    }
   ]
 }

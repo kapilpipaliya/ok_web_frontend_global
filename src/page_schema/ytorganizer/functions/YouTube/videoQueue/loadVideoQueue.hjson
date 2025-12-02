@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "loadVideoQueue",
-        description: "Load video queue from database for the current ownership",
-        body: '''
+        description: Load video queue from database for the current ownership
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession(args.request);
@@ -70,8 +70,9 @@ try {
   };
 }
 '''
+        key: loadVideoQueue
       }
     }
-  ],
+  ]
   edges: []
 }

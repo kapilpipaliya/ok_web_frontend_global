@@ -1,33 +1,36 @@
 {
   vertexes: [
     {
-      id: "admin_contact_submissions_page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "AdminContactSubmissions",
-        url: "/yto/admin/contact-submissions",
-        signinRequired: true,
-        title: "Contact Submissions - Admin - YSaar",
-        description: "View and manage contact form submissions",
-        fns: '''
+        signinRequired: true
+        description: View and manage contact form submissions
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        title: Contact Submissions - Admin - YSaar
+        url: /yto/admin/contact-submissions
+        key: AdminContactSubmissions
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "favicon_link",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 0.5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
 return {
   as: "link",
   rel: "icon",
@@ -35,38 +38,26 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "3"
+      L: Attr
       P: {
-        componentName: "Layout",
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 100%;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
         displayOrder: 1
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "admin_layout",
-      L: "PageLayout",
-      P: {
-        componentName: "AdminLayout",
-        displayOrder: 3
-      }
-    },
-    {
-      id: "main_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        fns:
+          '''
 // State management
 const [store, setStore] = args.createStore({
   submissions: [],
@@ -305,39 +296,23 @@ return {
   selectAll,
   clearSelection
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   onMount: args.fns.loadSubmissions
 };
-''',
-        css: '''
-return `._id {
-  padding: ${args.theme.var.spacing.lg};
-  max-width: 100%;
-  margin: 0 auto;
-
-  @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.md};
-  }
-}`;
 '''
       }
-    },
-    // Header Section
+    }
     {
-      id: "header_section",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: space-between;
@@ -350,34 +325,36 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "header_left",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "page_title",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: "Contact Submissions"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize['2xl']};
   font-weight: 700;
@@ -385,15 +362,33 @@ return `._id {
   margin: 0 0 ${args.theme.var.spacing.xs} 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Contact Submissions"
+};
+'''
       }
-    },
+    }
     {
-      id: "page_subtitle",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const totalCount = args.fns.store.totalCount;
 const currentPage = args.fns.store.currentPage;
 const pageSize = args.fns.store.pageSize;
@@ -405,26 +400,30 @@ return {
   text: totalCount > 0 ? `Showing ${startIndex}-${endIndex} of ${totalCount} submissions` : `${totalCount} submissions`,
   hide: () => args.fns.store.loading
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-}`;
 '''
       }
-    },
-    // Stats Summary
+    }
     {
-      id: "stats_summary",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        contextName: "stat",
-        loop: true,
-        fns: '''
+        contextName: stat
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}`;
+'''
+        loop: true
+        displayOrder: 2
+        fns:
+          '''
 return {
   getStatsData: () => {
     const submissions = args.fns.store.submissions;
@@ -441,39 +440,24 @@ return {
     ];
   }
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   data: args.fns.getStatsData(),
   hide: () => args.fns.store.loading
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  gap: ${args.theme.var.spacing.md};
-  flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "stat_badge",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -485,15 +469,31 @@ return `._id {
   white-space: nowrap;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "stat_badge_icon",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+const stat = args.contextData.stat;
+return `._id {
+  color: ${args.theme.var.color[stat.color]};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const stat = args.contextData.stat;
 return {
   as: "icon",
@@ -501,103 +501,97 @@ return {
   width: 16,
   height: 16
 };
-''',
-        css: '''
-const stat = args.contextData.stat;
-return `._id {
-  color: ${args.theme.var.color[stat.color]};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "stat_badge_content",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "stat_badge_value",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const stat = args.contextData.stat;
-return {
-  as: "span",
-  text: stat.value
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.lg};
   font-weight: 700;
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "stat_badge_label",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const stat = args.contextData.stat;
 return {
   as: "span",
-  text: ` ${stat.label}`
+  text: stat.value
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.sm};
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    // Toolbar Section
-    {
-      id: "toolbar_section",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const stat = args.contextData.stat;
 return {
-  as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  as: "span",
+  text: ` ${stat.label}`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-bottom: ${args.theme.var.spacing.lg};
 }`;
 '''
-      }
-    },
-    {
-      id: "search_and_filters_row",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.md};
@@ -605,15 +599,31 @@ return `._id {
   flex-wrap: wrap;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "search_input",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TextInput",
-        props: '''
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 250px;
+}`;
+'''
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
 return {
   type: "search",
   placeholder: "Search by name, email, or message...",
@@ -623,22 +633,23 @@ return {
     args.fns.handleSearch(e.target.value);
   }
 };
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  min-width: 250px;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "filter_status_select",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TomSelect",
-        props: '''
+        css:
+          '''
+return `._id {
+  min-width: 200px;
+}`;
+'''
+        displayOrder: 2
+        componentName: TomSelect
+        props:
+          '''
 return {
   value: args.fns.store.filterStatus,
   options: [
@@ -654,28 +665,15 @@ return {
     args.fns.handleFilterChange(value);
   }
 };
-''',
-        css: '''
-return `._id {
-  min-width: 200px;
-}`;
 '''
       }
-    },
-    // Bulk Actions Row
+    }
     {
-      id: "bulk_actions_row",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: () => args.fns.store.selectedSubmissions.length === 0
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -686,44 +684,47 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.md};
 }`;
 '''
-      }
-    },
-    {
-      id: "bulk_actions_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const count = args.fns.store.selectedSubmissions.length;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: `${count} submission${count === 1 ? '' : 's'} selected`
+  as: "div",
+  hide: () => args.fns.store.selectedSubmissions.length === 0
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.sm};
   font-weight: 600;
   color: ${args.theme.var.color.primary_light_100_text};
 }`;
 '''
-      }
-    },
-    {
-      id: "bulk_action_clear",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const count = args.fns.store.selectedSubmissions.length;
 return {
-  as: "button",
-  text: "Clear",
-  onClick: args.fns.clearSelection
+  as: "span",
+  text: `${count} submission${count === 1 ? '' : 's'} selected`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
   background: transparent;
@@ -739,46 +740,48 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    // Loading State
-    {
-      id: "loading_state",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: "Loading submissions...",
-  hide: () => !args.fns.store.loading
+  as: "button",
+  text: "Clear",
+  onClick: args.fns.clearSelection
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    // Error State
-    {
-      id: "error_state",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  text: args.fns.store.error || "An error occurred",
-  hide: () => !args.fns.store.error
+  text: "Loading submissions...",
+  hide: () => !args.fns.store.loading
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
@@ -787,22 +790,24 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.md};
 }`;
 '''
-      }
-    },
-    // Table Container
-    {
-      id: "table_container",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error
+  text: args.fns.store.error || "An error occurred",
+  hide: () => !args.fns.store.error
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
@@ -811,21 +816,23 @@ return `._id {
   position: relative;
 }`;
 '''
-      }
-    },
-    {
-      id: "table_loading_overlay",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
-  hide: () => !args.fns.store.tableLoading
+  hide: () => args.fns.store.loading || args.fns.store.error
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 0;
@@ -841,104 +848,114 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.lg};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.store.tableLoading
+};
+'''
       }
-    },
+    }
     {
-      id: "table_loading_spinner",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "LoadingSpinner",
-        props: '''
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
 return {
   size: "md"
 };
 '''
       }
-    },
+    }
     {
-      id: "table_scroll_wrapper",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   overflow-x: auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "submissions_table",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "table"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   border-collapse: collapse;
   font-size: ${args.theme.var.fontSize.sm};
 }`;
 '''
-      }
-    },
-    // Table Head
-    {
-      id: "table_head",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "thead"
+  as: "table"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_dark_100};
   border-bottom: 2px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "thead"
+};
+'''
       }
-    },
+    }
     {
-      id: "table_head_row",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "tr"
 };
 '''
       }
-    },
+    }
     {
-      id: "th_checkbox",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "th"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: left;
@@ -947,15 +964,32 @@ return `._id {
   width: 40px;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th"
+};
+'''
       }
-    },
+    }
     {
-      id: "th_checkbox_input",
-      L: "Attr",
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const submissions = args.fns.store.submissions;
 const allSelected = submissions.length > 0 && submissions.every(sub => args.fns.store.selectedSubmissions.includes(sub.id));
 
@@ -971,29 +1005,15 @@ return {
     }
   }
 };
-''',
-        css: '''
-return `._id {
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "th_name",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "th",
-  text: "Contact"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: left;
@@ -1002,21 +1022,23 @@ return `._id {
   min-width: 200px;
 }`;
 '''
-      }
-    },
-    {
-      id: "th_message",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
-  text: "Message"
+  text: "Contact"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: left;
@@ -1025,21 +1047,23 @@ return `._id {
   min-width: 300px;
 }`;
 '''
-      }
-    },
-    {
-      id: "th_status",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
-  text: "Status"
+  text: "Message"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: center;
@@ -1048,21 +1072,23 @@ return `._id {
   min-width: 120px;
 }`;
 '''
-      }
-    },
-    {
-      id: "th_submitted",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
-  text: "Submitted"
+  text: "Status"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: left;
@@ -1071,21 +1097,23 @@ return `._id {
   min-width: 110px;
 }`;
 '''
-      }
-    },
-    {
-      id: "th_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
-  text: "Actions"
+  text: "Submitted"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: center;
@@ -1094,41 +1122,40 @@ return `._id {
   min-width: 200px;
 }`;
 '''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  text: "Actions"
+};
+'''
       }
-    },
-    // Table Body
+    }
     {
-      id: "table_body",
-      L: "Attr",
+      id: "37"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        contextName: "submission",
-        loop: true,
-        props: '''
+        contextName: submission
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "tbody",
   data: args.fns.store.submissions
 };
 '''
       }
-    },
+    }
     {
-      id: "table_row",
-      L: "Attr",
+      id: "38"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const submission = args.contextData.submission;
-const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
-
-return {
-  as: "tr",
-  "data-selected": isSelected
-};
-''',
-        css: '''
+        css:
+          '''
 const submission = args.contextData.submission;
 const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
 
@@ -1145,33 +1172,56 @@ return `._id {
   ` : ''}
 }`;
 '''
-      }
-    },
-    {
-      id: "td_checkbox",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const submission = args.contextData.submission;
+const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
+
 return {
-  as: "td"
+  as: "tr",
+  "data-selected": isSelected
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td"
+};
+'''
       }
-    },
+    }
     {
-      id: "td_checkbox_input",
-      L: "Attr",
+      id: "40"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const submission = args.contextData.submission;
 const isSelected = args.fns.store.selectedSubmissions.includes(submission.id);
 
@@ -1181,95 +1231,82 @@ return {
   checked: isSelected,
   onChange: () => args.fns.toggleSelection(submission.id)
 };
-''',
-        css: '''
-return `._id {
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "td_contact",
-      L: "Attr",
+      id: "41"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "td"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
 }`;
 '''
-      }
-    },
-    {
-      id: "td_contact_name",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const submission = args.contextData.submission;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: submission.P.name || 'N/A'
+  as: "td"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-weight: 600;
   color: ${args.theme.var.color.text};
   margin-bottom: ${args.theme.var.spacing.xs};
 }`;
 '''
-      }
-    },
-    {
-      id: "td_contact_email",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const submission = args.contextData.submission;
 return {
   as: "div",
-  text: submission.P.email || 'N/A'
+  text: submission.P.name || 'N/A'
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.xs};
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    {
-      id: "td_message",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const submission = args.contextData.submission;
-const message = submission.P.message || '';
-const truncated = message.length > 100 ? message.substring(0, 100) + '...' : message;
-
 return {
-  as: "td",
-  text: truncated,
-  title: message
+  as: "div",
+  text: submission.P.email || 'N/A'
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   color: ${args.theme.var.color.text};
@@ -1279,44 +1316,49 @@ return `._id {
   white-space: nowrap;
 }`;
 '''
-      }
-    },
-    {
-      id: "td_status",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const submission = args.contextData.submission;
+const message = submission.P.message || '';
+const truncated = message.length > 100 ? message.substring(0, 100) + '...' : message;
+
 return {
-  as: "td"
+  as: "td",
+  text: truncated,
+  title: message
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.md};
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "td_status_badge",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const submission = args.contextData.submission;
-const status = submission.P.status || 'new';
-const statusText = status.charAt(0).toUpperCase() + status.slice(1);
-
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: statusText
+  as: "td"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''
 const submission = args.contextData.submission;
 const status = submission.P.status || 'new';
 
@@ -1340,15 +1382,36 @@ return `._id {
   text-transform: capitalize;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const submission = args.contextData.submission;
+const status = submission.P.status || 'new';
+const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+
+return {
+  as: "span",
+  text: statusText
+};
+'''
       }
-    },
+    }
     {
-      id: "td_submitted",
-      L: "Attr",
+      id: "47"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 const submission = args.contextData.submission;
 const submittedText = args.fns.formatDate(submission.P.submittedAt);
 
@@ -1356,48 +1419,36 @@ return {
   as: "td",
   text: submittedText
 };
-''',
-        css: '''
-return `._id {
-  padding: ${args.theme.var.spacing.md};
-  color: ${args.theme.var.color.text};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "td_actions",
-      L: "Attr",
+      id: "48"
+      L: Attr
       P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
 return {
   as: "td"
 };
-''',
-        css: '''
-return `._id {
-  padding: ${args.theme.var.spacing.md};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "td_actions_container",
-      L: "Attr",
+      id: "49"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "statusOption",
-        loop: true,
-        props: '''
-return {
-  as: "div",
-  data: ['new', 'read', 'responded', 'closed']
-};
-''',
-        css: '''
+        contextName: statusOption
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.xs};
@@ -1405,33 +1456,24 @@ return `._id {
   flex-wrap: wrap;
 }`;
 '''
-      }
-    },
-    {
-      id: "status_action_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const submission = args.contextData.submission;
-const status = args.contextData.statusOption;
-const isCurrentStatus = (submission.P.status || 'new') === status;
-const statusText = status.charAt(0).toUpperCase() + status.slice(1);
-
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  text: statusText,
-  disabled: isCurrentStatus,
-  onClick: (e) => {
-    e.stopPropagation();
-    if (!isCurrentStatus) {
-      args.fns.updateStatus(submission, status);
-    }
-  }
+  as: "div",
+  data: ['new', 'read', 'responded', 'closed']
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        css:
+          '''
 const submission = args.contextData.submission;
 const status = args.contextData.statusOption;
 const isCurrentStatus = (submission.P.status || 'new') === status;
@@ -1457,22 +1499,35 @@ return `._id {
   ` : ''}
 }`;
 '''
-      }
-    },
-    // Pagination
-    {
-      id: "pagination_container",
-      L: "Attr",
-      P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const submission = args.contextData.submission;
+const status = args.contextData.statusOption;
+const isCurrentStatus = (submission.P.status || 'new') === status;
+const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+
 return {
-  as: "div",
-  hide: () => args.fns.store.loading || args.fns.store.error || args.fns.store.totalPages <= 1
+  as: "button",
+  text: statusText,
+  disabled: isCurrentStatus,
+  onClick: (e) => {
+    e.stopPropagation();
+    if (!isCurrentStatus) {
+      args.fns.updateStatus(submission, status);
+    }
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: space-between;
@@ -1484,15 +1539,32 @@ return `._id {
   gap: ${args.theme.var.spacing.md};
 }`;
 '''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error || args.fns.store.totalPages <= 1
+};
+'''
       }
-    },
+    }
     {
-      id: "pagination_info",
-      L: "Attr",
+      id: "52"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const currentPage = args.fns.store.currentPage;
 const totalPages = args.fns.store.totalPages;
 const totalCount = args.fns.store.totalCount;
@@ -1501,53 +1573,37 @@ return {
   as: "div",
   text: `Page ${currentPage} of ${totalPages} (${totalCount} total)`
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  color: ${args.theme.var.color.muted};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "pagination_buttons",
-      L: "Attr",
+      id: "53"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.xs};
   align-items: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "pagination_prev_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const currentPage = args.fns.store.currentPage;
-const isDisabled = currentPage <= 1;
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  text: "← Previous",
-  onClick: args.fns.goToPreviousPage,
-  disabled: isDisabled
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''
 const currentPage = args.fns.store.currentPage;
 const isDisabled = currentPage <= 1;
 
@@ -1568,50 +1624,52 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "pagination_pages_container",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        contextName: "pageNum",
-        loop: true,
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const currentPage = args.fns.store.currentPage;
+const isDisabled = currentPage <= 1;
+
 return {
-  as: "div",
-  data: args.fns.getVisiblePages()
+  as: "button",
+  text: "← Previous",
+  onClick: args.fns.goToPreviousPage,
+  disabled: isDisabled
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        contextName: pageNum
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.xs};
 }`;
 '''
-      }
-    },
-    {
-      id: "pagination_page_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const pageNum = args.contextData.pageNum;
-const currentPage = args.fns.store.currentPage;
-const isEllipsis = pageNum === '...';
-const isActive = pageNum === currentPage;
-
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: isEllipsis ? "span" : "button",
-  text: pageNum,
-  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
-  disabled: isActive
+  as: "div",
+  data: args.fns.getVisiblePages()
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css:
+          '''
 const pageNum = args.contextData.pageNum;
 const currentPage = args.fns.store.currentPage;
 const isEllipsis = pageNum === '...';
@@ -1638,27 +1696,30 @@ return `._id {
   ` : ''}
 }`;
 '''
-      }
-    },
-    {
-      id: "pagination_next_button",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const pageNum = args.contextData.pageNum;
 const currentPage = args.fns.store.currentPage;
-const totalPages = args.fns.store.totalPages;
-const isDisabled = currentPage >= totalPages;
+const isEllipsis = pageNum === '...';
+const isActive = pageNum === currentPage;
 
 return {
-  as: "button",
-  text: "Next →",
-  onClick: args.fns.goToNextPage,
-  disabled: isDisabled
+  as: isEllipsis ? "span" : "button",
+  text: pageNum,
+  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  disabled: isActive
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
 const currentPage = args.fns.store.currentPage;
 const totalPages = args.fns.store.totalPages;
 const isDisabled = currentPage >= totalPages;
@@ -1680,114 +1741,433 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    // Empty State
-    {
-      id: "empty_state",
-      L: "Attr",
-      P: {
-        displayOrder: 7,
-        componentName: "Html",
-        props: '''
-const submissions = args.fns.store.submissions;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const isDisabled = currentPage >= totalPages;
+
 return {
-  as: "div",
-  text: "No submissions found matching your filters",
-  hide: () => submissions.length > 0 || args.fns.store.loading || args.fns.store.error
+  as: "button",
+  text: "Next →",
+  onClick: args.fns.goToNextPage,
+  disabled: isDisabled
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: ${args.theme.var.spacing.xl};
   color: ${args.theme.var.color.muted};
 }`;
 '''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+const submissions = args.fns.store.submissions;
+return {
+  as: "div",
+  text: "No submissions found matching your filters",
+  hide: () => submissions.length > 0 || args.fns.store.loading || args.fns.store.error
+};
+'''
       }
     }
-  ],
+    {
+      id: "59"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "60"
+      L: PageLayout
+      P: {
+        displayOrder: 3
+        componentName: AdminLayout
+      }
+    }
+    {
+      id: "61"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
   edges: [
-    // Root structure
-    { id: "e1", T: "Attr", S: "admin_contact_submissions_page", E: "favicon_link" },
-    { id: "e2", T: "PageLayout", S: "admin_contact_submissions_page", E: "page_layout" },
-    { id: "e2b", T: "PageLayout", S: "admin_contact_submissions_page", E: "page_layout_content" },
-    { id: "e2c", T: "PageLayout", S: "admin_contact_submissions_page", E: "admin_layout" },
-    { id: "e3", T: "Attr", S: "admin_contact_submissions_page", E: "main_container" },
-
-    // Header
-    { id: "e4", T: "Attr", S: "main_container", E: "header_section" },
-    { id: "e5", T: "Attr", S: "header_section", E: "header_left" },
-    { id: "e6", T: "Attr", S: "header_left", E: "page_title" },
-    { id: "e7", T: "Attr", S: "header_left", E: "page_subtitle" },
-    { id: "e8", T: "Attr", S: "header_section", E: "stats_summary" },
-
-    // Stats
-    { id: "e9", T: "Attr", S: "stats_summary", E: "stat_badge" },
-    { id: "e10", T: "Attr", S: "stat_badge", E: "stat_badge_icon" },
-    { id: "e11", T: "Attr", S: "stat_badge", E: "stat_badge_content" },
-    { id: "e12", T: "Attr", S: "stat_badge_content", E: "stat_badge_value" },
-    { id: "e13", T: "Attr", S: "stat_badge_content", E: "stat_badge_label" },
-
-    // Toolbar
-    { id: "e14", T: "Attr", S: "main_container", E: "toolbar_section" },
-    { id: "e15", T: "Attr", S: "toolbar_section", E: "search_and_filters_row" },
-    { id: "e16", T: "Attr", S: "search_and_filters_row", E: "search_input" },
-    { id: "e17", T: "Attr", S: "search_and_filters_row", E: "filter_status_select" },
-    { id: "e18", T: "Attr", S: "toolbar_section", E: "bulk_actions_row" },
-    { id: "e19", T: "Attr", S: "bulk_actions_row", E: "bulk_actions_label" },
-    { id: "e20", T: "Attr", S: "bulk_actions_row", E: "bulk_action_clear" },
-
-    // States
-    { id: "e21", T: "Attr", S: "main_container", E: "loading_state" },
-    { id: "e22", T: "Attr", S: "main_container", E: "error_state" },
-
-    // Table
-    { id: "e23", T: "Attr", S: "main_container", E: "table_container" },
-    { id: "e23a", T: "Attr", S: "table_container", E: "table_loading_overlay" },
-    { id: "e23b", T: "Attr", S: "table_loading_overlay", E: "table_loading_spinner" },
-    { id: "e24", T: "Attr", S: "table_container", E: "table_scroll_wrapper" },
-    { id: "e25", T: "Attr", S: "table_scroll_wrapper", E: "submissions_table" },
-    { id: "e26", T: "Attr", S: "submissions_table", E: "table_head" },
-    { id: "e27", T: "Attr", S: "table_head", E: "table_head_row" },
-
-    // Table headers
-    { id: "e28", T: "Attr", S: "table_head_row", E: "th_checkbox" },
-    { id: "e29", T: "Attr", S: "th_checkbox", E: "th_checkbox_input" },
-    { id: "e30", T: "Attr", S: "table_head_row", E: "th_name" },
-    { id: "e31", T: "Attr", S: "table_head_row", E: "th_message" },
-    { id: "e32", T: "Attr", S: "table_head_row", E: "th_status" },
-    { id: "e33", T: "Attr", S: "table_head_row", E: "th_submitted" },
-    { id: "e34", T: "Attr", S: "table_head_row", E: "th_actions" },
-
-    // Table body
-    { id: "e35", T: "Attr", S: "submissions_table", E: "table_body" },
-    { id: "e36", T: "Attr", S: "table_body", E: "table_row" },
-
-    // Table row cells
-    { id: "e37", T: "Attr", S: "table_row", E: "td_checkbox" },
-    { id: "e38", T: "Attr", S: "td_checkbox", E: "td_checkbox_input" },
-    { id: "e39", T: "Attr", S: "table_row", E: "td_contact" },
-    { id: "e40", T: "Attr", S: "td_contact", E: "td_contact_name" },
-    { id: "e41", T: "Attr", S: "td_contact", E: "td_contact_email" },
-    { id: "e42", T: "Attr", S: "table_row", E: "td_message" },
-    { id: "e43", T: "Attr", S: "table_row", E: "td_status" },
-    { id: "e44", T: "Attr", S: "td_status", E: "td_status_badge" },
-    { id: "e45", T: "Attr", S: "table_row", E: "td_submitted" },
-    { id: "e46", T: "Attr", S: "table_row", E: "td_actions" },
-    { id: "e47", T: "Attr", S: "td_actions", E: "td_actions_container" },
-    { id: "e48", T: "Attr", S: "td_actions_container", E: "status_action_button" },
-
-    // Pagination
-    { id: "e49", T: "Attr", S: "main_container", E: "pagination_container" },
-    { id: "e50", T: "Attr", S: "pagination_container", E: "pagination_info" },
-    { id: "e51", T: "Attr", S: "pagination_container", E: "pagination_buttons" },
-    { id: "e52", T: "Attr", S: "pagination_buttons", E: "pagination_prev_button" },
-    { id: "e53", T: "Attr", S: "pagination_buttons", E: "pagination_pages_container" },
-    { id: "e54", T: "Attr", S: "pagination_pages_container", E: "pagination_page_button" },
-    { id: "e55", T: "Attr", S: "pagination_buttons", E: "pagination_next_button" },
-
-    // Empty state
-    { id: "e56", T: "Attr", S: "main_container", E: "empty_state" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "58"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "21"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "23"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "14"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "22"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "51"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "23"
+      E: "26"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "14"
+      E: "18"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "51"
+      E: "53"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "51"
+      E: "52"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "53"
+      E: "57"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "53"
+      E: "54"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "53"
+      E: "55"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "27"
+      E: "37"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "55"
+      E: "56"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "29"
+      E: "33"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "29"
+      E: "36"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "29"
+      E: "32"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "29"
+      E: "34"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "29"
+      E: "35"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "38"
+      E: "47"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "38"
+      E: "44"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "38"
+      E: "41"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "38"
+      E: "48"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "38"
+      E: "45"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "38"
+      E: "39"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "41"
+      E: "43"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "48"
+      E: "49"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "45"
+      E: "46"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "49"
+      E: "50"
+    }
+    {
+      id: e58
+      T: PageLayout
+      S: "1"
+      E: "59"
+    }
+    {
+      id: e59
+      T: PageLayout
+      S: "1"
+      E: "60"
+    }
+    {
+      id: e60
+      T: PageLayout
+      S: "1"
+      E: "61"
+    }
   ]
 }

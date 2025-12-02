@@ -1,13 +1,11 @@
 {
   vertexes: [
     {
-      id: "theme_root",
-      L: "Theme",
+      id: "1"
+      L: Theme
       P: {
-        key: "Theme",
-        name: "YouTube Theme",
-        description: "YouTube-inspired theme with custom brand color (#db4646)",
-        data: '''
+        data:
+          '''
 return {
   var: {
     color: {
@@ -118,8 +116,11 @@ return {
   }
 };
 '''
+        name: YouTube Theme
+        description: YouTube-inspired theme with custom brand color (#db4646)
+        key: Theme
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "parse_sort_by_util_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "parseSortByUtil",
-        description: "Shared utility function to parse sortBy parameter into database orderBy and orderDirection. Eliminates duplicate parsing logic across multiple backend functions.",
-        body: '''
+        description: Shared utility function to parse sortBy parameter into database orderBy and orderDirection. Eliminates duplicate parsing logic across multiple backend functions.
+        body:
+          '''
 /**
  * Parse SortBy Utility
  *
@@ -151,8 +151,9 @@ return {
   secondaryOrderBy
 };
 '''
+        key: parseSortByUtil
       }
     }
-  ],
+  ]
   edges: []
 }

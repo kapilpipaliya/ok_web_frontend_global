@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "delete_playlist_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "deletePlaylist",
-        description: "Deletes playlists (array, 'all', or 'allInContext') from a specific ownership. Prevents deletion of playlists with active jobs to avoid orphaned video jobs. Removes pending BullMQ jobs, calls deleteVideo for all videos, then cleans up orphan playlist nodes. 'allInContext' deletes all playlists in the context channels. Supports multi-ownership model, batch processing, and special keywords.",
-        body: '''
+        description: Deletes playlists (array, 'all', or 'allInContext') from a specific ownership. Prevents deletion of playlists with active jobs to avoid orphaned video jobs. Removes pending BullMQ jobs, calls deleteVideo for all videos, then cleans up orphan playlist nodes. 'allInContext' deletes all playlists in the context channels. Supports multi-ownership model, batch processing, and special keywords.
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -370,8 +370,9 @@ try {
   };
 }
 '''
+        key: deletePlaylist
       }
     }
-  ],
+  ]
   edges: []
 }

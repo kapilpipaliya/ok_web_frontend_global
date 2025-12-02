@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "send_quota_alert_email_function"
-      L: "Function"
+      id: "1"
+      L: Function
       P: {
-        key: "sendQuotaAlertEmail"
-        description: "Send email alert to admins when shared YouTube API quota reaches critical levels (80%, 95%, or 100%)"
-        body: '''
+        description: Send email alert to admins when shared YouTube API quota reaches critical levels (80%, 95%, or 100%)
+        body:
+          '''
 try {
   const { level } = args.contextData;  // 'warning' (80%), 'critical' (95%), or 'exhausted' (100%)
 
@@ -183,6 +183,7 @@ try {
   };
 }
 '''
+        key: sendQuotaAlertEmail
       }
     }
   ]

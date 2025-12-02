@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "queue_helpers_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "queueHelpers",
-        description: "Common helper functions for creating and managing BullMQ queues",
-        body: '''
+        description: Common helper functions for creating and managing BullMQ queues
+        body:
+          '''
 try {
   const { Queue } = args.bullmq;
 
@@ -183,8 +183,9 @@ try {
   };
 }
 '''
+        key: queueHelpers
       }
     }
-  ],
+  ]
   edges: []
 }

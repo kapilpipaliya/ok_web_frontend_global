@@ -628,8 +628,6 @@ Clean design
 
 Trust badges
 
-Smooth onboarding
-
 ✓ Performance on mobile
 
 Google ranks based on mobile-first indexing.

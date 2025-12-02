@@ -1,25 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "PageTitle"
+        key: PageTitle
       }
-    },
+    }
     {
-      id: "title_element",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: args.contextData.props?.text || "Page Title"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.title};
   font-weight: 700;
@@ -27,10 +20,24 @@ return `._id {
   margin: 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: args.contextData.props?.text || "Page Title"
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "title_element" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
   ]
 }

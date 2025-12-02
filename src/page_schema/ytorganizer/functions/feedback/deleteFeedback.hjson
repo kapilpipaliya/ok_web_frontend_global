@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "deleteFeedback",
-        description: "Soft deletes a feedback submission by setting deletedAt timestamp",
-        body: '''
+        description: Soft deletes a feedback submission by setting deletedAt timestamp
+        body:
+          '''
 const { feedbackId } = args.contextData;
 
 // Validate input
@@ -36,8 +36,9 @@ return {
   message: "Feedback deleted successfully"
 };
 '''
+        key: deleteFeedback
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "process_stale_job_cleanup_worker",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "processStaleJobCleanup",
-        description: "Background worker that cleans up stale jobs stuck in processing state",
-        body: '''
+        description: Background worker that cleans up stale jobs stuck in processing state
+        body:
+          '''
 /**
  * Stale Job Cleanup Worker
  *
@@ -188,8 +188,9 @@ if (args.contextData.action === 'start') {
   };
 }
 '''
+        key: processStaleJobCleanup
       }
     }
-  ],
+  ]
   edges: []
 }

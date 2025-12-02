@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "checkQuotaLimit",
-        description: "Check if user can add more videos based on their subscription plan quota",
-        body: '''
+        description: Check if user can add more videos based on their subscription plan quota
+        body:
+          '''
 try {
   // Get authenticated user
   const user = await args.getUserFromSession();
@@ -99,8 +99,9 @@ try {
   };
 }
 '''
+        key: checkQuotaLimit
       }
     }
-  ],
+  ]
   edges: []
 }

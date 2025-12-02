@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "pause_all_channels_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "pauseAllChannels",
-        description: "Pause all queued/processing channels/playlists for a user",
-        body: '''
+        description: Pause all queued/processing channels/playlists for a user
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -147,8 +147,9 @@ try {
   };
 }
 '''
+        key: pauseAllChannels
       }
     }
-  ],
+  ]
   edges: []
 }

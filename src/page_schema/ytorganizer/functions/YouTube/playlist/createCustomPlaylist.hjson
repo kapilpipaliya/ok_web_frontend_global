@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "create_custom_playlist_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "createCustomPlaylist",
-        description: "Creates a custom user playlist that can contain any videos",
-        body: '''
+        description: Creates a custom user playlist that can contain any videos
+        body:
+          '''
 try {
   // Extract input parameters from the request
   const { name, description, ownershipId } = args.contextData;
@@ -122,8 +122,9 @@ try {
   };
 }
 '''
+        key: createCustomPlaylist
       }
     }
-  ],
+  ]
   edges: []
 }

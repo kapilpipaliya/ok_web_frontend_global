@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_user_favourites_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getUserFavourites",
-        description: "Fetches all favourite videos, channels, and playlists for the current user",
-        body: '''
+        description: Fetches all favourite videos, channels, and playlists for the current user
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -128,8 +128,9 @@ try {
   };
 }
 '''
+        key: getUserFavourites
       }
     }
-  ],
+  ]
   edges: []
 }

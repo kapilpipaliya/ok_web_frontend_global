@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "save_feedback_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "saveFeedback",
-        description: "Saves user feedback to the database",
-        body: '''
+        description: Saves user feedback to the database
+        body:
+          '''
 try {
   // Extract parameters
   const { feedback, category, email } = args.contextData;
@@ -141,8 +141,9 @@ try {
   };
 }
 '''
+        key: saveFeedback
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_queue_jobs",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getQueueJobs",
-        description: "Fetches detailed job information for a specific queue and state",
-        body: '''
+        description: Fetches detailed job information for a specific queue and state
+        body:
+          '''
 /**
  * Get detailed job information from BullMQ queues
  *
@@ -243,8 +243,9 @@ try {
   };
 }
 '''
+        key: getQueueJobs
       }
     }
-  ],
+  ]
   edges: []
 }

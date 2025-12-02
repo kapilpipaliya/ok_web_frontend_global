@@ -1,59 +1,47 @@
 {
   vertexes: [
     {
-      id: "page_root"
-      L: "Page"
+      id: "1"
+      L: Page
       P: {
-        key: "QuotaMonitor"
-        url: "/yto/admin/quota-monitor"
-        title: "YouTube API Quota Monitor"
-        description: "Monitor shared YouTube API quota usage across all users and ownerships"
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        description: Monitor shared YouTube API quota usage across all users and ownerships
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        title: YouTube API Quota Monitor
+        url: /yto/admin/quota-monitor
+        key: QuotaMonitor
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout"
-      L: "PageLayout"
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout"
+        css:
+          '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
         displayOrder: 1
-        description: "YTO layout with navigation"
-      }
-    },
-    {
-      id: "page_layout_content"
-      L: "PageLayout"
-      P: {
-        componentName: "LayoutContent"
-        displayOrder: 2
-      }
-    },
-    {
-      id: "admin_layout"
-      L: "PageLayout"
-      P: {
-        componentName: "AdminLayout"
-        displayOrder: 3
-        description: "Admin layout wrapper"
-      }
-    },
-    {
-      id: "main_container"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        fns: '''
+        fns:
+          '''
 const [quotaData, setQuotaData] = args.createSignal(null);
 const [loading, setLoading] = args.createSignal(true);
 
@@ -106,7 +94,9 @@ return {
   stopAutoRefresh
 };
 '''
-        props: '''
+        componentName: Html
+        props:
+          '''
 const fetchQuotaData = args.fns.fetchQuotaData;
 const startAutoRefresh = args.fns.startAutoRefresh;
 const stopAutoRefresh = args.fns.stopAutoRefresh;
@@ -122,32 +112,14 @@ return {
   }
 };
 '''
-        css: '''
-return `._id {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1.5rem;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-}`;
-'''
       }
-    },
+    }
     {
-      id: "page_title"
-      L: "Attr"
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "h1",
-  text: "YouTube API Quota Monitor"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
@@ -159,41 +131,46 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "page_subtitle"
-      L: "Attr"
-      P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Shared quota across all users: 10,000 units per day (resets at midnight UTC)"
+  as: "h1",
+  text: "YouTube API Quota Monitor"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.125rem;
   color: ${args.theme.var.color.muted};
   margin: 0.5rem 0 3rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "quota_cards_grid"
-      L: "Attr"
-      P: {
-        displayOrder: 3
-        componentName: "Html"
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Shared quota across all users: 10,000 units per day (resets at midnight UTC)"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -205,15 +182,24 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "quota_usage_card"
-      L: "Attr"
+      id: "6"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "SimpleCard"
-        props: '''
+        componentName: SimpleCard
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const status = data?.status;
 
@@ -231,14 +217,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "quota_usage_wrapper"
-      L: "Attr"
+      id: "7"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const loading = args.fns.loading?.();
 
 if (loading) {
@@ -248,14 +235,33 @@ if (loading) {
 return { as: "div" };
 '''
       }
-    },
+    }
     {
-      id: "quota_usage_numbers"
-      L: "Attr"
+      id: "8"
+      L: Attr
       P: {
+        css:
+          '''
+const data = args.fns.quotaData?.();
+const status = data?.status;
+
+const color = status?.level === 'critical' || status?.level === 'danger'
+  ? args.theme.var.color.error
+  : status?.level === 'warning'
+    ? args.theme.var.color.warning
+    : args.theme.var.color.success;
+
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${color};
+  margin-bottom: 0.5rem;
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const quota = data?.quota;
 const status = data?.status;
@@ -275,32 +281,24 @@ return {
   text: `${quota.used.toLocaleString()} / ${quota.limit.toLocaleString()}`
 };
 '''
-        css: '''
-const data = args.fns.quotaData?.();
-const status = data?.status;
-
-const color = status?.level === 'critical' || status?.level === 'danger'
-  ? args.theme.var.color.error
-  : status?.level === 'warning'
-    ? args.theme.var.color.warning
-    : args.theme.var.color.success;
-
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: ${color};
-  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "quota_percentage"
-      L: "Attr"
-      P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const quota = data?.quota;
 
@@ -309,25 +307,14 @@ return {
   text: `${quota?.percentUsed || 0}% used`
 };
 '''
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-  margin-bottom: 1rem;
-}`;
-'''
       }
-    },
+    }
     {
-      id: "progress_bar_outer"
-      L: "Attr"
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 3
-        componentName: "Html"
-        props: '''
-return { as: "div" };
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_light_200};
   height: 8px;
@@ -336,18 +323,20 @@ return `._id {
   margin-bottom: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "progress_bar_inner"
-      L: "Attr"
-      P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return { as: "div" };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 const data = args.fns.quotaData?.();
 const quota = data?.quota;
 const status = data?.status;
@@ -367,33 +356,51 @@ return `._id {
   transition: width 0.3s ease;
 }`;
 '''
-      }
-    },
-    {
-      id: "quota_status_section"
-      L: "Attr"
-      P: {
-        displayOrder: 4
-        componentName: "Html"
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return { as: "div" };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid ${args.theme.var.color.background_light_300};
 }`;
 '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
       }
-    },
+    }
     {
-      id: "status_message"
-      L: "Attr"
+      id: "13"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const status = data?.status;
 
@@ -402,23 +409,23 @@ return {
   text: `Status: ${status?.message || 'Loading...'}`
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
-  color: ${args.theme.var.color.text};
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    {
-      id: "effective_remaining"
-      L: "Attr"
-      P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const quota = data?.quota;
 
@@ -427,35 +434,31 @@ return {
   text: `Effective remaining: ${quota?.effectiveRemaining?.toLocaleString() || 0} units (${quota?.activeReservations || 0} reserved)`
 };
 '''
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
       }
-    },
+    }
     {
-      id: "quota_reset_card"
-      L: "Attr"
+      id: "15"
+      L: Attr
       P: {
         displayOrder: 2
-        componentName: "SimpleCard"
-        props: '''
+        componentName: SimpleCard
+        props:
+          '''
 return {
   title: "Quota Reset",
   icon: "carbon:time"
 };
 '''
       }
-    },
+    }
     {
-      id: "reset_content_wrapper"
-      L: "Attr"
+      id: "16"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const loading = args.fns.loading?.();
 const data = args.fns.quotaData?.();
 
@@ -466,14 +469,24 @@ if (loading || !data?.reset) {
 return { as: "div" };
 '''
       }
-    },
+    }
     {
-      id: "reset_time_display"
-      L: "Attr"
+      id: "17"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const reset = data?.reset;
 
@@ -482,44 +495,46 @@ return {
   text: `${reset?.inHours || 0}h ${reset?.inMinutes || 0}m`
 };
 '''
-        css: '''
-return `._id {
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin-bottom: 0.5rem;
-}`;
-'''
       }
-    },
+    }
     {
-      id: "reset_label"
-      L: "Attr"
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "div",
-  text: "Resets at midnight UTC"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
   margin-bottom: 1rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Resets at midnight UTC"
+};
+'''
       }
-    },
+    }
     {
-      id: "reset_timestamp"
-      L: "Attr"
+      id: "19"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
         displayOrder: 3
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const reset = data?.reset;
 
@@ -530,35 +545,38 @@ return {
   text: timestamp
 };
 '''
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
       }
-    },
+    }
     {
-      id: "quota_stats_card"
-      L: "Attr"
+      id: "20"
+      L: Attr
       P: {
         displayOrder: 3
-        componentName: "SimpleCard"
-        props: '''
+        componentName: SimpleCard
+        props:
+          '''
 return {
   title: "Usage Statistics",
   icon: "carbon:chart-line"
 };
 '''
       }
-    },
+    }
     {
-      id: "stats_content_wrapper"
-      L: "Attr"
+      id: "21"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  gap: 1rem;
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const loading = args.fns.loading?.();
 const data = args.fns.quotaData?.();
 
@@ -568,32 +586,36 @@ if (loading || !data?.stats) {
 
 return { as: "div" };
 '''
-        css: '''
-return `._id {
-  display: grid;
-  gap: 1rem;
-}`;
-'''
       }
-    },
+    }
     {
-      id: "total_calls_section"
-      L: "Attr"
+      id: "22"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return { as: "div" };
 '''
       }
-    },
+    }
     {
-      id: "total_calls_number"
-      L: "Attr"
+      id: "23"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const stats = data?.stats;
 
@@ -602,53 +624,58 @@ return {
   text: stats?.totalCalls?.toLocaleString() || '0'
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Total API Calls"
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "div" };
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "total_calls_label"
-      L: "Attr"
-      P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "div",
-  text: "Total API Calls"
-};
-'''
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "avg_cost_section"
-      L: "Attr"
-      P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return { as: "div" };
-'''
-      }
-    },
-    {
-      id: "avg_cost_number"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 const stats = data?.stats;
 
@@ -657,65 +684,51 @@ return {
   text: String(stats?.averageCostPerCall || '0')
 };
 '''
-        css: '''
-return `._id {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
       }
-    },
+    }
     {
-      id: "avg_cost_label"
-      L: "Attr"
+      id: "27"
+      L: Attr
       P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return {
-  as: "div",
-  text: "Avg Units Per Call"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Avg Units Per Call"
+};
+'''
       }
-    },
+    }
     {
-      id: "breakdown_section"
-      L: "Attr"
+      id: "28"
+      L: Attr
       P: {
         displayOrder: 4
-        componentName: "SimpleCard"
-        props: '''
+        componentName: SimpleCard
+        props:
+          '''
 return {
   title: "Usage Breakdown by Ownership",
   icon: "carbon:tree-view"
 };
 '''
       }
-    },
+    }
     {
-      id: "breakdown_table_wrapper"
-      L: "Attr"
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-const loading = args.fns.loading?.();
-
-if (loading) {
-  return { as: "div", text: "Loading..." };
-}
-
-return { as: "div" };
-'''
-        css: '''
+        css:
+          '''
 const loading = args.fns.loading?.();
 
 if (loading) {
@@ -729,65 +742,75 @@ return `._id {
   width: 100%;
 }`;
 '''
-      }
-    },
-    {
-      id: "breakdown_table"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
-return { as: "table" };
+        componentName: Html
+        props:
+          '''
+const loading = args.fns.loading?.();
+
+if (loading) {
+  return { as: "div", text: "Loading..." };
+}
+
+return { as: "div" };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   border-collapse: collapse;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "table" };
+'''
       }
-    },
+    }
     {
-      id: "table_head"
-      L: "Attr"
+      id: "31"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return { as: "thead" };
 '''
       }
-    },
+    }
     {
-      id: "header_row"
-      L: "Attr"
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return { as: "tr" };
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   border-bottom: 2px solid ${args.theme.var.color.background_light_400};
 }`;
 '''
-      }
-    },
-    {
-      id: "header_ownership"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "th",
-  text: "Ownership"
-};
+        componentName: Html
+        props:
+          '''
+return { as: "tr" };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 0;
   text-align: left;
@@ -795,21 +818,47 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  text: "Ownership"
+};
+'''
       }
-    },
+    }
     {
-      id: "header_units"
-      L: "Attr"
+      id: "34"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  padding: 0.75rem 0;
+  text-align: right;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
   text: "Units Used"
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 0;
   text-align: right;
@@ -817,48 +866,37 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "header_percent"
-      L: "Attr"
-      P: {
         displayOrder: 3
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return {
   as: "th",
   text: "% of Total"
 };
 '''
-        css: '''
-return `._id {
-  padding: 0.75rem 0;
-  text-align: right;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-}`;
-'''
       }
-    },
+    }
     {
-      id: "table_body"
-      L: "Attr"
+      id: "36"
+      L: Attr
       P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 return { as: "tbody" };
 '''
       }
-    },
+    }
     {
-      id: "empty_state_row"
-      L: "Attr"
+      id: "37"
+      L: Attr
       P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 
 // Only show when there's no breakdown data
@@ -869,21 +907,13 @@ if (data?.breakdown && data.breakdown.length > 0) {
 return { as: "tr" };
 '''
       }
-    },
+    }
     {
-      id: "empty_state_cell"
-      L: "Attr"
+      id: "38"
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return {
-  as: "td",
-  colspan: "3",
-  text: "No usage data available for today"
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem 0;
   text-align: center;
@@ -891,16 +921,27 @@ return `._id {
   font-style: italic;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td",
+  colspan: "3",
+  text: "No usage data available for today"
+};
+'''
       }
-    },
+    }
     {
-      id: "data_rows_wrapper"
-      L: "Attr"
+      id: "39"
+      L: Attr
       P: {
+        contextName: breakdownItem
         displayOrder: 2
-        componentName: "Html"
-        contextName: "breakdownItem"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const data = args.fns.quotaData?.();
 
 // Only loop when there's data
@@ -914,46 +955,58 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "data_row"
-      L: "Attr"
+      id: "40"
+      L: Attr
       P: {
-        displayOrder: 1
-        componentName: "Html"
-        props: '''
-return { as: "tr" };
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   border-bottom: 1px solid ${args.theme.var.color.background_light_300};
 }`;
 '''
-      }
-    },
-    {
-      id: "cell_ownership"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
-return { as: "td" };
+        componentName: Html
+        props:
+          '''
+return { as: "tr" };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "ownership_name"
-      L: "Attr"
-      P: {
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
+return { as: "td" };
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.breakdownItem;
 
 return {
@@ -961,21 +1014,23 @@ return {
   text: item.customName || item.channelName || item.ownershipId
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    {
-      id: "ownership_channel"
-      L: "Attr"
-      P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.breakdownItem;
 
 if (!item.customName || !item.channelName) {
@@ -987,38 +1042,42 @@ return {
   text: item.channelName
 };
 '''
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
       }
-    },
+    }
     {
-      id: "cell_units"
-      L: "Attr"
+      id: "44"
+      L: Attr
       P: {
-        displayOrder: 2
-        componentName: "Html"
-        props: '''
-return { as: "td" };
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.75rem 0;
   text-align: right;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "td" };
+'''
       }
-    },
+    }
     {
-      id: "units_number"
-      L: "Attr"
+      id: "45"
+      L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
         displayOrder: 1
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.breakdownItem;
 
 return {
@@ -1026,21 +1085,23 @@ return {
   text: item.used.toLocaleString()
 };
 '''
-        css: '''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    {
-      id: "units_calls"
-      L: "Attr"
-      P: {
         displayOrder: 2
-        componentName: "Html"
-        props: '''
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.breakdownItem;
 
 return {
@@ -1048,29 +1109,14 @@ return {
   text: `${item.calls} calls`
 };
 '''
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
       }
-    },
+    }
     {
-      id: "cell_percent"
-      L: "Attr"
+      id: "47"
+      L: Attr
       P: {
-        displayOrder: 3
-        componentName: "Html"
-        props: '''
-const item = args.contextData.breakdownItem;
-
-return {
-  as: "td",
-  text: `${item.percentOfTotal}%`
-};
-'''
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.75rem 0;
   text-align: right;
@@ -1078,62 +1124,340 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.breakdownItem;
+
+return {
+  as: "td",
+  text: `${item.percentOfTotal}%`
+};
+'''
+      }
+    }
+    {
+      id: "48"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+    {
+      id: "49"
+      L: PageLayout
+      P: {
+        displayOrder: 3
+        description: Admin layout wrapper
+        componentName: AdminLayout
+      }
+    }
+    {
+      id: "50"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
       }
     }
   ]
   edges: [
-    { id: "e_layout", T: "PageLayout", S: "page_root", E: "page_layout" },
-    { id: "e_layout_content", T: "PageLayout", S: "page_root", E: "page_layout_content" },
-    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
-    { id: "e1", T: "Attr", S: "page_root", E: "main_container" },
-    { id: "e2", T: "Attr", S: "main_container", E: "page_title" },
-    { id: "e3", T: "Attr", S: "main_container", E: "page_subtitle" },
-    { id: "e4", T: "Attr", S: "main_container", E: "quota_cards_grid" },
-
-    { id: "e5", T: "Attr", S: "quota_cards_grid", E: "quota_usage_card" },
-    { id: "e6", T: "Attr", S: "quota_usage_card", E: "quota_usage_wrapper" },
-    { id: "e7", T: "Attr", S: "quota_usage_wrapper", E: "quota_usage_numbers" },
-    { id: "e8", T: "Attr", S: "quota_usage_wrapper", E: "quota_percentage" },
-    { id: "e9", T: "Attr", S: "quota_usage_wrapper", E: "progress_bar_outer" },
-    { id: "e10", T: "Attr", S: "progress_bar_outer", E: "progress_bar_inner" },
-    { id: "e11", T: "Attr", S: "quota_usage_wrapper", E: "quota_status_section" },
-    { id: "e12", T: "Attr", S: "quota_status_section", E: "status_message" },
-    { id: "e13", T: "Attr", S: "quota_status_section", E: "effective_remaining" },
-
-    { id: "e14", T: "Attr", S: "quota_cards_grid", E: "quota_reset_card" },
-    { id: "e15", T: "Attr", S: "quota_reset_card", E: "reset_content_wrapper" },
-    { id: "e16", T: "Attr", S: "reset_content_wrapper", E: "reset_time_display" },
-    { id: "e17", T: "Attr", S: "reset_content_wrapper", E: "reset_label" },
-    { id: "e18", T: "Attr", S: "reset_content_wrapper", E: "reset_timestamp" },
-
-    { id: "e19", T: "Attr", S: "quota_cards_grid", E: "quota_stats_card" },
-    { id: "e20", T: "Attr", S: "quota_stats_card", E: "stats_content_wrapper" },
-    { id: "e21", T: "Attr", S: "stats_content_wrapper", E: "total_calls_section" },
-    { id: "e22", T: "Attr", S: "total_calls_section", E: "total_calls_number" },
-    { id: "e23", T: "Attr", S: "total_calls_section", E: "total_calls_label" },
-    { id: "e24", T: "Attr", S: "stats_content_wrapper", E: "avg_cost_section" },
-    { id: "e25", T: "Attr", S: "avg_cost_section", E: "avg_cost_number" },
-    { id: "e26", T: "Attr", S: "avg_cost_section", E: "avg_cost_label" },
-
-    { id: "e27", T: "Attr", S: "main_container", E: "breakdown_section" },
-    { id: "e28", T: "Attr", S: "breakdown_section", E: "breakdown_table_wrapper" },
-    { id: "e29", T: "Attr", S: "breakdown_table_wrapper", E: "breakdown_table" },
-    { id: "e30", T: "Attr", S: "breakdown_table", E: "table_head" },
-    { id: "e31", T: "Attr", S: "table_head", E: "header_row" },
-    { id: "e32", T: "Attr", S: "header_row", E: "header_ownership" },
-    { id: "e33", T: "Attr", S: "header_row", E: "header_units" },
-    { id: "e34", T: "Attr", S: "header_row", E: "header_percent" },
-    { id: "e35", T: "Attr", S: "breakdown_table", E: "table_body" },
-    { id: "e35a", T: "Attr", S: "table_body", E: "empty_state_row" },
-    { id: "e35b", T: "Attr", S: "empty_state_row", E: "empty_state_cell" },
-    { id: "e35c", T: "Attr", S: "table_body", E: "data_rows_wrapper" },
-    { id: "e36", T: "Attr", S: "data_rows_wrapper", E: "data_row" },
-    { id: "e37", T: "Attr", S: "data_row", E: "cell_ownership" },
-    { id: "e38", T: "Attr", S: "cell_ownership", E: "ownership_name" },
-    { id: "e39", T: "Attr", S: "cell_ownership", E: "ownership_channel" },
-    { id: "e40", T: "Attr", S: "data_row", E: "cell_units" },
-    { id: "e41", T: "Attr", S: "cell_units", E: "units_number" },
-    { id: "e42", T: "Attr", S: "cell_units", E: "units_calls" },
-    { id: "e43", T: "Attr", S: "data_row", E: "cell_percent" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "28"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "20"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "15"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "21"
+      E: "25"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "19"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "7"
+      E: "12"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "30"
+      E: "36"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "36"
+      E: "39"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "32"
+      E: "35"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "40"
+      E: "47"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "40"
+      E: "44"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "44"
+      E: "46"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "44"
+      E: "45"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "41"
+      E: "43"
+    }
+    {
+      id: e47
+      T: PageLayout
+      S: "1"
+      E: "48"
+    }
+    {
+      id: e48
+      T: PageLayout
+      S: "1"
+      E: "49"
+    }
+    {
+      id: e49
+      T: PageLayout
+      S: "1"
+      E: "50"
+    }
   ]
 }

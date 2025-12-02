@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_playlist_status_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getPlaylistStatus",
-        description: "Get processing status for a specific playlist",
-        body: '''
+        description: Get processing status for a specific playlist
+        body:
+          '''
 try {
   const { playlistId, ownershipId } = args.contextData;
 
@@ -61,8 +61,9 @@ try {
   };
 }
 '''
+        key: getPlaylistStatus
       }
     }
-  ],
+  ]
   edges: []
 }

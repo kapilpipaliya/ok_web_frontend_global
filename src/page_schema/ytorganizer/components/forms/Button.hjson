@@ -1,137 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "Button"
+        key: Button
       }
-    },
+    }
     {
-      id: "variant_text",
-      L: "ComponentVariant",
+      id: "2"
+      L: Attr
       P: {
-        key: "text",
-        type: "string",
-        defValue: "Button"
-      }
-    },
-    {
-      id: "variant_type",
-      L: "ComponentVariant",
-      P: {
-        key: "type",
-        type: "string",
-        defValue: "button"
-      }
-    },
-    {
-      id: "variant_variant",
-      L: "ComponentVariant",
-      P: {
-        key: "variant",
-        type: "string",
-        defValue: "primary"
-      }
-    },
-    {
-      id: "variant_variant_primary",
-      L: "ComponentVariantOption",
-      P: {
-        key: "primary",
-        value: "primary",
-        description: "Primary button with brand color"
-      }
-    },
-    {
-      id: "variant_variant_secondary",
-      L: "ComponentVariantOption",
-      P: {
-        key: "secondary",
-        value: "secondary",
-        description: "Secondary button with border"
-      }
-    },
-    {
-      id: "variant_variant_success",
-      L: "ComponentVariantOption",
-      P: {
-        key: "success",
-        value: "success",
-        description: "Success button with green color"
-      }
-    },
-    {
-      id: "variant_variant_danger",
-      L: "ComponentVariantOption",
-      P: {
-        key: "danger",
-        value: "danger",
-        description: "Danger button with red color"
-      }
-    },
-    {
-      id: "variant_disabled",
-      L: "ComponentVariant",
-      P: {
-        key: "disabled",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_full_width",
-      L: "ComponentVariant",
-      P: {
-        key: "fullWidth",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_loading",
-      L: "ComponentVariant",
-      P: {
-        key: "loading",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_on_click",
-      L: "ComponentVariant",
-      P: {
-        key: "onClick",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "button_element",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-// Access props reactively
-const text = args.contextData.props?.text || "Button";
-const type = args.contextData.props?.type || "button";
-const disabled = args.contextData.props?.disabled || args.contextData.props?.loading || false;
-const onClick = args.contextData.props?.onClick || (() => {});
-const loading = args.contextData.props?.loading || false;
-const className = args.contextData.props?.class
-
-return {
-  as: "button",
-  class: className,
-  text: text,
-  type: type,
-  disabled: disabled,
-  onClick: onClick,
-  "aria-busy": loading ? "true" : "false"
-};
-''',
-        css: '''
+        css:
+          '''
 // Access props reactively
 const variant = args.contextData.props?.variant || "primary";
 const fullWidth = args.contextData.props?.fullWidth || false;
@@ -213,21 +94,201 @@ return `._id {
   ${variantStyles}
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Access props reactively
+const text = args.contextData.props?.text || "Button";
+const type = args.contextData.props?.type || "button";
+const disabled = args.contextData.props?.disabled || args.contextData.props?.loading || false;
+const onClick = args.contextData.props?.onClick || (() => {});
+const loading = args.contextData.props?.loading || false;
+const className = args.contextData.props?.class
+
+return {
+  as: "button",
+  class: className,
+  text: text,
+  type: type,
+  disabled: disabled,
+  onClick: onClick,
+  "aria-busy": loading ? "true" : "false"
+};
+'''
       }
     }
-  ],
+    {
+      id: "3"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: loading
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: fullWidth
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Button
+        key: text
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClick
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: primary
+        key: variant
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        description: Secondary button with border
+        value: secondary
+        key: secondary
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Primary button with brand color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Danger button with red color
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Success button with green color
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: button
+        key: type
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_text" },
-    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_type" },
-    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_variant" },
-    { id: "e4", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_primary" },
-    { id: "e5", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_secondary" },
-    { id: "e6", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_success" },
-    { id: "e7", T: "ComponentVariantOption", S: "variant_variant", E: "variant_variant_danger" },
-    { id: "e8", T: "ComponentVariant", S: "component_root", E: "variant_disabled" },
-    { id: "e9", T: "ComponentVariant", S: "component_root", E: "variant_full_width" },
-    { id: "e10", T: "ComponentVariant", S: "component_root", E: "variant_loading" },
-    { id: "e11", T: "ComponentVariant", S: "component_root", E: "variant_on_click" },
-    { id: "e12", T: "Attr", S: "component_root", E: "button_element" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e9
+      T: ComponentVariantOption
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "8"
+      E: "12"
+    }
   ]
 }

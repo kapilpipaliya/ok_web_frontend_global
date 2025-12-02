@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getRazorpayConfig",
-        description: "Get Razorpay public configuration (Key ID only, not secrets)",
-        body: '''
+        description: Get Razorpay public configuration (Key ID only, not secrets)
+        body:
+          '''
 try {
   // Fetch Razorpay setting from database
   const result = await args.session.run(
@@ -47,8 +47,9 @@ try {
   };
 }
 '''
+        key: getRazorpayConfig
       }
     }
-  ],
+  ]
   edges: []
 }

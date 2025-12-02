@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_playlist_videos_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getPlaylistVideos",
-        description: "Fetches a single playlist's videos for the current user",
-        body: '''
+        description: Fetches a single playlist's videos for the current user
+        body:
+          '''
 try {
   // Extract playlist ID, ownership, and sort from request parameters
   const { playlistId, ownershipId, sortBy = "position_asc" } = args.contextData;
@@ -123,8 +123,9 @@ try {
   };
 }
 '''
+        key: getPlaylistVideos
       }
     }
-  ],
+  ]
   edges: []
 }

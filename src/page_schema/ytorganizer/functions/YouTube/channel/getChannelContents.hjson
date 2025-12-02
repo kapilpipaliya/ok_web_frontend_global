@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_channel_contents_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getChannelContents",
-        description: "Fetches a single channel's playlists for the current user. Requires ownershipId to determine which playlists to return.",
-        body: '''
+        description: Fetches a single channel's playlists for the current user. Requires ownershipId to determine which playlists to return.
+        body:
+          '''
 try {
   // Extract channel ID, ownership ID, and sort from request parameters
   const { channelId, ownershipId, sortBy = "position_asc" } = args.contextData;
@@ -146,8 +146,9 @@ try {
   };
 }
 '''
+        key: getChannelContents
       }
     }
-  ],
+  ]
   edges: []
 }

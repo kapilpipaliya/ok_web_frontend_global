@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "addVideosToCustomPlaylist",
-        description: "Add multiple videos to a custom playlist",
-        body: '''
+        description: Add multiple videos to a custom playlist
+        body:
+          '''
 try {
   // Extract input parameters
   const { playlistId, videoIds, ownershipId } = args.contextData;
@@ -176,8 +176,9 @@ try {
   };
 }
 '''
+        key: addVideosToCustomPlaylist
       }
     }
-  ],
+  ]
   edges: []
 }

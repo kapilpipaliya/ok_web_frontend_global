@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "add_video_to_playlists_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "addVideoToPlaylists",
-        description: "Adds a video to multiple playlists at once",
-        body: '''
+        description: Adds a video to multiple playlists at once
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -128,8 +128,9 @@ try {
   };
 }
 '''
+        key: addVideoToPlaylists
       }
     }
-  ],
+  ]
   edges: []
 }

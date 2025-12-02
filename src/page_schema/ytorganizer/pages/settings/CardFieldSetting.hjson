@@ -1,13 +1,12 @@
 {
   vertexes: [
     {
-      id: "page_root",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "CardFieldSetting",
-        url: "/settings/card-fields",
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        fns:
+          '''
 // Available field options for each content type
 // Using YouTube API field names directly
 const FIELD_OPTIONS = {
@@ -104,81 +103,65 @@ return {
   handleSave,
   handleCancel
 };
-''',
-        props: '''
+'''
+        url: /settings/card-fields
+        key: CardFieldSetting
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout",
-        displayOrder: 1
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem;
   max-width: 1000px;
   margin: 0 auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "header"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: "Configure Card Fields"
+  as: "header"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.75rem;
   font-weight: 700;
@@ -186,41 +169,46 @@ return `._id {
   margin: 0 0 0.5rem 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Select and reorder additional fields for each card type. Drag to reorder your selections."
+  as: "h1",
+  text: "Configure Card Fields"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1rem;
   color: ${args.theme.var.color.text_light_200};
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "sections_container",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "p",
+  text: "Select and reorder additional fields for each card type. Drag to reorder your selections."
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -228,20 +216,22 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "video_section",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "section"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_dark_50};
   border: 1px solid ${args.theme.var.color.border};
@@ -249,21 +239,22 @@ return `._id {
   padding: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "video_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Video Cards"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
@@ -271,15 +262,25 @@ return `._id {
   margin: 0 0 1rem 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Video Cards"
+};
+'''
       }
-    },
+    }
     {
-      id: "video_select",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TomSelect",
-        props: '''
+        displayOrder: 2
+        componentName: TomSelect
+        props:
+          '''
 return {
   value: args.fns.videoFields(),
   options: args.fns.FIELD_OPTIONS.video,
@@ -293,19 +294,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "playlist_section",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_dark_50};
   border: 1px solid ${args.theme.var.color.border};
@@ -313,21 +308,22 @@ return `._id {
   padding: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "playlist_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Playlist Cards"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
@@ -335,15 +331,25 @@ return `._id {
   margin: 0 0 1rem 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Playlist Cards"
+};
+'''
       }
-    },
+    }
     {
-      id: "playlist_select",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TomSelect",
-        props: '''
+        displayOrder: 2
+        componentName: TomSelect
+        props:
+          '''
 return {
   value: args.fns.playlistFields(),
   options: args.fns.FIELD_OPTIONS.playlist,
@@ -357,19 +363,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "channel_section",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_dark_50};
   border: 1px solid ${args.theme.var.color.border};
@@ -377,21 +377,22 @@ return `._id {
   padding: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "channel_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Channel Cards"
+  as: "section"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
@@ -399,15 +400,25 @@ return `._id {
   margin: 0 0 1rem 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Channel Cards"
+};
+'''
       }
-    },
+    }
     {
-      id: "channel_select",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "TomSelect",
-        props: '''
+        displayOrder: 2
+        componentName: TomSelect
+        props:
+          '''
 return {
   value: args.fns.channelFields(),
   options: args.fns.FIELD_OPTIONS.channel,
@@ -421,19 +432,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "actions",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
@@ -446,22 +451,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "cancel_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  text: "Cancel",
-  onClick: args.fns.handleCancel
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1.5rem;
   background: ${args.theme.var.color.background_light_200};
@@ -487,23 +492,24 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "save_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "button",
-  text: args.fns.isSaving() ? "Saving..." : "Save Changes",
-  onClick: args.fns.handleSave,
-  disabled: args.fns.isSaving()
+  text: "Cancel",
+  onClick: args.fns.handleCancel
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem 1.5rem;
   background: ${args.theme.var.color.primary};
@@ -534,28 +540,150 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: args.fns.isSaving() ? "Saving..." : "Save Changes",
+  onClick: args.fns.handleSave,
+  disabled: args.fns.isSaving()
+};
+'''
       }
     }
-  ],
+    {
+      id: "19"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "20"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
-    { id: "e1a", T: "PageLayout", S: "page_root", E: "page_layout_content" },
-    { id: "e2", T: "Attr", S: "page_root", E: "container" },
-    { id: "e3", T: "Attr", S: "container", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "title" },
-    { id: "e5", T: "Attr", S: "header", E: "description" },
-    { id: "e6", T: "Attr", S: "container", E: "sections_container" },
-    { id: "e7", T: "Attr", S: "sections_container", E: "video_section" },
-    { id: "e8", T: "Attr", S: "video_section", E: "video_title" },
-    { id: "e9", T: "Attr", S: "video_section", E: "video_select" },
-    { id: "e10", T: "Attr", S: "sections_container", E: "playlist_section" },
-    { id: "e11", T: "Attr", S: "playlist_section", E: "playlist_title" },
-    { id: "e12", T: "Attr", S: "playlist_section", E: "playlist_select" },
-    { id: "e13", T: "Attr", S: "sections_container", E: "channel_section" },
-    { id: "e14", T: "Attr", S: "channel_section", E: "channel_title" },
-    { id: "e15", T: "Attr", S: "channel_section", E: "channel_select" },
-    { id: "e16", T: "Attr", S: "container", E: "actions" },
-    { id: "e17", T: "Attr", S: "actions", E: "cancel_button" },
-    { id: "e18", T: "Attr", S: "actions", E: "save_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "16"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "13"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e18
+      T: PageLayout
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e19
+      T: PageLayout
+      S: "1"
+      E: "20"
+    }
   ]
 }

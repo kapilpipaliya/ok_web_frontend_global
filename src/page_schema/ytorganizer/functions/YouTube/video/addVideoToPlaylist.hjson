@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "add_video_to_playlist_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "addVideoToPlaylist",
-        description: "Adds video(s) to a custom playlist. Accepts playlistId and either videoYoutubeId (for existing videos) or videoUrl (single URL or comma/newline-separated URLs to fetch new videos)",
-        body: '''
+        description: Adds video(s) to a custom playlist. Accepts playlistId and either videoYoutubeId (for existing videos) or videoUrl (single URL or comma/newline-separated URLs to fetch new videos)
+        body:
+          '''
 try {
   // Extract input parameters from the request
   const { playlistId, videoYoutubeId, videoUrl, ownershipId } = args.contextData;
@@ -307,8 +307,9 @@ try {
   };
 }
 '''
+        key: addVideoToPlaylist
       }
     }
-  ],
+  ]
   edges: []
 }

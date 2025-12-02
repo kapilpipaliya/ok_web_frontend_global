@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "delete_all_queue_jobs",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "deleteAllQueueJobs",
-        description: "Deletes all jobs in a specific state from a BullMQ queue",
-        body: '''
+        description: Deletes all jobs in a specific state from a BullMQ queue
+        body:
+          '''
 /**
  * Delete all jobs in a specific state from a queue
  *
@@ -94,8 +94,9 @@ try {
   };
 }
 '''
+        key: deleteAllQueueJobs
       }
     }
-  ],
+  ]
   edges: []
 }

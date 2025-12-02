@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_worker_logs_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getWorkerLogs",
-        description: "Fetches worker logs from database with optional filters",
-        body: '''
+        description: Fetches worker logs from database with optional filters
+        body:
+          '''
 // Fetch worker logs from database
 const filterWorker = args.contextData?.filterWorker || 'all';
 const filterLevel = args.contextData?.filterLevel || 'all';
@@ -47,8 +47,9 @@ try {
   return [];
 }
 '''
+        key: getWorkerLogs
       }
     }
-  ],
+  ]
   edges: []
 }

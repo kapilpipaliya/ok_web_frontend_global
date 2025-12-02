@@ -1,240 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "TextInput"
+        key: TextInput
       }
-    },
+    }
     {
-      id: "variant_type",
-      L: "ComponentVariant",
+      id: "2"
+      L: Attr
       P: {
-        key: "type",
-        type: "string",
-        defValue: "text"
-      }
-    },
-    {
-      id: "option_text",
-      L: "ComponentVariantOption",
-      P: {
-        key: "text",
-        value: "text",
-        description: "Standard text input"
-      }
-    },
-    {
-      id: "option_email",
-      L: "ComponentVariantOption",
-      P: {
-        key: "email",
-        value: "email",
-        description: "Email input with validation"
-      }
-    },
-    {
-      id: "option_password",
-      L: "ComponentVariantOption",
-      P: {
-        key: "password",
-        value: "password",
-        description: "Password input (hidden text)"
-      }
-    },
-    {
-      id: "option_number",
-      L: "ComponentVariantOption",
-      P: {
-        key: "number",
-        value: "number",
-        description: "Numeric input"
-      }
-    },
-    {
-      id: "option_tel",
-      L: "ComponentVariantOption",
-      P: {
-        key: "tel",
-        value: "tel",
-        description: "Telephone number input"
-      }
-    },
-    {
-      id: "option_url",
-      L: "ComponentVariantOption",
-      P: {
-        key: "url",
-        value: "url",
-        description: "URL input with validation"
-      }
-    },
-    {
-      id: "option_search",
-      L: "ComponentVariantOption",
-      P: {
-        key: "search",
-        value: "search",
-        description: "Search input"
-      }
-    },
-    {
-      id: "variant_value",
-      L: "ComponentVariant",
-      P: {
-        key: "value",
-        type: "string",
-        defValue: ""
-      }
-    },
-    {
-      id: "variant_placeholder",
-      L: "ComponentVariant",
-      P: {
-        key: "placeholder",
-        type: "string",
-        defValue: ""
-      }
-    },
-    {
-      id: "variant_required",
-      L: "ComponentVariant",
-      P: {
-        key: "required",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_disabled",
-      L: "ComponentVariant",
-      P: {
-        key: "disabled",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_readonly",
-      L: "ComponentVariant",
-      P: {
-        key: "readOnly",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_max_length",
-      L: "ComponentVariant",
-      P: {
-        key: "maxLength",
-        type: "number",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_min_length",
-      L: "ComponentVariant",
-      P: {
-        key: "minLength",
-        type: "number",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_change",
-      L: "ComponentVariant",
-      P: {
-        key: "onChange",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_blur",
-      L: "ComponentVariant",
-      P: {
-        key: "onBlur",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_focus",
-      L: "ComponentVariant",
-      P: {
-        key: "onFocus",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_input",
-      L: "ComponentVariant",
-      P: {
-        key: "onInput",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_auto_focus",
-      L: "ComponentVariant",
-      P: {
-        key: "autoFocus",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_on_mount",
-      L: "ComponentVariant",
-      P: {
-        key: "onMount",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_left_icon",
-      L: "ComponentVariant",
-      P: {
-        key: "leftIcon",
-        type: "string",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_right_icon",
-      L: "ComponentVariant",
-      P: {
-        key: "rightIcon",
-        type: "string",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_icon_size",
-      L: "ComponentVariant",
-      P: {
-        key: "iconSize",
-        type: "number",
-        defValue: 20
-      }
-    },
-    {
-      id: "input_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 const hasLeftIcon = !!args.contextData.props?.leftIcon;
 const hasRightIcon = !!args.contextData.props?.rightIcon;
 const iconSize = args.contextData.props?.iconSize || 20;
@@ -266,15 +44,33 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "left_icon",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  flex-shrink: 0;
+  margin-left: ${args.theme.var.spacing.md};
+  margin-right: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const leftIcon = args.contextData.props?.leftIcon;
 const iconSize = args.contextData.props?.iconSize || 20;
 
@@ -285,44 +81,15 @@ return {
   height: iconSize,
   hide: !leftIcon
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  flex-shrink: 0;
-  margin-left: ${args.theme.var.spacing.md};
-  margin-right: ${args.theme.var.spacing.sm};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "input_element",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "input",
-  type: args.contextData.props?.type || "text",
-  value: args.contextData.props?.value || "",
-  placeholder: args.contextData.props?.placeholder || "",
-  required: args.contextData.props?.required || false,
-  disabled: args.contextData.props?.disabled || false,
-  // readOnly: args.contextData.props?.readOnly || false, // not work on server
-  maxLength: args.contextData.props?.maxLength || undefined,
-  minLength: args.contextData.props?.minLength || undefined,
-  autoFocus: args.contextData.props?.autoFocus || false,
-  onChange: args.contextData.props?.onChange || null,
-  onBlur: args.contextData.props?.onBlur || null,
-  onFocus: args.contextData.props?.onFocus || null,
-  onInput: args.contextData.props?.onInput || null,
-  onKeyDown: args.contextData.props?.onKeyDown || null,
-  onMount: args.contextData.props?.onMount || null
-};
-''',
-        css: '''
+        css:
+          '''
 const hasLeftIcon = !!args.contextData.props?.leftIcon;
 const hasRightIcon = !!args.contextData.props?.rightIcon;
 
@@ -347,15 +114,48 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  type: args.contextData.props?.type || "text",
+  value: args.contextData.props?.value || "",
+  placeholder: args.contextData.props?.placeholder || "",
+  required: args.contextData.props?.required || false,
+  disabled: args.contextData.props?.disabled || false,
+  // readOnly: args.contextData.props?.readOnly || false, // not work on server
+  maxLength: args.contextData.props?.maxLength || undefined,
+  minLength: args.contextData.props?.minLength || undefined,
+  autoFocus: args.contextData.props?.autoFocus || false,
+  onChange: args.contextData.props?.onChange || null,
+  onBlur: args.contextData.props?.onBlur || null,
+  onFocus: args.contextData.props?.onFocus || null,
+  onInput: args.contextData.props?.onInput || null,
+  onKeyDown: args.contextData.props?.onKeyDown || null,
+  onMount: args.contextData.props?.onMount || null
+};
+'''
       }
-    },
+    }
     {
-      id: "right_icon",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  flex-shrink: 0;
+  margin-left: ${args.theme.var.spacing.sm};
+  margin-right: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const rightIcon = args.contextData.props?.rightIcon;
 const iconSize = args.contextData.props?.iconSize || 20;
 
@@ -366,46 +166,385 @@ return {
   height: iconSize,
   hide: !rightIcon
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  flex-shrink: 0;
-  margin-left: ${args.theme.var.spacing.sm};
-  margin-right: ${args.theme.var.spacing.md};
-}`;
 '''
       }
     }
-  ],
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onMount
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onBlur
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: text
+        key: type
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        description: Standard text input
+        value: text
+        key: text
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Email input with validation
+        value: email
+        key: email
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Password input (hidden text)
+        value: password
+        key: password
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Numeric input
+        value: number
+        key: number
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Telephone number input
+        value: tel
+        key: tel
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        description: URL input with validation
+        value: url
+        key: url
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        description: Search input
+        value: search
+        key: search
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: autoFocus
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxLength
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onInput
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: leftIcon
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: readOnly
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: placeholder
+      }
+    }
+    {
+      id: "24"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFocus
+      }
+    }
+    {
+      id: "25"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: value
+      }
+    }
+    {
+      id: "26"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: minLength
+      }
+    }
+    {
+      id: "27"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: rightIcon
+      }
+    }
+    {
+      id: "28"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: required
+      }
+    }
+    {
+      id: "29"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 20
+        key: iconSize
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_type" },
-    { id: "e2", T: "ComponentVariantOption", S: "variant_type", E: "option_text" },
-    { id: "e3", T: "ComponentVariantOption", S: "variant_type", E: "option_email" },
-    { id: "e4", T: "ComponentVariantOption", S: "variant_type", E: "option_password" },
-    { id: "e5", T: "ComponentVariantOption", S: "variant_type", E: "option_number" },
-    { id: "e6", T: "ComponentVariantOption", S: "variant_type", E: "option_tel" },
-    { id: "e7", T: "ComponentVariantOption", S: "variant_type", E: "option_url" },
-    { id: "e8", T: "ComponentVariantOption", S: "variant_type", E: "option_search" },
-    { id: "e9", T: "ComponentVariant", S: "component_root", E: "variant_value" },
-    { id: "e10", T: "ComponentVariant", S: "component_root", E: "variant_placeholder" },
-    { id: "e11", T: "ComponentVariant", S: "component_root", E: "variant_required" },
-    { id: "e12", T: "ComponentVariant", S: "component_root", E: "variant_disabled" },
-    { id: "e13", T: "ComponentVariant", S: "component_root", E: "variant_readonly" },
-    { id: "e14", T: "ComponentVariant", S: "component_root", E: "variant_max_length" },
-    { id: "e15", T: "ComponentVariant", S: "component_root", E: "variant_min_length" },
-    { id: "e16", T: "ComponentVariant", S: "component_root", E: "variant_on_change" },
-    { id: "e17", T: "ComponentVariant", S: "component_root", E: "variant_on_blur" },
-    { id: "e18", T: "ComponentVariant", S: "component_root", E: "variant_on_focus" },
-    { id: "e19", T: "ComponentVariant", S: "component_root", E: "variant_on_input" },
-    { id: "e20", T: "ComponentVariant", S: "component_root", E: "variant_auto_focus" },
-    { id: "e20a", T: "ComponentVariant", S: "component_root", E: "variant_on_mount" },
-    { id: "e21", T: "ComponentVariant", S: "component_root", E: "variant_left_icon" },
-    { id: "e22", T: "ComponentVariant", S: "component_root", E: "variant_right_icon" },
-    { id: "e23", T: "ComponentVariant", S: "component_root", E: "variant_icon_size" },
-    { id: "e24", T: "Attr", S: "component_root", E: "input_wrapper" },
-    { id: "e25", T: "Attr", S: "input_wrapper", E: "left_icon" },
-    { id: "e26", T: "Attr", S: "input_wrapper", E: "input_element" },
-    { id: "e27", T: "Attr", S: "input_wrapper", E: "right_icon" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "18"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "20"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "21"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "22"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "23"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "24"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "25"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "26"
+    }
+    {
+      id: e19
+      T: ComponentVariant
+      S: "1"
+      E: "27"
+    }
+    {
+      id: e20
+      T: ComponentVariant
+      S: "1"
+      E: "28"
+    }
+    {
+      id: e21
+      T: ComponentVariant
+      S: "1"
+      E: "29"
+    }
+    {
+      id: e22
+      T: ComponentVariantOption
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e23
+      T: ComponentVariantOption
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e24
+      T: ComponentVariantOption
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e25
+      T: ComponentVariantOption
+      S: "8"
+      E: "12"
+    }
+    {
+      id: e26
+      T: ComponentVariantOption
+      S: "8"
+      E: "13"
+    }
+    {
+      id: e27
+      T: ComponentVariantOption
+      S: "8"
+      E: "14"
+    }
+    {
+      id: e28
+      T: ComponentVariantOption
+      S: "8"
+      E: "15"
+    }
   ]
 }

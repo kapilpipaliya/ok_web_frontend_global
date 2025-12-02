@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "save_channel_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "saveChannel",
-        description: "Fetches basic channel metadata using per-ownership OAuth and queues background processing for playlists and videos. Supports multi-ownership model where each YouTube account has separate quota.",
-        body: '''
+        description: Fetches basic channel metadata using per-ownership OAuth and queues background processing for playlists and videos. Supports multi-ownership model where each YouTube account has separate quota.
+        body:
+          '''
 /**
  * Extract channel ID or identifier from various YouTube URL formats
  * Supports: /channel/ID, /@handle, /c/custom, /user/username
@@ -384,8 +384,9 @@ try {
   };
 }
 '''
+        key: saveChannel
       }
     }
-  ],
+  ]
   edges: []
 }

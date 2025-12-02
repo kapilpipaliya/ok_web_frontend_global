@@ -1,43 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "Card"
+        key: Card
       }
-    },
+    }
     {
-      id: "card_container",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
-// Common function to get effective setting (prefers live polling data over stale itemSetting)
-const getEffectiveSetting = () => {
-  const item = args.contextData.props?.item;
-  const itemType = args.contextData.props?.itemType;
-  const processingStatus = args.contextData.props?.processingStatus;
-debugger
-  // Prefer processing queueStatus (live updates from polling) over item (stale data)
-  return (itemType === "playlist" && processingStatus?.playlist) ||
-         (itemType === "channel" && processingStatus?.channel) ||
-         item;
-};
-
-return {
-  getEffectiveSetting
-};
-''',
-        props: '''
-const containerClass = args.contextData.props?.class || "";
-return {
-  as: "div",
-  class: containerClass,
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border: none;
@@ -59,15 +34,64 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        fns:
+          '''
+// Common function to get effective setting (prefers live polling data over stale itemSetting)
+const getEffectiveSetting = () => {
+  const item = args.contextData.props?.item;
+  const itemType = args.contextData.props?.itemType;
+  const processingStatus = args.contextData.props?.processingStatus;
+debugger
+  // Prefer processing queueStatus (live updates from polling) over item (stale data)
+  return (itemType === "playlist" && processingStatus?.playlist) ||
+         (itemType === "channel" && processingStatus?.channel) ||
+         item;
+};
+
+return {
+  getEffectiveSetting
+};
+'''
+        componentName: Html
+        props:
+          '''
+const containerClass = args.contextData.props?.class || "";
+return {
+  as: "div",
+  class: containerClass,
+};
+'''
       }
-    },
+    }
     {
-      id: "card_thumbnail",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 100px;
+  height: 56px;
+  background-color: ${args.theme.var.color.background_light_300};
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  text-decoration: none;
+  display: block;
+  position: relative;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
@@ -137,54 +161,15 @@ return {
     }
   }
 };
-''',
-        css: '''
-return `._id {
-  width: 100px;
-  height: 56px;
-  background-color: ${args.theme.var.color.background_light_300};
-  border-radius: 0.375rem;
-  flex-shrink: 0;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  text-decoration: none;
-  display: block;
-  position: relative;
-
-  &:hover {
-    transform: scale(1.05);
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_thumbnail_placeholder",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
-
-// Check if thumbnail exists
-const thumbnailUrl = item?.P?.thumbnailMaxres ||
-                     item?.P?.thumbnailStandard ||
-                     item?.P?.thumbnailHigh ||
-                     item?.P?.thumbnailMedium ||
-                     item?.P?.thumbnailDefault ||
-                     item?.P?.thumbnailUrl ||
-                     item?.P?.thumbnail || "";
-
-// Only show placeholder when no thumbnail exists
-return {
-  as: "div",
-  hide: !!thumbnailUrl
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 50%;
@@ -203,15 +188,45 @@ return `._id {
   box-sizing: border-box;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if thumbnail exists
+const thumbnailUrl = item?.P?.thumbnailMaxres ||
+                     item?.P?.thumbnailStandard ||
+                     item?.P?.thumbnailHigh ||
+                     item?.P?.thumbnailMedium ||
+                     item?.P?.thumbnailDefault ||
+                     item?.P?.thumbnailUrl ||
+                     item?.P?.thumbnail || "";
+
+// Only show placeholder when no thumbnail exists
+return {
+  as: "div",
+  hide: !!thumbnailUrl
+};
+'''
       }
-    },
+    }
     {
-      id: "card_thumbnail_placeholder_icon",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  opacity: 0.5;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const itemType = args.contextData.props?.itemType;
 
 let iconName;
@@ -229,22 +244,27 @@ return {
   width: 32,
   height: 32
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  opacity: 0.5;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_thumbnail_placeholder_text",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 0.65rem;
+  color: ${args.theme.var.color.muted};
+  opacity: 0.7;
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const itemType = args.contextData.props?.itemType;
 
 let text;
@@ -260,39 +280,15 @@ return {
   as: "span",
   text: text
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.65rem;
-  color: ${args.theme.var.color.muted};
-  opacity: 0.7;
-  font-weight: 500;
-  text-align: center;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_playing_indicator",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
-const currentVideo = args.fns?.currentVideo;
-
-const isCurrentlyPlaying = itemType === "video" &&
-  currentVideo?.() &&
-  item?.P?.youtubeId === currentVideo()?.P?.youtubeId;
-
-return {
-  as: "div",
-  hide: !isCurrentlyPlaying
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: absolute;
   top: 50%;
@@ -309,41 +305,54 @@ return `._id {
   pointer-events: none;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+const currentVideo = args.fns?.currentVideo;
+
+const isCurrentlyPlaying = itemType === "video" &&
+  currentVideo?.() &&
+  item?.P?.youtubeId === currentVideo()?.P?.youtubeId;
+
+return {
+  as: "div",
+  hide: !isCurrentlyPlaying
+};
+'''
       }
-    },
+    }
     {
-      id: "card_playing_icon",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary_text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:play-filled",
   width: 20,
   height: 20
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary_text};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_info",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   display: flex;
@@ -353,38 +362,22 @@ return `._id {
   overflow: hidden;
 }`;
 '''
-      }
-    },
-    {
-      id: "card_type_badge",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const showTypeBadge = args.contextData.props?.showTypeBadge || false;
-const itemType = args.contextData.props?.itemType;
-
-let text, color;
-if (itemType === "channel") {
-  text = "Channel";
-  color = "error";
-} else if (itemType === "playlist") {
-  text = "Playlist";
-  color = "success";
-} else {
-  text = "Video";
-  color = "info";
-}
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: text,
-  "data-color": color,
-  hide: !showTypeBadge
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: inline-flex;
   padding: 0.125rem 0.375rem;
@@ -409,15 +402,57 @@ return `._id {
   color: ${args.theme.var.color.info_light_100_text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showTypeBadge = args.contextData.props?.showTypeBadge || false;
+const itemType = args.contextData.props?.itemType;
+
+let text, color;
+if (itemType === "channel") {
+  text = "Channel";
+  color = "error";
+} else if (itemType === "playlist") {
+  text = "Playlist";
+  color = "success";
+} else {
+  text = "Video";
+  color = "info";
+}
+
+return {
+  as: "span",
+  text: text,
+  "data-color": color,
+  hide: !showTypeBadge
+};
+'''
       }
-    },
+    }
     {
-      id: "card_title",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
@@ -435,30 +470,51 @@ return {
   as: "h3",
   text: displayTitle
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  margin: 0;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_processing_status",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 2.5,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+const queueStatus = effectiveSetting?.P?.queueStatus;
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+
+// Map color names to theme colors
+const colorMap = {
+  blue: args.theme.var.color.info,
+  yellow: args.theme.var.color.warning,
+  orange: args.theme.var.color.warning,
+  gray: args.theme.var.color.muted,
+  green: args.theme.var.color.success,
+  red: args.theme.var.color.error
+};
+
+const borderColor = colorMap[statusInfo?.color] || args.theme.var.color.info;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-left: 3px solid ${borderColor};
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2.5
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
@@ -515,69 +571,45 @@ return {
   as: "div",
   "data-color": statusInfo.color
 };
-''',
-        css: '''
-// Get effective setting (prefers live polling data)
-const effectiveSetting = args.fns.getEffectiveSetting();
-
-const queueStatus = effectiveSetting?.P?.queueStatus;
-const statusInfo = args.fns.getStatusInfo?.(queueStatus);
-
-// Map color names to theme colors
-const colorMap = {
-  blue: args.theme.var.color.info,
-  yellow: args.theme.var.color.warning,
-  orange: args.theme.var.color.warning,
-  gray: args.theme.var.color.muted,
-  green: args.theme.var.color.success,
-  red: args.theme.var.color.error
-};
-
-const borderColor = colorMap[statusInfo?.color] || args.theme.var.color.info;
-
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.375rem 0.5rem;
-  background: ${args.theme.var.color.background_light_100};
-  border-left: 3px solid ${borderColor};
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
-  color: ${args.theme.var.color.text};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_processing_status_row",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
   gap: 0.375rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "card_processing_status_icon",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
@@ -595,21 +627,24 @@ return {
   width: 14,
   height: 14
 };
-''',
-        css: '''
-return `._id {
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_processing_status_text",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  line-height: 1.3;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
@@ -646,22 +681,29 @@ return {
   as: "span",
   text: statusText
 };
-''',
-        css: '''
-return `._id {
-  font-weight: 500;
-  line-height: 1.3;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_processing_status_error",
-      L: "Attr",
+      id: "16"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 0.7rem;
+  color: ${args.theme.var.color.error};
+  line-height: 1.3;
+  margin-top: 0.125rem;
+  font-style: italic;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 // Get effective setting (prefers live polling data)
 const effectiveSetting = args.fns.getEffectiveSetting();
 
@@ -678,27 +720,29 @@ return {
   as: "div",
   text: error
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.7rem;
-  color: ${args.theme.var.color.error};
-  line-height: 1.3;
-  margin-top: 0.125rem;
-  font-style: italic;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_extension_existence_badge",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 2.7,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  width: fit-content;
+}`;
+'''
+        displayOrder: 2.7
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 
 // Check if this is an extension item (has extensionExists property)
@@ -712,27 +756,32 @@ if (!isExtensionItem) {
 return {
   as: "div"
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  width: fit-content;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_extension_existence_icon",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+const item = args.contextData.props?.item;
+const exists = item?.P?.extensionExists || false;
+
+let iconColor;
+if (exists) {
+  iconColor = args.theme.var.color.success;
+}
+
+return `._id {
+  flex-shrink: 0;
+  color: ${iconColor};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const exists = item?.P?.extensionExists || false;
 
@@ -747,30 +796,130 @@ return {
   width: 16,
   height: 16
 };
-''',
-        css: '''
-const item = args.contextData.props?.item;
-const exists = item?.P?.extensionExists || false;
-
-let iconColor;
-if (exists) {
-  iconColor = args.theme.var.color.success;
-}
-
-return `._id {
-  flex-shrink: 0;
-  color: ${iconColor};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_extension_existence_add_button",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: ${args.theme.var.color.error};
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+const isFavourite = itemSetting?.P?.isFavourite || false;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  as: "button",
+  hide: !isFavourite || notSaved,
+  onClick: async (e) => {
+    e.stopPropagation();
+    await args.fns.toggleFavourite?.(item);
+  },
+  title: isFavourite ? "Remove from favourites" : "Add to favourites"
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:favorite-filled",
+  width: 14,
+  height: 14
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  transition: all 0.2s ease;
+  line-height: 1.2;
+  flex-shrink: 0;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    border-color: ${args.theme.var.color.primary_dark_200};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 
 // Check if this is an extension item
@@ -827,63 +976,92 @@ return {
     args.fns?.setIsModalOpen?.(true);
   }
 };
-''',
-        css: '''
-return `._id {
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid ${args.theme.var.color.primary};
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  transition: all 0.2s ease;
-  line-height: 1.2;
-  flex-shrink: 0;
-
-  &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
-    border-color: ${args.theme.var.color.primary_dark_200};
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_meta_row",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.primary};
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    color: ${args.theme.var.color.primary_dark_200};
+  }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  as: "button",
+  hide: itemType === "channel" || notSaved,
+  onClick: async (e) => {
+    e.stopPropagation();
+    if (item) {
+      if (itemType === "video") {
+        args.fns.addToQueue?.(item);
+      } else if (itemType === "playlist") {
+        args.fns.addPlaylistToQueue?.(item);
       }
-    },
+    }
+  },
+  title: itemType === "playlist" ? "Add playlist to queue" : "Add to queue",
+  "aria-label": itemType === "playlist" ? "Add playlist to queue" : "Add to queue"
+};
+'''
+      }
+    }
     {
-      id: "card_meta_text",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:add",
+  width: 14,
+  height: 14
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
@@ -938,147 +1116,25 @@ return {
   text: metaText,
   hide: !metaText
 };
-''',
-        css: '''
-return `._id {
-  margin: 0;
-}`;
 '''
-      }
-    },
-    {
-      id: "card_favourite_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item;
-const itemSetting = args.contextData.props?.itemSetting;
-const itemType = args.contextData.props?.itemType;
-const isFavourite = itemSetting?.P?.isFavourite || false;
-
-// Check if this is an unsaved extension item
-const isExtensionItem = item?.P?.extensionExists !== undefined;
-const notSaved = isExtensionItem && !item?.P?.extensionExists;
-
-return {
-  as: "button",
-  hide: !isFavourite || notSaved,
-  onClick: async (e) => {
-    e.stopPropagation();
-    await args.fns.toggleFavourite?.(item);
-  },
-  title: isFavourite ? "Remove from favourites" : "Add to favourites"
-};
-''',
-        css: '''
-return `._id {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  color: ${args.theme.var.color.error};
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "card_favourite_icon_svg",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:favorite-filled",
-  width: 14,
-  height: 14
-};
-'''
-      }
-    },
-    {
-      id: "card_queue_button",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const item = args.contextData.props?.item;
-const itemType = args.contextData.props?.itemType;
-
-// Check if this is an unsaved extension item
-const isExtensionItem = item?.P?.extensionExists !== undefined;
-const notSaved = isExtensionItem && !item?.P?.extensionExists;
-
-return {
-  as: "button",
-  hide: itemType === "channel" || notSaved,
-  onClick: async (e) => {
-    e.stopPropagation();
-    if (item) {
-      if (itemType === "video") {
-        args.fns.addToQueue?.(item);
-      } else if (itemType === "playlist") {
-        args.fns.addPlaylistToQueue?.(item);
       }
     }
-  },
-  title: itemType === "playlist" ? "Add playlist to queue" : "Add to queue",
-  "aria-label": itemType === "playlist" ? "Add playlist to queue" : "Add to queue"
-};
-''',
-        css: '''
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  color: ${args.theme.var.color.primary};
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: scale(1.1);
-    color: ${args.theme.var.color.primary_dark_200};
-  }
+  gap: 0.25rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "card_queue_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:add",
-  width: 14,
-  height: 14
-};
-'''
-      }
-    },
-    {
-      id: "card_note_display",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const note = itemSetting?.P?.note || "";
@@ -1092,45 +1148,54 @@ return {
   as: "div",
   hide: !hasNote || notSaved
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_note_icon",
-      L: "Attr",
+      id: "27"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "carbon:document",
   width: 14,
   height: 14
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_note_text",
-      L: "Attr",
+      id: "28"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
@@ -1146,28 +1211,26 @@ return {
     args.fns.openNoteModal?.(item, note);
   }
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  color: ${args.theme.var.color.text};
-  line-height: 1.3;
-  cursor: pointer;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_additional_fields",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
@@ -1294,47 +1357,15 @@ return {
   contextName: "fieldData",
   data: fieldData
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card_additional_field_item",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const fieldData = args.contextData.fieldData;
-
-// Safety check
-if (!fieldData || !fieldData.field) {
-  return { hide: true };
-}
-
-// For description field, show full text
-if (fieldData.field === "description") {
-  return {
-    as: "div",
-    text: fieldData.value,
-    title: fieldData.value
-  };
-}
-
-// For other fields, show label: value format
-return {
-  as: "span",
-  text: `${fieldData.label}: ${fieldData.value}`
-};
-''',
-        css: '''
+        css:
+          '''
 const fieldData = args.contextData.fieldData;
 
 // Safety check
@@ -1366,34 +1397,63 @@ return `._id {
   white-space: nowrap;
 }`;
 '''
-      }
-    },
-    {
-      id: "card_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const fieldData = args.contextData.fieldData;
+
+// Safety check
+if (!fieldData || !fieldData.field) {
+  return { hide: true };
+}
+
+// For description field, show full text
+if (fieldData.field === "description") {
+  return {
+    as: "div",
+    text: fieldData.value,
+    title: fieldData.value
+  };
+}
+
+// For other fields, show label: value format
 return {
-  as: "div"
+  as: "span",
+  text: `${fieldData.label}: ${fieldData.value}`
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-left: auto;
   flex-shrink: 0;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "card_menu",
-      L: "Attr",
+      id: "32"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "FloatingMenu",
-        props: '''
+        displayOrder: 1
+        componentName: FloatingMenu
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemData = args.contextData.props?.itemData;
 const itemSetting = args.contextData.props?.itemSetting;
@@ -1409,15 +1469,16 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_add_note",
-      L: "Attr",
+      id: "33"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 1
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
@@ -1440,15 +1501,16 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_play_playlist",
-      L: "Attr",
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 1.5,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 1.5
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
@@ -1468,15 +1530,16 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_toggle_favourite",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 2
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemSetting = args.contextData.props?.itemSetting;
 const itemType = args.contextData.props?.itemType;
@@ -1498,15 +1561,16 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_add_to_playlist",
-      L: "Attr",
+      id: "36"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 3
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
@@ -1526,29 +1590,31 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_divider",
-      L: "Attr",
+      id: "37"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 4
+        componentName: MenuItem
+        props:
+          '''
 return {
   isDivider: true
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_open_youtube",
-      L: "Attr",
+      id: "38"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 5
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 
@@ -1565,15 +1631,16 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_edit_name",
-      L: "Attr",
+      id: "39"
+      L: Attr
       P: {
-        displayOrder: 6,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 6
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const hideMenuItems = args.contextData.props?.hideMenuItems || [];
 
@@ -1596,15 +1663,16 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_retry",
-      L: "Attr",
+      id: "40"
+      L: Attr
       P: {
-        displayOrder: 7,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 7
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const itemType = args.contextData.props?.itemType;
 const hideMenuItems = args.contextData.props?.hideMenuItems || [];
@@ -1656,15 +1724,16 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "menu_item_delete",
-      L: "Attr",
+      id: "41"
+      L: Attr
       P: {
-        displayOrder: 8,
-        componentName: "MenuItem",
-        slotName: "menu-items",
-        props: '''
+        slotName: menu-items
+        displayOrder: 8
+        componentName: MenuItem
+        props:
+          '''
 const item = args.contextData.props?.item;
 const hideMenuItems = args.contextData.props?.hideMenuItems || [];
 
@@ -1689,47 +1758,247 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "component_root", E: "card_container" },
-    { id: "e2", T: "Attr", S: "card_container", E: "card_thumbnail" },
-    { id: "e2_0_1", T: "Attr", S: "card_thumbnail", E: "card_thumbnail_placeholder" },
-    { id: "e2_0_2", T: "Attr", S: "card_thumbnail_placeholder", E: "card_thumbnail_placeholder_icon" },
-    { id: "e2_0_3", T: "Attr", S: "card_thumbnail_placeholder", E: "card_thumbnail_placeholder_text" },
-    { id: "e2_1", T: "Attr", S: "card_thumbnail", E: "card_playing_indicator" },
-    { id: "e2_2", T: "Attr", S: "card_playing_indicator", E: "card_playing_icon" },
-    { id: "e3", T: "Attr", S: "card_container", E: "card_info" },
-    { id: "e4", T: "Attr", S: "card_info", E: "card_type_badge" },
-    { id: "e5", T: "Attr", S: "card_info", E: "card_title" },
-    { id: "e5_1", T: "Attr", S: "card_info", E: "card_processing_status" },
-    { id: "e5_1_1", T: "Attr", S: "card_processing_status", E: "card_processing_status_row" },
-    { id: "e5_2", T: "Attr", S: "card_processing_status_row", E: "card_processing_status_icon" },
-    { id: "e5_3", T: "Attr", S: "card_processing_status_row", E: "card_processing_status_text" },
-    { id: "e5_4", T: "Attr", S: "card_processing_status", E: "card_processing_status_error" },
-    { id: "e5_5", T: "Attr", S: "card_info", E: "card_extension_existence_badge" },
-    { id: "e5_5_1", T: "Attr", S: "card_extension_existence_badge", E: "card_extension_existence_icon" },
-    { id: "e6", T: "Attr", S: "card_info", E: "card_meta_row" },
-    { id: "e6_1", T: "Attr", S: "card_info", E: "card_additional_fields" },
-    { id: "e6_2", T: "Attr", S: "card_additional_fields", E: "card_additional_field_item" },
-    { id: "e7", T: "Attr", S: "card_meta_row", E: "card_meta_text" },
-    { id: "e8", T: "Attr", S: "card_meta_row", E: "card_favourite_icon" },
-    { id: "e8_1", T: "Attr", S: "card_meta_row", E: "card_extension_existence_add_button" },
-    { id: "e9", T: "Attr", S: "card_favourite_icon", E: "card_favourite_icon_svg" },
-    { id: "e10", T: "Attr", S: "card_meta_row", E: "card_queue_button" },
-    { id: "e11", T: "Attr", S: "card_queue_button", E: "card_queue_icon" },
-    { id: "e12", T: "Attr", S: "card_meta_row", E: "card_note_display" },
-    { id: "e13", T: "Attr", S: "card_note_display", E: "card_note_icon" },
-    { id: "e14", T: "Attr", S: "card_note_display", E: "card_note_text" },
-    { id: "e15", T: "Attr", S: "card_container", E: "card_actions" },
-    { id: "e16", T: "Attr", S: "card_actions", E: "card_menu" },
-    { id: "e17", T: "Attr", S: "card_menu", E: "menu_item_add_note" },
-    { id: "e17_5", T: "Attr", S: "card_menu", E: "menu_item_play_playlist" },
-    { id: "e18", T: "Attr", S: "card_menu", E: "menu_item_toggle_favourite" },
-    { id: "e19", T: "Attr", S: "card_menu", E: "menu_item_add_to_playlist" },
-    { id: "e20", T: "Attr", S: "card_menu", E: "menu_divider" },
-    { id: "e21", T: "Attr", S: "card_menu", E: "menu_item_open_youtube" },
-    { id: "e22", T: "Attr", S: "card_menu", E: "menu_item_edit_name" },
-    { id: "e23", T: "Attr", S: "card_menu", E: "menu_item_retry" },
-    { id: "e24", T: "Attr", S: "card_menu", E: "menu_item_delete" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "31"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "19"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "17"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "29"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "32"
+      E: "36"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "32"
+      E: "41"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "32"
+      E: "37"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "32"
+      E: "40"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "32"
+      E: "35"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "32"
+      E: "38"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "32"
+      E: "39"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "19"
+      E: "23"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "19"
+      E: "22"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "19"
+      E: "25"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "19"
+      E: "26"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "26"
+      E: "28"
+    }
   ]
 }

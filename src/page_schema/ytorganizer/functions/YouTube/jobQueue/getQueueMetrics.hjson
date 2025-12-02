@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_queue_metrics",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getQueueMetrics",
-        description: "Fetches performance metrics for a specific queue",
-        body: '''
+        description: Fetches performance metrics for a specific queue
+        body:
+          '''
 /**
  * Get performance metrics for a BullMQ queue
  *
@@ -134,8 +134,9 @@ function formatDuration(ms) {
   return `${seconds}s`;
 }
 '''
+        key: getQueueMetrics
       }
     }
-  ],
+  ]
   edges: []
 }

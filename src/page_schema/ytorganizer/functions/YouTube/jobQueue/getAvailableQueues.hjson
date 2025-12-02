@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "get_available_queues",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getAvailableQueues",
-        description: "Fetches all available BullMQ queues and their statistics",
-        body: '''
+        description: Fetches all available BullMQ queues and their statistics
+        body:
+          '''
 /**
  * Get all available BullMQ queues
  * Returns queue names, counts, and metadata
@@ -127,8 +127,9 @@ try {
   };
 }
 '''
+        key: getAvailableQueues
       }
     }
-  ],
+  ]
   edges: []
 }

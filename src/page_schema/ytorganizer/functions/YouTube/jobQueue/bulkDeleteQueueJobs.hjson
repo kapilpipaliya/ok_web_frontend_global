@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "bulk_delete_queue_jobs",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "bulkDeleteQueueJobs",
-        description: "Deletes multiple jobs from a BullMQ queue",
-        body: '''
+        description: Deletes multiple jobs from a BullMQ queue
+        body:
+          '''
 /**
  * Bulk delete queue jobs
  *
@@ -101,8 +101,9 @@ try {
   };
 }
 '''
+        key: bulkDeleteQueueJobs
       }
     }
-  ],
+  ]
   edges: []
 }

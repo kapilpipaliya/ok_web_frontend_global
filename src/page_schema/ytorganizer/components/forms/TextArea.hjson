@@ -1,199 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "TextArea"
+        key: TextArea
       }
-    },
+    }
     {
-      id: "variant_value",
-      L: "ComponentVariant",
+      id: "2"
+      L: Attr
       P: {
-        key: "value",
-        type: "string",
-        defValue: ""
-      }
-    },
-    {
-      id: "variant_placeholder",
-      L: "ComponentVariant",
-      P: {
-        key: "placeholder",
-        type: "string",
-        defValue: ""
-      }
-    },
-    {
-      id: "variant_required",
-      L: "ComponentVariant",
-      P: {
-        key: "required",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_disabled",
-      L: "ComponentVariant",
-      P: {
-        key: "disabled",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_readonly",
-      L: "ComponentVariant",
-      P: {
-        key: "readOnly",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_rows",
-      L: "ComponentVariant",
-      P: {
-        key: "rows",
-        type: "number",
-        defValue: 4
-      }
-    },
-    {
-      id: "variant_cols",
-      L: "ComponentVariant",
-      P: {
-        key: "cols",
-        type: "number",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_max_length",
-      L: "ComponentVariant",
-      P: {
-        key: "maxLength",
-        type: "number",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_min_length",
-      L: "ComponentVariant",
-      P: {
-        key: "minLength",
-        type: "number",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_resize",
-      L: "ComponentVariant",
-      P: {
-        key: "resize",
-        type: "string",
-        defValue: "vertical"
-      }
-    },
-    {
-      id: "option_resize_none",
-      L: "ComponentVariantOption",
-      P: {
-        key: "none",
-        value: "none",
-        description: "No resize handle"
-      }
-    },
-    {
-      id: "option_resize_both",
-      L: "ComponentVariantOption",
-      P: {
-        key: "both",
-        value: "both",
-        description: "Resize both horizontally and vertically"
-      }
-    },
-    {
-      id: "option_resize_horizontal",
-      L: "ComponentVariantOption",
-      P: {
-        key: "horizontal",
-        value: "horizontal",
-        description: "Resize horizontally only"
-      }
-    },
-    {
-      id: "option_resize_vertical",
-      L: "ComponentVariantOption",
-      P: {
-        key: "vertical",
-        value: "vertical",
-        description: "Resize vertically only"
-      }
-    },
-    {
-      id: "variant_on_change",
-      L: "ComponentVariant",
-      P: {
-        key: "onChange",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_blur",
-      L: "ComponentVariant",
-      P: {
-        key: "onBlur",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_focus",
-      L: "ComponentVariant",
-      P: {
-        key: "onFocus",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_auto_focus",
-      L: "ComponentVariant",
-      P: {
-        key: "autoFocus",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "textarea_element",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "textarea",
-  value: args.contextData.props?.value || "",
-  placeholder: args.contextData.props?.placeholder || "",
-  required: args.contextData.props?.required || false,
-  disabled: args.contextData.props?.disabled || false,
-  readOnly: args.contextData.props?.readOnly || false,
-  rows: args.contextData.props?.rows || 4,
-  cols: args.contextData.props?.cols || undefined,
-  maxLength: args.contextData.props?.maxLength || undefined,
-  minLength: args.contextData.props?.minLength || undefined,
-  autoFocus: args.contextData.props?.autoFocus || false,
-  onChange: args.contextData.props?.onChange || null,
-  onBlur: args.contextData.props?.onBlur || null,
-  onFocus: args.contextData.props?.onFocus || null
-};
-''',
-        css: '''
+        css:
+          '''
 const resize = args.contextData.props?.resize || "vertical";
 
 return `._id {
@@ -245,28 +64,300 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "textarea",
+  value: args.contextData.props?.value || "",
+  placeholder: args.contextData.props?.placeholder || "",
+  required: args.contextData.props?.required || false,
+  disabled: args.contextData.props?.disabled || false,
+  readOnly: args.contextData.props?.readOnly || false,
+  rows: args.contextData.props?.rows || 4,
+  cols: args.contextData.props?.cols || undefined,
+  maxLength: args.contextData.props?.maxLength || undefined,
+  minLength: args.contextData.props?.minLength || undefined,
+  autoFocus: args.contextData.props?.autoFocus || false,
+  onChange: args.contextData.props?.onChange || null,
+  onBlur: args.contextData.props?.onBlur || null,
+  onFocus: args.contextData.props?.onFocus || null
+};
+'''
       }
     }
-  ],
+    {
+      id: "3"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: required
+      }
+    }
+    {
+      id: "4"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: cols
+      }
+    }
+    {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: autoFocus
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: minLength
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: readOnly
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxLength
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onBlur
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: placeholder
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 4
+        key: rows
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: vertical
+        key: resize
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        description: No resize handle
+        value: none
+        key: none
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        description: Resize both horizontally and vertically
+        value: both
+        key: both
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariantOption
+      P: {
+        description: Resize horizontally only
+        value: horizontal
+        key: horizontal
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariantOption
+      P: {
+        description: Resize vertically only
+        value: vertical
+        key: vertical
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: value
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFocus
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_value" },
-    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_placeholder" },
-    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_required" },
-    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_disabled" },
-    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_readonly" },
-    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_rows" },
-    { id: "e7", T: "ComponentVariant", S: "component_root", E: "variant_cols" },
-    { id: "e8", T: "ComponentVariant", S: "component_root", E: "variant_max_length" },
-    { id: "e9", T: "ComponentVariant", S: "component_root", E: "variant_min_length" },
-    { id: "e10", T: "ComponentVariant", S: "component_root", E: "variant_resize" },
-    { id: "e11", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_none" },
-    { id: "e12", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_both" },
-    { id: "e13", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_horizontal" },
-    { id: "e14", T: "ComponentVariantOption", S: "variant_resize", E: "option_resize_vertical" },
-    { id: "e15", T: "ComponentVariant", S: "component_root", E: "variant_on_change" },
-    { id: "e16", T: "ComponentVariant", S: "component_root", E: "variant_on_blur" },
-    { id: "e17", T: "ComponentVariant", S: "component_root", E: "variant_on_focus" },
-    { id: "e18", T: "ComponentVariant", S: "component_root", E: "variant_auto_focus" },
-    { id: "e19", T: "Attr", S: "component_root", E: "textarea_element" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "18"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "20"
+    }
+    {
+      id: e16
+      T: ComponentVariantOption
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e17
+      T: ComponentVariantOption
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e18
+      T: ComponentVariantOption
+      S: "13"
+      E: "16"
+    }
+    {
+      id: e19
+      T: ComponentVariantOption
+      S: "13"
+      E: "17"
+    }
   ]
 }

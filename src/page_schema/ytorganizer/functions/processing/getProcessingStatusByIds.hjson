@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getProcessingStatusByIds",
-        description: "Fetches processing status for specific channel and playlist IDs",
-        body: '''
+        description: Fetches processing status for specific channel and playlist IDs
+        body:
+          '''
 try {
   const { channelIds = [], playlistIds = [], ownershipId } = args.contextData;
 
@@ -83,8 +83,9 @@ try {
   };
 }
 '''
+        key: getProcessingStatusByIds
       }
     }
-  ],
+  ]
   edges: []
 }

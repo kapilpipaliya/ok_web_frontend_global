@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getUserYTODetails",
-        description: "Get detailed YTO data for a specific user (channels, playlists, videos)",
-        body: '''
+        description: Get detailed YTO data for a specific user (channels, playlists, videos)
+        body:
+          '''
 const actualUser = await args.getUserFromSession();
 if (!actualUser) {
   throw new Error("User session not found");
@@ -124,8 +124,9 @@ return {
   message: `Found ${channels.length} channels, ${playlists.length} playlists, ${favoriteVideos.length} favorite videos, ${totalVideos} total videos`
 };
 '''
+        key: getUserYTODetails
       }
     }
-  ],
+  ]
   edges: []
 }

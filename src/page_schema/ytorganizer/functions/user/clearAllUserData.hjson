@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "clear_all_user_data_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "clearAllUserData",
-        description: "Clears all user-specific data (channel setting, playlist setting, video setting) without deleting the actual channels, playlists, or videos",
-        body: '''
+        description: Clears all user-specific data (channel setting, playlist setting, video setting) without deleting the actual channels, playlists, or videos
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
@@ -159,8 +159,9 @@ try {
   };
 }
 '''
+        key: clearAllUserData
       }
     }
-  ],
+  ]
   edges: []
 }

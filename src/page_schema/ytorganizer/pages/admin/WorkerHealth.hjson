@@ -1,58 +1,47 @@
 {
   vertexes: [
     {
-      id: "root",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "WorkerHealth",
-        url: "/yto/admin/worker-health",
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        url: /yto/admin/worker-health
+        key: WorkerHealth
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout",
-        displayOrder: 1,
-        description: "YTO layout with navigation"
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "admin_layout",
-      L: "PageLayout",
-      P: {
-        componentName: "AdminLayout",
-        displayOrder: 3,
-        description: "Admin layout wrapper"
-      }
-    },
-    {
-      id: "container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        description: "Main container with data fetching and state management",
-        fns: '''
+        css:
+          '''
+return `._id {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        description: Main container with data fetching and state management
+        fns:
+          '''
 // STATE MANAGEMENT
 const [healthData, setHealthData] = args.createSignal(null);
 const [queuesData, setQueuesData] = args.createSignal([]);
@@ -443,38 +432,22 @@ return {
   deleteSelectedJobs,
   deleteAllJobs
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
-return `._id {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 100vh;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "header",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: space-between;
@@ -484,21 +457,22 @@ return `._id {
   gap: 1rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: "Worker Health Monitor"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2rem;
   font-weight: 700;
@@ -506,20 +480,23 @@ return `._id {
   margin: 0;
 }`;
 '''
-      }
-    },
-    {
-      id: "controls",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "h1",
+  text: "Worker Health Monitor"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 1rem;
@@ -527,35 +504,22 @@ return `._id {
   flex-wrap: wrap;
 }`;
 '''
-      }
-    },
-    {
-      id: "auto_refresh_toggle",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isAutoRefresh = args.fns.autoRefresh();
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  text: isAutoRefresh ? "Auto-Refresh: ON" : "Auto-Refresh: OFF",
-  onClick: () => {
-    const newValue = !args.fns.autoRefresh();
-    args.fns.setAutoRefresh(newValue);
-
-    if (newValue) {
-      args.fns.startAutoRefresh();
-      args.showSuccessToast("Auto-refresh enabled");
-    } else {
-      args.fns.stopAutoRefresh();
-      args.showWarningToast("Auto-refresh disabled");
-    }
-  }
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 const isAutoRefresh = args.fns.autoRefresh();
 
 return `._id {
@@ -574,25 +538,37 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "refresh_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const isLoading = args.fns.loading();
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isAutoRefresh = args.fns.autoRefresh();
 
 return {
   as: "button",
-  text: isLoading ? "Refreshing..." : "Refresh Now",
-  disabled: isLoading,
-  onClick: () => args.fns.fetchHealth()
+  text: isAutoRefresh ? "Auto-Refresh: ON" : "Auto-Refresh: OFF",
+  onClick: () => {
+    const newValue = !args.fns.autoRefresh();
+    args.fns.setAutoRefresh(newValue);
+
+    if (newValue) {
+      args.fns.startAutoRefresh();
+      args.showSuccessToast("Auto-refresh enabled");
+    } else {
+      args.fns.stopAutoRefresh();
+      args.showWarningToast("Auto-refresh disabled");
+    }
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 const isLoading = args.fns.loading();
 
 return `._id {
@@ -620,15 +596,37 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.loading();
+
+return {
+  as: "button",
+  text: isLoading ? "Refreshing..." : "Refresh Now",
+  disabled: isLoading,
+  onClick: () => args.fns.fetchHealth()
+};
+'''
       }
-    },
+    }
     {
-      id: "last_updated",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  font-size: 0.875rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const lastUpdated = args.fns.lastUpdated();
 const currentTime = args.fns.currentTime();
 
@@ -651,46 +649,29 @@ return {
   as: "div",
   text: `Updated: ${timeText}`
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  opacity: 0.7;
-  font-size: 0.875rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "content",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
 '''
       }
-    },
+    }
     {
-      id: "loading_state",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isLoading = args.fns.loading();
-const hasData = args.fns.healthData() !== null;
-
-return {
-  as: "div",
-  text: "Loading worker health data...",
-  hide: !isLoading || hasData
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   text-align: center;
   padding: 3rem;
@@ -699,23 +680,27 @@ return `._id {
   font-size: 1.125rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "error_state",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const error = args.fns.error();
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.loading();
+const hasData = args.fns.healthData() !== null;
 
 return {
   as: "div",
-  hide: !error
+  text: "Loading worker health data...",
+  hide: !isLoading || hasData
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.error_light_100};
   border: 2px solid ${args.theme.var.color.error};
@@ -724,21 +709,25 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "error_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const error = args.fns.error();
+
 return {
-  as: "h3",
-  text: "⚠️ Error Loading Worker Health"
+  as: "div",
+  hide: !error
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.error_light_100_text};
   margin: 0 0 0.5rem 0;
@@ -746,38 +735,50 @@ return `._id {
   font-weight: 600;
 }`;
 '''
-      }
-    },
-    {
-      id: "error_message",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const error = args.fns.error();
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: error || ""
+  as: "h3",
+  text: "⚠️ Error Loading Worker Health"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.error_light_100_text};
   margin: 0;
   opacity: 0.9;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const error = args.fns.error();
+
+return {
+  as: "p",
+  text: error || ""
+};
+'''
       }
-    },
+    }
     {
-      id: "health_data_container",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const healthData = args.fns.healthData();
 
 return {
@@ -786,19 +787,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "status_card",
-      L: "Attr",
+      id: "15"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 const healthData = args.fns.healthData();
 const isHealthy = healthData?.healthy;
 
@@ -810,24 +805,22 @@ return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "status_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const healthData = args.fns.healthData();
-const isHealthy = healthData?.healthy;
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  text: `${isHealthy ? "✅" : "❌"} ${isHealthy ? "Workers are Healthy" : "Workers are Unhealthy"}`
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 const healthData = args.fns.healthData();
 const isHealthy = healthData?.healthy;
 
@@ -838,15 +831,39 @@ return `._id {
   margin-bottom: 0.5rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const healthData = args.fns.healthData();
+const isHealthy = healthData?.healthy;
+
+return {
+  as: "div",
+  text: `${isHealthy ? "✅" : "❌"} ${isHealthy ? "Workers are Healthy" : "Workers are Unhealthy"}`
+};
+'''
       }
-    },
+    }
     {
-      id: "status_summary",
-      L: "Attr",
+      id: "17"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+const healthData = args.fns.healthData();
+const isHealthy = healthData?.healthy;
+
+return `._id {
+  font-size: 1rem;
+  opacity: 0.9;
+  color: ${isHealthy ? args.theme.var.color.success_light_100_text : args.theme.var.color.error_light_100_text};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const queues = args.fns.queuesData();
 
 // Calculate totals across all queues
@@ -882,37 +899,15 @@ return {
   as: "div",
   text: message
 };
-''',
-        css: '''
-const healthData = args.fns.healthData();
-const isHealthy = healthData?.healthy;
-
-return `._id {
-  font-size: 1rem;
-  opacity: 0.9;
-  color: ${isHealthy ? args.theme.var.color.success_light_100_text : args.theme.var.color.error_light_100_text};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "queues_container",
-      L: "Attr",
+      id: "18"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        description: "Container for all queue cards using loop",
-        props: '''
-const queues = args.fns.queuesData();
-
-return {
-  as: "div",
-  contextName: "queue",
-  loop: true,
-  data: queues
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -923,20 +918,28 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_card",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        description: Container for all queue cards using loop
+        componentName: Html
+        props:
+          '''
+const queues = args.fns.queuesData();
+
 return {
-  as: "div"
+  as: "div",
+  contextName: "queue",
+  loop: true,
+  data: queues
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_light_100};
   border: 1px solid ${args.theme.var.color.border};
@@ -945,23 +948,22 @@ return `._id {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }`;
 '''
-      }
-    },
-    {
-      id: "queue_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const queue = args.contextData.queue;
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h3",
-  text: `${queue.icon} ${queue.displayName}`
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin: 0 0 1.5rem 0;
   font-size: 1.25rem;
@@ -969,15 +971,35 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const queue = args.contextData.queue;
+
+return {
+  as: "h3",
+  text: `${queue.icon} ${queue.displayName}`
+};
+'''
       }
-    },
+    }
     {
-      id: "queue_stats",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const queue = args.contextData.queue;
 
 return {
@@ -993,28 +1015,15 @@ return {
     { label: "Paused", value: queue.paused, color: "text", icon: "⏸️" }
   ]
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "stat_item",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: space-between;
@@ -1025,45 +1034,46 @@ return `._id {
   border: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "stat_label",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const stat = args.contextData.stat;
 
 return {
   as: "span",
   text: `${stat.icon} ${stat.label}`
 };
-''',
-        css: '''
-return `._id {
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "stat_value",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const stat = args.contextData.stat;
-
-return {
-  as: "span",
-  text: String(stat.value)
-};
-''',
-        css: '''
+        css:
+          '''
 const stat = args.contextData.stat;
 let color = args.theme.var.color[stat.color] || args.theme.var.color.text;
 
@@ -1073,15 +1083,36 @@ return `._id {
   color: ${color};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const stat = args.contextData.stat;
+
+return {
+  as: "span",
+  text: String(stat.value)
+};
+'''
       }
-    },
+    }
     {
-      id: "sections_container",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const queue = args.contextData.queue;
 
 return {
@@ -1097,51 +1128,35 @@ return {
     { key: "metrics", label: "Performance Metrics", icon: "carbon:chart-line", count: null, queueName: queue.queueName }
   ]
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "section_wrapper",
-      L: "Attr",
+      id: "26"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-bottom: 0.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "section_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const section = args.contextData.section;
-const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  onClick: () => args.fns.toggleSection(section.queueName, section.key)
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -1160,15 +1175,36 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.section;
+const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+
+return {
+  as: "button",
+  onClick: () => args.fns.toggleSection(section.queueName, section.key)
+};
+'''
       }
-    },
+    }
     {
-      id: "section_button_text",
-      L: "Attr",
+      id: "28"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  font-size: 0.9375rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const countText = section.count !== null ? ` (${section.count})` : '';
 
@@ -1176,23 +1212,25 @@ return {
   as: "span",
   text: `${section.label}${countText}`
 };
-''',
-        css: '''
-return `._id {
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-  font-size: 0.9375rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "section_button_icon",
-      L: "Attr",
+      id: "29"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  font-size: 0.75rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
 const cacheKey = `${section.queueName}-${section.key}`;
@@ -1202,34 +1240,15 @@ return {
   as: "span",
   text: isLoading ? "Loading..." : (isExpanded ? "▼" : "▶")
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text};
-  opacity: 0.6;
-  font-size: 0.75rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "section_content",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const section = args.contextData.section;
-const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
-const cacheKey = `${section.queueName}-${section.key}`;
-const hasData = args.fns.jobDataCache()[cacheKey]?.data;
-
-return {
-  as: "div",
-  hide: !isExpanded || !hasData
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-top: 0.5rem;
   padding: 1rem;
@@ -1239,24 +1258,28 @@ return `._id {
   overflow-x: auto;
 }`;
 '''
-      }
-    },
-    {
-      id: "bulk_actions",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
-const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+const cacheKey = `${section.queueName}-${section.key}`;
+const hasData = args.fns.jobDataCache()[cacheKey]?.data;
 
 return {
   as: "div",
-  hide: section.key === 'metrics' || section.key === 'active'
+  hide: !isExpanded || !hasData
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 0.75rem;
@@ -1264,26 +1287,26 @@ return `._id {
   flex-wrap: wrap;
 }`;
 '''
-      }
-    },
-    {
-      id: "delete_selected_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
 
 return {
-  as: "button",
-  text: `Delete Selected (${selectedCount})`,
-  disabled: selectedCount === 0,
-  onClick: () => args.fns.deleteSelectedJobs(section.queueName, section.key)
+  as: "div",
+  hide: section.key === 'metrics' || section.key === 'active'
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
 const section = args.contextData.section;
 const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
 
@@ -1309,24 +1332,28 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "delete_all_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
+const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
 
 return {
   as: "button",
-  text: "Delete All",
-  onClick: () => args.fns.deleteAllJobs(section.queueName, section.key)
+  text: `Delete Selected (${selectedCount})`,
+  disabled: selectedCount === 0,
+  onClick: () => args.fns.deleteSelectedJobs(section.queueName, section.key)
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.5rem 1rem;
   background: ${args.theme.var.color.background_light_200};
@@ -1344,37 +1371,52 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.section;
+
+return {
+  as: "button",
+  text: "Delete All",
+  onClick: () => args.fns.deleteAllJobs(section.queueName, section.key)
+};
+'''
       }
-    },
+    }
     {
-      id: "jobs_table",
-      L: "Attr",
+      id: "34"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 
 return {
   as: "table",
   hide: section.key === 'metrics'
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  border-collapse: collapse;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "table_header",
-      L: "Attr",
+      id: "35"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const cacheKey = `${section.queueName}-${section.key}`;
 const cachedData = args.fns.jobDataCache()[cacheKey];
@@ -1392,41 +1434,34 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "header_row",
-      L: "Attr",
+      id: "36"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "tr"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background_light_200};
   border-bottom: 2px solid ${args.theme.var.color.border};
 }`;
 '''
-      }
-    },
-    {
-      id: "header_checkbox_cell",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const headerData = args.contextData.headerData;
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "th",
-  hide: !headerData.showCheckbox
+  as: "tr"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0.75rem;
   text-align: left;
@@ -1434,15 +1469,35 @@ return `._id {
   width: 40px;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const headerData = args.contextData.headerData;
+
+return {
+  as: "th",
+  hide: !headerData.showCheckbox
+};
+'''
       }
-    },
+    }
     {
-      id: "select_all_checkbox",
-      L: "Attr",
+      id: "38"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const headerData = args.contextData.headerData;
 const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
@@ -1455,23 +1510,17 @@ return {
   checked: selectedCount === totalCount && totalCount > 0,
   onChange: () => args.fns.toggleSelectAll(section.queueName, section.key, jobIds)
 };
-''',
-        css: '''
-return `._id {
-  cursor: pointer;
-  width: 1rem;
-  height: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "header_cells",
-      L: "Attr",
+      id: "39"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const headerData = args.contextData.headerData;
 
@@ -1499,19 +1548,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "header_th",
-      L: "Attr",
+      id: "40"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "th"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.75rem;
   text-align: left;
@@ -1520,15 +1563,24 @@ return `._id {
   white-space: nowrap;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th"
+};
+'''
       }
-    },
+    }
     {
-      id: "header_cell_text",
-      L: "Attr",
+      id: "41"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const header = args.contextData.header;
 
 return {
@@ -1536,14 +1588,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "table_body",
-      L: "Attr",
+      id: "42"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const cacheKey = `${section.queueName}-${section.key}`;
 const cachedData = args.fns.jobDataCache()[cacheKey];
@@ -1557,19 +1610,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "table_row",
-      L: "Attr",
+      id: "43"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "tr"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   border-bottom: 1px solid ${args.theme.var.color.border};
 
@@ -1582,15 +1629,30 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "tr"
+};
+'''
       }
-    },
+    }
     {
-      id: "checkbox_cell",
-      L: "Attr",
+      id: "44"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  padding: 0.75rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const showCheckbox = ['waiting', 'failed', 'delayed', 'completed'].includes(section.key);
 
@@ -1598,21 +1660,25 @@ return {
   as: "td",
   hide: !showCheckbox
 };
-''',
-        css: '''
-return `._id {
-  padding: 0.75rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "job_checkbox",
-      L: "Attr",
+      id: "45"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const job = args.contextData.job;
 const isSelected = args.fns.isJobSelected(section.queueName, section.key, job.id);
@@ -1623,23 +1689,17 @@ return {
   checked: isSelected,
   onChange: () => args.fns.toggleJobSelection(section.queueName, section.key, job.id)
 };
-''',
-        css: '''
-return `._id {
-  cursor: pointer;
-  width: 1rem;
-  height: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "row_cells",
-      L: "Attr",
+      id: "46"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const job = args.contextData.job;
 const section = args.contextData.section;
 
@@ -1718,51 +1778,34 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "cell_td",
-      L: "Attr",
+      id: "47"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "td"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 0.75rem;
   color: ${args.theme.var.color.text};
 }`;
 '''
-      }
-    },
-    {
-      id: "cell_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const cell = args.contextData.cell;
-
-if (cell.type === 'link' && cell.url) {
-  return {
-    as: "a",
-    href: cell.url,
-    target: "_blank",
-    rel: "noopener noreferrer",
-    text: cell.value
-  };
-}
-
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  text: cell.value,
-  title: cell.value
+  as: "td"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''
 const cell = args.contextData.cell;
 
 if (cell.type === 'json') {
@@ -1790,15 +1833,45 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cell = args.contextData.cell;
+
+if (cell.type === 'link' && cell.url) {
+  return {
+    as: "a",
+    href: cell.url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    text: cell.value
+  };
+}
+
+return {
+  text: cell.value,
+  title: cell.value
+};
+'''
       }
-    },
+    }
     {
-      id: "metrics_display",
-      L: "Attr",
+      id: "49"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const section = args.contextData.section;
 const cacheKey = `${section.queueName}-metrics`;
 const cachedData = args.fns.jobDataCache()[cacheKey];
@@ -1819,31 +1892,15 @@ return {
     { label: "Concurrency", value: `${data.concurrency} workers` }
   ] : []
 };
-''',
-        css: '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "metric_item",
-      L: "Attr",
+      id: "50"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const metric = args.contextData.metric;
-
-return {
-  as: "div",
-  text: `${metric.label}: ${metric.value}`
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1rem;
   background: ${args.theme.var.color.background_light_100};
@@ -1853,61 +1910,358 @@ return `._id {
   color: ${args.theme.var.color.text};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const metric = args.contextData.metric;
+
+return {
+  as: "div",
+  text: `${metric.label}: ${metric.value}`
+};
+'''
       }
     }
-  ],
+    {
+      id: "51"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+    {
+      id: "52"
+      L: PageLayout
+      P: {
+        displayOrder: 3
+        description: Admin layout wrapper
+        componentName: AdminLayout
+      }
+    }
+    {
+      id: "53"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "PageLayout", S: "root", E: "page_layout" },
-    { id: "e_layout_content", T: "PageLayout", S: "root", E: "page_layout_content" },
-    { id: "e_admin_layout", T: "PageLayout", S: "root", E: "admin_layout" },
-    { id: "e2", T: "Attr", S: "root", E: "container" },
-    { id: "e3", T: "Attr", S: "container", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "title" },
-    { id: "e5", T: "Attr", S: "header", E: "controls" },
-    { id: "e6", T: "Attr", S: "controls", E: "auto_refresh_toggle" },
-    { id: "e7", T: "Attr", S: "controls", E: "refresh_button" },
-    { id: "e8", T: "Attr", S: "controls", E: "last_updated" },
-    { id: "e9", T: "Attr", S: "container", E: "content" },
-    { id: "e10", T: "Attr", S: "content", E: "loading_state" },
-    { id: "e11", T: "Attr", S: "content", E: "error_state" },
-    { id: "e12", T: "Attr", S: "error_state", E: "error_title" },
-    { id: "e13", T: "Attr", S: "error_state", E: "error_message" },
-    { id: "e14", T: "Attr", S: "content", E: "health_data_container" },
-    { id: "e15", T: "Attr", S: "health_data_container", E: "status_card" },
-    { id: "e16", T: "Attr", S: "status_card", E: "status_header" },
-    { id: "e16b", T: "Attr", S: "status_card", E: "status_summary" },
-    { id: "e17", T: "Attr", S: "health_data_container", E: "queues_container" },
-    { id: "e18", T: "Attr", S: "queues_container", E: "queue_card" },
-    { id: "e19", T: "Attr", S: "queue_card", E: "queue_title" },
-    { id: "e20", T: "Attr", S: "queue_card", E: "queue_stats" },
-    { id: "e21", T: "Attr", S: "queue_stats", E: "stat_item" },
-    { id: "e22", T: "Attr", S: "stat_item", E: "stat_label" },
-    { id: "e23", T: "Attr", S: "stat_item", E: "stat_value" },
-    { id: "e24", T: "Attr", S: "queue_card", E: "sections_container" },
-    { id: "e25", T: "Attr", S: "sections_container", E: "section_wrapper" },
-    { id: "e26", T: "Attr", S: "section_wrapper", E: "section_button" },
-    { id: "e27", T: "Attr", S: "section_button", E: "section_button_text" },
-    { id: "e28", T: "Attr", S: "section_button", E: "section_button_icon" },
-    { id: "e29", T: "Attr", S: "section_wrapper", E: "section_content" },
-    { id: "e30", T: "Attr", S: "section_content", E: "bulk_actions" },
-    { id: "e31", T: "Attr", S: "bulk_actions", E: "delete_selected_button" },
-    { id: "e32", T: "Attr", S: "bulk_actions", E: "delete_all_button" },
-    { id: "e33", T: "Attr", S: "section_content", E: "jobs_table" },
-    { id: "e34", T: "Attr", S: "jobs_table", E: "table_header" },
-    { id: "e35", T: "Attr", S: "table_header", E: "header_row" },
-    { id: "e36", T: "Attr", S: "header_row", E: "header_checkbox_cell" },
-    { id: "e37", T: "Attr", S: "header_checkbox_cell", E: "select_all_checkbox" },
-    { id: "e38", T: "Attr", S: "header_row", E: "header_cells" },
-    { id: "e39", T: "Attr", S: "header_cells", E: "header_th" },
-    { id: "e39b", T: "Attr", S: "header_th", E: "header_cell_text" },
-    { id: "e40", T: "Attr", S: "jobs_table", E: "table_body" },
-    { id: "e41", T: "Attr", S: "table_body", E: "table_row" },
-    { id: "e42", T: "Attr", S: "table_row", E: "checkbox_cell" },
-    { id: "e43", T: "Attr", S: "checkbox_cell", E: "job_checkbox" },
-    { id: "e44", T: "Attr", S: "table_row", E: "row_cells" },
-    { id: "e45", T: "Attr", S: "row_cells", E: "cell_td" },
-    { id: "e45b", T: "Attr", S: "cell_td", E: "cell_content" },
-    { id: "e46", T: "Attr", S: "section_content", E: "metrics_display" },
-    { id: "e47", T: "Attr", S: "metrics_display", E: "metric_item" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "9"
+      E: "14"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "14"
+      E: "18"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "19"
+      E: "25"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "26"
+      E: "30"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "30"
+      E: "34"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "30"
+      E: "49"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "27"
+      E: "29"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "34"
+      E: "42"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "31"
+      E: "33"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "49"
+      E: "50"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "42"
+      E: "43"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "35"
+      E: "36"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "43"
+      E: "46"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "36"
+      E: "39"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "44"
+      E: "45"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "47"
+      E: "48"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e50
+      T: PageLayout
+      S: "1"
+      E: "51"
+    }
+    {
+      id: e51
+      T: PageLayout
+      S: "1"
+      E: "52"
+    }
+    {
+      id: e52
+      T: PageLayout
+      S: "1"
+      E: "53"
+    }
   ]
 }

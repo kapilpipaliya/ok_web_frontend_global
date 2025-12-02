@@ -1,37 +1,19 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "CookieBanner",
-        description: "GDPR-compliant cookie consent banner with fixed position at bottom"
+        description: GDPR-compliant cookie consent banner with fixed position at bottom
+        key: CookieBanner
       }
-    },
+    }
     {
-      id: "cookie_banner_container",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
-return {
-  acceptCookies: () => {
-    localStorage.setItem('cookie_consent_accepted', 'true');
-    args.fns.setHasCookieConsent(true);
-  }
-};
-''',
-        props: '''
-// Get cookie consent state from parent layout
-const hasCookieConsent = args.fns.hasCookieConsent?.() || false;
-
-return {
-  as: "div",
-  hide: hasCookieConsent
-};
-''',
-        css: '''
+        css:
+          '''
 return [
   `@keyframes slideUp {
     from {
@@ -56,20 +38,35 @@ return [
   }`
 ];
 '''
-      }
-    },
-    {
-      id: "cookie_banner_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        fns:
+          '''
 return {
-  as: "div"
+  acceptCookies: () => {
+    localStorage.setItem('cookie_consent_accepted', 'true');
+    args.fns.setHasCookieConsent(true);
+  }
 };
-''',
-        css: '''
+'''
+        componentName: Html
+        props:
+          '''
+// Get cookie consent state from parent layout
+const hasCookieConsent = args.fns.hasCookieConsent?.() || false;
+
+return {
+  as: "div",
+  hide: hasCookieConsent
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   max-width: 1200px;
   margin: 0 auto;
@@ -88,20 +85,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "cookie_banner_message",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
   display: flex;
@@ -116,42 +115,46 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "cookie_icon",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "ph:cookie",
   width: 24,
   height: 24
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "cookie_text",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin: 0;
   font-size: 0.9375rem;
@@ -165,39 +168,37 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p"
+};
+'''
       }
-    },
+    }
     {
-      id: "cookie_text_main",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "We use cookies to remember your settings, maintain your session, and help us understand how the app is used. "
 };
 '''
       }
-    },
+    }
     {
-      id: "cookie_text_privacy_link",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "a",
-  text: "Learn more in our Privacy Policy",
-  onClick: (e) => {
-    e.preventDefault();
-    args.navigate('/privacy');
-  }
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.primary};
   text-decoration: underline;
@@ -209,34 +210,42 @@ return `._id {
   color: ${args.theme.var.color.primary_dark_200};
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "a",
+  text: "Learn more in our Privacy Policy",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate('/privacy');
+  }
+};
+'''
       }
-    },
+    }
     {
-      id: "cookie_text_period",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
   text: "."
 };
 '''
       }
-    },
+    }
     {
-      id: "cookie_banner_actions",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   justify-content: flex-end;
@@ -248,22 +257,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "cookie_accept_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  text: "Accept Cookies",
-  onClick: args.fns.acceptCookies
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.primary_text};
@@ -290,20 +299,79 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Accept Cookies",
+  onClick: args.fns.acceptCookies
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    // Component to root
-    { id: "e1", T: "Attr", S: "component_root", E: "cookie_banner_container" },
-    { id: "e2", T: "Attr", S: "cookie_banner_container", E: "cookie_banner_content" },
-    { id: "e3", T: "Attr", S: "cookie_banner_content", E: "cookie_banner_message" },
-    { id: "e4", T: "Attr", S: "cookie_banner_message", E: "cookie_icon" },
-    { id: "e5", T: "Attr", S: "cookie_banner_message", E: "cookie_text" },
-    { id: "e6", T: "Attr", S: "cookie_text", E: "cookie_text_main" },
-    { id: "e7", T: "Attr", S: "cookie_text", E: "cookie_text_privacy_link" },
-    { id: "e8", T: "Attr", S: "cookie_text", E: "cookie_text_period" },
-    { id: "e9", T: "Attr", S: "cookie_banner_content", E: "cookie_banner_actions" },
-    { id: "e10", T: "Attr", S: "cookie_banner_actions", E: "cookie_accept_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "9"
+    }
   ]
 }

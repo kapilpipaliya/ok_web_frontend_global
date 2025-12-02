@@ -484,11 +484,54 @@ addBinaryOp(
   },
   evalGetParents,
 );
-addBinaryOp("++", 13, true, (vertexes1, vertexes2) => {
+addBinaryOp("++", 13, false, (vertexes1, vertexes2) => {
   return [
     ...(Array.isArray(vertexes1) ? vertexes1 : []),
     ...(Array.isArray(vertexes2) ? vertexes2 : []),
   ];
+});
+// Parse a token like "price.asc" or "displayOrder:desc"
+function parseSortToken(token: string) {
+  token = String(token).trim();
+
+  let field = "";
+  let order = "asc";
+
+  if (token.includes(":")) {
+    [field, order] = token.split(":");
+  } else {
+    field = token;
+  }
+
+  return { field, order: order.toLowerCase() };
+}
+// not tested
+// ^ operator: sort `first` by the field & direction from `sort`
+addBinaryOp("^", 12, true, (first, sort) => {
+  const { field, order } = parseSortToken(
+    Array.isArray(sort) ? sort[0] : sort
+  );
+
+  const direction = order === "desc" ? -1 : 1;
+
+  // If first is not array → return as array
+  if (!Array.isArray(first)) return [first];
+
+  // Create sorted copy
+  const sorted = [...first].sort((a, b) => {
+    // Support sorting objects by key and primitives
+    const av = typeof a === "object" ? path(field)(a) : a;
+    const bv = typeof b === "object" ? path(field)(b) : b;
+
+    if (av < bv) return -1 * direction;
+    if (av > bv) return 1 * direction;
+    return 0;
+  });
+  if (sorted.find(x => x.id === "4:e776509e-3240-4c03-b321-79103c6829b0:1379")) {
+    console.log(sorted.map(x=>x.id))
+  }
+
+  return sorted;
 });
 addUnaryOp("json:", (string) => {
   try {

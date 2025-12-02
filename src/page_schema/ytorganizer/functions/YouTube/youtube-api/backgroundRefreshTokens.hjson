@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "background_refresh_tokens_worker",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "backgroundRefreshTokens",
-        description: "Background worker that automatically refreshes YouTube OAuth tokens that are about to expire",
-        body: '''
+        description: Background worker that automatically refreshes YouTube OAuth tokens that are about to expire
+        body:
+          '''
 // This is a background worker function that runs on a schedule
 if (args.contextData.action === 'start') {
   // Helper function to log messages to database
@@ -304,8 +304,9 @@ if (args.contextData.action === 'start') {
   }
 }
 '''
+        key: backgroundRefreshTokens
       }
     }
-  ],
+  ]
   edges: []
 }

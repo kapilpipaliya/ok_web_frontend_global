@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "check_playlist_exists_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "checkPlaylistExists",
-        description: "Check if a playlist already exists for a specific ownership",
-        body: '''
+        description: Check if a playlist already exists for a specific ownership
+        body:
+          '''
 try {
   const { youtubeId, ownershipId } = args.contextData;
 
@@ -70,8 +70,9 @@ try {
   };
 }
 '''
+        key: checkPlaylistExists
       }
     }
-  ],
+  ]
   edges: []
 }

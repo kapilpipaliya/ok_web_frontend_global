@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "removeVideoFromQueue",
-        description: "Remove a video from the queue at a specific position and reorder remaining videos",
-        body: '''
+        description: Remove a video from the queue at a specific position and reorder remaining videos
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession(args.request);
@@ -93,8 +93,9 @@ try {
   };
 }
 '''
+        key: removeVideoFromQueue
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "saveVideoQueue",
-        description: "Save entire video queue to database (replaces existing queue)",
-        body: '''
+        description: Save entire video queue to database (replaces existing queue)
+        body:
+          '''
 try {
   // Get effective user (handles admin impersonation)
   const user = await args.getEffectiveUser(args.session, args.contextData.impersonatedUserUuid);
@@ -103,8 +103,9 @@ try {
   };
 }
 '''
+        key: saveVideoQueue
       }
     }
-  ],
+  ]
   edges: []
 }

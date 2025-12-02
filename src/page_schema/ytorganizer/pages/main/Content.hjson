@@ -1,47 +1,40 @@
 {
   vertexes: [
     {
-      id: "page_root",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "Content",
-        url: "/content",
-        signinRequired: true,
-        fns: '''
+        signinRequired: true
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        url: /content
+        key: Content
+        props:
+          '''
 return {
   isNoPermissionCheck: true,
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "2"
+      L: Attr
       P: {
-        componentName: "Layout",
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+}`;
+'''
         displayOrder: 1
-      }
-    },
-    {
-      id: "page_layout_content",
-      L: "PageLayout",
-      P: {
-        componentName: "LayoutContent",
-        displayOrder: 2
-      }
-    },
-    {
-      id: "page_root_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        fns:
+          '''
 // Reactive content type detection
 const contentType = args.createMemo(() => args.searchParams?.type || "channels");
 const detailId = args.createMemo(() => args.searchParams?.id || null);
@@ -2007,8 +2000,10 @@ return {
   splitSortValue,
   getYouTubeUrl
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   onMount: () => {
@@ -2030,27 +2025,15 @@ return {
     window.removeEventListener('message', args.fns.handleMessage);
   }
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "header_section",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   padding: 1.5rem 1.5rem 0 1.5rem;
   margin: 0 auto;
@@ -2063,15 +2046,39 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "page_title",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.xl};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const contentType = args.fns.contentType();
 
 // Determine title based on view
@@ -2102,30 +2109,17 @@ return {
   as: "h1",
   text: title
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 0.5rem 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: ${args.theme.var.fontSize.xl};
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "processing_status",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "ProcessingStatus",
-        props: '''
+        displayOrder: 2
+        componentName: ProcessingStatus
+        props:
+          '''
 const contentType = args.fns.contentType();
 const data = args.fns.detailData();
 
@@ -2177,24 +2171,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "search_container",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-// Check if no ownerships exist - hide search and actions when no accounts connected
-const ownerships = args.fns.ownerships?.() || [];
-const hasNoOwnerships = ownerships.length === 0;
-
-return {
-  as: "div",
-  hide: hasNoOwnerships
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-bottom: 0.75rem;
   display: flex;
@@ -2209,118 +2192,27 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "description_sort_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-// Check if no ownerships exist - hide sort controls when no accounts connected
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - hide search and actions when no accounts connected
 const ownerships = args.fns.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
 
 return {
   as: "div",
-  hide: args.fns.loading() || hasNoOwnerships
+  hide: hasNoOwnerships
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    /*flex-direction: column;*/
-    /*align-items: flex-start;*/
-    gap: 0.5rem;
-    margin: 0 0 ${args.theme.var.spacing.md} 0;
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "page_description",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const contentType = args.fns.contentType();
-
-// Determine description based on view
-let description = "";
-if (args.fns.isSearchView()) {
-  const results = args.fns.searchResults();
-  const totalCount = results?.totalCount || 0;
-  description = results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "";
-} else if (args.fns.isFavouritesView()) {
-  const items = args.fns.getFavouritesItems();
-  const totalCount = items.length;
-  description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
-} else if (args.fns.isExtensionView()) {
-  const items = args.fns.filteredExtensionItems();
-  const totalCount = items.length;
-  description = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
-} else if (args.fns.isDetailView()) {
-  const count = args.fns.filteredDetailItems().length;
-  description = contentType === "playlists"
-    ? `${count} video${count !== 1 ? 's' : ''}`
-    : `${count} playlist${count !== 1 ? 's' : ''}`;
-} else {
-  // List view
-  const count = args.fns.filteredItems().length;
-  description = contentType === "playlists"
-    ? `${count} playlist${count !== 1 ? 's' : ''}`
-    : `${count} channel${count !== 1 ? 's' : ''}`;
-}
-
-return {
-  as: "p",
-  text: description
-};
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-  flex: 1;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: ${args.theme.var.fontSize.sm};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "search_input_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-// Use form for search view to handle Enter key, div for others
-const as = args.fns.isSearchView() ? "form" : "div";
-const onSubmit = args.fns.isSearchView() ? args.fns.handleSearch : undefined;
-
-return {
-  as,
-  onSubmit
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
 }
@@ -2331,15 +2223,29 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Use form for search view to handle Enter key, div for others
+const as = args.fns.isSearchView() ? "form" : "div";
+const onSubmit = args.fns.isSearchView() ? args.fns.handleSearch : undefined;
+
+return {
+  as,
+  onSubmit
+};
+'''
       }
-    },
+    }
     {
-      id: "search_input",
-      L: "Attr",
+      id: "8"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TextInput",
-        props: '''
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
 const contentType = args.fns.contentType();
 
 // Determine placeholder and handlers based on view
@@ -2385,14 +2291,21 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "add_button",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const contentType = args.fns.contentType();
 const text = contentType === "playlists" ? "Add Playlist" : "Add Channel";
 
@@ -2403,27 +2316,15 @@ return {
   onClick: args.fns.openModal,
   hide: () => !args.fns.isListView()
 };
-''',
-        css: '''
-return `._id {
-  flex-shrink: 0;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "detail_actions_container",
-      L: "Attr",
+      id: "10"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: () => !args.fns.isDetailView()
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   gap: 0.5rem;
@@ -2431,15 +2332,25 @@ return `._id {
   flex-wrap: wrap;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.isDetailView()
+};
+'''
       }
-    },
+    }
     {
-      id: "sync_button",
-      L: "Attr",
+      id: "11"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Button",
-        props: '''
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
 const isSyncing = args.fns.isSyncing();
 
 return {
@@ -2451,14 +2362,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "add_playlist_button",
-      L: "Attr",
+      id: "12"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Button",
-        props: '''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
 const contentType = args.fns.contentType();
 
 return {
@@ -2485,14 +2397,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "add_videos_button",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Button",
-        props: '''
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
 const contentType = args.fns.contentType();
 
 return {
@@ -2504,19 +2417,156 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "main_content_container",
-      L: "Attr",
+      id: "14"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    /*flex-direction: column;*/
+    /*align-items: flex-start;*/
+    gap: 0.5rem;
+    margin: 0 0 ${args.theme.var.spacing.md} 0;
+  }
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - hide sort controls when no accounts connected
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
 return {
-  as: "main"
+  as: "div",
+  hide: args.fns.loading() || hasNoOwnerships
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contentType = args.fns.contentType();
+
+// Determine description based on view
+let description = "";
+if (args.fns.isSearchView()) {
+  const results = args.fns.searchResults();
+  const totalCount = results?.totalCount || 0;
+  description = results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "";
+} else if (args.fns.isFavouritesView()) {
+  const items = args.fns.getFavouritesItems();
+  const totalCount = items.length;
+  description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isExtensionView()) {
+  const items = args.fns.filteredExtensionItems();
+  const totalCount = items.length;
+  description = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isDetailView()) {
+  const count = args.fns.filteredDetailItems().length;
+  description = contentType === "playlists"
+    ? `${count} video${count !== 1 ? 's' : ''}`
+    : `${count} playlist${count !== 1 ? 's' : ''}`;
+} else {
+  // List view
+  const count = args.fns.filteredItems().length;
+  description = contentType === "playlists"
+    ? `${count} playlist${count !== 1 ? 's' : ''}`
+    : `${count} channel${count !== 1 ? 's' : ''}`;
+}
+
+return {
+  as: "p",
+  text: description
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: auto;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  ._id {
+
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: SplitButton
+        props:
+          '''
+// Hide sort controls on extension page
+const isExtension = args.fns.isExtensionView();
+if (isExtension) {
+  return { hide: true };
+}
+
+// Get sort field, direction, and options from fns
+const currentField = args.fns.getCurrentSortField();
+const currentDirection = args.fns.getCurrentSortDirection();
+const options = args.fns.getCurrentSortOptions();
+
+return {
+  field: currentField,
+  direction: currentDirection,
+  options: options,
+  onFieldChange: (newField) => {
+    args.fns.handleSortFieldChange(newField);
+  },
+  onDirectionToggle: () => {
+    args.fns.handleSortDirectionToggle();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: 0 1.5rem;
   margin: 0 auto;
@@ -2529,21 +2579,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "loading_state",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div",
-  hide: !args.fns.loading()
+  as: "main"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   flex-direction: column;
@@ -2553,28 +2604,53 @@ return `._id {
   gap: 1rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.loading()
+};
+'''
       }
-    },
+    }
     {
-      id: "loading_spinner",
-      L: "Attr",
+      id: "19"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "LoadingSpinner",
-        props: '''
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
 return {
   size: "lg"
 };
 '''
       }
-    },
+    }
     {
-      id: "loading_text",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.md};
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
@@ -2599,29 +2675,17 @@ return {
   as: "p",
   text
 };
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.md};
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: ${args.theme.var.fontSize.sm};
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "no_accounts_message",
-      L: "Attr",
+      id: "21"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "NoAccountsMessage",
-        props: '''
+        displayOrder: 2
+        componentName: NoAccountsMessage
+        props:
+          '''
 // Check if no ownerships exist
 const ownerships = args.fns.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
@@ -2631,196 +2695,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "empty_state",
-      L: "Attr",
+      id: "22"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-// Check if no ownerships exist - don't show this state if no accounts
-const ownerships = args.fns.ownerships?.() || [];
-const hasNoOwnerships = ownerships.length === 0;
-
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-
-let hasItems = false;
-if (isListView) {
-  hasItems = args.fns.filteredItems().length > 0;
-} else if (isDetailView) {
-  hasItems = args.fns.filteredDetailItems().length > 0;
-} else if (isSearchView) {
-  hasItems = args.fns.getSearchItems().length > 0;
-} else if (isFavouritesView) {
-  hasItems = args.fns.getFavouritesItems().length > 0;
-} else if (isExtensionView) {
-  hasItems = args.fns.filteredExtensionItems().length > 0;
-}
-
-return {
-  as: "div",
-  hide: args.fns.loading() || hasItems || hasNoOwnerships
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 3rem 2rem;
-  text-align: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "empty_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
-
-let icon;
-if (isListView) {
-  icon = contentType === "playlists" ? "mdi:playlist-play" : "mdi:youtube";
-} else if (isDetailView) {
-  icon = contentType === "channels" ? "mdi:playlist-remove" : "mdi:video-off";
-} else if (isSearchView) {
-  icon = "mdi:magnify";
-} else if (isFavouritesView) {
-  icon = "carbon:favorite";
-} else if (isExtensionView) {
-  icon = "carbon:data-1";
-}
-
-return {
-  as: "icon",
-  icon,
-  width: 64,
-  height: 64
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}`;
-'''
-      }
-    },
-    {
-      id: "empty_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
-const hasSearchTerm = args.fns.searchTerm().length > 0;
-const query = args.searchParams?.q || "";
-
-let title;
-if (isListView) {
-  title = hasSearchTerm
-    ? "No results found"
-    : (contentType === "playlists" ? "No playlists yet" : "No channels yet");
-} else if (isDetailView) {
-  title = contentType === "channels" ? "No playlists found" : "No videos found";
-} else if (isSearchView) {
-  title = query ? "No results found" : "Enter a search query";
-} else if (isFavouritesView) {
-  title = "No favourite items yet";
-} else if (isExtensionView) {
-  title = "No Content Found";
-}
-
-return {
-  as: "h3",
-  text: title
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 0.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "empty_description",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
-const hasSearchTerm = args.fns.searchTerm().length > 0;
-const query = args.searchParams?.q || "";
-
-let text;
-if (isListView) {
-  text = hasSearchTerm
-    ? "Try adjusting your search terms"
-    : (contentType === "playlists"
-        ? "Start by adding some YouTube playlists to organize your content"
-        : "Start by adding some YouTube channels to track your favorites");
-} else if (isDetailView) {
-  text = ""; // Detail view doesn't show description (only has 2 children)
-} else if (isSearchView) {
-  text = query ? "Try adjusting your search terms" : "to find channels, playlists, and videos";
-} else if (isFavouritesView) {
-  text = "Start by adding channels, playlists, or videos to your favourites!";
-} else if (isExtensionView) {
-  text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
-}
-
-return {
-  as: "p",
-  text,
-  hide: isDetailView // Hide in detail view
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "content_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
@@ -2846,14 +2729,28 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "virtual_list",
-      L: "Attr",
+      id: "23"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "VirtualList",
-        props: '''
+        css:
+          '''
+return `._id {
+  overflow-y: auto;
+  height: calc(100vh - 280px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    height: calc(100vh - 72px);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: VirtualList
+        props:
+          '''
 const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
@@ -2879,29 +2776,18 @@ return {
   itemHeight: 90,
   overscan: 5
 };
-''',
-        css: '''
-return `._id {
-  overflow-y: auto;
-  height: calc(100vh - 280px);
-}
-
-@media (max-width: 768px) {
-  ._id {
-    height: calc(100vh - 72px);
-  }
-}`;
 '''
       }
-    },
+    }
     {
-      id: "card",
-      L: "Attr",
+      id: "24"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Card",
-        slotName: "children",
-        props: '''
+        slotName: children
+        displayOrder: 1
+        componentName: Card
+        props:
+          '''
 const isListView = args.fns.isListView();
 const isDetailView = args.fns.isDetailView();
 const isSearchView = args.fns.isSearchView();
@@ -2984,14 +2870,205 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "add_modal",
-      L: "Attr",
+      id: "25"
+      L: Attr
       P: {
-        displayOrder: 9,
-        componentName: "AddModal",
-        props: '''
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 3rem 2rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - don't show this state if no accounts
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
+
+let hasItems = false;
+if (isListView) {
+  hasItems = args.fns.filteredItems().length > 0;
+} else if (isDetailView) {
+  hasItems = args.fns.filteredDetailItems().length > 0;
+} else if (isSearchView) {
+  hasItems = args.fns.getSearchItems().length > 0;
+} else if (isFavouritesView) {
+  hasItems = args.fns.getFavouritesItems().length > 0;
+} else if (isExtensionView) {
+  hasItems = args.fns.filteredExtensionItems().length > 0;
+}
+
+return {
+  as: "div",
+  hide: args.fns.loading() || hasItems || hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
+const contentType = args.fns.contentType();
+
+let icon;
+if (isListView) {
+  icon = contentType === "playlists" ? "mdi:playlist-play" : "mdi:youtube";
+} else if (isDetailView) {
+  icon = contentType === "channels" ? "mdi:playlist-remove" : "mdi:video-off";
+} else if (isSearchView) {
+  icon = "mdi:magnify";
+} else if (isFavouritesView) {
+  icon = "carbon:favorite";
+} else if (isExtensionView) {
+  icon = "carbon:data-1";
+}
+
+return {
+  as: "icon",
+  icon,
+  width: 64,
+  height: 64
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
+const contentType = args.fns.contentType();
+const hasSearchTerm = args.fns.searchTerm().length > 0;
+const query = args.searchParams?.q || "";
+
+let title;
+if (isListView) {
+  title = hasSearchTerm
+    ? "No results found"
+    : (contentType === "playlists" ? "No playlists yet" : "No channels yet");
+} else if (isDetailView) {
+  title = contentType === "channels" ? "No playlists found" : "No videos found";
+} else if (isSearchView) {
+  title = query ? "No results found" : "Enter a search query";
+} else if (isFavouritesView) {
+  title = "No favourite items yet";
+} else if (isExtensionView) {
+  title = "No Content Found";
+}
+
+return {
+  as: "h3",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+const isExtensionView = args.fns.isExtensionView();
+const contentType = args.fns.contentType();
+const hasSearchTerm = args.fns.searchTerm().length > 0;
+const query = args.searchParams?.q || "";
+
+let text;
+if (isListView) {
+  text = hasSearchTerm
+    ? "Try adjusting your search terms"
+    : (contentType === "playlists"
+        ? "Start by adding some YouTube playlists to organize your content"
+        : "Start by adding some YouTube channels to track your favorites");
+} else if (isDetailView) {
+  text = ""; // Detail view doesn't show description (only has 2 children)
+} else if (isSearchView) {
+  text = query ? "Try adjusting your search terms" : "to find channels, playlists, and videos";
+} else if (isFavouritesView) {
+  text = "Start by adding channels, playlists, or videos to your favourites!";
+} else if (isExtensionView) {
+  text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
+}
+
+return {
+  as: "p",
+  text,
+  hide: isDetailView // Hide in detail view
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: AddModal
+        props:
+          '''
 const contentType = args.fns.contentType();
 const modalData = args.fns.modalData;
 const isOpen = args.fns.isModalOpen();
@@ -3008,14 +3085,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "note_modal",
-      L: "Attr",
+      id: "30"
+      L: Attr
       P: {
-        displayOrder: 10,
-        componentName: "NoteModal",
-        props: '''
+        displayOrder: 10
+        componentName: NoteModal
+        props:
+          '''
 return {
   isOpen: args.fns.isNoteModalOpen,
   onClose: args.fns.closeNoteModal,
@@ -3025,14 +3103,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "add_videos_modal",
-      L: "Attr",
+      id: "31"
+      L: Attr
       P: {
-        displayOrder: 11,
-        componentName: "AddVideosModal",
-        props: '''
+        displayOrder: 11
+        componentName: AddVideosModal
+        props:
+          '''
 // Check which modal should be open and return function for isOpen
 const isDetailModalOpen = args.fns.isAddVideosModalOpen;
 const isExtensionModalOpen = args.fns.isAddVideoToPlaylistModalOpen;
@@ -3080,84 +3159,216 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "sort_split_button",
-      L: "Attr",
+      id: "32"
+      L: PageLayout
       P: {
-        displayOrder: 2,
-        componentName: "SplitButton",
-        props: '''
-// Hide sort controls on extension page
-const isExtension = args.fns.isExtensionView();
-if (isExtension) {
-  return { hide: true };
-}
-
-// Get sort field, direction, and options from fns
-const currentField = args.fns.getCurrentSortField();
-const currentDirection = args.fns.getCurrentSortDirection();
-const options = args.fns.getCurrentSortOptions();
-
-return {
-  field: currentField,
-  direction: currentDirection,
-  options: options,
-  onFieldChange: (newField) => {
-    args.fns.handleSortFieldChange(newField);
-  },
-  onDirectionToggle: () => {
-    args.fns.handleSortDirectionToggle();
-  }
-};
-''',
-        css: '''
-return `._id {
-  width: auto;
-  min-width: 250px;
-}
-
-@media (max-width: 768px) {
-  ._id {
-
-  }
-}`;
-'''
+        displayOrder: 1
+        componentName: Layout
       }
     }
-  ],
+    {
+      id: "33"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
-    { id: "e1a", T: "PageLayout", S: "page_root", E: "page_layout_content" },
-    { id: "e2", T: "Attr", S: "page_root", E: "page_root_container" },
-    { id: "e3", T: "Attr", S: "page_root_container", E: "header_section" },
-    { id: "e4", T: "Attr", S: "header_section", E: "page_title" },
-    { id: "e5", T: "Attr", S: "header_section", E: "description_sort_wrapper" },
-    { id: "e5a", T: "Attr", S: "header_section", E: "processing_status" },
-    { id: "e5b", T: "Attr", S: "description_sort_wrapper", E: "page_description" },
-    { id: "e5c", T: "Attr", S: "description_sort_wrapper", E: "sort_split_button" },
-    { id: "e6", T: "Attr", S: "header_section", E: "search_container" },
-    { id: "e7", T: "Attr", S: "search_container", E: "search_input_wrapper" },
-    { id: "e7a", T: "Attr", S: "search_input_wrapper", E: "search_input" },
-    { id: "e7b", T: "Attr", S: "search_container", E: "add_button" },
-    { id: "e7c", T: "Attr", S: "search_container", E: "detail_actions_container" },
-    { id: "e7d", T: "Attr", S: "detail_actions_container", E: "sync_button" },
-    { id: "e7e", T: "Attr", S: "detail_actions_container", E: "add_playlist_button" },
-    { id: "e7f", T: "Attr", S: "detail_actions_container", E: "add_videos_button" },
-    { id: "e8", T: "Attr", S: "page_root_container", E: "main_content_container" },
-    { id: "e9", T: "Attr", S: "main_content_container", E: "loading_state" },
-    { id: "e10", T: "Attr", S: "loading_state", E: "loading_spinner" },
-    { id: "e11", T: "Attr", S: "loading_state", E: "loading_text" },
-    { id: "e12", T: "Attr", S: "main_content_container", E: "no_accounts_message" },
-    { id: "e12a", T: "Attr", S: "main_content_container", E: "empty_state" },
-    { id: "e13", T: "Attr", S: "empty_state", E: "empty_icon" },
-    { id: "e14", T: "Attr", S: "empty_state", E: "empty_title" },
-    { id: "e15", T: "Attr", S: "empty_state", E: "empty_description" },
-    { id: "e16", T: "Attr", S: "main_content_container", E: "content_wrapper" },
-    { id: "e17", T: "Attr", S: "content_wrapper", E: "virtual_list" },
-    { id: "e18", T: "Attr", S: "virtual_list", E: "card" },
-    { id: "e101", T: "Attr", S: "page_root_container", E: "add_modal" },
-    { id: "e102", T: "Attr", S: "page_root_container", E: "note_modal" },
-    { id: "e103", T: "Attr", S: "page_root_container", E: "add_videos_modal" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "30"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "17"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "29"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "31"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "14"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "17"
+      E: "21"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "17"
+      E: "22"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "17"
+      E: "25"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "25"
+      E: "28"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "10"
+      E: "13"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e31
+      T: PageLayout
+      S: "1"
+      E: "32"
+    }
+    {
+      id: e32
+      T: PageLayout
+      S: "1"
+      E: "33"
+    }
   ]
 }

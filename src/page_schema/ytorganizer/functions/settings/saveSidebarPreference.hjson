@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "save_sidebar_preference_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "saveSidebarPreference",
-        description: "Saves the user's sidebar collapsed/expanded preference",
-        body: '''
+        description: Saves the user's sidebar collapsed/expanded preference
+        body:
+          '''
 try {
   const { isCollapsed } = args.contextData;
   const userId = args.user?.id;
@@ -60,8 +60,9 @@ try {
   };
 }
 '''
+        key: saveSidebarPreference
       }
     }
-  ],
+  ]
   edges: []
 }

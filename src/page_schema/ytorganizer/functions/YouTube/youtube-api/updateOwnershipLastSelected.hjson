@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root"
-      L: "Function"
+      id: "1"
+      L: Function
       P: {
-        key: "updateOwnershipLastSelected"
-        description: "Update the lastSelected timestamp for a YouTube ownership"
-        body: '''
+        description: Update the lastSelected timestamp for a YouTube ownership
+        body:
+          '''
 try {
   const { ownershipId } = args.contextData;
 
@@ -62,6 +62,7 @@ try {
   };
 }
 '''
+        key: updateOwnershipLastSelected
       }
     }
   ]

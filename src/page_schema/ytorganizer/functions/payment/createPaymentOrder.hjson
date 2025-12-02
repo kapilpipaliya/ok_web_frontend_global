@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "createPaymentOrder",
-        description: "Create a Razorpay payment order for subscription",
-        body: '''
+        description: Create a Razorpay payment order for subscription
+        body:
+          '''
 try {
   // Get authenticated user
   const user = await args.getUserFromSession();
@@ -169,8 +169,9 @@ try {
   };
 }
 '''
+        key: createPaymentOrder
       }
     }
-  ],
+  ]
   edges: []
 }

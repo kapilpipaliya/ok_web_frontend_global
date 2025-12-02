@@ -1,79 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "SplitButton"
+        key: SplitButton
       }
-    },
+    }
     {
-      id: "variant_field",
-      L: "ComponentVariant",
+      id: "2"
+      L: Attr
       P: {
-        key: "field",
-        type: "string",
-        defValue: ""
-      }
-    },
-    {
-      id: "variant_direction",
-      L: "ComponentVariant",
-      P: {
-        key: "direction",
-        type: "string",
-        defValue: "asc"
-      }
-    },
-    {
-      id: "variant_options",
-      L: "ComponentVariant",
-      P: {
-        key: "options",
-        type: "array",
-        defValue: []
-      }
-    },
-    {
-      id: "variant_on_field_change",
-      L: "ComponentVariant",
-      P: {
-        key: "onFieldChange",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_direction_toggle",
-      L: "ComponentVariant",
-      P: {
-        key: "onDirectionToggle",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_disabled",
-      L: "ComponentVariant",
-      P: {
-        key: "disabled",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "wrapper_div",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  class: args.contextData.props?.class
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: inline-flex;
   align-items: stretch;
@@ -82,34 +21,52 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
-      }
-    },
-    {
-      id: "dropdown_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "div",
+  class: args.contextData.props?.class
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   flex: 1;
   min-width: 150px;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "dropdown_select",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "TomSelect",
-        props: '''
+        css:
+          '''
+return `._id {
+  border-radius: ${args.theme.var.borderRadius.md} 0 0 ${args.theme.var.borderRadius.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: TomSelect
+        props:
+          '''
 const field = args.contextData.props?.field || "";
 const options = args.contextData.props?.options || [];
 const onFieldChange = args.contextData.props?.onFieldChange || (() => {});
@@ -125,60 +82,36 @@ return {
   search: false,
   placeholder: "Sort by..."
 };
-''',
-        css: '''
-return `._id {
-  border-radius: ${args.theme.var.borderRadius.md} 0 0 ${args.theme.var.borderRadius.md};
-}`;
 '''
       }
-    },
+    }
     {
-      id: "divider",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   width: 1px;
   background: ${args.theme.var.color.border};
 }`;
 '''
-      }
-    },
-    {
-      id: "direction_button",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const direction = args.contextData.props?.direction || "asc";
-const onDirectionToggle = args.contextData.props?.onDirectionToggle || (() => {});
-const disabled = args.contextData.props?.disabled || false;
-
-// Determine icon based on direction
-const icon = direction === "asc" ? "arrow-up" : "arrow-down";
-const ariaLabel = direction === "asc" ? "Sort ascending" : "Sort descending";
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  type: "button",
-  onClick: () => {
-    onDirectionToggle();
-  },
-  disabled: disabled,
-  "aria-label": ariaLabel,
-  title: ariaLabel
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -206,15 +139,45 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const direction = args.contextData.props?.direction || "asc";
+const onDirectionToggle = args.contextData.props?.onDirectionToggle || (() => {});
+const disabled = args.contextData.props?.disabled || false;
+
+// Determine icon based on direction
+const icon = direction === "asc" ? "arrow-up" : "arrow-down";
+const ariaLabel = direction === "asc" ? "Sort ascending" : "Sort descending";
+
+return {
+  as: "button",
+  type: "button",
+  onClick: () => {
+    onDirectionToggle();
+  },
+  disabled: disabled,
+  "aria-label": ariaLabel,
+  title: ariaLabel
+};
+'''
       }
-    },
+    }
     {
-      id: "direction_icon",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  display: block;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const direction = args.contextData.props?.direction || "asc";
 const iconName = direction === "asc" ? "ph:arrow-up" : "ph:arrow-down";
 
@@ -224,27 +187,134 @@ return {
   width: "20",
   height: "20"
 };
-''',
-        css: '''
-return `._id {
-  display: block;
-}`;
 '''
       }
     }
-  ],
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onDirectionToggle
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFieldChange
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: options
+        defValue: []
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: field
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: asc
+        key: direction
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_field" },
-    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_direction" },
-    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_options" },
-    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_on_field_change" },
-    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_on_direction_toggle" },
-    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_disabled" },
-    { id: "e7", T: "Attr", S: "component_root", E: "wrapper_div" },
-    { id: "e8", T: "Attr", S: "wrapper_div", E: "dropdown_wrapper" },
-    { id: "e9", T: "Attr", S: "dropdown_wrapper", E: "dropdown_select" },
-    { id: "e10", T: "Attr", S: "wrapper_div", E: "divider" },
-    { id: "e11", T: "Attr", S: "wrapper_div", E: "direction_button" },
-    { id: "e12", T: "Attr", S: "direction_button", E: "direction_icon" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
   ]
 }

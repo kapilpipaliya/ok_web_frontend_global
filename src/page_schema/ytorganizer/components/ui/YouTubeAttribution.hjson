@@ -1,25 +1,19 @@
 {
   vertexes: [
     {
-      id: "youtube_attribution_component",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "YouTubeAttribution",
-        description: "YouTube API Services attribution component for branding compliance"
+        description: YouTube API Services attribution component for branding compliance
+        key: YouTubeAttribution
       }
-    },
+    }
     {
-      id: "youtube_attribution_root",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -40,43 +34,44 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "youtube_attribution_text",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: "Powered by"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.background_light_100_text};
   opacity: 0.7;
 }`;
 '''
-      }
-    },
-    {
-      id: "youtube_attribution_link",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "a",
-  href: "https://www.youtube.com",
-  target: "_blank",
-  rel: "noopener noreferrer"
+  as: "span",
+  text: "Powered by"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -89,41 +84,48 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "a",
+  href: "https://www.youtube.com",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+'''
       }
-    },
+    }
     {
-      id: "youtube_logo",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  color: #FF0000;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "icon",
   icon: "logos:youtube-icon",
   width: 32,
   height: 32
 };
-''',
-        css: '''
-return `._id {
-  color: #FF0000;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "youtube_text_wrapper",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   display: flex;
   align-items: center;
@@ -131,56 +133,103 @@ return `._id {
   font-size: 0.875rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "youtube_text_bold",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "span",
-  text: "YouTube"
+  as: "span"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.background_light_100_text};
   font-weight: 700;
 }`;
 '''
-      }
-    },
-    {
-      id: "youtube_text_normal",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   as: "span",
-  text: "API Services"
+  text: "YouTube"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.background_light_100_text};
   font-weight: 400;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "API Services"
+};
+'''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e1", T: "Attr", S: "youtube_attribution_component", E: "youtube_attribution_root" },
-    { id: "e2", T: "Attr", S: "youtube_attribution_root", E: "youtube_attribution_text" },
-    { id: "e3", T: "Attr", S: "youtube_attribution_root", E: "youtube_attribution_link" },
-    { id: "e4", T: "Attr", S: "youtube_attribution_link", E: "youtube_logo" },
-    { id: "e5", T: "Attr", S: "youtube_attribution_link", E: "youtube_text_wrapper" },
-    { id: "e6", T: "Attr", S: "youtube_text_wrapper", E: "youtube_text_bold" },
-    { id: "e7", T: "Attr", S: "youtube_text_wrapper", E: "youtube_text_normal" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "8"
+    }
   ]
 }

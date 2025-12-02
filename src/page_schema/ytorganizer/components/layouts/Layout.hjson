@@ -1,11 +1,11 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "Layout",
-        fns: '''
+        fns:
+          '''
 // Check if user is admin
 const checkAdminRole = () => {
   const userRoles = args.user?.OUT?.UserRole || [];
@@ -610,8 +610,10 @@ return {
   // Utilities
   openYouTubeInParentTab
 };
-''',
-        props: '''
+'''
+        key: Layout
+        props:
+          '''
 return {
   onMount: async () => {
     if (typeof window !== 'undefined') {
@@ -630,22 +632,23 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "layout_root",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "ConfirmProvider"
+        displayOrder: 1
+        componentName: ConfirmProvider
       }
-    },
+    }
     {
-      id: "favicon_link",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 0.5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
 return {
   as: "link",
   rel: "icon",
@@ -653,23 +656,24 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "slot_content",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot",
-        slot: "1children"
+        displayOrder: 1
+        componentName: Slot
+        slot: 1children
       }
-    },
+    }
     {
-      id: "video_player",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 4,
-        componentName: "VideoPlayer",
-        props: '''
+        displayOrder: 4
+        componentName: VideoPlayer
+        props:
+          '''
 return {
   playerState: args.fns.playerState,
   currentVideo: args.fns.currentVideo,
@@ -687,14 +691,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "queue_modal",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 5,
-        componentName: "QueueModal",
-        props: '''
+        displayOrder: 5
+        componentName: QueueModal
+        props:
+          '''
 return {
   isOpen: args.fns.isQueueModalOpen,
   onClose: args.fns.closeQueueModal,
@@ -709,14 +714,15 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "feedback_modal",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 7,
-        componentName: "FeedbackModal",
-        props: '''
+        displayOrder: 7
+        componentName: FeedbackModal
+        props:
+          '''
 return {
   isOpen: args.fns.isFeedbackModalOpen,
   onClose: args.fns.closeFeedbackModal,
@@ -725,13 +731,43 @@ return {
 '''
       }
     }
-  ],
+  ]
   edges: [
-    { id: "e_component", T: "Attr", S: "component_root", E: "layout_root" },
-    { id: "e0", T: "Attr", S: "layout_root", E: "favicon_link" },
-    { id: "e1", T: "Attr", S: "layout_root", E: "slot_content" },
-    { id: "e60", T: "Attr", S: "layout_root", E: "video_player" },
-    { id: "e61", T: "Attr", S: "layout_root", E: "queue_modal" },
-    { id: "e63", T: "Attr", S: "layout_root", E: "feedback_modal" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "6"
+    }
   ]
 }

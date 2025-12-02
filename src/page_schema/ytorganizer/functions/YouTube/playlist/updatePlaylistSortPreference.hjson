@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "update_playlist_sort_preference_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "updatePlaylistSortPreference",
-        description: "Updates the sort preference and custom order for a user's playlist setting. Supports multi-ownership model - requires ownershipId.",
-        body: '''
+        description: Updates the sort preference and custom order for a user's playlist setting. Supports multi-ownership model - requires ownershipId.
+        body:
+          '''
 // Get the parameters from the context
 const { playlistId, sortBy, customOrder, ownershipId } = args.contextData;
 
@@ -100,8 +100,9 @@ try {
   throw new Error(`Failed to update sort preference: ${error.message}`);
 }
 '''
+        key: updatePlaylistSortPreference
       }
     }
-  ],
+  ]
   edges: []
 }

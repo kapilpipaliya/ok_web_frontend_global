@@ -1,141 +1,18 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "ConfirmDialog"
+        key: ConfirmDialog
       }
-    },
-    {
-      id: "variant_is_open",
-      L: "ComponentVariant",
-      P: {
-        key: "isOpen",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "variant_title",
-      L: "ComponentVariant",
-      P: {
-        key: "title",
-        type: "string",
-        defValue: "Confirm Action"
-      }
-    },
-    {
-      id: "variant_message",
-      L: "ComponentVariant",
-      P: {
-        key: "message",
-        type: "string",
-        defValue: "Are you sure you want to proceed?"
-      }
-    },
-    {
-      id: "variant_confirm_text",
-      L: "ComponentVariant",
-      P: {
-        key: "confirmText",
-        type: "string",
-        defValue: "Confirm"
-      }
-    },
-    {
-      id: "variant_cancel_text",
-      L: "ComponentVariant",
-      P: {
-        key: "cancelText",
-        type: "string",
-        defValue: "Cancel"
-      }
-    },
-    {
-      id: "variant_variant",
-      L: "ComponentVariant",
-      P: {
-        key: "variant",
-        type: "string",
-        defValue: "danger"
-      }
-    },
-    {
-      id: "option_danger",
-      L: "ComponentVariantOption",
-      P: {
-        key: "danger",
-        value: "danger",
-        description: "Red confirmation button for destructive actions"
-      }
-    },
-    {
-      id: "option_primary",
-      L: "ComponentVariantOption",
-      P: {
-        key: "primary",
-        value: "primary",
-        description: "Primary colored confirmation button"
-      }
-    },
-    {
-      id: "option_warning",
-      L: "ComponentVariantOption",
-      P: {
-        key: "warning",
-        value: "warning",
-        description: "Warning colored confirmation button"
-      }
-    },
-    {
-      id: "variant_on_confirm",
-      L: "ComponentVariant",
-      P: {
-        key: "onConfirm",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_on_cancel",
-      L: "ComponentVariant",
-      P: {
-        key: "onCancel",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_loading",
-      L: "ComponentVariant",
-      P: {
-        key: "loading",
-        type: "boolean",
-        defValue: false
-      }
-    },
-    {
-      id: "dialog_overlay",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const isOpen = args.contextData.props?.isOpen || false;
-const onCancel = args.contextData.props?.onCancel;
-
-return {
-  as: "div",
-  hide: !isOpen,
-  onClick: (e) => {
-    if (e.target === e.currentTarget && onCancel) {
-      onCancel();
     }
-  }
-};
-''',
-        css: '''
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   position: fixed;
   top: 0;
@@ -164,23 +41,31 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "dialog_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isOpen = args.contextData.props?.isOpen || false;
+const onCancel = args.contextData.props?.onCancel;
+
 return {
   as: "div",
+  hide: !isOpen,
   onClick: (e) => {
-    e.stopPropagation();
+    if (e.target === e.currentTarget && onCancel) {
+      onCancel();
+    }
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
@@ -224,34 +109,66 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "dialog_header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "header"
+  as: "div",
+  onClick: (e) => {
+    e.stopPropagation();
+  }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "header"
+};
+'''
       }
-    },
+    }
     {
-      id: "dialog_icon",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+const variant = args.contextData.props?.variant || "danger";
+
+const iconConfig = {
+  danger: args.theme.var.color.error,
+  warning: args.theme.var.color.warning,
+  primary: args.theme.var.color.primary
+};
+
+const iconColor = iconConfig[variant] || iconConfig.danger;
+
+return `._id {
+  color: ${iconColor};
+  margin-bottom: ${args.theme.var.spacing.sm};
+  display: block;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const variant = args.contextData.props?.variant || "danger";
 
 const iconConfig = {
@@ -277,41 +194,15 @@ return {
   width: 24,
   height: 24
 };
-''',
-        css: '''
-const variant = args.contextData.props?.variant || "danger";
-
-const iconConfig = {
-  danger: args.theme.var.color.error,
-  warning: args.theme.var.color.warning,
-  primary: args.theme.var.color.primary
-};
-
-const iconColor = iconConfig[variant] || iconConfig.danger;
-
-return `._id {
-  color: ${iconColor};
-  margin-bottom: ${args.theme.var.spacing.sm};
-  display: block;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "dialog_title",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const title = args.contextData.props?.title || "Confirm Action";
-
-return {
-  as: "h2",
-  text: title
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   font-size: ${args.theme.var.fontSize.xl};
   font-weight: 600;
@@ -320,42 +211,46 @@ return `._id {
   line-height: 1.4;
 }`;
 '''
-      }
-    },
-    {
-      id: "dialog_body",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const title = args.contextData.props?.title || "Confirm Action";
+
 return {
-  as: "div"
+  as: "h2",
+  text: title
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   padding: ${args.theme.var.spacing.xl};
   padding-top: ${args.theme.var.spacing.md};
 }`;
 '''
-      }
-    },
-    {
-      id: "dialog_message",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const message = args.contextData.props?.message || "Are you sure you want to proceed?";
-
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: message
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   color: ${args.theme.var.color.text};
   font-size: ${args.theme.var.fontSize.md};
@@ -364,20 +259,25 @@ return `._id {
   white-space: pre-line;
 }`;
 '''
-      }
-    },
-    {
-      id: "dialog_footer",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const message = args.contextData.props?.message || "Are you sure you want to proceed?";
+
 return {
-  as: "footer"
+  as: "p",
+  text: message
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: flex;
   gap: ${args.theme.var.spacing.md};
@@ -392,32 +292,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "cancel_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const cancelText = args.contextData.props?.cancelText || "Cancel";
-const onCancel = args.contextData.props?.onCancel;
-const loading = args.contextData.props?.loading || false;
-
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  type: "button",
-  text: cancelText,
-  disabled: loading,
-  onClick: () => {
-    if (onCancel && !loading) {
-      onCancel();
-    }
-  }
+  as: "footer"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   min-height: ${args.theme.var.touch.button};
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
@@ -455,32 +345,34 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "confirm_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const confirmText = args.contextData.props?.confirmText || "Confirm";
-const onConfirm = args.contextData.props?.onConfirm;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cancelText = args.contextData.props?.cancelText || "Cancel";
+const onCancel = args.contextData.props?.onCancel;
 const loading = args.contextData.props?.loading || false;
 
 return {
   as: "button",
   type: "button",
-  text: loading ? "Please wait..." : confirmText,
+  text: cancelText,
   disabled: loading,
-  onClick: async () => {
-    if (onConfirm && !loading) {
-      await onConfirm();
+  onClick: () => {
+    if (onCancel && !loading) {
+      onCancel();
     }
   }
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
 const variant = args.contextData.props?.variant || "danger";
 
 const variantStyles = {
@@ -543,31 +435,267 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const confirmText = args.contextData.props?.confirmText || "Confirm";
+const onConfirm = args.contextData.props?.onConfirm;
+const loading = args.contextData.props?.loading || false;
+
+return {
+  as: "button",
+  type: "button",
+  text: loading ? "Please wait..." : confirmText,
+  disabled: loading,
+  onClick: async () => {
+    if (onConfirm && !loading) {
+      await onConfirm();
+    }
+  }
+};
+'''
       }
     }
-  ],
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onCancel
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: isOpen
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Are you sure you want to proceed?
+        key: message
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Confirm Action
+        key: title
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: danger
+        key: variant
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariantOption
+      P: {
+        description: Primary colored confirmation button
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariantOption
+      P: {
+        description: Warning colored confirmation button
+        value: warning
+        key: warning
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariantOption
+      P: {
+        description: Red confirmation button for destructive actions
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onConfirm
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Cancel
+        key: cancelText
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Confirm
+        key: confirmText
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: loading
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_is_open" },
-    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_title" },
-    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_message" },
-    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_confirm_text" },
-    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_cancel_text" },
-    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_variant" },
-    { id: "e7", T: "ComponentVariantOption", S: "variant_variant", E: "option_danger" },
-    { id: "e8", T: "ComponentVariantOption", S: "variant_variant", E: "option_primary" },
-    { id: "e9", T: "ComponentVariantOption", S: "variant_variant", E: "option_warning" },
-    { id: "e10", T: "ComponentVariant", S: "component_root", E: "variant_on_confirm" },
-    { id: "e11", T: "ComponentVariant", S: "component_root", E: "variant_on_cancel" },
-    { id: "e12", T: "ComponentVariant", S: "component_root", E: "variant_loading" },
-    { id: "e13", T: "Attr", S: "component_root", E: "dialog_overlay" },
-    { id: "e14", T: "Attr", S: "dialog_overlay", E: "dialog_container" },
-    { id: "e15", T: "Attr", S: "dialog_container", E: "dialog_header" },
-    { id: "e16", T: "Attr", S: "dialog_header", E: "dialog_icon" },
-    { id: "e17", T: "Attr", S: "dialog_header", E: "dialog_title" },
-    { id: "e18", T: "Attr", S: "dialog_container", E: "dialog_body" },
-    { id: "e19", T: "Attr", S: "dialog_body", E: "dialog_message" },
-    { id: "e20", T: "Attr", S: "dialog_container", E: "dialog_footer" },
-    { id: "e21", T: "Attr", S: "dialog_footer", E: "cancel_button" },
-    { id: "e22", T: "Attr", S: "dialog_footer", E: "confirm_button" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "20"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "21"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "22"
+    }
+    {
+      id: e19
+      T: ComponentVariant
+      S: "1"
+      E: "23"
+    }
+    {
+      id: e20
+      T: ComponentVariantOption
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e21
+      T: ComponentVariantOption
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e22
+      T: ComponentVariantOption
+      S: "16"
+      E: "19"
+    }
   ]
 }

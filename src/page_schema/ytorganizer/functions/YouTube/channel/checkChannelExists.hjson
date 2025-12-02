@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "check_channel_exists_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "checkChannelExists",
-        description: "Check if a channel already exists for a specific ownership",
-        body: '''
+        description: Check if a channel already exists for a specific ownership
+        body:
+          '''
 try {
   const { youtubeId, ownershipId } = args.contextData;
 
@@ -123,8 +123,9 @@ try {
   };
 }
 '''
+        key: checkChannelExists
       }
     }
-  ],
+  ]
   edges: []
 }

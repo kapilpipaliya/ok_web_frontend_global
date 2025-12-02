@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "getAllFeedbacks",
-        description: "Fetches all user feedback submissions with user information",
-        body: '''
+        description: Fetches all user feedback submissions with user information
+        body:
+          '''
 // Extract parameters with defaults
 const {
   searchQuery = '',
@@ -108,8 +108,9 @@ return {
   }
 };
 '''
+        key: getAllFeedbacks
       }
     }
-  ],
+  ]
   edges: []
 }

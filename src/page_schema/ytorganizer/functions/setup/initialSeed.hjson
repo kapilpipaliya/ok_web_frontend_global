@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "initial_seed_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "initialSeed",
-        description: "Seeds initial data for general setting, email setting, and Google OAuth setting using unified Setting format",
-        body: '''
+        description: Seeds initial data for general setting, email setting, and Google OAuth setting using unified Setting format
+        body:
+          '''
 // This function initializes the database with default settings using the unified Setting vertex format
 // It should only be run once during initial setup
 
@@ -153,8 +153,9 @@ try {
   };
 }
 '''
+        key: initialSeed
       }
     }
-  ],
+  ]
   edges: []
 }

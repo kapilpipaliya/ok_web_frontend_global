@@ -1,64 +1,19 @@
 {
   vertexes: [
     {
-      id: "component_root",
-      L: "Component",
+      id: "1"
+      L: Component
       P: {
-        key: "VirtualList"
+        key: VirtualList
       }
-    },
+    }
     {
-      id: "variant_items",
-      L: "ComponentVariant",
+      id: "2"
+      L: Attr
       P: {
-        key: "items",
-        type: "array",
-        defValue: []
-      }
-    },
-    {
-      id: "variant_itemHeight",
-      L: "ComponentVariant",
-      P: {
-        key: "itemHeight",
-        type: "number",
-        defValue: 90
-      }
-    },
-    {
-      id: "variant_overscan",
-      L: "ComponentVariant",
-      P: {
-        key: "overscan",
-        type: "number",
-        defValue: 5
-      }
-    },
-    {
-      id: "variant_onScroll",
-      L: "ComponentVariant",
-      P: {
-        key: "onScroll",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
-      id: "variant_containerClass",
-      L: "ComponentVariant",
-      P: {
-        key: "containerClass",
-        type: "string",
-        defValue: ""
-      }
-    },
-    {
-      id: "attr_root",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        fns: '''
+        displayOrder: 1
+        fns:
+          '''
 // Get props from context reactively
 const getItems = () => args.contextData.props?.items || [];
 const getItemHeight = () => args.contextData.props?.itemHeight || 90;
@@ -138,8 +93,10 @@ return {
   handleScroll,
   getItems
 };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 const containerClass = args.contextData.props?.class || "";
 
 return {
@@ -150,50 +107,66 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "attr_content",
-      L: "Attr",
+      id: "3"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   position: relative;
   width: 100%;
   height: ${args.fns.getTotalSize()}px;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
-    },
+    }
     {
-      id: "attr_items_loop",
-      L: "Attr",
+      id: "4"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "virtualItem",
-        loop: true,
-        props: '''
+        contextName: virtualItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
   data: args.fns.getVirtualItems()
 };
 '''
       }
-    },
+    }
     {
-      id: "attr_item_wrapper",
-      L: "Attr",
+      id: "5"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        contextName: "item",
-        props: '''
+        contextName: item
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+
+return `._id {
+  position: absolute;
+  top: ${virtualItem.start}px;
+  left: 0;
+  width: 100%;
+  height: ${virtualItem.size}px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const virtualItem = args.contextData.virtualItem;
 const item = args.fns.getItems()[virtualItem.index];
 
@@ -205,40 +178,123 @@ return {
     index: virtualItem.index
   }
 };
-''',
-        css: '''
-const virtualItem = args.contextData.virtualItem;
-
-return `._id {
-  position: absolute;
-  top: ${virtualItem.start}px;
-  left: 0;
-  width: 100%;
-  height: ${virtualItem.size}px;
-}`;
 '''
       }
-    },
+    }
     {
-      id: "attr_slot",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Slot",
-        slot: "children"
+        displayOrder: 1
+        componentName: Slot
+        slot: children
       }
     }
-  ],
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 5
+        key: overscan
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onScroll
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: items
+        defValue: []
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 90
+        key: itemHeight
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: containerClass
+      }
+    }
+  ]
   edges: [
-    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_items" },
-    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_itemHeight" },
-    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_overscan" },
-    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_onScroll" },
-    { id: "e5", T: "ComponentVariant", S: "component_root", E: "variant_containerClass" },
-    { id: "e6", T: "Attr", S: "component_root", E: "attr_root" },
-    { id: "e7", T: "Attr", S: "attr_root", E: "attr_content" },
-    { id: "e8", T: "Attr", S: "attr_content", E: "attr_items_loop" },
-    { id: "e9", T: "Attr", S: "attr_items_loop", E: "attr_item_wrapper" },
-    { id: "e10", T: "Attr", S: "attr_item_wrapper", E: "attr_slot" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
   ]
 }

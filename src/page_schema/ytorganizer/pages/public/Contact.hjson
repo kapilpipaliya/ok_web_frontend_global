@@ -1,32 +1,35 @@
 {
   vertexes: [
     {
-      id: "yto_contact_page",
-      L: "Page",
+      id: "1"
+      L: Page
       P: {
-        key: "Contact",
-        url: "/contact",
-        title: "Contact Us - YSaar",
-        description: "Get in touch with YSaar support team",
-        fns: '''
+        description: Get in touch with YSaar support team
+        fns:
+          '''
 return {
   enabled: true
 };
-''',
-        props: '''
+'''
+        title: Contact Us - YSaar
+        key: Contact
+        url: /contact
+        props:
+          '''
 return {
   isNoPermissionCheck: true
 };
 '''
       }
-    },
+    }
     {
-      id: "favicon_link",
-      L: "Attr",
+      id: "2"
+      L: Attr
       P: {
-        displayOrder: 0.5,
-        componentName: "Html",
-        props: '''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
 return {
   as: "link",
   rel: "icon",
@@ -34,28 +37,13 @@ return {
 };
 '''
       }
-    },
+    }
     {
-      id: "page_layout",
-      L: "PageLayout",
+      id: "3"
+      L: Attr
       P: {
-        componentName: "PublicLayout",
-        displayOrder: 1
-      }
-    },
-    // Main Content
-    {
-      id: "contact_main",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "main"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   flex: 1;
   max-width: 700px;
@@ -70,21 +58,22 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "contact_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h1",
-  text: "Contact Us"
+  as: "main"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 2.5rem;
   font-weight: 700;
@@ -99,21 +88,23 @@ return `._id {
   }
 }`;
 '''
-      }
-    },
-    {
-      id: "contact_subtitle",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "p",
-  text: "Have a question or need help? Send us a message and we'll get back to you as soon as possible."
+  as: "h1",
+  text: "Contact Us"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.1rem;
   line-height: 1.6;
@@ -122,40 +113,40 @@ return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "contact_owner_info",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "p",
-  text: "YSaar (KAPIL MULJIBHAI PIPALIYA)"
+  text: "Have a question or need help? Send us a message and we'll get back to you as soon as possible."
 };
-''',
-        css: '''
-return `._id {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: ${args.theme.var.color.text};
-  margin-bottom: 3rem;
-  text-align: center;
-  font-weight: 600;
-}`;
 '''
       }
-    },
-    // Contact Form
+    }
     {
-      id: "contact_form",
-      L: "Attr",
+      id: "6"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        fns: '''
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 2.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem;
+  }
+}`;
+'''
+        displayOrder: 3
+        fns:
+          '''
 const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 const [isSubmitted, setIsSubmitted] = args.createSignal(false);
 
@@ -200,63 +191,43 @@ async function handleSubmit(e) {
 }
 
 return { handleSubmit, isSubmitting, isSubmitted };
-''',
-        props: '''
+'''
+        componentName: Html
+        props:
+          '''
 return {
   as: "form",
   onSubmit: args.fns.handleSubmit
 };
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 2.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 1.5rem;
-  }
-}`;
 '''
       }
-    },
-    // Name Field
+    }
     {
-      id: "name_field_group",
-      L: "Attr",
+      id: "7"
+      L: Attr
       P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-bottom: 1.5rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "name_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "label",
-  for: "name",
-  text: "Name"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: block;
   font-weight: 600;
@@ -265,15 +236,49 @@ return `._id {
   font-size: 0.95rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  for: "name",
+  text: "Name"
+};
+'''
       }
-    },
+    }
     {
-      id: "name_input",
-      L: "Attr",
+      id: "9"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all 0.2s ease;
+}
+
+._id:focus {
+  outline: none;
+  border-color: ${args.theme.var.color.primary};
+  box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+}
+
+._id::placeholder {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "text",
@@ -282,8 +287,61 @@ return {
   placeholder: "Your full name",
   required: true
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  for: "email",
+  text: "Email"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -305,58 +363,10 @@ return `._id {
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    // Email Field
-    {
-      id: "email_field_group",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "email_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "label",
-  for: "email",
-  text: "Email"
-};
-''',
-        css: '''
-return `._id {
-  display: block;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "email_input",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "input",
   type: "email",
@@ -365,64 +375,35 @@ return {
   placeholder: "your.email@example.com",
   required: true
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  transition: all 0.2s ease;
-}
-
-._id:focus {
-  outline: none;
-  border-color: ${args.theme.var.color.primary};
-  box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
-}
-
-._id::placeholder {
-  color: ${args.theme.var.color.muted};
-}`;
 '''
       }
-    },
-    // Message Field
+    }
     {
-      id: "message_field_group",
-      L: "Attr",
+      id: "13"
+      L: Attr
       P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
+        css:
+          '''
 return `._id {
   margin-bottom: 2rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "message_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
 return {
-  as: "label",
-  for: "message",
-  text: "Message"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   display: block;
   font-weight: 600;
@@ -431,25 +412,24 @@ return `._id {
   font-size: 0.95rem;
 }`;
 '''
-      }
-    },
-    {
-      id: "message_textarea",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 return {
-  as: "textarea",
-  id: "message",
-  name: "message",
-  placeholder: "Tell us how we can help you...",
-  rows: 6,
-  required: true
+  as: "label",
+  for: "message",
+  text: "Message"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -474,24 +454,27 @@ return `._id {
   color: ${args.theme.var.color.muted};
 }`;
 '''
-      }
-    },
-    // Submit Button
-    {
-      id: "submit_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
-  as: "button",
-  type: "submit",
-  disabled: args.fns.isSubmitting(),
-  text: args.fns.isSubmitting() ? "Sending..." : "Send Message"
+  as: "textarea",
+  id: "message",
+  name: "message",
+  placeholder: "Tell us how we can help you...",
+  rows: 6,
+  required: true
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   width: 100%;
   padding: 1rem 2rem;
@@ -520,21 +503,51 @@ return `._id {
   cursor: not-allowed;
 }`;
 '''
-      }
-    },
-    // Alternative Contact Info
-    {
-      id: "alternative_contact",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "div"
+  as: "button",
+  type: "submit",
+  disabled: args.fns.isSubmitting(),
+  text: args.fns.isSubmitting() ? "Sending..." : "Send Message"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 3rem;
+  text-align: center;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "YSaar (KAPIL MULJIBHAI PIPALIYA)"
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   margin-top: 3rem;
   padding-top: 2rem;
@@ -542,21 +555,22 @@ return `._id {
   text-align: center;
 }`;
 '''
-      }
-    },
-    {
-      id: "alternative_contact_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
 return {
-  as: "h2",
-  text: "Other Ways to Reach Us"
+  as: "div"
 };
-''',
-        css: '''
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
 return `._id {
   font-size: 1.5rem;
   font-weight: 600;
@@ -564,15 +578,25 @@ return `._id {
   margin-bottom: 1.5rem;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Other Ways to Reach Us"
+};
+'''
       }
-    },
+    }
     {
-      id: "email_contact_info",
-      L: "Attr",
+      id: "20"
+      L: Attr
       P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
 return {
   as: "div",
   innerHTML: `
@@ -588,37 +612,135 @@ return {
 '''
       }
     }
-  ],
+    {
+      id: "21"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: PublicLayout
+      }
+    }
+  ]
   edges: [
-    // Root structure
-    { id: "e1", T: "Attr", S: "yto_contact_page", E: "favicon_link" },
-    { id: "e2", T: "PageLayout", S: "yto_contact_page", E: "page_layout" },
-    { id: "e3", T: "Attr", S: "yto_contact_page", E: "contact_main" },
-
-    // Main content
-    { id: "e4", T: "Attr", S: "contact_main", E: "contact_title" },
-    { id: "e5", T: "Attr", S: "contact_main", E: "contact_subtitle" },
-    { id: "e6", T: "Attr", S: "contact_main", E: "contact_owner_info" },
-    { id: "e7", T: "Attr", S: "contact_main", E: "contact_form" },
-    { id: "e8", T: "Attr", S: "contact_main", E: "alternative_contact" },
-
-    // Form fields
-    { id: "e9", T: "Attr", S: "contact_form", E: "name_field_group" },
-    { id: "e10", T: "Attr", S: "name_field_group", E: "name_label" },
-    { id: "e11", T: "Attr", S: "name_field_group", E: "name_input" },
-
-    { id: "e12", T: "Attr", S: "contact_form", E: "email_field_group" },
-    { id: "e13", T: "Attr", S: "email_field_group", E: "email_label" },
-    { id: "e14", T: "Attr", S: "email_field_group", E: "email_input" },
-
-    { id: "e15", T: "Attr", S: "contact_form", E: "message_field_group" },
-    { id: "e16", T: "Attr", S: "message_field_group", E: "message_label" },
-    { id: "e17", T: "Attr", S: "message_field_group", E: "message_textarea" },
-
-    { id: "e18", T: "Attr", S: "contact_form", E: "submit_button" },
-
-    // Alternative contact
-    { id: "e19", T: "Attr", S: "alternative_contact", E: "alternative_contact_title" },
-    { id: "e20", T: "Attr", S: "alternative_contact", E: "email_contact_info" }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "18"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "17"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "13"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "16"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e20
+      T: PageLayout
+      S: "1"
+      E: "21"
+    }
   ]
 }

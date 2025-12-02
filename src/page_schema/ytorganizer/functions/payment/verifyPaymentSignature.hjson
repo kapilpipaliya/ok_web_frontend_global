@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "verifyPaymentSignature",
-        description: "Verify Razorpay payment signature and activate subscription",
-        body: '''
+        description: Verify Razorpay payment signature and activate subscription
+        body:
+          '''
 try {
   // Get authenticated user
   const user = await args.getUserFromSession();
@@ -125,8 +125,9 @@ try {
   };
 }
 '''
+        key: verifyPaymentSignature
       }
     }
-  ],
+  ]
   edges: []
 }

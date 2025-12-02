@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "function_root",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "addVideoToQueue",
-        description: "Add a single video to the end of the queue",
-        body: '''
+        description: Add a single video to the end of the queue
+        body:
+          '''
 try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession(args.request);
@@ -138,8 +138,9 @@ try {
   };
 }
 '''
+        key: addVideoToQueue
       }
     }
-  ],
+  ]
   edges: []
 }

@@ -1,12 +1,12 @@
 {
   vertexes: [
     {
-      id: "clear_worker_logs_function",
-      L: "Function",
+      id: "1"
+      L: Function
       P: {
-        key: "clearWorkerLogs",
-        description: "Clears all worker logs from the database",
-        body: '''
+        description: Clears all worker logs from the database
+        body:
+          '''
 // Clear all worker logs
 
 try {
@@ -45,8 +45,9 @@ try {
   };
 }
 '''
+        key: clearWorkerLogs
       }
     }
-  ],
+  ]
   edges: []
 }
