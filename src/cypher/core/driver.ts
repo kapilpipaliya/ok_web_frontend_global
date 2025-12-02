@@ -1,4 +1,5 @@
-import { auth, driver as createDriver, type Driver } from "neo4j-driver";
+import { Neogma } from "neogma";
+import type { Driver } from "neo4j-driver";
 
 import { boltPort } from "./boltConstant";
 import { logger } from "~/lib/logger";
@@ -15,6 +16,7 @@ import { logger } from "~/lib/logger";
 declare global {
   var __neo4jDriverState:
     | {
+        neogmaInstance: Neogma | null;
         driverInstance: Driver | null;
         driverPromise: Promise<Driver> | null;
         driverWasClosed: boolean;
@@ -26,6 +28,7 @@ declare global {
 if (!global.__neo4jDriverState) {
   logger.debug("Initializing Neo4j global driver state");
   global.__neo4jDriverState = {
+    neogmaInstance: null,
     driverInstance: null,
     driverPromise: null,
     driverWasClosed: false,
@@ -34,6 +37,31 @@ if (!global.__neo4jDriverState) {
 
 // Export reference to global state for easy access
 const driverState = global.__neo4jDriverState;
+
+/**
+ * Get the Neogma instance (singleton pattern)
+ *
+ * If the instance doesn't exist yet, it will wait for getDriver() to initialize it.
+ * This provides access to Neogma-specific features like queryRunner, models, etc.
+ *
+ * @returns Promise<Neogma> - Singleton Neogma instance
+ */
+export async function getNeogmaInstance(): Promise<Neogma> {
+  // If instance exists, return it immediately
+  if (driverState.neogmaInstance) {
+    return driverState.neogmaInstance;
+  }
+
+  // Otherwise, wait for driver initialization which will also set neogmaInstance
+  await getDriver();
+
+  // neogmaInstance should now be set
+  if (!driverState.neogmaInstance) {
+    throw new Error("Failed to initialize Neogma instance");
+  }
+
+  return driverState.neogmaInstance;
+}
 
 /**
  * Get the Neo4j driver instance (singleton pattern)
@@ -74,10 +102,12 @@ export async function getDriver(): Promise<Driver> {
       database: `bolt://localhost:${boltPort}`,
     });
 
-    // Create driver with optimized connection pool settings
-    const driver = createDriver(
-      `bolt://localhost:${boltPort}`,
-      auth.basic(username, password),
+    // Create Neogma instance with optimized connection pool settings
+    const neogma = new Neogma({
+        url: `bolt://localhost:${boltPort}`,
+        username,
+        password,
+      },
       {
         disableLosslessIntegers: true,
 
@@ -110,14 +140,14 @@ export async function getDriver(): Promise<Driver> {
         // Maximum time (ms) to retry transient errors (e.g., deadlocks, timeouts)
         // Default: 30000 (30 seconds)
         // Driver automatically retries failed transactions within this window
-      },
-    );
+      });
 
-    logger.info("Neo4j connection pool created successfully");
-    driverState.driverInstance = driver;
+    logger.info("Neo4j connection pool created successfully with Neogma");
+    driverState.neogmaInstance = neogma;
+    driverState.driverInstance = neogma.driver;
     driverState.driverPromise = null; // Clear promise after successful creation
     driverState.driverWasClosed = false; // Reset flag
-    return driver;
+    return driverState.driverInstance;
   })();
 
   return driverState.driverPromise;
@@ -147,6 +177,7 @@ export async function closeDriver() {
     });
 
     await driverState.driverInstance.close();
+    driverState.neogmaInstance = null;
     driverState.driverInstance = null;
     driverState.driverPromise = null; // Clear promise as well
     driverState.driverWasClosed = true; // Mark driver as closed

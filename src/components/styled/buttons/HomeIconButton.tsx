@@ -10,7 +10,7 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 export const HomeIconButton = () => {
   const [graph] = useGraph();
   const navigate = useNavigate();
-  const isAdminSubDomain = () => getMemberVertex(graph).P.subDomain === "admin";
+  const isAdminSubDomain = () => getMemberVertex(graph)?.P.subDomain === "admin";
 
   const context = () => {
     if (isAdminSubDomain()) {
@@ -30,8 +30,8 @@ export const HomeIconButton = () => {
   margin-left: 2px;
 }\`;`,
       ]}
+      href={getHomeUrl(context())}
       icon="ph:house"
-      onClick={() => navigate(getHomeUrl(context()))}
       size={22}
       title="Home"
       tooltipGroup="left-buttons"

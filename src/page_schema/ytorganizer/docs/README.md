@@ -672,8 +672,7 @@ Users can set their preferred language through LanguageSetting vertex:
 │   │   ├── Settings.hjson            # User settings and YouTube connection
 │   ├── legal/
 │   │   ├── Privacy.hjson             # Privacy policy page
-│   │   ├── Terms.hjson               # Terms of Service page
-│   │   └── Onboarding.hjson          # New user onboarding flow
+│   │   └── Terms.hjson               # Terms of Service page
 │   └── admin/
 │       ├── AdminHome.hjson           # Admin: Dashboard with quick links
 │       ├── QuotaMonitor.hjson        # Admin: Shared quota monitoring

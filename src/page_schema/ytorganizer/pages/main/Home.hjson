@@ -127,7 +127,7 @@ const fetchDashboardData = async () => {
 
 // Fetch data on mount
 const onMount = async () => {
-  // Fetch dashboard data (will check accounts and onboarding internally)
+  // Fetch dashboard data (will check accounts internally)
   fetchDashboardData();
 };
 

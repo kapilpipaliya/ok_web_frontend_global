@@ -219,7 +219,7 @@ try {
       }
     }
 
-    // STEP 1 & 2: Create ownership-specific playlist instance and direct ownership relationship
+    // STEP 1-3: Create ownership-specific playlist instance with metadata and queue tracking in single query
     // NEW SCHEMA v4.0: Each ownership has its own playlist instances (duplicate resources per ownership)
     // This ensures complete data isolation between different YouTube accounts
     const playlistKey = `playlist_${playlistId}_${ownershipId}`;
@@ -241,7 +241,15 @@ try {
         p.itemCount = $itemCount,
         p.originalPlaylistId = $originalPlaylistId,
         p.publishedAt = datetime($publishedAt),
-        p.updatedAt = datetime()
+        p.updatedAt = datetime(),
+        p.priority = $priority,
+        p.queueStatus = 'queued',
+        p.progress = 0,
+        p.totalVideos = 0,
+        p.processedVideos = 0,
+        p.error = null,
+        p.queuedAt = datetime(),
+        p.lastUpdated = datetime()
       RETURN p
     `;
 
@@ -260,33 +268,12 @@ try {
       // videoCount cannot come from playlists because playlists can contain videos from anywhere, deleted videos, private videos etc.. reasons
       itemCount: playlistData.contentDetails?.itemCount || 0,
       originalPlaylistId: isSpecialPlaylist ? originalPlaylistId : null,
-      publishedAt: playlistData.snippet.publishedAt
-    });
-
-    // STEP 3: Update Playlist with queue tracking properties
-    // NEW ARCHITECTURE: Queue tracking on Playlist, user customization on PlaylistSetting (created on-demand)
-    const updatePlaylistResult = await tx.run(`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
-
-      SET
-        p.priority = $priority,
-        p.queueStatus = 'queued',
-        p.progress = 0,
-        p.totalVideos = 0,
-        p.processedVideos = 0,
-        p.error = null,
-        p.queuedAt = datetime(),
-        p.lastUpdated = datetime()
-
-      RETURN p
-    `, {
-      ownershipId,
-      playlistId,
+      publishedAt: playlistData.snippet.publishedAt,
       priority: playlistPriority
     });
 
     // Extract the Playlist vertex from the result
-    const playlistNode = updatePlaylistResult.records[0].get('p');
+    const playlistNode = playlistResult.records[0].get('p');
     const playlistVertex = args.convertNodeToJson(playlistNode);
 
     // Create Channel->Playlist relationship using channel ID from YouTube API
@@ -308,7 +295,7 @@ try {
     return { playlist: playlistVertex };
   });
 
-  // STEP 3: Add to background processing queue using BullMQ
+  // STEP 4: Add to background processing queue using BullMQ
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
   const playlistQueue = helpers.result.data.createPlaylistQueue(args);
 

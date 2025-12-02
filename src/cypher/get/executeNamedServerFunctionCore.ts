@@ -46,6 +46,122 @@ import {
 import { sendEmail } from "~/lib/playwright/sendEmail";
 import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
 import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
+import {
+  Models,
+  registerModel,
+  hasModel,
+  getRegisteredModels,
+  modelToVertex,
+  modelsToVertices,
+} from "~/lib/models";
+import { serverFunctionUtils } from "~/lib/utils/serverFunctionUtils";
+import { cypherUtils } from "~/lib/utils/cypherUtils";
+import * as crypto from "crypto";
+import * as path from "path";
+import { getNeogmaInstance } from "~/cypher/core/driver";
+// Enhanced server function utilities
+import {
+  errors,
+  isAppError,
+  errorToResponse,
+} from "~/lib/utils/errorClasses";
+import {
+  validate,
+  validateOrThrow,
+  schema,
+  commonSchemas,
+  createSchema,
+  z,
+} from "~/lib/utils/schemaValidation";
+import {
+  createPipeline,
+  type Pipeline,
+  type PipelineContext,
+  type Middleware,
+} from "~/lib/utils/pipeline";
+import {
+  transaction,
+  transactionBatch,
+  transactionWithRetry,
+  createTransactionManager,
+  type TransactionOptions,
+  type TransactionManager,
+} from "~/lib/utils/transactions";
+import {
+  checkPermissions,
+  requirePermissions,
+  hasRole,
+  hasPermission,
+  isAdmin,
+  isOwner,
+  type PermissionRequirement,
+  type PermissionContext,
+  type PermissionResult,
+} from "~/lib/utils/permissions";
+import {
+  responses,
+  formatters,
+  success,
+  error as createError,
+  paginated,
+  type StandardResponse,
+  type PaginatedResponse,
+} from "~/lib/utils/responseTransformers";
+import {
+  cache,
+  cacheGet,
+  cacheSet,
+  cacheDelete,
+  cacheHas,
+  cacheClear,
+  cacheGetOrSet,
+  cacheMemoize,
+  createCacheManager,
+  type CacheOptions,
+  type CacheManager,
+} from "~/lib/utils/cache";
+import {
+  jobs,
+  registerJobHandler,
+  addJob,
+  getJob,
+  getJobStatus,
+  waitForJob,
+  type Job,
+  type JobHandler,
+  type JobOptions,
+  type QueueStats,
+} from "~/lib/utils/jobs";
+import {
+  batch,
+  batchProcess,
+  batchCreateVertices,
+  batchUpdateVertices,
+  batchDeleteVertices,
+  parallelMap,
+  chunk,
+  processInChunks,
+  retry,
+  type BatchResult,
+  type BatchOptions,
+} from "~/lib/utils/batch";
+import {audit} from "~/lib/utils/audit";
+import {circuitBreaker} from "~/lib/utils/circuitBreaker";
+import {dataExport, dataImport} from "~/lib/utils/exportImport";
+import {files} from "~/lib/utils/files";
+import {
+  clearOldLogs,
+  logger,
+  Logger,
+  PerformanceTimer,
+  queryLogs,
+} from "~/lib/utils/logger";
+import {
+  rateLimit, RateLimiter,
+} from "~/lib/utils/rateLimiter";
+import {schedule} from "~/lib/utils/scheduler";
+import {test} from "~/lib/utils/testing";
+import {webhooks} from "~/lib/utils/webhooks";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -250,6 +366,94 @@ export async function executeNamedServerFunctionCore(
       createDatabaseBackup,
       restoreFromBackup,
       getDriver,
+      // Neogma OGM Models registry
+      Models,
+      registerModel,
+      hasModel,
+      getRegisteredModels,
+      getNeogmaInstance,
+      modelToVertex,
+      modelsToVertices,
+      // Server function utilities
+      utils: serverFunctionUtils,
+      cypher: cypherUtils,
+      // Node.js built-ins
+      crypto,
+      path,
+      // Enhanced utilities
+      // Error handling
+      errors,
+      isAppError,
+      errorToResponse,
+      // Validation
+      validate,
+      validateOrThrow,
+      schema,
+      commonSchemas,
+      createSchema,
+      z,
+      // Pipeline/middleware
+      createPipeline,
+      // Transactions
+      transaction,
+      transactionBatch,
+      transactionWithRetry,
+      createTransactionManager,
+      // Permissions
+      checkPermissions,
+      requirePermissions,
+      hasRole,
+      hasPermission,
+      isAdmin,
+      isOwner,
+      // Response transformers
+      responses,
+      formatters,
+      success,
+      createError,
+      paginated,
+      // Cache
+      cache,
+      cacheGet,
+      cacheSet,
+      cacheDelete,
+      cacheHas,
+      cacheClear,
+      cacheGetOrSet,
+      cacheMemoize,
+      createCacheManager,
+      // Jobs
+      jobs,
+      registerJobHandler,
+      addJob,
+      getJob,
+      getJobStatus,
+      waitForJob,
+      // Batch operations
+      batch,
+      batchProcess,
+      batchCreateVertices,
+      batchUpdateVertices,
+      batchDeleteVertices,
+      parallelMap,
+      chunk,
+      processInChunks,
+      retry,
+      audit,
+      circuitBreaker,
+      dataImport,
+      dataExport,
+      files,
+      PerformanceTimer,
+      Logger,
+      logger,
+      queryLogs,
+      clearOldLogs,
+      RateLimiter,
+      rateLimit,
+      schedule,
+      test,
+      webhooks
     };
 
     // Execute the function

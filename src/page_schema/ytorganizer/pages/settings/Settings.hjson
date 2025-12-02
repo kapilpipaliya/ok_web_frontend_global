@@ -498,18 +498,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "SimpleCard",
-        css: '''
-return `._id {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    display: block;
-  }
-}`;
-'''
+        componentName: "SimpleCard"
       }
     },
     {

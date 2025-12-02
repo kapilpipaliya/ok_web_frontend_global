@@ -23,7 +23,7 @@ export const RedirectUrlIconButton = () => {
 }\`;`,
         ]}
         icon="ph:app-window"
-        onClick={() => navigate(redirectUrl()!)}
+        href={redirectUrl()!}
         size={22}
         title={`Go to ${redirectUrl()}`}
         tooltipGroup="left-buttons"
