@@ -461,17 +461,18 @@ return {
       id: "12"
       L: ComponentVariant
       P: {
-        type: function
-        key: onCancel
+        type: boolean
+        defValue: false
+        key: isOpen
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: isOpen
+        type: string
+        defValue: Confirm Action
+        key: title
       }
     }
     {
@@ -488,56 +489,12 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: Confirm Action
-        key: title
+        defValue: Confirm
+        key: confirmText
       }
     }
     {
       id: "16"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: danger
-        key: variant
-      }
-    }
-    {
-      id: "17"
-      L: ComponentVariantOption
-      P: {
-        description: Primary colored confirmation button
-        value: primary
-        key: primary
-      }
-    }
-    {
-      id: "18"
-      L: ComponentVariantOption
-      P: {
-        description: Warning colored confirmation button
-        value: warning
-        key: warning
-      }
-    }
-    {
-      id: "19"
-      L: ComponentVariantOption
-      P: {
-        description: Red confirmation button for destructive actions
-        value: danger
-        key: danger
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onConfirm
-      }
-    }
-    {
-      id: "21"
       L: ComponentVariant
       P: {
         type: string
@@ -546,12 +503,55 @@ return {
       }
     }
     {
-      id: "22"
+      id: "17"
       L: ComponentVariant
       P: {
         type: string
-        defValue: Confirm
-        key: confirmText
+        defValue: danger
+        key: variant
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariantOption
+      P: {
+        description: Red confirmation button for destructive actions
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariantOption
+      P: {
+        description: Warning colored confirmation button
+        value: warning
+        key: warning
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariantOption
+      P: {
+        description: Primary colored confirmation button
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onCancel
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onConfirm
       }
     }
     {
@@ -573,129 +573,129 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "3"
-      E: "9"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "3"
-      E: "7"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "9"
-      E: "11"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "9"
-      E: "10"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "4"
-      E: "6"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "4"
-      E: "5"
-    }
-    {
-      id: e11
       T: ComponentVariant
       S: "1"
       E: "12"
     }
     {
-      id: e12
+      id: e3
       T: ComponentVariant
       S: "1"
       E: "13"
     }
     {
-      id: e13
+      id: e4
       T: ComponentVariant
       S: "1"
       E: "14"
     }
     {
-      id: e14
+      id: e5
       T: ComponentVariant
       S: "1"
       E: "15"
     }
     {
-      id: e15
+      id: e6
       T: ComponentVariant
       S: "1"
       E: "16"
     }
     {
-      id: e16
+      id: e7
       T: ComponentVariant
       S: "1"
-      E: "20"
+      E: "17"
     }
     {
-      id: e17
+      id: e8
       T: ComponentVariant
       S: "1"
       E: "21"
     }
     {
-      id: e18
+      id: e9
       T: ComponentVariant
       S: "1"
       E: "22"
     }
     {
-      id: e19
+      id: e10
       T: ComponentVariant
       S: "1"
       E: "23"
     }
     {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
       id: e20
       T: ComponentVariantOption
-      S: "16"
-      E: "17"
+      S: "17"
+      E: "18"
     }
     {
       id: e21
       T: ComponentVariantOption
-      S: "16"
-      E: "18"
+      S: "17"
+      E: "19"
     }
     {
       id: e22
       T: ComponentVariantOption
-      S: "16"
-      E: "19"
+      S: "17"
+      E: "20"
     }
   ]
 }

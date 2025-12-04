@@ -149,21 +149,30 @@ return {
       L: ComponentVariant
       P: {
         type: string
+        defValue: Menu Item
+        key: text
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: icon
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
         defValue: default
         key: type
       }
     }
     {
-      id: "6"
-      L: ComponentVariantOption
-      P: {
-        description: Danger menu item (red)
-        value: danger
-        key: danger
-      }
-    }
-    {
-      id: "7"
+      id: "8"
       L: ComponentVariantOption
       P: {
         description: Default menu item
@@ -172,21 +181,12 @@ return {
       }
     }
     {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: Menu Item
-        key: text
-      }
-    }
-    {
       id: "9"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        defValue: ""
-        key: icon
+        description: Danger menu item (red)
+        value: danger
+        key: danger
       }
     }
   ]
@@ -199,45 +199,45 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "4"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e4
       T: ComponentVariant
       S: "1"
       E: "5"
     }
     {
-      id: e5
+      id: e3
       T: ComponentVariant
       S: "1"
-      E: "8"
+      E: "6"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "3"
     }
     {
       id: e6
-      T: ComponentVariant
-      S: "1"
-      E: "9"
+      T: Attr
+      S: "2"
+      E: "4"
     }
     {
       id: e7
       T: ComponentVariantOption
-      S: "5"
-      E: "6"
+      S: "7"
+      E: "8"
     }
     {
       id: e8
       T: ComponentVariantOption
-      S: "5"
-      E: "7"
+      S: "7"
+      E: "9"
     }
   ]
 }

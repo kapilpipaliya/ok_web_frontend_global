@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { parse } from "tldts";
 
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
-import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmailOrUuid";
+import { findUserVertexSimple } from "~/cypher/mutate/user/findUserByEmailOrUuid";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { API } from "~/lib/api/endpoints";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
@@ -35,7 +35,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     const user = await getUserFromSession(request);
-    const existingUser = await findUserByEmailSimple(dbSession, user?.P?.email);
+    const existingUser = await findUserVertexSimple(dbSession, user?.P?.uuid, user?.P?.email || user?.P?.username);
 
     const validatedUser = validateUser(existingUser);
 

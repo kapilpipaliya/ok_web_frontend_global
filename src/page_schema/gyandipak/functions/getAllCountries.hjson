@@ -1,0 +1,30 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Get all unique countries from contacts
+        body:
+          '''const query = `
+  MATCH (c:Contact)
+  WHERE c.country IS NOT NULL AND c.country <> ''
+  RETURN DISTINCT c.country as country
+  ORDER BY c.country ASC
+`;
+
+const result = await args.session.run(query);
+
+const countries = result.records.map(record => record.get('country'));
+
+return {
+  success: true,
+  data: { countries }
+};
+'''
+        key: getAllCountries
+      }
+    }
+  ]
+  edges: []
+}

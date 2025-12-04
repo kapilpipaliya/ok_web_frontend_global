@@ -1,0 +1,110 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Assign selected contacts to a user
+        body:
+          '''const { username, contactIds } = args.contextData;
+
+if (!username || !username.trim()) {
+  throw new Error("Username is required");
+}
+
+if (!contactIds || !Array.isArray(contactIds) || contactIds.length === 0) {
+  throw new Error("At least one contact must be selected");
+}
+
+// Validate username format (same as signin)
+if (username !== username) {
+  // This check is placeholder, actual validation below
+}
+
+if (!(username.length === 3 || username.length === 6)) {
+  throw new Error("Username should be 3 or 6 characters");
+}
+
+function isNumberOnly(str) {
+  return /^[0-9]+$/.test(str);
+}
+
+if (!isNumberOnly(username)) {
+  throw new Error("Username should be number only");
+}
+
+const result = await args.session.executeWrite(async (tx) => {
+  // Find or create user
+  let user;
+  const userResult = await tx.run(
+    `MATCH (u:User {username: $username})
+     RETURN u`,
+    { username: username.trim() }
+  );
+
+  if (userResult.records.length === 0) {
+    // Create new user
+    const createUserResult = await tx.run(
+      `CREATE (u:User {
+        username: $username,
+        uuid: $uuid,
+        createdAt: datetime()
+      })
+      RETURN u`,
+      {
+        username: username.trim(),
+        uuid: username.trim()
+      }
+    );
+    const node = createUserResult.records[0].get('u');
+    user = args.convertNodeToJson(node);
+  } else {
+    const node = userResult.records[0].get('u');
+    user = args.convertNodeToJson(node);
+  }
+
+  // Get contacts by IDs
+  const contactsResult = await tx.run(
+    `MATCH (c:Contact)
+     WHERE elementId(c) IN $contactIds
+     RETURN c`,
+    { contactIds: contactIds }
+  );
+
+  if (contactsResult.records.length === 0) {
+    throw new Error("No valid contacts found");
+  }
+
+  // Remove existing UserContact relationships and create new ones
+  await tx.run(
+    `MATCH (c:Contact)
+     WHERE elementId(c) IN $contactIds
+     OPTIONAL MATCH (oldUser:User)-[r:UserContact]->(c)
+     DELETE r
+     WITH c
+     MATCH (u:User {username: $username})
+     MERGE (u)-[:UserContact]->(c)`,
+    {
+      username: username.trim(),
+      contactIds: contactIds
+    }
+  );
+
+  return {
+    user,
+    assignedCount: contactsResult.records.length
+  };
+});
+
+return {
+  success: true,
+  data: result,
+  message: `Successfully assigned ${result.assignedCount} contact(s) to user ${username}`
+};
+'''
+        key: assignContactsToUser
+      }
+    }
+  ]
+  edges: []
+}

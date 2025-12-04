@@ -782,21 +782,13 @@ return {
       id: "25"
       L: ComponentVariant
       P: {
-        type: function
-        key: onSuccess
-      }
-    }
-    {
-      id: "26"
-      L: ComponentVariant
-      P: {
         type: string
         defValue: ""
         key: videoUrl
       }
     }
     {
-      id: "27"
+      id: "26"
       L: ComponentVariant
       P: {
         type: function
@@ -804,11 +796,19 @@ return {
       }
     }
     {
-      id: "28"
+      id: "27"
       L: ComponentVariant
       P: {
         type: object
         key: playlist
+      }
+    }
+    {
+      id: "28"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSuccess
       }
     }
   ]
@@ -821,105 +821,105 @@ return {
     }
     {
       id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "24"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "25"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "26"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "27"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "28"
+    }
+    {
+      id: e7
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e3
-      T: Attr
-      S: "3"
-      E: "21"
-    }
-    {
-      id: e4
+      id: e8
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e5
+      id: e9
       T: Attr
       S: "3"
       E: "8"
     }
     {
-      id: e6
+      id: e10
       T: Attr
-      S: "21"
-      E: "22"
+      S: "3"
+      E: "21"
     }
     {
-      id: e7
-      T: Attr
-      S: "21"
-      E: "23"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "4"
-      E: "6"
-    }
-    {
-      id: e9
+      id: e11
       T: Attr
       S: "4"
       E: "5"
     }
     {
-      id: e10
-      T: Attr
-      S: "8"
-      E: "18"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "8"
-      E: "17"
-    }
-    {
       id: e12
       T: Attr
-      S: "8"
-      E: "9"
+      S: "4"
+      E: "6"
     }
     {
       id: e13
-      T: Attr
-      S: "8"
-      E: "16"
-    }
-    {
-      id: e14
       T: Attr
       S: "6"
       E: "7"
     }
     {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
       id: e15
       T: Attr
-      S: "18"
-      E: "19"
+      S: "8"
+      E: "16"
     }
     {
       id: e16
       T: Attr
-      S: "18"
-      E: "20"
+      S: "8"
+      E: "17"
     }
     {
       id: e17
       T: Attr
-      S: "9"
-      E: "10"
+      S: "8"
+      E: "18"
     }
     {
       id: e18
       T: Attr
       S: "9"
-      E: "14"
+      E: "10"
     }
     {
       id: e19
@@ -930,50 +930,50 @@ return {
     {
       id: e20
       T: Attr
-      S: "14"
-      E: "15"
+      S: "9"
+      E: "14"
     }
     {
       id: e21
       T: Attr
       S: "11"
-      E: "13"
+      E: "12"
     }
     {
       id: e22
       T: Attr
       S: "11"
-      E: "12"
+      E: "13"
     }
     {
       id: e23
-      T: ComponentVariant
-      S: "1"
-      E: "24"
+      T: Attr
+      S: "14"
+      E: "15"
     }
     {
       id: e24
-      T: ComponentVariant
-      S: "1"
-      E: "25"
+      T: Attr
+      S: "18"
+      E: "19"
     }
     {
       id: e25
-      T: ComponentVariant
-      S: "1"
-      E: "26"
+      T: Attr
+      S: "18"
+      E: "20"
     }
     {
       id: e26
-      T: ComponentVariant
-      S: "1"
-      E: "27"
+      T: Attr
+      S: "21"
+      E: "22"
     }
     {
       id: e27
-      T: ComponentVariant
-      S: "1"
-      E: "28"
+      T: Attr
+      S: "21"
+      E: "23"
     }
   ]
 }

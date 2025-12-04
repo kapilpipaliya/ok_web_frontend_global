@@ -1,0 +1,29 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Get all unique usernames for filtering
+        body:
+          '''const query = `
+  MATCH (u:User)-[:UserContact]->(c:Contact)
+  RETURN DISTINCT u.username as username
+  ORDER BY u.username ASC
+`;
+
+const result = await args.session.run(query);
+
+const usernames = result.records.map(record => record.get('username'));
+
+return {
+  success: true,
+  data: { usernames }
+};
+'''
+        key: getAllUsernames
+      }
+    }
+  ]
+  edges: []
+}

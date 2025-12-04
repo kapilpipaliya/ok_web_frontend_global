@@ -195,20 +195,12 @@ return {
       L: ComponentVariant
       P: {
         type: number
-        defValue: 5
-        key: overscan
+        defValue: 90
+        key: itemHeight
       }
     }
     {
       id: "8"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onScroll
-      }
-    }
-    {
-      id: "9"
       L: ComponentVariant
       P: {
         type: array
@@ -217,21 +209,29 @@ return {
       }
     }
     {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onScroll
+      }
+    }
+    {
       id: "10"
       L: ComponentVariant
       P: {
-        type: number
-        defValue: 90
-        key: itemHeight
+        type: string
+        defValue: ""
+        key: containerClass
       }
     }
     {
       id: "11"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: containerClass
+        type: number
+        defValue: 5
+        key: overscan
       }
     }
   ]
@@ -244,57 +244,57 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "4"
-      E: "5"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "5"
-      E: "6"
-    }
-    {
-      id: e6
       T: ComponentVariant
       S: "1"
       E: "7"
     }
     {
-      id: e7
+      id: e3
       T: ComponentVariant
       S: "1"
       E: "8"
     }
     {
-      id: e8
+      id: e4
       T: ComponentVariant
       S: "1"
       E: "9"
     }
     {
-      id: e9
+      id: e5
       T: ComponentVariant
       S: "1"
       E: "10"
     }
     {
-      id: e10
+      id: e6
       T: ComponentVariant
       S: "1"
       E: "11"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "6"
     }
   ]
 }

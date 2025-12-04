@@ -1,0 +1,97 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Saves contact form submission to database
+        body:
+          '''
+// This function runs on the server
+// It has access to args object with:
+// - args.contextData: Request parameters (name, email, message)
+// - args.session: Current neo4j Database session
+// - args.graph: Graph interface
+
+const { name, email, message } = args.contextData;
+
+// Validate input
+if (!name || !email || !message) {
+  return {
+    success: false,
+    error: "All fields are required"
+  };
+}
+
+// Validate email format
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(email)) {
+  return {
+    success: false,
+    error: "Invalid email format"
+  };
+}
+
+// Validate message length
+if (message.length < 10) {
+  return {
+    success: false,
+    error: "Message must be at least 10 characters long"
+  };
+}
+
+if (message.length > 5000) {
+  return {
+    success: false,
+    error: "Message is too long (max 5000 characters)"
+  };
+}
+
+try {
+  // Create a contact submission vertex using Cypher query
+  const query = `
+    CREATE (c:ContactSubmission {
+      name: $name,
+      email: $email,
+      message: $message,
+      submittedAt: $submittedAt,
+      status: $status,
+      ipAddress: $ipAddress
+    })
+    RETURN c
+  `;
+
+  const result = await args.session.run(query, {
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
+    message: message.trim(),
+    submittedAt: new Date().toISOString(),
+    status: "new",
+    ipAddress: args.contextData.ipAddress || "unknown"
+  });
+
+  const node = result.records[0].get('c');
+  const contactSubmission = args.convertNodeToJson(node);
+
+  return {
+    success: true,
+    data: {
+      id: contactSubmission.id,
+      submission: contactSubmission,
+      message: "Your message has been sent successfully!"
+    }
+  };
+} catch (error) {
+  console.error("Error saving contact form:", error);
+  return {
+    success: false,
+    error: "Failed to save your message. Please try again or contact us directly at support@ysaar.com"
+  };
+}
+'''
+        key: submitContactForm
+      }
+    }
+  ]
+  edges: []
+}

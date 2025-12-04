@@ -1,0 +1,4334 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true
+};
+'''
+        url: /gyandipak/admin/contacts
+        key: AdminContacts
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 100%;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+// State management
+const [store, setStore] = args.createStore({
+  contacts: [],
+  usernames: [],
+  countries: [],
+  loading: true,
+  error: null,
+  searchQuery: '',
+  selectedContacts: [],
+  sortBy: 'createdAt',
+  sortOrder: 'desc',
+  filterUsername: '',
+  filterCountry: '',
+  currentPage: 1,
+  pageSize: 20,
+  totalCount: 0,
+  totalPages: 0,
+  stats: {
+    totalContacts: 0,
+    totalCalled: 0,
+    totalJoined: 0
+  },
+  showAssignModal: false,
+  assignUsername: '',
+  assignLoading: false,
+  showContactModal: false,
+  isEditMode: false,
+  editingContact: null,
+  showSelectModal: false,
+  selectCount: 10
+});
+
+// Execute server function helper
+const executeFunction = async (functionName, contextData) => {
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName,
+      contextData
+    });
+
+    if (result.error) {
+      args.showErrorToast(result.error);
+      return null;
+    }
+
+    return result.result;
+  } catch (error) {
+    args.showErrorToast(error.message || "An error occurred");
+    return null;
+  }
+};
+
+// Load contacts
+const loadContacts = async (page = store.currentPage) => {
+  setStore('loading', true);
+  setStore('error', null);
+
+  const offset = (page - 1) * store.pageSize;
+
+  const result = await executeFunction("getContactsWithUsers", {
+    searchQuery: store.searchQuery,
+    filterUsername: store.filterUsername,
+    filterCountry: store.filterCountry,
+    sortBy: store.sortBy,
+    sortOrder: store.sortOrder,
+    limit: store.pageSize,
+    offset: offset
+  });
+
+  if (result?.success) {
+    setStore('contacts', result.data.contacts || []);
+    setStore('totalCount', result.data.totalCount || 0);
+    setStore('totalPages', Math.ceil((result.data.totalCount || 0) / store.pageSize));
+    setStore('currentPage', page);
+    setStore('stats', result.data.stats || { totalContacts: 0, totalCalled: 0, totalJoined: 0 });
+  } else {
+    setStore('error', result?.message || "Failed to load contacts");
+  }
+  setStore('loading', false);
+};
+
+// Load usernames for filter
+const loadUsernames = async () => {
+  const result = await executeFunction("getAllUsernames", {});
+  if (result?.success) {
+    setStore('usernames', result.data.usernames || []);
+  }
+};
+
+// Load countries for filter
+const loadCountries = async () => {
+  const result = await executeFunction("getAllCountries", {});
+  if (result?.success) {
+    setStore('countries', result.data.countries || []);
+  }
+};
+
+// Toggle contact selection
+const toggleContactSelection = (contactId) => {
+  const selected = store.selectedContacts;
+  if (selected.includes(contactId)) {
+    setStore('selectedContacts', selected.filter(id => id !== contactId));
+  } else {
+    setStore('selectedContacts', [...selected, contactId]);
+  }
+};
+
+// Select all contacts
+const selectAllContacts = () => {
+  setStore('selectedContacts', store.contacts.map(cd => cd.contact?.id));
+};
+
+// Clear selection
+const clearSelection = () => {
+  setStore('selectedContacts', []);
+};
+
+// Select first X contacts
+const selectFirstX = (count) => {
+  const firstX = store.contacts.slice(0, count).map(cd => cd.contact?.id);
+  setStore('selectedContacts', firstX);
+};
+
+// Show select X modal
+const showSelectXModal = () => {
+  setStore('showSelectModal', true);
+  setStore('selectCount', 10);
+};
+
+// Hide select X modal
+const hideSelectXModal = () => {
+  setStore('showSelectModal', false);
+};
+
+// Search handler - no debounce, triggered by button
+const handleSearch = () => {
+  setStore('currentPage', 1);
+  loadContacts(1);
+};
+
+// Sort handler
+const handleSort = (column) => {
+  if (store.sortBy === column) {
+    setStore('sortOrder', store.sortOrder === 'asc' ? 'desc' : 'asc');
+  } else {
+    setStore('sortBy', column);
+    setStore('sortOrder', 'desc');
+  }
+  loadContacts(1);
+};
+
+// Filter handler
+const handleFilterChange = (username) => {
+  setStore('filterUsername', username);
+  setStore('currentPage', 1);
+  loadContacts(1);
+};
+
+// Country filter handler
+const handleCountryFilterChange = (country) => {
+  setStore('filterCountry', country);
+  setStore('currentPage', 1);
+  loadContacts(1);
+};
+
+// Page size handler
+const handlePageSizeChange = (newPageSize) => {
+  setStore('pageSize', newPageSize);
+  setStore('currentPage', 1);
+  loadContacts(1);
+};
+
+// Pagination handlers
+const goToPage = (page) => {
+  if (page < 1 || page > store.totalPages) return;
+  loadContacts(page);
+};
+
+const goToNextPage = () => {
+  if (store.currentPage < store.totalPages) {
+    loadContacts(store.currentPage + 1);
+  }
+};
+
+const goToPreviousPage = () => {
+  if (store.currentPage > 1) {
+    loadContacts(store.currentPage - 1);
+  }
+};
+
+// Get visible page numbers
+const getVisiblePages = () => {
+  const pages = [];
+  const totalPages = store.totalPages;
+  const currentPage = store.currentPage;
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    pages.push(1);
+
+    if (currentPage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (currentPage < totalPages - 2) {
+      pages.push('...');
+    }
+
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+  }
+
+  return pages;
+};
+
+// Show assign modal
+const showAssignModal = () => {
+  if (store.selectedContacts.length === 0) {
+    args.showWarningToast("Please select at least one contact");
+    return;
+  }
+  setStore('showAssignModal', true);
+  setStore('assignUsername', '');
+};
+
+// Hide assign modal
+const hideAssignModal = () => {
+  setStore('showAssignModal', false);
+  setStore('assignUsername', '');
+};
+
+// Assign contacts to user
+const assignContacts = async () => {
+  if (!store.assignUsername.trim()) {
+    args.showWarningToast("Please enter a username");
+    return;
+  }
+
+  setStore('assignLoading', true);
+
+  const result = await executeFunction("assignContactsToUser", {
+    username: store.assignUsername,
+    contactIds: store.selectedContacts
+  });
+
+  setStore('assignLoading', false);
+
+  if (result?.success) {
+    args.showSuccessToast(result.message || "Contacts assigned successfully");
+    hideAssignModal();
+    clearSelection();
+    await loadContacts(store.currentPage);
+    await loadUsernames();
+  }
+};
+
+// Toggle contact field (called, isUnavailable, notInterested)
+const toggleContactField = async (contactId, field, currentValue) => {
+  const result = await executeFunction("updateContactField", {
+    contactId,
+    field,
+    value: !currentValue
+  });
+
+  if (result?.success) {
+    // Update contact in store
+    const updatedContact = result.data.contact;
+    setStore('contacts', (contacts) =>
+      contacts.map(cd =>
+        cd.contact?.id === contactId
+          ? { ...cd, contact: updatedContact }
+          : cd
+      )
+    );
+  }
+};
+
+// Delete contact
+const handleDeleteContact = async (contactId, contactName) => {
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  if (!rbConfirm) {
+    args.showErrorToast("Confirmation dialog not available");
+    return;
+  }
+
+  const confirmed = await rbConfirm({
+    title: "Delete Contact",
+    message: `Are you sure you want to permanently delete contact "${contactName}"?`,
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
+  const result = await executeFunction("deleteContact", {
+    contactId
+  });
+
+  if (result?.success) {
+    args.showSuccessToast(result.message || "Contact deleted successfully");
+    await loadContacts(store.currentPage);
+  }
+};
+
+// Show add modal
+const showAddModal = () => {
+  setStore('isEditMode', false);
+  setStore('editingContact', {
+    id: null,
+    name: '',
+    phoneNumber: '',
+    country: '',
+    countryCode: '',
+    remark: '',
+    called: false,
+    isUnavailable: false,
+    notInterested: false
+  });
+  setStore('showContactModal', true);
+};
+
+// Show edit modal
+const showEditModal = (contactData) => {
+  setStore('isEditMode', true);
+  setStore('editingContact', {
+    id: contactData.contact?.id,
+    name: contactData.contact?.P?.name || '',
+    phoneNumber: contactData.contact?.P?.phoneNumber || '',
+    country: contactData.contact?.P?.country || '',
+    countryCode: contactData.contact?.P?.countryCode || '',
+    remark: contactData.contact?.P?.remark || '',
+    called: contactData.contact?.P?.called || false,
+    isUnavailable: contactData.contact?.P?.isUnavailable || false,
+    notInterested: contactData.contact?.P?.notInterested || false
+  });
+  setStore('showContactModal', true);
+};
+
+// Hide contact modal
+const hideContactModal = () => {
+  setStore('showContactModal', false);
+  setStore('editingContact', null);
+};
+
+// Save contact (create or update)
+const saveContact = async () => {
+  if (!store.editingContact?.name?.trim()) {
+    args.showWarningToast("Name is required");
+    return;
+  }
+  if (!store.editingContact?.phoneNumber?.trim()) {
+    args.showWarningToast("Phone number is required");
+    return;
+  }
+
+  const isEdit = store.isEditMode;
+  const functionName = isEdit ? "updateContact" : "createContact";
+  const payload = {
+    name: store.editingContact.name,
+    phoneNumber: store.editingContact.phoneNumber,
+    country: store.editingContact.country,
+    countryCode: store.editingContact.countryCode,
+    remark: store.editingContact.remark,
+    called: store.editingContact.called,
+    isUnavailable: store.editingContact.isUnavailable,
+    notInterested: store.editingContact.notInterested
+  };
+
+  if (isEdit) {
+    payload.contactId = store.editingContact.id;
+  }
+
+  const result = await executeFunction(functionName, payload);
+
+  if (result?.success) {
+    args.showSuccessToast(result.message || (isEdit ? "Contact updated successfully" : "Contact created successfully"));
+
+    if (isEdit) {
+      // Update contact in store
+      const updatedContact = result.data.contact;
+      setStore('contacts', (contacts) =>
+        contacts.map(cd =>
+          cd.contact?.id === store.editingContact.id
+            ? { ...cd, contact: updatedContact }
+            : cd
+        )
+      );
+    } else {
+      // Reload contacts and countries for new contact
+      await loadContacts(store.currentPage);
+      await loadCountries();
+    }
+
+    hideContactModal();
+  }
+};
+
+// Export PDF
+const exportPDF = () => {
+  if (store.selectedContacts.length === 0) {
+    args.showWarningToast("Please select at least one contact to export");
+    return;
+  }
+
+  // Get selected contacts data
+  const selectedData = store.contacts.filter(cd => 
+    store.selectedContacts.includes(cd.contact?.id)
+  );
+
+  // Create CSV content
+  let csvContent = "Name,Phone Number,Country,Country Code,Called,Unavailable,Not Interested,Assigned Users,Remark\n";
+
+  selectedData.forEach(cd => {
+    const contact = cd.contact?.P || {};
+    const users = cd.users?.map(u => u?.P?.username).join('; ') || 'None';
+
+    csvContent += `"${contact.name || ''}","${contact.phoneNumber || ''}","${contact.country || ''}","${contact.countryCode || ''}","${contact.called ? 'Yes' : 'No'}","${contact.isUnavailable ? 'Yes' : 'No'}","${contact.notInterested ? 'Yes' : 'No'}","${users}","${contact.remark || ''}"\n`;
+  });
+
+  // Create download link
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `contacts_export_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  args.showSuccessToast("Contacts exported successfully");
+};
+
+// Initialize
+const initialize = async () => {
+  await Promise.all([loadContacts(1), loadUsernames(), loadCountries()]);
+};
+
+return {
+  store,
+  setStore,
+  loadContacts,
+  toggleContactSelection,
+  selectAllContacts,
+  clearSelection,
+  selectFirstX,
+  showSelectXModal,
+  hideSelectXModal,
+  handleSearch,
+  handleSort,
+  handleFilterChange,
+  handleCountryFilterChange,
+  handlePageSizeChange,
+  goToPage,
+  goToNextPage,
+  goToPreviousPage,
+  getVisiblePages,
+  showAssignModal,
+  hideAssignModal,
+  assignContacts,
+  toggleContactField,
+  handleDeleteContact,
+  showEditModal,
+  showAddModal,
+  hideContactModal,
+  saveContact,
+  exportPDF,
+  initialize
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onMount: args.fns.initialize
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  gap: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize['2xl']};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Contact Management"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const totalCount = args.fns.store.totalCount;
+const currentPage = args.fns.store.currentPage;
+const pageSize = args.fns.store.pageSize;
+const startIndex = (currentPage - 1) * pageSize + 1;
+const endIndex = Math.min(currentPage * pageSize, totalCount);
+
+return {
+  as: "p",
+  text: totalCount > 0 ? `Showing ${startIndex}-${endIndex} of ${totalCount} contacts` : `${totalCount} contacts`
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.primary_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: () => args.fns.loadContacts(args.fns.store.currentPage)
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:renew",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Refresh"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.success};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.success_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+
+  &:hover {
+    background: ${args.theme.var.color.success_dark_200};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  onClick: args.fns.showAddModal
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:add",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Add Contact"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+}`;
+'''
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+return {
+  type: "search",
+  placeholder: "Search by name, phone, or country...",
+  value: args.fns.store.searchQuery,
+  onInput: (e) => {
+    args.fns.setStore('searchQuery', e.target.value);
+  },
+  onKeyPress: (e) => {
+    if (e.key === 'Enter') {
+      args.fns.handleSearch();
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.primary_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Search",
+  onClick: args.fns.handleSearch
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  min-width: 120px;
+}`;
+'''
+        displayOrder: 3
+        componentName: TomSelect
+        props:
+          '''
+const pageSizeOptions = [
+  { value: "10", label: "10 per page" },
+  { value: "20", label: "20 per page" },
+  { value: "50", label: "50 per page" },
+  { value: "100", label: "100 per page" }
+];
+
+return {
+  value: String(args.fns.store.pageSize),
+  options: pageSizeOptions,
+  placeholder: "Page size...",
+  search: false,
+  onChange: (value) => {
+    args.fns.handlePageSizeChange(parseInt(value));
+  }
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  min-width: 200px;
+}`;
+'''
+        displayOrder: 4
+        componentName: TomSelect
+        props:
+          '''
+const usernameOptions = [
+  { value: "", label: "All Contacts" },
+  { value: "unassigned", label: "Unassigned Contacts" },
+  ...args.fns.store.usernames.map(username => ({
+    value: username,
+    label: username
+  }))
+];
+
+return {
+  value: args.fns.store.filterUsername,
+  options: usernameOptions,
+  placeholder: "Filter by user...",
+  search: false,
+  onChange: (value) => {
+    args.fns.handleFilterChange(value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  min-width: 160px;
+}`;
+'''
+        displayOrder: 5
+        componentName: TomSelect
+        props:
+          '''
+const countryOptions = [
+  { value: "", label: "All Countries" },
+  ...args.fns.store.countries.map(country => ({
+    value: country,
+    label: country
+  }))
+];
+
+return {
+  value: args.fns.store.filterCountry,
+  options: countryOptions,
+  placeholder: "Filter by country...",
+  search: false,
+  onChange: (value) => {
+    args.fns.handleCountryFilterChange(value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.primary_light_100};
+  border: 1px solid ${args.theme.var.color.primary_light_300};
+  border-radius: ${args.theme.var.borderRadius.md};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.store.selectedContacts.length === 0
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_light_100_text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const count = args.fns.store.selectedContacts.length;
+return {
+  as: "span",
+  text: `${count} contact${count === 1 ? '' : 's'} selected`
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Select All",
+  onClick: args.fns.selectAllContacts
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Select First X",
+  onClick: args.fns.showSelectXModal
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Clear",
+  onClick: args.fns.clearSelection
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.primary_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Assign to User",
+  onClick: args.fns.showAssignModal
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  background: ${args.theme.var.color.info};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.info_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.info_dark_200};
+  }
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Export CSV",
+  onClick: args.fns.exportPDF
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Loading contacts...",
+  hide: () => !args.fns.store.loading
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.error_light_50_text};
+  background: ${args.theme.var.color.error_light_50};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: args.fns.store.error || "An error occurred",
+  hide: () => !args.fns.store.error
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  overflow: hidden;
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  overflow-x: auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "table"
+};
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "thead"
+};
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "tr"
+};
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  width: 40px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th"
+};
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contacts = args.fns.store.contacts;
+const allSelected = contacts.length > 0 && contacts.every(cd => args.fns.store.selectedContacts.includes(cd.contact?.id));
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: allSelected,
+  onChange: () => {
+    if (allSelected) {
+      args.fns.clearSelection();
+    } else {
+      args.fns.selectAllContacts();
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 140px;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  text: "Actions"
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 150px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('name')
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sortIcon = args.fns.store.sortBy === 'name'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `Name ${sortIcon}`
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 130px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('phoneNumber')
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sortIcon = args.fns.store.sortBy === 'phoneNumber'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `Phone ${sortIcon}`
+};
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 100px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('country')
+};
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sortIcon = args.fns.store.sortBy === 'country'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `Country ${sortIcon}`
+};
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 80px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('called')
+};
+'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sortIcon = args.fns.store.sortBy === 'called'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `Called ${sortIcon}`
+};
+'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 100px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('isUnavailable')
+};
+'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sortIcon = args.fns.store.sortBy === 'isUnavailable'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `Unavailable ${sortIcon}`
+};
+'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  user-select: none;
+  min-width: 110px;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  onClick: () => args.fns.handleSort('notInterested')
+};
+'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sortIcon = args.fns.store.sortBy === 'notInterested'
+  ? (args.fns.store.sortOrder === 'asc' ? ' ↑' : ' ↓')
+  : '';
+return {
+  as: "span",
+  text: `Not Interested ${sortIcon}`
+};
+'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 120px;
+}`;
+'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  text: "Assigned To"
+};
+'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  min-width: 150px;
+}`;
+'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+return {
+  as: "th",
+  text: "Remark"
+};
+'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        contextName: contactdata
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "tbody",
+  data: args.fns.store.contacts
+};
+'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''
+const contactdata = args.contextData.contactdata;
+const isSelected = args.fns.store.selectedContacts.includes(contactdata.contact?.id);
+
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+
+  ${isSelected ? `
+    background: ${args.theme.var.color.primary_light_100} !important;
+  ` : ''}
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+const isSelected = args.fns.store.selectedContacts.includes(contactdata.contact?.id);
+
+return {
+  as: "tr",
+  "data-selected": isSelected
+};
+'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td"
+};
+'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+const contactId = contactdata.contact?.id;
+const isSelected = args.fns.store.selectedContacts.includes(contactId);
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: isSelected,
+  onChange: () => args.fns.toggleContactSelection(contactId)
+};
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td"
+};
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+  justify-content: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs};
+  background: ${args.theme.var.color.info};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.info_text};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.info_dark_200};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+
+return {
+  as: "button",
+  title: "Edit Contact",
+  onClick: () => args.fns.showEditModal(contactdata)
+};
+'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:edit",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xs};
+  background: ${args.theme.var.color.error};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.error_text};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error_dark_200};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+const contactId = contactdata.contact?.id;
+const contactName = contactdata.contact?.P?.name || 'Unknown';
+
+return {
+  as: "button",
+  title: "Delete Contact",
+  onClick: () => args.fns.handleDeleteContact(contactId, contactName)
+};
+'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:trash-can",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+return {
+  as: "td",
+  text: contactdata.contact?.P?.name || 'N/A'
+};
+'''
+      }
+    }
+    {
+      id: "64"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+return {
+  as: "td",
+  text: contactdata.contact?.P?.phoneNumber || 'N/A'
+};
+'''
+      }
+    }
+    {
+      id: "65"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+return {
+  as: "td",
+  text: contactdata.contact?.P?.country || 'N/A'
+};
+'''
+      }
+    }
+    {
+      id: "66"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td"
+};
+'''
+      }
+    }
+    {
+      id: "67"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+const contactId = contactdata.contact?.id;
+const called = contactdata.contact?.P?.called || false;
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: called,
+  onChange: () => args.fns.toggleContactField(contactId, 'called', called)
+};
+'''
+      }
+    }
+    {
+      id: "68"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+}`;
+'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td"
+};
+'''
+      }
+    }
+    {
+      id: "69"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+const contactId = contactdata.contact?.id;
+const isUnavailable = contactdata.contact?.P?.isUnavailable || false;
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: isUnavailable,
+  onChange: () => args.fns.toggleContactField(contactId, 'isUnavailable', isUnavailable)
+};
+'''
+      }
+    }
+    {
+      id: "70"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  text-align: center;
+}`;
+'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
+return {
+  as: "td"
+};
+'''
+      }
+    }
+    {
+      id: "71"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+const contactId = contactdata.contact?.id;
+const notInterested = contactdata.contact?.P?.notInterested || false;
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: notInterested,
+  onChange: () => args.fns.toggleContactField(contactId, 'notInterested', notInterested)
+};
+'''
+      }
+    }
+    {
+      id: "72"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+const users = contactdata.users || [];
+const usernames = users.map(u => u?.P?.username).filter(Boolean).join(', ');
+
+return {
+  as: "td",
+  text: usernames || 'None'
+};
+'''
+      }
+    }
+    {
+      id: "73"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;
+'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+const contactdata = args.contextData.contactdata;
+return {
+  as: "td",
+  text: contactdata.contact?.P?.remark || '-',
+  title: contactdata.contact?.P?.remark || ''
+};
+'''
+      }
+    }
+    {
+      id: "74"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.lg};
+  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+'''
+      }
+    }
+    {
+      id: "75"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.lg};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "76"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const stats = args.fns.store.stats;
+return {
+  as: "div",
+  text: `Total Called: ${stats.totalCalled}`
+};
+'''
+      }
+    }
+    {
+      id: "77"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const stats = args.fns.store.stats;
+return {
+  as: "div",
+  text: `Total Joined: ${stats.totalJoined}`
+};
+'''
+      }
+    }
+    {
+      id: "78"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+  align-items: center;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.store.totalPages <= 1
+};
+'''
+      }
+    }
+    {
+      id: "79"
+      L: Attr
+      P: {
+        css:
+          '''
+const currentPage = args.fns.store.currentPage;
+const isDisabled = currentPage <= 1;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  opacity: ${isDisabled ? '0.5' : '1'};
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const currentPage = args.fns.store.currentPage;
+const isDisabled = currentPage <= 1;
+
+return {
+  as: "button",
+  text: "← Previous",
+  onClick: args.fns.goToPreviousPage,
+  disabled: isDisabled
+};
+'''
+      }
+    }
+    {
+      id: "80"
+      L: Attr
+      P: {
+        contextName: pageNum
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+        loop: true
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  data: args.fns.getVisiblePages()
+};
+'''
+      }
+    }
+    {
+      id: "81"
+      L: Attr
+      P: {
+        css:
+          '''
+const pageNum = args.contextData.pageNum;
+const currentPage = args.fns.store.currentPage;
+const isEllipsis = pageNum === '...';
+const isActive = pageNum === currentPage;
+
+return `._id {
+  min-width: 40px;
+  padding: ${args.theme.var.spacing.sm};
+  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background};
+  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: ${isActive ? '700' : '400'};
+  cursor: ${isEllipsis || isActive ? 'default' : 'pointer'};
+  transition: all 0.2s ease;
+  text-align: center;
+
+  ${!isEllipsis && !isActive ? `
+    &:hover {
+      background: ${args.theme.var.color.background_dark_100};
+      border-color: ${args.theme.var.color.primary};
+    }
+  ` : ''}
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const pageNum = args.contextData.pageNum;
+const currentPage = args.fns.store.currentPage;
+const isEllipsis = pageNum === '...';
+const isActive = pageNum === currentPage;
+
+return {
+  as: isEllipsis ? "span" : "button",
+  text: pageNum,
+  onClick: isEllipsis ? undefined : () => args.fns.goToPage(pageNum),
+  disabled: isActive
+};
+'''
+      }
+    }
+    {
+      id: "82"
+      L: Attr
+      P: {
+        css:
+          '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const isDisabled = currentPage >= totalPages;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  opacity: ${isDisabled ? '0.5' : '1'};
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const currentPage = args.fns.store.currentPage;
+const totalPages = args.fns.store.totalPages;
+const isDisabled = currentPage >= totalPages;
+
+return {
+  as: "button",
+  text: "Next →",
+  onClick: args.fns.goToNextPage,
+  disabled: isDisabled
+};
+'''
+      }
+    }
+    {
+      id: "83"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+const contacts = args.fns.store.contacts;
+return {
+  as: "div",
+  text: "No contacts found",
+  hide: () => contacts.length > 0 || args.fns.store.loading || args.fns.store.error
+};
+'''
+      }
+    }
+    {
+      id: "84"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.store.showAssignModal,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.fns.hideAssignModal();
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "85"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "86"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Assign Contacts to User"
+};
+'''
+      }
+    }
+    {
+      id: "87"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Username (3 or 6 digits)",
+  placeholder: "Enter username...",
+  value: args.fns.store.assignUsername,
+  onInput: (e) => {
+    args.fns.setStore('assignUsername', e.target.value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "88"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  justify-content: flex-end;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "89"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Cancel",
+  onClick: args.fns.hideAssignModal
+};
+'''
+      }
+    }
+    {
+      id: "90"
+      L: Attr
+      P: {
+        css:
+          '''
+const loading = args.fns.store.assignLoading;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.primary_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: ${loading ? 'not-allowed' : 'pointer'};
+  opacity: ${loading ? '0.6' : '1'};
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const loading = args.fns.store.assignLoading;
+
+return {
+  as: "button",
+  text: loading ? "Assigning..." : "Assign",
+  onClick: args.fns.assignContacts,
+  disabled: loading
+};
+'''
+      }
+    }
+    {
+      id: "91"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.store.showSelectModal,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.fns.hideSelectXModal();
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "92"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "93"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Select First X Contacts"
+};
+'''
+      }
+    }
+    {
+      id: "94"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Number of contacts",
+  placeholder: "Enter number...",
+  type: "number",
+  value: args.fns.store.selectCount,
+  onInput: (e) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      args.fns.setStore('selectCount', value);
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "95"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  justify-content: flex-end;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "96"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Cancel",
+  onClick: args.fns.hideSelectXModal
+};
+'''
+      }
+    }
+    {
+      id: "97"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.primary_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Select",
+  onClick: () => {
+    args.fns.selectFirstX(args.fns.store.selectCount);
+    args.fns.hideSelectXModal();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "98"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: ${args.theme.var.spacing.md};
+  overflow-y: auto;
+}`;
+'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.store.showContactModal,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.fns.hideContactModal();
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "99"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-height: 90vh;
+  overflow-y: auto;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "100"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isEditMode = args.fns.store.isEditMode;
+return {
+  as: "h2",
+  text: isEditMode ? "Edit Contact" : "Add New Contact"
+};
+'''
+      }
+    }
+    {
+      id: "101"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "102"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Name *",
+  placeholder: "Enter name...",
+  value: args.fns.store.editingContact?.name || '',
+  onInput: (e) => {
+    args.fns.setStore('editingContact', 'name', e.target.value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "103"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Phone Number *",
+  placeholder: "Enter phone number...",
+  value: args.fns.store.editingContact?.phoneNumber || '',
+  onInput: (e) => {
+    args.fns.setStore('editingContact', 'phoneNumber', e.target.value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "104"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Country",
+  placeholder: "Enter country...",
+  value: args.fns.store.editingContact?.country || '',
+  onInput: (e) => {
+    args.fns.setStore('editingContact', 'country', e.target.value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "105"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Country Code",
+  placeholder: "Enter country code...",
+  value: args.fns.store.editingContact?.countryCode || '',
+  onInput: (e) => {
+    args.fns.setStore('editingContact', 'countryCode', e.target.value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "106"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: TextInput
+        props:
+          '''
+return {
+  label: "Remark",
+  placeholder: "Enter remark...",
+  value: args.fns.store.editingContact?.remark || '',
+  as: "textarea",
+  rows: 3,
+  onInput: (e) => {
+    args.fns.setStore('editingContact', 'remark', e.target.value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "107"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "108"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label"
+};
+'''
+      }
+    }
+    {
+      id: "109"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.store.editingContact?.called || false,
+  onChange: (e) => {
+    args.fns.setStore('editingContact', 'called', e.target.checked);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "110"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Called"
+};
+'''
+      }
+    }
+    {
+      id: "111"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label"
+};
+'''
+      }
+    }
+    {
+      id: "112"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.store.editingContact?.isUnavailable || false,
+  onChange: (e) => {
+    args.fns.setStore('editingContact', 'isUnavailable', e.target.checked);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "113"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Unavailable"
+};
+'''
+      }
+    }
+    {
+      id: "114"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label"
+};
+'''
+      }
+    }
+    {
+      id: "115"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.store.editingContact?.notInterested || false,
+  onChange: (e) => {
+    args.fns.setStore('editingContact', 'notInterested', e.target.checked);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "116"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Not Interested"
+};
+'''
+      }
+    }
+    {
+      id: "117"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  justify-content: flex-end;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "118"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Cancel",
+  onClick: args.fns.hideContactModal
+};
+'''
+      }
+    }
+    {
+      id: "119"
+      L: Attr
+      P: {
+        css:
+          '''
+const isEditMode = args.fns.store.isEditMode;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isEditMode ? args.theme.var.color.primary : args.theme.var.color.success};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  color: ${isEditMode ? args.theme.var.color.primary_text : args.theme.var.color.success_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${isEditMode ? args.theme.var.color.primary_dark_200 : args.theme.var.color.success_dark_200};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isEditMode = args.fns.store.isEditMode;
+
+return {
+  as: "button",
+  text: isEditMode ? "Save Changes" : "Create Contact",
+  onClick: args.fns.saveContact
+};
+'''
+      }
+    }
+    {
+      id: "120"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "121"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "120"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "121"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "29"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "30"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "31"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "74"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "83"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "84"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
+      E: "91"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "98"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "3"
+      E: "11"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "14"
+      E: "22"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "15"
+      E: "19"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "15"
+      E: "20"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "15"
+      E: "21"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "22"
+      E: "25"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "22"
+      E: "26"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "22"
+      E: "27"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "22"
+      E: "28"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "33"
+      E: "53"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "35"
+      E: "36"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "35"
+      E: "38"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "35"
+      E: "39"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "35"
+      E: "41"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "35"
+      E: "43"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "35"
+      E: "45"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "35"
+      E: "47"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "35"
+      E: "49"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "35"
+      E: "51"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "35"
+      E: "52"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "45"
+      E: "46"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "47"
+      E: "48"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "49"
+      E: "50"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "53"
+      E: "54"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "54"
+      E: "55"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "54"
+      E: "57"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "54"
+      E: "63"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "54"
+      E: "64"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "54"
+      E: "65"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "54"
+      E: "66"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "54"
+      E: "68"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "54"
+      E: "70"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "54"
+      E: "72"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "54"
+      E: "73"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "55"
+      E: "56"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "57"
+      E: "58"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "58"
+      E: "59"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "58"
+      E: "61"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "59"
+      E: "60"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "61"
+      E: "62"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "66"
+      E: "67"
+    }
+    {
+      id: e78
+      T: Attr
+      S: "68"
+      E: "69"
+    }
+    {
+      id: e79
+      T: Attr
+      S: "70"
+      E: "71"
+    }
+    {
+      id: e80
+      T: Attr
+      S: "74"
+      E: "75"
+    }
+    {
+      id: e81
+      T: Attr
+      S: "74"
+      E: "78"
+    }
+    {
+      id: e82
+      T: Attr
+      S: "75"
+      E: "76"
+    }
+    {
+      id: e83
+      T: Attr
+      S: "75"
+      E: "77"
+    }
+    {
+      id: e84
+      T: Attr
+      S: "78"
+      E: "79"
+    }
+    {
+      id: e85
+      T: Attr
+      S: "78"
+      E: "80"
+    }
+    {
+      id: e86
+      T: Attr
+      S: "78"
+      E: "82"
+    }
+    {
+      id: e87
+      T: Attr
+      S: "80"
+      E: "81"
+    }
+    {
+      id: e88
+      T: Attr
+      S: "84"
+      E: "85"
+    }
+    {
+      id: e89
+      T: Attr
+      S: "85"
+      E: "86"
+    }
+    {
+      id: e90
+      T: Attr
+      S: "85"
+      E: "87"
+    }
+    {
+      id: e91
+      T: Attr
+      S: "85"
+      E: "88"
+    }
+    {
+      id: e92
+      T: Attr
+      S: "88"
+      E: "89"
+    }
+    {
+      id: e93
+      T: Attr
+      S: "88"
+      E: "90"
+    }
+    {
+      id: e94
+      T: Attr
+      S: "91"
+      E: "92"
+    }
+    {
+      id: e95
+      T: Attr
+      S: "92"
+      E: "93"
+    }
+    {
+      id: e96
+      T: Attr
+      S: "92"
+      E: "94"
+    }
+    {
+      id: e97
+      T: Attr
+      S: "92"
+      E: "95"
+    }
+    {
+      id: e98
+      T: Attr
+      S: "95"
+      E: "96"
+    }
+    {
+      id: e99
+      T: Attr
+      S: "95"
+      E: "97"
+    }
+    {
+      id: e100
+      T: Attr
+      S: "98"
+      E: "99"
+    }
+    {
+      id: e101
+      T: Attr
+      S: "99"
+      E: "100"
+    }
+    {
+      id: e102
+      T: Attr
+      S: "99"
+      E: "101"
+    }
+    {
+      id: e103
+      T: Attr
+      S: "99"
+      E: "117"
+    }
+    {
+      id: e104
+      T: Attr
+      S: "101"
+      E: "102"
+    }
+    {
+      id: e105
+      T: Attr
+      S: "101"
+      E: "103"
+    }
+    {
+      id: e106
+      T: Attr
+      S: "101"
+      E: "104"
+    }
+    {
+      id: e107
+      T: Attr
+      S: "101"
+      E: "105"
+    }
+    {
+      id: e108
+      T: Attr
+      S: "101"
+      E: "106"
+    }
+    {
+      id: e109
+      T: Attr
+      S: "101"
+      E: "107"
+    }
+    {
+      id: e110
+      T: Attr
+      S: "107"
+      E: "108"
+    }
+    {
+      id: e111
+      T: Attr
+      S: "107"
+      E: "111"
+    }
+    {
+      id: e112
+      T: Attr
+      S: "107"
+      E: "114"
+    }
+    {
+      id: e113
+      T: Attr
+      S: "108"
+      E: "109"
+    }
+    {
+      id: e114
+      T: Attr
+      S: "108"
+      E: "110"
+    }
+    {
+      id: e115
+      T: Attr
+      S: "111"
+      E: "112"
+    }
+    {
+      id: e116
+      T: Attr
+      S: "111"
+      E: "113"
+    }
+    {
+      id: e117
+      T: Attr
+      S: "114"
+      E: "115"
+    }
+    {
+      id: e118
+      T: Attr
+      S: "114"
+      E: "116"
+    }
+    {
+      id: e119
+      T: Attr
+      S: "117"
+      E: "118"
+    }
+    {
+      id: e120
+      T: Attr
+      S: "117"
+      E: "119"
+    }
+  ]
+}

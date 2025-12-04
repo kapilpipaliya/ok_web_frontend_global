@@ -1,0 +1,175 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        description: Admin layout wrapper that renders children slot
+        key: AdminLayout
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        description: Admin layout container
+        fns:
+          '''
+if (!args.fns.checkAdminRole()) {
+  args.navigate('/home');
+  args.showErrorToast("Admin access required");
+  return {};
+}
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onMount: () => {
+    // Add admin navigation sections only if not already added
+    if (args.fns.setNavigationSections && args.fns.navigationSections) {
+      const currentSections = args.fns.navigationSections();
+      const hasAdminSection = currentSections.some(section => section.id === "admin");
+
+      if (!hasAdminSection) {
+        const adminNavigationSections = [
+          {
+            id: "admin",
+            title: "Admin",
+            items: [
+              // {
+              //   id: "admin_home",
+              //   href: "/yto/admin",
+              //   label: "Dashboard",
+              //   icon: "carbon:dashboard-reference",
+              //   title: "Admin dashboard home",
+              //   pathCheck: (pathname) => pathname === "/yto/admin" || pathname === "/yto/admin/"
+              // },
+              {
+                id: "quota_monitor",
+                href: "/yto/admin/quota-monitor",
+                label: "Quota Monitor",
+                icon: "carbon:analytics",
+                title: "Monitor shared YouTube API quota usage",
+                pathCheck: (pathname) => pathname === "/yto/admin/quota-monitor"
+              },
+              {
+                id: "queue_management",
+                href: "/yto/admin/queue-management",
+                label: "Queue Management",
+                icon: "carbon:task-settings",
+                title: "Control processing queue operations",
+                pathCheck: (pathname) => pathname === "/yto/admin/queue-management"
+              },
+              {
+                id: "worker_health",
+                href: "/yto/admin/worker-health",
+                label: "Worker Health",
+                icon: "carbon:dashboard",
+                title: "Monitor background workers and queue status",
+                pathCheck: (pathname) => pathname === "/yto/admin/worker-health"
+              },
+              {
+                id: "worker_logs",
+                href: "/yto/admin/worker-logs",
+                label: "Worker Logs",
+                icon: "carbon:document-tasks",
+                title: "View background worker processing logs",
+                pathCheck: (pathname) => pathname === "/yto/admin/worker-logs"
+              },
+              {
+                id: "user_management",
+                href: "/yto/admin/users",
+                label: "Manage Users",
+                icon: "carbon:user-multiple",
+                title: "View and manage all users",
+                pathCheck: (pathname) => pathname === "/yto/admin/users"
+              },
+              {
+                id: "user_feedback",
+                href: "/yto/admin/feedback",
+                label: "User Feedback",
+                icon: "carbon:chat",
+                title: "View and manage user feedback submissions",
+                pathCheck: (pathname) => pathname === "/yto/admin/feedback"
+              },
+              {
+                id: "contact_submissions",
+                href: "/yto/admin/contact-submissions",
+                label: "Contact Submissions",
+                icon: "carbon:email",
+                title: "View and manage contact form submissions",
+                pathCheck: (pathname) => pathname === "/yto/admin/contact-submissions"
+              },
+              {
+                id: "api_keys",
+                href: "/yto/admin/api-keys",
+                label: "API Keys",
+                icon: "carbon:key",
+                title: "Manage YouTube API keys",
+                pathCheck: (pathname) => pathname === "/yto/admin/api-keys"
+              },
+              {
+                id: "global_settings",
+                href: "/admin/GlobalSettings",
+                label: "Global Settings",
+                icon: "carbon:settings",
+                title: "Configure system-wide settings",
+                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && !args.searchParams?.tab,
+                openInNewTab: true
+              },
+              {
+                id: "workers",
+                href: "/admin/GlobalSettings?tab=workers",
+                label: "Workers",
+                icon: "carbon:task",
+                title: "Manage background workers and scheduled tasks",
+                pathCheck: (pathname) => pathname.startsWith("/admin/GlobalSettings") && args.searchParams?.tab === "workers",
+                openInNewTab: true
+              }
+            ]
+          }
+        ];
+
+        args.fns.setNavigationSections(v => [...v, ...adminNavigationSections]);
+      }
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        description: Renders the page content
+        componentName: Slot
+        slot: children
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+  ]
+}

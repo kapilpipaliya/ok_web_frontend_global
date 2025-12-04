@@ -1,0 +1,83 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''
+// Check if user is admin
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some(edgeId => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge.E];
+    return role?.P?.key === "Admin";
+  });
+};
+return {
+  enabled: true,
+  checkAdminRole
+}'''
+        key: Layout
+        props:
+          '''
+return {};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: ConfirmProvider
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: 1children
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+  ]
+}

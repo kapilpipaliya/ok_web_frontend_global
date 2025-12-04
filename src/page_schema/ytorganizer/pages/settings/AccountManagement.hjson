@@ -276,87 +276,6 @@ return {
       P: {
         css:
           '''
-return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
-  display: flex;
-  gap: ${args.theme.var.spacing.md};
-  align-items: flex-start;
-
-  @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
-    gap: ${args.theme.var.spacing.sm};
-  }
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
-  flex-shrink: 0;
-  margin-top: 2px;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "icon",
-  icon: "ph:info",
-  width: "20px",
-  height: "20px"
-};
-'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  margin: 0;
-  color: ${args.theme.var.color.info_light_100_text};
-  font-size: ${args.theme.var.fontSize.sm};
-  line-height: 1.5;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
-};
-'''
-      }
-    }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        css:
-          '''
 const messageState = args.fns.messageState;
 const isError = messageState?.type === 'error';
 
@@ -402,7 +321,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "7"
       L: Attr
       P: {
         css:
@@ -433,7 +352,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -453,7 +372,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -486,7 +405,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -530,7 +449,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "11"
       L: Attr
       P: {
         displayOrder: 1
@@ -542,6 +461,87 @@ return {
   icon: "ph:x",
   width: "20px",
   height: "20px"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.sm};
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  flex-shrink: 0;
+  margin-top: 2px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:info",
+  width: "20px",
+  height: "20px"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.info_light_100_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.5;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
 };
 '''
       }
@@ -1323,17 +1323,17 @@ return {
       id: "46"
       L: PageLayout
       P: {
-        displayOrder: 2
-        componentName: LayoutContent
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
       }
     }
     {
       id: "47"
       L: PageLayout
       P: {
-        displayOrder: 1
-        description: YTO layout with navigation
-        componentName: Layout
+        displayOrder: 2
+        componentName: LayoutContent
       }
     }
   ]
@@ -1346,15 +1346,15 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "15"
+      T: PageLayout
+      S: "1"
+      E: "46"
     }
     {
       id: e3
-      T: Attr
-      S: "2"
-      E: "17"
+      T: PageLayout
+      S: "1"
+      E: "47"
     }
     {
       id: e4
@@ -1372,247 +1372,247 @@ return {
       id: e6
       T: Attr
       S: "2"
-      E: "9"
+      E: "12"
     }
     {
       id: e7
       T: Attr
       S: "2"
-      E: "16"
+      E: "15"
     }
     {
       id: e8
       T: Attr
       S: "2"
-      E: "22"
+      E: "16"
     }
     {
       id: e9
       T: Attr
-      S: "17"
-      E: "19"
+      S: "2"
+      E: "17"
     }
     {
       id: e10
       T: Attr
-      S: "17"
-      E: "21"
+      S: "2"
+      E: "22"
     }
     {
       id: e11
-      T: Attr
-      S: "17"
-      E: "20"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "17"
-      E: "18"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "3"
-      E: "5"
-    }
-    {
-      id: e14
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e15
+      id: e12
       T: Attr
-      S: "6"
-      E: "8"
+      S: "3"
+      E: "5"
     }
     {
-      id: e16
+      id: e13
       T: Attr
       S: "6"
       E: "7"
     }
     {
+      id: e14
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
       id: e17
       T: Attr
-      S: "9"
+      S: "10"
       E: "11"
     }
     {
       id: e18
       T: Attr
-      S: "9"
+      S: "12"
       E: "13"
     }
     {
       id: e19
       T: Attr
-      S: "9"
-      E: "10"
+      S: "12"
+      E: "14"
     }
     {
       id: e20
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "17"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "17"
+      E: "21"
+    }
+    {
+      id: e24
       T: Attr
       S: "22"
       E: "23"
     }
     {
-      id: e21
-      T: Attr
-      S: "11"
-      E: "12"
-    }
-    {
-      id: e22
-      T: Attr
-      S: "13"
-      E: "14"
-    }
-    {
-      id: e23
-      T: Attr
-      S: "23"
-      E: "33"
-    }
-    {
-      id: e24
+      id: e25
       T: Attr
       S: "23"
       E: "24"
     }
     {
-      id: e25
+      id: e26
       T: Attr
-      S: "33"
-      E: "34"
+      S: "23"
+      E: "33"
     }
     {
-      id: e26
+      id: e27
       T: Attr
       S: "24"
       E: "25"
     }
     {
-      id: e27
-      T: Attr
-      S: "34"
-      E: "40"
-    }
-    {
       id: e28
-      T: Attr
-      S: "34"
-      E: "36"
-    }
-    {
-      id: e29
-      T: Attr
-      S: "34"
-      E: "35"
-    }
-    {
-      id: e30
-      T: Attr
-      S: "34"
-      E: "38"
-    }
-    {
-      id: e31
-      T: Attr
-      S: "34"
-      E: "41"
-    }
-    {
-      id: e32
-      T: Attr
-      S: "34"
-      E: "37"
-    }
-    {
-      id: e33
-      T: Attr
-      S: "34"
-      E: "42"
-    }
-    {
-      id: e34
-      T: Attr
-      S: "25"
-      E: "29"
-    }
-    {
-      id: e35
-      T: Attr
-      S: "25"
-      E: "32"
-    }
-    {
-      id: e36
-      T: Attr
-      S: "25"
-      E: "28"
-    }
-    {
-      id: e37
-      T: Attr
-      S: "25"
-      E: "30"
-    }
-    {
-      id: e38
-      T: Attr
-      S: "25"
-      E: "27"
-    }
-    {
-      id: e39
-      T: Attr
-      S: "25"
-      E: "31"
-    }
-    {
-      id: e40
       T: Attr
       S: "25"
       E: "26"
     }
     {
+      id: e29
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "25"
+      E: "28"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "25"
+      E: "29"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "25"
+      E: "30"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "25"
+      E: "31"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "25"
+      E: "32"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "34"
+      E: "36"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "34"
+      E: "37"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "34"
+      E: "38"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "34"
+      E: "40"
+    }
+    {
       id: e41
+      T: Attr
+      S: "34"
+      E: "41"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "34"
+      E: "42"
+    }
+    {
+      id: e43
       T: Attr
       S: "38"
       E: "39"
     }
     {
-      id: e42
+      id: e44
       T: Attr
       S: "42"
       E: "43"
     }
     {
-      id: e43
+      id: e45
       T: Attr
       S: "43"
       E: "44"
     }
     {
-      id: e44
+      id: e46
       T: Attr
       S: "43"
       E: "45"
-    }
-    {
-      id: e45
-      T: PageLayout
-      S: "1"
-      E: "46"
-    }
-    {
-      id: e46
-      T: PageLayout
-      S: "1"
-      E: "47"
     }
   ]
 }

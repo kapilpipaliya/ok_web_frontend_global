@@ -1,0 +1,283 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''const isLoading = args.atom(false);
+
+const onMount = () => undefined;
+return {
+  enabled: true,
+  isLoading,
+  onMount
+};
+'''
+        key: Home
+        url: /home
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+return {
+  enabled: true
+}'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onMount: args.fns.onMount
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  min-height: 200px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.isLoading?.()
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary",
+  text: "Loading..."
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.isLoading?.()
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  margin-bottom: 2rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: PageTitle
+        props:
+          '''
+const currentTime = new Date();
+const hour = currentTime.getHours();
+let greeting = "Good Evening";
+if (hour < 12) greeting = "Good Morning";
+else if (hour < 18) greeting = "Good Afternoon";
+
+return {
+  text: `${greeting} ${args.user.P.username}!`
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0.5rem 0 0 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: ""
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "11"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+  ]
+}

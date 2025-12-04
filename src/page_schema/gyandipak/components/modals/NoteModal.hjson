@@ -1,0 +1,584 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: NoteModal
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+const [note, setNote] = args.createSignal("");
+const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+
+const initializeNote = () => {
+  const existingNote = args.contextData.props?.existingNote || "";
+  setNote(existingNote);
+  setIsSubmitting(false);
+};
+
+const handleSave = async () => {
+  const noteValue = note().trim();
+  const item = args.contextData.props?.item;
+  const onSave = args.contextData.props?.onSave;
+  const onClose = args.contextData.props?.onClose;
+
+  setIsSubmitting(true);
+
+  try {
+    // Call save callback with note data (itemType is inferred server-side)
+    if (onSave) {
+      await onSave({
+        item,
+        note: noteValue
+      });
+    }
+
+    onClose?.();
+  } catch (error) {
+    console.error("Error saving note:", error);
+    // Error toast already shown by the onSave function
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+return {
+  note,
+  setNote,
+  isSubmitting,
+  initializeNote,
+  handleSave
+};
+'''
+        componentName: Html
+        props:
+          '''
+const isOpen = args.contextData.props?.isOpen;
+const getIsOpen = isOpen?.() || false;
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "div",
+  hide: !getIsOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      onClose?.();
+    }
+  },
+  onMount: () => {
+    args.fns.initializeNote();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  text-transform: capitalize;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const existingNote = args.contextData.props?.existingNote || "";
+const hasNote = existingNote.length > 0;
+const action = hasNote ? "Edit" : "Add";
+
+// Infer item type from the item labels
+let itemType = "item";
+if (item?.L?.includes('Video')) {
+  itemType = "video";
+} else if (item?.L?.includes('Channel')) {
+  itemType = "channel";
+} else if (item?.L?.includes('Playlist')) {
+  itemType = "playlist";
+}
+
+const title = `${action} note for ${itemType}`;
+
+return {
+  as: "h2",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "button",
+  onClick: onClose,
+  "aria-label": "Close modal"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1.5rem;
+  flex: 1;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "form",
+  onSubmit: (e) => {
+    e.preventDefault();
+    args.fns.handleSave();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Note"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "textarea",
+  value: args.fns.note(),
+  onInput: (e) => args.fns.setNote(e.target.value),
+  placeholder: "Add your note here (max 500 characters)...",
+  rows: 5,
+  maxlength: 500,
+  disabled: args.fns.isSubmitting()
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  text-align: right;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const charCount = args.fns.note().length;
+const maxChars = 500;
+
+return {
+  as: "div",
+  text: `${charCount}/${maxChars} characters`
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1.5rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  text: "Cancel",
+  variant: "secondary",
+  onClick: onClose,
+  disabled: args.fns.isSubmitting()
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+const isSubmitting = args.fns.isSubmitting();
+
+return {
+  text: isSubmitting ? "Saving..." : "Save Note",
+  variant: "primary",
+  onClick: args.fns.handleSave,
+  disabled: isSubmitting
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "14"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+  ]
+}

@@ -1569,9 +1569,9 @@ return {
       id: "56"
       L: PageLayout
       P: {
-        displayOrder: 3
-        description: Admin layout wrapper
-        componentName: AdminLayout
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
       }
     }
     {
@@ -1586,9 +1586,9 @@ return {
       id: "58"
       L: PageLayout
       P: {
-        displayOrder: 1
-        description: YTO layout with navigation
-        componentName: Layout
+        displayOrder: 3
+        description: Admin layout wrapper
+        componentName: AdminLayout
       }
     }
   ]
@@ -1597,19 +1597,19 @@ return {
       id: e1
       T: Attr
       S: "1"
-      E: "7"
+      E: "2"
     }
     {
       id: e2
       T: Attr
       S: "1"
-      E: "8"
+      E: "7"
     }
     {
       id: e3
       T: Attr
       S: "1"
-      E: "2"
+      E: "8"
     }
     {
       id: e4
@@ -1619,267 +1619,267 @@ return {
     }
     {
       id: e5
-      T: Attr
-      S: "8"
-      E: "9"
+      T: PageLayout
+      S: "1"
+      E: "56"
     }
     {
       id: e6
+      T: PageLayout
+      S: "1"
+      E: "57"
+    }
+    {
+      id: e7
+      T: PageLayout
+      S: "1"
+      E: "58"
+    }
+    {
+      id: e8
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e7
+      id: e9
       T: Attr
       S: "2"
       E: "4"
     }
     {
-      id: e8
-      T: Attr
-      S: "25"
-      E: "26"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "9"
-      E: "10"
-    }
-    {
       id: e10
-      T: Attr
-      S: "9"
-      E: "21"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "9"
-      E: "17"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "4"
-      E: "6"
-    }
-    {
-      id: e13
       T: Attr
       S: "4"
       E: "5"
     }
     {
+      id: e11
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
       id: e14
       T: Attr
-      S: "26"
-      E: "27"
+      S: "9"
+      E: "17"
     }
     {
       id: e15
       T: Attr
-      S: "10"
-      E: "11"
+      S: "9"
+      E: "21"
     }
     {
       id: e16
       T: Attr
       S: "10"
-      E: "14"
+      E: "11"
     }
     {
       id: e17
       T: Attr
-      S: "21"
-      E: "22"
+      S: "10"
+      E: "14"
     }
     {
       id: e18
-      T: Attr
-      S: "21"
-      E: "24"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "21"
-      E: "23"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "17"
-      E: "19"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "17"
-      E: "18"
-    }
-    {
-      id: e22
-      T: Attr
-      S: "27"
-      E: "46"
-    }
-    {
-      id: e23
-      T: Attr
-      S: "27"
-      E: "32"
-    }
-    {
-      id: e24
-      T: Attr
-      S: "27"
-      E: "53"
-    }
-    {
-      id: e25
-      T: Attr
-      S: "27"
-      E: "29"
-    }
-    {
-      id: e26
-      T: Attr
-      S: "27"
-      E: "28"
-    }
-    {
-      id: e27
       T: Attr
       S: "11"
       E: "12"
     }
     {
-      id: e28
+      id: e19
       T: Attr
       S: "11"
       E: "13"
     }
     {
-      id: e29
+      id: e20
       T: Attr
       S: "14"
       E: "15"
     }
     {
-      id: e30
+      id: e21
       T: Attr
       S: "14"
       E: "16"
     }
     {
-      id: e31
+      id: e22
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e24
       T: Attr
       S: "19"
       E: "20"
     }
     {
+      id: e25
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "21"
+      E: "23"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "21"
+      E: "24"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "27"
+      E: "29"
+    }
+    {
       id: e32
       T: Attr
-      S: "46"
-      E: "48"
+      S: "27"
+      E: "32"
     }
     {
       id: e33
       T: Attr
-      S: "46"
-      E: "47"
+      S: "27"
+      E: "46"
     }
     {
       id: e34
       T: Attr
-      S: "46"
-      E: "49"
+      S: "27"
+      E: "53"
     }
     {
       id: e35
-      T: Attr
-      S: "46"
-      E: "50"
-    }
-    {
-      id: e36
-      T: Attr
-      S: "32"
-      E: "33"
-    }
-    {
-      id: e37
-      T: Attr
-      S: "53"
-      E: "54"
-    }
-    {
-      id: e38
-      T: Attr
-      S: "53"
-      E: "55"
-    }
-    {
-      id: e39
-      T: Attr
-      S: "29"
-      E: "31"
-    }
-    {
-      id: e40
       T: Attr
       S: "29"
       E: "30"
     }
     {
-      id: e41
+      id: e36
       T: Attr
-      S: "50"
-      E: "51"
+      S: "29"
+      E: "31"
     }
     {
-      id: e42
+      id: e37
       T: Attr
-      S: "50"
-      E: "52"
+      S: "32"
+      E: "33"
     }
     {
-      id: e43
+      id: e38
       T: Attr
       S: "33"
       E: "34"
     }
     {
-      id: e44
-      T: Attr
-      S: "33"
-      E: "43"
-    }
-    {
-      id: e45
+      id: e39
       T: Attr
       S: "33"
       E: "37"
     }
     {
-      id: e46
+      id: e40
       T: Attr
       S: "33"
       E: "40"
     }
     {
-      id: e47
+      id: e41
+      T: Attr
+      S: "33"
+      E: "43"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e43
       T: Attr
       S: "34"
       E: "36"
     }
     {
+      id: e44
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "37"
+      E: "39"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "40"
+      E: "42"
+    }
+    {
       id: e48
       T: Attr
-      S: "34"
-      E: "35"
+      S: "43"
+      E: "44"
     }
     {
       id: e49
@@ -1890,50 +1890,50 @@ return {
     {
       id: e50
       T: Attr
-      S: "43"
-      E: "44"
+      S: "46"
+      E: "47"
     }
     {
       id: e51
       T: Attr
-      S: "37"
-      E: "38"
+      S: "46"
+      E: "48"
     }
     {
       id: e52
       T: Attr
-      S: "37"
-      E: "39"
+      S: "46"
+      E: "49"
     }
     {
       id: e53
       T: Attr
-      S: "40"
-      E: "41"
+      S: "46"
+      E: "50"
     }
     {
       id: e54
       T: Attr
-      S: "40"
-      E: "42"
+      S: "50"
+      E: "51"
     }
     {
       id: e55
-      T: PageLayout
-      S: "1"
-      E: "56"
+      T: Attr
+      S: "50"
+      E: "52"
     }
     {
       id: e56
-      T: PageLayout
-      S: "1"
-      E: "57"
+      T: Attr
+      S: "53"
+      E: "54"
     }
     {
       id: e57
-      T: PageLayout
-      S: "1"
-      E: "58"
+      T: Attr
+      S: "53"
+      E: "55"
     }
   ]
 }

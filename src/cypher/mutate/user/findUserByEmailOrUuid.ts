@@ -1,4 +1,4 @@
-import type { Node, Session } from "neo4j-driver";
+import type { Node, RecordShape, Result, Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { processResult } from "~/cypher/conversion/processResult";
@@ -18,37 +18,9 @@ export async function findUserByEmailOrUuid(
     return getGuestOnlyResult(dbSession);
   }
 
-  let query = "";
+  const result = await findUserInternal(dbSession, uuid!, email!, true);
 
-  if (uuid) {
-    query = `
-    MATCH (u:User {uuid: $uuid})
-    `;
-  } else if (email) {
-    query = `
-    MATCH (u:User)
-    WHERE u.email = $email OR u.username = $email
-    `;
-  } else {
-    query = `
-    MATCH (u:User)
-    `;
-  }
-
-  query += `
-    OPTIONAL MATCH (u)-[rel1:UserSetting]->(s:UserSetting)
-    OPTIONAL MATCH (u)-[rel2:UserRole]->(r:Role)
-    OPTIONAL MATCH (u)-[rel3:UserProfileImage]->(p:File)
-    OPTIONAL MATCH (g:GlobalSetting)
-    RETURN u, s, collect(DISTINCT r) AS roles, p, g,
-           collect(DISTINCT rel1) AS userSettingRels,
-           collect(DISTINCT rel2) AS userRoleRels,
-           collect(DISTINCT rel3) AS profileImageRels
-  `;
-
-  const result = await dbSession.run(query, { email, uuid });
-
-  if (result.records.length === 0) {
+  if (!result || result.records.length === 0) {
     return getGuestOnlyResult(dbSession);
   }
 
@@ -115,22 +87,61 @@ export async function findUserByEmailOrUuid(
   };
 }
 
-export async function findUserByEmailSimple(
+async function findUserInternal(
   dbSession: Session,
-  email: null | string,
-): Promise<null | Vertex> {
-  if (!email) {
+  uuid: null | string,
+  emailOrUsername: null | string,
+  addOptionalData = false
+): Promise<null | Result<RecordShape>> {
+  if (!(emailOrUsername || uuid)) {
     return null;
   }
 
-  const query = `
-    MATCH (u:User {email: $email})
+  let query = "";
+
+  if (uuid) {
+    query = `
+    MATCH (u:User {uuid: $uuid})
+    `;
+  } else if (emailOrUsername) {
+    query = `
+    MATCH (u:User)
+    WHERE u.email = $emailOrUsername OR u.username = $emailOrUsername
+    `;
+  } else {
+    query = `
+    MATCH (u:User)
+    `;
+  }
+
+  if (addOptionalData) {
+    query += `
+      OPTIONAL MATCH (u)-[rel1:UserSetting]->(s:UserSetting)
+      OPTIONAL MATCH (u)-[rel2:UserRole]->(r:Role)
+      OPTIONAL MATCH (u)-[rel3:UserProfileImage]->(p:File)
+      OPTIONAL MATCH (g:GlobalSetting)
+      RETURN u, s, collect(DISTINCT r) AS roles, p, g,
+            collect(DISTINCT rel1) AS userSettingRels,
+            collect(DISTINCT rel2) AS userRoleRels,
+            collect(DISTINCT rel3) AS profileImageRels
+    `;
+  } else {
+    query += `
     RETURN u
-  `;
+    `;
+  }
+  return await dbSession.run(query, { emailOrUsername, uuid });
+}
 
-  const result = await dbSession.run(query, { email });
+export async function findUserVertexSimple(
+  dbSession: Session,
+  uuid: string,
+  emailOrUsername: null | string,
+  
+): Promise<null | Vertex> {
 
-  if (result.records.length === 0) {
+  const result = await findUserInternal(dbSession, uuid, emailOrUsername);
+  if (!result || result.records.length === 0) {
     return null;
   }
 

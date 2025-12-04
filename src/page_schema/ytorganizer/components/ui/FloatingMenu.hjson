@@ -286,30 +286,12 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: triggerIcon
-        defValue: carbon:overflow-menu-vertical
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: string
         defValue: bottom-end
         key: placement
       }
     }
     {
-      id: "10"
-      L: ComponentVariantOption
-      P: {
-        description: Bottom end placement
-        value: bottom-end
-        key: bottom-end
-      }
-    }
-    {
-      id: "11"
+      id: "9"
       L: ComponentVariantOption
       P: {
         description: Top start placement
@@ -318,7 +300,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "10"
       L: ComponentVariantOption
       P: {
         description: Top end placement
@@ -327,12 +309,30 @@ return {
       }
     }
     {
-      id: "13"
+      id: "11"
       L: ComponentVariantOption
       P: {
         description: Bottom start placement
         value: bottom-start
         key: bottom-start
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Bottom end placement
+        value: bottom-end
+        key: bottom-end
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: triggerIcon
+        defValue: carbon:overflow-menu-vertical
       }
     }
   ]
@@ -345,69 +345,69 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "5"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "5"
-      E: "6"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "6"
-      E: "7"
-    }
-    {
-      id: e7
       T: ComponentVariant
       S: "1"
       E: "8"
     }
     {
-      id: e8
+      id: e3
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "13"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
     }
     {
       id: e9
       T: ComponentVariantOption
-      S: "9"
-      E: "10"
+      S: "8"
+      E: "9"
     }
     {
       id: e10
       T: ComponentVariantOption
-      S: "9"
-      E: "11"
+      S: "8"
+      E: "10"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "9"
-      E: "12"
+      S: "8"
+      E: "11"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "9"
-      E: "13"
+      S: "8"
+      E: "12"
     }
   ]
 }

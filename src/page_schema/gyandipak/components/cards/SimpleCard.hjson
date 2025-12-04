@@ -1,0 +1,319 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        description: Simple card component for displaying content with optional header
+        key: SimpleCard
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+const variant = args.contextData.props?.variant || "default";
+const noPadding = args.contextData.props?.noPadding || false;
+
+let borderColor = args.theme.var.color.border;
+let backgroundColor = args.theme.var.color.background_dark_50;
+
+if (variant === 'error') {
+  borderColor = args.theme.var.color.error;
+  backgroundColor = args.theme.var.color.error_light_50;
+} else if (variant === 'warning') {
+  borderColor = args.theme.var.color.warning;
+  backgroundColor = args.theme.var.color.warning_light_50;
+} else if (variant === 'success') {
+  borderColor = args.theme.var.color.success;
+  backgroundColor = args.theme.var.color.success_light_50;
+}
+
+return `._id {
+  background: ${backgroundColor};
+  border: 1px solid ${borderColor};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  ${noPadding ? '' : `padding: ${args.theme.var.spacing.lg};`}
+  transition: box-shadow ${args.theme.var.animation.normal} ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const className = args.contextData.props?.class;
+return {
+  as: "div",
+  class: className
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+const noPadding = args.contextData.props?.noPadding || false;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  margin-bottom: ${args.theme.var.spacing.md};
+  ${noPadding ? `padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.lg} 0 ${args.theme.var.spacing.lg};` : ''}
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const title = args.contextData.props?.title || "";
+const icon = args.contextData.props?.icon || "";
+const noPadding = args.contextData.props?.noPadding || false;
+
+return {
+  as: "div",
+  hide: !title && !icon
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const icon = args.contextData.props?.icon || "";
+
+return {
+  as: "icon",
+  icon: icon,
+  width: 24,
+  height: 24,
+  hide: !icon
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const title = args.contextData.props?.title || "";
+
+return {
+  as: "h3",
+  text: title,
+  hide: !title
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+const noPadding = args.contextData.props?.noPadding || false;
+
+return `._id {
+  ${noPadding ? `padding: ${args.theme.var.spacing.lg};` : ''}
+}`;
+'''
+        displayOrder: 2
+        componentName: Slot
+        props:
+          '''
+const noPadding = args.contextData.props?.noPadding || false;
+
+return {
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: title
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: icon
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: default
+        key: variant
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Success state with green border and light green background
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Default card style with standard background and border
+        value: default
+        key: default
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Warning state with yellow border and light yellow background
+        value: warning
+        key: warning
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Error state with red border and light red background
+        value: error
+        key: error
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: noPadding
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e10
+      T: ComponentVariantOption
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: ComponentVariantOption
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e12
+      T: ComponentVariantOption
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e13
+      T: ComponentVariantOption
+      S: "9"
+      E: "13"
+    }
+  ]
+}

@@ -482,17 +482,17 @@ return {
       id: "14"
       L: PageLayout
       P: {
-        displayOrder: 2
-        componentName: LayoutContent
+        displayOrder: 1
+        description: YTO layout with navigation
+        componentName: Layout
       }
     }
     {
       id: "15"
       L: PageLayout
       P: {
-        displayOrder: 1
-        description: YTO layout with navigation
-        componentName: Layout
+        displayOrder: 2
+        componentName: LayoutContent
       }
     }
     {
@@ -514,87 +514,87 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "2"
-      E: "6"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "3"
-      E: "5"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "6"
-      E: "7"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "7"
-      E: "12"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "7"
-      E: "13"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "8"
-      E: "9"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "8"
-      E: "11"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "9"
-      E: "10"
-    }
-    {
-      id: e13
       T: PageLayout
       S: "1"
       E: "14"
     }
     {
-      id: e14
+      id: e3
       T: PageLayout
       S: "1"
       E: "15"
     }
     {
-      id: e15
+      id: e4
       T: PageLayout
       S: "1"
       E: "16"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "12"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9"
+      E: "10"
     }
   ]
 }

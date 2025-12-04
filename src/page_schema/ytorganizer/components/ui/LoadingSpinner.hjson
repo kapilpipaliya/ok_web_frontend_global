@@ -152,30 +152,21 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: ""
-        key: text
-      }
-    }
-    {
-      id: "6"
-      L: ComponentVariant
-      P: {
-        type: string
         defValue: primary
         key: color
       }
     }
     {
-      id: "7"
+      id: "6"
       L: ComponentVariantOption
       P: {
-        description: White color
-        value: white
-        key: white
+        description: Primary theme color
+        value: primary
+        key: primary
       }
     }
     {
-      id: "8"
+      id: "7"
       L: ComponentVariantOption
       P: {
         description: Muted theme color
@@ -184,12 +175,21 @@ return {
       }
     }
     {
-      id: "9"
+      id: "8"
       L: ComponentVariantOption
       P: {
-        description: Primary theme color
-        value: primary
-        key: primary
+        description: White color
+        value: white
+        key: white
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: text
       }
     }
     {
@@ -205,18 +205,18 @@ return {
       id: "11"
       L: ComponentVariantOption
       P: {
-        description: Large spinner (64px)
-        value: large
-        key: large
+        description: Small spinner (24px)
+        value: small
+        key: small
       }
     }
     {
       id: "12"
       L: ComponentVariantOption
       P: {
-        description: Small spinner (24px)
-        value: small
-        key: small
+        description: Large spinner (64px)
+        value: large
+        key: large
       }
     }
     {
@@ -238,51 +238,51 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "4"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e4
       T: ComponentVariant
       S: "1"
       E: "5"
     }
     {
-      id: e5
+      id: e3
       T: ComponentVariant
       S: "1"
-      E: "6"
+      E: "9"
     }
     {
-      id: e6
+      id: e4
       T: ComponentVariant
       S: "1"
       E: "10"
     }
     {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
       id: e7
       T: ComponentVariantOption
-      S: "6"
-      E: "7"
+      S: "5"
+      E: "6"
     }
     {
       id: e8
       T: ComponentVariantOption
-      S: "6"
-      E: "8"
+      S: "5"
+      E: "7"
     }
     {
       id: e9
       T: ComponentVariantOption
-      S: "6"
-      E: "9"
+      S: "5"
+      E: "8"
     }
     {
       id: e10

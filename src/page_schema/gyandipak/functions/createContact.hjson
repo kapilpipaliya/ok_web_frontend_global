@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Create a new contact
+        body:
+          '''const { name, phoneNumber, country, countryCode, remark, called, isUnavailable, notInterested } = args.contextData;
+
+if (!name || !name.trim()) {
+  throw new Error("Name is required");
+}
+
+if (!phoneNumber || !phoneNumber.trim()) {
+  throw new Error("Phone number is required");
+}
+
+const result = await args.session.executeWrite(async (tx) => {
+  // Check if phone number already exists
+  const existingResult = await tx.run(
+    `MATCH (c:Contact {phoneNumber: $phoneNumber})
+     RETURN c`,
+    { phoneNumber: phoneNumber.trim() }
+  );
+
+  if (existingResult.records.length > 0) {
+    throw new Error("A contact with this phone number already exists");
+  }
+
+  // Create new contact
+  const query = `
+    CREATE (c:Contact {
+      name: $name,
+      phoneNumber: $phoneNumber,
+      country: $country,
+      countryCode: $countryCode,
+      remark: $remark,
+      called: $called,
+      isUnavailable: $isUnavailable,
+      notInterested: $notInterested,
+      createdAt: datetime()
+    })
+    RETURN c
+  `;
+
+  const createResult = await tx.run(query, {
+    name: name.trim(),
+    phoneNumber: phoneNumber.trim(),
+    country: country?.trim() || '',
+    countryCode: countryCode?.trim() || '',
+    remark: remark?.trim() || '',
+    called: Boolean(called),
+    isUnavailable: Boolean(isUnavailable),
+    notInterested: Boolean(notInterested)
+  });
+
+  const node = createResult.records[0].get('c');
+  const contact = args.convertNodeToJson(node);
+
+  return contact;
+});
+
+return {
+  success: true,
+  data: { contact: result },
+  message: "Contact created successfully"
+};
+'''
+        key: createContact
+      }
+    }
+  ]
+  edges: []
+}

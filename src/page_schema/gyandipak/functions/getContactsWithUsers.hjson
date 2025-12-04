@@ -1,0 +1,161 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Get all contacts with their assigned users
+        body:
+          '''const { searchQuery = '', filterUsername = '', filterCountry = '', sortBy = 'createdAt', sortOrder = 'desc', limit = 20, offset = 0 } = args.contextData;
+
+// Build query parameters
+let params = {
+  limit: args.neo4jDriver.int(limit),
+  offset: args.neo4jDriver.int(offset)
+};
+
+// Build contact filter conditions (applied to Contact node)
+let contactWhereConditions = [];
+if (searchQuery) {
+  contactWhereConditions.push('(c.name CONTAINS $searchQuery OR c.phoneNumber CONTAINS $searchQuery OR c.country CONTAINS $searchQuery)');
+  params.searchQuery = searchQuery;
+}
+if (filterCountry) {
+  contactWhereConditions.push('c.country = $filterCountry');
+  params.filterCountry = filterCountry;
+}
+
+// Determine sort field mapping
+const sortFieldMap = {
+  name: 'c.name',
+  phoneNumber: 'c.phoneNumber',
+  country: 'c.country',
+  createdAt: 'c.createdAt',
+  called: 'c.called',
+  isUnavailable: 'c.isUnavailable',
+  notInterested: 'c.notInterested'
+};
+
+const sortField = sortFieldMap[sortBy] || 'c.createdAt';
+const sortDirection = sortOrder === 'asc' ? 'ASC' : 'DESC';
+
+// Build queries based on filter type
+let countQuery, query;
+
+if (filterUsername === 'unassigned') {
+  // Query for unassigned contacts only
+  const contactWhere = contactWhereConditions.length > 0 ? 'WHERE ' + contactWhereConditions.join(' AND ') : '';
+
+  countQuery = `
+    MATCH (c:Contact)
+    ${contactWhere}
+    WHERE NOT EXISTS((c)<-[:UserContact]-(:User))
+    RETURN count(c) as totalCount
+  `;
+
+  query = `
+    MATCH (c:Contact)
+    ${contactWhere}
+    WHERE NOT EXISTS((c)<-[:UserContact]-(:User))
+    WITH c
+    ORDER BY ${sortField} ${sortDirection}
+    SKIP $offset
+    LIMIT $limit
+    RETURN c, [] as users
+  `;
+} else if (filterUsername) {
+  // Query for contacts assigned to specific user
+  params.filterUsername = filterUsername;
+  const contactWhere = contactWhereConditions.length > 0 ? 'AND ' + contactWhereConditions.join(' AND ') : '';
+
+  countQuery = `
+    MATCH (u:User {username: $filterUsername})-[:UserContact]->(c:Contact)
+    ${contactWhere}
+    RETURN count(DISTINCT c) as totalCount
+  `;
+
+  query = `
+    MATCH (u:User {username: $filterUsername})-[:UserContact]->(c:Contact)
+    ${contactWhere}
+    WITH c, collect(DISTINCT u) as users
+    ORDER BY ${sortField} ${sortDirection}
+    SKIP $offset
+    LIMIT $limit
+    RETURN c, users
+  `;
+} else {
+  // Query for all contacts
+  const contactWhere = contactWhereConditions.length > 0 ? 'WHERE ' + contactWhereConditions.join(' AND ') : '';
+
+  countQuery = `
+    MATCH (c:Contact)
+    ${contactWhere}
+    RETURN count(c) as totalCount
+  `;
+
+  query = `
+    MATCH (c:Contact)
+    ${contactWhere}
+    OPTIONAL MATCH (u:User)-[:UserContact]->(c)
+    WITH c, collect(DISTINCT u) as users
+    ORDER BY ${sortField} ${sortDirection}
+    SKIP $offset
+    LIMIT $limit
+    RETURN c, users
+  `;
+}
+
+const countResult = await args.session.run(countQuery, params);
+const totalCountValue = countResult.records[0]?.get('totalCount');
+const totalCount = typeof totalCountValue === 'number' ? totalCountValue : (totalCountValue?.toInt ? totalCountValue.toInt() : 0);
+
+const result = await args.session.run(query, params);
+
+const contacts = result.records.map(record => {
+  const contact = args.convertNodeToJson(record.get('c'));
+  const users = record.get('users').map(u => u ? args.convertNodeToJson(u) : null).filter(u => u);
+
+  return {
+    contact,
+    users
+  };
+});
+
+// Get statistics
+const statsQuery = `
+  MATCH (c:Contact)
+  OPTIONAL MATCH (u:User)-[:UserContact]->(c)
+  RETURN 
+    count(DISTINCT c) as totalContacts,
+    count(DISTINCT CASE WHEN c.called = true THEN c END) as totalCalled,
+    count(DISTINCT CASE WHEN u IS NOT NULL THEN u END) as totalJoined
+`;
+
+const statsResult = await args.session.run(statsQuery);
+const stats = statsResult.records[0];
+
+const getIntValue = (value) => {
+  if (typeof value === 'number') return value;
+  if (value?.toInt) return value.toInt();
+  return 0;
+};
+
+return {
+  success: true,
+  data: {
+    contacts,
+    totalCount,
+    stats: {
+      totalContacts: getIntValue(stats.get('totalContacts')),
+      totalCalled: getIntValue(stats.get('totalCalled')),
+      totalJoined: getIntValue(stats.get('totalJoined'))
+    }
+  }
+};
+'''
+        key: getContactsWithUsers
+      }
+    }
+  ]
+  edges: []
+}

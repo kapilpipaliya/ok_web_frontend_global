@@ -5,7 +5,7 @@ export async function createActivityLog(
   action: string,
   entityType: string,
   entityId: string,
-  updatedByEmail: string,
+  updatedByEmail?: string,
   details?: string,
 ) {
   await dbSession.run(
@@ -22,7 +22,7 @@ export async function createActivityLog(
       details: details ?? null,
       entityId,
       entityType,
-      updatedByEmail,
+      updatedByEmail: updatedByEmail ?? null,
     },
   );
 }

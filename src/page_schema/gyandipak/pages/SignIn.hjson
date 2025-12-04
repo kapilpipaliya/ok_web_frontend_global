@@ -1,0 +1,233 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''const isLoading = args.atom(false);
+const username = args.atom("");
+const password = args.atom("");
+const login = async () => {
+  const response = await args.executeNamedServerFunction({
+    functionName: "signin",
+    contextData: { username: username(), password: password() }
+  });
+  if (response?.error) {
+    args.showErrorToast(response.error);
+  } else if (response?.result?.url) {
+    location.href = response.result.url;
+  } else {
+    const msg = response?.result?.message || "Operation failed";
+    args.showErrorToast(msg);
+  }
+}
+return {
+  enabled: () => true,
+  isLoading,
+  username,
+  password,
+  login
+}'''
+        key: SignIn
+        url: /signin
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: File
+      P: {
+        originalFileName: preview.png
+        fileName: preview_v11_2025-12-04T07:23:20.960Z.png
+        fileSize: 29934
+        subDomain: gyandipak
+        filePath: /Users/kapil/UploadFiles/gyandipak/2025/12/04/preview_v11_2025-12-04T07:23:20.960Z.png
+        checksum: 88bafacbc41bd0a25c1a0c8f37587879c2bc4369132d5e003bd17b3ae3bfabaa
+        mimeType: image/png
+        version: 11
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 auto;
+  gap: 1rem;
+  max-width: 600px;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        key: unique_4
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  text-align: center;
+  font-size: 2rem;
+}`;'''
+        as: div
+        displayOrder: 1
+        componentName: Html
+        key: unique_6
+        props:
+          '''return {
+  text: "SIGN IN"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  text: "GYAN DIPAK NUMBER"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextInput
+        key: unique_1
+        props:
+          '''return {
+  placeholder: "Gyan Dipank Number",
+  leftIcon: "mdi:user",
+  value: args.fns.username(),
+  onInput: (e) => args.fns.username(e.target.value),
+  autofocus: true
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 4
+        componentName: Html
+        key: unique_5
+        props:
+          '''return {
+  text: "GYAN DIPAK NUMBER"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: TextInput
+        key: unique_2
+        props:
+          '''return {
+  placeholder: "Gyan Dipank Number",
+  leftIcon: "mdi:password",
+  value: args.fns.password(),
+  onInput: (e) => args.fns.password(e.target.value),
+  autofocus: true
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: block !important;
+
+}`;'''
+        displayOrder: 6
+        componentName: Button
+        key: unique_7
+        props:
+          '''
+
+return {
+  text: "Sign In",
+  variant: "primary",
+  leftIcon: "carbon:refresh",
+  onClick: args.fns.login,
+  disabled: args.fns.isLoading()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PagePreview
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+  ]
+}

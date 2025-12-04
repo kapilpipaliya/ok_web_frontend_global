@@ -1,0 +1,49 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Delete a contact from the database
+        body:
+          '''const { contactId } = args.contextData;
+
+if (!contactId) {
+  throw new Error("Contact ID is required");
+}
+
+const result = await args.session.executeWrite(async (tx) => {
+  // Delete the contact and all its relationships
+  const query = `
+    MATCH (c:Contact)
+    WHERE elementId(c) = $contactId
+    DETACH DELETE c
+    RETURN count(c) as deletedCount
+  `;
+
+  const deleteResult = await tx.run(query, {
+    contactId: contactId
+  });
+
+  const deletedCountValue = deleteResult.records[0]?.get('deletedCount');
+  const deletedCount = typeof deletedCountValue === 'number' ? deletedCountValue : (deletedCountValue?.toInt ? deletedCountValue.toInt() : 0);
+
+  if (deletedCount === 0) {
+    throw new Error("Contact not found");
+  }
+
+  return { deletedCount };
+});
+
+return {
+  success: true,
+  data: result,
+  message: "Contact deleted successfully"
+};
+'''
+        key: deleteContact
+      }
+    }
+  ]
+  edges: []
+}

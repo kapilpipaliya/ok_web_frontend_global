@@ -1,0 +1,300 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: VirtualList
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+// Get props from context reactively
+const getItems = () => args.contextData.props?.items || [];
+const getItemHeight = () => args.contextData.props?.itemHeight || 90;
+const getOverscan = () => args.contextData.props?.overscan || 5;
+const getOnScrollCallback = () => args.contextData.props?.onScroll;
+
+// Virtualization state
+const [scrollTop, setScrollTop] = args.createSignal(0);
+const [scrollElement, setScrollElement] = args.createSignal(null);
+
+// Calculate visible range
+const getVisibleRange = () => {
+  const el = scrollElement();
+  const scroll = scrollTop();
+  const items = getItems();
+  const itemHeight = getItemHeight();
+  const overscan = getOverscan();
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+
+  // Use default container height if element not yet available
+  const containerHeight = el?.clientHeight || 600;
+
+  const startIndex = Math.max(0, Math.floor(scroll / height) - overscan);
+  const endIndex = Math.min(
+    items.length - 1,
+    Math.ceil((scroll + containerHeight) / height) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+// Get virtual items to render
+const getVirtualItems = () => {
+  const { start, end } = getVisibleRange();
+  const virtualItems = [];
+  const itemHeight = getItemHeight();
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+
+  for (let i = start; i <= end; i++) {
+    virtualItems.push({
+      index: i,
+      start: i * height,
+      size: height
+    });
+  }
+
+  return virtualItems;
+};
+
+// Total height of all items
+const getTotalSize = () => {
+  const items = getItems();
+  const itemHeight = getItemHeight();
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+  return items.length * height;
+};
+
+// Handle scroll
+const handleScroll = (e) => {
+  setScrollTop(e.target.scrollTop);
+
+  // Call custom onScroll callback if provided
+  const onScrollCallback = getOnScrollCallback();
+  if (onScrollCallback) {
+    onScrollCallback(e);
+  }
+};
+
+return {
+  scrollTop,
+  setScrollTop,
+  scrollElement,
+  setScrollElement,
+  getVisibleRange,
+  getVirtualItems,
+  getTotalSize,
+  handleScroll,
+  getItems
+};
+'''
+        componentName: Html
+        props:
+          '''
+const containerClass = args.contextData.props?.class || "";
+
+return {
+  as: "div",
+  class: containerClass,
+  ref: args.fns.setScrollElement,
+  onScroll: args.fns.handleScroll
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: relative;
+  width: 100%;
+  height: ${args.fns.getTotalSize()}px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        contextName: virtualItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  data: args.fns.getVirtualItems()
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        contextName: item
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+
+return `._id {
+  position: absolute;
+  top: ${virtualItem.start}px;
+  left: 0;
+  width: 100%;
+  height: ${virtualItem.size}px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+const item = args.fns.getItems()[virtualItem.index];
+
+return {
+  as: "div",
+  data: {
+    item: item,
+    virtualItem: virtualItem,
+    index: virtualItem.index
+  }
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: children
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: containerClass
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: items
+        defValue: []
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 90
+        key: itemHeight
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onScroll
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: number
+        defValue: 5
+        key: overscan
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+  ]
+}

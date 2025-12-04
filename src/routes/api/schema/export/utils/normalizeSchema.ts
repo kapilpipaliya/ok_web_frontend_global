@@ -26,11 +26,10 @@ export function normalizeSchema(schema: ExportedSchema): ExportedSchema {
   // DFS ordering variables
   const orderedIds: string[] = [];
   const visited = new Set<string>();
-  const stack = new Set<string>(); // <---- for cycle detection
+  const stack = new Set<string>(); // for cycle detection
 
   function dfs(vertexId: string, path: string[]) {
     if (stack.has(vertexId)) {
-      // Cycle detected → throw error with path
       const cyclePath = [...path, vertexId].join(" -> ");
       throw new Error(`Cycle detected in schema: ${cyclePath}`);
     }
@@ -43,13 +42,12 @@ export function normalizeSchema(schema: ExportedSchema): ExportedSchema {
 
     orderedIds.push(vertexId);
 
-    // Sort children (only Attr by displayOrder)
-    let children = childrenMap.get(vertexId) || [];
-    children = children.sort((a, b) => {
+    // Sort children (Attr and PageLayout by displayOrder)
+    let children = (childrenMap.get(vertexId) || []).sort((a, b) => {
       const va = vertexById.get(a);
       const vb = vertexById.get(b);
 
-      if (va?.L === "Attr" && vb?.L === "Attr") {
+      if (va?.L === vb?.L && (va?.L === "Attr" || va?.L === "PageLayout")) {
         const da = Number(va.P.displayOrder ?? Number.MAX_SAFE_INTEGER);
         const db = Number(vb.P.displayOrder ?? Number.MAX_SAFE_INTEGER);
         return da - db;
@@ -67,19 +65,17 @@ export function normalizeSchema(schema: ExportedSchema): ExportedSchema {
   }
 
   // Traverse root vertices
-  for (const rootId of rootVertexes) {
-    dfs(rootId, []);
-  }
+  for (const rootId of rootVertexes) dfs(rootId, []);
 
-  // In case of disconnected vertices or cycles handled as visited
+  // Handle disconnected graph parts
   for (const v of schema.vertexes) {
     if (!visited.has(v.id)) dfs(v.id, []);
   }
 
-  // Reorder vertices based on DFS order
+  // Reorder vertices by DFS order
   const orderedVertices = orderedIds.map((id) => vertexById.get(id)!);
 
-  // ===== NORMALIZATION (your original logic) =====
+  // ===== NORMALIZATION =====
   const idMap = new Map<string, string>();
   let idCounter = 1;
 
@@ -93,13 +89,31 @@ export function normalizeSchema(schema: ExportedSchema): ExportedSchema {
     P: vertex.P,
   }));
 
+  // ------ NEW PART: Sort edges based on DFS vertex order ------
+  // Edges are sorted by:
+  // DFS order of source vertex (S)
+  // If same source, then DFS order of target vertex (E)
+  const vertexOrderIndex = new Map<string, number>();
+  orderedIds.forEach((id, i) => vertexOrderIndex.set(id, i));
+
+  const orderedEdges = [...schema.edges].sort((e1, e2) => {
+    const s1 = vertexOrderIndex.get(e1.S) ?? Number.MAX_SAFE_INTEGER;
+    const s2 = vertexOrderIndex.get(e2.S) ?? Number.MAX_SAFE_INTEGER;
+    if (s1 !== s2) return s1 - s2;
+
+    const t1 = vertexOrderIndex.get(e1.E) ?? Number.MAX_SAFE_INTEGER;
+    const t2 = vertexOrderIndex.get(e2.E) ?? Number.MAX_SAFE_INTEGER;
+    return t1 - t2;
+  });
+
+  // Normalize edges with new order
   let edgeCounter = 1;
-  const normalizedEdges: ExportedEdge[] = schema.edges.map((edge) => ({
+  const normalizedEdges: ExportedEdge[] = orderedEdges.map((edge) => ({
     id: `e${edgeCounter++}`,
     T: edge.T,
     S: idMap.get(edge.S) || edge.S,
     E: idMap.get(edge.E) || edge.E,
-    ...(edge.P ? {P: edge.P} : {}) as {P: Record<string, unknown>},
+    ...(edge.P ? { P: edge.P } : {}) as { P: Record<string, unknown> },
   }));
 
   return {

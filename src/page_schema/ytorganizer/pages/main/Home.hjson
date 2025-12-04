@@ -675,16 +675,16 @@ return {
       id: "24"
       L: PageLayout
       P: {
-        displayOrder: 2
-        componentName: LayoutContent
+        displayOrder: 1
+        componentName: Layout
       }
     }
     {
       id: "25"
       L: PageLayout
       P: {
-        displayOrder: 1
-        componentName: Layout
+        displayOrder: 2
+        componentName: LayoutContent
       }
     }
   ]
@@ -697,45 +697,45 @@ return {
     }
     {
       id: e2
+      T: PageLayout
+      S: "1"
+      E: "24"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "25"
+    }
+    {
+      id: e4
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e3
-      T: Attr
-      S: "3"
-      E: "12"
-    }
-    {
-      id: e4
+      id: e5
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e5
+      id: e6
       T: Attr
       S: "3"
       E: "6"
     }
     {
-      id: e6
+      id: e7
       T: Attr
       S: "3"
       E: "11"
     }
     {
-      id: e7
-      T: Attr
-      S: "12"
-      E: "16"
-    }
-    {
       id: e8
       T: Attr
-      S: "12"
-      E: "13"
+      S: "3"
+      E: "12"
     }
     {
       id: e9
@@ -747,7 +747,7 @@ return {
       id: e10
       T: Attr
       S: "6"
-      E: "9"
+      E: "7"
     }
     {
       id: e11
@@ -759,7 +759,7 @@ return {
       id: e12
       T: Attr
       S: "6"
-      E: "7"
+      E: "9"
     }
     {
       id: e13
@@ -770,14 +770,14 @@ return {
     {
       id: e14
       T: Attr
-      S: "16"
-      E: "17"
+      S: "12"
+      E: "13"
     }
     {
       id: e15
       T: Attr
-      S: "13"
-      E: "15"
+      S: "12"
+      E: "16"
     }
     {
       id: e16
@@ -788,32 +788,32 @@ return {
     {
       id: e17
       T: Attr
-      S: "17"
-      E: "18"
+      S: "13"
+      E: "15"
     }
     {
       id: e18
       T: Attr
-      S: "18"
-      E: "21"
+      S: "16"
+      E: "17"
     }
     {
       id: e19
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e20
       T: Attr
       S: "18"
       E: "19"
     }
     {
-      id: e20
-      T: Attr
-      S: "21"
-      E: "22"
-    }
-    {
       id: e21
       T: Attr
-      S: "21"
-      E: "23"
+      S: "18"
+      E: "21"
     }
     {
       id: e22
@@ -823,15 +823,15 @@ return {
     }
     {
       id: e23
-      T: PageLayout
-      S: "1"
-      E: "24"
+      T: Attr
+      S: "21"
+      E: "22"
     }
     {
       id: e24
-      T: PageLayout
-      S: "1"
-      E: "25"
+      T: Attr
+      S: "21"
+      E: "23"
     }
   ]
 }

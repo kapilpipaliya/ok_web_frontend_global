@@ -1,0 +1,320 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SplitButton
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: args.contextData.props?.class
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 150px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  border-radius: ${args.theme.var.borderRadius.md} 0 0 ${args.theme.var.borderRadius.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: TomSelect
+        props:
+          '''
+const field = args.contextData.props?.field || "";
+const options = args.contextData.props?.options || [];
+const onFieldChange = args.contextData.props?.onFieldChange || (() => {});
+const disabled = args.contextData.props?.disabled || false;
+
+return {
+  value: field,
+  options: options,
+  onChange: (value) => {
+    onFieldChange(value);
+  },
+  disabled: disabled,
+  search: false,
+  placeholder: "Sort by..."
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 1px;
+  background: ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 ${args.theme.var.spacing.md};
+  min-width: ${args.theme.var.touch.minTarget};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  border: none;
+  border-radius: 0 ${args.theme.var.borderRadius.md} ${args.theme.var.borderRadius.md} 0;
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+
+  &:active:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_300};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const direction = args.contextData.props?.direction || "asc";
+const onDirectionToggle = args.contextData.props?.onDirectionToggle || (() => {});
+const disabled = args.contextData.props?.disabled || false;
+
+// Determine icon based on direction
+const icon = direction === "asc" ? "arrow-up" : "arrow-down";
+const ariaLabel = direction === "asc" ? "Sort ascending" : "Sort descending";
+
+return {
+  as: "button",
+  type: "button",
+  onClick: () => {
+    onDirectionToggle();
+  },
+  disabled: disabled,
+  "aria-label": ariaLabel,
+  title: ariaLabel
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const direction = args.contextData.props?.direction || "asc";
+const iconName = direction === "asc" ? "ph:arrow-up" : "ph:arrow-down";
+
+return {
+  as: "icon",
+  icon: iconName,
+  width: "20",
+  height: "20"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFieldChange
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onDirectionToggle
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: options
+        defValue: []
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: disabled
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: asc
+        key: direction
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: field
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+  ]
+}

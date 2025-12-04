@@ -34,7 +34,7 @@ import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getC
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 import type { JSX } from "solid-js";
 
-// Component Field just render PageAttrRender, it render Children Attr of Component, there will be one root Attr where we define fns, its run inside <DynamicComponent/> so it will work with nested functions too.
+// MOST Important: Component Field just render PageAttrRender, it render Children Attr of Component, there will be one root Attr where we define fns, its run inside <DynamicComponent/> so it will work with nested functions too.
 export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();

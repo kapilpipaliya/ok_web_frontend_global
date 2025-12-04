@@ -1,0 +1,2071 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+const contentType = args.createMemo(() => args.searchParams?.type || "channels");
+const detailId = args.createMemo(() => args.searchParams?.id || null);
+const searchQuery = args.createMemo(() => args.searchParams?.q || "");
+
+const isSearchView = args.createMemo(() => args.searchParams?.q !== undefined);
+const isFavouritesView = args.createMemo(() => contentType() === "favourites");
+const isExtensionView = args.createMemo(() => contentType() === "extension");
+const isChannelDetail = args.createMemo(() => contentType() === "channels" && args.searchParams?.id);
+const isPlaylistDetail = args.createMemo(() => contentType() === "playlists" && args.searchParams?.id);
+const isPlaylists = args.createMemo(() => !args.searchParams?.id && contentType() === "playlists");
+const isChannels = args.createMemo(() => !args.searchParams?.id && contentType() === "channels");
+
+const items = args.atom([]);
+const loading = args.atom(true);
+const searchTerm = args.atom("");
+const pageContent = args.atom(null);
+const userSetting = args.atom(null);
+const settingLoaded = args.atom(false);
+
+const isModalOpen = args.atom(false);
+const [modalData, setModalData] = args.createStore({ editMode: false, itemData: null });
+
+// Add videos to playlist modal
+const isAddVideosModalOpen = args.atom(false);
+
+// Add single video to playlist modal (for extension)
+const isAddVideoToPlaylistModalOpen = args.atom(false);
+const [addVideoToPlaylistData, setAddVideoToPlaylistData] = args.createStore({ videoId: null, videoTitle: null });
+
+// Sync current channel or playlist
+const isSyncing = args.atom(false);
+
+const isNoteModalOpen = args.atom(false);
+const [noteModalData, setNoteModalData] = args.createStore({ item: null, existingNote: "" });
+
+// ----- LOAD DATA -------
+const loadData = async () => {
+  loading(true);
+  try {
+    let fnName;
+    let fnArgs = {};
+    let onSuccess = () => { };
+    if (isPlaylists()) {
+      fnName = "getUserPlaylists";
+      // fnArgs = { sortBy: listSortBy() };
+      onSuccess = (data) => {
+        items(data.playlists || []);
+      };
+    } else if (isChannels()) {
+      fnName = "getUserChannels";
+      // fnArgs = { sortBy: listSortBy() };
+      onSuccess = (data) => {
+        items(data.channels || []);
+      }
+    } else if (isPlaylistDetail()) {
+      fnName = "getPlaylistVideos";
+      fnArgs = {
+        ["playlistId"]: detailId(),
+        // sortBy: detailSortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isChannelDetail()) {
+      fnName = "getChannelContents";
+      fnArgs = {
+        ["channelId"]: detailId(),
+        // sortBy: detailSortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isSearchView()) {
+      if (!searchQuery()?.trim()) {
+        items({ channels: [], playlists: [], videos: [], totalCount: 0 });
+        loading(false);
+        return;
+      }
+      fnName = "searchUserContent";
+      fnArgs = {
+        query: searchQuery().trim(),
+        type: "all",
+        // sortBy: searchSortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isFavouritesView()) {
+      fnName = "getUserFavourites";
+      fnArgs = {
+        // sortBy: favouritesSortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isExtensionView()) {
+      const content = pageContent();
+      if (!content) {
+        loading(false);
+        return;
+      }
+      fnName = "checkPageItemsExistence";
+      fnArgs = {
+        channels: content.channels || [],
+        playlists: content.playlists || [],
+        videos: content.videos || []
+      };
+      onSuccess = (data) => items(data);
+    }  else {
+      console.error("Unknown mode:");
+      loading(false);
+      return;
+    }
+
+    const response = await args.fns.executeYTOFunction(fnName, fnArgs);
+    if (response?.error) {
+      args.showErrorToast(response.error);
+      onSuccess(null);
+    } else if (response?.result?.success && response?.result?.data) {
+      onSuccess(response.result.data);
+    } else {
+      const msg = response?.result?.message || "Operation failed";
+      args.showErrorToast(msg);
+      onSuccess(null);
+    }
+  } catch (err) {
+    console.error("Unexpected load error:", err);
+    args.showErrorToast("Failed to load data");
+  } finally {
+    loading(false);
+  }
+};
+
+
+// Consolidated effect to watch URL params and sort changes
+// This prevents duplicate data loads by tracking both in a single effect
+args.createEffect(
+  args.on(
+    () => [
+      args.searchParams?.type,
+      args.searchParams?.id,
+      args.searchParams?.q,
+      () => "",//listSortBy(),
+      () => "",//detailSortBy(),
+      () => "",//searchSortBy(),
+      () => "",//favouritesSortBy(),
+      args.fns.selectedOwnership?.(), // Watch for ownership selection
+      args.fns.ownershipsLoading?.(), // Watch for ownerships loading state
+      pageContent() // Watch for page content changes (for extension view)
+    ],
+    (
+      [currentType, currentId, currentQuery, currentListSort, currentDetailSort, currentSearchSort, currentFavouritesSort, currentOwnership, currentOwnershipsLoading, currentPageContent],
+      [prevType, prevId, prevQuery, prevListSort, prevDetailSort, prevSearchSort, prevFavouritesSort, prevOwnership, prevOwnershipsLoading, prevPageContent] = []
+    ) => {
+      // If ownerships are still loading, keep loading state
+      if (currentOwnershipsLoading) {
+        return;
+      }
+
+      // If ownerships are loaded but none exist (and no ownership selected), stop loading
+      if (!currentOwnership) {
+        const ownerships = args.fns.ownerships?.() || [];
+        if (ownerships.length === 0) {
+          loading(false);
+        }
+        return;
+      }
+
+      // Check what changed
+      const urlParamsChanged = currentType !== prevType || currentId !== prevId || currentQuery !== prevQuery;
+      const listSortChanged = currentListSort !== prevListSort;
+      const detailSortChanged = currentDetailSort !== prevDetailSort;
+      const searchSortChanged = currentSearchSort !== prevSearchSort;
+      const favouritesSortChanged = currentFavouritesSort !== prevFavouritesSort;
+      const ownershipChanged = currentOwnership !== prevOwnership || currentOwnershipsLoading !== prevOwnershipsLoading;
+      const pageContentChanged = currentPageContent !== prevPageContent;
+
+      // Reset scroll positions if URL params changed
+      if (urlParamsChanged) {
+        // resetScrollPositions();
+      }
+
+      // Load data based on what changed
+      // Priority: Ownership change or URL change loads everything, sort changes only reload if view hasn't changed
+      if (urlParamsChanged || ownershipChanged) {
+        // URL or ownership changed, load appropriate data for new view
+        loadData();
+      } else if (pageContentChanged && isExtensionView()) {
+        // Page content changed in extension view, reload extension data only
+        loadData();
+      } else {
+        // Only sort changed, reload current view
+        if (listSortChanged && (isChannels() || isPlaylists())) {
+          loadData();
+        } else if (detailSortChanged && (isChannelDetail() || isPlaylistDetail())) {
+          loadData();
+        } else if (searchSortChanged && isSearchView()) {
+          loadData(currentQuery);
+        } else if (favouritesSortChanged && isFavouritesView()) {
+          loadData();
+        }
+      }
+    }
+  )
+);
+
+// ----- FILTER DATA -------
+// Helper to extract YouTube ID from item data (works for both raw and vertex data)
+const getItemYouTubeId = (itemData, type) => {
+  const item = itemData[type];
+  if (!item) return null;
+
+  // Raw extension data has .id property
+  if (itemData.extensionData) {
+    return item.id;
+  }
+
+  // Database vertex data has .P.youtubeId property
+  return item.P?.youtubeId || null;
+};
+// Helper to convert extension item to Vertex format
+const convertToVertex = (item, type) => {
+  const label = type === 'channel' ? 'Channel' : type === 'playlist' ? 'Playlist' : 'Video';
+  const youtubeId = item.id;
+
+  // Generate thumbnail URLs based on type
+  let thumbnailProps = {};
+  if (type === 'video') {
+    // For videos, use YouTube's thumbnail URLs
+    thumbnailProps = {
+      thumbnailDefault: `https://i.ytimg.com/vi/${youtubeId}/default.jpg`,
+      thumbnailMedium: `https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg`,
+      thumbnailHigh: `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
+      thumbnailStandard: `https://i.ytimg.com/vi/${youtubeId}/sddefault.jpg`,
+      thumbnailMaxres: `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`
+    };
+  } else if (type === 'channel' || type === 'playlist') {
+    // For channels and playlists, use thumbnail from extension if available
+    if (item.thumbnail) {
+      thumbnailProps = {
+        thumbnailHigh: item.thumbnail,
+        thumbnailMedium: item.thumbnail,
+        thumbnailDefault: item.thumbnail
+      };
+    }
+  }
+
+  return {
+    resultType: type,
+    [type]: {
+      id: `ext:${type}:${youtubeId}`,
+      L: [label],
+      P: {
+        youtubeId: youtubeId,
+        title: item.title || youtubeId,
+        ...thumbnailProps,
+        // Extension-specific metadata (defaults to false if not provided)
+        extensionExists: item.exists ?? false,
+        extensionIsCurrentPage: item.isCurrentPage ?? false
+      },
+      IN: {},
+      OUT: {}
+    },
+    [`${type}Setting`]: null
+  };
+};
+// Helper to process extension item (handles both full vertex data and raw extension data)
+const processExtensionItem = (itemData, type) => {
+  // Check if this is raw extension data that needs conversion
+  if (itemData.extensionData) {
+    // Convert raw extension data to vertex format
+    const rawItem = itemData[type];
+    return convertToVertex(rawItem, type);
+  } else {
+    // Already has full vertex data from database
+    // Add resultType and mark as existing
+    const item = itemData[type];
+    const itemSetting = itemData[`${type}Setting`];
+
+    // Add extension metadata to the item properties
+    if (item && item.P) {
+      item.P.extensionExists = true;
+      item.P.extensionIsCurrentPage = false; // Database items are never current page
+    }
+
+    return {
+      resultType: type,
+      [type]: item,
+      [`${type}Setting`]: itemSetting
+    };
+  }
+};
+
+const filteredItems = args.createMemo(() => {
+  const term = searchTerm().toLowerCase();
+  let items2 = [];
+
+  if (isSearchView()) {
+    const results = items();
+    if (results) {
+      if (results.channels) items2.push(...results.channels.map(x => ({ ...x, resultType: "channel" })));
+      if (results.playlists) items2.push(...results.playlists.map(x => ({ ...x, resultType: "playlist" })));
+      if (results.videos) items2.push(...results.videos.map(x => ({ ...x, resultType: "video" })));
+    }
+  }
+
+  else if (isFavouritesView()) {
+    const data = items();
+    if (data) {
+      if (data.channels)
+        items2.push(...data.channels.map(x => ({ ...x, resultType: "channel" })));
+
+      if (data.playlists)
+        items2.push(...data.playlists.map(x => ({ ...x, resultType: "playlist" })));
+
+      if (data.videos)
+        items2.push(...data.videos.map(x => ({ ...x, resultType: "video" })));
+    }
+  }
+
+  else if (isExtensionView()) {
+    const data = items();
+    if (data) {
+      const combined = [];
+      const seen = {
+        channel: new Set(),
+        playlist: new Set(),
+        video: new Set()
+      };
+
+      const addItem = (itemData, type) => {
+        const id = getItemYouTubeId(itemData, type);
+        if (!id || seen[type].has(id)) return;
+        seen[type].add(id);
+        combined.push(processExtensionItem(itemData, type));
+      };
+
+      if (data.channels) data.channels.forEach(x => addItem(x, "channel"));
+      if (data.playlists) data.playlists.forEach(x => addItem(x, "playlist"));
+      if (data.videos) data.videos.forEach(x => addItem(x, "video"));
+
+      items2 = combined;
+    }
+  }
+  else if (isChannelDetail()) {
+    const data = items();
+    items2 = data?.playlists || [];
+  }
+  else if (isPlaylistDetail()) {
+    const data = items();
+    items2 = data?.videos || [];
+  }
+  else if (isChannels()) {
+    items2 = items();
+  } else if (isPlaylists()) {
+    items2 = items();
+  }
+
+  if (!term) return items2;
+
+  return items2.filter(item => {
+    if (item.video) {
+      const v = item.video;
+      const title = v?.P?.title?.toLowerCase() || "";
+      const desc = v?.P?.description?.toLowerCase() || "";
+      const channelTitle = v?.P?.channelTitle?.toLowerCase() || "";
+      const note = item.videoSetting?.P?.note?.toLowerCase() || "";
+      return title.includes(term) || desc.includes(term) || channelTitle.includes(term) || note.includes(term);
+    }
+    if (item.playlist) {
+      const p = item.playlist;
+      const title = p?.P?.title?.toLowerCase() || "";
+      const desc = p?.P?.description?.toLowerCase() || "";
+      const custom = item.playlistSetting?.P?.customName?.toLowerCase() || "";
+      return title.includes(term) || desc.includes(term) || custom.includes(term);
+    }
+    if (item.channel) {
+      const c = item.channel;
+      const title = c?.P?.title?.toLowerCase() || "";
+      const desc = c?.P?.description?.toLowerCase() || "";
+      const custom = item.channelSetting?.P?.customName?.toLowerCase() || "";
+      return title.includes(term) || desc.includes(term) || custom.includes(term);
+    }
+    return false;
+  });
+});
+
+//------EXTRA FUNCTIONS----------
+// Unified helper: Infer item type from data structure
+const inferItemType = (data) => {
+  if (data.video) {
+    return { type: 'video', item: data.video, setting: data.videoSetting };
+  }
+  if (data.playlist) {
+    return { type: 'playlist', item: data.playlist, setting: data.playlistSetting };
+  }
+  if (data.channel) {
+    return { type: 'channel', item: data.channel, setting: data.channelSetting };
+  }
+  return null;
+};
+
+return {
+  enabled: true,
+  contentType,
+  detailId,
+  searchQuery,
+  isSearchView,
+  isFavouritesView,
+  isExtensionView,
+  isChannelDetail,
+  isPlaylistDetail,
+  isPlaylists,
+  isChannels,
+  searchTerm,
+  pageContent,
+  userSetting,
+  settingLoaded,
+  isAddVideosModalOpen,
+  isAddVideoToPlaylistModalOpen,
+  addVideoToPlaylistData,
+  setAddVideoToPlaylistData,
+  isSyncing,
+  items,
+  items,
+  loading,
+  loading,
+  isModalOpen,
+  modalData,
+  setModalData,
+  isNoteModalOpen,
+  noteModalData,
+  setNoteModalData,
+  filteredItems,
+  getPlaylistProcessingStatus: () => undefined,
+  getChannelProcessingStatus: () => undefined,
+  handleSearchSubmit: () => "",
+  formatProcessingStatus: () => "",
+  inferItemType
+};
+'''
+        url: /content2
+        key: Content2
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    // Initialize sort from URL (highest priority)
+    //const hasURLSort = args.fns.initializeSortFromURL();
+
+    // Load user setting (will be overridden by URL if present)
+    //args.fns.loadUserSetting();
+
+    // Initialize window width and add resize listener
+    //args.fns.handleResize();
+    //window.addEventListener('resize', args.fns.handleResize);
+
+    // Add message listener for extension view
+    //window.addEventListener('message', args.fns.handleMessage);
+  },
+  onCleanup: () => {
+    //window.removeEventListener('resize', args.fns.handleResize);
+    //window.removeEventListener('message', args.fns.handleMessage);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: File
+      P: {
+        originalFileName: preview.png
+        fileName: preview_v2_2025-12-03T18:50:21.297Z.png
+        fileSize: 93367
+        subDomain: ytorganizer
+        filePath: /Users/kapil/UploadFiles/ytorganizer/2025/12/03/preview_v2_2025-12-03T18:50:21.297Z.png
+        checksum: 6a75cd4612f7e4e822b0d1715fc1f6c6f8fec95045dc80edfafea068d4739bed
+        mimeType: image/png
+        version: 2
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem 1rem 0 1rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.xl};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Determine title based on view
+let title = "";
+if (args.fns.isSearchView()) {
+  title = "Search";
+} else if (args.fns.isFavouritesView()) {
+  title = "Favourites";
+} else if (args.fns.isExtensionView()) {
+  title = "Quick Add Channel, Playlist or Video";
+} else if (args.fns.isChannelDetail()) {
+  const data = args.fns.items();
+  title = data?.channel?.channel?.P?.title || "Channel Details";
+} else if (args.fns.isPlaylistDetail()) {
+  const data = args.fns.items();
+  title = data?.playlist?.playlist?.P?.title || "Playlist Details";
+} else if (args.fns.isChannels()) {
+  title = "Channels";
+} else if (args.fns.isPlaylists()) {
+  title = "Playlists";
+}
+
+return {
+  as: "h1",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: ProcessingStatus
+        props:
+          '''
+const data = args.fns.items();
+
+if (!(args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) || !data) {
+  return { hide: true };
+}
+
+const itemId = args.fns.isPlaylistDetail()
+  ? data.playlist?.playlist?.P?.youtubeId
+  : data.channel?.channel?.P?.youtubeId;
+
+const processingData = args.fns.isPlaylistDetail()
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : args.fns.getChannelProcessingStatus(itemId);
+
+if (!processingData) {
+  return { hide: true };
+}
+
+// Extract data from vertex format
+const item = args.fns.isPlaylistDetail()
+  ? processingData.playlist
+  : processingData.channel;
+
+if (!item?.P) {
+  return { hide: true };
+}
+
+let details = '';
+if (args.fns.isChannelDetail()) {
+  const processedPlaylists = item.P.processedPlaylists || 0;
+  const totalPlaylists = item.P.totalPlaylists || 0;
+  const processedVideos = item.P.processedVideos || 0;
+  const totalVideos = item.P.totalVideos || 0;
+  details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
+} else {
+  const processedVideos = item.P.processedVideos || 0;
+  const totalVideos = item.P.totalVideos || 0;
+  details = `${processedVideos}/${totalVideos} videos`;
+}
+
+return {
+  queueStatus: item.P.queueStatus,
+  progress: item.P.progress || 0,
+  type: args.fns.isPlaylistDetail() ? "playlist" : "channel",
+  details,
+  error: item.P.error || ''
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    /*flex-direction: column;*/
+    /*gap: 0.75rem;*/
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - hide search and actions when no accounts connected
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+return {
+  as: "div",
+  hide: hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Use form for search view to handle Enter key, div for others
+const as = args.fns.isSearchView() ? "form" : "div";
+const onSubmit = args.fns.isSearchView() ? args.fns.handleSearchSubmit : undefined;
+
+return {
+  as,
+  onSubmit
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+// Determine placeholder and handlers based on view
+let placeholder = "";
+let value = "";
+let onInput = null;
+let autofocus = false;
+
+if (args.fns.isSearchView()) {
+  placeholder = "Search channels, playlists, and videos...";
+  autofocus = true;
+} else if (args.fns.isFavouritesView()) {
+  placeholder = "Filter favourites...";
+} else if (args.fns.isExtensionView()) {
+  placeholder = "Filter items...";
+} else if (args.fns.isPlaylistDetail()) {
+  placeholder = "Search videos..."
+} else if (args.fns.isChannelDetail()) {
+  placeholder = "Search playlists...";
+} else if (args.fns.isPlaylists()) {
+  placeholder = "Search playlists...";
+} else if (args.fns.isChannels()) {
+  placeholder = "Search channels...";
+}
+
+return {
+  placeholder,
+  leftIcon: "mdi:magnify",
+  value: args.fns.searchTerm(),
+  onInput: (e) => args.fns.searchTerm(e.target.value),
+  autofocus
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+const text = (() => {
+  if (args.fns.isPlaylists()) return "Add Playlist";
+  if (args.fns.isChannels()) return "Add Channel";
+  return "";
+})();
+
+return {
+  text,
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: args.fns.openModal,
+  show: () => args.fns.isPlaylists() || args.fns.isChannels()
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+const isSyncing = args.fns.isSyncing();
+
+return {
+  text: isSyncing ? "Syncing..." : "Sync",
+  variant: "secondary",
+  leftIcon: "carbon:refresh",
+  onClick: args.fns.syncCurrentItem,
+  disabled: isSyncing
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  text: "Add Playlist",
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: () => {
+    const data = args.fns.items();
+    const channel = data?.channel?.channel;
+
+    if (!channel) {
+      args.showErrorToast("Channel data not loaded");
+      return;
+    }
+
+    args.fns.setModalData({
+      editMode: false,
+      contentType: "playlists",
+      channelId: channel.P.youtubeId
+    });
+    args.fns.isModalOpen(true);
+  },
+  show: args.fns.isChannelDetail() || args.fns.isPlaylists()
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  text: "Add Videos",
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: () => args.fns.isAddVideosModalOpen(true),
+  show: args.fns.isPlaylistDetail()
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    /*flex-direction: column;*/
+    /*align-items: flex-start;*/
+    gap: 0.5rem;
+    margin: 0 0 ${args.theme.var.spacing.md} 0;
+  }
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - hide sort controls when no accounts connected
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+return {
+  as: "div",
+  hide: args.fns.loading() || hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Determine description based on view
+let description = "";
+if (args.fns.isSearchView()) {
+  const results = args.fns.searchResults();
+  const totalCount = results?.totalCount || 0;
+  description = results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "";
+} else if (args.fns.isFavouritesView()) {
+  const items = args.fns.getFavouritesItems();
+  const totalCount = items.length;
+  description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isExtensionView()) {
+  const items = args.fns.filteredItems();
+  const totalCount = items.length;
+  description = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isChannelDetail()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} playlist${count !== 1 ? 's' : ''}`;
+} else if (args.fns.isPlaylistDetail()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} video${count !== 1 ? 's' : ''}`;
+} else if (args.fns.isChannels()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} channel${count !== 1 ? 's' : ''}`;
+} else if (args.fns.isPlaylists()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} playlist${count !== 1 ? 's' : ''}`;
+}
+
+return {
+  as: "p",
+  text: description
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: auto;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  ._id {
+
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: SplitButton
+        props:
+          '''
+// Hide sort controls on extension page
+const isExtension = args.fns.isExtensionView();
+if (isExtension) {
+  return { hide: true };
+}
+
+return { hide: true }; // temp
+
+// Get sort field, direction, and options from fns
+const currentField = args.fns.getCurrentSortField();
+const currentDirection = args.fns.getCurrentSortDirection();
+const options = args.fns.getCurrentSortOptions();
+
+return {
+  field: currentField,
+  direction: currentDirection,
+  options: options,
+  onFieldChange: (newField) => {
+    args.fns.handleSortFieldChange(newField);
+  },
+  onDirectionToggle: () => {
+    args.fns.handleSortDirectionToggle();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0 1.5rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0 1rem;
+  }
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.loading()
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "lg"
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.md};
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+let text;
+if (args.fns.isPlaylists()) {
+  text = "Loading playlists...";
+} else if (args.fns.isChannels()) {
+  text = "Loading channels...";
+} else if (args.fns.isChannelDetail()) {
+  text = "Loading playlists...";
+} else if (args.fns.isPlaylistDetail()) {
+  text = "Loading videos...";
+} else if (args.fns.isSearchView()) {
+  text = "Searching...";
+} else if (args.fns.isFavouritesView()) {
+  text = "Loading favourites...";
+} else if (args.fns.isExtensionView()) {
+  text = "Loading page content...";
+}
+
+return {
+  as: "p",
+  text
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: NoAccountsMessage
+        props:
+          '''
+// Check if no ownerships exist
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+return {
+  hide: args.fns.loading() || !hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 3
+        fns:
+          '''
+// Unified helper: Update item in array by ID
+const updateItemInArrayById = (items, itemId, itemKey, settingKey, newSetting) => {
+  return items.map(existingItem => {
+    if (existingItem[itemKey]?.P?.youtubeId === itemId) {
+      return { ...existingItem, [settingKey]: newSetting };
+    }
+    return existingItem;
+  });
+};
+
+// Unified helper: Update all views with new item data
+const updateAllViews = (itemInfo) => {
+  if (!itemInfo) return;
+
+  const { type, item, setting } = itemInfo;
+  const itemId = item.P?.youtubeId;
+  if (!itemId) return;
+
+  // Map of type to field names
+  const typeMap = {
+    channel: { itemKey: 'channel', settingKey: 'channelSetting', arrayKey: 'channels' },
+    playlist: { itemKey: 'playlist', settingKey: 'playlistSetting', arrayKey: 'playlists' },
+    video: { itemKey: 'video', settingKey: 'videoSetting', arrayKey: 'videos' }
+  };
+
+  const { itemKey, settingKey, arrayKey } = typeMap[type];
+
+  // Update list view
+  if ((args.fns.isChannels() || args.fns.isPlaylists()) && args.fns.contentType() === arrayKey) {
+    args.fns.items(updateItemInArrayById(args.fns.items(), itemId, itemKey, settingKey, setting));
+  }
+
+  // Update detail view
+  if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
+    const detail = args.fns.items();
+    if (!detail) return;
+
+    // Update arrays in detail view
+    if (detail[arrayKey]) {
+      const updated = updateItemInArrayById(detail[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...detail, [arrayKey]: updated });
+    }
+
+    // Update single item in detail view (channel/playlist object)
+    if (detail[type]?.[itemKey]?.P?.youtubeId === itemId) {
+      args.fns.items({ ...detail, [type]: { ...detail[type], [settingKey]: setting } });
+    }
+  }
+
+  // Update search results
+  if (args.fns.isSearchView()) {
+    const results = args.fns.items();
+    if (results?.[arrayKey]) {
+      const updated = updateItemInArrayById(results[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...results, [arrayKey]: updated });
+    }
+  }
+
+  // Update favourites
+  if (args.fns.isFavouritesView()) {
+    const favourites = args.fns.items();
+    if (favourites?.[arrayKey]) {
+      const updated = updateItemInArrayById(favourites[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...favourites, [arrayKey]: updated });
+    }
+  }
+
+  // Update extension view
+  if (args.fns.isExtensionView()) {
+    const extension = args.fns.items();
+    if (extension?.[arrayKey]) {
+      const updated = updateItemInArrayById(extension[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...extension, [arrayKey]: updated });
+    }
+  }
+};
+
+// Update item data after toggle favourite
+const updateItemDataAfterToggleFavourite = (updatedData) => {
+  const itemInfo = args.fns.inferItemType(updatedData);
+  updateAllViews(itemInfo);
+};
+
+// Update item data after note is saved
+const updateItemDataAfterNoteSave = (updatedData) => {
+  const itemInfo = args.fns.inferItemType(updatedData);
+  updateAllViews(itemInfo);
+};
+
+const openModal = () => {
+  args.fns.setModalData({ editMode: false, itemData: null });
+  args.fns.isModalOpen(true);
+};
+
+const closeModal = () => {
+  args.fns.isModalOpen(false);
+  args.fns.setModalData({ editMode: false, itemData: null });
+};
+
+const handleModalSave = async (saveData) => {
+  closeModal();
+
+  if (saveData?.editMode && saveData?.result) {
+    // Edit mode - update local data instead of refetching
+    args.fns.updateLocalItemSetting(saveData.result);
+  } else {
+    // Add mode, reload all data
+    await args.fns.loadData();
+  }
+};
+
+// Note modal functions
+const openNoteModal = (item, existingNote = "") => {
+  args.fns.setNoteModalData({ item, existingNote });
+  args.fns.isNoteModalOpen(true);
+};
+
+const closeNoteModal = () => {
+  args.fns.isNoteModalOpen(false);
+  args.fns.setNoteModalData({ item: null, existingNote: "" });
+};
+
+const saveNote = async (data) => {
+  try {
+    const result = await args.fns.executeYTOFunction("saveNote", data);
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message);
+
+      // Update item data locally
+      updateItemDataAfterNoteSave(result.result.data);
+
+      return result.result;
+    } else {
+      const errorMessage = result?.result?.message || "Failed to save note";
+      args.showErrorToast(errorMessage);
+      const error = new Error(errorMessage);
+      error.toastShown = true;
+      throw error;
+    }
+  } catch (error) {
+    // Only show toast for unexpected errors (network, etc.)
+    if (!error.toastShown) {
+      console.error("Unexpected error saving note:", error);
+      args.showErrorToast("Failed to save note");
+    }
+    throw error;
+  }
+};
+
+// Toggle favourite function
+const toggleFavourite = async (item) => {
+  try {
+    const result = await args.fns.executeYTOFunction("toggleFavourite", { item });
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message);
+
+      // Update item data locally
+      updateItemDataAfterToggleFavourite(result.result.data);
+
+      return result.result;
+    } else {
+      const errorMessage = result?.result?.message || "Failed to toggle favourite";
+      args.showErrorToast(errorMessage);
+      const error = new Error(errorMessage);
+      error.toastShown = true;
+      throw error;
+    }
+  } catch (error) {
+    // Only show toast for unexpected errors (network, etc.)
+    if (!error.toastShown) {
+      console.error("Unexpected error toggling favourite:", error);
+      args.showErrorToast("Failed to toggle favourite");
+    }
+    throw error;
+  }
+};
+
+const openInYouTube = (item) => {
+  const data = args.fns.contentType() === "playlists" ? item.playlist : item.channel;
+  const youtubeId = data?.P?.youtubeId || "";
+  const url = args.fns.contentType() === "playlists"
+    ? `https://www.youtube.com/playlist?list=${youtubeId}`
+    : `https://www.youtube.com/channel/${youtubeId}`;
+  window.open(url, "_blank");
+};
+
+const editCustomName = async (item) => {
+  args.fns.setModalData({ editMode: true, itemData: item });
+  args.fns.isModalOpen(true);
+};
+
+// Alias for Card component - converts item structure to match editCustomName expectations
+const openCustomNameModal = (itemData) => {
+  // If called with old signature (item, itemType, itemSetting), convert to new format
+  if (arguments.length > 1) {
+    const [item, itemType, itemSetting] = arguments;
+    const typeMap = {
+      video: { itemKey: 'video', settingKey: 'videoSetting' },
+      playlist: { itemKey: 'playlist', settingKey: 'playlistSetting' },
+      channel: { itemKey: 'channel', settingKey: 'channelSetting' }
+    };
+    const config = typeMap[itemType] || typeMap.channel;
+    itemData = { [config.itemKey]: item, [config.settingKey]: itemSetting };
+  }
+
+  args.fns.setModalData({ editMode: true, itemData });
+  args.fns.isModalOpen(true);
+};
+
+// Unified delete function for channels, playlists, and videos
+const deleteItem = async (item) => {
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  if (!rbConfirm) {
+    args.showErrorToast("Confirmation dialog not available");
+
+    return;
+  }
+
+  // Infer item type and extract data
+  const itemInfo = args.fns.inferItemType(item);
+  if (!itemInfo) {
+    args.showErrorToast("Cannot determine item type");
+
+    return;
+  }
+
+  const { type: itemType, item: data } = itemInfo;
+  const title = data?.P?.title || "this item";
+
+  // Build confirmation message with type-specific details
+  const deleteMessages = {
+    channel: "\n\nThis will also delete:\n• All playlists in this channel\n• All videos that are only in this channel's playlists",
+    playlist: "\n\nThis will also delete:\n• All videos that are only in this playlist",
+    video: () => {
+      const detail = args.fns.items();
+      const contextItem = detail?.playlist?.playlist;
+      const contextName = contextItem?.P?.title || "current view";
+      return `\n\nRemoving from ${contextName}.\n\nNote: This video will only be deleted if it doesn't exist in other playlists or the channel.`;
+    }
+  };
+
+  let message = `Are you sure you want to delete "${title}"?`;
+  const extraMessage = deleteMessages[itemType];
+  message += typeof extraMessage === 'function' ? extraMessage() : extraMessage;
+  message += "\n\nThis action cannot be undone!";
+
+  const confirmed = await rbConfirm({
+    title: `Delete ${itemType}`,
+    message,
+    confirmText: `Delete ${itemType}`,
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+
+  if (confirmed) {
+    try {
+      // Call appropriate delete function with unified pattern
+      const deleteConfig = {
+        channel: {
+          functionName: 'deleteChannel',
+          params: { items: [data], itemType, contextItems: [] },
+          onSuccess: loadData
+        },
+        playlist: {
+          functionName: 'deletePlaylist',
+          params: { items: [data], itemType, contextItems: [] },
+          onSuccess: loadData
+        },
+        video: {
+          functionName: 'deleteVideo',
+          params: () => {
+            const detail = args.fns.items();
+            const contextItem = detail?.playlist?.playlist;
+            if (!contextItem) {
+              throw new Error("Playlist information not found");
+            }
+            return { videos: [data], contextType: 'playlist', contextItems: [contextItem] };
+          },
+          onSuccess: loadDetailData
+        }
+      };
+
+      const config = deleteConfig[itemType];
+      const params = typeof config.params === 'function' ? config.params() : config.params;
+
+      const result = await args.fns.executeYTOFunction(config.functionName, params);
+
+      if (result?.result?.success) {
+        args.showSuccessToast(result.result.message);
+        await config.onSuccess();
+      } else {
+        args.showErrorToast(result?.result?.message || `Failed to delete ${itemType}`);
+      }
+    } catch (error) {
+      console.error(`Error deleting ${itemType}:`, error);
+      args.showErrorToast(error.message || `An error occurred while deleting ${itemType}`);
+    }
+  }
+};
+
+return {
+  updateItemInArrayById,
+  updateAllViews,
+  updateItemDataAfterToggleFavourite,
+  updateItemDataAfterNoteSave,
+  openModal,
+  closeModal,
+  handleModalSave,
+  openNoteModal,
+  closeNoteModal,
+  saveNote,
+  toggleFavourite,
+  openInYouTube,
+  editCustomName,
+  openCustomNameModal,
+  deleteItem,
+
+}'''
+        componentName: Html
+        props:
+          '''
+const hasItems = args.fns.filteredItems().length > 0;
+
+return {
+  as: "div",
+  hide: args.fns.loading() || !hasItems
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  overflow-y: auto;
+  height: calc(100vh - 280px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    height: calc(100vh - 72px);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: VirtualList
+        props:
+          '''
+const items = args.fns.filteredItems();
+
+return {
+  items: items || [],
+  itemHeight: 90,
+  overscan: 5
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        slotName: children
+        displayOrder: 1
+        componentName: Card
+        props:
+          '''
+// VirtualList provides item context with {item, virtualItem, index}
+const itemContext = args.contextData.item;
+if (!itemContext) return {};
+
+// Get the actual data from the context
+const itemData = itemContext.item;
+if (!itemData) return {};
+
+let item, itemSetting, itemType, processingStatus, showTypeBadge, itemId;
+
+if (args.fns.isPlaylists()) {
+  item = itemData.playlist;
+  itemId = item?.P?.youtubeId;
+  processingStatus = args.fns.getPlaylistProcessingStatus(itemId);
+  itemSetting = itemData.playlistSetting;
+  itemType = "playlist";
+  showTypeBadge = false;
+} else if (args.fns.isChannels()) {
+  item = itemData.channel;
+  itemId = item?.P?.youtubeId;
+  processingStatus = args.fns.getChannelProcessingStatus(itemId);
+  itemSetting = itemData.channelSetting;
+  itemType = "channel";
+  showTypeBadge = false;
+} else if (args.fns.isChannelDetail()) {
+  item = itemData.playlist;
+  itemId = item?.P?.youtubeId;
+  processingStatus = args.fns.getPlaylistProcessingStatus(itemId);
+  itemSetting = itemData.playlistSetting;
+  itemType = "playlist";
+  showTypeBadge = false;
+} else if (args.fns.isPlaylistDetail()) {
+  item = itemData.video;
+  itemId = item?.P?.youtubeId;
+  processingStatus = null;
+  itemSetting = itemData.videoSetting;
+  itemType = "video";
+  showTypeBadge = false;
+} else if (args.fns.isSearchView() || args.fns.isFavouritesView() || args.fns.isExtensionView()) {
+  const resultType = itemData.resultType;
+  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+  itemId = item?.P?.youtubeId;
+  processingStatus = resultType === "channel"
+    ? args.fns.getChannelProcessingStatus(itemId)
+    : resultType === "playlist"
+    ? args.fns.getPlaylistProcessingStatus(itemId)
+    : null;
+  itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
+  itemType = resultType;
+  showTypeBadge = true;
+}
+
+// Format processing queueStatus with detailed information
+processingStatus = args.fns.formatProcessingStatus(processingStatus, itemType);
+
+return {
+  item,
+  itemData,
+  itemSetting,
+  itemType,
+  showTypeBadge,
+  processingStatus
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: AddModal
+        props:
+          '''
+
+const modalData = args.fns.modalData;
+const isOpen = args.fns.isModalOpen();
+
+return {
+  isOpen: isOpen,
+  contentType: modalData.contentType,
+  editMode: modalData.editMode,
+  itemData: modalData.itemData,
+  channelId: modalData.channelId,
+  initialUrl: modalData.initialUrl,
+  onClose: args.fns.closeModal,
+  onSave: args.fns.handleModalSave
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: NoteModal
+        props:
+          '''
+return {
+  isOpen: args.fns.isNoteModalOpen,
+  onClose: args.fns.closeNoteModal,
+  item: args.fns.noteModalData.item,
+  existingNote: args.fns.noteModalData.existingNote,
+  onSave: args.fns.saveNote
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: AddVideosModal
+        props:
+          '''
+// Check which modal should be open and return function for isOpen
+const isDetailModalOpen = args.fns.isAddVideosModalOpen;
+const isExtensionModalOpen = args.fns.isAddVideoToPlaylistModalOpen;
+
+// Determine if any modal is open
+const getIsDetailOpen = isDetailModalOpen?.() || false;
+const getIsExtensionOpen = isExtensionModalOpen?.() || false;
+
+let playlist = null;
+let videoUrl = "";
+let onClose = null;
+let onSuccess = null;
+
+if (getIsDetailOpen) {
+  // Detail view: adding videos to specific playlist
+  const data = args.fns.detailData();
+  const playlistData = data?.playlist;
+  const playlistVertex = playlistData?.playlist;
+  const ownership = playlistData?.ownership;
+
+  // Add ownership key to playlist object for modal to use
+  playlist = playlistVertex ? {
+    ...playlistVertex,
+    ownershipId: ownership?.P?.key
+  } : null;
+
+  onClose = () => args.fns.isAddVideosModalOpen(false);
+  onSuccess = args.fns.loadDetailData;
+} else if (getIsExtensionOpen) {
+  // Extension view: user selects playlist, pre-filled video URL
+  const videoData = args.fns.addVideoToPlaylistData;
+  videoUrl = videoData.videoId ? `https://www.youtube.com/watch?v=${videoData.videoId}` : "";
+  playlist = null; // User will select from dropdown
+  onClose = () => args.fns.isAddVideoToPlaylistModalOpen(false);
+  onSuccess = () => args.fns.loadData?.();
+}
+
+// Return isOpen as a function that checks both modal states
+return {
+  isOpen: () => isDetailModalOpen?.() || isExtensionModalOpen?.() || false,
+  onClose: onClose,
+  playlist: playlist,
+  videoUrl: videoUrl,
+  onSuccess: onSuccess
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 3rem 2rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - don't show this state if no accounts
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+const hasItems =  args.fns.filteredItems().length > 0;
+
+return {
+  as: "div",
+  hide: args.fns.loading() || hasItems || hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+let icon;
+if (args.fns.isPlaylists()) {
+  icon = "mdi:playlist-play";
+} else if (args.fns.isChannels()) {
+  icon = "mdi:youtube";
+} else if (args.fns.isChannelDetail()) {
+  icon = "mdi:playlist-remove";
+} else if (args.fns.isPlaylistDetail()) {
+  icon = "mdi:video-off";
+} else if (args.fns.isSearchView()) {
+  icon = "mdi:magnify";
+} else if (args.fns.isFavouritesView()) {
+  icon = "carbon:favorite";
+} else if (args.fns.isExtensionView()) {
+  icon = "carbon:data-1";
+}
+
+return {
+  as: "icon",
+  icon,
+  width: 64,
+  height: 64
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const hasSearchTerm = args.fns.searchTerm().length > 0;
+const query = args.searchParams?.q || "";
+
+let title;
+if (hasSearchTerm) {
+  title = "No results found";
+} else if (args.fns.isChannels()) {
+  title = "No channels yet";
+} else if (args.fns.isPlaylists()) {
+  title = "No playlists yet";
+} else if (args.fns.isChannelDetail()) {
+  title = "No playlists found";
+} else if (args.fns.isPlaylistDetail()) {
+  title = "No videos found";
+} else if (args.fns.isSearchView()) {
+  title = "Enter a search query";
+} else if (args.fns.isFavouritesView()) {
+  title = "No favourite items yet";
+} else if (args.fns.isExtensionView()) {
+  title = "No Content Found";
+}
+
+return {
+  as: "h3",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const hasSearchTerm = args.fns.searchTerm().length > 0;
+let text;
+if (hasSearchTerm) {
+  text = "Try adjusting your search terms";
+} else if (args.fns.isChannels()) {
+  text = "Start by adding some YouTube channels to track your content";
+} else if (args.fns.isPlaylists()) {
+  text = "Start by adding some YouTube playlists to organize your content";
+} else if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
+  text = ""; // Detail view doesn't show description (only has 2 children)
+} else if (args.fns.isSearchView()) {
+  text = "to find channels, playlists, and videos";
+} else if (args.fns.isFavouritesView()) {
+  text = "Start by adding channels, playlists, or videos to your favourites!";
+} else if (args.fns.isExtensionView()) {
+  text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
+}
+
+return {
+  as: "p",
+  text,
+  hide: args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "34"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: PagePreview
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "33"
+    }
+    {
+      id: e4
+      T: PageLayout
+      S: "1"
+      E: "34"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "18"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "4"
+      E: "15"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "10"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "7"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "11"
+      E: "14"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "18"
+      E: "22"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "18"
+      E: "23"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "18"
+      E: "29"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "23"
+      E: "26"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "23"
+      E: "28"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "29"
+      E: "31"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "29"
+      E: "32"
+    }
+  ]
+}

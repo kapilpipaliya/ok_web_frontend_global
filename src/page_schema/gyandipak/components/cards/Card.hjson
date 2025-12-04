@@ -1,0 +1,2004 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: Card
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 0.75rem;
+  cursor: default;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  height: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  position: relative;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_100};
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+// Common function to get effective setting (prefers live polling data over stale itemSetting)
+const getEffectiveSetting = () => {
+  const item = args.contextData.props?.item;
+  const itemType = args.contextData.props?.itemType;
+  const processingStatus = args.contextData.props?.processingStatus;
+debugger
+  // Prefer processing queueStatus (live updates from polling) over item (stale data)
+  return (itemType === "playlist" && processingStatus?.playlist) ||
+         (itemType === "channel" && processingStatus?.channel) ||
+         item;
+};
+
+return {
+  getEffectiveSetting
+};
+'''
+        componentName: Html
+        props:
+          '''
+const containerClass = args.contextData.props?.class || "";
+return {
+  as: "div",
+  class: containerClass,
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100px;
+  height: 56px;
+  background-color: ${args.theme.var.color.background_light_300};
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  text-decoration: none;
+  display: block;
+  position: relative;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if this is an extension item (has extensionExists property)
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+
+// Priority order: maxres > standard > high > medium > default > legacy thumbnailUrl/thumbnail
+const thumbnailUrl = item?.P?.thumbnailMaxres ||
+                     item?.P?.thumbnailStandard ||
+                     item?.P?.thumbnailHigh ||
+                     item?.P?.thumbnailMedium ||
+                     item?.P?.thumbnailDefault ||
+                     item?.P?.thumbnailUrl ||
+                     item?.P?.thumbnail || "";
+
+const youtubeId = item?.P?.youtubeId || "";
+
+let href, target;
+if (itemType === "video") {
+  href = args.fns.getYouTubeUrl?.(item, itemType);
+  target = "_blank";
+} else if (itemType === "playlist") {
+  href = `/content?type=playlists&id=${youtubeId}`;
+  target = "_self";
+} else {
+  href = `/content?type=channels&id=${youtubeId}`;
+  target = "_self";
+}
+
+return {
+  as: "a",
+  href: href,
+  target: target,
+  rel: target === "_blank" ? "noopener" : "",
+  style: thumbnailUrl ? `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` : "",
+  onClick: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Check if running in extension iframe
+    const isInExtension = window.self !== window.top;
+
+    // Check if this is an extension item that's not added yet
+    const isExtensionItem = item?.P?.extensionExists !== undefined;
+    const notAdded = isExtensionItem && !item?.P?.extensionExists;
+
+    if (itemType === "video") {
+      if (isInExtension) {
+        // Use common function to open in parent tab when in extension
+        const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`;
+        args.fns.openYouTubeInParentTab(youtubeUrl);
+      } else {
+        // Use video player when in main app
+        args.fns.playVideo?.(item);
+      }
+    } else {
+      // Handle playlists and channels
+      const youtubeUrl = args.fns.getYouTubeUrl?.(item, itemType);
+
+      const contentType = itemType === "playlist" ? "playlists" : "channels";
+
+      if (notAdded) {
+        args.fns.openYouTubeInParentTab(youtubeUrl);
+      } else {
+        args.navigate(`/content?type=${contentType}&id=${youtubeId}`);
+      }
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  box-sizing: border-box;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if thumbnail exists
+const thumbnailUrl = item?.P?.thumbnailMaxres ||
+                     item?.P?.thumbnailStandard ||
+                     item?.P?.thumbnailHigh ||
+                     item?.P?.thumbnailMedium ||
+                     item?.P?.thumbnailDefault ||
+                     item?.P?.thumbnailUrl ||
+                     item?.P?.thumbnail || "";
+
+// Only show placeholder when no thumbnail exists
+return {
+  as: "div",
+  hide: !!thumbnailUrl
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  opacity: 0.5;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const itemType = args.contextData.props?.itemType;
+
+let iconName;
+if (itemType === "video") {
+  iconName = "mdi:video-outline";
+} else if (itemType === "playlist") {
+  iconName = "mdi:playlist-play";
+} else {
+  iconName = "mdi:youtube";
+}
+
+return {
+  as: "icon",
+  icon: iconName,
+  width: 32,
+  height: 32
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.65rem;
+  color: ${args.theme.var.color.muted};
+  opacity: 0.7;
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const itemType = args.contextData.props?.itemType;
+
+let text;
+if (itemType === "video") {
+  text = "No Preview";
+} else if (itemType === "playlist") {
+  text = "Playlist";
+} else {
+  text = "Channel";
+}
+
+return {
+  as: "span",
+  text: text
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: ${args.theme.var.color.primary};
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+const currentVideo = args.fns?.currentVideo;
+
+const isCurrentlyPlaying = itemType === "video" &&
+  currentVideo?.() &&
+  item?.P?.youtubeId === currentVideo()?.P?.youtubeId;
+
+return {
+  as: "div",
+  hide: !isCurrentlyPlaying
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary_text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:play-filled",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow: hidden;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: inline-flex;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  border-radius: 0.25rem;
+  width: fit-content;
+}
+
+._id[data-color="error"] {
+  background: ${args.theme.var.color.error_light_100};
+  color: ${args.theme.var.color.error_light_100_text};
+}
+
+._id[data-color="success"] {
+  background: ${args.theme.var.color.success_light_100};
+  color: ${args.theme.var.color.success_light_100_text};
+}
+
+._id[data-color="info"] {
+  background: ${args.theme.var.color.info_light_100};
+  color: ${args.theme.var.color.info_light_100_text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showTypeBadge = args.contextData.props?.showTypeBadge || false;
+const itemType = args.contextData.props?.itemType;
+
+let text, color;
+if (itemType === "channel") {
+  text = "Channel";
+  color = "error";
+} else if (itemType === "playlist") {
+  text = "Playlist";
+  color = "success";
+} else {
+  text = "Video";
+  color = "info";
+}
+
+return {
+  as: "span",
+  text: text,
+  "data-color": color,
+  hide: !showTypeBadge
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+
+const baseTitle = item?.P?.title || "Untitled";
+const customName = itemSetting?.P?.customName;
+
+// For playlists, channels, and videos, show custom name in brackets if it exists
+let displayTitle = baseTitle;
+if (customName && (itemType === "playlist" || itemType === "channel" || itemType === "video")) {
+  displayTitle = `${baseTitle} (${customName})`;
+}
+
+return {
+  as: "h3",
+  text: displayTitle
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+const queueStatus = effectiveSetting?.P?.queueStatus;
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+
+// Map color names to theme colors
+const colorMap = {
+  blue: args.theme.var.color.info,
+  yellow: args.theme.var.color.warning,
+  orange: args.theme.var.color.warning,
+  gray: args.theme.var.color.muted,
+  green: args.theme.var.color.success,
+  red: args.theme.var.color.error
+};
+
+const borderColor = colorMap[statusInfo?.color] || args.theme.var.color.info;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-left: 3px solid ${borderColor};
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2.5
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if this is an extension item (has extensionExists property)
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+
+// Hide for extension items (we show existence badge instead)
+if (isExtensionItem) {
+  return { hide: true };
+}
+
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+// Get queueStatus from effective setting
+const queueStatus = effectiveSetting?.P?.queueStatus;
+
+// Hide for videos (they don't have processing queueStatus)
+if (itemType === "video") {
+  return { hide: true };
+}
+
+// Hide if no queueStatus
+if (!queueStatus) {
+  return { hide: true };
+}
+
+// Hide if queueStatus is "completed" (only show non-completed statuses)
+if (queueStatus === "completed") {
+  return { hide: true };
+}
+
+// Get queueStatus info from constants
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+
+// Only show if we have valid queueStatus info
+if (!statusInfo) {
+  return { hide: true };
+}
+
+// Map color names to theme colors
+const colorMap = {
+  blue: args.theme.var.color.info,
+  yellow: args.theme.var.color.warning,
+  orange: args.theme.var.color.warning,
+  gray: args.theme.var.color.muted,
+  green: args.theme.var.color.success,
+  red: args.theme.var.color.error
+};
+
+const borderColor = colorMap[statusInfo.color] || args.theme.var.color.info;
+
+return {
+  as: "div",
+  "data-color": statusInfo.color
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+const queueStatus = effectiveSetting?.P?.queueStatus;
+
+// Get queueStatus info from constants
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+
+// Use icon from queueStatus info, fallback to time icon
+const iconName = statusInfo?.icon || 'carbon:time';
+
+return {
+  as: "icon",
+  icon: iconName,
+  width: 14,
+  height: 14
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-weight: 500;
+  line-height: 1.3;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+// Get queueStatus and progress from effective setting
+const queueStatus = effectiveSetting?.P?.queueStatus || '';
+const progress = effectiveSetting?.P?.progress || 0;
+const processedCount = effectiveSetting?.P?.processedPlaylists || effectiveSetting?.P?.processedVideos || 0;
+const totalCount = effectiveSetting?.P?.totalPlaylists || effectiveSetting?.P?.totalVideos || 0;
+
+// Get queueStatus info from constants
+const statusInfo = args.fns.getStatusInfo?.(queueStatus);
+
+let statusText = '';
+
+if (statusInfo) {
+  // Use label from queueStatus info
+  statusText = statusInfo.label;
+
+  // Add progress percentage for processing queueStatus
+  if (queueStatus === 'processing' && progress > 0) {
+    statusText += ` ${progress}%`;
+  }
+
+  // Add processed/total counts if available
+  if (queueStatus === 'processing' && totalCount > 0) {
+    statusText += ` (${processedCount}/${totalCount})`;
+  }
+} else {
+  // Fallback to basic queueStatus display
+  statusText = queueStatus || 'Unknown';
+}
+
+return {
+  as: "span",
+  text: statusText
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.7rem;
+  color: ${args.theme.var.color.error};
+  line-height: 1.3;
+  margin-top: 0.125rem;
+  font-style: italic;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+// Get queueStatus and error from effective setting
+const queueStatus = effectiveSetting?.P?.queueStatus || '';
+const error = effectiveSetting?.P?.error || '';
+
+// Only show error for failed or completed_with_errors queueStatus
+if ((queueStatus !== 'failed' && queueStatus !== 'completed_with_errors') || !error) {
+  return { hide: true };
+}
+
+return {
+  as: "div",
+  text: error
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  width: fit-content;
+}`;
+'''
+        displayOrder: 2.7
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+
+// Check if this is an extension item (has extensionExists property)
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+
+// Only show for extension items
+if (!isExtensionItem) {
+  return { hide: true };
+}
+
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+const item = args.contextData.props?.item;
+const exists = item?.P?.extensionExists || false;
+
+let iconColor;
+if (exists) {
+  iconColor = args.theme.var.color.success;
+}
+
+return `._id {
+  flex-shrink: 0;
+  color: ${iconColor};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const exists = item?.P?.extensionExists || false;
+
+// Only show icon for already added items (not for current page)
+if (!exists) {
+  return { hide: true };
+}
+
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: ${args.theme.var.color.error};
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+const isFavourite = itemSetting?.P?.isFavourite || false;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  as: "button",
+  hide: !isFavourite || notSaved,
+  onClick: async (e) => {
+    e.stopPropagation();
+    await args.fns.toggleFavourite?.(item);
+  },
+  title: isFavourite ? "Remove from favourites" : "Add to favourites"
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:favorite-filled",
+  width: 14,
+  height: 14
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  transition: all 0.2s ease;
+  line-height: 1.2;
+  flex-shrink: 0;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    border-color: ${args.theme.var.color.primary_dark_200};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+
+// Check if this is an extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined || item?.P?.extensionIsCurrentPage !== undefined;
+
+// Only show for extension items
+if (!isExtensionItem) {
+  return { hide: true };
+}
+
+const exists = item?.P?.extensionExists || false;
+
+// Only show button for items not already added
+if (exists) {
+  return { hide: true };
+}
+
+const youtubeId = item?.P?.youtubeId;
+const itemType = args.contextData.props?.itemType;
+
+return {
+  as: "button",
+  text: "Add",
+  onClick: (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (itemType === 'video') {
+      // For videos, open add video to playlist modal
+      const videoTitle = item?.P?.title || '';
+
+      args.fns?.setAddVideoToPlaylistData?.({
+        videoId: youtubeId,
+        videoTitle: videoTitle
+      });
+      args.fns?.isAddVideoToPlaylistModalOpen?.(true);
+      return;
+    }
+
+    // For channels and playlists, open add modal with prefilled URL
+    // Use getYouTubeUrl function to generate proper URL (handles @handle, channel IDs, etc)
+    const url = args.fns?.getYouTubeUrl?.(item, itemType);
+    const contentType = itemType === 'channel' ? 'channels' : 'playlists';
+
+    // Set modal data with content type and initial URL
+    args.fns?.setModalData?.({
+      editMode: false,
+      itemData: null,
+      contentType: contentType,
+      initialUrl: url
+    });
+
+    // Open the modal
+    args.fns?.isModalOpen?.(true);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: ${args.theme.var.color.primary};
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    color: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  as: "button",
+  hide: itemType === "channel" || notSaved,
+  onClick: async (e) => {
+    e.stopPropagation();
+    if (item) {
+      if (itemType === "video") {
+        args.fns.addToQueue?.(item);
+      } else if (itemType === "playlist") {
+        args.fns.addPlaylistToQueue?.(item);
+      }
+    }
+  },
+  title: itemType === "playlist" ? "Add playlist to queue" : "Add to queue",
+  "aria-label": itemType === "playlist" ? "Add playlist to queue" : "Add to queue"
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:add",
+  width: 14,
+  height: 14
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+
+// Check if this is an extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+
+let metaText = "";
+
+if (itemType === "channel") {
+  const subscriberCount = item?.P?.subscriberCount || 0;
+  const videoCount = item?.P?.videoCount ?? 0;
+
+  let parts = [];
+  if (subscriberCount >= 1000000) {
+    parts.push(`${(subscriberCount / 1000000).toFixed(1)}M subscribers`);
+  } else if (subscriberCount >= 1000) {
+    parts.push(`${(subscriberCount / 1000).toFixed(1)}K subscribers`);
+  } else if (subscriberCount > 0) {
+    parts.push(`${subscriberCount} subscriber${subscriberCount !== 1 ? 's' : ''}`);
+  }
+
+  // Don't show video count for extension items
+  if (!isExtensionItem) {
+    parts.push(`${videoCount} video${videoCount !== 1 ? 's' : ''}`);
+  }
+  metaText = parts.join(' • ');
+} else if (itemType === "playlist") {
+  const videoCount = item?.P?.itemCount ?? 0;
+  const channelTitle = item?.P?.channelTitle || "";
+
+  // Don't show video count for extension items
+  if (!isExtensionItem) {
+    metaText = `${videoCount} video${videoCount !== 1 ? 's' : ''}`;
+  }
+
+  // If there's a parent channel, show it
+  if (channelTitle) {
+    if (metaText) {
+      metaText += ` • ${channelTitle}`;
+    } else {
+      metaText = channelTitle;
+    }
+  }
+} else if (itemType === "video") {
+  const channelTitle = item?.P?.channelTitle || "";
+  metaText = channelTitle;
+}
+
+return {
+  as: "span",
+  text: metaText,
+  hide: !metaText
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const note = itemSetting?.P?.note || "";
+const hasNote = note.length > 0;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  as: "div",
+  hide: !hasNote || notSaved
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:document",
+  width: 14,
+  height: 14
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+const note = itemSetting?.P?.note || "";
+const shouldTruncate = note.length > 30;
+const displayNote = shouldTruncate ? note.substring(0, 30) + "..." : note;
+
+return {
+  as: "span",
+  text: displayNote,
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.openNoteModal?.(item, note);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+
+// Get configured fields from layout setting
+const cardFieldSetting = args.fns.cardFieldSetting?.() || {
+  video: [],
+  playlist: [],
+  channel: []
+};
+
+// Determine which fields to show based on item type
+let fieldsToShow = [];
+if (itemType === "video") {
+  fieldsToShow = cardFieldSetting.video || [];
+} else if (itemType === "playlist") {
+  fieldsToShow = cardFieldSetting.playlist || [];
+} else if (itemType === "channel") {
+  fieldsToShow = cardFieldSetting.channel || [];
+}
+
+// If no fields configured, hide this section
+if (fieldsToShow.length === 0) {
+  return { hide: true };
+}
+
+// Helper function to format values
+const formatValue = (field) => {
+  let value;
+
+  // Fields from itemSetting (user-specific or relationship-specific)
+  if (field === "note") {
+    value = itemSetting?.P?.note;
+  } else if (field === "position") {
+    value = itemSetting?.P?.position;
+  } else if (field === "itemCount") {
+    value = itemSetting?.P?.itemCount ?? item?.P?.itemCount ?? 0;
+  } else if (field === "videoCount") {
+    // For channels: use videoCount from setting
+    value = item?.P?.videoCount;
+  } else {
+    // All other fields come directly from the item (YouTube API fields)
+    value = item?.P?.[field];
+  }
+
+  // Handle different field types
+  if (field === "duration" && value) {
+    // Convert Neo4j duration to readable format
+    try {
+      if (typeof value === 'object' && value.months !== undefined) {
+        const hours = Math.floor(value.seconds / 3600);
+        const minutes = Math.floor((value.seconds % 3600) / 60);
+        const seconds = value.seconds % 60;
+        if (hours > 0) {
+          return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+      }
+      return value;
+    } catch (e) {
+      return value;
+    }
+  } else if (field.includes("Count") && value !== null && value !== undefined) {
+    // Format counts with commas
+    return Number(value).toLocaleString();
+  } else if (field === "position" && value !== null && value !== undefined) {
+    // Format position with # prefix
+    return `#${value}`;
+  } else if (field.includes("Date") || field === "publishedAt" || field === "updatedAt") {
+    // Format dates
+    if (value) {
+      try {
+        return new Date(value).toLocaleDateString();
+      } catch (e) {
+        return value;
+      }
+    }
+    return "";
+  }
+
+  return value || "";
+};
+
+// Helper function to get field label
+const getFieldLabel = (field) => {
+  const labels = {
+    description: "Description",
+    channelTitle: "Channel",
+    publishedAt: "Published",
+    duration: "Duration",
+    viewCount: "Views",
+    likeCount: "Likes",
+    commentCount: "Comments",
+    position: "Position",
+    note: "Notes",
+    videoCount: "Videos",
+    itemCount: "Videos",
+    updatedAt: "Updated",
+    subscriberCount: "Subscribers"
+  };
+  return labels[field] || field;
+};
+
+// Build field data array
+const fieldData = fieldsToShow
+  .map(field => {
+    const value = formatValue(field);
+    return {
+      label: getFieldLabel(field),
+      value: value,
+      field: field
+    };
+  })
+  .filter(f => f.value); // Only show fields with values
+
+// If no fields with values, hide this section
+if (fieldData.length === 0) {
+  return { hide: true };
+}
+
+return {
+  as: "div",
+  loop: true,
+  contextName: "fieldData",
+  data: fieldData
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
+const fieldData = args.contextData.fieldData;
+
+// Safety check
+if (!fieldData || !fieldData.field) {
+  return `._id { display: none; }`;
+}
+
+// Different styling for description vs other fields
+if (fieldData.field === "description") {
+  return `._id {
+    font-size: 0.75rem;
+    color: ${args.theme.var.color.text_light_200};
+    line-height: 1.4;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }`;
+}
+
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  padding: 0.125rem 0.375rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const fieldData = args.contextData.fieldData;
+
+// Safety check
+if (!fieldData || !fieldData.field) {
+  return { hide: true };
+}
+
+// For description field, show full text
+if (fieldData.field === "description") {
+  return {
+    as: "div",
+    text: fieldData.value,
+    title: fieldData.value
+  };
+}
+
+// For other fields, show label: value format
+return {
+  as: "span",
+  text: `${fieldData.label}: ${fieldData.value}`
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-left: auto;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: FloatingMenu
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemData = args.contextData.props?.itemData;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+
+// pass data to parent component else args.contextData.props?.itemData will not work on MenuItem
+return {
+  placement: "bottom-end",
+  item,
+  itemData,
+  itemSetting,
+  itemType
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 1
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+const note = itemSetting?.P?.note || "";
+const hasNote = note.length > 0;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  icon: hasNote ? "carbon:edit" : "carbon:document-add",
+  text: hasNote ? "Edit a note" : "Add a note",
+  hide: notSaved,
+  onClick: (e) => {
+    e?.stopPropagation();
+    args.fns.openNoteModal?.(item, note);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 1.5
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  icon: "carbon:play-filled",
+  text: "Play playlist",
+  hide: itemType !== "playlist" || notSaved,
+  onClick: (e) => {
+    e?.stopPropagation();
+    args.fns.playPlaylist?.(item);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 2
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemSetting = args.contextData.props?.itemSetting;
+const itemType = args.contextData.props?.itemType;
+const isFavourite = itemSetting?.P?.isFavourite || false;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  icon: isFavourite ? "carbon:favorite-filled" : "carbon:favorite",
+  text: isFavourite ? "Remove from favourites" : "Add to favourites",
+  hide: notSaved,
+  onClick: async (e) => {
+    e?.stopPropagation();
+    await args.fns.toggleFavourite?.(item);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 3
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+return {
+  icon: "material-symbols:playlist-add",
+  text: "Add to playlist",
+  hide: itemType !== "video" || notSaved,
+  onClick: (e) => {
+    e?.stopPropagation();
+    args.fns.openAddToPlaylistModal?.(item);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 4
+        componentName: MenuItem
+        props:
+          '''
+return {
+  isDivider: true
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 5
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+
+const youtubeUrl = args.fns.getYouTubeUrl?.(item, itemType) || "";
+
+return {
+  icon: "carbon:launch",
+  text: "Open in YouTube",
+  onClick: (e) => {
+    e?.stopPropagation();
+    args.fns.openYouTubeInParentTab(youtubeUrl);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 6
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const hideMenuItems = args.contextData.props?.hideMenuItems || [];
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+// Hide if specified in hideMenuItems prop
+const isHidden = hideMenuItems.includes("editName");
+
+return {
+  icon: "carbon:edit",
+  text: "Edit custom name",
+  hide: notSaved || isHidden,
+  onClick: (e) => {
+    e?.stopPropagation();
+    args.fns.openCustomNameModal?.(args.contextData.props?.itemData);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 7
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+const hideMenuItems = args.contextData.props?.hideMenuItems || [];
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+// Get effective setting (prefers live polling data)
+const effectiveSetting = args.fns.getEffectiveSetting();
+
+const queueStatus = effectiveSetting?.P?.queueStatus;
+const youtubeId = item?.P?.youtubeId;
+const ownershipId = args.fns.getSelectedOwnershipId?.();
+
+// Only show for channels and playlists with failed or completed_with_errors queueStatus
+const canRetry = (itemType === "channel" || itemType === "playlist") &&
+                 (queueStatus === "failed" || queueStatus === "completed_with_errors");
+
+// Hide if specified in hideMenuItems prop
+const isHidden = hideMenuItems.includes("retry");
+
+return {
+  icon: "carbon:restart",
+  text: "Retry Processing",
+  hide: !canRetry || notSaved || isHidden,
+  onClick: async (e) => {
+    e?.stopPropagation();
+
+    try {
+      const functionName = itemType === "channel" ? "retryChannel" : "retryPlaylist";
+      const contextData = itemType === "channel"
+        ? { channelId: youtubeId, ownershipId }
+        : { playlistId: youtubeId, ownershipId };
+
+      const response = await args.fns.executeYTOFunction(functionName, contextData);
+
+      if (response.result?.success) {
+        args.showSuccessToast(response.result.message || "Processing retry queued successfully");
+      } else {
+        args.showErrorToast(response.result?.message || "Failed to retry processing");
+      }
+    } catch (error) {
+      args.showErrorToast("Error retrying processing: " + error.message);
+    }
+
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 8
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const hideMenuItems = args.contextData.props?.hideMenuItems || [];
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+// Hide if specified in hideMenuItems prop
+const isHidden = hideMenuItems.includes("delete");
+
+return {
+  icon: "carbon:trash-can",
+  text: "Delete",
+  type: "danger",
+  hide: notSaved || isHidden,
+  onClick: (e) => {
+    e?.stopPropagation();
+    args.fns.deleteItem?.(args.contextData.props?.itemData);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "31"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "17"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "19"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9"
+      E: "29"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
+      E: "22"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "19"
+      E: "23"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "19"
+      E: "25"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "19"
+      E: "26"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "26"
+      E: "28"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "32"
+      E: "35"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "32"
+      E: "36"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "32"
+      E: "37"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "32"
+      E: "38"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "32"
+      E: "39"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "32"
+      E: "40"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "32"
+      E: "41"
+    }
+  ]
+}

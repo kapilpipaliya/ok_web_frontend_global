@@ -1,0 +1,59 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Sign
+        body:
+          '''const { username, password } = args.contextData;
+
+if (username !== password) {
+ throw new Error("Username and Password should be same");
+}
+if (!(username.length === 3 || username.length === 6)) {
+  throw new Error("Username Should be 3 or 6 characters");
+}
+function isNumberOnly(str) {
+  return /^[0-9]+$/.test(str);
+}
+if (!isNumberOnly(username)) {
+  throw new Error("Username Should be Number Only");
+}
+let user;
+const result = await args.session.run(
+  `MATCH (u:User {username: $username})
+   RETURN u`,
+  { username: username }
+);
+if (result.records.length === 0) {
+ const query = `
+    CREATE (u:User {
+      username: $username, uuid: $uuid
+    })
+    RETURN u
+  `;
+  const result = await args.session.run(query, {
+    username: username.trim(),
+    uuid: username.trim()
+  });
+  const node = result.records[0].get('u');
+  user = args.convertNodeToJson(node);
+} else {
+  const node = result.records[0].get('u');
+  user = args.convertNodeToJson(node);
+}
+
+    const userData = await args.updateSession(user);
+    return {
+      url: "/home"
+    }
+
+
+'''
+        key: signin
+      }
+    }
+  ]
+  edges: []
+}

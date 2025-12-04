@@ -1,0 +1,458 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''const contacts = args.atom("");
+const isSubmitting = args.atom(false);
+const importContacts = async () => {
+  const response = await args.executeNamedServerFunction({
+    functionName: "importContacts",
+    contextData: { contacts: contacts() }
+  });
+  if (response?.error) {
+    args.showErrorToast(response.error);
+  } else if (response?.result?.success) {
+    location.href = response.result.success;
+  } else {
+    const msg = response?.result?.message || "Operation failed";
+    args.showErrorToast(msg);
+  }
+}
+return {
+  enabled: () => true,
+  contacts,
+  importContacts,
+  isSubmitting
+}'''
+        url: /import
+        key: Import
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 2rem 1rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_2
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Import Contacts"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''
+return {
+  as: "p",
+  text: ""
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 3rem;
+  text-align: center;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_4
+        props:
+          '''
+return {
+  as: "p",
+  text: ""
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 2.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem;
+  }
+}`;
+'''
+        displayOrder: 4
+        fns:
+          '''
+const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+const [isSubmitted, setIsSubmitted] = args.createSignal(false);
+
+async function handleSubmit(e) {
+  e.preventDefault();
+
+  if (!args.fns.contacts()) {
+    args.showErrorToast('Please fill in all fields');
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: 'importContacts',
+      contextData: {
+        contacts: args.fns.contacts()
+      }
+    });
+
+    if (response?.error) {
+      args.showErrorToast(response.error);
+    } else if (response?.result?.success) {
+      args.showSuccessToast('Message sent successfully! We will get back to you soon.');
+      setIsSubmitted(true);
+    } else {
+      const msg = response?.result?.message || "Operation failed";
+      args.showErrorToast(msg);
+    }
+  } catch (error) {
+    console.error('Import form error:', error);
+    args.showErrorToast('An error occurred. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+}
+
+return { handleSubmit, isSubmitting, isSubmitted };
+'''
+        componentName: Html
+        key: unique_5
+        props:
+          '''
+return {
+  as: "form",
+  onSubmit: args.fns.handleSubmit
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_12
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_13
+        props:
+          '''
+return {
+  as: "label",
+  for: "contacts",
+  text: "Contacts"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all 0.2s ease;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+._id:focus {
+  outline: none;
+  border-color: ${args.theme.var.color.primary};
+  box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
+}
+
+._id::placeholder {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_14
+        props:
+          '''return {
+  as: "textarea",
+  id: "contacts",
+  name: "contacts",
+  placeholder: "Enter All Contacts you want to import to database",
+  rows: 15,
+  required: true,
+  value: args.fns.contacts(),
+  onChange: (e) => args.fns.contacts(e.target.value),
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id:hover:not(:disabled) {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px ${args.theme.var.color.primary_light_600};
+}
+
+._id:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+._id:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        key: unique_15
+        props:
+          '''
+return {
+  as: "button",
+  type: "submit",
+  disabled: args.fns.isSubmitting(),
+  text: args.fns.isSubmitting() ? "Saving..." : "Save"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+    {
+      id: "12"
+      L: PageLayout
+      P: {
+        displayOrder: 2
+        componentName: LayoutContent
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+  ]
+}

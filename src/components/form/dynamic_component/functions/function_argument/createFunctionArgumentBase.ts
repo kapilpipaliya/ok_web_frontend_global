@@ -41,6 +41,7 @@ import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSett
 import { debounce } from "@solid-primitives/scheduled";
 import * as focusTrap from "focus-trap";
 import { KeepAwake } from "@capacitor-community/keep-awake";
+import { atom } from "~/lib/solid/atom";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -278,5 +279,6 @@ export function createFunctionArgumentBase(
     debounce,
     focusTrap,
     KeepAwake,
+    atom
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

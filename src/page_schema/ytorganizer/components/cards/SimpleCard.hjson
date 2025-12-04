@@ -168,17 +168,17 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: default
-        key: variant
+        defValue: ""
+        key: icon
       }
     }
     {
       id: "8"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Success state with green border and light green background
-        value: success
-        key: success
+        type: string
+        defValue: default
+        key: variant
       }
     }
     {
@@ -194,13 +194,22 @@ return {
       id: "10"
       L: ComponentVariantOption
       P: {
+        description: Success state with green border and light green background
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
         description: Default card style with standard background and border
         value: default
         key: default
       }
     }
     {
-      id: "11"
+      id: "12"
       L: ComponentVariantOption
       P: {
         description: Warning state with yellow border and light yellow background
@@ -209,30 +218,21 @@ return {
       }
     }
     {
-      id: "12"
+      id: "13"
       L: ComponentVariant
       P: {
         type: string
         defValue: ""
-        key: icon
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        defValue: false
-        key: noPadding
+        key: title
       }
     }
     {
       id: "14"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: title
+        type: boolean
+        defValue: false
+        key: noPadding
       }
     }
   ]
@@ -245,75 +245,75 @@ return {
     }
     {
       id: e2
-      T: Attr
-      S: "2"
-      E: "6"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "5"
-    }
-    {
-      id: e6
       T: ComponentVariant
       S: "1"
       E: "7"
     }
     {
-      id: e7
+      id: e3
       T: ComponentVariant
       S: "1"
-      E: "12"
+      E: "8"
     }
     {
-      id: e8
+      id: e4
       T: ComponentVariant
       S: "1"
       E: "13"
     }
     {
-      id: e9
+      id: e5
       T: ComponentVariant
       S: "1"
       E: "14"
     }
     {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
       id: e10
       T: ComponentVariantOption
-      S: "7"
-      E: "8"
+      S: "8"
+      E: "9"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "7"
-      E: "9"
+      S: "8"
+      E: "10"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "7"
-      E: "10"
+      S: "8"
+      E: "11"
     }
     {
       id: e13
       T: ComponentVariantOption
-      S: "7"
-      E: "11"
+      S: "8"
+      E: "12"
     }
   ]
 }

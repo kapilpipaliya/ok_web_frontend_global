@@ -211,13 +211,13 @@ return {
       id: e4
       T: Attr
       S: "4"
-      E: "6"
+      E: "5"
     }
     {
       id: e5
       T: Attr
       S: "4"
-      E: "5"
+      E: "6"
     }
     {
       id: e6

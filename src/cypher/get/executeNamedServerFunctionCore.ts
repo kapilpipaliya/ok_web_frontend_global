@@ -162,6 +162,7 @@ import {
 import {schedule} from "~/lib/utils/scheduler";
 import {test} from "~/lib/utils/testing";
 import {webhooks} from "~/lib/utils/webhooks";
+import {updateSession} from "~/server/auth/session/updateSession";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -453,7 +454,8 @@ export async function executeNamedServerFunctionCore(
       rateLimit,
       schedule,
       test,
-      webhooks
+      webhooks,
+      updateSession
     };
 
     // Execute the function

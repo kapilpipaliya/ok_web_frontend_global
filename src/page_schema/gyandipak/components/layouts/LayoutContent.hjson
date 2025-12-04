@@ -1,0 +1,1346 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''
+// Define navigation items for both desktop and mobile menus
+// Using createSignal for reactive state management
+const navigationSectionsData = [
+  {
+    id: "main",
+    title: null, // No title for main section
+    items: [
+      {
+        id: "home",
+        href: "/home",
+        label: "Home",
+        icon: "carbon:home",
+        title: "Dashboard and overview",
+        pathCheck: (pathname) => pathname === "/" || pathname === ""
+      },
+      {
+        id: "contacts",
+        href: "/gyandipak/admin/contacts",
+        label: "Contacts",
+        icon: "carbon:user-multiple",
+        title: "Manage contacts",
+        pathCheck: (pathname) => pathname.startsWith("/gyandipak/admin/contacts")
+      },
+    ]
+  },
+  {
+    id: "other",
+    title: null, // No title for other section
+    hasBorder: true,
+    items: [
+      {
+        id: "import",
+        href: "/import",
+        label: "Import",
+        icon: "carbon:cloud-upload",
+        title: "Import Contacts",
+        pathCheck: (pathname) => pathname.startsWith("/import")
+      },
+      {
+        id: "logout",
+        href: "/auth/logout",
+        label: "Logout",
+        icon: "carbon:logout",
+        title: "Sign out of your account",
+        isButton: true,
+        isDanger: true
+      }
+    ]
+  }
+];
+
+// Filter navigation sections based on showIf condition
+const filteredNavigationSections = navigationSectionsData.filter(section => {
+  if (section.showIf && typeof section.showIf === 'function') {
+    return section.showIf();
+  }
+  return true; // Show by default if no showIf condition
+});
+
+// Create signal for navigation sections
+const [navigationSections, setNavigationSections] = args.createSignal(filteredNavigationSections);
+
+// Define mobile navigation items (subset of desktop items)
+const mobileNavigationItemsData = [
+  {
+    id: "home",
+    href: "/home",
+    label: "Home",
+    icon: "carbon:home",
+    title: "Dashboard and overview",
+    pathCheck: (pathname) => pathname === "/" || pathname === ""
+  },
+  {
+    id: "contacts",
+    href: "/gyandipak/admin/contacts",
+    label: "Contacts",
+    icon: "carbon:user-multiple",
+    title: "Manage contacts",
+    pathCheck: (pathname) => pathname.startsWith("/gyandipak/admin/contacts")
+  },
+  {
+    id: "import",
+    href: "/import",
+    label: "Import",
+    icon: "carbon:cloud-upload",
+    title: "Import Contacts",
+    pathCheck: (pathname) => pathname.startsWith("/import")
+  },
+];
+
+// Create reactive memo for mobile navigation items
+// Automatically updates when isInIframe changes
+const mobileNavigationItems = args.createMemo(() => {
+  return mobileNavigationItemsData.filter(item => {
+    if (item.showIf && typeof item.showIf === 'function') {
+      return item.showIf();
+    }
+    return true; // Show by default if no showIf condition
+  });
+});
+// Sidebar collapse state management
+const [isSidebarCollapsed, setIsSidebarCollapsed] = args.createSignal(false);
+
+const toggleSidebar = async () => {
+  const newState = !isSidebarCollapsed();
+  setIsSidebarCollapsed(newState);
+
+  // Save to database
+  try {
+    await args.executeServerFunction('saveSidebarPreference', {
+      isCollapsed: newState
+    });
+  } catch (error) {
+    console.error('Failed to save sidebar preference:', error);
+  }
+};
+
+const loadSidebarState = async () => {
+  try {
+    const result = await args.executeServerFunction('getSidebarPreference', {});
+
+    if (result.success && result.data) {
+      setIsSidebarCollapsed(result.data.isCollapsed);
+    }
+  } catch (error) {
+    console.error('Failed to load sidebar preference:', error);
+  }
+};
+
+return {
+  // Navigation
+  navigationSections,
+  setNavigationSections,
+  mobileNavigationItems,
+  // Sidebar
+  isSidebarCollapsed,
+  toggleSidebar,
+  loadSidebarState,
+
+
+};
+'''
+        key: LayoutContent
+        props:
+          '''
+return {
+  onMount: async () => {
+    // Load sidebar state from database
+    await args.fns.loadSidebarState();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  min-height: 100vh;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-columns: 1fr;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}
+
+@media (min-width: 768px) {
+  ._id {
+    display: flex;
+    flex-direction: row;
+    height: auto;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+const sidebarWidth = isCollapsed ? '72px' : '240px';
+
+return `._id {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  ._id {
+    display: flex;
+    width: ${sidebarWidth};
+    height: 100vh;
+    background: ${args.theme.var.color.background};
+    border-right: 1px solid ${args.theme.var.color.border};
+    flex-direction: column;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: width ${args.theme.var.animation?.normal || '300ms'} ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "nav"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -8px;
+  bottom: 0;
+  width: 16px;
+  cursor: col-resize;
+  z-index: 100;
+  transition: background ${args.theme.var.animation?.fast || '150ms'} ease;
+
+  /* Only apply hover on devices that support hover (not touch devices) */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary};
+      opacity: 0.3;
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary};
+    opacity: 0.5;
+  }
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: args.fns.toggleSidebar,
+  title: args.fns.isSidebarCollapsed?.() ? "Expand sidebar" : "Collapse sidebar"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+const sidebarPadding = isCollapsed ? `${args.theme.var.spacing?.md || "1rem"} ${args.theme.var.spacing?.sm || "0.5rem"}` : `${args.theme.var.spacing?.xl || "2rem"} ${args.theme.var.spacing?.lg || "1.5rem"}`;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding: ${sidebarPadding};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.md};
+  padding-bottom: ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  display: ${isCollapsed ? 'none' : 'block'};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: block;
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "a",
+  href: "/home"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  object-position: left center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanyRectangularLogo",
+  alt: "YSaar"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: ${args.theme.var.spacing?.md || '1rem'} 0;
+  margin-bottom: ${args.theme.var.spacing?.md || '1rem'};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1.3
+        componentName: Html
+        props:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "div",
+  hide: !isCollapsed
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  cursor: pointer;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Logo",
+  onClick: () => args.navigate?.('/home')
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.lg};
+  flex: 1;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        contextName: navSection
+        css:
+          '''
+return `._id {
+  display: contents;
+}`;
+'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const sections = args.fns.navigationSections();
+return {
+  as: "div",
+  data: sections
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.navSection;
+const hasBorder = section.hasBorder;
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  padding: 0 ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.navSection;
+const title = section.title;
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "h3",
+  text: title,
+  hide: !title || isCollapsed
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+const section = args.contextData.navSection;
+const hasBorder = section.hasBorder;
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+  ${hasBorder ? `padding-top: ${args.theme.var.spacing.md}; border-top: 1px solid ${args.theme.var.color.border};` : ''}
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.navSection;
+return {
+  as: "ul"
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        contextName: navItem
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const section = args.contextData.navSection;
+const items = section.items;
+return {
+  as: "li",
+  data: items
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+const item = args.contextData.navItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const isButton = item.isButton;
+const isDanger = item.isDanger;
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${isCollapsed ? args.theme.var.spacing.sm : args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+  ${isCollapsed ? 'justify-content: center;' : ''}
+  ${isButton ? `
+    border: none;
+    font-size: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+  ` : ''}
+
+  &:hover {
+    background: ${isDanger ? args.theme.var.color.error_light_100 : args.theme.var.color.background_light_200};
+    color: ${isDanger ? args.theme.var.color.error_light_100_text : args.theme.var.color.primary};
+  }
+
+  ${isButton ? `
+    &:active {
+      transform: scale(0.98);
+    }
+  ` : ''}
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.navItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const isButton = item.isButton;
+const isDanger = item.isDanger;
+const openInNewTab = item.openInNewTab;
+
+return {
+  as: isButton ? "button" : "a",
+  href: !isButton ? item.href : undefined,
+  target: openInNewTab ? "_blank" : undefined,
+  rel: openInNewTab ? "noopener noreferrer" : undefined,
+  "aria-label": item.label,
+  title: item.title,
+  onClick: (e) => {
+    if (openInNewTab) {
+      // Let the browser handle the new tab opening
+      return;
+    }
+    e.preventDefault();
+    args.fns.navigateTo?.(item.href);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.navItem;
+return {
+  as: "icon",
+  icon: item.icon,
+  width: 20,
+  height: 20
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return `._id {
+  display: ${isCollapsed ? 'none' : 'inline'};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.navItem;
+return {
+  as: "span",
+  text: item.label
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-top: auto;
+  padding-top: ${args.theme.var.spacing.md};
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+
+return {
+  as: "div",
+  hide: isCollapsed
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  hide: true,
+  onClick: () => {
+    args.fns.openFeedbackModal();
+  },
+  title: "Send Feedback"
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:chat",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Send Feedback"
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+const isCollapsed = args.fns.isSidebarCollapsed?.();
+const sidebarWidth = isCollapsed ? '72px' : '240px';
+
+return `._id {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+  ._id {
+    margin-left: ${sidebarWidth};
+    transition: margin-left ${args.theme.var.animation?.normal || '300ms'} ease;
+    overflow: hidden;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: children
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  /* Full-screen overlay positioning */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* Match theme background for seamless appearance */
+  background: ${args.theme.var.color.background};
+
+  /* Position spinner at top instead of center */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: ${args.theme.var.spacing.xxl};
+
+  /* High z-index to appear above all content */
+  z-index: 1;
+
+  /* Start invisible and fade in smoothly */
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Smooth fade-in animation for overlay appearance */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+// Get navigation state from ConfirmProvider context
+// This controls when the overlay should be visible
+const isNavigating = args.fns.isNavigating?.();
+
+return {
+  as: "div",
+  style: {
+    // Show overlay during navigation, hide when complete
+    // Uses flex to center the loading spinner
+    display: isNavigating ? 'flex' : 'none'
+  }
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  height: 72px;
+  background: ${args.theme.var.color.background};
+  border-top: 1px solid ${args.theme.var.color.border};
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  padding: ${args.theme.var.spacing.sm} 0;
+  grid-row: 2;
+}
+
+._id .slider-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 ${args.theme.var.spacing.sm};
+  width: 100%;
+}
+
+/* Make each nav item equally distributed */
+._id .slider-container > * {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Responsive adjustment - hide on desktop */
+@media (min-width: 768px) {
+  ._id {
+    display: none;
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "nav"
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  className: "slider-container"
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        contextName: mobileNavItem
+        css:
+          '''
+return `._id {
+  display: contents;
+}`;
+'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const items = args.fns.mobileNavigationItems();
+return {
+  as: "div",
+  data: items
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+const item = args.contextData.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+  position: relative;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const openInNewTab = item.openInNewTab;
+
+return {
+  as: "a",
+  href: item.href,
+  target: openInNewTab ? "_blank" : undefined,
+  rel: openInNewTab ? "noopener noreferrer" : undefined,
+  "aria-label": item.label,
+  title: item.title,
+  onClick: (e) => {
+    if (openInNewTab) {
+      // Let the browser handle the new tab opening
+      return;
+    }
+    e.preventDefault();
+    args.fns.navigateTo?.(item.href);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.mobileNavItem;
+const iconSize = item.iconSize || 24;
+return {
+  as: "icon",
+  icon: item.icon,
+  width: iconSize,
+  height: iconSize
+};
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.mobileNavItem;
+return {
+  as: "span",
+  text: item.label
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "25"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "29"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "5"
+      E: "11"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "20"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+  ]
+}

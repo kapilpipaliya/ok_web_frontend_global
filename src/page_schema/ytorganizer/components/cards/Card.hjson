@@ -955,7 +955,7 @@ return {
         videoId: youtubeId,
         videoTitle: videoTitle
       });
-      args.fns?.setIsAddVideoToPlaylistModalOpen?.(true);
+      args.fns?.isAddVideoToPlaylistModalOpen?.(true);
       return;
     }
 
@@ -973,7 +973,7 @@ return {
     });
 
     // Open the modal
-    args.fns?.setIsModalOpen?.(true);
+    args.fns?.isModalOpen?.(true);
   }
 };
 '''
@@ -1770,235 +1770,235 @@ return {
       id: e2
       T: Attr
       S: "2"
-      E: "31"
+      E: "3"
     }
     {
       id: e3
       T: Attr
       S: "2"
-      E: "3"
+      E: "9"
     }
     {
       id: e4
       T: Attr
       S: "2"
-      E: "9"
+      E: "31"
     }
     {
       id: e5
-      T: Attr
-      S: "31"
-      E: "32"
-    }
-    {
-      id: e6
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e7
+      id: e6
       T: Attr
       S: "3"
       E: "7"
     }
     {
-      id: e8
-      T: Attr
-      S: "9"
-      E: "11"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "9"
-      E: "12"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "9"
-      E: "19"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "9"
-      E: "17"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "9"
-      E: "10"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "9"
-      E: "29"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "32"
-      E: "36"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "32"
-      E: "41"
-    }
-    {
-      id: e16
-      T: Attr
-      S: "32"
-      E: "34"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "32"
-      E: "33"
-    }
-    {
-      id: e18
-      T: Attr
-      S: "32"
-      E: "37"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "32"
-      E: "40"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "32"
-      E: "35"
-    }
-    {
-      id: e21
-      T: Attr
-      S: "32"
-      E: "38"
-    }
-    {
-      id: e22
-      T: Attr
-      S: "32"
-      E: "39"
-    }
-    {
-      id: e23
+      id: e7
       T: Attr
       S: "4"
       E: "5"
     }
     {
-      id: e24
+      id: e8
       T: Attr
       S: "4"
       E: "6"
     }
     {
-      id: e25
+      id: e9
       T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e26
+      id: e10
       T: Attr
-      S: "12"
-      E: "16"
+      S: "9"
+      E: "10"
     }
     {
-      id: e27
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "17"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "19"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9"
+      E: "29"
+    }
+    {
+      id: e16
       T: Attr
       S: "12"
       E: "13"
     }
     {
-      id: e28
+      id: e17
       T: Attr
-      S: "19"
-      E: "23"
+      S: "12"
+      E: "16"
     }
     {
-      id: e29
-      T: Attr
-      S: "19"
-      E: "22"
-    }
-    {
-      id: e30
-      T: Attr
-      S: "19"
-      E: "20"
-    }
-    {
-      id: e31
-      T: Attr
-      S: "19"
-      E: "25"
-    }
-    {
-      id: e32
-      T: Attr
-      S: "19"
-      E: "26"
-    }
-    {
-      id: e33
-      T: Attr
-      S: "17"
-      E: "18"
-    }
-    {
-      id: e34
-      T: Attr
-      S: "29"
-      E: "30"
-    }
-    {
-      id: e35
+      id: e18
       T: Attr
       S: "13"
       E: "14"
     }
     {
-      id: e36
+      id: e19
       T: Attr
       S: "13"
       E: "15"
     }
     {
-      id: e37
+      id: e20
       T: Attr
-      S: "23"
-      E: "24"
+      S: "17"
+      E: "18"
     }
     {
-      id: e38
+      id: e21
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
+      E: "22"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "19"
+      E: "23"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "19"
+      E: "25"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "19"
+      E: "26"
+    }
+    {
+      id: e26
       T: Attr
       S: "20"
       E: "21"
     }
     {
-      id: e39
+      id: e27
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e28
       T: Attr
       S: "26"
       E: "27"
     }
     {
-      id: e40
+      id: e29
       T: Attr
       S: "26"
       E: "28"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "32"
+      E: "35"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "32"
+      E: "36"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "32"
+      E: "37"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "32"
+      E: "38"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "32"
+      E: "39"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "32"
+      E: "40"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "32"
+      E: "41"
     }
   ]
 }

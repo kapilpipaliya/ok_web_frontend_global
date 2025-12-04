@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
-import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmailOrUuid";
+import { findUserVertexSimple } from "~/cypher/mutate/user/findUserByEmailOrUuid";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { API } from "~/lib/api/endpoints";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
@@ -44,8 +44,8 @@ export async function GET({ request }: APIEvent) {
       });
     }
 
-    const { email } = decodeUserData(userData);
-    const existingUser = await findUserByEmailSimple(dbSession, email);
+    const { uuid, email, username } = decodeUserData(userData);
+    const existingUser = await findUserVertexSimple(dbSession, uuid, email || username!);
 
     if (!existingUser) {
       return new Response(null, {
@@ -58,9 +58,10 @@ export async function GET({ request }: APIEvent) {
     if (existingUser.P.password) {
       await updateSession(existingUser);
     } else {
-      const adminUser = await findUserByEmailSimple(
+      const adminUser = await findUserVertexSimple(
         adminDbSession,
-        existingUser.P.email,
+        existingUser.P.uuid,
+        existingUser.P.email || existingUser.P.username,
       );
       if (adminUser) {
         await updateSession(adminUser);

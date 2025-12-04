@@ -1,0 +1,60 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Update a single field of a contact
+        body:
+          '''const { contactId, field, value } = args.contextData;
+
+if (!contactId) {
+  throw new Error("Contact ID is required");
+}
+
+if (!field) {
+  throw new Error("Field name is required");
+}
+
+// Validate field name
+const allowedFields = ['called', 'isUnavailable', 'notInterested'];
+if (!allowedFields.includes(field)) {
+  throw new Error("Invalid field name");
+}
+
+const result = await args.session.executeWrite(async (tx) => {
+  // Update the contact field
+  const query = `
+    MATCH (c:Contact)
+    WHERE elementId(c) = $contactId
+    SET c.${field} = $value, c.updatedAt = datetime()
+    RETURN c
+  `;
+
+  const updateResult = await tx.run(query, {
+    contactId: contactId,
+    value: Boolean(value)
+  });
+
+  if (updateResult.records.length === 0) {
+    throw new Error("Contact not found");
+  }
+
+  const node = updateResult.records[0].get('c');
+  const contact = args.convertNodeToJson(node);
+
+  return contact;
+});
+
+return {
+  success: true,
+  data: { contact: result },
+  message: `Contact ${field} updated successfully`
+};
+'''
+        key: updateContactField
+      }
+    }
+  ]
+  edges: []
+}

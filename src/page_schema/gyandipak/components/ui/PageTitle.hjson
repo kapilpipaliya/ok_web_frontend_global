@@ -1,0 +1,43 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: PageTitle
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: args.contextData.props?.text || "Page Title"
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Import contacts form submission to database
+        body:
+          '''const { contacts } = args.contextData;
+
+if (!contacts || typeof contacts !== 'string') {
+  throw new Error("Contacts data is required and must be a CSV string");
+}
+
+// Clean up the CSV string - replace quoted newlines with empty string
+const cleanedContacts = contacts.replace(/"\n"/g, '');
+
+// Parse CSV - detect delimiter (tab or comma)
+const lines = contacts.trim().split('\n');
+if (lines.length === 0) {
+  throw new Error("CSV data is empty");
+}
+
+// Detect delimiter from first line
+const firstLine = lines[0];
+const delimiter = firstLine.includes('\t') ? '\t' : ',';
+
+// Helper function to parse CSV line handling quoted values
+function parseCSVLine(line, delimiter) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === delimiter && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+// Parse header row
+const headers = parseCSVLine(lines[0], delimiter);
+
+// Find column indices
+const countryCodeIndex = headers.findIndex(h => h.toLowerCase().includes('country code'));
+const countryIndex = headers.findIndex(h => h.toLowerCase() === 'country');
+const displayNameIndex = headers.findIndex(h => h.toLowerCase().includes('display name'));
+const phoneNumberIndex = headers.findIndex(h => h.toLowerCase().includes('phone number'));
+const savedNameIndex = headers.findIndex(h => h.toLowerCase().includes('saved name'));
+
+if (phoneNumberIndex === -1) {
+  throw new Error("Phone Number column not found in CSV");
+}
+
+// Process contacts - extract unique phone numbers and prepare data
+const contactsMap = new Map();
+
+for (let i = 1; i < lines.length; i++) {
+  const line = lines[i].trim();
+  if (!line) continue;
+
+  const values = parseCSVLine(line, delimiter);
+
+  const phoneNumber = values[phoneNumberIndex]?.trim();
+  const savedName = savedNameIndex !== -1 ? values[savedNameIndex]?.trim() : '';
+  const displayName = displayNameIndex !== -1 ? values[displayNameIndex]?.trim() : '';
+  const country = countryIndex !== -1 ? values[countryIndex]?.trim() : '';
+  const countryCode = countryCodeIndex !== -1 ? values[countryCodeIndex]?.trim() : '';
+
+  // Skip if no phone number
+  if (!phoneNumber) continue;
+
+  // Skip if phone number contains only quotes or whitespace
+  if (phoneNumber === '""' || phoneNumber.replace(/["\s]/g, '') === '') continue;
+
+  // Use saved name if available and not empty quotes, otherwise use display name
+  let name = savedName;
+  if (!name || name === '""' || name.replace(/["\s]/g, '') === '') {
+    name = displayName;
+  }
+  if (!name || name === '""' || name.replace(/["\s]/g, '') === '') {
+    name = 'Unknown';
+  }
+
+  // Store in map to avoid duplicates (last occurrence wins)
+  if (!contactsMap.has(phoneNumber)) {
+    contactsMap.set(phoneNumber, {
+      phoneNumber,
+      name,
+      country: country || '',
+      countryCode: countryCode || ''
+    });
+  }
+}
+
+// Use transaction for batch creation
+const result = await args.session.executeWrite(async (tx) => {
+  const contactsArray = Array.from(contactsMap.values());
+  let createdCount = 0;
+  let skippedCount = 0;
+
+  if (contactsArray.length === 0) {
+    return {
+      created: 0,
+      skipped: 0,
+      total: 0,
+      message: "No valid contacts to import"
+    };
+  }
+
+  // Check existing contacts
+  const existingResult = await tx.run(
+    `MATCH (c:Contact) WHERE c.phoneNumber IN $phoneNumbers RETURN c.phoneNumber as phoneNumber`,
+    { phoneNumbers: contactsArray.map(c => c.phoneNumber) }
+  );
+
+  const existingNumbers = new Set(existingResult.records.map(r => r.get('phoneNumber')));
+
+  // Filter out existing contacts
+  const newContacts = contactsArray.filter(c => !existingNumbers.has(c.phoneNumber));
+  skippedCount = existingNumbers.size;
+
+  // Batch create new contacts
+  if (newContacts.length > 0) {
+    await tx.run(
+      `UNWIND $contacts AS contact
+       CREATE (c:Contact {
+         phoneNumber: contact.phoneNumber,
+         name: contact.name,
+         country: contact.country,
+         countryCode: contact.countryCode,
+         createdAt: datetime()
+       })`,
+      { contacts: newContacts }
+    );
+    createdCount = newContacts.length;
+  }
+
+  return {
+    created: createdCount,
+    skipped: skippedCount,
+    total: contactsArray.length,
+    message: `Successfully imported ${createdCount} contacts, skipped ${skippedCount} duplicates`
+  };
+});
+
+return result;
+'''
+        key: importContacts
+      }
+    }
+  ]
+  edges: []
+}
