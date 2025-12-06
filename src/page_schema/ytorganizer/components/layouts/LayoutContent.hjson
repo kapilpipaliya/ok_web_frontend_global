@@ -29,11 +29,11 @@ const navigationSectionsData = [
     items: [
       {
         id: "search",
-        href: "/content?q=",
+        href: "/content?type=search&q=",
         label: "Search",
         icon: "mdi:magnify",
         title: "Search for YouTube channels and playlists",
-        pathCheck: (pathname) => pathname === "/content" && args.searchParams?.q !== undefined
+        pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "search"
       },
       {
         id: "channels",
@@ -119,11 +119,11 @@ const mobileNavigationItemsData = [
   },
   {
     id: "search",
-    href: "/content?q=",
+    href: "/content?type=search&q=",
     label: "Search",
     icon: "mdi:magnify",
     title: "Search for YouTube channels and playlists",
-    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.q !== undefined
+    pathCheck: (pathname) => pathname === "/content" && args.searchParams?.type === "search"
   },
   {
     id: "channels",

@@ -35,6 +35,7 @@ export function AdminWorkerManagement() {
   const { showSuccessToast, showErrorToast } = useToast();
   const [refreshKey, setRefreshKey] = createSignal(0);
   const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
+  const [isStoppingAll, setIsStoppingAll] = createSignal(false);
 
   const workerStatus = createAsync(
     async () => {
@@ -86,6 +87,7 @@ export function AdminWorkerManagement() {
   };
 
   const handleStopAllWorkers = async () => {
+    setIsStoppingAll(true);
     try {
       const result = await stopAllSubdomainWorkersUI();
       if (result.success) {
@@ -98,6 +100,8 @@ export function AdminWorkerManagement() {
       showErrorToast(
         error instanceof Error ? error.message : "Failed to stop all workers",
       );
+    } finally {
+      setIsStoppingAll(false);
     }
   };
 
@@ -750,7 +754,12 @@ export function AdminWorkerManagement() {
                 <As
                   as="button"
                   onClick={handleStopAllWorkers}
-                  css={`return \`._id {
+                  disabled={isStoppingAll()}
+                  css={`return \`
+@keyframes stopAllWorkersSpin {
+    to { transform: rotate(360deg); }
+}
+._id {
   padding: 0.625rem 1.25rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -764,11 +773,30 @@ export function AdminWorkerManagement() {
   background: \${args.theme.var.color.error};
   color: \${args.theme.var.color.error_text};
 }
-._id:hover {
+._id:hover:not(:disabled) {
   background: \${args.theme.var.color.error_dark_200};
+}
+._id:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+._id .spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid \${args.theme.var.color.error_text};
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: stopAllWorkersSpin 0.8s linear infinite;
 }\`;`}
                 >
-                  {"⏹️ Stop All Workers"}
+                  <Show
+                    when={isStoppingAll()}
+                    fallback={<As as="span">⏹️ Stop All Workers</As>}
+                  >
+                    <As as="div" class="spinner" />
+                    <As as="span">Stopping...</As>
+                  </Show>
                 </As>
               </As>
 

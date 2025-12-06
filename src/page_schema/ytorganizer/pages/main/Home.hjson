@@ -23,6 +23,19 @@ return {
     }
     {
       id: "2"
+      L: File
+      P: {
+        originalFileName: preview.png
+        fileName: preview.png
+        fileSize: 77947
+        subDomain: ytorganizer
+        filePath: /Users/kapil/UploadFiles/ytorganizer/2025/12/06/preview.png
+        checksum: 1cab6d3259679a614490b6e1d9c3d669290561994a740932599fe97d65f7f260
+        mimeType: image/png
+      }
+    }
+    {
+      id: "3"
       L: Attr
       P: {
         css:
@@ -156,7 +169,7 @@ return {
       }
     }
     {
-      id: "3"
+      id: "4"
       L: Attr
       P: {
         css:
@@ -176,7 +189,7 @@ return {
       }
     }
     {
-      id: "4"
+      id: "5"
       L: Attr
       P: {
         css:
@@ -202,7 +215,7 @@ return {
       }
     }
     {
-      id: "5"
+      id: "6"
       L: Attr
       P: {
         displayOrder: 1
@@ -218,7 +231,7 @@ return {
       }
     }
     {
-      id: "6"
+      id: "7"
       L: Attr
       P: {
         css:
@@ -248,7 +261,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -272,7 +285,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -296,7 +309,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -321,7 +334,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "11"
       L: Attr
       P: {
         displayOrder: 4
@@ -337,7 +350,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "12"
       L: Attr
       P: {
         displayOrder: 3
@@ -351,7 +364,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "13"
       L: Attr
       P: {
         displayOrder: 4
@@ -366,7 +379,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "14"
       L: Attr
       P: {
         css:
@@ -387,7 +400,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "15"
       L: Attr
       P: {
         displayOrder: 1
@@ -407,7 +420,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "16"
       L: Attr
       P: {
         css:
@@ -430,7 +443,7 @@ return {
       }
     }
     {
-      id: "16"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -453,7 +466,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "18"
       L: Attr
       P: {
         contextName: stat
@@ -504,7 +517,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "19"
       L: Attr
       P: {
         css:
@@ -552,7 +565,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "20"
       L: Attr
       P: {
         css:
@@ -580,7 +593,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "21"
       L: Attr
       P: {
         displayOrder: 1
@@ -599,7 +612,7 @@ return {
       }
     }
     {
-      id: "21"
+      id: "22"
       L: Attr
       P: {
         css:
@@ -619,7 +632,7 @@ return {
       }
     }
     {
-      id: "22"
+      id: "23"
       L: Attr
       P: {
         css:
@@ -646,7 +659,7 @@ return {
       }
     }
     {
-      id: "23"
+      id: "24"
       L: Attr
       P: {
         css:
@@ -672,7 +685,393 @@ return {
       }
     }
     {
-      id: "24"
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "section",
+  hide: args.fns.isInIframe()
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_200} 100%);
+  border: 1px solid ${args.theme.var.color.primary_light_300};
+  border-radius: 1rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 64px;
+  height: 64px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 56px;
+    height: 56px;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "mdi:google-chrome",
+  width: 36,
+  height: 36
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Install Chrome Extension"
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Save YouTube channels, playlists, and videos instantly while browsing. Access your full YSaar dashboard right from your browser extension."
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+._id:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "a",
+  href: "https://chromewebstore.google.com/detail/ilefdojdfngmajhcjjfbjgkhdieedlfj?utm_source=item-share-cb",
+  target: "_blank",
+  rel: "noopener noreferrer",
+  onClick: (e) => {
+    e.preventDefault();
+    window.open("https://chromewebstore.google.com/detail/ilefdojdfngmajhcjjfbjgkhdieedlfj?utm_source=item-share-cb", "_blank", "noopener,noreferrer");
+  }
+};
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "mdi:google-chrome",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 0.9375rem;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: "Add to Chrome"
+};
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 0.8125rem;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: ""
+};
+'''
+      }
+    }
+    {
+      id: "38"
       L: PageLayout
       P: {
         displayOrder: 1
@@ -680,7 +1079,7 @@ return {
       }
     }
     {
-      id: "25"
+      id: "39"
       L: PageLayout
       P: {
         displayOrder: 2
@@ -691,27 +1090,27 @@ return {
   edges: [
     {
       id: e1
-      T: Attr
+      T: PagePreview
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: PageLayout
+      T: Attr
       S: "1"
-      E: "24"
+      E: "3"
     }
     {
       id: e3
       T: PageLayout
       S: "1"
-      E: "25"
+      E: "38"
     }
     {
       id: e4
-      T: Attr
-      S: "2"
-      E: "3"
+      T: PageLayout
+      S: "1"
+      E: "39"
     }
     {
       id: e5
@@ -722,98 +1121,98 @@ return {
     {
       id: e6
       T: Attr
-      S: "3"
-      E: "6"
+      S: "4"
+      E: "5"
     }
     {
       id: e7
       T: Attr
-      S: "3"
-      E: "11"
+      S: "4"
+      E: "7"
     }
     {
       id: e8
       T: Attr
-      S: "3"
+      S: "4"
       E: "12"
     }
     {
       id: e9
       T: Attr
       S: "4"
-      E: "5"
+      E: "13"
     }
     {
       id: e10
       T: Attr
-      S: "6"
-      E: "7"
+      S: "5"
+      E: "6"
     }
     {
       id: e11
       T: Attr
-      S: "6"
+      S: "7"
       E: "8"
     }
     {
       id: e12
       T: Attr
-      S: "6"
+      S: "7"
       E: "9"
     }
     {
       id: e13
       T: Attr
-      S: "6"
+      S: "7"
       E: "10"
     }
     {
       id: e14
       T: Attr
-      S: "12"
-      E: "13"
+      S: "7"
+      E: "11"
     }
     {
       id: e15
-      T: Attr
-      S: "12"
-      E: "16"
-    }
-    {
-      id: e16
       T: Attr
       S: "13"
       E: "14"
     }
     {
+      id: e16
+      T: Attr
+      S: "13"
+      E: "17"
+    }
+    {
       id: e17
       T: Attr
       S: "13"
-      E: "15"
+      E: "25"
     }
     {
       id: e18
       T: Attr
-      S: "16"
-      E: "17"
+      S: "14"
+      E: "15"
     }
     {
       id: e19
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e20
       T: Attr
       S: "17"
       E: "18"
     }
     {
-      id: e20
-      T: Attr
-      S: "18"
-      E: "19"
-    }
-    {
       id: e21
       T: Attr
       S: "18"
-      E: "21"
+      E: "19"
     }
     {
       id: e22
@@ -824,14 +1223,98 @@ return {
     {
       id: e23
       T: Attr
-      S: "21"
+      S: "19"
       E: "22"
     }
     {
       id: e24
       T: Attr
-      S: "21"
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
       E: "23"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "26"
+      E: "33"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "27"
+      E: "30"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "30"
+      E: "32"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "33"
+      E: "37"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "34"
+      E: "36"
     }
   ]
 }

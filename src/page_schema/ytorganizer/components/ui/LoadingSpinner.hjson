@@ -152,35 +152,35 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: primary
-        key: color
+        defValue: medium
+        key: size
       }
     }
     {
       id: "6"
       L: ComponentVariantOption
       P: {
-        description: Primary theme color
-        value: primary
-        key: primary
+        description: Small spinner (24px)
+        value: small
+        key: small
       }
     }
     {
       id: "7"
       L: ComponentVariantOption
       P: {
-        description: Muted theme color
-        value: muted
-        key: muted
+        description: Medium spinner (48px)
+        value: medium
+        key: medium
       }
     }
     {
       id: "8"
       L: ComponentVariantOption
       P: {
-        description: White color
-        value: white
-        key: white
+        description: Large spinner (64px)
+        value: large
+        key: large
       }
     }
     {
@@ -197,35 +197,35 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: medium
-        key: size
+        defValue: primary
+        key: color
       }
     }
     {
       id: "11"
       L: ComponentVariantOption
       P: {
-        description: Small spinner (24px)
-        value: small
-        key: small
+        description: White color
+        value: white
+        key: white
       }
     }
     {
       id: "12"
       L: ComponentVariantOption
       P: {
-        description: Large spinner (64px)
-        value: large
-        key: large
+        description: Primary theme color
+        value: primary
+        key: primary
       }
     }
     {
       id: "13"
       L: ComponentVariantOption
       P: {
-        description: Medium spinner (48px)
-        value: medium
-        key: medium
+        description: Muted theme color
+        value: muted
+        key: muted
       }
     }
   ]

@@ -16,7 +16,7 @@ if (!contacts || typeof contacts !== 'string') {
 const cleanedContacts = contacts.replace(/"\n"/g, '');
 
 // Parse CSV - detect delimiter (tab or comma)
-const lines = contacts.trim().split('\n');
+const lines = cleanedContacts.trim().split('\n');
 if (lines.length === 0) {
   throw new Error("CSV data is empty");
 }

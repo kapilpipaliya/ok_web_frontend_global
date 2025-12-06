@@ -50,14 +50,18 @@ try {
   // Prepare search pattern for case-insensitive matching
   const trimmedQuery = query.trim();
   let searchPattern;
+  let searchText; // For CONTAINS-based search
 
   if (isRegex) {
     // Use query as-is for regex search
     searchPattern = `(?i)${trimmedQuery}`;
+    searchText = null;
   } else {
     // Escape special regex characters for literal string matching
     const escapedQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     searchPattern = `(?i).*${escapedQuery}.*`;
+    // Also prepare lowercase text for CONTAINS fallback
+    searchText = trimmedQuery.toLowerCase();
   }
 
   const results = {
@@ -76,7 +80,7 @@ try {
       contextData: {
         userUuid: user.P.uuid,
         ownershipId,  // Filter by ownership if provided
-        customFilter: 'c.title =~ $pattern OR c.description =~ $pattern OR cs.customName =~ $pattern',
+        customFilter: 'c.title =~ $pattern OR (c.description IS NOT NULL AND c.description =~ $pattern) OR (cs IS NOT NULL AND cs.customName =~ $pattern)',
         customFilterParams: { pattern: searchPattern },
         orderBy,
         orderDirection,
@@ -101,7 +105,7 @@ try {
       contextData: {
         userUuid: user.P.uuid,
         ownershipId,  // Filter by ownership if provided
-        customFilter: 'p.title =~ $pattern OR p.description =~ $pattern OR ps.customName =~ $pattern',
+        customFilter: 'p.title =~ $pattern OR (p.description IS NOT NULL AND p.description =~ $pattern) OR (ps IS NOT NULL AND ps.customName =~ $pattern)',
         customFilterParams: { pattern: searchPattern },
         orderBy,
         orderDirection,
@@ -126,8 +130,12 @@ try {
       contextData: {
         userUuid: user.P.uuid,
         ownershipId,  // Filter by ownership if provided
-        customFilter: 'v.title =~ $pattern OR v.description =~ $pattern OR v.channelTitle =~ $pattern OR vs.note =~ $pattern',
-        customFilterParams: { pattern: searchPattern },
+        customFilter: searchText 
+          ? 'toLower(v.title) CONTAINS $searchText OR (v.description IS NOT NULL AND toLower(v.description) CONTAINS $searchText) OR toLower(v.channelTitle) CONTAINS $searchText OR (vs IS NOT NULL AND toLower(vs.note) CONTAINS $searchText)'
+          : 'v.title =~ $pattern OR (v.description IS NOT NULL AND v.description =~ $pattern) OR v.channelTitle =~ $pattern OR (vs IS NOT NULL AND vs.note =~ $pattern)',
+        customFilterParams: searchText 
+          ? { searchText: searchText }
+          : { pattern: searchPattern },
         includePlaylist: true,
         orderBy,
         orderDirection,

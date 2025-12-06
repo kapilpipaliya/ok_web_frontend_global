@@ -401,6 +401,29 @@ return {
         css:
           '''
 return `._id {
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Enter video URLs (one per line or comma-separated):"
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
@@ -425,7 +448,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "11"
       L: Attr
       P: {
         css:
@@ -450,7 +473,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -470,7 +493,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -494,7 +517,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "14"
       L: Attr
       P: {
         css:
@@ -520,7 +543,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "15"
       L: Attr
       P: {
         css:
@@ -556,7 +579,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "16"
       L: Attr
       P: {
         displayOrder: 1
@@ -568,29 +591,6 @@ return {
   icon: "carbon:close",
   width: 16,
   height: 16
-};
-'''
-      }
-    }
-    {
-      id: "16"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  margin: 0 0 1rem 0;
-  color: ${args.theme.var.color.muted};
-  font-size: 0.875rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: "Enter video URLs (one per line or comma-separated):"
 };
 '''
       }
@@ -775,16 +775,15 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onClose
+        key: isOpen
       }
     }
     {
       id: "25"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: videoUrl
+        type: function
+        key: onSuccess
       }
     }
     {
@@ -792,7 +791,7 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: isOpen
+        key: onClose
       }
     }
     {
@@ -807,8 +806,9 @@ return {
       id: "28"
       L: ComponentVariant
       P: {
-        type: function
-        key: onSuccess
+        type: string
+        defValue: ""
+        key: videoUrl
       }
     }
   ]
@@ -901,7 +901,7 @@ return {
       id: e15
       T: Attr
       S: "8"
-      E: "16"
+      E: "10"
     }
     {
       id: e16
@@ -918,38 +918,38 @@ return {
     {
       id: e18
       T: Attr
-      S: "9"
-      E: "10"
+      S: "10"
+      E: "11"
     }
     {
       id: e19
       T: Attr
-      S: "9"
-      E: "11"
+      S: "10"
+      E: "12"
     }
     {
       id: e20
       T: Attr
-      S: "9"
-      E: "14"
+      S: "10"
+      E: "15"
     }
     {
       id: e21
       T: Attr
-      S: "11"
-      E: "12"
+      S: "12"
+      E: "13"
     }
     {
       id: e22
       T: Attr
-      S: "11"
-      E: "13"
+      S: "12"
+      E: "14"
     }
     {
       id: e23
       T: Attr
-      S: "14"
-      E: "15"
+      S: "15"
+      E: "16"
     }
     {
       id: e24

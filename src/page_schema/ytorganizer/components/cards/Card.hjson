@@ -42,7 +42,7 @@ const getEffectiveSetting = () => {
   const item = args.contextData.props?.item;
   const itemType = args.contextData.props?.itemType;
   const processingStatus = args.contextData.props?.processingStatus;
-debugger
+
   // Prefer processing queueStatus (live updates from polling) over item (stale data)
   return (itemType === "playlist" && processingStatus?.playlist) ||
          (itemType === "channel" && processingStatus?.channel) ||

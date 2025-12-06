@@ -33,7 +33,7 @@ try {
         userUuid: user.P.uuid,
         ownershipId,  // Filter by ownership if provided
         channelIds: channelIds,
-        statusFilter: ['queued', 'processing']
+        // statusFilter: ['queued', 'processing']
       }
     });
 
@@ -50,7 +50,7 @@ try {
         userUuid: user.P.uuid,
         ownershipId,  // Filter by ownership if provided
         playlistIds: playlistIds,
-        statusFilter: ['queued', 'processing']
+        // statusFilter: ['queued', 'processing']
       }
     });
 

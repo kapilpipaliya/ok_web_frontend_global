@@ -887,136 +887,13 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: required
+        type: string
+        defValue: ""
+        key: functionName
       }
     }
     {
       id: "4"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: functionContext
-      }
-    }
-    {
-      id: "5"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: value
-      }
-    }
-    {
-      id: "6"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: maxItems
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: subType
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: options
-        defValue: []
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: id
-        key: valueKey
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: title
-        key: labelKey
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: placeholder
-        defValue: Select an option...
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onChange
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: optionType
-      }
-    }
-    {
-      id: "14"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: pluralName
-      }
-    }
-    {
-      id: "15"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        defValue: true
-        key: search
-      }
-    }
-    {
-      id: "16"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: singularName
-      }
-    }
-    {
-      id: "17"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: dataKey
-      }
-    }
-    {
-      id: "18"
       L: ComponentVariant
       P: {
         type: array
@@ -1025,16 +902,43 @@ return {
       }
     }
     {
-      id: "19"
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: title
+        key: labelKey
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: true
+        key: search
+      }
+    }
+    {
+      id: "7"
       L: ComponentVariant
       P: {
         type: string
         defValue: ""
-        key: functionName
+        key: pluralName
       }
     }
     {
-      id: "20"
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        defValue: false
+        key: required
+      }
+    }
+    {
+      id: "9"
       L: ComponentVariant
       P: {
         type: boolean
@@ -1043,12 +947,108 @@ return {
       }
     }
     {
-      id: "21"
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxItems
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: singularName
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: dataKey
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: placeholder
+        defValue: Select an option...
+      }
+    }
+    {
+      id: "15"
       L: ComponentVariant
       P: {
         type: boolean
         defValue: false
         key: multiple
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: optionType
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: functionContext
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: value
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: subType
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: id
+        key: valueKey
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: options
+        defValue: []
       }
     }
   ]

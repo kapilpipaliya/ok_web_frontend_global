@@ -195,21 +195,12 @@ return {
       L: ComponentVariant
       P: {
         type: number
-        defValue: 90
-        key: itemHeight
+        defValue: 5
+        key: overscan
       }
     }
     {
       id: "8"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: items
-        defValue: []
-      }
-    }
-    {
-      id: "9"
       L: ComponentVariant
       P: {
         type: function
@@ -217,7 +208,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "9"
       L: ComponentVariant
       P: {
         type: string
@@ -226,12 +217,21 @@ return {
       }
     }
     {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: items
+        defValue: []
+      }
+    }
+    {
       id: "11"
       L: ComponentVariant
       P: {
         type: number
-        defValue: 5
-        key: overscan
+        defValue: 90
+        key: itemHeight
       }
     }
   ]

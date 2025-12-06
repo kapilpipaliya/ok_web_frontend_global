@@ -276,6 +276,87 @@ return {
       P: {
         css:
           '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.sm};
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  flex-shrink: 0;
+  margin-top: 2px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:info",
+  width: "20px",
+  height: "20px"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.info_light_100_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.5;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
 const messageState = args.fns.messageState;
 const isError = messageState?.type === 'error';
 
@@ -321,7 +402,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -352,7 +433,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "11"
       L: Attr
       P: {
         css:
@@ -372,7 +453,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -405,7 +486,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -449,7 +530,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "14"
       L: Attr
       P: {
         displayOrder: 1
@@ -461,87 +542,6 @@ return {
   icon: "ph:x",
   width: "20px",
   height: "20px"
-};
-'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
-  display: flex;
-  gap: ${args.theme.var.spacing.md};
-  align-items: flex-start;
-
-  @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
-    gap: ${args.theme.var.spacing.sm};
-  }
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
-  flex-shrink: 0;
-  margin-top: 2px;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "icon",
-  icon: "ph:info",
-  width: "20px",
-  height: "20px"
-};
-'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  margin: 0;
-  color: ${args.theme.var.color.info_light_100_text};
-  font-size: ${args.theme.var.fontSize.sm};
-  line-height: 1.5;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
 };
 '''
       }
@@ -1372,7 +1372,7 @@ return {
       id: e6
       T: Attr
       S: "2"
-      E: "12"
+      E: "9"
     }
     {
       id: e7
@@ -1425,31 +1425,31 @@ return {
     {
       id: e15
       T: Attr
-      S: "6"
+      S: "9"
       E: "10"
     }
     {
       id: e16
       T: Attr
-      S: "8"
-      E: "9"
+      S: "9"
+      E: "11"
     }
     {
       id: e17
       T: Attr
-      S: "10"
-      E: "11"
+      S: "9"
+      E: "13"
     }
     {
       id: e18
       T: Attr
-      S: "12"
-      E: "13"
+      S: "11"
+      E: "12"
     }
     {
       id: e19
       T: Attr
-      S: "12"
+      S: "13"
       E: "14"
     }
     {

@@ -463,20 +463,11 @@ return {
       P: {
         type: boolean
         defValue: false
-        key: isOpen
+        key: loading
       }
     }
     {
       id: "13"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: Confirm Action
-        key: title
-      }
-    }
-    {
-      id: "14"
       L: ComponentVariant
       P: {
         type: string
@@ -485,25 +476,24 @@ return {
       }
     }
     {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onCancel
+      }
+    }
+    {
       id: "15"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: Confirm
-        key: confirmText
+        type: boolean
+        defValue: false
+        key: isOpen
       }
     }
     {
       id: "16"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: Cancel
-        key: cancelText
-      }
-    }
-    {
-      id: "17"
       L: ComponentVariant
       P: {
         type: string
@@ -512,7 +502,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "17"
       L: ComponentVariantOption
       P: {
         description: Red confirmation button for destructive actions
@@ -521,7 +511,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "18"
       L: ComponentVariantOption
       P: {
         description: Warning colored confirmation button
@@ -530,7 +520,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "19"
       L: ComponentVariantOption
       P: {
         description: Primary colored confirmation button
@@ -539,11 +529,21 @@ return {
       }
     }
     {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: Confirm
+        key: confirmText
+      }
+    }
+    {
       id: "21"
       L: ComponentVariant
       P: {
-        type: function
-        key: onCancel
+        type: string
+        defValue: Confirm Action
+        key: title
       }
     }
     {
@@ -558,9 +558,9 @@ return {
       id: "23"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: loading
+        type: string
+        defValue: Cancel
+        key: cancelText
       }
     }
   ]
@@ -605,7 +605,7 @@ return {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "17"
+      E: "20"
     }
     {
       id: e8
@@ -682,20 +682,20 @@ return {
     {
       id: e20
       T: ComponentVariantOption
-      S: "17"
-      E: "18"
+      S: "16"
+      E: "17"
     }
     {
       id: e21
       T: ComponentVariantOption
-      S: "17"
-      E: "19"
+      S: "16"
+      E: "18"
     }
     {
       id: e22
       T: ComponentVariantOption
-      S: "17"
-      E: "20"
+      S: "16"
+      E: "19"
     }
   ]
 }

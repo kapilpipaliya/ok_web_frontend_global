@@ -7,101 +7,159 @@
         signinRequired: true
         fns:
           '''
-return {
-  enabled: true
-};
-'''
-        url: /content
-        key: Content
-        props:
-          '''
-return {
-  isNoPermissionCheck: true,
-};
-'''
-      }
-    }
-    {
-      id: "2"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-}`;
-'''
-        displayOrder: 1
-        fns:
-          '''
-// Reactive content type detection
 const contentType = args.createMemo(() => args.searchParams?.type || "channels");
 const detailId = args.createMemo(() => args.searchParams?.id || null);
 const searchQuery = args.createMemo(() => args.searchParams?.q || "");
 
-// Reactive view mode detection
-const isDetailView = args.createMemo(() => !!args.searchParams?.id);
-const isSearchView = args.createMemo(() => args.searchParams?.q !== undefined);
+const isSearchView = args.createMemo(() => contentType() === "search");
 const isFavouritesView = args.createMemo(() => contentType() === "favourites");
 const isExtensionView = args.createMemo(() => contentType() === "extension");
-const isListView = args.createMemo(() => !isDetailView() && !isSearchView() && !isFavouritesView() && !isExtensionView());
+const isChannelDetail = args.createMemo(() => contentType() === "channels" && args.searchParams?.id);
+const isPlaylistDetail = args.createMemo(() => contentType() === "playlists" && args.searchParams?.id);
+const isPlaylists = args.createMemo(() => !args.searchParams?.id && contentType() === "playlists");
+const isChannels = args.createMemo(() => !args.searchParams?.id && contentType() === "channels");
 
-// State for data
-const [items, setItems] = args.createSignal([]);
-const [loading, setLoading] = args.createSignal(true);
-const [searchTerm, setSearchTerm] = args.createSignal("");
-const [scrollElement, setScrollElement] = args.createSignal(null);
+const items = args.atom([]);
+const loading = args.atom(true);
+const searchTerm = args.atom("");
+const searchInput = args.atom(searchQuery());
+const pageContent = args.atom(null);
+const userSetting = args.atom(null);
+const settingLoaded = args.atom(false);
+const isInitialLoad = args.atom(true);
+const loadError = args.atom(null);
+// Track if URL params changed to prevent duplicate loads when sort updates as a consequence
+const urlParamsChangedFlag = args.atom(false);
+// Store the combined string of contentType, detailId, and searchQuery when data is loaded
+const loadedDataKey = args.atom(null);
 
-// State for detail view
-const [detailData, setDetailData] = args.createSignal(null);
-const [detailSearchTerm, setDetailSearchTerm] = args.createSignal("");
+const isModalOpen = args.atom(false);
+const [modalData, setModalData] = args.createStore({ editMode: false, itemData: null });
 
-// State for search view
-const [searchResults, setSearchResults] = args.createSignal(null);
-const [searchInput, setSearchInput] = args.createSignal(searchQuery());
+// Add videos to playlist modal
+const isAddVideosModalOpen = args.atom(false);
 
-// State for favourites view
-const [favouritesData, setFavouritesData] = args.createSignal(null);
+// Add single video to playlist modal (for extension)
+const isAddVideoToPlaylistModalOpen = args.atom(false);
+const [addVideoToPlaylistData, setAddVideoToPlaylistData] = args.createStore({ videoId: null, videoTitle: null });
 
-// State for extension view
-const [extensionData, setExtensionData] = args.createSignal(null);
-const [pageContent, setPageContent] = args.createSignal(null);
+// Sync current channel or playlist
+const isSyncing = args.atom(false);
 
-// State for user setting
-const [userSetting, setUserSetting] = args.createSignal(null);
-const [settingLoaded, setSettingLoaded] = args.createSignal(false);
+const isNoteModalOpen = args.atom(false);
+const [noteModalData, setNoteModalData] = args.createStore({ item: null, existingNote: "" });
 
-// Sort state for different views - split into field + direction for better UX
-// List view (channels/playlists)
-const [listSortField, setListSortField] = args.createSignal("title");
-const [listSortDirection, setListSortDirection] = args.createSignal("asc");
+// Common sort state - updates based on current view
+const sortField = args.atom("title");
+const sortDirection = args.atom("asc");
 
-// Detail view (playlists for channels / videos for playlists)
-const [detailSortField, setDetailSortField] = args.createSignal("position");
-const [detailSortDirection, setDetailSortDirection] = args.createSignal("asc");
-
-// Search view
-const [searchSortField, setSearchSortField] = args.createSignal("relevance");
-const [searchSortDirection, setSearchSortDirection] = args.createSignal("asc");
-
-// Favourites view
-const [favouritesSortField, setFavouritesSortField] = args.createSignal("favourited");
-const [favouritesSortDirection, setFavouritesSortDirection] = args.createSignal("desc");
-
-// Computed values for backward compatibility and backend calls
-const listSortBy = args.createMemo(() =>
-  listSortField() === "relevance" ? "relevance" : `${listSortField()}_${listSortDirection()}`
+// Computed sort value for backend calls
+const sortBy = args.createMemo(() =>
+  sortField() === "relevance" ? "relevance" : `${sortField()}_${sortDirection()}`
 );
-const detailSortBy = args.createMemo(() =>
-  detailSortField() === "relevance" ? "relevance" : `${detailSortField()}_${detailSortDirection()}`
-);
-const searchSortBy = args.createMemo(() =>
-  searchSortField() === "relevance" ? "relevance" : `${searchSortField()}_${searchSortDirection()}`
-);
-const favouritesSortBy = args.createMemo(() =>
-  favouritesSortField() === "relevance" ? "relevance" : `${favouritesSortField()}_${favouritesSortDirection()}`
-);
+
+// Polling state for processing status
+const [processingStatuses, setProcessingStatuses] = args.createSignal({
+  channels: {},
+  playlists: {}
+});
+const pollingInterval = args.atom(null);
+const isPolling = args.atom(false);
+
+// Helper function to generate combined string from contentType, detailId, and searchQuery
+const getDataKey = () => {
+  const type = contentType() || "";
+  const id = detailId() || "";
+  const query = searchQuery() || "";
+  return `${type}|${id}|${query}`;
+};
+
+// Helper to split "field_direction" format into field + direction
+const splitSortValue = (sortValue) => {
+  if (!sortValue || sortValue === "relevance") {
+    return { field: "relevance", direction: "asc" };
+  }
+
+  const match = sortValue.match(/^([a-z_]+)_(asc|desc)$/);
+  if (!match) {
+    return { field: "title", direction: "asc" }; // fallback
+  }
+
+  return { field: match[1], direction: match[2] };
+};
+
+// Get default sort for current view
+const getDefaultSortForView = () => {
+  if (isFavouritesView()) {
+    return { field: "favourited", direction: "desc" };
+  }
+  if (isChannelDetail() || isPlaylistDetail()) {
+    return { field: "position", direction: "asc" };
+  }
+  if (isSearchView()) {
+    return { field: "relevance", direction: "asc" };
+  }
+  // List view (channels/playlists)
+  return { field: "title", direction: "asc" };
+};
+
+// Get sort preference key for current view
+const getSortPreferenceKey = () => {
+  if (isFavouritesView()) return "favourites";
+  if (isChannelDetail() || isPlaylistDetail()) return "videos";
+  if (isSearchView()) return "search";
+  // List view
+  return contentType() === "playlists" ? "playlists" : "channels";
+};
+
+// Update sort state based on current view and saved preferences
+const updateSortForCurrentView = () => {
+  const prefs = userSetting()?.P?.sortPreferences;
+  if (!prefs) {
+    const defaultSort = getDefaultSortForView();
+    sortField(defaultSort.field);
+    sortDirection(defaultSort.direction);
+    return;
+  }
+
+  const prefsObj = typeof prefs === 'string' ? JSON.parse(prefs) : prefs;
+  const key = getSortPreferenceKey();
+  const savedSort = prefsObj[key];
+
+  if (savedSort) {
+    const { field, direction } = splitSortValue(savedSort);
+    sortField(field);
+    sortDirection(direction);
+  } else {
+    const defaultSort = getDefaultSortForView();
+    sortField(defaultSort.field);
+    sortDirection(defaultSort.direction);
+  }
+};
+
+// Function to load user setting
+const loadUserSetting = async (skipSortUpdate = false) => {
+  try {
+    const result = await args.fns.executeYTOFunction("getYTOUserSetting", {});
+
+    if (result?.result?.success && result?.result?.data?.setting) {
+      const settingVertex = result.result.data.setting;
+      userSetting(settingVertex);
+
+      // Only update sort if not skipped (skipped when URL sort is present)
+      if (!skipSortUpdate) {
+        updateSortForCurrentView();
+      }
+
+      settingLoaded(true);
+    } else {
+      settingLoaded(true);
+    }
+  } catch (error) {
+    console.error("Error loading user setting:", error);
+    settingLoaded(true);  // Mark as loaded even on error to prevent blocking
+  }
+};
 
 // Initialize sort from URL if present (highest priority)
 const initializeSortFromURL = () => {
@@ -110,10 +168,8 @@ const initializeSortFromURL = () => {
 
   // Handle "relevance" special case
   if (urlSort === "relevance") {
-    if (isSearchView()) {
-      setSearchSortField("relevance");
-      setSearchSortDirection("asc");
-    }
+    sortField("relevance");
+    sortDirection("asc");
     return true;
   }
 
@@ -127,21 +183,8 @@ const initializeSortFromURL = () => {
   }
 
   const [, field, direction] = match;
-
-  // Apply to current view
-  if (isFavouritesView()) {
-    setFavouritesSortField(field);
-    setFavouritesSortDirection(direction);
-  } else if (isSearchView()) {
-    setSearchSortField(field);
-    setSearchSortDirection(direction);
-  } else if (isDetailView()) {
-    setDetailSortField(field);
-    setDetailSortDirection(direction);
-  } else {
-    setListSortField(field);
-    setListSortDirection(direction);
-  }
+  sortField(field);
+  sortDirection(direction);
 
   return true;
 };
@@ -173,89 +216,31 @@ const clearURLSort = () => {
   window.history.replaceState({}, '', newURL);
 };
 
-// Helper to split "field_direction" format into field + direction
-const splitSortValue = (sortValue) => {
-  if (!sortValue || sortValue === "relevance") {
-    return { field: "relevance", direction: "asc" };
-  }
-
-  const match = sortValue.match(/^([a-z_]+)_(asc|desc)$/);
-  if (!match) {
-    return { field: "title", direction: "asc" }; // fallback
-  }
-
-  return { field: match[1], direction: match[2] };
-};
-
-// Function to load user setting
-const loadUserSetting = async () => {
-  try {
-    const result = await args.fns.executeYTOFunction("getYTOUserSetting", {});
-
-    if (result?.result?.success && result?.result?.data?.setting) {
-      const settingVertex = result.result.data.setting;
-      setUserSetting(settingVertex);
-
-      // Update sort signals from saved setting (access via .P property)
-      if (settingVertex.P?.sortPreferences) {
-        const prefs = typeof settingVertex.P.sortPreferences === 'string'
-          ? JSON.parse(settingVertex.P.sortPreferences)
-          : settingVertex.P.sortPreferences;
-
-        // Set initial sort values from preferences (split into field + direction)
-        if (prefs.channels) {
-          const { field, direction } = splitSortValue(prefs.channels);
-          setListSortField(field);
-          setListSortDirection(direction);
-        }
-        if (prefs.videos) {
-          const { field, direction } = splitSortValue(prefs.videos);
-          setDetailSortField(field);
-          setDetailSortDirection(direction);
-        }
-        if (prefs.favourites) {
-          const { field, direction } = splitSortValue(prefs.favourites);
-          setFavouritesSortField(field);
-          setFavouritesSortDirection(direction);
-        }
-      }
-
-      setSettingLoaded(true);
-    }
-  } catch (error) {
-    console.error("Error loading user setting:", error);
-    setSettingLoaded(true);  // Mark as loaded even on error to prevent blocking
-  }
-};
-
-// Clear URL sort param when view changes
-args.createEffect(() => {
-  // Track view state
-  const detailView = isDetailView();
-  const searchView = isSearchView();
-  const favourites = isFavouritesView();
-
-  // Clear URL on view change (not on initial mount)
-  if (settingLoaded()) {
-    clearURLSort();
-  }
-});
-
-// Save user setting when sort preferences change
-const debouncedSaveSetting = args.debounce(async () => {
+// Save user setting when sort preferences change (called explicitly by user actions)
+const saveUserSortPreference = async () => {
   try {
     const currentSettingVertex = userSetting() || { P: {} };
 
-    const sortPreferences = {
-      channels: listSortBy(),
-      playlists: listSortBy(),  // Playlists use the same sort as channels in list view
-      videos: detailSortBy(),
-      favourites: favouritesSortBy()
-    };
+    // Get existing preferences
+    const existingPrefs = currentSettingVertex.P?.sortPreferences;
+    const prefsObj = existingPrefs 
+      ? (typeof existingPrefs === 'string' ? JSON.parse(existingPrefs) : existingPrefs)
+      : {};
+
+    // Update only the current view's sort preference
+    const key = getSortPreferenceKey();
+    const currentSort = sortBy();
+    prefsObj[key] = currentSort;
+
+    // For list view, also update both channels and playlists
+    if (isChannels() || isPlaylists()) {
+      prefsObj.channels = currentSort;
+      prefsObj.playlists = currentSort;
+    }
 
     const updatedSettingProps = {
       ...currentSettingVertex.P,
-      sortPreferences: JSON.stringify(sortPreferences)
+      sortPreferences: JSON.stringify(prefsObj)
     };
 
     await args.fns.executeYTOFunction("saveYTOUserSetting", {
@@ -263,23 +248,54 @@ const debouncedSaveSetting = args.debounce(async () => {
     });
 
     // Update local vertex with new properties
-    setUserSetting({
+    userSetting({
       ...currentSettingVertex,
       P: updatedSettingProps
     });
   } catch (error) {
     console.error("Error saving user setting:", error);
   }
-}, 1000);  // Debounce for 1 second to avoid excessive saves
+};
 
-// Watch sort changes and save setting
+// Debounced version for user actions
+const debouncedSaveSetting = args.debounce(saveUserSortPreference, 1000);
+
+// Note: Sort preferences are saved explicitly when user changes sort
+// via handleSortFieldChange or handleSortDirectionToggle, not reactively
+
+// Update sort when view changes
 args.createEffect(
   args.on(
-    () => [listSortBy(), detailSortBy(), favouritesSortBy(), settingLoaded()],
-    () => {
-      // Only save if setting have been loaded (avoid saving defaults before load)
-      if (settingLoaded()) {
-        debouncedSaveSetting();
+    () => [
+      contentType(),
+      detailId(),
+      isSearchView(),
+      isFavouritesView(),
+      settingLoaded()
+    ],
+    ([currentType, currentId, isSearch, isFavourites, loaded], prev = []) => {
+      // Only run after settings are loaded
+      if (!loaded) return;
+
+      // On initial load, just mark as complete
+      if (prev.length === 0) {
+        isInitialLoad(false);
+        return;
+      }
+
+      // Check if view actually changed
+      const viewChanged = (
+        currentType !== prev[0] ||
+        currentId !== prev[1] ||
+        isSearch !== prev[2] ||
+        isFavourites !== prev[3]
+      );
+
+      if (viewChanged) {
+        // Clear URL sort
+        clearURLSort();
+        // Update sort for new view from user settings (won't trigger save due to flag)
+        updateSortForCurrentView();
       }
     }
   )
@@ -317,7 +333,7 @@ const getCurrentSortOptions = args.createMemo(() => {
   if (isFavouritesView()) {
     return favouritesSortOptions;
   }
-  if (isDetailView()) {
+  if (isChannelDetail() || isPlaylistDetail()) {
     return contentType() === "channels" ? playlistSortOptions : videoSortOptions;
   }
   if (isSearchView()) {
@@ -330,236 +346,684 @@ const getCurrentSortOptions = args.createMemo(() => {
   return contentType() === "playlists" ? playlistSortOptions : channelSortOptions;
 });
 
-// Get current sort value based on view
-const getCurrentSortValue = args.createMemo(() => {
-  if (isFavouritesView()) return favouritesSortBy();
-  if (isDetailView()) return detailSortBy();
-  if (isSearchView()) return searchSortBy();
-  return listSortBy();
-});
+// Get current sort value
+const getCurrentSortValue = args.createMemo(() => sortBy());
 
-// Set current sort value based on view
+// Set current sort value
 const setCurrentSortValue = (value) => {
   const { field, direction } = splitSortValue(value);
-
-  if (isFavouritesView()) {
-    setFavouritesSortField(field);
-    setFavouritesSortDirection(direction);
-  } else if (isDetailView()) {
-    setDetailSortField(field);
-    setDetailSortDirection(direction);
-  } else if (isSearchView()) {
-    setSearchSortField(field);
-    setSearchSortDirection(direction);
-  } else {
-    setListSortField(field);
-    setListSortDirection(direction);
-  }
-
-  // Update URL with new sort value
+  sortField(field);
+  sortDirection(direction);
+  // Update URL to reflect sort change
   updateURLSort(value);
 };
 
-// Get current sort field based on view
-const getCurrentSortField = args.createMemo(() => {
-  if (isFavouritesView()) return favouritesSortField();
-  if (isDetailView()) return detailSortField();
-  if (isSearchView()) return searchSortField();
-  return listSortField();
-});
+// Get current sort field
+const getCurrentSortField = args.createMemo(() => sortField());
 
-// Get current sort direction based on view
-const getCurrentSortDirection = args.createMemo(() => {
-  if (isFavouritesView()) return favouritesSortDirection();
-  if (isDetailView()) return detailSortDirection();
-  if (isSearchView()) return searchSortDirection();
-  return listSortDirection();
-});
+// Get current sort direction
+const getCurrentSortDirection = args.createMemo(() => sortDirection());
 
 // Handle field change (keeps direction the same)
 const handleSortFieldChange = (newField) => {
-  const currentDirection = getCurrentSortDirection();
+  const currentDirection = sortDirection();
   const newSortValue = newField === "relevance" ? "relevance" : `${newField}_${currentDirection}`;
   setCurrentSortValue(newSortValue);
+
+  // Save user preference after user-initiated change
+  debouncedSaveSetting();
 };
 
 // Handle direction toggle (keeps field the same)
 const handleSortDirectionToggle = () => {
-  const currentField = getCurrentSortField();
-  const currentDirection = getCurrentSortDirection();
+  const currentField = sortField();
+
+  // Can't toggle direction for relevance
+  if (currentField === "relevance") {
+    return;
+  }
+
+  const currentDirection = sortDirection();
   const newDirection = currentDirection === "asc" ? "desc" : "asc";
   const newSortValue = `${currentField}_${newDirection}`;
   setCurrentSortValue(newSortValue);
+
+  // Save user preference after user-initiated change
+  debouncedSaveSetting();
 };
 
-// Note modal state
-const [isNoteModalOpen, setIsNoteModalOpen] = args.createSignal(false);
-const [noteModalData, setNoteModalData] = args.createStore({ item: null, existingNote: "" });
-
-// Virtualization constants
-const overscan = 5;
-const [scrollTop, setScrollTop] = args.createSignal(0);
-const [windowWidth, setWindowWidth] = args.createSignal(768); // Default to mobile width, updated in onMount
-
-// Virtualization state for detail view items (playlists for channels, videos for playlists)
-const [detailScrollTop, setDetailScrollTop] = args.createSignal(0);
-const [detailScrollElement, setDetailScrollElement] = args.createSignal(null);
-
-// Get items from detail data (playlists for channels, videos for playlists)
-const detailItems = args.createMemo(() => {
-  const data = detailData();
-  if (!data) return [];
-
-  // For channels, return playlists
-  if (contentType() === "channels") {
-    return data.playlists || [];
-  }
-
-  // For playlists, return videos
-  return data.videos || [];
-});
-
-// Filtered detail items based on search term
-const filteredDetailItems = args.createMemo(() => {
-  const term = detailSearchTerm().toLowerCase();
-  if (!term) return detailItems();
-
-  return detailItems().filter(item => {
-    // For playlists (in channel detail view)
-    if (item.playlist) {
-      const playlist = item.playlist;
-      const playlistSetting = item.playlistSetting;
-      const title = playlist?.P?.title?.toLowerCase() || "";
-      const description = playlist?.P?.description?.toLowerCase() || "";
-      const customName = playlistSetting?.P?.customName?.toLowerCase() || "";
-      return title.includes(term) || description.includes(term) || customName.includes(term);
+// ----- LOAD DATA -------
+const loadData = async () => {
+  loading(true);
+  loadError(null); // Clear any previous errors
+  try {
+    let fnName;
+    let fnArgs = {};
+    let onSuccess = () => { };
+    if (isPlaylists()) {
+      fnName = "getUserPlaylists";
+      fnArgs = { sortBy: sortBy() };
+      onSuccess = (data) => {
+        items(data.playlists || []);
+      };
+    } else if (isChannels()) {
+      fnName = "getUserChannels";
+      fnArgs = { sortBy: sortBy() };
+      onSuccess = (data) => {
+        items(data.channels || []);
+      }
+    } else if (isPlaylistDetail()) {
+      fnName = "getPlaylistVideos";
+      fnArgs = {
+        ["playlistId"]: detailId(),
+        sortBy: sortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isChannelDetail()) {
+      fnName = "getChannelContents";
+      fnArgs = {
+        ["channelId"]: detailId(),
+        sortBy: sortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isSearchView()) {
+      if (!searchQuery()?.trim()) {
+        items({ channels: [], playlists: [], videos: [], totalCount: 0 });
+        loading(false);
+        return;
+      }
+      fnName = "searchUserContent";
+      fnArgs = {
+        query: searchQuery().trim(),
+        type: "all",
+        sortBy: sortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isFavouritesView()) {
+      fnName = "getUserFavourites";
+      fnArgs = {
+        sortBy: sortBy()
+      };
+      onSuccess = (data) => items(data);
+    } else if (isExtensionView()) {
+      const content = pageContent();
+      if (!content) {
+        loading(false);
+        return;
+      }
+      fnName = "checkPageItemsExistence";
+      fnArgs = {
+        channels: content.channels || [],
+        playlists: content.playlists || [],
+        videos: content.videos || []
+      };
+      onSuccess = (data) => items(data);
+    }  else {
+      console.error("Unknown mode:");
+      loading(false);
+      return;
     }
 
-    // For videos (in playlist detail view)
-    if (item.video) {
-      const video = item.video;
-      const videoSetting = item.videoSetting;
-      const title = video?.P?.title?.toLowerCase() || "";
-      const description = video?.P?.description?.toLowerCase() || "";
-      const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
-      const note = videoSetting?.P?.note?.toLowerCase() || "";
-      return title.includes(term) || description.includes(term) || channelTitle.includes(term) || note.includes(term);
+    const response = await args.fns.executeYTOFunction(fnName, fnArgs);
+    if (response?.error) {
+      loadError(response.error);
+      onSuccess(null);
+    } else if (response?.result?.success && response?.result?.data) {
+      loadError(null); // Clear error on success
+      onSuccess(response.result.data);
+    } else {
+      const msg = response?.result?.message || "Operation failed";
+      loadError(msg);
+      onSuccess(null);
+    }
+  } catch (err) {
+    console.error("Unexpected load error:", err);
+    loadError(err.message || "Failed to load data");
+  } finally {
+    loading(false);
+  }
+};
+
+// Clear error message
+const clearLoadError = () => {
+  loadError(null);
+};
+
+// Listen for messages from extension (popup or content script)
+const handleMessage = (event) => {
+  if (event.data.type === "PAGE_CONTENT") {
+    const { channels, playlists, videos } = event.data;
+    pageContent({ channels: channels || [], playlists: playlists || [], videos: videos || [] });
+  }
+};
+
+// Request page content from parent window (extension popup/iframe)
+const requestPageContent = () => {
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: "REQUEST_PAGE_CONTENT" }, "*");
+  }
+};
+
+// Watch for extension view and request page content
+args.createEffect(
+  args.on([isExtensionView], () => {
+    if (isExtensionView()) {
+      requestPageContent();
+    }
+  })
+);
+
+// Consolidated effect to watch URL params and sort changes
+// This prevents duplicate data loads by tracking both in a single effect
+args.createEffect(
+  args.on(
+    () => [
+      args.searchParams?.type,
+      args.searchParams?.id,
+      args.searchParams?.q,
+      sortBy(),
+      args.fns.selectedOwnership?.(),
+      args.fns.ownershipsLoading?.(),
+      pageContent(),
+      settingLoaded()
+    ],
+    (
+      [currentType, currentId, currentQuery, currentSort, currentOwnership, currentOwnershipsLoading, currentPageContent, currUserSettingsLoaded],
+      [prevType, prevId, prevQuery, prevSort, prevOwnership, prevOwnershipsLoading, prevPageContent, prevUserSettingsLoaded] = []
+    ) => {
+      // Save the combined string when data is successfully loaded
+      loadedDataKey(getDataKey());
+      // Wait for settings to be loaded before fetching data
+      if (!currUserSettingsLoaded) {
+        return;
+      }
+
+      // If ownerships are still loading, keep loading state
+      if (currentOwnershipsLoading) {
+        return;
+      }
+
+      // If ownerships are loaded but none exist (and no ownership selected), stop loading
+      if (!currentOwnership) {
+        const ownerships = args.fns.ownerships?.() || [];
+        if (ownerships.length === 0) {
+          loading(false);
+        }
+        return;
+      }
+
+      // Determine what changed
+      const urlParamsChanged = currentType !== prevType || currentId !== prevId || currentQuery !== prevQuery;
+      const sortChanged = currentSort !== prevSort;
+      const ownershipChanged = currentOwnership !== prevOwnership || currentOwnershipsLoading !== prevOwnershipsLoading;
+      const pageContentChanged = currentPageContent !== prevPageContent;
+      const settingsJustLoaded = currUserSettingsLoaded && !prevUserSettingsLoaded;
+
+      // Handle data loading - minimize effect runs by batching updates
+      if (settingsJustLoaded || urlParamsChanged || ownershipChanged) {
+        // Major changes: update sort when view changes, then load data
+        if (urlParamsChanged) {
+          updateSortForCurrentView();
+          urlParamsChangedFlag(true);
+        } else {
+          urlParamsChangedFlag(false);
+        }
+        loadData();
+      } else if (pageContentChanged && isExtensionView()) {
+        // Page content changed in extension view
+        urlParamsChangedFlag(false);
+        loadData();
+      } else if (sortChanged) {
+        // Sort changed - only load if URL params didn't change in previous run
+        if (!urlParamsChangedFlag()) {
+          loadData();
+        }
+        urlParamsChangedFlag(false);
+      } else {
+        urlParamsChangedFlag(false);
+      }
+    }
+  )
+);
+
+// Helper function to collect visible IDs from channel/playlist arrays (all items)
+const collectVisibleIds = (channelsArray, playlistsArray, channelIds, playlistIds) => {
+  // Collect all channel IDs
+  if (channelsArray) {
+    channelsArray.forEach(item => {
+      const channelId = item.channel?.P?.youtubeId;
+      if (channelId && !channelIds.includes(channelId)) {
+        channelIds.push(channelId);
+      }
+    });
+  }
+
+  // Collect all playlist IDs
+  if (playlistsArray) {
+    playlistsArray.forEach(item => {
+      const playlistId = item.playlist?.P?.youtubeId;
+      if (playlistId && !playlistIds.includes(playlistId)) {
+        playlistIds.push(playlistId);
+      }
+    });
+  }
+};
+
+// Helper function to extract all items from arrays
+const extractProcessingItems = (channelsArray, playlistsArray, channelsMap, playlistsMap) => {
+  // Extract all channels
+  if (channelsArray) {
+    channelsArray.forEach(item => {
+      const channelId = item.channel?.P?.youtubeId;
+      if (channelId) {
+        channelsMap[channelId] = item;
+      }
+    });
+  }
+
+  // Extract all playlists
+  if (playlistsArray) {
+    playlistsArray.forEach(item => {
+      const playlistId = item.playlist?.P?.youtubeId;
+      if (playlistId) {
+        playlistsMap[playlistId] = item;
+      }
+    });
+  }
+};
+
+// Reactive effect to automatically update all visible items when data changes
+args.createEffect(
+  args.on(
+    [items],
+    () => {
+      const channelsMap = {};
+      const playlistsMap = {};
+
+      const currentItems = items();
+
+      // Watch list view items
+      if (isChannels() || isPlaylists()) {
+        if (isChannels()) {
+          extractProcessingItems(currentItems, null, channelsMap, playlistsMap);
+        } else if (isPlaylists()) {
+          extractProcessingItems(null, currentItems, channelsMap, playlistsMap);
+        }
+      }
+
+      // Watch detail view
+      if (isChannelDetail() || isPlaylistDetail()) {
+        const detail = currentItems;
+        if (detail) {
+          if (isChannelDetail()) {
+            // Include channel itself
+            const channelId = detail.channel?.channel?.P?.youtubeId;
+            if (channelId) {
+              channelsMap[channelId] = detail.channel;
+            }
+
+            // Include playlists in channel
+            extractProcessingItems(null, detail.playlists, channelsMap, playlistsMap);
+          } else if (isPlaylistDetail()) {
+            // Include playlist itself
+            const playlistId = detail.playlist?.playlist?.P?.youtubeId;
+            if (playlistId) {
+              playlistsMap[playlistId] = detail.playlist;
+            }
+          }
+        }
+      }
+
+      // Watch search results
+      if (isSearchView()) {
+        const results = currentItems;
+        if (results) {
+          extractProcessingItems(results.channels, results.playlists, channelsMap, playlistsMap);
+        }
+      }
+
+      // Watch favourites
+      if (isFavouritesView()) {
+        const favourites = currentItems;
+        if (favourites) {
+          extractProcessingItems(favourites.channels, favourites.playlists, channelsMap, playlistsMap);
+        }
+      }
+
+      // Automatically update all visible items whenever data changes
+      setProcessingStatuses({
+        channels: channelsMap,
+        playlists: playlistsMap
+      });
+    }
+  )
+);
+
+// Collect visible IDs from current view for polling
+const collectVisibleIdsFromData = () => {
+  const channelIds = [];
+  const playlistIds = [];
+
+  const currentItems = items();
+
+  // Collect from list view items
+  if (isChannels() || isPlaylists()) {
+    if (isChannels()) {
+      collectVisibleIds(currentItems, null, channelIds, playlistIds);
+    } else if (isPlaylists()) {
+      collectVisibleIds(null, currentItems, channelIds, playlistIds);
+    }
+  }
+
+  // Collect from detail view
+  if (isChannelDetail() || isPlaylistDetail()) {
+    const detail = currentItems;
+    if (detail) {
+      if (isChannelDetail()) {
+        // Collect channel ID itself
+        const channelId = detail.channel?.channel?.P?.youtubeId;
+        if (channelId && !channelIds.includes(channelId)) {
+          channelIds.push(channelId);
+        }
+
+        // Collect playlists in channel
+        collectVisibleIds(null, detail.playlists, channelIds, playlistIds);
+      } else if (isPlaylistDetail()) {
+        // Collect playlist ID itself
+        const playlistId = detail.playlist?.playlist?.P?.youtubeId;
+        if (playlistId && !playlistIds.includes(playlistId)) {
+          playlistIds.push(playlistId);
+        }
+      }
+    }
+  }
+
+  // Collect from search results
+  if (isSearchView()) {
+    const results = currentItems;
+    if (results) {
+      collectVisibleIds(results.channels, results.playlists, channelIds, playlistIds);
+    }
+  }
+
+  // Collect from favourites
+  if (isFavouritesView()) {
+    const favourites = currentItems;
+    if (favourites) {
+      collectVisibleIds(favourites.channels, favourites.playlists, channelIds, playlistIds);
+    }
+  }
+
+  return { channelIds, playlistIds };
+};
+
+// Poll for processing status updates
+const pollProcessingStatus = async () => {
+  // Skip if already polling
+  if (isPolling()) {
+    return;
+  }
+
+  // Collect visible IDs from current view
+  const { channelIds, playlistIds } = collectVisibleIdsFromData();
+
+  // If no IDs to poll, skip
+  if (channelIds.length === 0 && playlistIds.length === 0) {
+    return;
+  }
+
+  isPolling(true);
+  try {
+    const result = await args.fns.executeYTOFunction("getProcessingStatusByIds", {
+      channelIds,
+      playlistIds
+    });
+
+    if (result?.result?.success && result?.result?.data) {
+      const data = result.result.data;
+
+      // Convert arrays to objects keyed by ID for easier lookup
+      const channelsMap = {};
+      data.channels.forEach(item => {
+        const channelId = item.channel?.P?.youtubeId;
+        if (channelId) {
+          channelsMap[channelId] = item;
+        }
+      });
+
+      const playlistsMap = {};
+      data.playlists.forEach(item => {
+        const playlistId = item.playlist?.P?.youtubeId;
+        if (playlistId) {
+          playlistsMap[playlistId] = item;
+        }
+      });
+
+      setProcessingStatuses({
+        channels: channelsMap,
+        playlists: playlistsMap
+      });
+
+      // If no active processing, stop polling and reload data
+      if (!data.hasActiveProcessing) {
+        stopPolling();
+        // Reload data to show completed items in all views
+        await loadData();
+      }
+    }
+  } catch (error) {
+    console.error('Error polling processing status:', error);
+  } finally {
+    isPolling(false);
+  }
+};
+
+// Start polling
+const startPolling = () => {
+  // Don't start if already polling
+  if (pollingInterval()) {
+    return;
+  }
+
+  // Start polling immediately
+  pollProcessingStatus();
+
+  // Set up interval (poll every 3 seconds)
+  const interval = setInterval(pollProcessingStatus, 3000);
+  pollingInterval(interval);
+};
+
+// Stop polling
+const stopPolling = () => {
+  const interval = pollingInterval();
+  if (interval) {
+    clearInterval(interval);
+    pollingInterval(null);
+  }
+  isPolling(false);
+};
+
+// Watch for processing status changes and start/stop polling as needed
+args.createEffect(
+  args.on([processingStatuses, pollingInterval], () => {
+    const statuses = processingStatuses();
+
+    // Check if any items are actually being processed (queued or processing status)
+    let hasActiveProcessing = false;
+
+    // Check channels
+    for (const channelId in statuses.channels) {
+      const item = statuses.channels[channelId];
+      const queueStatus = item.channel?.P?.queueStatus;
+      if (queueStatus === 'queued' || queueStatus === 'processing') {
+        hasActiveProcessing = true;
+        break;
+      }
     }
 
-    return false;
-  });
-});
-
-// Virtualization state for search results
-const [searchScrollTop, setSearchScrollTop] = args.createSignal(0);
-const [searchScrollElement, setSearchScrollElement] = args.createSignal(null);
-
-// Get combined search results
-const getSearchItems = args.createMemo(() => {
-  const results = searchResults();
-  if (!results) return [];
-
-  const combined = [];
-
-  // Add channels
-  if (results.channels) {
-    results.channels.forEach(item => {
-      combined.push({ ...item, resultType: 'channel' });
-    });
-  }
-
-  // Add playlists
-  if (results.playlists) {
-    results.playlists.forEach(item => {
-      combined.push({ ...item, resultType: 'playlist' });
-    });
-  }
-
-  // Add videos
-  if (results.videos) {
-    results.videos.forEach(item => {
-      combined.push({ ...item, resultType: 'video' });
-    });
-  }
-
-  return combined;
-});
-
-// Get combined favourites items with filtering
-const getFavouritesItems = args.createMemo(() => {
-  const data = favouritesData();
-  if (!data) return [];
-
-  const term = searchTerm().toLowerCase();
-  const combined = [];
-
-  // Add favourite channels
-  if (data.channels) {
-    data.channels.forEach(item => {
-      if (!term) {
-        combined.push({ ...item, resultType: 'channel' });
-      } else {
-        const channel = item.channel;
-        const channelSetting = item.channelSetting;
-        const title = channel?.P?.title?.toLowerCase() || "";
-        const description = channel?.P?.description?.toLowerCase() || "";
-        const customName = channelSetting?.P?.customName?.toLowerCase() || "";
-        if (title.includes(term) || description.includes(term) || customName.includes(term)) {
-          combined.push({ ...item, resultType: 'channel' });
+    // Check playlists if no active channel processing found
+    if (!hasActiveProcessing) {
+      for (const playlistId in statuses.playlists) {
+        const item = statuses.playlists[playlistId];
+        const queueStatus = item.playlist?.P?.queueStatus;
+        if (queueStatus === 'queued' || queueStatus === 'processing') {
+          hasActiveProcessing = true;
+          break;
         }
       }
-    });
-  }
+    }
 
-  // Add favourite playlists
-  if (data.playlists) {
-    data.playlists.forEach(item => {
-      if (!term) {
-        combined.push({ ...item, resultType: 'playlist' });
-      } else {
-        const playlist = item.playlist;
-        const playlistSetting = item.playlistSetting;
-        const title = playlist?.P?.title?.toLowerCase() || "";
-        const description = playlist?.P?.description?.toLowerCase() || "";
-        const customName = playlistSetting?.P?.customName?.toLowerCase() || "";
-        if (title.includes(term) || description.includes(term) || customName.includes(term)) {
-          combined.push({ ...item, resultType: 'playlist' });
-        }
-      }
-    });
-  }
+    // Start polling if there's active processing
+    if (hasActiveProcessing && !pollingInterval()) {
+      args.untrack(() => startPolling());
+    }
+    // Stop polling if there's no active processing
+    else if (!hasActiveProcessing && pollingInterval()) {
+      args.untrack(() => stopPolling());
+    }
+  })
+);
 
-  // Add favourite videos
-  if (data.videos) {
-    data.videos.forEach(item => {
-      if (!term) {
-        combined.push({ ...item, resultType: 'video' });
-      } else {
-        const video = item.video;
-        const videoSetting = item.videoSetting;
-        const title = video?.P?.title?.toLowerCase() || "";
-        const description = video?.P?.description?.toLowerCase() || "";
-        const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
-        const note = videoSetting?.P?.note?.toLowerCase() || "";
-        if (title.includes(term) || description.includes(term) || channelTitle.includes(term) || note.includes(term)) {
-          combined.push({ ...item, resultType: 'video' });
-        }
-      }
-    });
-  }
-
-  return combined;
+// Cleanup on unmount
+args.onCleanup(() => {
+  args.untrack(() => stopPolling());
 });
 
+// Get processing status for a specific channel
+const getChannelProcessingStatus = (channelId) => {
+  return processingStatuses().channels[channelId] || null;
+};
 
-// Virtualization state for favourites
-const [favouritesScrollTop, setFavouritesScrollTop] = args.createSignal(0);
-const [favouritesScrollElement, setFavouritesScrollElement] = args.createSignal(null);
+// Get processing status for a specific playlist
+const getPlaylistProcessingStatus = (playlistId) => {
+  return processingStatuses().playlists[playlistId] || null;
+};
 
-// Virtualization state for extension
-const [extensionScrollTop, setExtensionScrollTop] = args.createSignal(0);
-const [extensionScrollElement, setExtensionScrollElement] = args.createSignal(null);
+// Format processing status with detailed information
+const formatProcessingStatus = (processingStatus, itemType) => {
+  if (!processingStatus) {
+    return null;
+  }
 
+  // Extract main item (queue tracking is on Channel/Playlist vertex)
+  let item = null;
+  if (itemType === "playlist") {
+    item = processingStatus.playlist;
+  } else if (itemType === "channel") {
+    item = processingStatus.channel;
+  }
+
+  // If no item found, return null
+  if (!item || !item.P) {
+    return null;
+  }
+
+  const props = item.P;
+
+  // Check if we have a valid queueStatus
+  const queueStatus = props.queueStatus;
+  if (!queueStatus) {
+    return null;
+  }
+
+  // Format for any queueStatus: queued, processing, completed, or failed
+  const progress = props.progress || 0;
+
+  // Build details string based on item type
+  let details = '';
+  if (itemType === "channel") {
+    const processedPlaylists = props.processedPlaylists || 0;
+    const totalPlaylists = props.totalPlaylists || 0;
+    const processedVideos = props.processedVideos || 0;
+    const totalVideos = props.totalVideos || 0;
+    details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
+  } else if (itemType === "playlist") {
+    const processedVideos = props.processedVideos || 0;
+    const totalVideos = props.totalVideos || 0;
+    details = `${processedVideos}/${totalVideos} videos`;
+  }
+
+  // Return formatted status
+  return {
+    ...processingStatus,
+    queueStatus,
+    progress,
+    details,
+    error: props.error || ''
+  };
+};
+
+// Sync current channel or playlist
+const syncCurrentItem = async () => {
+  const data = items();
+
+  if (!data) {
+    args.showErrorToast("No item to sync");
+    return;
+  }
+
+  isSyncing(true);
+
+  try {
+    if (isPlaylistDetail()) {
+      const playlist = data.playlist?.playlist;
+      if (!playlist) {
+        args.showErrorToast("Playlist not found");
+        isSyncing(false);
+        return;
+      }
+
+      const url = `https://www.youtube.com/playlist?list=${playlist.P.youtubeId}`;
+
+      const result = await args.fns.executeYTOFunction("savePlaylist", { url });
+
+      if (result?.result?.success) {
+        args.showSuccessToast(result.result.message || "Playlist synced successfully");
+        await loadData();
+      } else {
+        args.showErrorToast(result?.result?.message || "Failed to sync playlist");
+      }
+    } else if (isChannelDetail()) {
+      const channel = data.channel?.channel;
+      if (!channel) {
+        args.showErrorToast("Channel not found");
+        isSyncing(false);
+        return;
+      }
+
+      const url = `https://www.youtube.com/channel/${channel.P.youtubeId}`;
+
+      const result = await args.fns.executeYTOFunction("saveChannel", { url });
+
+      if (result?.result?.success) {
+        args.showSuccessToast(result.result.message || "Channel synced successfully");
+        await loadData();
+      } else {
+        args.showErrorToast(result?.result?.message || "Failed to sync channel");
+      }
+    }
+  } catch (error) {
+    console.error("Error syncing:", error);
+    args.showErrorToast("An error occurred while syncing");
+  } finally {
+    isSyncing(false);
+  }
+};
+
+// ----- FILTER DATA -------
+// Helper to extract YouTube ID from item data (works for both raw and vertex data)
+const getItemYouTubeId = (itemData, type) => {
+  const item = itemData[type];
+  if (!item) return null;
+
+  // Raw extension data has .id property
+  if (itemData.extensionData) {
+    return item.id;
+  }
+
+  // Database vertex data has .P.youtubeId property
+  return item.P?.youtubeId || null;
+};
 // Helper to convert extension item to Vertex format
 const convertToVertex = (item, type) => {
   const label = type === 'channel' ? 'Channel' : type === 'playlist' ? 'Playlist' : 'Video';
@@ -606,21 +1070,6 @@ const convertToVertex = (item, type) => {
     [`${type}Setting`]: null
   };
 };
-
-// Helper to extract YouTube ID from item data (works for both raw and vertex data)
-const getItemYouTubeId = (itemData, type) => {
-  const item = itemData[type];
-  if (!item) return null;
-
-  // Raw extension data has .id property
-  if (itemData.extensionData) {
-    return item.id;
-  }
-
-  // Database vertex data has .P.youtubeId property
-  return item.P?.youtubeId || null;
-};
-
 // Helper to process extension item (handles both full vertex data and raw extension data)
 const processExtensionItem = (itemData, type) => {
   // Check if this is raw extension data that needs conversion
@@ -648,591 +1097,1093 @@ const processExtensionItem = (itemData, type) => {
   }
 };
 
-// Get combined extension items with filtering (in Vertex format)
-const getExtensionItems = args.createMemo(() => {
-  const data = extensionData();
-  if (!data) return [];
-
-  const combined = [];
-  const seenChannelIds = new Set(); // Track unique channel IDs
-  const seenPlaylistIds = new Set(); // Track unique playlist IDs
-  const seenVideoIds = new Set(); // Track unique video IDs
-
-  // Helper to add item if not duplicate
-  const addUniqueItem = (itemData, type) => {
-    const youtubeId = getItemYouTubeId(itemData, type);
-    if (!youtubeId) return; // Skip items without ID
-
-    // Check against the appropriate set for this type
-    const seenIds = type === 'channel' ? seenChannelIds :
-                    type === 'playlist' ? seenPlaylistIds :
-                    seenVideoIds;
-
-    if (!seenIds.has(youtubeId)) {
-      seenIds.add(youtubeId);
-      combined.push(processExtensionItem(itemData, type));
-    }
-  };
-
-  // Add all channels
-  if (data.channels) {
-    for (const channelData of data.channels) {
-      addUniqueItem(channelData, 'channel');
-    }
+const filteredItems = args.createMemo(() => {
+  const data = items();
+  // Check if current combined string matches the saved state
+  const currentKey = getDataKey();
+  const savedKey = args.untrack(loadedDataKey);
+  if (savedKey !== null && currentKey !== savedKey) {
+    return [];
   }
 
-  // Add all playlists
-  if (data.playlists) {
-    for (const playlistData of data.playlists) {
-      addUniqueItem(playlistData, 'playlist');
-    }
-  }
-
-  // Add all videos
-  if (data.videos) {
-    for (const videoData of data.videos) {
-      addUniqueItem(videoData, 'video');
-    }
-  }
-
-  return combined;
-});
-
-// Filtered extension items
-const filteredExtensionItems = args.createMemo(() => {
   const term = searchTerm().toLowerCase();
-  const items = getExtensionItems();
+  let items2 = [];
 
-  if (!term) return items;
+  if (isSearchView()) {
+    if (data) {
+      if (data.channels) items2.push(...data.channels.map(x => ({ ...x, resultType: "channel" })));
+      if (data.playlists) items2.push(...data.playlists.map(x => ({ ...x, resultType: "playlist" })));
+      if (data.videos) items2.push(...data.videos.map(x => ({ ...x, resultType: "video" })));
+    }
+  }
 
-  return items.filter(itemData => {
-    const resultType = itemData.resultType;
-    const item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
-    const title = item?.P?.title?.toLowerCase() || "";
-    return title.includes(term);
+  else if (isFavouritesView()) {
+    if (data) {
+      if (data.channels)
+        items2.push(...data.channels.map(x => ({ ...x, resultType: "channel" })));
+
+      if (data.playlists)
+        items2.push(...data.playlists.map(x => ({ ...x, resultType: "playlist" })));
+
+      if (data.videos)
+        items2.push(...data.videos.map(x => ({ ...x, resultType: "video" })));
+    }
+  }
+
+  else if (isExtensionView()) {
+    if (data) {
+      const combined = [];
+      const seen = {
+        channel: new Set(),
+        playlist: new Set(),
+        video: new Set()
+      };
+
+      const addItem = (itemData, type) => {
+        const id = getItemYouTubeId(itemData, type);
+        if (!id || seen[type].has(id)) return;
+        seen[type].add(id);
+        combined.push(processExtensionItem(itemData, type));
+      };
+
+      if (data.channels) data.channels.forEach(x => addItem(x, "channel"));
+      if (data.playlists) data.playlists.forEach(x => addItem(x, "playlist"));
+      if (data.videos) data.videos.forEach(x => addItem(x, "video"));
+
+      items2 = combined;
+    }
+  }
+  else if (isChannelDetail()) {
+    items2 = data?.playlists || [];
+  }
+  else if (isPlaylistDetail()) {
+    items2 = data?.videos || [];
+  }
+  else if (isChannels()) {
+    items2 = data;
+  } else if (isPlaylists()) {
+    items2 = data;
+  }
+
+  if (!term) return items2;
+
+  return items2.filter(item => {
+    if (item.video) {
+      const v = item.video;
+      const title = v?.P?.title?.toLowerCase() || "";
+      const desc = v?.P?.description?.toLowerCase() || "";
+      const channelTitle = v?.P?.channelTitle?.toLowerCase() || "";
+      const note = item.videoSetting?.P?.note?.toLowerCase() || "";
+      return title.includes(term) || desc.includes(term) || channelTitle.includes(term) || note.includes(term);
+    }
+    if (item.playlist) {
+      const p = item.playlist;
+      const title = p?.P?.title?.toLowerCase() || "";
+      const desc = p?.P?.description?.toLowerCase() || "";
+      const custom = item.playlistSetting?.P?.customName?.toLowerCase() || "";
+      return title.includes(term) || desc.includes(term) || custom.includes(term);
+    }
+    if (item.channel) {
+      const c = item.channel;
+      const title = c?.P?.title?.toLowerCase() || "";
+      const desc = c?.P?.description?.toLowerCase() || "";
+      const custom = item.channelSetting?.P?.customName?.toLowerCase() || "";
+      return title.includes(term) || desc.includes(term) || custom.includes(term);
+    }
+    return false;
   });
 });
 
-// Menu state
-const [activeMenu, setActiveMenu] = args.createSignal(null);
-const [menuPosition, setMenuPosition] = args.createSignal({ x: 0, y: 0 });
-
-// Modal state
-const [isModalOpen, setIsModalOpen] = args.createSignal(false);
-const [modalData, setModalData] = args.createStore({ editMode: false, itemData: null });
-
-// Handle window resize
-const handleResize = () => {
-  setWindowWidth(window.innerWidth);
-};
-
-// Load list data
-const loadListData = async () => {
-  setLoading(true);
-  try {
-    const functionName = contentType() === "playlists" ? "getUserPlaylists" : "getUserChannels";
-    const result = await args.fns.executeYTOFunction(functionName, {
-      sortBy: listSortBy()
-    });
-
-    if (result?.error) {
-      console.error("Error loading data:", result.error);
-      args.showErrorToast(result.error);
-      setItems([]);
-    } else if (result?.result?.success && result?.result?.data) {
-      const itemsData = contentType() === "playlists"
-        ? result.result.data.playlists || []
-        : result.result.data.channels || [];
-      setItems(itemsData);
-    } else {
-      // Handle error case
-      const errorMessage = result?.result?.message || "Failed to load data";
-      const errorDetails = result?.result?.error?.details;
-
-      console.error("Error loading data:", errorDetails || errorMessage);
-      args.showErrorToast(errorMessage);
-
-      setItems([]);
-    }
-  } catch (error) {
-    console.error("Unexpected error loading data:", error);
-    args.showErrorToast("Failed to load data");
-    setItems([]);
-  } finally {
-    setLoading(false);
+//------EXTRA FUNCTIONS----------
+// Unified helper: Infer item type from data structure
+const inferItemType = (data) => {
+  if (data.video) {
+    return { type: 'video', item: data.video, setting: data.videoSetting };
   }
-};
-
-// Load detail data
-const loadDetailData = async () => {
-  setLoading(true);
-  try {
-    const functionName = contentType() === "playlists" ? "getPlaylistVideos" : "getChannelContents";
-    const result = await args.fns.executeYTOFunction(functionName, {
-      [contentType() === "playlists" ? "playlistId" : "channelId"]: detailId(),
-      sortBy: detailSortBy()
-    });
-
-    if (result?.error) {
-      console.error("Error loading details:", result.error);
-      args.showErrorToast(result.error);
-      setDetailData(null);
-    } else if (result?.result?.success && result?.result?.data) {
-      setDetailData(result.result.data);
-    } else {
-      // Handle error case
-      const errorMessage = result?.result?.message || "Failed to load details";
-      const errorDetails = result?.result?.error?.details;
-
-      console.error("Error loading details:", errorDetails || errorMessage);
-      args.showErrorToast(errorMessage);
-
-      setDetailData(null);
-    }
-  } catch (error) {
-    console.error("Error loading detail data:", error);
-    args.showErrorToast("Failed to load details");
-    setDetailData(null);
-  } finally {
-    setLoading(false);
+  if (data.playlist) {
+    return { type: 'playlist', item: data.playlist, setting: data.playlistSetting };
   }
-};
-
-// Load search data
-const loadSearchData = async (query) => {
-  if (!query || query.trim().length === 0) {
-    setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
-    setLoading(false);
-    return;
+  if (data.channel) {
+    return { type: 'channel', item: data.channel, setting: data.channelSetting };
   }
-
-  setLoading(true);
-  try {
-    const result = await args.fns.executeYTOFunction("searchUserContent", {
-      query: query.trim(),
-      type: "all",
-      sortBy: searchSortBy()
-    });
-
-    if (result?.error) {
-      console.error("Error searching:", result.error);
-      args.showErrorToast(result.error);
-      setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
-    } else if (result?.result?.success && result?.result?.data) {
-      setSearchResults(result.result.data);
-    } else {
-      // Handle error case
-      const errorMessage = result?.result?.message || "Failed to search content";
-      const errorDetails = result?.result?.error?.details;
-
-      console.error("Error searching:", errorDetails || errorMessage);
-      args.showErrorToast(errorMessage);
-
-      setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
-    }
-  } catch (error) {
-    console.error("Unexpected error searching:", error);
-    args.showErrorToast("Failed to search");
-    setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
-  } finally {
-    setLoading(false);
-  }
+  return null;
 };
-
-// Load favourites data
-const loadFavouritesData = async () => {
-  setLoading(true);
-  try {
-    const result = await args.fns.executeYTOFunction("getUserFavourites", {
-      sortBy: favouritesSortBy()
-    });
-
-    if (result?.error) {
-      console.error("Error loading favourites:", result.error);
-      args.showErrorToast(result.error);
-      setFavouritesData({ channels: [], playlists: [], videos: [] });
-    } else if (result?.result?.success && result?.result?.data) {
-      setFavouritesData(result.result.data);
-    } else {
-      // Handle error case - show the error message from server
-      const errorMessage = result?.result?.message || "Failed to load favourites";
-      const errorDetails = result?.result?.error?.details;
-
-      console.error("Error loading favourites:", errorDetails || errorMessage);
-      args.showErrorToast(errorMessage);
-
-      setFavouritesData({ channels: [], playlists: [], videos: [] });
-    }
-  } catch (error) {
-    console.error("Unexpected error loading favourites:", error);
-    args.showErrorToast("Failed to load favourites");
-    setFavouritesData({ channels: [], playlists: [], videos: [] });
-  } finally {
-    setLoading(false);
-  }
-};
-
-// Load extension data
-const loadExtensionData = async () => {
-  const content = pageContent();
-  if (!content) {
-    setLoading(false);
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const result = await args.fns.executeYTOFunction("checkPageItemsExistence", {
-      channels: content.channels || [],
-      playlists: content.playlists || [],
-      videos: content.videos || []
-    });
-
-    if (result?.error || result?.errorType) {
-      console.error("Error loading extension data:", result.error || result.message);
-      args.showErrorToast(result.error || "Failed to check items");
-      setExtensionData(null);
-    } else if (result?.result?.success && result?.result?.data) {
-      setExtensionData(result.result.data);
-    } else {
-      const errorMessage = result?.result?.message || "Failed to check items";
-      console.error("Error loading extension data:", errorMessage);
-      args.showErrorToast(errorMessage);
-      setExtensionData(null);
-    }
-  } catch (error) {
-    console.error("Unexpected error loading extension data:", error);
-    args.showErrorToast("Failed to load extension data");
-    setExtensionData(null);
-  } finally {
-    setLoading(false);
-  }
-};
-
-// Listen for messages from extension (popup or content script)
-const handleMessage = (event) => {
-  if (event.data.type === "PAGE_CONTENT") {
-    const { channels, playlists, videos } = event.data;
-    setPageContent({ channels: channels || [], playlists: playlists || [], videos: videos || [] });
-  }
-};
-
-// Request page content from parent window (extension popup/iframe)
-const requestPageContent = () => {
-  if (window.parent && window.parent !== window) {
-    window.parent.postMessage({ type: "REQUEST_PAGE_CONTENT" }, "*");
-  }
-};
-
-// Load data based on view
-const loadData = async () => {
-  const currentSearchQuery = args.searchParams?.q;
-  const currentDetailId = args.searchParams?.id;
-
-  if (currentSearchQuery !== undefined) {
-    await loadSearchData(currentSearchQuery);
-  } else if (currentDetailId) {
-    await loadDetailData();
-  } else if (isFavouritesView()) {
-    await loadFavouritesData();
-  } else if (isExtensionView()) {
-    await loadExtensionData();
-  } else {
-    await loadListData();
-  }
-};
-
-// Reset all scroll positions
-const resetScrollPositions = () => {
-  // Reset signals immediately
-  setScrollTop(0);
-  setDetailScrollTop(0);
-  setSearchScrollTop(0);
-  setFavouritesScrollTop(0);
-  setExtensionScrollTop(0);
-
-  // Reset DOM elements after a small delay to ensure they're rendered
-  setTimeout(() => {
-    const listEl = scrollElement();
-    const detailEl = detailScrollElement();
-    const searchEl = searchScrollElement();
-    const favouritesEl = favouritesScrollElement();
-    const extensionEl = extensionScrollElement();
-    if (listEl) listEl.scrollTop = 0;
-    if (detailEl) detailEl.scrollTop = 0;
-    if (searchEl) searchEl.scrollTop = 0;
-    if (favouritesEl) favouritesEl.scrollTop = 0;
-    if (extensionEl) extensionEl.scrollTop = 0;
-  }, 0);
-};
-
-// Consolidated effect to watch URL params and sort changes
-// This prevents duplicate data loads by tracking both in a single effect
-args.createEffect(
-  args.on(
-    () => [
-      args.searchParams?.type,
-      args.searchParams?.id,
-      args.searchParams?.q,
-      listSortBy(),
-      detailSortBy(),
-      searchSortBy(),
-      favouritesSortBy(),
-      args.fns.selectedOwnership?.(), // Watch for ownership selection
-      args.fns.ownershipsLoading?.(), // Watch for ownerships loading state
-      pageContent() // Watch for page content changes (for extension view)
-    ],
-    (
-      [currentType, currentId, currentQuery, currentListSort, currentDetailSort, currentSearchSort, currentFavouritesSort, currentOwnership, currentOwnershipsLoading, currentPageContent],
-      [prevType, prevId, prevQuery, prevListSort, prevDetailSort, prevSearchSort, prevFavouritesSort, prevOwnership, prevOwnershipsLoading, prevPageContent] = []
-    ) => {
-      // If ownerships are still loading, keep loading state
-      if (currentOwnershipsLoading) {
-        return;
-      }
-
-      // If ownerships are loaded but none exist (and no ownership selected), stop loading
-      if (!currentOwnership) {
-        const ownerships = args.fns.ownerships?.() || [];
-        if (ownerships.length === 0) {
-          setLoading(false);
-        }
-        return;
-      }
-
-      // Check what changed
-      const urlParamsChanged = currentType !== prevType || currentId !== prevId || currentQuery !== prevQuery;
-      const listSortChanged = currentListSort !== prevListSort;
-      const detailSortChanged = currentDetailSort !== prevDetailSort;
-      const searchSortChanged = currentSearchSort !== prevSearchSort;
-      const favouritesSortChanged = currentFavouritesSort !== prevFavouritesSort;
-      const ownershipChanged = currentOwnership !== prevOwnership || currentOwnershipsLoading !== prevOwnershipsLoading;
-      const pageContentChanged = currentPageContent !== prevPageContent;
-
-      // Reset scroll positions if URL params changed
-      if (urlParamsChanged) {
-        resetScrollPositions();
-      }
-
-      // Load data based on what changed
-      // Priority: Ownership change or URL change loads everything, sort changes only reload if view hasn't changed
-      if (urlParamsChanged || ownershipChanged) {
-        // URL or ownership changed, load appropriate data for new view
-        loadData();
-      } else if (pageContentChanged && isExtensionView()) {
-        // Page content changed in extension view, reload extension data only
-        loadExtensionData();
-      } else {
-        // Only sort changed, reload current view
-        if (listSortChanged && isListView()) {
-          loadListData();
-        } else if (detailSortChanged && isDetailView()) {
-          loadDetailData();
-        } else if (searchSortChanged && isSearchView()) {
-          loadSearchData(currentQuery);
-        } else if (favouritesSortChanged && isFavouritesView()) {
-          loadFavouritesData();
-        }
-      }
-    }
-  )
-);
 
 // Handle search form submission
-const handleSearch = async (e) => {
+const handleSearchSubmit = async (e) => {
   if (e) e.preventDefault();
   const query = searchInput().trim();
   if (query) {
-    args.navigate(`/content?q=${encodeURIComponent(query)}`);
+    args.navigate(`/content?type=search&q=${encodeURIComponent(query)}`);
   }
 };
 
-// Filtered items
-const filteredItems = args.createMemo(() => {
-  const term = searchTerm().toLowerCase();
-  if (!term) return items();
-
-  return items().filter(item => {
-    const data = contentType() === "playlists" ? item.playlist : item.channel;
-    const title = data?.P?.title?.toLowerCase() || "";
-    const description = data?.P?.description?.toLowerCase() || "";
-    return title.includes(term) || description.includes(term);
-  });
-});
-
-// Navigation actions
-const navigateToDetail = (item) => {
-  const data = contentType() === "playlists" ? item.playlist : item.channel;
-  const id = data?.P?.youtubeId || "";
-  args.navigate(`/content?type=${contentType()}&id=${id}`);
-};
-
-const navigateBack = () => {
-  args.navigate(`/content?type=${contentType()}`);
-};
-
-// Menu actions
-const openInYouTube = (item) => {
-  const data = contentType() === "playlists" ? item.playlist : item.channel;
-  const youtubeId = data?.P?.youtubeId || "";
-  const url = contentType() === "playlists"
-    ? `https://www.youtube.com/playlist?list=${youtubeId}`
-    : `https://www.youtube.com/channel/${youtubeId}`;
-  window.open(url, "_blank");
-  setActiveMenu(null);
-};
-
-const editCustomName = async (item) => {
-  setModalData({ editMode: true, itemData: item });
-  setIsModalOpen(true);
-  setActiveMenu(null);
-};
-
-// Alias for Card component - converts item structure to match editCustomName expectations
-const openCustomNameModal = (itemData) => {
-  // If called with old signature (item, itemType, itemSetting), convert to new format
-  if (arguments.length > 1) {
-    const [item, itemType, itemSetting] = arguments;
-    const typeMap = {
-      video: { itemKey: 'video', settingKey: 'videoSetting' },
-      playlist: { itemKey: 'playlist', settingKey: 'playlistSetting' },
-      channel: { itemKey: 'channel', settingKey: 'channelSetting' }
-    };
-    const config = typeMap[itemType] || typeMap.channel;
-    itemData = { [config.itemKey]: item, [config.settingKey]: itemSetting };
-  }
-
-  setModalData({ editMode: true, itemData });
-  setIsModalOpen(true);
-};
-
-// Unified delete function for channels, playlists, and videos
-const deleteItem = async (item) => {
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
-  if (!rbConfirm) {
-    args.showErrorToast("Confirmation dialog not available");
-    setActiveMenu(null);
-    return;
-  }
-
-  // Infer item type and extract data
-  const itemInfo = inferItemType(item);
-  if (!itemInfo) {
-    args.showErrorToast("Cannot determine item type");
-    setActiveMenu(null);
-    return;
-  }
-
-  const { type: itemType, item: data } = itemInfo;
-  const title = data?.P?.title || "this item";
-
-  // Build confirmation message with type-specific details
-  const deleteMessages = {
-    channel: "\n\nThis will also delete:\n• All playlists in this channel\n• All videos that are only in this channel's playlists",
-    playlist: "\n\nThis will also delete:\n• All videos that are only in this playlist",
-    video: () => {
-      const detail = detailData();
-      const contextItem = detail?.playlist?.playlist;
-      const contextName = contextItem?.P?.title || "current view";
-      return `\n\nRemoving from ${contextName}.\n\nNote: This video will only be deleted if it doesn't exist in other playlists or the channel.`;
-    }
-  };
-
-  let message = `Are you sure you want to delete "${title}"?`;
-  const extraMessage = deleteMessages[itemType];
-  message += typeof extraMessage === 'function' ? extraMessage() : extraMessage;
-  message += "\n\nThis action cannot be undone!";
-
-  const confirmed = await rbConfirm({
-    title: `Delete ${itemType}`,
-    message,
-    confirmText: `Delete ${itemType}`,
-    cancelText: "Cancel",
-    variant: "danger"
-  });
-
-  if (confirmed) {
-    try {
-      // Call appropriate delete function with unified pattern
-      const deleteConfig = {
-        channel: {
-          functionName: 'deleteChannel',
-          params: { items: [data], itemType, contextItems: [] },
-          onSuccess: loadData
-        },
-        playlist: {
-          functionName: 'deletePlaylist',
-          params: { items: [data], itemType, contextItems: [] },
-          onSuccess: loadData
-        },
-        video: {
-          functionName: 'deleteVideo',
-          params: () => {
-            const detail = detailData();
-            const contextItem = detail?.playlist?.playlist;
-            if (!contextItem) {
-              throw new Error("Playlist information not found");
-            }
-            return { videos: [data], contextType: 'playlist', contextItems: [contextItem] };
-          },
-          onSuccess: loadDetailData
-        }
-      };
-
-      const config = deleteConfig[itemType];
-      const params = typeof config.params === 'function' ? config.params() : config.params;
-
-      const result = await args.fns.executeYTOFunction(config.functionName, params);
-
-      if (result?.result?.success) {
-        args.showSuccessToast(result.result.message);
-        await config.onSuccess();
-      } else {
-        args.showErrorToast(result?.result?.message || `Failed to delete ${itemType}`);
-      }
-    } catch (error) {
-      console.error(`Error deleting ${itemType}:`, error);
-      args.showErrorToast(error.message || `An error occurred while deleting ${itemType}`);
-    }
-  }
-  setActiveMenu(null);
-};
-
-// Alias for backward compatibility
-const deleteVideo = deleteItem;
-
-// Modal actions
 const openModal = () => {
-  setModalData({ editMode: false, itemData: null });
-  setIsModalOpen(true);
+  setModalData({ editMode: false, itemData: null, contentType: contentType() });
+  isModalOpen(true);
 };
 
 const closeModal = () => {
-  setIsModalOpen(false);
+  isModalOpen(false);
   setModalData({ editMode: false, itemData: null });
 };
+// Generate YouTube URL for items (channels, playlists, videos)
+const getYouTubeUrl = (item, itemType) => {
+  if (!item) return null;
+
+  const youtubeId = item.P?.youtubeId || "";
+
+  if (itemType === "video") {
+    return `https://www.youtube.com/watch?v=${youtubeId}`;
+  } else if (itemType === "playlist") {
+    // For special playlists, use originalPlaylistId for YouTube URL
+    const playlistId = item.P?.originalPlaylistId || youtubeId;
+    return `https://www.youtube.com/playlist?list=${playlistId}`;
+  } else if (itemType === "channel") {
+    // For channels, prefer handle format (@handle) over channel ID
+    const handle = item.P?.handle || item.P?.customUrl;
+    if (handle) {
+      // Ensure handle starts with @
+      const formattedHandle = handle.startsWith('@') ? handle : `@${handle}`;
+      return `https://www.youtube.com/${formattedHandle}`;
+    } else {
+      // Check if youtubeId is a channel ID (starts with "UC") or a handle
+      // For extension items, youtubeId might be a handle directly
+      if (youtubeId.startsWith('UC')) {
+        // Channel ID format
+        return `https://www.youtube.com/channel/${youtubeId}`;
+      } else {
+        // Treat as handle format
+        const formattedHandle = youtubeId.startsWith('@') ? youtubeId : `@${youtubeId}`;
+        return `https://www.youtube.com/${formattedHandle}`;
+      }
+    }
+  }
+
+  return null;
+};
+
+return {
+  enabled: true,
+  contentType,
+  detailId,
+  searchQuery,
+  isSearchView,
+  isFavouritesView,
+  isExtensionView,
+  isChannelDetail,
+  isPlaylistDetail,
+  isPlaylists,
+  isChannels,
+  searchTerm,
+  searchInput,
+  pageContent,
+  userSetting,
+  settingLoaded,
+  isAddVideosModalOpen,
+  isAddVideoToPlaylistModalOpen,
+  addVideoToPlaylistData,
+  setAddVideoToPlaylistData,
+  isSyncing,
+  syncCurrentItem,
+  items,
+  loading,
+  loadError,
+  clearLoadError,
+  isModalOpen,
+  modalData,
+  setModalData,
+  isNoteModalOpen,
+  noteModalData,
+  setNoteModalData,
+  filteredItems,
+  getPlaylistProcessingStatus,
+  getChannelProcessingStatus,
+  formatProcessingStatus,
+  inferItemType,
+  handleSearchSubmit,
+  loadData,
+  loadUserSetting,
+  initializeSortFromURL,
+  updateURLSort,
+  clearURLSort,
+  splitSortValue,
+  getCurrentSortOptions,
+  getCurrentSortValue,
+  setCurrentSortValue,
+  getCurrentSortField,
+  getCurrentSortDirection,
+  handleSortFieldChange,
+  handleSortDirectionToggle,
+  sortBy,
+  sortField,
+  sortDirection,
+  processingStatuses,
+  getDefaultSortForView,
+  getSortPreferenceKey,
+  updateSortForCurrentView,
+  openModal,
+  closeModal,
+  handleMessage,
+  requestPageContent,
+  getYouTubeUrl
+};
+'''
+        url: /content
+        key: Content
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    // Initialize sort from URL (highest priority)
+    const hasURLSort = args.fns.initializeSortFromURL();
+
+    // Load user setting (skip sort update if URL sort was set)
+    args.fns.loadUserSetting(hasURLSort);
+
+    // Add message listener for extension view
+    window.addEventListener('message', args.fns.handleMessage);
+
+    // Request page content if already in extension view
+    if (args.fns.isExtensionView()) {
+      args.fns.requestPageContent();
+    }
+  },
+  onCleanup: () => {
+    // Remove message listener for extension view
+    window.removeEventListener('message', args.fns.handleMessage);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: File
+      P: {
+        originalFileName: preview.png
+        fileName: preview_v2_2025-12-03T18:50:21.297Z.png
+        fileSize: 93367
+        subDomain: ytorganizer
+        filePath: /Users/kapil/UploadFiles/ytorganizer/2025/12/03/preview_v2_2025-12-03T18:50:21.297Z.png
+        checksum: 6a75cd4612f7e4e822b0d1715fc1f6c6f8fec95045dc80edfafea068d4739bed
+        mimeType: image/png
+        version: 2
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1rem 1rem 0 1rem;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.xl};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Determine title based on view
+let title = "";
+if (args.fns.isSearchView()) {
+  title = "Search";
+} else if (args.fns.isFavouritesView()) {
+  title = "Favourites";
+} else if (args.fns.isExtensionView()) {
+  title = "Quick Add Channel, Playlist or Video";
+} else if (args.fns.isChannelDetail()) {
+  const data = args.fns.items();
+  title = data?.channel?.channel?.P?.title || "Channel Details";
+} else if (args.fns.isPlaylistDetail()) {
+  const data = args.fns.items();
+  title = data?.playlist?.playlist?.P?.title || "Playlist Details";
+} else if (args.fns.isChannels()) {
+  title = "Channels";
+} else if (args.fns.isPlaylists()) {
+  title = "Playlists";
+}
+
+return {
+  as: "h1",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1.5
+        componentName: ErrorBanner
+        props:
+          '''
+const error = args.fns.loadError?.();
+
+return {
+  error: error || null,
+  onClose: () => args.fns.clearLoadError()
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: ProcessingStatus
+        props:
+          '''
+const data = args.fns.items();
+
+if (!(args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) || !data) {
+  return { hide: true };
+}
+
+const itemId = args.fns.isPlaylistDetail()
+  ? data.playlist?.playlist?.P?.youtubeId
+  : data.channel?.channel?.P?.youtubeId;
+
+const processingData = args.fns.isPlaylistDetail()
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : args.fns.getChannelProcessingStatus(itemId);
+
+if (!processingData) {
+  return { hide: true };
+}
+
+// Extract data from vertex format
+const item = args.fns.isPlaylistDetail()
+  ? processingData.playlist
+  : processingData.channel;
+
+if (!item?.P) {
+  return { hide: true };
+}
+
+let details = '';
+if (args.fns.isChannelDetail()) {
+  const processedPlaylists = item.P.processedPlaylists || 0;
+  const totalPlaylists = item.P.totalPlaylists || 0;
+  const processedVideos = item.P.processedVideos || 0;
+  const totalVideos = item.P.totalVideos || 0;
+  details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
+} else {
+  const processedVideos = item.P.processedVideos || 0;
+  const totalVideos = item.P.totalVideos || 0;
+  details = `${processedVideos}/${totalVideos} videos`;
+}
+
+return {
+  queueStatus: item.P.queueStatus,
+  progress: item.P.progress || 0,
+  type: args.fns.isPlaylistDetail() ? "playlist" : "channel",
+  details,
+  error: item.P.error || ''
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    /*flex-direction: column;*/
+    /*gap: 0.75rem;*/
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - hide search and actions when no accounts connected
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+return {
+  as: "div",
+  hide: hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Use form for search view to handle Enter key, div for others
+const as = args.fns.isSearchView() ? "form" : "div";
+const onSubmit = args.fns.isSearchView() ? args.fns.handleSearchSubmit : undefined;
+
+return {
+  as,
+  onSubmit
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+// Determine placeholder and handlers based on view
+let placeholder = "";
+let value = "";
+let onInput = null;
+let autofocus = false;
+
+if (args.fns.isSearchView()) {
+  placeholder = "Search channels, playlists, and videos...";
+  value = args.fns.searchInput();
+  onInput = (e) => args.fns.searchInput(e.target.value);
+  autofocus = true;
+} else if (args.fns.isFavouritesView()) {
+  placeholder = "Filter favourites...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.searchTerm(e.target.value);
+} else if (args.fns.isExtensionView()) {
+  placeholder = "Filter items...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.searchTerm(e.target.value);
+} else if (args.fns.isPlaylistDetail()) {
+  placeholder = "Search videos...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.searchTerm(e.target.value);
+} else if (args.fns.isChannelDetail()) {
+  placeholder = "Search playlists...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.searchTerm(e.target.value);
+} else if (args.fns.isPlaylists()) {
+  placeholder = "Search playlists...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.searchTerm(e.target.value);
+} else if (args.fns.isChannels()) {
+  placeholder = "Search channels...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.searchTerm(e.target.value);
+}
+
+return {
+  placeholder,
+  leftIcon: "mdi:magnify",
+  value,
+  onInput,
+  autofocus
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+const text = (() => {
+  if (args.fns.isPlaylists()) return "Add Playlist";
+  if (args.fns.isChannels()) return "Add Channel";
+  return "";
+})();
+
+return {
+  text,
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: args.fns.openModal,
+  show: () => args.fns.isPlaylists() || args.fns.isChannels()
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  show: () => args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+const isSyncing = args.fns.isSyncing();
+
+return {
+  text: isSyncing ? "Syncing..." : "Sync",
+  variant: "secondary",
+  leftIcon: "carbon:refresh",
+  onClick: args.fns.syncCurrentItem,
+  disabled: isSyncing
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  text: "Add Playlist",
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: () => {
+    const data = args.fns.items();
+    const channel = data?.channel?.channel;
+
+    if (!channel) {
+      args.showErrorToast("Channel data not loaded");
+      return;
+    }
+
+    args.fns.setModalData({
+      editMode: false,
+      contentType: "playlists",
+      channelId: channel.P.youtubeId
+    });
+    args.fns.isModalOpen(true);
+  },
+  show: args.fns.isChannelDetail() || args.fns.isPlaylists()
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  text: "Add Videos",
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: () => args.fns.isAddVideosModalOpen(true),
+  show: args.fns.isPlaylistDetail()
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    /*flex-direction: column;*/
+    /*align-items: flex-start;*/
+    gap: 0.5rem;
+    margin: 0 0 ${args.theme.var.spacing.md} 0;
+  }
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - hide sort controls when no accounts connected
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+return {
+  as: "div",
+  hide: args.fns.loading() || hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+// Determine description based on view
+let description = "";
+if (args.fns.isSearchView()) {
+  const results = args.fns.items();
+  const totalCount = results?.totalCount || 0;
+  description = results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "";
+} else if (args.fns.isFavouritesView()) {
+  const items = args.fns.filteredItems();
+  const totalCount = items.length;
+  description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isExtensionView()) {
+  const items = args.fns.filteredItems();
+  const totalCount = items.length;
+  description = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isChannelDetail()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} playlist${count !== 1 ? 's' : ''}`;
+} else if (args.fns.isPlaylistDetail()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} video${count !== 1 ? 's' : ''}`;
+} else if (args.fns.isChannels()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} channel${count !== 1 ? 's' : ''}`;
+} else if (args.fns.isPlaylists()) {
+  const count = args.fns.filteredItems().length;
+  description = `${count} playlist${count !== 1 ? 's' : ''}`;
+}
+
+return {
+  as: "p",
+  text: description
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: auto;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  ._id {
+
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: SplitButton
+        props:
+          '''
+// Hide sort controls on extension page
+const isExtension = args.fns.isExtensionView();
+if (isExtension) {
+  return { hide: true };
+}
+
+// Get sort field, direction, and options from fns
+const currentField = args.fns.getCurrentSortField();
+const currentDirection = args.fns.getCurrentSortDirection();
+const options = args.fns.getCurrentSortOptions();
+
+return {
+  field: currentField,
+  direction: currentDirection,
+  options: options,
+  onFieldChange: (newField) => {
+    args.fns.handleSortFieldChange(newField);
+  },
+  onDirectionToggle: () => {
+    args.fns.handleSortDirectionToggle();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0 1.5rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0 1rem;
+  }
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main"
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.loading()
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "lg"
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.md};
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+let text;
+if (args.fns.isPlaylists()) {
+  text = "Loading playlists...";
+} else if (args.fns.isChannels()) {
+  text = "Loading channels...";
+} else if (args.fns.isChannelDetail()) {
+  text = "Loading playlists...";
+} else if (args.fns.isPlaylistDetail()) {
+  text = "Loading videos...";
+} else if (args.fns.isSearchView()) {
+  text = "Searching...";
+} else if (args.fns.isFavouritesView()) {
+  text = "Loading favourites...";
+} else if (args.fns.isExtensionView()) {
+  text = "Loading page content...";
+}
+
+return {
+  as: "p",
+  text
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: NoAccountsMessage
+        props:
+          '''
+// Check if no ownerships exist
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+return {
+  hide: args.fns.loading() || !hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 3
+        fns:
+          '''
+// Unified helper: Update item in array by ID
+const updateItemInArrayById = (items, itemId, itemKey, settingKey, newSetting) => {
+  return items.map(existingItem => {
+    if (existingItem[itemKey]?.P?.youtubeId === itemId) {
+      return { ...existingItem, [settingKey]: newSetting };
+    }
+    return existingItem;
+  });
+};
+
+// Unified helper: Update all views with new item data
+const updateAllViews = (itemInfo) => {
+  if (!itemInfo) return;
+
+  const { type, item, setting } = itemInfo;
+  const itemId = item.P?.youtubeId;
+  if (!itemId) return;
+
+  // Map of type to field names
+  const typeMap = {
+    channel: { itemKey: 'channel', settingKey: 'channelSetting', arrayKey: 'channels' },
+    playlist: { itemKey: 'playlist', settingKey: 'playlistSetting', arrayKey: 'playlists' },
+    video: { itemKey: 'video', settingKey: 'videoSetting', arrayKey: 'videos' }
+  };
+
+  const { itemKey, settingKey, arrayKey } = typeMap[type];
+
+  // Update list view
+  if ((args.fns.isChannels() || args.fns.isPlaylists()) && args.fns.contentType() === arrayKey) {
+    args.fns.items(updateItemInArrayById(args.fns.items(), itemId, itemKey, settingKey, setting));
+  }
+
+  // Update detail view
+  if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
+    const detail = args.fns.items();
+    if (!detail) return;
+
+    // Update arrays in detail view
+    if (detail[arrayKey]) {
+      const updated = updateItemInArrayById(detail[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...detail, [arrayKey]: updated });
+    }
+
+    // Update single item in detail view (channel/playlist object)
+    if (detail[type]?.[itemKey]?.P?.youtubeId === itemId) {
+      args.fns.items({ ...detail, [type]: { ...detail[type], [settingKey]: setting } });
+    }
+  }
+
+  // Update search results
+  if (args.fns.isSearchView()) {
+    const results = args.fns.items();
+    if (results?.[arrayKey]) {
+      const updated = updateItemInArrayById(results[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...results, [arrayKey]: updated });
+    }
+  }
+
+  // Update favourites
+  if (args.fns.isFavouritesView()) {
+    const favourites = args.fns.items();
+    if (favourites?.[arrayKey]) {
+      const updated = updateItemInArrayById(favourites[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...favourites, [arrayKey]: updated });
+    }
+  }
+
+  // Update extension view
+  if (args.fns.isExtensionView()) {
+    const extension = args.fns.items();
+    if (extension?.[arrayKey]) {
+      const updated = updateItemInArrayById(extension[arrayKey], itemId, itemKey, settingKey, setting);
+      args.fns.items({ ...extension, [arrayKey]: updated });
+    }
+  }
+};
+
+// Update item data after toggle favourite
+const updateItemDataAfterToggleFavourite = (updatedData) => {
+  const itemInfo = args.fns.inferItemType(updatedData);
+  updateAllViews(itemInfo);
+};
+
+// Update item data after note is saved
+const updateItemDataAfterNoteSave = (updatedData) => {
+  const itemInfo = args.fns.inferItemType(updatedData);
+  updateAllViews(itemInfo);
+};
+
 
 const handleModalSave = async (saveData) => {
-  closeModal();
+  args.fns.closeModal();
 
   if (saveData?.editMode && saveData?.result) {
     // Edit mode - update local data instead of refetching
-    args.fns.updateLocalItemSetting(saveData.result);
+    updateItemDataAfterNoteSave(saveData.result);
   } else {
     // Add mode, reload all data
-    await loadData();
+    await args.fns.loadData();
   }
 };
 
 // Note modal functions
 const openNoteModal = (item, existingNote = "") => {
-  setNoteModalData({ item, existingNote });
-  setIsNoteModalOpen(true);
+  args.fns.setNoteModalData({ item, existingNote });
+  args.fns.isNoteModalOpen(true);
 };
 
 const closeNoteModal = () => {
-  setIsNoteModalOpen(false);
-  setNoteModalData({ item: null, existingNote: "" });
+  args.fns.isNoteModalOpen(false);
+  args.fns.setNoteModalData({ item: null, existingNote: "" });
 };
 
 const saveNote = async (data) => {
@@ -1292,1446 +2243,144 @@ const toggleFavourite = async (item) => {
   }
 };
 
-// Unified helper: Infer item type from data structure
-const inferItemType = (data) => {
-  if (data.video) {
-    return { type: 'video', item: data.video, setting: data.videoSetting };
-  }
-  if (data.playlist) {
-    return { type: 'playlist', item: data.playlist, setting: data.playlistSetting };
-  }
-  if (data.channel) {
-    return { type: 'channel', item: data.channel, setting: data.channelSetting };
-  }
-  return null;
+const openInYouTube = (item) => {
+  const data = args.fns.contentType() === "playlists" ? item.playlist : item.channel;
+  const youtubeId = data?.P?.youtubeId || "";
+  const url = args.fns.contentType() === "playlists"
+    ? `https://www.youtube.com/playlist?list=${youtubeId}`
+    : `https://www.youtube.com/channel/${youtubeId}`;
+  window.open(url, "_blank");
 };
 
-// Unified helper: Update item in array by ID
-const updateItemInArrayById = (items, itemId, itemKey, settingKey, newSetting) => {
-  return items.map(existingItem => {
-    if (existingItem[itemKey]?.P?.youtubeId === itemId) {
-      return { ...existingItem, [settingKey]: newSetting };
+const editCustomName = async (item) => {
+  args.fns.setModalData({ editMode: true, itemData: item });
+  args.fns.isModalOpen(true);
+};
+
+const openCustomNameModal = (itemData) => {
+  args.fns.setModalData({ editMode: true, itemData });
+  args.fns.isModalOpen(true);
+};
+
+// Unified delete function for channels, playlists, and videos
+const deleteItem = async (item) => {
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  if (!rbConfirm) {
+    args.showErrorToast("Confirmation dialog not available");
+
+    return;
+  }
+
+  // Infer item type and extract data
+  const itemInfo = args.fns.inferItemType(item);
+  if (!itemInfo) {
+    args.showErrorToast("Cannot determine item type");
+
+    return;
+  }
+
+  const { type: itemType, item: data } = itemInfo;
+  const title = data?.P?.title || "this item";
+
+  // Build confirmation message with type-specific details
+  const deleteMessages = {
+    channel: "\n\nThis will also delete:\n• All playlists in this channel\n• All videos that are only in this channel's playlists",
+    playlist: "\n\nThis will also delete:\n• All videos that are only in this playlist",
+    video: () => {
+      const detail = args.fns.items();
+      const contextItem = detail?.playlist?.playlist;
+      const contextName = contextItem?.P?.title || "current view";
+      return `\n\nRemoving from ${contextName}.\n\nNote: This video will only be deleted if it doesn't exist in other playlists or the channel.`;
     }
-    return existingItem;
+  };
+
+  let message = `Are you sure you want to delete "${title}"?`;
+  const extraMessage = deleteMessages[itemType];
+  message += typeof extraMessage === 'function' ? extraMessage() : extraMessage;
+  message += "\n\nThis action cannot be undone!";
+
+  const confirmed = await rbConfirm({
+    title: `Delete ${itemType}`,
+    message,
+    confirmText: `Delete ${itemType}`,
+    cancelText: "Cancel",
+    variant: "danger"
   });
-};
 
-// Unified helper: Update all views with new item data
-const updateAllViews = (itemInfo) => {
-  if (!itemInfo) return;
+  if (confirmed) {
+    try {
+      // Call appropriate delete function with unified pattern
+      const deleteConfig = {
+        channel: {
+          functionName: 'deleteChannel',
+          params: { items: [data], itemType, contextItems: [] },
+          onSuccess: args.fns.loadData
+        },
+        playlist: {
+          functionName: 'deletePlaylist',
+          params: { items: [data], itemType, contextItems: [] },
+          onSuccess: args.fns.loadData
+        },
+        video: {
+          functionName: 'deleteVideo',
+          params: () => {
+            const detail = args.fns.items();
+            const contextItem = detail?.playlist?.playlist;
+            if (!contextItem) {
+              throw new Error("Playlist information not found");
+            }
+            return { videos: [data], contextType: 'playlist', contextItems: [contextItem] };
+          },
+          onSuccess: args.fns.loadData
+        }
+      };
 
-  const { type, item, setting } = itemInfo;
-  const itemId = item.P?.youtubeId;
-  if (!itemId) return;
+      const config = deleteConfig[itemType];
+      const params = typeof config.params === 'function' ? config.params() : config.params;
 
-  // Map of type to field names
-  const typeMap = {
-    channel: { itemKey: 'channel', settingKey: 'channelSetting', arrayKey: 'channels' },
-    playlist: { itemKey: 'playlist', settingKey: 'playlistSetting', arrayKey: 'playlists' },
-    video: { itemKey: 'video', settingKey: 'videoSetting', arrayKey: 'videos' }
-  };
-
-  const { itemKey, settingKey, arrayKey } = typeMap[type];
-
-  // Update list view
-  if (isListView() && contentType() === arrayKey) {
-    setItems(updateItemInArrayById(items(), itemId, itemKey, settingKey, setting));
-  }
-
-  // Update detail view
-  if (isDetailView()) {
-    const detail = detailData();
-    if (!detail) return;
-
-    // Update arrays in detail view
-    if (detail[arrayKey]) {
-      const updated = updateItemInArrayById(detail[arrayKey], itemId, itemKey, settingKey, setting);
-      setDetailData({ ...detail, [arrayKey]: updated });
-    }
-
-    // Update single item in detail view (channel/playlist object)
-    if (detail[type]?.[itemKey]?.P?.youtubeId === itemId) {
-      setDetailData({ ...detail, [type]: { ...detail[type], [settingKey]: setting } });
-    }
-  }
-
-  // Update search results
-  if (isSearchView()) {
-    const results = searchResults();
-    if (results?.[arrayKey]) {
-      const updated = updateItemInArrayById(results[arrayKey], itemId, itemKey, settingKey, setting);
-      setSearchResults({ ...results, [arrayKey]: updated });
-    }
-  }
-
-  // Update favourites
-  if (isFavouritesView()) {
-    const favourites = favouritesData();
-    if (favourites?.[arrayKey]) {
-      const updated = updateItemInArrayById(favourites[arrayKey], itemId, itemKey, settingKey, setting);
-      setFavouritesData({ ...favourites, [arrayKey]: updated });
-    }
-  }
-
-  // Update extension view
-  if (isExtensionView()) {
-    const extension = extensionData();
-    if (extension?.[arrayKey]) {
-      const updated = updateItemInArrayById(extension[arrayKey], itemId, itemKey, settingKey, setting);
-      setExtensionData({ ...extension, [arrayKey]: updated });
-    }
-  }
-};
-
-// Update item data after toggle favourite
-const updateItemDataAfterToggleFavourite = (updatedData) => {
-  const itemInfo = inferItemType(updatedData);
-  updateAllViews(itemInfo);
-};
-
-// Update item data after note is saved
-const updateItemDataAfterNoteSave = (updatedData) => {
-  const itemInfo = inferItemType(updatedData);
-  updateAllViews(itemInfo);
-};
-
-// Sync current channel or playlist
-const [isSyncing, setIsSyncing] = args.createSignal(false);
-
-const syncCurrentItem = async () => {
-  const currentContentType = contentType();
-  const data = detailData();
-
-  if (!data) {
-    args.showErrorToast("No item to sync");
-    return;
-  }
-
-  setIsSyncing(true);
-
-  try {
-    if (currentContentType === "playlists") {
-      const playlist = data.playlist?.playlist;
-      if (!playlist) {
-        args.showErrorToast("Playlist not found");
-        setIsSyncing(false);
-        return;
-      }
-
-      const url = `https://www.youtube.com/playlist?list=${playlist.P.youtubeId}`;
-
-      const result = await args.fns.executeYTOFunction("savePlaylist", { url });
+      const result = await args.fns.executeYTOFunction(config.functionName, params);
 
       if (result?.result?.success) {
-        args.showSuccessToast(result.result.message || "Playlist synced successfully");
-        await loadDetailData();
+        args.showSuccessToast(result.result.message);
+        await config.onSuccess();
       } else {
-        args.showErrorToast(result?.result?.message || "Failed to sync playlist");
+        args.showErrorToast(result?.result?.message || `Failed to delete ${itemType}`);
       }
-    } else {
-      const channel = data.channel?.channel;
-      if (!channel) {
-        args.showErrorToast("Channel not found");
-        setIsSyncing(false);
-        return;
-      }
-
-      const url = `https://www.youtube.com/channel/${channel.P.youtubeId}`;
-
-      const result = await args.fns.executeYTOFunction("saveChannel", { url });
-
-      if (result?.result?.success) {
-        args.showSuccessToast(result.result.message || "Channel synced successfully");
-        await loadDetailData();
-      } else {
-        args.showErrorToast(result?.result?.message || "Failed to sync channel");
-      }
-    }
-  } catch (error) {
-    console.error("Error syncing:", error);
-    args.showErrorToast("An error occurred while syncing");
-  } finally {
-    setIsSyncing(false);
-  }
-};
-
-// Add videos to playlist modal
-const [isAddVideosModalOpen, setIsAddVideosModalOpen] = args.createSignal(false);
-
-// Add single video to playlist modal (for extension)
-const [isAddVideoToPlaylistModalOpen, setIsAddVideoToPlaylistModalOpen] = args.createSignal(false);
-const [addVideoToPlaylistData, setAddVideoToPlaylistData] = args.createStore({ videoId: null, videoTitle: null });
-
-// Update local item setting across all views
-const updateLocalItemSetting = (updatedData) => {
-  const itemInfo = inferItemType(updatedData);
-  updateAllViews(itemInfo);
-};
-
-// Polling state for all items (to track processing queueStatus and other metadata)
-const [processingStatuses, setProcessingStatuses] = args.createSignal({
-  channels: {},
-  playlists: {}
-});
-const [pollingInterval, setPollingInterval] = args.createSignal(null);
-const [isPolling, setIsPolling] = args.createSignal(false);
-
-// Helper function to collect visible IDs from channel/playlist arrays (all items)
-const collectVisibleIds = (channelsArray, playlistsArray, channelIds, playlistIds) => {
-  // Collect all channel IDs
-  if (channelsArray) {
-    channelsArray.forEach(item => {
-      const channelId = item.channel?.P?.youtubeId;
-      if (channelId && !channelIds.includes(channelId)) {
-        channelIds.push(channelId);
-      }
-    });
-  }
-
-  // Collect all playlist IDs
-  if (playlistsArray) {
-    playlistsArray.forEach(item => {
-      const playlistId = item.playlist?.P?.youtubeId;
-      if (playlistId && !playlistIds.includes(playlistId)) {
-        playlistIds.push(playlistId);
-      }
-    });
-  }
-};
-
-// Helper function to extract all items from arrays
-const extractProcessingItems = (channelsArray, playlistsArray, channelsMap, playlistsMap) => {
-  // Extract all channels
-  if (channelsArray) {
-    channelsArray.forEach(item => {
-      const channelId = item.channel?.P?.youtubeId;
-      if (channelId) {
-        channelsMap[channelId] = item;
-      }
-    });
-  }
-
-  // Extract all playlists
-  if (playlistsArray) {
-    playlistsArray.forEach(item => {
-      const playlistId = item.playlist?.P?.youtubeId;
-      if (playlistId) {
-        playlistsMap[playlistId] = item;
-      }
-    });
-  }
-};
-
-// Reactive effect to automatically update all visible items when data changes
-args.createEffect(
-  args.on(
-    [items, detailData, searchResults, favouritesData, isListView, isDetailView, isSearchView, isFavouritesView],
-    () => {
-      const channelsMap = {};
-      const playlistsMap = {};
-
-      // Watch list view items
-      if (isListView() && !isSearchView() && !isFavouritesView()) {
-        const currentItems = items();
-
-        if (contentType() === "channels") {
-          extractProcessingItems(currentItems, null, channelsMap, playlistsMap);
-        } else if (contentType() === "playlists") {
-          extractProcessingItems(null, currentItems, channelsMap, playlistsMap);
-        }
-      }
-
-      // Watch detail view
-      if (isDetailView()) {
-        const detail = detailData();
-        if (detail) {
-          if (contentType() === "channels") {
-            // Include channel itself
-            const channelId = detail.channel?.channel?.P?.youtubeId;
-            if (channelId) {
-              channelsMap[channelId] = detail.channel;
-            }
-
-            // Include playlists in channel
-            extractProcessingItems(null, detail.playlists, channelsMap, playlistsMap);
-          } else if (contentType() === "playlists") {
-            // Include playlist itself
-            const playlistId = detail.playlist?.playlist?.P?.youtubeId;
-            if (playlistId) {
-              playlistsMap[playlistId] = detail.playlist;
-            }
-          }
-        }
-      }
-
-      // Watch search results
-      if (isSearchView()) {
-        const results = searchResults();
-        if (results) {
-          extractProcessingItems(results.channels, results.playlists, channelsMap, playlistsMap);
-        }
-      }
-
-      // Watch favourites
-      if (isFavouritesView()) {
-        const favourites = favouritesData();
-        if (favourites) {
-          extractProcessingItems(favourites.channels, favourites.playlists, channelsMap, playlistsMap);
-        }
-      }
-
-      // Automatically update all visible items whenever data changes
-      setProcessingStatuses({
-        channels: channelsMap,
-        playlists: playlistsMap
-      });
-    }
-  )
-);
-
-// Collect visible IDs from current view for polling
-const collectVisibleIdsFromData = () => {
-  const channelIds = [];
-  const playlistIds = [];
-
-  // Collect from list view items
-  if (isListView() && !isSearchView() && !isFavouritesView()) {
-    const currentItems = items();
-
-    if (contentType() === "channels") {
-      collectVisibleIds(currentItems, null, channelIds, playlistIds);
-    } else if (contentType() === "playlists") {
-      collectVisibleIds(null, currentItems, channelIds, playlistIds);
+    } catch (error) {
+      console.error(`Error deleting ${itemType}:`, error);
+      args.showErrorToast(error.message || `An error occurred while deleting ${itemType}`);
     }
   }
-
-  // Collect from detail view
-  if (isDetailView()) {
-    const detail = detailData();
-    if (detail) {
-      if (contentType() === "channels") {
-        // Collect channel ID itself
-        const channelId = detail.channel?.channel?.P?.youtubeId;
-        if (channelId && !channelIds.includes(channelId)) {
-          channelIds.push(channelId);
-        }
-
-        // Collect playlists in channel
-        collectVisibleIds(null, detail.playlists, channelIds, playlistIds);
-      } else if (contentType() === "playlists") {
-        // Collect playlist ID itself
-        const playlistId = detail.playlist?.playlist?.P?.youtubeId;
-        if (playlistId && !playlistIds.includes(playlistId)) {
-          playlistIds.push(playlistId);
-        }
-      }
-    }
-  }
-
-  // Collect from search results
-  if (isSearchView()) {
-    const results = searchResults();
-    if (results) {
-      collectVisibleIds(results.channels, results.playlists, channelIds, playlistIds);
-    }
-  }
-
-  // Collect from favourites
-  if (isFavouritesView()) {
-    const favourites = favouritesData();
-    if (favourites) {
-      collectVisibleIds(favourites.channels, favourites.playlists, channelIds, playlistIds);
-    }
-  }
-
-  return { channelIds, playlistIds };
-};
-
-// Poll for processing queueStatus updates
-const pollProcessingStatus = async () => {
-  // Skip if already polling
-  if (isPolling()) {
-    return;
-  }
-
-  // Collect visible IDs from current view
-  const { channelIds, playlistIds } = collectVisibleIdsFromData();
-
-  // If no IDs to poll, skip
-  if (channelIds.length === 0 && playlistIds.length === 0) {
-    return;
-  }
-
-  setIsPolling(true);
-  try {
-    const result = await args.fns.executeYTOFunction("getProcessingStatusByIds", {
-      channelIds,
-      playlistIds
-    });
-
-    if (result?.result?.success && result?.result?.data) {
-      const data = result.result.data;
-
-      // Convert arrays to objects keyed by ID for easier lookup
-      const channelsMap = {};
-      data.channels.forEach(item => {
-        const channelId = item.channel?.P?.youtubeId;
-        if (channelId) {
-          channelsMap[channelId] = item;
-        }
-      });
-
-      const playlistsMap = {};
-      data.playlists.forEach(item => {
-        const playlistId = item.playlist?.P?.youtubeId;
-        if (playlistId) {
-          playlistsMap[playlistId] = item;
-        }
-      });
-
-      setProcessingStatuses({
-        channels: channelsMap,
-        playlists: playlistsMap
-      });
-
-      // If no active processing, stop polling and reload data
-      if (!data.hasActiveProcessing) {
-        stopPolling();
-        // Reload data to show completed items in all views
-        await loadData();
-      }
-    }
-  } catch (error) {
-    console.error('Error polling processing queueStatus:', error);
-  } finally {
-    setIsPolling(false);
-  }
-};
-
-// Start polling
-const startPolling = () => {
-  // Don't start if already polling
-  if (pollingInterval()) {
-    return;
-  }
-
-  // Start polling immediately
-  pollProcessingStatus();
-
-  // Set up interval (poll every 3 seconds)
-  const interval = setInterval(pollProcessingStatus, 3000);
-  setPollingInterval(interval);
-};
-
-// Stop polling
-const stopPolling = () => {
-  const interval = pollingInterval();
-  if (interval) {
-    clearInterval(interval);
-    setPollingInterval(null);
-  }
-  setIsPolling(false);
-};
-
-// Watch for processing queueStatus changes and start/stop polling as needed
-args.createEffect(
-  args.on([processingStatuses, pollingInterval], () => {
-    const statuses = processingStatuses();
-
-    // Check if any items are actually being processed (queued or processing queueStatus)
-    let hasActiveProcessing = false;
-
-    // Check channels
-    for (const channelId in statuses.channels) {
-      const item = statuses.channels[channelId];
-      const queueStatus = item.channel?.P?.queueStatus;
-      if (queueStatus === 'queued' || queueStatus === 'processing') {
-        hasActiveProcessing = true;
-        break;
-      }
-    }
-
-    // Check playlists if no active channel processing found
-    // NEW ARCHITECTURE: Queue queueStatus on Playlist vertex
-    if (!hasActiveProcessing) {
-      for (const playlistId in statuses.playlists) {
-        const item = statuses.playlists[playlistId];
-        const queueStatus = item.playlist?.P?.queueStatus;
-        if (queueStatus === 'queued' || queueStatus === 'processing') {
-          hasActiveProcessing = true;
-          break;
-        }
-      }
-    }
-
-    // Start polling if there's active processing
-    if (hasActiveProcessing && !pollingInterval()) {
-      args.untrack(() => startPolling());
-    }
-    // Stop polling if there's no active processing
-    else if (!hasActiveProcessing && pollingInterval()) {
-      args.untrack(() => stopPolling());
-    }
-  })
-);
-
-// Cleanup on unmount
-args.onCleanup(() => {
-    args.untrack(() => stopPolling());
-});
-
-// Watch for extension view and request page content
-args.createEffect(
-  args.on([isExtensionView], () => {
-    if (isExtensionView()) {
-      requestPageContent();
-    }
-  })
-);
-
-// Get processing queueStatus for a specific channel
-const getChannelProcessingStatus = (channelId) => {
-  return processingStatuses().channels[channelId] || null;
-};
-
-// Get processing queueStatus for a specific playlist
-const getPlaylistProcessingStatus = (playlistId) => {
-  return processingStatuses().playlists[playlistId] || null;
-};
-
-// Format processing queueStatus with detailed information
-const formatProcessingStatus = (processingStatus, itemType) => {
-  if (!processingStatus) {
-    return null;
-  }
-
-  // NEW ARCHITECTURE: Extract main item (queue tracking is on Channel/Playlist vertex)
-  let item = null;
-  if (itemType === "playlist") {
-    item = processingStatus.playlist;
-  } else if (itemType === "channel") {
-    item = processingStatus.channel;
-  }
-
-  // If no item found, return null
-  if (!item || !item.P) {
-    return null;
-  }
-
-  const props = item.P;
-
-  // Check if we have a valid queueStatus
-  const queueStatus = props.queueStatus;
-  if (!queueStatus) {
-    return null;
-  }
-
-  // Only format if queueStatus is queued or processing
-  if (queueStatus !== 'queued' && queueStatus !== 'processing') {
-    return null;
-  }
-
-  // Extract progress
-  const progress = props.progress || 0;
-
-  // Build details string based on item type
-  let details = '';
-  if (itemType === "channel") {
-    const processedPlaylists = props.processedPlaylists || 0;
-    const totalPlaylists = props.totalPlaylists || 0;
-    const processedVideos = props.processedVideos || 0;
-    const totalVideos = props.totalVideos || 0;
-    details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
-  } else if (itemType === "playlist") {
-    const processedVideos = props.processedVideos || 0;
-    const totalVideos = props.totalVideos || 0;
-    details = `${processedVideos}/${totalVideos} videos`;
-  }
-
-  // Return formatted queueStatus
-  return {
-    ...processingStatus,
-    queueStatus,
-    progress,
-    details
-  };
-};
-
-// Generate YouTube URL for items (channels, playlists, videos)
-const getYouTubeUrl = (item, itemType) => {
-  if (!item) return null;
-
-  const youtubeId = item.P?.youtubeId || "";
-
-  if (itemType === "video") {
-    return `https://www.youtube.com/watch?v=${youtubeId}`;
-  } else if (itemType === "playlist") {
-    // For special playlists, use originalPlaylistId for YouTube URL
-    const playlistId = item.P?.originalPlaylistId || youtubeId;
-    return `https://www.youtube.com/playlist?list=${playlistId}`;
-  } else if (itemType === "channel") {
-    // For channels, prefer handle format (@handle) over channel ID
-    const handle = item.P?.handle || item.P?.customUrl;
-    if (handle) {
-      // Ensure handle starts with @
-      const formattedHandle = handle.startsWith('@') ? handle : `@${handle}`;
-      return `https://www.youtube.com/${formattedHandle}`;
-    } else {
-      // Check if youtubeId is a channel ID (starts with "UC") or a handle
-      // For extension items, youtubeId might be a handle directly
-      if (youtubeId.startsWith('UC')) {
-        // Channel ID format
-        return `https://www.youtube.com/channel/${youtubeId}`;
-      } else {
-        // Treat as handle format
-        const formattedHandle = youtubeId.startsWith('@') ? youtubeId : `@${youtubeId}`;
-        return `https://www.youtube.com/${formattedHandle}`;
-      }
-    }
-  }
-
-  return null;
 };
 
 return {
-  contentType,
-  items,
-  filteredItems,
-  loading,
+  updateItemInArrayById,
+  updateAllViews,
+  updateItemDataAfterToggleFavourite,
   updateItemDataAfterNoteSave,
-  isNoteModalOpen,
-  noteModalData,
+  handleModalSave,
   openNoteModal,
   closeNoteModal,
   saveNote,
   toggleFavourite,
-  searchTerm,
-  setSearchTerm,
-  activeMenu,
-  setActiveMenu,
-  menuPosition,
-  setMenuPosition,
-  navigateToDetail,
-  navigateBack,
   openInYouTube,
   editCustomName,
   openCustomNameModal,
   deleteItem,
-  deleteVideo,
-  isModalOpen,
-  modalData,
-  setModalData,
-  setIsModalOpen,
-  openModal,
-  closeModal,
-  handleModalSave,
-  updateLocalItemSetting,
-  isDetailView,
-  isSearchView,
-  isFavouritesView,
-  isListView,
-  detailData,
-  filteredDetailItems,
-  detailSearchTerm,
-  setDetailSearchTerm,
-  searchResults,
-  searchInput,
-  setSearchInput,
-  getSearchItems,
-  favouritesData,
-  getFavouritesItems,
-  extensionData,
-  getExtensionItems,
-  filteredExtensionItems,
-  isExtensionView,
-  handleMessage,
-  requestPageContent,
-  pageContent,
-  handleSearch,
-  loadData,
-  loadListData,
-  loadDetailData,
-  loadSearchData,
-  loadFavouritesData,
-  handleResize,
-  syncCurrentItem,
-  isSyncing,
-  isAddVideosModalOpen,
-  setIsAddVideosModalOpen,
-  isAddVideoToPlaylistModalOpen,
-  setIsAddVideoToPlaylistModalOpen,
-  addVideoToPlaylistData,
-  setAddVideoToPlaylistData,
-  processingStatuses,
-  getChannelProcessingStatus,
-  getPlaylistProcessingStatus,
-  formatProcessingStatus,
-  getCurrentSortOptions,
-  getCurrentSortValue,
-  setCurrentSortValue,
-  getCurrentSortField,
-  getCurrentSortDirection,
-  handleSortFieldChange,
-  handleSortDirectionToggle,
-  listSortBy,
-  detailSortBy,
-  searchSortBy,
-  favouritesSortBy,
-  listSortField,
-  listSortDirection,
-  setListSortField,
-  setListSortDirection,
-  detailSortField,
-  detailSortDirection,
-  setDetailSortField,
-  setDetailSortDirection,
-  searchSortField,
-  searchSortDirection,
-  setSearchSortField,
-  setSearchSortDirection,
-  favouritesSortField,
-  favouritesSortDirection,
-  setFavouritesSortField,
-  setFavouritesSortDirection,
-  loadUserSetting,
-  initializeSortFromURL,
-  updateURLSort,
-  clearURLSort,
-  splitSortValue,
-  getYouTubeUrl
-};
-'''
+
+}'''
         componentName: Html
         props:
           '''
 return {
   as: "div",
-  onMount: () => {
-    // Initialize sort from URL (highest priority)
-    const hasURLSort = args.fns.initializeSortFromURL();
 
-    // Load user setting (will be overridden by URL if present)
-    args.fns.loadUserSetting();
-
-    // Initialize window width and add resize listener
-    args.fns.handleResize();
-    window.addEventListener('resize', args.fns.handleResize);
-
-    // Add message listener for extension view
-    window.addEventListener('message', args.fns.handleMessage);
-  },
-  onCleanup: () => {
-    window.removeEventListener('resize', args.fns.handleResize);
-    window.removeEventListener('message', args.fns.handleMessage);
-  }
 };
 '''
       }
     }
     {
-      id: "3"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  padding: 1.5rem 1.5rem 0 1.5rem;
-  margin: 0 auto;
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 1rem 1rem 0 1rem;
-  }
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "4"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 0.5rem 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: ${args.theme.var.fontSize.xl};
-  }
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const contentType = args.fns.contentType();
-
-// Determine title based on view
-let title = "";
-if (args.fns.isSearchView()) {
-  title = "Search";
-} else if (args.fns.isFavouritesView()) {
-  title = "Favourites";
-} else if (args.fns.isExtensionView()) {
-  title = "Quick Add Channel, Playlist or Video";
-} else if (args.fns.isDetailView()) {
-  const data = args.fns.detailData();
-  if (data) {
-    if (contentType === "playlists") {
-      title = data.playlist?.playlist?.P?.title || "Playlist Details";
-    } else {
-      title = data.channel?.channel?.P?.title || "Channel Details";
-    }
-  } else {
-    title = contentType === "playlists" ? "Playlist Details" : "Channel Details";
-  }
-} else {
-  // List view
-  title = contentType === "playlists" ? "Playlists" : "Channels";
-}
-
-return {
-  as: "h1",
-  text: title
-};
-'''
-      }
-    }
-    {
-      id: "5"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: ProcessingStatus
-        props:
-          '''
-const contentType = args.fns.contentType();
-const data = args.fns.detailData();
-
-if (!args.fns.isDetailView() || !data) {
-  return { hide: true };
-}
-
-const itemId = contentType === "playlists"
-  ? data.playlist?.playlist?.P?.youtubeId
-  : data.channel?.channel?.P?.youtubeId;
-
-const processingData = contentType === "playlists"
-  ? args.fns.getPlaylistProcessingStatus(itemId)
-  : args.fns.getChannelProcessingStatus(itemId);
-
-if (!processingData) {
-  return { hide: true };
-}
-
-// Extract data from vertex format
-// NEW ARCHITECTURE: Queue tracking on main vertex (Channel/Playlist)
-const item = contentType === "playlists"
-  ? processingData.playlist
-  : processingData.channel;
-
-if (!item || !item.P) {
-  return { hide: true };
-}
-
-let details = '';
-if (contentType === "channels") {
-  const processedPlaylists = item.P.processedPlaylists || 0;
-  const totalPlaylists = item.P.totalPlaylists || 0;
-  const processedVideos = item.P.processedVideos || 0;
-  const totalVideos = item.P.totalVideos || 0;
-  details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
-} else {
-  const processedVideos = item.P.processedVideos || 0;
-  const totalVideos = item.P.totalVideos || 0;
-  details = `${processedVideos}/${totalVideos} videos`;
-}
-
-return {
-  queueStatus: item.P.queueStatus,
-  progress: item.P.progress || 0,
-  type: contentType === "playlists" ? "playlist" : "channel",
-  details,
-  error: item.P.error || ''
-};
-'''
-      }
-    }
-    {
-      id: "6"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  margin-bottom: 0.75rem;
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    /*flex-direction: column;*/
-    /*gap: 0.75rem;*/
-  }
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-// Check if no ownerships exist - hide search and actions when no accounts connected
-const ownerships = args.fns.ownerships?.() || [];
-const hasNoOwnerships = ownerships.length === 0;
-
-return {
-  as: "div",
-  hide: hasNoOwnerships
-};
-'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  flex: 1;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    width: 100%;
-  }
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-// Use form for search view to handle Enter key, div for others
-const as = args.fns.isSearchView() ? "form" : "div";
-const onSubmit = args.fns.isSearchView() ? args.fns.handleSearch : undefined;
-
-return {
-  as,
-  onSubmit
-};
-'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: TextInput
-        props:
-          '''
-const contentType = args.fns.contentType();
-
-// Determine placeholder and handlers based on view
-let placeholder = "";
-let value = "";
-let onInput = null;
-let autofocus = false;
-
-if (args.fns.isSearchView()) {
-  placeholder = "Search channels, playlists, and videos...";
-  value = args.fns.searchInput();
-  onInput = (e) => args.fns.setSearchInput(e.target.value);
-  autofocus = true;
-} else if (args.fns.isFavouritesView()) {
-  placeholder = "Filter favourites...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.setSearchTerm(e.target.value);
-} else if (args.fns.isExtensionView()) {
-  placeholder = "Filter items...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.setSearchTerm(e.target.value);
-} else if (args.fns.isDetailView()) {
-  placeholder = contentType === "playlists"
-    ? "Search videos..."
-    : "Search playlists...";
-  value = args.fns.detailSearchTerm();
-  onInput = (e) => args.fns.setDetailSearchTerm(e.target.value);
-} else {
-  // List view
-  placeholder = contentType === "playlists"
-    ? "Search playlists..."
-    : "Search channels...";
-  value = args.fns.searchTerm();
-  onInput = (e) => args.fns.setSearchTerm(e.target.value);
-}
-
-return {
-  placeholder,
-  leftIcon: "mdi:magnify",
-  value,
-  onInput,
-  autofocus
-};
-'''
-      }
-    }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  flex-shrink: 0;
-}`;
-'''
-        displayOrder: 2
-        componentName: Button
-        props:
-          '''
-const contentType = args.fns.contentType();
-const text = contentType === "playlists" ? "Add Playlist" : "Add Channel";
-
-return {
-  text,
-  variant: "primary",
-  leftIcon: "carbon:add",
-  onClick: args.fns.openModal,
-  hide: () => !args.fns.isListView()
-};
-'''
-      }
-    }
-    {
-      id: "10"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  hide: () => !args.fns.isDetailView()
-};
-'''
-      }
-    }
-    {
-      id: "11"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Button
-        props:
-          '''
-const isSyncing = args.fns.isSyncing();
-
-return {
-  text: isSyncing ? "Syncing..." : "Sync",
-  variant: "secondary",
-  leftIcon: "carbon:refresh",
-  onClick: args.fns.syncCurrentItem,
-  disabled: isSyncing
-};
-'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Button
-        props:
-          '''
-const contentType = args.fns.contentType();
-
-return {
-  text: "Add Playlist",
-  variant: "primary",
-  leftIcon: "carbon:add",
-  onClick: () => {
-    const data = args.fns.detailData();
-    const channel = data?.channel?.channel;
-
-    if (!channel) {
-      args.showErrorToast("Channel data not loaded");
-      return;
-    }
-
-    args.fns.setModalData({
-      editMode: false,
-      contentType: "playlists",
-      channelId: channel.P.youtubeId
-    });
-    args.fns.setIsModalOpen(true);
-  },
-  hide: contentType !== "channels"
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Button
-        props:
-          '''
-const contentType = args.fns.contentType();
-
-return {
-  text: "Add Videos",
-  variant: "primary",
-  leftIcon: "carbon:add",
-  onClick: () => args.fns.setIsAddVideosModalOpen(true),
-  hide: contentType !== "playlists"
-};
-'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    /*flex-direction: column;*/
-    /*align-items: flex-start;*/
-    gap: 0.5rem;
-    margin: 0 0 ${args.theme.var.spacing.md} 0;
-  }
-}`;
-'''
-        displayOrder: 4
-        componentName: Html
-        props:
-          '''
-// Check if no ownerships exist - hide sort controls when no accounts connected
-const ownerships = args.fns.ownerships?.() || [];
-const hasNoOwnerships = ownerships.length === 0;
-
-return {
-  as: "div",
-  hide: args.fns.loading() || hasNoOwnerships
-};
-'''
-      }
-    }
-    {
-      id: "15"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-  flex: 1;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: ${args.theme.var.fontSize.sm};
-  }
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const contentType = args.fns.contentType();
-
-// Determine description based on view
-let description = "";
-if (args.fns.isSearchView()) {
-  const results = args.fns.searchResults();
-  const totalCount = results?.totalCount || 0;
-  description = results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "";
-} else if (args.fns.isFavouritesView()) {
-  const items = args.fns.getFavouritesItems();
-  const totalCount = items.length;
-  description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
-} else if (args.fns.isExtensionView()) {
-  const items = args.fns.filteredExtensionItems();
-  const totalCount = items.length;
-  description = `${totalCount} item${totalCount !== 1 ? 's' : ''}`;
-} else if (args.fns.isDetailView()) {
-  const count = args.fns.filteredDetailItems().length;
-  description = contentType === "playlists"
-    ? `${count} video${count !== 1 ? 's' : ''}`
-    : `${count} playlist${count !== 1 ? 's' : ''}`;
-} else {
-  // List view
-  const count = args.fns.filteredItems().length;
-  description = contentType === "playlists"
-    ? `${count} playlist${count !== 1 ? 's' : ''}`
-    : `${count} channel${count !== 1 ? 's' : ''}`;
-}
-
-return {
-  as: "p",
-  text: description
-};
-'''
-      }
-    }
-    {
-      id: "16"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  width: auto;
-  min-width: 250px;
-}
-
-@media (max-width: 768px) {
-  ._id {
-
-  }
-}`;
-'''
-        displayOrder: 2
-        componentName: SplitButton
-        props:
-          '''
-// Hide sort controls on extension page
-const isExtension = args.fns.isExtensionView();
-if (isExtension) {
-  return { hide: true };
-}
-
-// Get sort field, direction, and options from fns
-const currentField = args.fns.getCurrentSortField();
-const currentDirection = args.fns.getCurrentSortDirection();
-const options = args.fns.getCurrentSortOptions();
-
-return {
-  field: currentField,
-  direction: currentDirection,
-  options: options,
-  onFieldChange: (newField) => {
-    args.fns.handleSortFieldChange(newField);
-  },
-  onDirectionToggle: () => {
-    args.fns.handleSortDirectionToggle();
-  }
-};
-'''
-      }
-    }
-    {
-      id: "17"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  padding: 0 1.5rem;
-  margin: 0 auto;
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 0 1rem;
-  }
-}`;
-'''
-        displayOrder: 5
-        componentName: Html
-        props:
-          '''
-return {
-  as: "main"
-};
-'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  gap: 1rem;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  hide: !args.fns.loading()
-};
-'''
-      }
-    }
-    {
-      id: "19"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: LoadingSpinner
-        props:
-          '''
-return {
-  size: "lg"
-};
-'''
-      }
-    }
-    {
-      id: "20"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.md};
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: ${args.theme.var.fontSize.sm};
-  }
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
-
-let text;
-if (isListView) {
-  text = contentType === "playlists" ? "Loading playlists..." : "Loading channels...";
-} else if (isDetailView) {
-  text = contentType === "channels" ? "Loading playlists..." : "Loading videos...";
-} else if (isSearchView) {
-  text = "Searching...";
-} else if (isFavouritesView) {
-  text = "Loading favourites...";
-} else if (isExtensionView) {
-  text = "Loading page content...";
-}
-
-return {
-  as: "p",
-  text
-};
-'''
-      }
-    }
-    {
-      id: "21"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: NoAccountsMessage
-        props:
-          '''
-// Check if no ownerships exist
-const ownerships = args.fns.ownerships?.() || [];
-const hasNoOwnerships = ownerships.length === 0;
-
-return {
-  hide: args.fns.loading() || !hasNoOwnerships
-};
-'''
-      }
-    }
-    {
-      id: "22"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-
-let hasItems = false;
-if (isListView) {
-  hasItems = args.fns.filteredItems().length > 0;
-} else if (isDetailView) {
-  hasItems = args.fns.filteredDetailItems().length > 0;
-} else if (isSearchView) {
-  hasItems = args.fns.getSearchItems().length > 0;
-} else if (isFavouritesView) {
-  hasItems = args.fns.getFavouritesItems().length > 0;
-} else if (isExtensionView) {
-  hasItems = args.fns.filteredExtensionItems().length > 0;
-}
-
-return {
-  as: "div",
-  hide: args.fns.loading() || !hasItems
-};
-'''
-      }
-    }
-    {
-      id: "23"
+      id: "25"
       L: Attr
       P: {
         css:
@@ -2743,7 +2392,7 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id {
-    height: calc(100vh - 72px);
+    height: calc(100vh - 72px - 32px);
   }
 }`;
 '''
@@ -2751,36 +2400,20 @@ return `._id {
         componentName: VirtualList
         props:
           '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-
-// Get items based on current view
-let items;
-if (isListView) {
-  items = args.fns.filteredItems();
-} else if (isDetailView) {
-  items = args.fns.filteredDetailItems();
-} else if (isSearchView) {
-  items = args.fns.getSearchItems();
-} else if (isFavouritesView) {
-  items = args.fns.getFavouritesItems();
-} else if (isExtensionView) {
-  items = args.fns.filteredExtensionItems();
-}
+const items = args.fns.filteredItems();
+const hasItems = args.fns.filteredItems().length > 0;
 
 return {
   items: items || [],
   itemHeight: 90,
-  overscan: 5
+  overscan: 5,
+  hide: args.fns.loading() || !hasItems
 };
 '''
       }
     }
     {
-      id: "24"
+      id: "26"
       L: Attr
       P: {
         slotName: children
@@ -2788,13 +2421,6 @@ return {
         componentName: Card
         props:
           '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
-
 // VirtualList provides item context with {item, virtualItem, index}
 const itemContext = args.contextData.item;
 if (!itemContext) return {};
@@ -2805,53 +2431,43 @@ if (!itemData) return {};
 
 let item, itemSetting, itemType, processingStatus, showTypeBadge, itemId;
 
-if (isListView) {
-  item = contentType === "playlists" ? itemData.playlist : itemData.channel;
+if (args.fns.isPlaylists()) {
+  item = itemData.playlist;
   itemId = item?.P?.youtubeId;
-  processingStatus = contentType === "playlists"
-    ? args.fns.getPlaylistProcessingStatus(itemId)
-    : args.fns.getChannelProcessingStatus(itemId);
-  itemSetting = contentType === "playlists" ? itemData.playlistSetting : itemData.channelSetting;
-  itemType = contentType === "playlists" ? "playlist" : "channel";
+  processingStatus = args.fns.getPlaylistProcessingStatus(itemId);
+  itemSetting = itemData.playlistSetting;
+  itemType = "playlist";
   showTypeBadge = false;
-} else if (isDetailView) {
-  const isPlaylistItem = contentType === "channels";
-  item = isPlaylistItem ? itemData.playlist : itemData.video;
+} else if (args.fns.isChannels()) {
+  item = itemData.channel;
   itemId = item?.P?.youtubeId;
-  processingStatus = isPlaylistItem ? args.fns.getPlaylistProcessingStatus(itemId) : null;
-  itemSetting = isPlaylistItem ? itemData.playlistSetting : itemData.videoSetting;
-  itemType = isPlaylistItem ? "playlist" : "video";
+  processingStatus = args.fns.getChannelProcessingStatus(itemId);
+  itemSetting = itemData.channelSetting;
+  itemType = "channel";
   showTypeBadge = false;
-} else if (isSearchView) {
-  const resultType = itemData.resultType;
-  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+} else if (args.fns.isChannelDetail()) {
+  item = itemData.playlist;
   itemId = item?.P?.youtubeId;
-  processingStatus = resultType === "channel"
-    ? args.fns.getChannelProcessingStatus(itemId)
-    : resultType === "playlist"
-    ? args.fns.getPlaylistProcessingStatus(itemId)
-    : null;
-  itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
-  itemType = resultType;
-  showTypeBadge = true;
-} else if (isFavouritesView) {
-  const resultType = itemData.resultType;
-  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+  processingStatus = args.fns.getPlaylistProcessingStatus(itemId);
+  itemSetting = itemData.playlistSetting;
+  itemType = "playlist";
+  showTypeBadge = false;
+} else if (args.fns.isPlaylistDetail()) {
+  item = itemData.video;
   itemId = item?.P?.youtubeId;
-  processingStatus = resultType === "channel"
-    ? args.fns.getChannelProcessingStatus(itemId)
-    : resultType === "playlist"
-    ? args.fns.getPlaylistProcessingStatus(itemId)
-    : null;
-  itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
-  itemType = resultType;
-  showTypeBadge = true;
-} else if (isExtensionView) {
-  const resultType = itemData.resultType;
-  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
-  itemId = item?.P?.youtubeId;
-  // Extension items don't have processing queueStatus
   processingStatus = null;
+  itemSetting = itemData.videoSetting;
+  itemType = "video";
+  showTypeBadge = false;
+} else if (args.fns.isSearchView() || args.fns.isFavouritesView() || args.fns.isExtensionView()) {
+  const resultType = itemData.resultType;
+  item = resultType === "channel" ? itemData.channel : (resultType === "playlist" ? itemData.playlist : itemData.video);
+  itemId = item?.P?.youtubeId;
+  processingStatus = resultType === "channel"
+    ? args.fns.getChannelProcessingStatus(itemId)
+    : resultType === "playlist"
+    ? args.fns.getPlaylistProcessingStatus(itemId)
+    : null;
   itemSetting = resultType === "channel" ? itemData.channelSetting : (resultType === "playlist" ? itemData.playlistSetting : itemData.videoSetting);
   itemType = resultType;
   showTypeBadge = true;
@@ -2872,7 +2488,106 @@ return {
       }
     }
     {
-      id: "25"
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: AddModal
+        props:
+          '''
+
+const modalData = args.fns.modalData;
+const isOpen = args.fns.isModalOpen();
+
+return {
+  isOpen: isOpen,
+  contentType: modalData.contentType,
+  editMode: modalData.editMode,
+  itemData: modalData.itemData,
+  channelId: modalData.channelId,
+  initialUrl: modalData.initialUrl,
+  onClose: args.fns.closeModal,
+  onSave: args.fns.handleModalSave
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: NoteModal
+        props:
+          '''
+return {
+  isOpen: args.fns.isNoteModalOpen,
+  onClose: args.fns.closeNoteModal,
+  item: args.fns.noteModalData.item,
+  existingNote: args.fns.noteModalData.existingNote,
+  onSave: args.fns.saveNote
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: AddVideosModal
+        props:
+          '''
+// Check which modal should be open and return function for isOpen
+const isDetailModalOpen = args.fns.isAddVideosModalOpen;
+const isExtensionModalOpen = args.fns.isAddVideoToPlaylistModalOpen;
+
+// Determine if any modal is open
+const getIsDetailOpen = isDetailModalOpen?.() || false;
+const getIsExtensionOpen = isExtensionModalOpen?.() || false;
+
+let playlist = null;
+let videoUrl = "";
+let onClose = null;
+let onSuccess = null;
+
+if (getIsDetailOpen) {
+  // Detail view: adding videos to specific playlist
+  const data = args.fns.items();
+  const playlistData = data?.playlist;
+  const playlistVertex = playlistData?.playlist;
+  const ownership = playlistData?.ownership;
+
+  // Add ownership key to playlist object for modal to use
+  playlist = playlistVertex ? {
+    ...playlistVertex,
+    ownershipId: ownership?.P?.key
+  } : null;
+
+  onClose = () => args.fns.isAddVideosModalOpen(false);
+  onSuccess = args.fns.loadData;
+} else if (getIsExtensionOpen) {
+  // Extension view: user selects playlist, pre-filled video URL
+  const videoData = args.fns.addVideoToPlaylistData;
+  videoUrl = videoData.videoId ? `https://www.youtube.com/watch?v=${videoData.videoId}` : "";
+  playlist = null; // User will select from dropdown
+  onClose = () => args.fns.isAddVideoToPlaylistModalOpen(false);
+  onSuccess = args.fns.loadData;
+}
+
+// Return isOpen as a function that checks both modal states
+return {
+  isOpen: () => isDetailModalOpen?.() || isExtensionModalOpen?.() || false,
+  onClose: onClose,
+  playlist: playlist,
+  videoUrl: videoUrl,
+  onSuccess: onSuccess
+};
+'''
+      }
+    }
+    {
+      id: "30"
       L: Attr
       P: {
         css:
@@ -2893,24 +2608,7 @@ return `._id {
 const ownerships = args.fns.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
 
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-
-let hasItems = false;
-if (isListView) {
-  hasItems = args.fns.filteredItems().length > 0;
-} else if (isDetailView) {
-  hasItems = args.fns.filteredDetailItems().length > 0;
-} else if (isSearchView) {
-  hasItems = args.fns.getSearchItems().length > 0;
-} else if (isFavouritesView) {
-  hasItems = args.fns.getFavouritesItems().length > 0;
-} else if (isExtensionView) {
-  hasItems = args.fns.filteredExtensionItems().length > 0;
-}
+const hasItems =  args.fns.filteredItems().length > 0;
 
 return {
   as: "div",
@@ -2920,7 +2618,7 @@ return {
       }
     }
     {
-      id: "26"
+      id: "31"
       L: Attr
       P: {
         css:
@@ -2935,23 +2633,20 @@ return `._id {
         componentName: Html
         props:
           '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
-
 let icon;
-if (isListView) {
-  icon = contentType === "playlists" ? "mdi:playlist-play" : "mdi:youtube";
-} else if (isDetailView) {
-  icon = contentType === "channels" ? "mdi:playlist-remove" : "mdi:video-off";
-} else if (isSearchView) {
+if (args.fns.isPlaylists()) {
+  icon = "mdi:playlist-play";
+} else if (args.fns.isChannels()) {
+  icon = "mdi:youtube";
+} else if (args.fns.isChannelDetail()) {
+  icon = "mdi:playlist-remove";
+} else if (args.fns.isPlaylistDetail()) {
+  icon = "mdi:video-off";
+} else if (args.fns.isSearchView()) {
   icon = "mdi:magnify";
-} else if (isFavouritesView) {
+} else if (args.fns.isFavouritesView()) {
   icon = "carbon:favorite";
-} else if (isExtensionView) {
+} else if (args.fns.isExtensionView()) {
   icon = "carbon:data-1";
 }
 
@@ -2965,7 +2660,7 @@ return {
       }
     }
     {
-      id: "27"
+      id: "32"
       L: Attr
       P: {
         css:
@@ -2981,27 +2676,25 @@ return `._id {
         componentName: Html
         props:
           '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
 const hasSearchTerm = args.fns.searchTerm().length > 0;
 const query = args.searchParams?.q || "";
 
 let title;
-if (isListView) {
-  title = hasSearchTerm
-    ? "No results found"
-    : (contentType === "playlists" ? "No playlists yet" : "No channels yet");
-} else if (isDetailView) {
-  title = contentType === "channels" ? "No playlists found" : "No videos found";
-} else if (isSearchView) {
-  title = query ? "No results found" : "Enter a search query";
-} else if (isFavouritesView) {
+if (hasSearchTerm) {
+  title = "No results found";
+} else if (args.fns.isChannels()) {
+  title = "No channels yet";
+} else if (args.fns.isPlaylists()) {
+  title = "No playlists yet";
+} else if (args.fns.isChannelDetail()) {
+  title = "No playlists found";
+} else if (args.fns.isPlaylistDetail()) {
+  title = "No videos found";
+} else if (args.fns.isSearchView()) {
+  title = "Enter a search query";
+} else if (args.fns.isFavouritesView()) {
   title = "No favourite items yet";
-} else if (isExtensionView) {
+} else if (args.fns.isExtensionView()) {
   title = "No Content Found";
 }
 
@@ -3013,7 +2706,7 @@ return {
       }
     }
     {
-      id: "28"
+      id: "33"
       L: Attr
       P: {
         css:
@@ -3027,141 +2720,34 @@ return `._id {
         componentName: Html
         props:
           '''
-const isListView = args.fns.isListView();
-const isDetailView = args.fns.isDetailView();
-const isSearchView = args.fns.isSearchView();
-const isFavouritesView = args.fns.isFavouritesView();
-const isExtensionView = args.fns.isExtensionView();
-const contentType = args.fns.contentType();
 const hasSearchTerm = args.fns.searchTerm().length > 0;
-const query = args.searchParams?.q || "";
-
 let text;
-if (isListView) {
-  text = hasSearchTerm
-    ? "Try adjusting your search terms"
-    : (contentType === "playlists"
-        ? "Start by adding some YouTube playlists to organize your content"
-        : "Start by adding some YouTube channels to track your favorites");
-} else if (isDetailView) {
+if (hasSearchTerm) {
+  text = "Try adjusting your search terms";
+} else if (args.fns.isChannels()) {
+  text = "Start by adding some YouTube channels to track your content";
+} else if (args.fns.isPlaylists()) {
+  text = "Start by adding some YouTube playlists to organize your content";
+} else if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
   text = ""; // Detail view doesn't show description (only has 2 children)
-} else if (isSearchView) {
-  text = query ? "Try adjusting your search terms" : "to find channels, playlists, and videos";
-} else if (isFavouritesView) {
+} else if (args.fns.isSearchView()) {
+  text = "to find channels, playlists, and videos";
+} else if (args.fns.isFavouritesView()) {
   text = "Start by adding channels, playlists, or videos to your favourites!";
-} else if (isExtensionView) {
+} else if (args.fns.isExtensionView()) {
   text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
 }
 
 return {
   as: "p",
   text,
-  hide: isDetailView // Hide in detail view
+  hide: args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
 };
 '''
       }
     }
     {
-      id: "29"
-      L: Attr
-      P: {
-        displayOrder: 9
-        componentName: AddModal
-        props:
-          '''
-const contentType = args.fns.contentType();
-const modalData = args.fns.modalData;
-const isOpen = args.fns.isModalOpen();
-
-return {
-  isOpen: isOpen,
-  contentType: modalData.contentType || contentType,
-  editMode: modalData.editMode,
-  itemData: modalData.itemData,
-  channelId: modalData.channelId,
-  initialUrl: modalData.initialUrl,
-  onClose: args.fns.closeModal,
-  onSave: args.fns.handleModalSave
-};
-'''
-      }
-    }
-    {
-      id: "30"
-      L: Attr
-      P: {
-        displayOrder: 10
-        componentName: NoteModal
-        props:
-          '''
-return {
-  isOpen: args.fns.isNoteModalOpen,
-  onClose: args.fns.closeNoteModal,
-  item: args.fns.noteModalData.item,
-  existingNote: args.fns.noteModalData.existingNote,
-  onSave: args.fns.saveNote
-};
-'''
-      }
-    }
-    {
-      id: "31"
-      L: Attr
-      P: {
-        displayOrder: 11
-        componentName: AddVideosModal
-        props:
-          '''
-// Check which modal should be open and return function for isOpen
-const isDetailModalOpen = args.fns.isAddVideosModalOpen;
-const isExtensionModalOpen = args.fns.isAddVideoToPlaylistModalOpen;
-
-// Determine if any modal is open
-const getIsDetailOpen = isDetailModalOpen?.() || false;
-const getIsExtensionOpen = isExtensionModalOpen?.() || false;
-
-let playlist = null;
-let videoUrl = "";
-let onClose = null;
-let onSuccess = null;
-
-if (getIsDetailOpen) {
-  // Detail view: adding videos to specific playlist
-  const data = args.fns.detailData();
-  const playlistData = data?.playlist;
-  const playlistVertex = playlistData?.playlist;
-  const ownership = playlistData?.ownership;
-
-  // Add ownership key to playlist object for modal to use
-  playlist = playlistVertex ? {
-    ...playlistVertex,
-    ownershipId: ownership?.P?.key
-  } : null;
-
-  onClose = () => args.fns.setIsAddVideosModalOpen(false);
-  onSuccess = args.fns.loadDetailData;
-} else if (getIsExtensionOpen) {
-  // Extension view: user selects playlist, pre-filled video URL
-  const videoData = args.fns.addVideoToPlaylistData;
-  videoUrl = videoData.videoId ? `https://www.youtube.com/watch?v=${videoData.videoId}` : "";
-  playlist = null; // User will select from dropdown
-  onClose = () => args.fns.setIsAddVideoToPlaylistModalOpen(false);
-  onSuccess = () => args.fns.loadData?.();
-}
-
-// Return isOpen as a function that checks both modal states
-return {
-  isOpen: () => isDetailModalOpen?.() || isExtensionModalOpen?.() || false,
-  onClose: onClose,
-  playlist: playlist,
-  videoUrl: videoUrl,
-  onSuccess: onSuccess
-};
-'''
-      }
-    }
-    {
-      id: "32"
+      id: "34"
       L: PageLayout
       P: {
         displayOrder: 1
@@ -3169,7 +2755,7 @@ return {
       }
     }
     {
-      id: "33"
+      id: "35"
       L: PageLayout
       P: {
         displayOrder: 2
@@ -3180,195 +2766,207 @@ return {
   edges: [
     {
       id: e1
-      T: Attr
+      T: PagePreview
       S: "1"
       E: "2"
     }
     {
       id: e2
-      T: PageLayout
+      T: Attr
       S: "1"
-      E: "32"
+      E: "3"
     }
     {
       id: e3
       T: PageLayout
       S: "1"
-      E: "33"
+      E: "34"
     }
     {
       id: e4
-      T: Attr
-      S: "2"
-      E: "3"
+      T: PageLayout
+      S: "1"
+      E: "35"
     }
     {
       id: e5
-      T: Attr
-      S: "2"
-      E: "17"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "2"
-      E: "29"
-    }
-    {
-      id: e7
-      T: Attr
-      S: "2"
-      E: "30"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "2"
-      E: "31"
-    }
-    {
-      id: e9
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e10
+      id: e6
       T: Attr
       S: "3"
+      E: "19"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
       E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "4"
+      E: "8"
     }
     {
       id: e11
       T: Attr
-      S: "3"
-      E: "6"
+      S: "4"
+      E: "16"
     }
     {
       id: e12
       T: Attr
-      S: "3"
-      E: "14"
+      S: "8"
+      E: "9"
     }
     {
       id: e13
       T: Attr
-      S: "6"
-      E: "7"
+      S: "8"
+      E: "11"
     }
     {
       id: e14
       T: Attr
-      S: "6"
-      E: "9"
+      S: "8"
+      E: "12"
     }
     {
       id: e15
       T: Attr
-      S: "6"
+      S: "9"
       E: "10"
     }
     {
       id: e16
       T: Attr
-      S: "7"
-      E: "8"
+      S: "12"
+      E: "13"
     }
     {
       id: e17
       T: Attr
-      S: "10"
-      E: "11"
+      S: "12"
+      E: "14"
     }
     {
       id: e18
       T: Attr
-      S: "10"
-      E: "12"
+      S: "12"
+      E: "15"
     }
     {
       id: e19
       T: Attr
-      S: "10"
-      E: "13"
+      S: "16"
+      E: "17"
     }
     {
       id: e20
       T: Attr
-      S: "14"
-      E: "15"
+      S: "16"
+      E: "18"
     }
     {
       id: e21
       T: Attr
-      S: "14"
-      E: "16"
+      S: "19"
+      E: "20"
     }
     {
       id: e22
       T: Attr
-      S: "17"
-      E: "18"
+      S: "19"
+      E: "23"
     }
     {
       id: e23
       T: Attr
-      S: "17"
-      E: "21"
+      S: "19"
+      E: "24"
     }
     {
       id: e24
       T: Attr
-      S: "17"
-      E: "22"
+      S: "19"
+      E: "30"
     }
     {
       id: e25
       T: Attr
-      S: "17"
-      E: "25"
+      S: "20"
+      E: "21"
     }
     {
       id: e26
       T: Attr
-      S: "18"
-      E: "19"
+      S: "20"
+      E: "22"
     }
     {
       id: e27
       T: Attr
-      S: "18"
-      E: "20"
+      S: "24"
+      E: "25"
     }
     {
       id: e28
       T: Attr
-      S: "22"
-      E: "23"
+      S: "24"
+      E: "27"
     }
     {
       id: e29
       T: Attr
-      S: "23"
-      E: "24"
+      S: "24"
+      E: "28"
     }
     {
       id: e30
       T: Attr
-      S: "25"
-      E: "26"
+      S: "24"
+      E: "29"
     }
     {
       id: e31
       T: Attr
       S: "25"
-      E: "27"
+      E: "26"
     }
     {
       id: e32
       T: Attr
-      S: "25"
-      E: "28"
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "30"
+      E: "32"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "30"
+      E: "33"
     }
   ]
 }

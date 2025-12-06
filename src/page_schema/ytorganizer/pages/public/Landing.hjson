@@ -2336,6 +2336,7 @@ return `._id {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
 }
 
 ._id:hover {
@@ -2360,12 +2361,10 @@ return `._id {
         props:
           '''
 return {
-  as: "button",
-  onClick: () => {
-    // TODO: Replace with Chrome Web Store URL when published
-    // For now, show installation instructions
-    args.showSuccessToast("Chrome Extension coming soon to Chrome Web Store! Contact support for early access.");
-  }
+  as: "a",
+  href: "https://chromewebstore.google.com/detail/ilefdojdfngmajhcjjfbjgkhdieedlfj?utm_source=item-share-cb",
+  target: "_blank",
+  rel: "noopener noreferrer"
 };
 '''
       }

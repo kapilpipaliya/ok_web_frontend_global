@@ -105,9 +105,11 @@ try {
   // Build video matching clause based on whether playlistId is provided
   // NEW SCHEMA v4.0: Global playlist membership + optional video settings
   let videoMatchClause;
+  let playlistInfoClause = '';
+  let playlistReturn = '';
 
   if (playlistId) {
-    // Match videos through global Playlist->Video relationship
+    // Match videos through global Playlist->Video relationship for specific playlist
     videoMatchClause = `
       MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
       MATCH (p)-[:PlaylistVideo]->(v:Video)
@@ -116,20 +118,38 @@ try {
       // Optional PlaylistSetting (only exists if user has customized playlist)
       OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
     `;
-  } else {
-    // Match videos that have settings for this ownership
-    // (Videos without settings won't appear here - only those with notes/favorites/watched status)
-    videoMatchClause = `
-      MATCH (o)-[:YouTubeOwnershipVideoSetting]->(vs:VideoSetting)<-[:VideoVideoSetting]-(v:Video)
+    playlistInfoClause = includePlaylist ? `
+      WITH v, vs, p, ps
+      WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
+    ` : `
+      WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     `;
+    playlistReturn = includePlaylist ? ', p as parentPlaylist, ps as parentPlaylistSetting' : '';
+  } else {
+    // Match videos through ownership's playlists (all videos in ownership's playlists)
+    // This ensures all videos are searchable, not just those with VideoSetting nodes
+    videoMatchClause = `
+      MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+      MATCH (p)-[:PlaylistVideo]->(v:Video)
+      // Optional VideoSetting (only exists if user has notes/favorites/etc.)
+      OPTIONAL MATCH (v)-[:VideoVideoSetting]->(vs:VideoSetting)<-[:YouTubeOwnershipVideoSetting]-(o)
+    `;
+    // For includePlaylist when no specific playlistId, collect first playlist per video and deduplicate
+    if (includePlaylist) {
+      playlistInfoClause = `
+        WITH DISTINCT v, vs, collect(DISTINCT p)[0] as p
+        OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+        WITH v, vs, p, ps
+        WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
+      `;
+      playlistReturn = ', p as parentPlaylist, ps as parentPlaylistSetting';
+    } else {
+      playlistInfoClause = `
+        WITH DISTINCT v, vs
+        WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
+      `;
+    }
   }
-
-  // Build playlist info collection clause for includePlaylist
-  const playlistInfoClause = includePlaylist && playlistId ? `
-    WITH v, vs, p, ps
-  ` : '';
-
-  const playlistReturn = includePlaylist && playlistId ? ', p as parentPlaylist, ps as parentPlaylistSetting' : '';
 
   // Build SKIP and LIMIT clauses
   const skipClause = skip > 0 ? `SKIP ${skip}` : '';
@@ -140,7 +160,6 @@ try {
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
     ${videoMatchClause}
-    WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
     ${playlistInfoClause}
     RETURN v, vs${playlistReturn}
     ORDER BY ${orderByClause}

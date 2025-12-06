@@ -105,17 +105,17 @@ try {
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+    WHERE 1=1 ${channelIdFilter} ${statusFilterClause}
 
     // Optional ChannelSetting (only exists if user has custom preferences)
     OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-
-    WHERE 1=1 ${channelIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
 
     // Count videos through uploads playlist (global playlist membership)
     OPTIONAL MATCH (uploadsPlaylist:Playlist {youtubeId: c.uploadsPlaylistId})
     OPTIONAL MATCH (uploadsPlaylist)-[:PlaylistVideo]->(v:Video)
 
     WITH c, cs, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+    WHERE 1=1 ${favouriteFilterClause} ${customFilterClause}
 
     RETURN c, cs, videoCount
     ORDER BY ${orderByClause}

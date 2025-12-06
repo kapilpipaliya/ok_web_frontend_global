@@ -131,6 +131,32 @@ return {
         css:
           '''
 return `._id {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 3rem;
+  text-align: center;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "YSaar (KAPIL MULJIBHAI PIPALIYA)"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
   background: ${args.theme.var.color.background_light_100};
   border: 1px solid ${args.theme.var.color.border};
   border-radius: 0.75rem;
@@ -203,7 +229,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -223,7 +249,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -249,7 +275,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -291,7 +317,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "11"
       L: Attr
       P: {
         css:
@@ -311,7 +337,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -337,7 +363,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -379,7 +405,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "14"
       L: Attr
       P: {
         css:
@@ -399,7 +425,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "15"
       L: Attr
       P: {
         css:
@@ -425,7 +451,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "16"
       L: Attr
       P: {
         css:
@@ -470,7 +496,7 @@ return {
       }
     }
     {
-      id: "16"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -512,32 +538,6 @@ return {
   type: "submit",
   disabled: args.fns.isSubmitting(),
   text: args.fns.isSubmitting() ? "Sending..." : "Send Message"
-};
-'''
-      }
-    }
-    {
-      id: "17"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: ${args.theme.var.color.text};
-  margin-bottom: 3rem;
-  text-align: center;
-  font-weight: 600;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: "YSaar (KAPIL MULJIBHAI PIPALIYA)"
 };
 '''
       }
@@ -662,7 +662,7 @@ return {
       id: e7
       T: Attr
       S: "3"
-      E: "17"
+      E: "7"
     }
     {
       id: e8
@@ -673,62 +673,62 @@ return {
     {
       id: e9
       T: Attr
-      S: "6"
-      E: "7"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "6"
-      E: "10"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "6"
-      E: "13"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "6"
-      E: "16"
-    }
-    {
-      id: e13
-      T: Attr
       S: "7"
       E: "8"
     }
     {
-      id: e14
+      id: e10
       T: Attr
       S: "7"
+      E: "11"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "14"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "17"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "8"
       E: "9"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "10"
     }
     {
       id: e15
       T: Attr
-      S: "10"
-      E: "11"
+      S: "11"
+      E: "12"
     }
     {
       id: e16
       T: Attr
-      S: "10"
-      E: "12"
+      S: "11"
+      E: "13"
     }
     {
       id: e17
       T: Attr
-      S: "13"
-      E: "14"
+      S: "14"
+      E: "15"
     }
     {
       id: e18
       T: Attr
-      S: "13"
-      E: "15"
+      S: "14"
+      E: "16"
     }
     {
       id: e19

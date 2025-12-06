@@ -127,7 +127,7 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
 
 try {
   // Extract input parameters from the request
-  const { url, name, refresh = false, priority = 'normal', ownershipId } = args.contextData;
+  const { url, name, refresh = false, priority = 'normal', ownershipId, skipPlaylists = false } = args.contextData;
 
   if (!url) {
     throw new Error("Channel URL is required");
@@ -263,16 +263,21 @@ try {
         c.publishedAt = datetime($publishedAt),
         c.updatedAt = datetime(),
         c.priority = $priority,
-        c.queueStatus = 'queued',
+        c.queueStatus = $queueStatus,
         c.progress = 0,
         c.totalPlaylists = 0,
         c.processedPlaylists = 0,
         c.totalVideos = 0,
         c.processedVideos = 0,
         c.error = null,
-        c.queuedAt = datetime()
+        c.queuedAt = CASE WHEN $skipPlaylists THEN null ELSE datetime() END
       RETURN c
     `;
+
+    // Determine queue status based on skipPlaylists flag
+    // If skipPlaylists is true, mark as completed (metadata only, no playlist processing)
+    // Otherwise, mark as queued for full processing
+    const queueStatus = skipPlaylists ? 'completed' : 'queued';
 
     const channelResult = await tx.run(mergeChannelQuery, {
       ownershipId,
@@ -290,42 +295,55 @@ try {
       subscriberCount: parseInt(channelData.statistics?.subscriberCount || "0"),
       uploadsPlaylistId: channelData.contentDetails?.relatedPlaylists?.uploads || "",
       publishedAt: channelData.snippet.publishedAt,
-      priority: channelPriority
+      priority: channelPriority,
+      queueStatus: queueStatus,
+      skipPlaylists: skipPlaylists
     });
   });
 
-  // STEP 4: Add to background processing queue using BullMQ
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-  const channelQueue = helpers.result.data.createChannelQueue(args);
+  // STEP 4: Add to background processing queue using BullMQ (skip if skipPlaylists is true)
+  if (!skipPlaylists) {
+    const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+    const channelQueue = helpers.result.data.createChannelQueue(args);
 
-  try {
-    // Map priority string to BullMQ priority number (lower = higher priority)
-    const jobPriority = channelPriority === 'high' ? 1 : channelPriority === 'low' ? 3 : 2;
+    try {
+      // Map priority string to BullMQ priority number (lower = higher priority)
+      const jobPriority = channelPriority === 'high' ? 1 : channelPriority === 'low' ? 3 : 2;
 
-    // Queue channel for processing with ownership's OAuth token
-    await helpers.result.data.addChannelJob(channelQueue, {
-      channelId: channelData.id,
-      userId: user.id,
-      userUuid: user.P.uuid,
-      ownershipId: ownershipId,  // Required for multi-ownership support
-      priority: channelPriority
-    }, {
-      priority: jobPriority  // Override default priority
-    });
-  } finally {
-    // Close queue connection
-    await channelQueue.close();
+      // Queue channel for processing with ownership's OAuth token
+      await helpers.result.data.addChannelJob(channelQueue, {
+        channelId: channelData.id,
+        userId: user.id,
+        userUuid: user.P.uuid,
+        ownershipId: ownershipId,  // Required for multi-ownership support
+        priority: channelPriority
+      }, {
+        priority: jobPriority  // Override default priority
+      });
+    } finally {
+      // Close queue connection
+      await channelQueue.close();
+    }
+  }
+
+  // Determine the appropriate message and queue status based on skipPlaylists
+  const responseQueueStatus = skipPlaylists ? 'completed' : 'queued';
+  let message;
+  if (skipPlaylists) {
+    message = `Channel "${channelData.snippet.title}" metadata has been saved. Playlist processing was skipped.`;
+  } else {
+    message = refresh
+      ? `Channel "${channelData.snippet.title}" has been queued for refresh. All data will be re-fetched from YouTube.`
+      : `Channel "${channelData.snippet.title}" has been queued for processing. This may take a few minutes.`;
   }
 
   return {
     success: true,
-    message: refresh
-      ? `Channel "${channelData.snippet.title}" has been queued for refresh. All data will be re-fetched from YouTube.`
-      : `Channel "${channelData.snippet.title}" has been queued for processing. This may take a few minutes.`,
+    message: message,
     data: {
       channelId: channelData.id,
       title: channelData.snippet.title,
-      queueStatus: 'queued',
+      queueStatus: responseQueueStatus,
       progress: 0,
       subscriberCount: channelData.statistics?.subscriberCount,
       videoCount: channelData.statistics?.videoCount,
@@ -333,7 +351,8 @@ try {
       ownershipId: ownershipId,  // Ownership context for multi-account support
       userSpecific: true,
       isRefresh: refresh,
-      usesOAuth: true
+      usesOAuth: true,
+      skipPlaylists: skipPlaylists  // Include flag in response
     }
   };
 

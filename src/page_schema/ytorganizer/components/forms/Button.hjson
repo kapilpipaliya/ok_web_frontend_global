@@ -122,8 +122,9 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: function
-        key: onClick
+        type: boolean
+        defValue: false
+        key: disabled
       }
     }
     {
@@ -131,8 +132,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: button
-        key: type
+        defValue: Button
+        key: text
       }
     }
     {
@@ -141,7 +142,7 @@ return {
       P: {
         type: boolean
         defValue: false
-        key: loading
+        key: fullWidth
       }
     }
     {
@@ -157,13 +158,22 @@ return {
       id: "7"
       L: ComponentVariantOption
       P: {
+        description: Success button with green color
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
+      P: {
         description: Secondary button with border
         value: secondary
         key: secondary
       }
     }
     {
-      id: "8"
+      id: "9"
       L: ComponentVariantOption
       P: {
         description: Danger button with red color
@@ -172,7 +182,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10"
       L: ComponentVariantOption
       P: {
         description: Primary button with brand color
@@ -181,39 +191,29 @@ return {
       }
     }
     {
-      id: "10"
-      L: ComponentVariantOption
-      P: {
-        description: Success button with green color
-        value: success
-        key: success
-      }
-    }
-    {
       id: "11"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: disabled
+        type: function
+        key: onClick
       }
     }
     {
       id: "12"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: fullWidth
+        type: string
+        defValue: button
+        key: type
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: Button
-        key: text
+        type: boolean
+        defValue: false
+        key: loading
       }
     }
   ]

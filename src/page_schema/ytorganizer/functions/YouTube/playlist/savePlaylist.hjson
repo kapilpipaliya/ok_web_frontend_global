@@ -200,7 +200,7 @@ try {
   }
 
   // Use write transaction for atomicity - prevents race conditions
-  const { playlist } = await args.session.executeWrite(async (tx) => {
+  const { playlist, channelWasCreated, apiChannelId } = await args.session.executeWrite(async (tx) => {
     // CHECK AGAIN WITHIN TRANSACTION: Prevent duplicate from another tab
     // NEW ARCHITECTURE: Status stored directly on Playlist vertex
     if (!refresh) {
@@ -279,7 +279,16 @@ try {
     // Create Channel->Playlist relationship using channel ID from YouTube API
     // This represents YouTube's data model (which channel owns the playlist)
     const apiChannelId = playlistVertex.P.channelId;
+    let channelWasCreated = false;
     if (apiChannelId) {
+      // Check if channel already exists before MERGE to detect if it's newly created
+      const existingChannelCheck = await tx.run(`
+        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $apiChannelId})
+        RETURN c
+      `, { ownershipId, apiChannelId });
+
+      const channelExists = existingChannelCheck.records.length > 0;
+
       const channelPlaylistQuery = `
         MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
         MERGE (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $apiChannelId})
@@ -290,10 +299,39 @@ try {
         MERGE (c)-[:ChannelPlaylist]->(p)
       `;
       await tx.run(channelPlaylistQuery, { ownershipId, playlistId, apiChannelId });
+
+      // If channel didn't exist before, it was just created
+      if (!channelExists) {
+        channelWasCreated = true;
+      }
     }
 
-    return { playlist: playlistVertex };
+    return { playlist: playlistVertex, channelWasCreated, apiChannelId };
   });
+
+  // If a new Channel was created, call saveChannel to fetch its metadata (but skip playlists)
+  if (channelWasCreated && apiChannelId) {
+    try {
+      // Construct channel URL from channelId
+      const channelUrl = `https://www.youtube.com/channel/${apiChannelId}`;
+
+      // Call saveChannel with skipPlaylists parameter to avoid processing playlists
+      // This ensures channel metadata is saved without triggering playlist processing
+      await args.executeNamedServerFunction({
+        functionName: 'saveChannel',
+        contextData: {
+          url: channelUrl,
+          ownershipId: ownershipId,
+          priority: playlistPriority,
+          skipPlaylists: true  // Skip playlist processing when channel is created from playlist
+        }
+      });
+    } catch (error) {
+      // Log error but don't fail the playlist save operation
+      console.error('Error calling saveChannel for newly created channel:', error);
+      // Continue with playlist processing even if channel save fails
+    }
+  }
 
   // STEP 4: Add to background processing queue using BullMQ
   const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });

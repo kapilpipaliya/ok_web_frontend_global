@@ -61,8 +61,9 @@ try {
     : '';
 
   // Build WHERE clause for favourite filter if provided
+  // Note: ps is from OPTIONAL MATCH, so we need to check it's not null
   const favouriteFilterClause = isFavouriteOnly
-    ? 'AND ps.isFavourite = true'
+    ? 'AND ps IS NOT NULL AND ps.isFavourite = true'
     : '';
 
   // Build custom filter clause if provided
@@ -105,7 +106,7 @@ try {
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
-    WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
+    WHERE 1=1 ${playlistIdFilter} ${statusFilterClause}
 
     // Optional PlaylistSetting (only exists if user has custom preferences)
     OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
@@ -117,6 +118,7 @@ try {
     OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
 
     WITH p, ps, c, o, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+    WHERE 1=1 ${favouriteFilterClause} ${customFilterClause}
 
     RETURN p, ps, c, o, videoCount
     ORDER BY ${orderByClause}
