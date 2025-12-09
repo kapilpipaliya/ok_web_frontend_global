@@ -7,50 +7,42 @@
         description: Retrieves the user's sidebar collapsed/expanded preference
         body:
           '''
-try {
-  const userId = args.user?.id;
+const userId = args.user?.id;
 
-  if (!userId) {
-    return {
-      success: false,
-      error: "User not authenticated"
-    };
+if (!userId) {
+  return {
+    success: false,
+    error: "User not authenticated"
+  };
+}
+
+// Fetch user preference for sidebar state
+const result = await args.session.run(
+  `MATCH (u:User {id: $userId})-[:UserUserPreference]->(p:UserPreference {key: 'sidebarCollapsed'})
+   RETURN p.value as isCollapsed`,
+  {
+    userId
   }
+);
 
-  // Fetch user preference for sidebar state
-  const result = await args.session.run(
-    `MATCH (u:User {id: $userId})-[:UserUserPreference]->(p:UserPreference {key: 'sidebarCollapsed'})
-     RETURN p.value as isCollapsed`,
-    {
-      userId
-    }
-  );
-
-  if (result.records.length === 0) {
-    // No preference saved, return default (expanded)
-    return {
-      success: true,
-      data: {
-        isCollapsed: false
-      }
-    };
-  }
-
-  const isCollapsed = result.records[0].get('isCollapsed');
-
+if (result.records.length === 0) {
+  // No preference saved, return default (expanded)
   return {
     success: true,
     data: {
-      isCollapsed: typeof isCollapsed === 'boolean' ? isCollapsed : false
+      isCollapsed: false
     }
   };
-} catch (error) {
-  console.error("Get sidebar preference error:", error);
-  return {
-    success: false,
-    error: error.message || "Failed to get sidebar preference"
-  };
 }
+
+const isCollapsed = result.records[0].get('isCollapsed');
+
+return {
+  success: true,
+  data: {
+    isCollapsed: typeof isCollapsed === 'boolean' ? isCollapsed : false
+  }
+};
 '''
         key: getSidebarPreference
       }

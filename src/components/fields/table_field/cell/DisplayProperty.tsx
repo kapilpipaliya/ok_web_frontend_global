@@ -36,7 +36,7 @@ export const getComponentClass = (componentName: string) => {
       return "min-width:200px;";
     case "TextArea":
       return "min-width:200px;";
-    case "Table":
+    case "TableField":
     case "DynamicTable":
       return "min-width:250px;";
     default:
@@ -171,7 +171,7 @@ export function DisplayProperty(
         </As>
       </Match>
       <Match
-        when={componentName() === "Table" || componentName() === "DynamicTable"}
+        when={componentName() === "TableField" || componentName() === "DynamicTable"}
       >
         <As
           as="td"

@@ -7,45 +7,32 @@
         description: Get Razorpay public configuration (Key ID only, not secrets)
         body:
           '''
-try {
-  // Fetch Razorpay setting from database
-  const result = await args.session.run(
-    "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
-  );
+// Fetch Razorpay setting from database
+const result = await args.session.run(
+  "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
+);
 
-  if (result.records.length === 0) {
-    return {
-      success: false,
-      message: "Razorpay is not enabled",
-      data: {
-        enabled: false,
-        keyId: null
-      }
-    };
-  }
-
-  const setting = result.records[0].get("s").properties;
-
-  // Only return public key ID, not secrets
-  return {
-    success: true,
-    data: {
-      enabled: setting.razorpayEnabled || false,
-      keyId: setting.razorpayKeyId || null
-    }
-  };
-
-} catch (error) {
-  console.error("Error fetching Razorpay config:", error);
+if (result.records.length === 0) {
   return {
     success: false,
-    message: "Failed to fetch Razorpay configuration",
-    error: {
-      type: error.name,
-      details: error.message
+    message: "Razorpay is not enabled",
+    data: {
+      enabled: false,
+      keyId: null
     }
   };
 }
+
+const setting = result.records[0].get("s").properties;
+
+// Only return public key ID, not secrets
+return {
+  success: true,
+  data: {
+    enabled: setting.razorpayEnabled || false,
+    keyId: setting.razorpayKeyId || null
+  }
+};
 '''
         key: getRazorpayConfig
       }

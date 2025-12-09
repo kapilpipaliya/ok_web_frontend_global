@@ -1713,7 +1713,7 @@ return {
       if (response.result?.success) {
         args.showSuccessToast(response.result.message || "Processing retry queued successfully");
       } else {
-        args.showErrorToast(response.result?.message || "Failed to retry processing");
+        args.showErrorToast(response.result?.message || response?.error || "Failed to retry processing");
       }
     } catch (error) {
       args.showErrorToast("Error retrying processing: " + error.message);

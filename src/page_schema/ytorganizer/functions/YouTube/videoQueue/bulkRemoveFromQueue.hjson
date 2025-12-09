@@ -7,95 +7,93 @@
         description: Remove multiple videos from the queue by their positions in a single operation
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession(args.request);
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Get ownershipId and positions from contextData
-  const { ownershipId, positions } = args.contextData;
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  if (!positions || !Array.isArray(positions) || positions.length === 0) {
-    throw new Error("Valid positions array is required");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, {
-    userUuid: user.P.uuid,
-    ownershipId
-  });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("YouTube ownership not found or access denied");
-  }
-
-  // Delete all videos at the specified positions
-  await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
-    WHERE vq.position IN $positions
-    DETACH DELETE vq
-  `, {
-    ownershipId,
-    positions
-  });
-
-  // Reorder remaining videos
-  // For each deleted position (from highest to lowest), decrement positions greater than it
-  const sortedPositions = positions.sort((a, b) => b - a); // Sort descending
-  for (const position of sortedPositions) {
-    await args.session.run(`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
-      WHERE vq.position > $position
-      SET vq.position = vq.position - 1, vq.updatedAt = datetime()
-    `, {
-      ownershipId,
-      position
-    });
-  }
-
-  // Return updated queue
-  const queueResult = await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
-    RETURN v
-    ORDER BY vq.position ASC
-  `, {
-    ownershipId
-  });
-
-  const queue = queueResult.records.map(record => {
-    return args.convertNodeToJson(record.get('v'));
-  });
-
-  return {
-    success: true,
-    message: `Removed ${positions.length} video(s) from queue`,
-    data: queue
-  };
-
-} catch (error) {
-  console.error("Error bulk removing videos from queue:", error);
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession(args.request);
+if (!actualUser) {
   return {
     success: false,
-    message: error.message || "Failed to remove videos from queue",
-    error: {
-      type: error.name || "BulkRemoveFromQueueError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again."
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Get ownershipId and positions from contextData
+const { ownershipId, positions } = args.contextData;
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
+  };
+}
+
+if (!positions || !Array.isArray(positions) || positions.length === 0) {
+  return {
+    success: false,
+    message: "Valid positions array is required"
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, {
+  userUuid: user.P.uuid,
+  ownershipId
+});
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "YouTube ownership not found or access denied"
+  };
+}
+
+// Delete all videos at the specified positions
+await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+  WHERE vq.position IN $positions
+  DETACH DELETE vq
+`, {
+  ownershipId,
+  positions
+});
+
+// Reorder remaining videos
+// For each deleted position (from highest to lowest), decrement positions greater than it
+const sortedPositions = positions.sort((a, b) => b - a); // Sort descending
+for (const position of sortedPositions) {
+  await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+    WHERE vq.position > $position
+    SET vq.position = vq.position - 1, vq.updatedAt = datetime()
+  `, {
+    ownershipId,
+    position
+  });
+}
+
+// Return updated queue
+const queueResult = await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
+  RETURN v
+  ORDER BY vq.position ASC
+`, {
+  ownershipId
+});
+
+const queue = queueResult.records.map(record => {
+  return args.convertNodeToJson(record.get('v'));
+});
+
+return {
+  success: true,
+  message: `Removed ${positions.length} video(s) from queue`,
+  data: queue
+};
 '''
         key: bulkRemoveFromQueue
       }

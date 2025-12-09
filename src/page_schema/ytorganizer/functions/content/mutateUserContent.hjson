@@ -1,0 +1,265 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Creates, updates, or deletes user content (Books or AudioVideo)
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { contentType, operation, data = {}, elementId, uniqueKeys = [] } = args.contextData;
+
+if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+  return {
+    success: false,
+    message: "Invalid contentType. Must be 'book' or 'audioVideo'"
+  };
+}
+
+if (!operation || !["create", "update", "delete"].includes(operation)) {
+  return {
+    success: false,
+    message: "Invalid operation. Must be 'create', 'update', or 'delete'"
+  };
+}
+
+// Determine vertex label and relationship type
+const vertexLabel = contentType === "book" ? "Book" : "AudioVideo";
+const relationshipType = contentType === "book" ? "UserBook" : "UserAudioVideo";
+
+try {
+  if (operation === "create") {
+    // Validate unique keys if provided
+    if (uniqueKeys && Array.isArray(uniqueKeys) && uniqueKeys.length > 0) {
+      // Build WHERE clause for unique key validation
+      const uniqueConditions = uniqueKeys.map(key => {
+        const value = data[key];
+        if (value === null || value === undefined || value === "") {
+          return null; // Skip null/empty values in unique check
+        }
+        return `c.${key} = $unique_${key}`;
+      }).filter(condition => condition !== null);
+
+      if (uniqueConditions.length > 0) {
+        // Check for existing records with same unique key values
+        const checkQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+          WHERE ${uniqueConditions.join(" AND ")}
+          RETURN c
+          LIMIT 1
+        `;
+
+        const checkParams = { userUuid: user.P.uuid };
+        uniqueKeys.forEach(key => {
+          if (data[key] !== null && data[key] !== undefined && data[key] !== "") {
+            checkParams[`unique_${key}`] = data[key];
+          }
+        });
+
+        const checkResult = await args.session.run(checkQuery, checkParams);
+        if (checkResult.records.length > 0) {
+          const conflictingKeys = uniqueKeys.filter(key => 
+            data[key] !== null && data[key] !== undefined && data[key] !== ""
+          );
+          return {
+            success: false,
+            message: `Record with ${conflictingKeys.join(", ")} already exists`
+          };
+        }
+      }
+    }
+
+    // Build properties object (exclude id/elementId from data)
+    const { id, elementId: dataElementId, ...dataWithoutId } = data;
+    const properties = {
+      ...dataWithoutId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Create vertex and relationship in a single optimized transaction
+    const createQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (c:${vertexLabel} $properties)
+      CREATE (u)-[:${relationshipType} {createdAt: datetime()}]->(c)
+      RETURN c
+    `;
+
+    const result = await args.session.run(createQuery, {
+      userUuid: user.P.uuid,
+      properties
+    });
+
+    if (result.records.length === 0) {
+      return {
+        success: false,
+        message: "Failed to create content"
+      };
+    }
+
+    const node = result.records[0].get('c');
+    const createdContent = args.convertNodeToJson(node);
+
+    return {
+      success: true,
+      data: createdContent,
+      message: `${contentType === "book" ? "Book" : "Audio/Video"} created successfully`
+    };
+
+  } else if (operation === "update") {
+    // Update existing content
+    if (!elementId) {
+      return {
+        success: false,
+        message: "elementId is required for update operation"
+      };
+    }
+
+    // Validate unique keys if provided (excluding current record)
+    if (uniqueKeys && Array.isArray(uniqueKeys) && uniqueKeys.length > 0) {
+      const uniqueConditions = uniqueKeys.map(key => {
+        const value = data[key];
+        if (value === null || value === undefined || value === "") {
+          return null;
+        }
+        return `c.${key} = $unique_${key}`;
+      }).filter(condition => condition !== null);
+
+      if (uniqueConditions.length > 0) {
+        // Check for existing records with same unique key values (excluding current record)
+        const checkQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+          WHERE elementId(c) <> $elementId AND ${uniqueConditions.join(" AND ")}
+          RETURN c
+          LIMIT 1
+        `;
+
+        const checkParams = { userUuid: user.P.uuid, elementId };
+        uniqueKeys.forEach(key => {
+          if (data[key] !== null && data[key] !== undefined && data[key] !== "") {
+            checkParams[`unique_${key}`] = data[key];
+          }
+        });
+
+        const checkResult = await args.session.run(checkQuery, checkParams);
+        if (checkResult.records.length > 0) {
+          const conflictingKeys = uniqueKeys.filter(key => 
+            data[key] !== null && data[key] !== undefined && data[key] !== ""
+          );
+          return {
+            success: false,
+            message: `Record with ${conflictingKeys.join(", ")} already exists`
+          };
+        }
+      }
+    }
+
+    // Build update properties (exclude id, elementId, createdAt)
+    const { id, elementId: dataElementId, createdAt, ...dataWithoutId } = data;
+    const updateProperties = {
+      ...dataWithoutId,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Remove undefined/null values
+    const cleanProperties = {};
+    for (const [k, v] of Object.entries(updateProperties)) {
+      if (v !== undefined && v !== null) {
+        cleanProperties[k] = v;
+      }
+    }
+
+    // Update vertex with ownership verification in single query
+    const updateQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+      WHERE elementId(c) = $elementId
+      SET c += $properties
+      RETURN c
+    `;
+
+    const result = await args.session.run(updateQuery, {
+      userUuid: user.P.uuid,
+      elementId,
+      properties: cleanProperties
+    });
+
+    if (result.records.length === 0) {
+      return {
+        success: false,
+        message: "Failed to update content"
+      };
+    }
+
+    const node = result.records[0].get('c');
+    const updatedContent = args.convertNodeToJson(node);
+
+    return {
+      success: true,
+      data: updatedContent,
+      message: `${contentType === "book" ? "Book" : "Audio/Video"} updated successfully`
+    };
+
+  } else if (operation === "delete") {
+    // Delete content - elementId can come from elementId parameter or data.elementId or data.id
+    const deleteElementId = elementId || data?.elementId || data?.id;
+    if (!deleteElementId) {
+      return {
+        success: false,
+        message: "elementId is required for delete operation"
+      };
+    }
+
+    // Verify ownership and delete in single optimized query
+    const deleteQuery = `
+      MATCH (u:User {uuid: $userUuid})-[r:${relationshipType}]->(c:${vertexLabel})
+      WHERE elementId(c) = $elementId
+      DETACH DELETE c, r
+      RETURN count(c) as deleted
+    `;
+
+    const result = await args.session.run(deleteQuery, {
+      userUuid: user.P.uuid,
+      elementId: deleteElementId
+    });
+
+    const deleted = result.records[0]?.get('deleted') || 0;
+
+    if (deleted === 0) {
+      return {
+        success: false,
+        message: "Content not found or you don't have permission to delete it"
+      };
+    }
+
+    return {
+      success: true,
+      message: `${contentType === "book" ? "Book" : "Audio/Video"} deleted successfully`
+    };
+  }
+} catch (error) {
+  console.error(`Error in mutateUserContent (${operation}):`, error);
+  return {
+    success: false,
+    message: error.message || `Failed to ${operation} ${contentType}`
+  };
+}
+'''
+        key: mutateUserContent
+      }
+    }
+  ]
+  edges: []
+}

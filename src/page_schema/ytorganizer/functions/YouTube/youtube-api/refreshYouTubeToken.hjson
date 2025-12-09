@@ -17,17 +17,12 @@
  * @returns { success: boolean, message: string, data?: object, error?: object }
  */
 
-try {
   const userUuid = args.contextData.userUuid;
 
   if (!userUuid) {
     return {
       success: false,
-      message: 'User UUID is required',
-      error: {
-        type: 'ValidationError',
-        details: 'userUuid parameter is missing'
-      }
+      message: 'User UUID is required'
     };
   }
 
@@ -49,11 +44,7 @@ try {
     console.warn(`[Token Refresh] No YouTube token found for user ${userUuid}`);
     return {
       success: false,
-      message: 'No YouTube authorization found for this user',
-      error: {
-        type: 'TokenNotFound',
-        details: 'User has not connected their YouTube account'
-      }
+      message: 'No YouTube authorization found for this user. User has not connected their YouTube account'
     };
   }
 
@@ -67,11 +58,7 @@ try {
     console.error(`[Token Refresh] No refresh token available for user ${userUuid}`);
     return {
       success: false,
-      message: 'No refresh token available',
-      error: {
-        type: 'NoRefreshToken',
-        details: 'User needs to reconnect their YouTube account to get a new refresh token'
-      }
+      message: 'No refresh token available. User needs to reconnect their YouTube account to get a new refresh token'
     };
   }
 
@@ -91,11 +78,7 @@ try {
     console.error('[Token Refresh] OAuth configuration not found');
     return {
       success: false,
-      message: 'OAuth configuration not found',
-      error: {
-        type: 'ConfigurationError',
-        details: 'YouTube OAuth is not configured in admin settings'
-      }
+      message: 'OAuth configuration not found. YouTube OAuth is not configured in admin settings'
     };
   }
 
@@ -107,11 +90,7 @@ try {
     console.error('[Token Refresh] Incomplete OAuth configuration');
     return {
       success: false,
-      message: 'Incomplete OAuth configuration',
-      error: {
-        type: 'ConfigurationError',
-        details: 'Client ID or Client Secret is missing'
-      }
+      message: 'Incomplete OAuth configuration. Client ID or Client Secret is missing'
     };
   }
 
@@ -138,9 +117,12 @@ try {
     console.log(`[Token Refresh] Requesting new access token for user ${userUuid}`);
     const { credentials } = await oauth2Client.refreshAccessToken();
 
-    if (!credentials.access_token) {
-      throw new Error('No access token received during refresh');
-    }
+  if (!credentials.access_token) {
+    return {
+      success: false,
+      message: 'No access token received during refresh'
+    };
+  }
 
     // Encrypt new access token
     const newAccessTokenEncrypted = args.encryptToken(credentials.access_token);
@@ -212,18 +194,6 @@ try {
     };
   }
 
-} catch (error) {
-  console.error('[Token Refresh] Unexpected error:', error);
-
-  return {
-    success: false,
-    message: 'Error refreshing YouTube token',
-    error: {
-      type: error.name || 'TokenRefreshError',
-      details: error.message,
-      stack: error.stack
-    }
-  };
 }
 '''
         key: refreshYouTubeToken

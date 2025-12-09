@@ -19,7 +19,6 @@
  * - Quota has been manually reset or increased
  */
 
-try {
   console.log('[Manual Retry] Starting manual retry of pending_quota jobs');
 
   // Call the retry function
@@ -44,24 +43,9 @@ try {
 
     return {
       success: false,
-      message: 'Failed to retry pending quota jobs',
-      error: result.result?.error || result.error
+      message: result.result?.message || 'Failed to retry pending quota jobs'
     };
   }
-
-} catch (error) {
-  console.error('[Manual Retry] Error:', error);
-
-  return {
-    success: false,
-    message: 'Error triggering manual retry',
-    error: {
-      type: error.name || 'ManualRetryError',
-      details: error.message,
-      stack: error.stack
-    }
-  };
-}
 '''
         key: manualRetryPendingQuota
       }

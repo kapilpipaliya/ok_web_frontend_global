@@ -7,118 +7,12 @@
         description: Fetches all favourite videos, channels, and playlists for the current user
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  const { ownershipId, sortBy = "favourited_desc" } = args.contextData;
-
-  // Helper function to parse sortBy using shared utility
-  const parseSortBy = async (sortBy, contentType) => {
-    const parseSortResult = await args.executeNamedServerFunction({
-      functionName: "parseSortByUtil",
-      contextData: { sortBy, contentType }
-    });
-
-    if (!parseSortResult.result) {
-      throw new Error("Failed to parse sort parameters");
-    }
-
-    return parseSortResult.result;
-  };
-
-  // Fetch favourite channels using helper function
-  const channelSort = await parseSortBy(sortBy, "channels");
-  const channelsResult = await args.executeNamedServerFunction({
-    functionName: "getChannelsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership if provided
-      isFavouriteOnly: true,
-      orderBy: channelSort.orderBy,
-      orderDirection: channelSort.orderDirection,
-      secondaryOrderBy: channelSort.secondaryOrderBy  // Pass secondary sort
-    }
-  });
-
-  const channels = channelsResult.result?.success
-    ? channelsResult.result.data
-    : [];
-
-  // Fetch favourite playlists using helper function
-  const playlistSort = await parseSortBy(sortBy, "playlists");
-  const playlistsResult = await args.executeNamedServerFunction({
-    functionName: "getPlaylistsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership if provided
-      isFavouriteOnly: true,
-      orderBy: playlistSort.orderBy,
-      orderDirection: playlistSort.orderDirection,
-      secondaryOrderBy: playlistSort.secondaryOrderBy  // Pass secondary sort
-    }
-  });
-
-  const playlists = playlistsResult.result?.success
-    ? playlistsResult.result.data
-    : [];
-
-  // Fetch favourite videos using helper function
-  const videoSort = await parseSortBy(sortBy, "videos");
-  const videosResult = await args.executeNamedServerFunction({
-    functionName: "getVideosWithDetails",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership if provided
-      isFavouriteOnly: true,
-      orderBy: videoSort.orderBy,
-      orderDirection: videoSort.orderDirection,
-      secondaryOrderBy: videoSort.secondaryOrderBy  // Pass secondary sort
-    }
-  });
-
-  const videos = videosResult.result?.success
-    ? videosResult.result.data
-    : [];
-
-  return {
-    success: true,
-    data: {
-      channels,
-      playlists,
-      videos,
-      totalCount: channels.length + playlists.length + videos.length,
-      userId: user.id,
-      ownershipId: ownershipId
-    },
-    message: `Found ${channels.length} channels, ${playlists.length} playlists, and ${videos.length} videos`
-  };
-
-} catch (error) {
-  console.error("Error fetching user favourites:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to fetch favourites. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to view your favourites.";
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    },
+    message: "Please log in to view your favourites.",
     data: {
       channels: [],
       playlists: [],
@@ -127,6 +21,128 @@ try {
     }
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+const { ownershipId, sortBy = "favourited_desc" } = args.contextData;
+
+// Helper function to parse sortBy using shared utility
+const parseSortBy = async (sortBy, contentType) => {
+  const parseSortResult = await args.executeNamedServerFunction({
+    functionName: "parseSortByUtil",
+    contextData: { sortBy, contentType }
+  });
+
+  if (!parseSortResult.result) {
+    return null;
+  }
+
+  return parseSortResult.result;
+};
+
+// Fetch favourite channels using helper function
+const channelSort = await parseSortBy(sortBy, "channels");
+if (!channelSort) {
+  return {
+    success: false,
+    message: "Failed to fetch favourites. Please try again.",
+    data: {
+      channels: [],
+      playlists: [],
+      videos: [],
+      totalCount: 0
+    }
+  };
+}
+const channelsResult = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by ownership if provided
+    isFavouriteOnly: true,
+    orderBy: channelSort.orderBy,
+    orderDirection: channelSort.orderDirection,
+    secondaryOrderBy: channelSort.secondaryOrderBy  // Pass secondary sort
+  }
+});
+
+const channels = channelsResult.result?.success
+  ? channelsResult.result.data
+  : [];
+
+// Fetch favourite playlists using helper function
+const playlistSort = await parseSortBy(sortBy, "playlists");
+if (!playlistSort) {
+  return {
+    success: false,
+    message: "Failed to fetch favourites. Please try again.",
+    data: {
+      channels: [],
+      playlists: [],
+      videos: [],
+      totalCount: 0
+    }
+  };
+}
+const playlistsResult = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by ownership if provided
+    isFavouriteOnly: true,
+    orderBy: playlistSort.orderBy,
+    orderDirection: playlistSort.orderDirection,
+    secondaryOrderBy: playlistSort.secondaryOrderBy  // Pass secondary sort
+  }
+});
+
+const playlists = playlistsResult.result?.success
+  ? playlistsResult.result.data
+  : [];
+
+// Fetch favourite videos using helper function
+const videoSort = await parseSortBy(sortBy, "videos");
+if (!videoSort) {
+  return {
+    success: false,
+    message: "Failed to fetch favourites. Please try again.",
+    data: {
+      channels: [],
+      playlists: [],
+      videos: [],
+      totalCount: 0
+    }
+  };
+}
+const videosResult = await args.executeNamedServerFunction({
+  functionName: "getVideosWithDetails",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by ownership if provided
+    isFavouriteOnly: true,
+    orderBy: videoSort.orderBy,
+    orderDirection: videoSort.orderDirection,
+    secondaryOrderBy: videoSort.secondaryOrderBy  // Pass secondary sort
+  }
+});
+
+const videos = videosResult.result?.success
+  ? videosResult.result.data
+  : [];
+
+return {
+  success: true,
+  data: {
+    channels,
+    playlists,
+    videos,
+    totalCount: channels.length + playlists.length + videos.length,
+    userId: user.id,
+    ownershipId: ownershipId
+  },
+  message: `Found ${channels.length} channels, ${playlists.length} playlists, and ${videos.length} videos`
+};
 '''
         key: getUserFavourites
       }

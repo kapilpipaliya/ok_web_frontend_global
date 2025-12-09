@@ -7,113 +7,100 @@
         description: Deletes user account by first clearing all user data and then deleting the user
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const currentUser = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Check if this is an admin deleting another user
-  const targetUserId = args.contextData.userId;
-  let userToDelete;
-  let isAdminDelete = false;
-
-  if (targetUserId) {
-    // Admin deletion - verify admin role (use actualUser for admin check, not impersonated user)
-    const adminCheck = await args.session.run(
-      `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
-       RETURN u`,
-      { userId: actualUser.P.uuid }
-    );
-
-    if (adminCheck.records.length === 0) {
-      throw new Error("Unauthorized: Admin role required");
-    }
-
-    // Get the target user
-    const targetUserQuery = `
-      MATCH (u:User)
-      WHERE elementId(u) = $userId
-      RETURN u
-    `;
-
-    const targetUserResult = await args.session.run(targetUserQuery, {
-      userId: targetUserId
-    });
-
-    if (targetUserResult.records.length === 0) {
-      throw new Error("Target user not found");
-    }
-
-    userToDelete = args.convertNodeToJson(targetUserResult.records[0].get('u'));
-    isAdminDelete = true;
-  } else {
-    // Self-deletion
-    userToDelete = currentUser;
-  }
-
-  // Step 1: Clear all user data first
-  const clearDataResult = await args.executeNamedServerFunction({
-    functionName: "clearAllUserData",
-    contextData: isAdminDelete ? { userId: targetUserId } : {}
-  });
-
-  if (!clearDataResult?.result?.success) {
-    throw new Error(clearDataResult?.result?.message || "Failed to clear user data");
-  }
-
-  // Step 2: Delete the user account
-  const deleteUserQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    DETACH DELETE u
-  `;
-
-  await args.session.run(deleteUserQuery, {
-    userUuid: userToDelete.P.uuid
-  });
-
-  const username = userToDelete.P.username || 'User';
-  const message = isAdminDelete
-    ? `User "${username}" and all their data have been deleted successfully`
-    : "Your account has been permanently deleted.";
-
-  return {
-    success: true,
-    message: message,
-    data: {
-      userId: userToDelete.id,
-      userUuid: userToDelete.P.uuid,
-      username: username
-    }
-  };
-
-} catch (error) {
-  console.error("Error deleting account:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to delete account. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to delete your account.";
-  } else if (error.message.includes("Failed to clear user data")) {
-    userMessage = "Failed to clear your data. Please contact support.";
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again."
   };
 }
+
+// Get effective user (handles admin impersonation)
+const currentUser = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Check if this is an admin deleting another user
+const targetUserId = args.contextData.userId;
+let userToDelete;
+let isAdminDelete = false;
+
+if (targetUserId) {
+  // Admin deletion - verify admin role (use actualUser for admin check, not impersonated user)
+  const adminCheck = await args.session.run(
+    `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
+     RETURN u`,
+    { userId: actualUser.P.uuid }
+  );
+
+  if (adminCheck.records.length === 0) {
+    return {
+      success: false,
+      message: "Unauthorized: Admin role required"
+    };
+  }
+
+  // Get the target user
+  const targetUserQuery = `
+    MATCH (u:User)
+    WHERE elementId(u) = $userId
+    RETURN u
+  `;
+
+  const targetUserResult = await args.session.run(targetUserQuery, {
+    userId: targetUserId
+  });
+
+  if (targetUserResult.records.length === 0) {
+    return {
+      success: false,
+      message: "Target user not found"
+    };
+  }
+
+  userToDelete = args.convertNodeToJson(targetUserResult.records[0].get('u'));
+  isAdminDelete = true;
+} else {
+  // Self-deletion
+  userToDelete = currentUser;
+}
+
+// Step 1: Clear all user data first
+const clearDataResult = await args.executeNamedServerFunction({
+  functionName: "clearAllUserData",
+  contextData: isAdminDelete ? { userId: targetUserId } : {}
+});
+
+if (!clearDataResult?.result?.success) {
+  return {
+    success: false,
+    message: clearDataResult?.result?.message || "Failed to clear user data. Please contact support."
+  };
+}
+
+// Step 2: Delete the user account
+const deleteUserQuery = `
+  MATCH (u:User {uuid: $userUuid})
+  DETACH DELETE u
+`;
+
+await args.session.run(deleteUserQuery, {
+  userUuid: userToDelete.P.uuid
+});
+
+const username = userToDelete.P.username || 'User';
+const message = isAdminDelete
+  ? `User "${username}" and all their data have been deleted successfully`
+  : "Your account has been permanently deleted.";
+
+return {
+  success: true,
+  message: message,
+  data: {
+    userId: userToDelete.id,
+    userUuid: userToDelete.P.uuid,
+    username: username
+  }
+};
 '''
         key: deleteAccount
       }

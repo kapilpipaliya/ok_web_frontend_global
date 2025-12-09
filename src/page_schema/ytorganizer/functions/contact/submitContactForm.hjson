@@ -47,7 +47,6 @@ if (message.length > 5000) {
   };
 }
 
-try {
   // Create a contact submission vertex using Cypher query
   const query = `
     CREATE (c:ContactSubmission {
@@ -81,13 +80,6 @@ try {
       message: "Your message has been sent successfully!"
     }
   };
-} catch (error) {
-  console.error("Error saving contact form:", error);
-  return {
-    success: false,
-    error: "Failed to save your message. Please try again or contact us directly at support@ysaar.com"
-  };
-}
 '''
         key: submitContactForm
       }

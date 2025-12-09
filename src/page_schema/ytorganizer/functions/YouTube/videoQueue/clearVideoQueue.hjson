@@ -7,66 +7,61 @@
         description: Clear the entire video queue for the current ownership
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession(args.request);
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Get ownershipId from contextData
-  const { ownershipId } = args.contextData;
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, {
-    userUuid: user.P.uuid,
-    ownershipId
-  });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("YouTube ownership not found or access denied");
-  }
-
-  // Delete all queue entries for this ownership
-  const deleteResult = await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
-    WITH vq, count(vq) as deletedCount
-    DETACH DELETE vq
-    RETURN deletedCount
-  `, {
-    ownershipId
-  });
-
-  const deletedCount = deleteResult.records[0]?.get('deletedCount') || 0;
-
-  return {
-    success: true,
-    message: `Queue cleared (${deletedCount} videos removed)`,
-    data: []
-  };
-
-} catch (error) {
-  console.error("Error clearing video queue:", error);
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession(args.request);
+if (!actualUser) {
   return {
     success: false,
-    message: error.message || "Failed to clear video queue",
-    error: {
-      type: error.name || "ClearQueueError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again.",
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Get ownershipId from contextData
+const { ownershipId } = args.contextData;
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account.",
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, {
+  userUuid: user.P.uuid,
+  ownershipId
+});
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "YouTube ownership not found or access denied",
+  };
+}
+
+// Delete all queue entries for this ownership
+const deleteResult = await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+  WITH vq, count(vq) as deletedCount
+  DETACH DELETE vq
+  RETURN deletedCount
+`, {
+  ownershipId
+});
+
+const deletedCount = deleteResult.records[0]?.get('deletedCount') || 0;
+
+return {
+  success: true,
+  message: `Queue cleared (${deletedCount} videos removed)`,
+  data: []
+};
 '''
         key: clearVideoQueue
       }

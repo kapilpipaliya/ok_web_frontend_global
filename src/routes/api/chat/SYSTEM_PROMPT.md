@@ -29,10 +29,11 @@ The graph must represent a valid Page Builder Item tree.
 2. Each Page Builder Item vertex represents a UI Item and has the label 'Attr'
 3. Parent-child relationships between Page Builder Items are represented by 'Attr' edges
 
-## Attr Vertex
+## Required Properties
+- `displayOrder`: number  
+  - Specifies the order of an item among its siblings. Required for vertices labeled `'Attr'`, `'ComponentVariant'`, or `'Layout'` to maintain correct item order.
 
-### Required Properties
-- `displayOrder`: number - Determines Item order among siblings
+## Attr Vertex
 
 ### Optional Properties
 - `componentName`: string - name of the component any of: 'Html', 'Slot' or Custom Component name if specified in prompt.

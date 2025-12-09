@@ -54,7 +54,7 @@ export function getEdgesFromGraph(
         });
       }
     } else if (
-      vertex.P.componentName === "Table" ||
+      vertex.P.componentName === "TableField" ||
       vertex.P.componentName === "DynamicTable"
     ) {
       if (ignoreTables) {

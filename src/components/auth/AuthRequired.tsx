@@ -10,12 +10,14 @@ import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import type { APIErrorResponse } from "~/lib/api/server/apiErrorHandler";
+import { ErrorMessage } from "../ErrorMessage";
 
 /**
  * A component that checks if the user is authenticated.
  * If not, it redirects to the login page with the current path as redirectUrl.
  * Otherwise, it renders its children.
  */
+
 export function AuthRequired(props: ParentProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,11 +32,7 @@ export function AuthRequired(props: ParentProps) {
     if ("error" in userData) {
       // Handle API error - redirect to login
       console.error("Failed to load user data:", userData.error);
-      const params = new URLSearchParams(location.search);
-      params.set("redirectUrl", location.pathname);
-      navigate(`${API.urls.admin.signIn}?${params.toString()}`, {
-        replace: true,
-      });
+      handleUserNavigation(null, navigate, location);
       return;
     }
 
@@ -47,29 +45,20 @@ export function AuthRequired(props: ParentProps) {
     setUserData(graph[0], graph[1], userData);
 
     // Handle user navigation
-    handleUserNavigation(userData, navigate);
+    handleUserNavigation(userData, navigate, location);
   };
 
   const authData = createAsync(
     async () => {
       try {
         const userData = await getUserRPC();
-        if (userData.error || !userData?.user) {
-          const params = new URLSearchParams(location.search);
-          params.set("redirectUrl", location.pathname);
-          navigate(`${API.urls.admin.signIn}?${params.toString()}`, {
-            replace: true,
-          });
-          return null;
+        if (userData && ("error" in userData || !(userData as any)?.user)) {
+          // Both error and missing user are unauthorized; redirect.
+          return { error: "Unauthorized" };
         }
         return userData;
       } catch (_error) {
-        const params = new URLSearchParams(location.search);
-        params.set("redirectUrl", location.pathname);
-        navigate(`${API.urls.admin.signIn}?${params.toString()}`, {
-          replace: true,
-        });
-        return null;
+        return { error: "Unauthorized" };
       }
     },
     { deferStream: true },
@@ -77,7 +66,14 @@ export function AuthRequired(props: ParentProps) {
 
   const RenderContent = () => {
     setData(authData());
-    return props.children;
+    return (
+      <Show
+        when={authData() && !("error" in authData()!)}
+        fallback={<ErrorMessage message={(authData() as APIErrorResponse)?.error || "Not authenticated"} />}
+      >
+        {props.children}
+      </Show>
+    );
   };
 
   return (

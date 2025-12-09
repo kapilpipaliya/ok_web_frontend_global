@@ -59,7 +59,7 @@ const fetchOwnerships = async () => {
     if (result?.result?.success && result?.result?.data) {
       setOwnerships(result.result.data);
     } else {
-      args.showErrorToast("Failed to load YouTube accounts");
+      args.showErrorToast(result?.error || "Failed to load YouTube accounts");
     }
   } catch (error) {
     console.error("Error fetching ownerships:", error);
@@ -605,125 +605,6 @@ return {
         css:
           '''
 return `._id {
-  text-align: center;
-  padding: ${args.theme.var.spacing.xxl};
-  background: ${args.theme.var.color.background_dark_50};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 2px dashed ${args.theme.var.color.border};
-}`;
-'''
-        displayOrder: 5
-        componentName: Html
-        props:
-          '''
-const isLoading = args.fns.isLoading?.();
-const ownerships = args.fns.ownerships?.() || [];
-const hasAccounts = ownerships.length > 0;
-
-return {
-  as: "div",
-  hide: isLoading || hasAccounts
-};
-'''
-      }
-    }
-    {
-      id: "18"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: ${args.theme.var.spacing.md};
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "icon",
-  icon: "ph:youtube-logo",
-  width: 64,
-  height: 64
-};
-'''
-      }
-    }
-    {
-      id: "19"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "h3",
-  text: "No YouTube Channels Connected"
-};
-'''
-      }
-    }
-    {
-      id: "20"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: "Connect your YouTube channels to start organizing your content. Each channel requires a separate connection."
-};
-'''
-      }
-    }
-    {
-      id: "21"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: Button
-        props:
-          '''
-const isConnecting = args.fns.isConnecting?.();
-
-return {
-  text: isConnecting ? "Connecting..." : "Connect YouTube Channel",
-  variant: "primary",
-  onClick: args.fns.connectAccount,
-  disabled: isConnecting
-};
-'''
-      }
-    }
-    {
-      id: "22"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
   overflow-x: auto;
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
@@ -745,7 +626,7 @@ return {
       }
     }
     {
-      id: "23"
+      id: "18"
       L: Attr
       P: {
         css:
@@ -767,7 +648,7 @@ return {
       }
     }
     {
-      id: "24"
+      id: "19"
       L: Attr
       P: {
         css:
@@ -788,7 +669,7 @@ return {
       }
     }
     {
-      id: "25"
+      id: "20"
       L: Attr
       P: {
         displayOrder: 1
@@ -802,7 +683,7 @@ return {
       }
     }
     {
-      id: "26"
+      id: "21"
       L: Attr
       P: {
         css:
@@ -826,7 +707,7 @@ return {
       }
     }
     {
-      id: "27"
+      id: "22"
       L: Attr
       P: {
         css:
@@ -850,7 +731,7 @@ return {
       }
     }
     {
-      id: "28"
+      id: "23"
       L: Attr
       P: {
         css:
@@ -874,7 +755,7 @@ return {
       }
     }
     {
-      id: "29"
+      id: "24"
       L: Attr
       P: {
         css:
@@ -898,7 +779,7 @@ return {
       }
     }
     {
-      id: "30"
+      id: "25"
       L: Attr
       P: {
         css:
@@ -922,7 +803,7 @@ return {
       }
     }
     {
-      id: "31"
+      id: "26"
       L: Attr
       P: {
         css:
@@ -946,7 +827,7 @@ return {
       }
     }
     {
-      id: "32"
+      id: "27"
       L: Attr
       P: {
         css:
@@ -971,7 +852,7 @@ return {
       }
     }
     {
-      id: "33"
+      id: "28"
       L: Attr
       P: {
         contextName: account
@@ -990,7 +871,7 @@ return {
       }
     }
     {
-      id: "34"
+      id: "29"
       L: Attr
       P: {
         css:
@@ -1019,7 +900,7 @@ return {
       }
     }
     {
-      id: "35"
+      id: "30"
       L: Attr
       P: {
         css:
@@ -1046,7 +927,7 @@ return {
       }
     }
     {
-      id: "36"
+      id: "31"
       L: Attr
       P: {
         css:
@@ -1072,7 +953,7 @@ return {
       }
     }
     {
-      id: "37"
+      id: "32"
       L: Attr
       P: {
         css:
@@ -1100,7 +981,7 @@ return {
       }
     }
     {
-      id: "38"
+      id: "33"
       L: Attr
       P: {
         css:
@@ -1121,7 +1002,7 @@ return {
       }
     }
     {
-      id: "39"
+      id: "34"
       L: Attr
       P: {
         css:
@@ -1160,7 +1041,7 @@ return {
       }
     }
     {
-      id: "40"
+      id: "35"
       L: Attr
       P: {
         css:
@@ -1187,7 +1068,7 @@ return {
       }
     }
     {
-      id: "41"
+      id: "36"
       L: Attr
       P: {
         css:
@@ -1229,7 +1110,7 @@ return {
       }
     }
     {
-      id: "42"
+      id: "37"
       L: Attr
       P: {
         css:
@@ -1250,7 +1131,7 @@ return {
       }
     }
     {
-      id: "43"
+      id: "38"
       L: Attr
       P: {
         css:
@@ -1272,7 +1153,7 @@ return {
       }
     }
     {
-      id: "44"
+      id: "39"
       L: Attr
       P: {
         displayOrder: 1
@@ -1294,7 +1175,7 @@ return {
       }
     }
     {
-      id: "45"
+      id: "40"
       L: Attr
       P: {
         displayOrder: 2
@@ -1315,6 +1196,125 @@ return {
   onClick: () => args.fns.disconnectAccount(ownershipId, channelName),
   disabled: isDisconnecting,
   hide: !isConnected
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xxl};
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 2px dashed ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.isLoading?.();
+const ownerships = args.fns.ownerships?.() || [];
+const hasAccounts = ownerships.length > 0;
+
+return {
+  as: "div",
+  hide: isLoading || hasAccounts
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:youtube-logo",
+  width: 64,
+  height: 64
+};
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h3",
+  text: "No YouTube Channels Connected"
+};
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Connect your YouTube channels to start organizing your content. Each channel requires a separate connection."
+};
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''
+const isConnecting = args.fns.isConnecting?.();
+
+return {
+  text: isConnecting ? "Connecting..." : "Connect YouTube Channel",
+  variant: "primary",
+  onClick: args.fns.connectAccount,
+  disabled: isConnecting
 };
 '''
       }
@@ -1396,7 +1396,7 @@ return {
       id: e10
       T: Attr
       S: "2"
-      E: "22"
+      E: "41"
     }
     {
       id: e11
@@ -1461,157 +1461,157 @@ return {
     {
       id: e21
       T: Attr
-      S: "17"
+      S: "18"
       E: "19"
     }
     {
       id: e22
       T: Attr
-      S: "17"
-      E: "20"
+      S: "18"
+      E: "28"
     }
     {
       id: e23
       T: Attr
-      S: "17"
-      E: "21"
+      S: "19"
+      E: "20"
     }
     {
       id: e24
       T: Attr
-      S: "22"
-      E: "23"
+      S: "20"
+      E: "21"
     }
     {
       id: e25
       T: Attr
-      S: "23"
-      E: "24"
+      S: "20"
+      E: "22"
     }
     {
       id: e26
       T: Attr
-      S: "23"
-      E: "33"
+      S: "20"
+      E: "23"
     }
     {
       id: e27
       T: Attr
-      S: "24"
-      E: "25"
+      S: "20"
+      E: "24"
     }
     {
       id: e28
       T: Attr
-      S: "25"
-      E: "26"
+      S: "20"
+      E: "25"
     }
     {
       id: e29
       T: Attr
-      S: "25"
-      E: "27"
+      S: "20"
+      E: "26"
     }
     {
       id: e30
       T: Attr
-      S: "25"
-      E: "28"
+      S: "20"
+      E: "27"
     }
     {
       id: e31
       T: Attr
-      S: "25"
+      S: "28"
       E: "29"
     }
     {
       id: e32
       T: Attr
-      S: "25"
+      S: "29"
       E: "30"
     }
     {
       id: e33
       T: Attr
-      S: "25"
+      S: "29"
       E: "31"
     }
     {
       id: e34
       T: Attr
-      S: "25"
+      S: "29"
       E: "32"
     }
     {
       id: e35
       T: Attr
-      S: "33"
-      E: "34"
+      S: "29"
+      E: "33"
     }
     {
       id: e36
       T: Attr
-      S: "34"
+      S: "29"
       E: "35"
     }
     {
       id: e37
       T: Attr
-      S: "34"
+      S: "29"
       E: "36"
     }
     {
       id: e38
       T: Attr
-      S: "34"
+      S: "29"
       E: "37"
     }
     {
       id: e39
       T: Attr
-      S: "34"
-      E: "38"
+      S: "33"
+      E: "34"
     }
     {
       id: e40
       T: Attr
-      S: "34"
-      E: "40"
+      S: "37"
+      E: "38"
     }
     {
       id: e41
-      T: Attr
-      S: "34"
-      E: "41"
-    }
-    {
-      id: e42
-      T: Attr
-      S: "34"
-      E: "42"
-    }
-    {
-      id: e43
       T: Attr
       S: "38"
       E: "39"
     }
     {
+      id: e42
+      T: Attr
+      S: "38"
+      E: "40"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
       id: e44
       T: Attr
-      S: "42"
+      S: "41"
       E: "43"
     }
     {
       id: e45
       T: Attr
-      S: "43"
+      S: "41"
       E: "44"
     }
     {
       id: e46
       T: Attr
-      S: "43"
+      S: "41"
       E: "45"
     }
   ]

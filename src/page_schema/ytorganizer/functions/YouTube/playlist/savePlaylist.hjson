@@ -48,7 +48,7 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   await args.logSharedAPIUsage(ownershipId, 'playlists.list', args.YOUTUBE_API_COSTS['playlists.list'], session);
 
   if (!playlistResponse.data.items || playlistResponse.data.items.length === 0) {
-    throw new Error('Playlist not found or is private/deleted');
+    return null;
   }
 
   const playlist = playlistResponse.data.items[0];
@@ -61,16 +61,21 @@ const fetchPlaylistMetadata = async (playlistId, youtube, ownershipId, session) 
   };
 };
 
-try {
   // Extract input parameters from the request
   const { url, name, channelId, refresh = false, priority = 'normal', ownershipId } = args.contextData;
 
   if (!url) {
-    throw new Error("Playlist URL is required");
+    return {
+      success: false,
+      message: "Please provide a playlist URL."
+    };
   }
 
   if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+    return {
+      success: false,
+      message: "Please select a YouTube account first. Go to Account Management to connect your YouTube account."
+    };
   }
 
   // Validate priority value
@@ -80,7 +85,10 @@ try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
   if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
+    return {
+      success: false,
+      message: "Your session has expired. Please log in again."
+    };
   }
 
   // Get effective user (handles admin impersonation)
@@ -93,7 +101,10 @@ try {
   `, { userUuid: user.P.uuid, ownershipId });
 
   if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+    return {
+      success: false,
+      message: "The selected YouTube account is invalid or no longer exists. Please select a different account."
+    };
   }
 
   const ownershipNode = ownershipCheck.records[0].get('o');
@@ -101,13 +112,19 @@ try {
   const ownershipChannelId = ownership.P.channelId;
 
   if (!ownershipChannelId) {
-    throw new Error("YouTube ownership does not have a channel ID. Please reconnect your YouTube account.");
+    return {
+      success: false,
+      message: "YouTube ownership does not have a channel ID. Please reconnect your YouTube account."
+    };
   }
 
   // Extract playlist ID from the provided URL
   let playlistId = extractPlaylistId(url);
   if (!playlistId) {
-    throw new Error("Invalid YouTube playlist URL. Please provide a valid playlist URL.");
+    return {
+      success: false,
+      message: "Invalid playlist URL. Please provide a valid YouTube playlist URL."
+    };
   }
 
   // SPECIAL PLAYLIST HANDLING:
@@ -162,16 +179,17 @@ try {
         error.message.includes('reconnect')) {
       return {
         success: false,
-        message: "YouTube account not connected. Please connect your YouTube account in settings to add playlists.",
-        error: {
-          type: "AuthorizationRequired",
-          details: error.message,
-          action: "connect_youtube"
-        }
+        message: "YouTube account not connected. Please connect your YouTube account in settings to add playlists."
       };
     }
-    throw error;
+    // throw error;
   }
+   if (!youtube) {
+     return {
+       success: false,
+       message: "YouTube account not connected. Please connect your YouTube account in settings to add playlists."
+     };
+   }
 
   // Fetch ONLY basic playlist metadata using ownership's OAuth (fast operation)
   // Use originalPlaylistId for API calls (special playlists use 2-char IDs in API)
@@ -182,19 +200,20 @@ try {
     args.session
   );
 
+  if (!playlistData) {
+    return {
+      success: false,
+      message: "Playlist not found. Please check the URL and make sure the playlist is public."
+    };
+  }
+
   // VALIDATE: If channelId is provided, ensure playlist belongs to that channel
   if (channelId) {
     const playlistChannelId = playlistData.snippet.channelId;
     if (playlistChannelId !== channelId) {
       return {
         success: false,
-        message: `This playlist belongs to a different channel. The playlist "${playlistData.snippet.title}" is from channel "${playlistData.snippet.channelTitle}", not from the channel you selected.`,
-        error: {
-          type: "ChannelMismatch",
-          details: "The playlist does not belong to the specified channel",
-          expectedChannelId: channelId,
-          actualChannelId: playlistChannelId
-        }
+        message: `This playlist belongs to a different channel. The playlist "${playlistData.snippet.title}" is from channel "${playlistData.snippet.channelTitle}", not from the channel you selected.`
       };
     }
   }
@@ -215,7 +234,10 @@ try {
         const status = record.get('status');
         const title = record.get('title');
 
-        throw new Error(`Playlist "${title}" is already ${status} for this YouTube account.`);
+        return {
+          success: false,
+          message: `Playlist "${title}" is already ${status} for this YouTube account.`
+        };
       }
     }
 
@@ -311,13 +333,12 @@ try {
 
   // If a new Channel was created, call saveChannel to fetch its metadata (but skip playlists)
   if (channelWasCreated && apiChannelId) {
-    try {
       // Construct channel URL from channelId
       const channelUrl = `https://www.youtube.com/channel/${apiChannelId}`;
 
       // Call saveChannel with skipPlaylists parameter to avoid processing playlists
       // This ensures channel metadata is saved without triggering playlist processing
-      await args.executeNamedServerFunction({
+      const saveChannelResult = await args.executeNamedServerFunction({
         functionName: 'saveChannel',
         contextData: {
           url: channelUrl,
@@ -326,11 +347,10 @@ try {
           skipPlaylists: true  // Skip playlist processing when channel is created from playlist
         }
       });
-    } catch (error) {
-      // Log error but don't fail the playlist save operation
-      console.error('Error calling saveChannel for newly created channel:', error);
       // Continue with playlist processing even if channel save fails
-    }
+      if (!saveChannelResult.result || !saveChannelResult.result.success) {
+        console.error('Error calling saveChannel for newly created channel:', saveChannelResult.result?.message);
+      }
   }
 
   // STEP 4: Add to background processing queue using BullMQ
@@ -369,51 +389,6 @@ try {
       playlist: playlist  // Playlist vertex with settings
     }
   };
-
-} catch (error) {
-  console.error("Error saving playlist:", error);
-
-  // Handle specific YouTube API and OAuth errors
-  let userMessage = "Failed to save playlist. Please try again. " + error.message;
-
-  if (error.message.includes("YouTube Ownership ID is required")) {
-    userMessage = "Please select a YouTube account first. Go to Account Management to connect your YouTube account.";
-  } else if (error.message.includes("Invalid YouTube ownership")) {
-    userMessage = "The selected YouTube account is invalid or no longer exists. Please select a different account.";
-  } else if (error.message.includes("User session not found")) {
-    userMessage = "Your session has expired. Please log in again.";
-  } else if (error.message.includes("Playlist URL is required")) {
-    userMessage = "Please provide a playlist URL.";
-  } else if (error.message.includes("Playlist not found")) {
-    userMessage = "Playlist not found. Please check the URL and make sure the playlist is public.";
-  } else if (error.message.includes("Invalid YouTube playlist URL")) {
-    userMessage = "Invalid playlist URL. Please provide a valid YouTube playlist URL.";
-  } else if (error.message.includes("quota")) {
-    userMessage = "YouTube API quota exceeded. This resets daily. Please try again tomorrow.";
-  } else if (error.message.includes("revoked") || error.message.includes("reconnect")) {
-    userMessage = "Your YouTube authorization has expired. Please reconnect your YouTube account in settings.";
-  } else if (error.message.includes("No YouTube authorization")) {
-    userMessage = "YouTube account not connected. Please connect your YouTube account in settings.";
-  } else if (error.message.includes("private")) {
-    userMessage = "This playlist is private and cannot be accessed.";
-  } else if (error.code === 404) {
-    userMessage = "Playlist not found or has been deleted.";
-  } else if (error.code === 403) {
-    userMessage = "Access denied. The playlist may be private or you may not have permission to access it.";
-  } else if (error.code === 401) {
-    userMessage = "Authentication failed. Please reconnect your YouTube account in settings.";
-  }
-
-  return {
-    success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "YouTubeAPIError",
-      details: error.message,
-      code: error.code || null
-    }
-  };
-}
 '''
         key: savePlaylist
       }

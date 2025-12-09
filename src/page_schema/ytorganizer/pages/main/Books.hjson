@@ -1,0 +1,86 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true
+};
+'''
+        url: /books
+        key: Books
+        props:
+          '''
+return {
+  isNoPermissionCheck: true,
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Table
+        props:
+          '''
+return {
+  contentType: "book",
+  loadFromSetting: true
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: Layout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+  ]
+}

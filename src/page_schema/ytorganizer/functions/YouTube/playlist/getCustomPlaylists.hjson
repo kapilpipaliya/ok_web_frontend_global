@@ -7,72 +7,67 @@
         description: Get all custom playlists for a YouTube ownership
         body:
           '''
-try {
-  // Extract input parameters
-  const { ownershipId } = args.contextData;
+// Extract input parameters
+const { ownershipId } = args.contextData;
 
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Get current authenticated user
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-  }
-
-  // Get all custom playlists for this ownership
-  // NEW SCHEMA v4.0: Direct ownership + optional settings
-  const playlistsResult = await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
-    WHERE p.isCustom = true
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-    RETURN p, ps
-    ORDER BY p.createdAt DESC
-  `, { ownershipId });
-
-  const playlists = playlistsResult.records.map(record => {
-    // Handle optional PlaylistSetting (might be null if user hasn't customized)
-    const playlistSettingNode = record.get('ps');
-    const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
-
-    return {
-      playlist: args.convertNodeToJson(record.get('p')),
-      playlistSetting
-    };
-  });
-
-  return {
-    success: true,
-    message: `Found ${playlists.length} custom playlist(s)`,
-    data: playlists
-  };
-
-} catch (error) {
-  console.error("Error getting custom playlists:", error);
-
+if (!ownershipId) {
   return {
     success: false,
-    message: error.message || "Failed to get custom playlists",
-    error: {
-      type: error.name || "GetCustomPlaylistsError",
-      details: error.message
-    }
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
   };
 }
+
+// Get current authenticated user
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, { userUuid: user.P.uuid, ownershipId });
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+  };
+}
+
+// Get all custom playlists for this ownership
+// NEW SCHEMA v4.0: Direct ownership + optional settings
+const playlistsResult = await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+  WHERE p.isCustom = true
+  OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+  RETURN p, ps
+  ORDER BY p.createdAt DESC
+`, { ownershipId });
+
+const playlists = playlistsResult.records.map(record => {
+  // Handle optional PlaylistSetting (might be null if user hasn't customized)
+  const playlistSettingNode = record.get('ps');
+  const playlistSetting = playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null;
+
+  return {
+    playlist: args.convertNodeToJson(record.get('p')),
+    playlistSetting
+  };
+});
+
+return {
+  success: true,
+  message: `Found ${playlists.length} custom playlist(s)`,
+  data: playlists
+};
 '''
         key: getCustomPlaylists
       }

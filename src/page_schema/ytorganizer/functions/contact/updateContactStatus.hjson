@@ -55,7 +55,6 @@ if (!validStatuses.includes(status)) {
   };
 }
 
-try {
   // Update the contact submission status
   const query = `
     MATCH (c:ContactSubmission)
@@ -87,13 +86,6 @@ try {
     success: true,
     data: updatedVertex
   };
-} catch (error) {
-  console.error("Error updating contact status:", error);
-  return {
-    success: false,
-    error: "Failed to update status"
-  };
-}
 '''
         key: updateContactStatus
       }

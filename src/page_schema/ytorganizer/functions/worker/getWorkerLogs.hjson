@@ -11,41 +11,36 @@
 const filterWorker = args.contextData?.filterWorker || 'all';
 const filterLevel = args.contextData?.filterLevel || 'all';
 
-try {
-  const session = args.session;
+const session = args.session;
 
-  // Build query based on filters
-  let query = 'MATCH (log:WorkerLog) ';
-  let params = {};
+// Build query based on filters
+let query = 'MATCH (log:WorkerLog) ';
+let params = {};
 
-  const conditions = [];
-  if (filterWorker !== 'all') {
-    conditions.push('log.workerName = $workerName');
-    params.workerName = filterWorker;
-  }
-  if (filterLevel !== 'all') {
-    conditions.push('log.level = $level');
-    params.level = filterLevel;
-  }
-
-  if (conditions.length > 0) {
-    query += 'WHERE ' + conditions.join(' AND ') + ' ';
-  }
-
-  query += 'RETURN log ORDER BY log.createdAt DESC LIMIT 100';
-
-  const result = await session.run(query, params);
-
-  const logs = result.records.map(record => {
-    const logNode = record.get('log');
-    return args.convertNodeToJson(logNode);
-  });
-
-  return logs;
-} catch (error) {
-  console.error('Error fetching worker logs:', error);
-  return [];
+const conditions = [];
+if (filterWorker !== 'all') {
+  conditions.push('log.workerName = $workerName');
+  params.workerName = filterWorker;
 }
+if (filterLevel !== 'all') {
+  conditions.push('log.level = $level');
+  params.level = filterLevel;
+}
+
+if (conditions.length > 0) {
+  query += 'WHERE ' + conditions.join(' AND ') + ' ';
+}
+
+query += 'RETURN log ORDER BY log.createdAt DESC LIMIT 100';
+
+const result = await session.run(query, params);
+
+const logs = result.records.map(record => {
+  const logNode = record.get('log');
+  return args.convertNodeToJson(logNode);
+});
+
+return logs;
 '''
         key: getWorkerLogs
       }

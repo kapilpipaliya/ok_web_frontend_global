@@ -1,0 +1,385 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Migrates or creates default Book and AudioVideo table configuration settings. Updates existing settings if they already exist.
+        body:
+          '''
+/**
+ * Migration: Content Table Settings
+ *
+ * This migration creates or updates default table configuration settings
+ * for Book and AudioVideo content types.
+ *
+ * Parameters (via args.contextData):
+ * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
+ *
+ * Returns:
+ * - Statistics about the migration
+ */
+
+const { dryRun = false } = args.contextData;
+
+console.log(`🚀 Starting content table settings migration (dryRun: ${dryRun})`);
+
+// Define settings configurations
+const settingsConfigs = [
+  {
+    key: 'book_settings_default',
+    contentType: 'book',
+    icon: '📚',
+    name: 'Book',
+    config: `return {
+  title: "Books",
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      type: "imagePreview",
+      width: "100px",
+      sortable: false
+    },
+    {
+      key: "name",
+      label: "Name",
+      type: "text",
+      width: "200px",
+      required: true
+    },
+    {
+      key: "description",
+      label: "Description",
+      type: "text",
+      width: "300px"
+    },
+    {
+      key: "year",
+      label: "Year",
+      type: "text",
+      width: "100px"
+    },
+    {
+      key: "language",
+      label: "Language",
+      type: "text",
+      width: "120px"
+    },
+    {
+      key: "download",
+      label: "Download",
+      type: "downloadLink",
+      width: "120px",
+      sortable: false,
+      urlAccessor: (row) => row.P?.downloadUrl || row.downloadUrl
+    }
+  ],
+  rowHeight: 80,
+  showRowNumber: true,
+  showSelection: true,
+  showActions: true,
+  resizableColumns: true,
+  formConfig: {
+    gridColumns: 1,
+    fields: [
+      {
+        key: "name",
+        label: "Name",
+        type: "text",
+        required: true,
+        maxLength: 255
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textArea",
+        maxLength: 1000
+      },
+      {
+        key: "year",
+        label: "Year",
+        type: "text",
+        maxLength: 4
+      },
+      {
+        key: "language",
+        label: "Language",
+        type: "text",
+        maxLength: 50
+      },
+      {
+        key: "preview",
+        label: "Preview Image URL",
+        type: "text",
+        maxLength: 500
+      },
+      {
+        key: "downloadUrl",
+        label: "Download URL",
+        type: "text",
+        maxLength: 500
+      }
+    ]
+  },
+  uniqueKeys: []
+};`
+  },
+  {
+    key: 'audioVideo_settings_default',
+    contentType: 'audioVideo',
+    icon: '🎬',
+    name: 'AudioVideo',
+    config: `return {
+  title: "Audio & Video",
+  columns: [
+    {
+      key: "event",
+      label: "Event",
+      type: "text",
+      width: "150px"
+    },
+    {
+      key: "title",
+      label: "Title",
+      type: "text",
+      width: "200px",
+      required: true
+    },
+    {
+      key: "subTitle",
+      label: "SubTitle",
+      type: "text",
+      width: "200px"
+    },
+    {
+      key: "volume",
+      label: "Volume",
+      type: "text",
+      width: "100px"
+    },
+    {
+      key: "location",
+      label: "Location",
+      type: "text",
+      width: "150px"
+    },
+    {
+      key: "year",
+      label: "Year",
+      type: "text",
+      width: "100px"
+    },
+    {
+      key: "language",
+      label: "Language",
+      type: "text",
+      width: "120px"
+    },
+    {
+      key: "duration",
+      label: "Duration (hh:mm)",
+      type: "duration",
+      width: "120px",
+      valueAccessor: (row) => row.P?.duration || row.duration
+    },
+    {
+      key: "downloadAudio",
+      label: "Download Audio",
+      type: "downloadLink",
+      width: "150px",
+      sortable: false,
+      urlAccessor: (row) => row.P?.audioDownloadUrl || row.audioDownloadUrl,
+      icon: "carbon:download"
+    },
+    {
+      key: "watchVideo",
+      label: "Watch Video",
+      type: "youtubeLink",
+      width: "150px",
+      sortable: false,
+      videoIdAccessor: (row) => row.P?.youtubeVideoId || row.youtubeVideoId
+    }
+  ],
+  rowHeight: 60,
+  showRowNumber: true,
+  showSelection: true,
+  showActions: true,
+  resizableColumns: true,
+  formConfig: {
+    gridColumns: 1,
+    fields: [
+      {
+        key: "event",
+        label: "Event",
+        type: "text",
+        maxLength: 255
+      },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        required: true,
+        maxLength: 255
+      },
+      {
+        key: "subTitle",
+        label: "SubTitle",
+        type: "text",
+        maxLength: 255
+      },
+      {
+        key: "volume",
+        label: "Volume",
+        type: "text",
+        maxLength: 50
+      },
+      {
+        key: "location",
+        label: "Location",
+        type: "text",
+        maxLength: 255
+      },
+      {
+        key: "year",
+        label: "Year",
+        type: "text",
+        maxLength: 4
+      },
+      {
+        key: "language",
+        label: "Language",
+        type: "text",
+        maxLength: 50
+      },
+      {
+        key: "duration",
+        label: "Duration (seconds)",
+        type: "number",
+        min: 0
+      },
+      {
+        key: "audioDownloadUrl",
+        label: "Audio Download URL",
+        type: "text",
+        maxLength: 500
+      },
+      {
+        key: "youtubeVideoId",
+        label: "YouTube Video ID",
+        type: "text",
+        maxLength: 50
+      }
+    ]
+  },
+  uniqueKeys: []
+};`
+  }
+];
+
+// Helper function to process a single setting
+async function processSetting(setting) {
+  const { key, contentType, icon, name, config } = setting;
+  
+  console.log(`\n${icon} Processing ${name} settings...`);
+  
+  // Check if setting exists
+  const checkResult = await args.session.run(
+    `MATCH (s:Setting {key: $key}) RETURN s`,
+    { key }
+  );
+  
+  const exists = checkResult.records.length > 0;
+  
+  if (!dryRun) {
+    if (exists) {
+      // Update existing
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.contentType = $contentType,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, contentType }
+      );
+      console.log(`✅ Updated existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      // Create new
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'table_config',
+          contentType: $contentType,
+          config: $config,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, config, contentType }
+      );
+      console.log(`✅ Created new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  } else {
+    // Dry run - just report
+    if (exists) {
+      console.log(`📋 Would update existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      console.log(`📋 Would create new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  }
+}
+
+// Process all settings
+const stats = {
+  bookSettingsCreated: 0,
+  bookSettingsUpdated: 0,
+  audioVideoSettingsCreated: 0,
+  audioVideoSettingsUpdated: 0
+};
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const setting = settingsConfigs[i];
+  const result = await processSetting(setting);
+  
+  // Update stats based on setting type
+  if (setting.contentType === 'book') {
+    stats.bookSettingsCreated += result.created;
+    stats.bookSettingsUpdated += result.updated;
+  } else if (setting.contentType === 'audioVideo') {
+    stats.audioVideoSettingsCreated += result.created;
+    stats.audioVideoSettingsUpdated += result.updated;
+  }
+}
+
+// ==========================================
+// Summary
+// ==========================================
+console.log('\n📊 Migration Summary:');
+console.log('==========================================');
+console.log(`Book settings - Created: ${stats.bookSettingsCreated}, Updated: ${stats.bookSettingsUpdated}`);
+console.log(`AudioVideo settings - Created: ${stats.audioVideoSettingsCreated}, Updated: ${stats.audioVideoSettingsUpdated}`);
+console.log('==========================================');
+
+return {
+  success: true,
+  message: dryRun
+    ? "Dry run completed - no changes made"
+    : "Content table settings migration completed successfully",
+  data: {
+    ...stats,
+    dryRun
+  }
+};
+'''
+        key: migrateContentTableSettings
+      }
+    }
+  ]
+  edges: []
+}
+

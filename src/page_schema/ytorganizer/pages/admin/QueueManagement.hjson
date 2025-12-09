@@ -40,7 +40,7 @@ const pauseAllChannels = async () => {
     if (result?.result?.success) {
       showMessage('success', result.result.message || "All processing paused successfully");
     } else {
-      showMessage('error', result?.result?.message || "Failed to pause processing");
+      showMessage('error', result?.result?.message || result?.error || "Failed to pause processing");
     }
   } catch (error) {
     console.error("Error pausing channels:", error);
@@ -59,7 +59,7 @@ const resumePendingChannels = async () => {
     if (result?.result?.success) {
       showMessage('success', result.result.message || "All items resumed successfully");
     } else {
-      showMessage('error', result?.result?.message || "Failed to resume processing");
+      showMessage('error', result?.result?.message || result?.error || "Failed to resume processing");
     }
   } catch (error) {
     console.error("Error resuming channels:", error);

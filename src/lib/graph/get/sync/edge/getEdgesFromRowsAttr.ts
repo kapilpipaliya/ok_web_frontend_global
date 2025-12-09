@@ -44,7 +44,7 @@ export function getEdgesFromRowsAttr(
           }); // `->$0${capitalizedName}`
         }
       } else if (
-        attribute.componentName === "Table" ||
+        attribute.componentName === "TableField" ||
         attribute.componentName === "DynamicTable"
       ) {
         if (ignoreTables) {

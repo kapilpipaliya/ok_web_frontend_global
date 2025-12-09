@@ -7,179 +7,173 @@
         description: Toggles favourite status for a video, channel, or playlist. Supports multi-ownership model - requires ownershipId.
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Extract parameters
-  const { item, ownershipId } = args.contextData;
-
-  if (!item) {
-    throw new Error("Item is required");
-  }
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Infer itemType from the item labels
-  let itemType;
-  if (item.L?.includes('Video')) {
-    itemType = 'video';
-  } else if (item.L?.includes('Channel')) {
-    itemType = 'channel';
-  } else if (item.L?.includes('Playlist')) {
-    itemType = 'playlist';
-  } else {
-    throw new Error("Cannot determine item type from labels. Item must be a video, channel, or playlist.");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-  }
-
-  // Get the item ID
-  const itemId = item.P?.youtubeId || item.P?.id;
-  if (!itemId) {
-    throw new Error("Item ID not found");
-  }
-
-  // NEW SCHEMA v4.0: Direct ownership with optional settings
-  // Settings are created on-demand when users favorite items
-  let nodeLabel, settingLabel, settingKey;
-
-  if (itemType === "video") {
-    nodeLabel = "Video";
-    settingLabel = "VideoSetting";
-    settingKey = `video_setting_${itemId}_${ownershipId}`;
-  } else if (itemType === "channel") {
-    nodeLabel = "Channel";
-    settingLabel = "ChannelSetting";
-    settingKey = `channel_setting_${itemId}_${ownershipId}`;
-  } else {
-    nodeLabel = "Playlist";
-    settingLabel = "PlaylistSetting";
-    settingKey = `playlist_setting_${itemId}_${ownershipId}`;
-  }
-
-  // Query to toggle favourite status for specific ownership
-  // NEW SCHEMA v4.0: Direct ownership + on-demand setting creation
-  const query = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnership${nodeLabel}]->(item:${nodeLabel} {youtubeId: $itemId})
-
-    MERGE (item)-[:${nodeLabel}${settingLabel}]->(setting:${settingLabel} {key: $settingKey})
-    ON CREATE SET
-      setting.createdAt = datetime()
-    MERGE (o)-[:YouTubeOwnership${settingLabel}]->(setting)
-
-    SET
-      setting.isFavourite = COALESCE(NOT setting.isFavourite, true),
-      setting.favouritedAt = CASE
-        WHEN COALESCE(NOT setting.isFavourite, true) = true THEN datetime()
-        ELSE null
-      END,
-      setting.updatedAt = datetime()
-    RETURN setting, item
-  `;
-
-  // Execute the query
-  const result = await args.session.run(query, {
-    ownershipId: ownershipId,
-    itemId: itemId,
-    settingKey: settingKey
-  });
-
-  if (result.records.length === 0) {
-    throw new Error(`${itemType} not found`);
-  }
-
-  const setting = args.convertNodeToJson(result.records[0].get('setting'));
-  const isFavourite = setting.P.isFavourite || false;
-
-  // Fetch updated data with video counts using helper functions
-  let itemData;
-
-  if (itemType === 'channel') {
-    const channelResult = await args.executeNamedServerFunction({
-      functionName: "getChannelsWithVideoCount",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,  // Filter by specific ownership
-        channelIds: [itemId]
-      }
-    });
-
-    if (channelResult.result?.success && channelResult.result.data.length > 0) {
-      itemData = channelResult.result.data[0];
-    }
-  } else if (itemType === 'playlist') {
-    const playlistResult = await args.executeNamedServerFunction({
-      functionName: "getPlaylistsWithVideoCount",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,  // Filter by specific ownership
-        playlistIds: [itemId]
-      }
-    });
-
-    if (playlistResult.result?.success && playlistResult.result.data.length > 0) {
-      itemData = playlistResult.result.data[0];
-    }
-  } else {
-    // For videos, use the original approach
-    const updatedItem = args.convertNodeToJson(result.records[0].get('item'));
-    itemData = { video: updatedItem, videoSetting: setting };
-  }
-
-  return {
-    success: true,
-    data: {
-      ...itemData,
-      isFavourite,
-      userId: user.id,
-      ownershipId: ownershipId
-    },
-    message: isFavourite ? `Added ${itemType} to favourites` : `Removed ${itemType} from favourites`
-  };
-
-} catch (error) {
-  console.error("Error toggling favourite:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to update favourite status. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to manage favourites.";
-  } else if (error.message.includes("not found")) {
-    userMessage = error.message;
-  } else if (error.message.includes("Invalid item type")) {
-    userMessage = error.message;
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    }
+    message: "Please log in to manage favourites.",
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { item, ownershipId } = args.contextData;
+
+if (!item) {
+  return {
+    success: false,
+    message: "Item is required",
+  };
+}
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account.",
+  };
+}
+
+// Infer itemType from the item labels
+let itemType;
+if (item.L?.includes('Video')) {
+  itemType = 'video';
+} else if (item.L?.includes('Channel')) {
+  itemType = 'channel';
+} else if (item.L?.includes('Playlist')) {
+  itemType = 'playlist';
+} else {
+  return {
+    success: false,
+    message: "Cannot determine item type from labels. Item must be a video, channel, or playlist.",
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, { userUuid: user.P.uuid, ownershipId });
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists.",
+  };
+}
+
+// Get the item ID
+const itemId = item.P?.youtubeId || item.P?.id;
+if (!itemId) {
+  return {
+    success: false,
+    message: "Item ID not found",
+  };
+}
+
+// NEW SCHEMA v4.0: Direct ownership with optional settings
+// Settings are created on-demand when users favorite items
+let nodeLabel, settingLabel, settingKey;
+
+if (itemType === "video") {
+  nodeLabel = "Video";
+  settingLabel = "VideoSetting";
+  settingKey = `video_setting_${itemId}_${ownershipId}`;
+} else if (itemType === "channel") {
+  nodeLabel = "Channel";
+  settingLabel = "ChannelSetting";
+  settingKey = `channel_setting_${itemId}_${ownershipId}`;
+} else {
+  nodeLabel = "Playlist";
+  settingLabel = "PlaylistSetting";
+  settingKey = `playlist_setting_${itemId}_${ownershipId}`;
+}
+
+// Query to toggle favourite status for specific ownership
+// NEW SCHEMA v4.0: Direct ownership + on-demand setting creation
+const query = `
+  MATCH (o:YouTubeOwnership {key: $ownershipId})
+  MATCH (o)-[:YouTubeOwnership${nodeLabel}]->(item:${nodeLabel} {youtubeId: $itemId})
+
+  MERGE (item)-[:${nodeLabel}${settingLabel}]->(setting:${settingLabel} {key: $settingKey})
+  ON CREATE SET
+    setting.createdAt = datetime()
+  MERGE (o)-[:YouTubeOwnership${settingLabel}]->(setting)
+
+  SET
+    setting.isFavourite = COALESCE(NOT setting.isFavourite, true),
+    setting.favouritedAt = CASE
+      WHEN COALESCE(NOT setting.isFavourite, true) = true THEN datetime()
+      ELSE null
+    END,
+    setting.updatedAt = datetime()
+  RETURN setting, item
+`;
+
+// Execute the query
+const result = await args.session.run(query, {
+  ownershipId: ownershipId,
+  itemId: itemId,
+  settingKey: settingKey
+});
+
+if (result.records.length === 0) {
+  return {
+    success: false,
+    message: `${itemType} not found`,
+  };
+}
+
+const setting = args.convertNodeToJson(result.records[0].get('setting'));
+const isFavourite = setting.P.isFavourite || false;
+
+// Fetch updated data with video counts using helper functions
+let itemData;
+
+if (itemType === 'channel') {
+  const channelResult = await args.executeNamedServerFunction({
+    functionName: "getChannelsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,  // Filter by specific ownership
+      channelIds: [itemId]
+    }
+  });
+
+  if (channelResult.result?.success && channelResult.result.data.length > 0) {
+    itemData = channelResult.result.data[0];
+  }
+} else if (itemType === 'playlist') {
+  const playlistResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,  // Filter by specific ownership
+      playlistIds: [itemId]
+    }
+  });
+
+  if (playlistResult.result?.success && playlistResult.result.data.length > 0) {
+    itemData = playlistResult.result.data[0];
+  }
+} else {
+  // For videos, use the original approach
+  const updatedItem = args.convertNodeToJson(result.records[0].get('item'));
+  itemData = { video: updatedItem, videoSetting: setting };
+}
+
+return {
+  success: true,
+  data: {
+    ...itemData,
+    isFavourite,
+    userId: user.id,
+    ownershipId: ownershipId
+  },
+  message: isFavourite ? `Added ${itemType} to favourites` : `Removed ${itemType} from favourites`
+};
 '''
         key: toggleFavourite
       }

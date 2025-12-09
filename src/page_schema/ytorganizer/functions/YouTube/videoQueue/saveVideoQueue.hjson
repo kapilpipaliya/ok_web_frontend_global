@@ -7,101 +7,99 @@
         description: Save entire video queue to database (replaces existing queue)
         body:
           '''
-try {
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, args.contextData.impersonatedUserUuid);
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, args.contextData.impersonatedUserUuid);
 
-  if (!user) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get ownershipId and videos from contextData
-  const { ownershipId, videos } = args.contextData;
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  if (!Array.isArray(videos)) {
-    throw new Error("Videos array is required");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, {
-    userUuid: user.P.uuid,
-    ownershipId
-  });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("YouTube ownership not found or access denied");
-  }
-
-  // Delete existing queue for this ownership
-  await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
-    DETACH DELETE vq
-  `, {
-    ownershipId
-  });
-
-  // Create new queue entries
-  for (let i = 0; i < videos.length; i++) {
-    const video = videos[i];
-    const videoId = video?.P?.youtubeId;
-
-    if (!videoId) {
-      console.warn(`Skipping video at position ${i} - missing youtubeId`);
-      continue;
-    }
-
-    // Create VideoQueue node and relationships
-    // NEW SCHEMA v4.0: Verify ownership before accessing video
-    const createResult = await args.session.run(`
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
-      CREATE (vq:VideoQueue {
-        key: $key,
-        position: $position,
-        addedAt: datetime(),
-        createdAt: datetime(),
-        updatedAt: datetime()
-      })
-      CREATE (o)-[:YouTubeOwnershipVideoQueue]->(vq)
-      CREATE (vq)-[:VideoQueueVideo]->(v)
-      RETURN vq
-    `, {
-      ownershipId,
-      videoId,
-      key: `video_queue_${ownershipId}_${videoId}_${i}`,
-      position: i
-    });
-
-    if (createResult.records.length === 0) {
-      console.warn(`Skipping video at position ${i} - not found in your collection`);
-      continue;
-    }
-  }
-
-  return {
-    success: true,
-    message: `Saved ${videos.length} videos to queue`,
-    data: videos
-  };
-
-} catch (error) {
-  console.error("Error saving video queue:", error);
-
+if (!user) {
   return {
     success: false,
-    message: error.message || "Failed to save video queue",
-    error: {
-      type: error.name || "SaveQueueError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again.",
   };
 }
+
+// Get ownershipId and videos from contextData
+const { ownershipId, videos } = args.contextData;
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account.",
+  };
+}
+
+if (!Array.isArray(videos)) {
+  return {
+    success: false,
+    message: "Videos array is required",
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, {
+  userUuid: user.P.uuid,
+  ownershipId
+});
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "YouTube ownership not found or access denied",
+  };
+}
+
+// Delete existing queue for this ownership
+await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)
+  DETACH DELETE vq
+`, {
+  ownershipId
+});
+
+// Create new queue entries
+for (let i = 0; i < videos.length; i++) {
+  const video = videos[i];
+  const videoId = video?.P?.youtubeId;
+
+  if (!videoId) {
+    console.warn(`Skipping video at position ${i} - missing youtubeId`);
+    continue;
+  }
+
+  // Create VideoQueue node and relationships
+  // NEW SCHEMA v4.0: Verify ownership before accessing video
+  const createResult = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $videoId})
+    CREATE (vq:VideoQueue {
+      key: $key,
+      position: $position,
+      addedAt: datetime(),
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    CREATE (o)-[:YouTubeOwnershipVideoQueue]->(vq)
+    CREATE (vq)-[:VideoQueueVideo]->(v)
+    RETURN vq
+  `, {
+    ownershipId,
+    videoId,
+    key: `video_queue_${ownershipId}_${videoId}_${i}`,
+    position: i
+  });
+
+  if (createResult.records.length === 0) {
+    console.warn(`Skipping video at position ${i} - not found in your collection`);
+    continue;
+  }
+}
+
+return {
+  success: true,
+  message: `Saved ${videos.length} videos to queue`,
+  data: videos
+};
 '''
         key: saveVideoQueue
       }

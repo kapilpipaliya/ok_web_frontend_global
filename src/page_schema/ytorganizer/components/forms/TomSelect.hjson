@@ -256,7 +256,7 @@ const loadOptionsFromFunction = async (optionType, subType) => {
 
     const result = await args.fns.executeYTOFunction("getSelectOptions", { params });
 
-    if (result.error) {
+    if (result?.error) {
       throw new Error(result.error);
     }
 
@@ -298,7 +298,7 @@ const loadOptionsFromCustomFunction = async (functionName, singularName, pluralN
   try {
     const result = await args.fns.executeYTOFunction(functionName, functionContext || {});
 
-    if (result.error) {
+    if (result?.error) {
       throw new Error(result.error);
     }
 
@@ -887,9 +887,8 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: functionName
+        type: object
+        key: functionContext
       }
     }
     {
@@ -897,7 +896,7 @@ return {
       L: ComponentVariant
       P: {
         type: array
-        key: plugins
+        key: options
         defValue: []
       }
     }
@@ -906,8 +905,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: title
-        key: labelKey
+        key: placeholder
+        defValue: Select an option...
       }
     }
     {
@@ -915,8 +914,8 @@ return {
       L: ComponentVariant
       P: {
         type: boolean
-        defValue: true
-        key: search
+        key: required
+        defValue: false
       }
     }
     {
@@ -925,7 +924,7 @@ return {
       P: {
         type: string
         defValue: ""
-        key: pluralName
+        key: value
       }
     }
     {
@@ -933,25 +932,26 @@ return {
       L: ComponentVariant
       P: {
         type: boolean
+        key: multiple
         defValue: false
-        key: required
       }
     }
     {
       id: "9"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: disabled
+        type: string
+        key: functionName
+        defValue: ""
       }
     }
     {
       id: "10"
       L: ComponentVariant
       P: {
-        type: number
-        key: maxItems
+        type: string
+        key: valueKey
+        defValue: id
       }
     }
     {
@@ -959,25 +959,25 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: ""
-        key: singularName
+        key: labelKey
+        defValue: title
       }
     }
     {
       id: "12"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: dataKey
+        type: boolean
+        key: disabled
+        defValue: false
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: function
-        key: onChange
+        type: number
+        key: maxItems
       }
     }
     {
@@ -985,17 +985,17 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: placeholder
-        defValue: Select an option...
+        key: dataKey
+        defValue: ""
       }
     }
     {
       id: "15"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: multiple
+        type: string
+        key: optionType
+        defValue: ""
       }
     }
     {
@@ -1003,52 +1003,52 @@ return {
       L: ComponentVariant
       P: {
         type: string
+        key: pluralName
         defValue: ""
-        key: optionType
       }
     }
     {
       id: "17"
       L: ComponentVariant
       P: {
-        type: object
-        key: functionContext
+        type: string
+        key: subType
+        defValue: ""
       }
     }
     {
       id: "18"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: value
+        type: boolean
+        key: search
+        defValue: true
       }
     }
     {
       id: "19"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: subType
+        type: array
+        key: plugins
+        defValue: []
       }
     }
     {
       id: "20"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: id
-        key: valueKey
+        type: function
+        key: onChange
       }
     }
     {
       id: "21"
       L: ComponentVariant
       P: {
-        type: array
-        key: options
-        defValue: []
+        type: string
+        key: singularName
+        defValue: ""
       }
     }
   ]

@@ -149,12 +149,21 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: default
-        key: type
+        defValue: ""
+        key: icon
       }
     }
     {
       id: "6"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: type
+        defValue: default
+      }
+    }
+    {
+      id: "7"
       L: ComponentVariantOption
       P: {
         description: Default menu item
@@ -163,7 +172,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "8"
       L: ComponentVariantOption
       P: {
         description: Danger menu item (red)
@@ -172,21 +181,12 @@ return {
       }
     }
     {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: ""
-        key: icon
-      }
-    }
-    {
       id: "9"
       L: ComponentVariant
       P: {
         type: string
-        defValue: Menu Item
         key: text
+        defValue: Menu Item
       }
     }
   ]
@@ -207,7 +207,7 @@ return {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "8"
+      E: "6"
     }
     {
       id: e4
@@ -230,14 +230,14 @@ return {
     {
       id: e7
       T: ComponentVariantOption
-      S: "5"
-      E: "6"
+      S: "6"
+      E: "7"
     }
     {
       id: e8
       T: ComponentVariantOption
-      S: "5"
-      E: "7"
+      S: "6"
+      E: "8"
     }
   ]
 }

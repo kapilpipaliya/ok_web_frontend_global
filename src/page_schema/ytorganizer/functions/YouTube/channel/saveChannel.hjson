@@ -107,11 +107,11 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
     // Custom URL format (/c/customname) or malformed /channel/ URL
     // YouTube API doesn't support custom URLs directly
     const suggestion = channelInfo.value ? `youtube.com/@${channelInfo.value}` : 'youtube.com/@channelname';
-    throw new Error(`Custom URL format is not supported. Please use the @handle URL format instead: ${suggestion}\n\nTo find the correct URL, visit the channel page and copy the URL from the address bar.`);
+    return null;
   }
 
   if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
-    throw new Error('Channel not found or is private/deleted');
+    return null;
   }
 
   const channel = channelResponse.data.items[0];
@@ -125,16 +125,21 @@ const fetchChannelMetadata = async (channelInfo, youtube, ownershipId, session) 
   };
 };
 
-try {
   // Extract input parameters from the request
   const { url, name, refresh = false, priority = 'normal', ownershipId, skipPlaylists = false } = args.contextData;
 
   if (!url) {
-    throw new Error("Channel URL is required");
+    return {
+      success: false,
+      message: "Please provide a channel URL."
+    };
   }
 
   if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+    return {
+      success: false,
+      message: "Please select a YouTube account first. Go to Account Management to connect your YouTube account."
+    };
   }
 
   // Validate priority value
@@ -144,7 +149,10 @@ try {
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
   if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
+    return {
+      success: false,
+      message: "Your session has expired. Please log in again."
+    };
   }
 
   // Get effective user (handles admin impersonation)
@@ -157,13 +165,19 @@ try {
   `, { userUuid: user.P.uuid, ownershipId });
 
   if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+    return {
+      success: false,
+      message: "The selected YouTube account is invalid or no longer exists. Please select a different account."
+    };
   }
 
   // Extract channel identifier from the provided URL
   const channelInfo = extractChannelId(url);
   if (!channelInfo) {
-    throw new Error("Invalid YouTube channel URL. Please provide a valid channel URL.");
+    return {
+      success: false,
+      message: "Invalid channel URL. Please provide a valid YouTube channel URL."
+    };
   }
 
   // DUPLICATE JOB PREVENTION: Check if this channel is already queued or processing for this ownership
@@ -195,28 +209,30 @@ try {
 
   // Get authenticated YouTube client for this ownership
   let youtube;
-  try {
-    youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
-  } catch (error) {
-    // Check if this is an OAuth authorization error
-    if (error.message.includes('No YouTube authorization') ||
-        error.message.includes('revoked') ||
-        error.message.includes('reconnect')) {
-      return {
-        success: false,
-        message: "YouTube account not connected. Please connect your YouTube account in settings to add channels.",
-        error: {
-          type: "AuthorizationRequired",
-          details: error.message,
-          action: "connect_youtube"
-        }
-      };
-    }
-    throw error;
+  youtube = await args.getYouTubeClient(ownershipId, args.session, args.request);
+  if (!youtube) {
+    return {
+      success: false,
+      message: "YouTube account not connected. Please connect your YouTube account in settings to add channels."
+    };
   }
 
   // Fetch ONLY basic channel metadata using ownership's OAuth
   const channelData = await fetchChannelMetadata(channelInfo, youtube, ownershipId, args.session);
+
+  if (!channelData) {
+    if (channelInfo.type === 'custom') {
+      const suggestion = channelInfo.value ? `youtube.com/@${channelInfo.value}` : 'youtube.com/@channelname';
+      return {
+        success: false,
+        message: `Custom URL format is not supported. Please use the @handle URL format instead: ${suggestion}\n\nTo find the correct URL, visit the channel page and copy the URL from the address bar.`
+      };
+    }
+    return {
+      success: false,
+      message: "Channel not found. Please check the URL and make sure the channel exists."
+    };
+  }
 
   // Use write transaction for atomicity - prevents race conditions
   await args.session.executeWrite(async (tx) => {
@@ -234,7 +250,10 @@ try {
         const status = record.get('status');
         const title = record.get('title');
 
-        throw new Error(`Channel "${title}" is already ${status} for this YouTube account.`);
+        return {
+          success: false,
+          message: `Channel "${title}" is already ${status} for this YouTube account.`
+        };
       }
     }
 
@@ -355,53 +374,6 @@ try {
       skipPlaylists: skipPlaylists  // Include flag in response
     }
   };
-
-} catch (error) {
-  console.error("Error saving channel:", error);
-
-  // Handle specific YouTube API and OAuth errors
-  let userMessage = "Failed to save channel. Please try again.";
-
-  if (error.message.includes("YouTube Ownership ID is required")) {
-    userMessage = "Please select a YouTube account first. Go to Account Management to connect your YouTube account.";
-  } else if (error.message.includes("Invalid YouTube ownership")) {
-    userMessage = "The selected YouTube account is invalid or no longer exists. Please select a different account.";
-  } else if (error.message.includes("User session not found")) {
-    userMessage = "Your session has expired. Please log in again.";
-  } else if (error.message.includes("Channel URL is required")) {
-    userMessage = "Please provide a channel URL.";
-  } else if (error.message.includes("Channel not found")) {
-    userMessage = "Channel not found. Please check the URL and make sure the channel exists.";
-  } else if (error.message.includes("Invalid YouTube channel URL")) {
-    userMessage = "Invalid channel URL. Please provide a valid YouTube channel URL.";
-  } else if (error.message.includes("Custom URL format")) {
-    userMessage = error.message; // Use the detailed message about /c/ format
-  } else if (error.message.includes("quota")) {
-    userMessage = "YouTube API quota exceeded. This resets daily. Please try again tomorrow.";
-  } else if (error.message.includes("revoked") || error.message.includes("reconnect")) {
-    userMessage = "Your YouTube authorization has expired. Please reconnect your YouTube account in settings.";
-  } else if (error.message.includes("No YouTube authorization")) {
-    userMessage = "YouTube account not connected. Please connect your YouTube account in settings.";
-  } else if (error.message.includes("private")) {
-    userMessage = "This channel is private and cannot be accessed.";
-  } else if (error.code === 404) {
-    userMessage = "Channel not found or has been deleted.";
-  } else if (error.code === 403) {
-    userMessage = "Access denied. The channel may be private or you may not have permission to access it.";
-  } else if (error.code === 401) {
-    userMessage = "Authentication failed. Please reconnect your YouTube account in settings.";
-  }
-
-  return {
-    success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "YouTubeAPIError",
-      details: error.message,
-      code: error.code || null
-    }
-  };
-}
 '''
         key: saveChannel
       }

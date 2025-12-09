@@ -4,147 +4,227 @@
       id: "1"
       L: Function
       P: {
-        description: Fetches a single channel's playlists for the current user. Requires ownershipId to determine which playlists to return.
+        description: Fetches a single channel's playlists for the current user or public access. Supports public access mode with username parameter. Requires ownershipId for normal access or username for public access.
         body:
           '''
-try {
-  // Extract channel ID, ownership ID, and sort from request parameters
-  const { channelId, ownershipId, sortBy = "position_asc" } = args.contextData;
+// Extract channel ID, ownership ID, sort, and public access parameters
+const { channelId, ownershipId: initialOwnershipId, sortBy = "position_asc", username, isPublicAccess = false } = args.contextData;
 
-  if (!channelId) {
-    throw new Error("Channel ID is required");
+if (!channelId) {
+  return {
+    success: false,
+    message: "Channel ID is required"
+  };
+}
+
+let user;
+let targetUserUuid;
+let requiresAuth = true;
+let ownershipId = initialOwnershipId;
+
+// Handle public access mode
+if (isPublicAccess) {
+  if (!username) {
+    return {
+      success: false,
+      message: "Username is required for public access"
+    };
   }
 
+  // Find user by username
+  const userResult = await args.session.run(
+    `MATCH (u:User {username: $username}) RETURN u`,
+    { username }
+  );
+
+  if (userResult.records.length === 0) {
+    return {
+      success: false,
+      message: "User not found"
+    };
+  }
+
+  const userNode = userResult.records[0].get('u');
+  user = args.convertNodeToJson(userNode);
+  targetUserUuid = user.P.uuid;
+
+  // Check if channel is public and get allowUnauthenticatedAccess flag
+  const channelCheck = await args.session.run(
+    `MATCH (c:Channel {youtubeId: $channelId})
+     RETURN c.isPublic as isPublic, c.allowUnauthenticatedAccess as allowUnauthenticatedAccess`,
+    { channelId }
+  );
+
+  if (channelCheck.records.length === 0) {
+    return {
+      success: false,
+      message: "Channel not found"
+    };
+  }
+
+  const channelProps = channelCheck.records[0];
+  const isPublic = channelProps.get('isPublic') === true;
+  const allowUnauthenticatedAccess = channelProps.get('allowUnauthenticatedAccess') === true;
+
+  if (!isPublic) {
+    return {
+      success: false,
+      message: "Channel is not public"
+    };
+  }
+
+  // If allowUnauthenticatedAccess is false, still require authentication
+  if (!allowUnauthenticatedAccess) {
+    const actualUser = await args.getUserFromSession();
+    if (!actualUser) {
+      return {
+        success: false,
+        message: "This channel requires authentication. Please log in to view it."
+      };
+    }
+    requiresAuth = true;
+  } else {
+    requiresAuth = false;
+  }
+
+  // For public access, we don't need ownershipId - we'll find any ownership for this user
+  // But we still need to verify the channel belongs to this user
+  const ownershipCheck = await args.session.run(
+    `MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+     RETURN o.key as ownershipId LIMIT 1`,
+    { userUuid: targetUserUuid, channelId }
+  );
+
+  if (ownershipCheck.records.length === 0) {
+    return {
+      success: false,
+      message: "Channel not found for this user"
+    };
+  }
+
+  ownershipId = ownershipCheck.records[0].get('ownershipId');
+} else {
+  // Normal authenticated access
   if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+    return {
+      success: false,
+      message: "YouTube Ownership ID is required. Please select a YouTube account."
+    };
   }
 
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
   if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
+    return {
+      success: false,
+      message: "User session not found. Please log in and try again."
+    };
   }
 
   // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  targetUserUuid = user.P.uuid;
+}
 
-  // Parse sortBy parameter using shared utility
-  const parseSortResult = await args.executeNamedServerFunction({
-    functionName: "parseSortByUtil",
-    contextData: { sortBy, contentType: "playlists" }
-  });
+// Parse sortBy parameter using shared utility
+const parseSortResult = await args.executeNamedServerFunction({
+  functionName: "parseSortByUtil",
+  contextData: { sortBy, contentType: "playlists" }
+});
 
-  if (!parseSortResult.result) {
-    throw new Error("Failed to parse sort parameters");
-  }
-
-  const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
-
-  // Use helper function to fetch channel with video count
-  const channelResult = await args.executeNamedServerFunction({
-    functionName: "getChannelsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Optional: filter by specific ownership
-      channelIds: [channelId]
-    }
-  });
-
-  if (!channelResult.result || !channelResult.result.success || channelResult.result.data.length === 0) {
-    throw new Error("Channel not found or access denied");
-  }
-
-  const channelData = channelResult.result.data[0];
-  const channel = channelData.channel;
-  const channelSetting = channelData.channelSetting;
-
-  // NEW SCHEMA v4.0: Get playlist IDs from this channel that are owned by user's ownership
-  // Only return playlists that belong to this channel AND are owned by the user's ownership
-  const getPlaylistIdsQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
-    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)<-[:YouTubeOwnershipPlaylist]-(o)
-    RETURN p.youtubeId as playlistId
-  `;
-
-  const playlistIdsResult = await args.session.run(getPlaylistIdsQuery, {
-    userUuid: user.P.uuid,
-    channelId,
-    ownershipId
-  });
-
-  const channelPlaylistIds = playlistIdsResult.records.map(record => record.get('playlistId'));
-
-  let playlists = [];
-
-  // Use helper function to get playlists with full sorting support
-  if (channelPlaylistIds.length > 0) {
-    const playlistsResult = await args.executeNamedServerFunction({
-      functionName: "getPlaylistsWithVideoCount",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,
-        playlistIds: channelPlaylistIds,
-        orderBy,
-        orderDirection,
-        secondaryOrderBy
-      }
-    });
-
-    playlists = playlistsResult.result?.success
-      ? playlistsResult.result.data
-      : [];
-  }
-
-  // Return raw converted nodes for frontend processing
-  return {
-    success: true,
-    data: {
-      channel: channelData,
-      playlists,
-      statistics: {
-        totalPlaylists: playlists.length,
-        userSavedPlaylists: playlists.length  // All returned playlists are user-saved
-      },
-      userId: user.id,
-      ownershipId
-    },
-    message: `Found ${playlists.length} saved playlist${playlists.length !== 1 ? 's' : ''} in channel`
-  };
-
-} catch (error) {
-  console.error("Error fetching channel contents:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to fetch channel contents. Please try again.";
-
-  if (error.message.includes("Channel ID is required")) {
-    userMessage = "Channel ID is required.";
-  } else if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to view channel contents.";
-  } else if (error.message.includes("Channel not found or access denied")) {
-    userMessage = "Channel not found or you don't have access to it.";
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+if (!parseSortResult.result) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    },
-    data: {
-      channel: null,
-      playlists: [],
-      statistics: {
-        totalPlaylists: 0,
-        userSavedPlaylists: 0
-      }
-    }
+    message: "Failed to parse sort parameters"
   };
 }
+
+const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
+
+// Use helper function to fetch channel with video count
+const channelResult = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: targetUserUuid,
+    ownershipId,  // Optional: filter by specific ownership
+    channelIds: [channelId],
+    isPublicAccess: isPublicAccess
+  }
+});
+
+if (!channelResult.result || !channelResult.result.success || channelResult.result.data.length === 0) {
+  return {
+    success: false,
+    message: "Channel not found or access denied"
+  };
+}
+
+const channelData = channelResult.result.data[0];
+const channel = channelData.channel;
+const channelSetting = channelData.channelSetting;
+
+// NEW SCHEMA v4.0: Get playlist IDs from this channel that are owned by user's ownership
+// Only return playlists that belong to this channel AND are owned by the user's ownership
+// Note: When channel is public, show all playlists in that channel (playlist isPublic flag is for direct playlist access only)
+const getPlaylistIdsQuery = `
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+  MATCH (c)-[:ChannelPlaylist]->(p:Playlist)<-[:YouTubeOwnershipPlaylist]-(o)
+  RETURN p.youtubeId as playlistId
+`;
+
+const playlistIdsResult = await args.session.run(getPlaylistIdsQuery, {
+  userUuid: targetUserUuid,
+  channelId,
+  ownershipId
+});
+
+const channelPlaylistIds = playlistIdsResult.records
+  .map(record => record.get('playlistId'))
+  .filter(id => id !== null && id !== undefined);
+
+let playlists = [];
+
+// Use helper function to get playlists with full sorting support
+// Note: When channel is public, we show all playlists in that channel
+// (playlist isPublic flag is only checked for direct playlist access, not channel access)
+if (channelPlaylistIds.length > 0) {
+  const playlistsResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: targetUserUuid,
+      ownershipId,
+      playlistIds: channelPlaylistIds,
+      orderBy,
+      orderDirection,
+      secondaryOrderBy,
+      // Don't filter by playlist public status when accessing via public channel
+      // The channel's public status is what matters here
+      isPublicAccess: false
+    }
+  });
+
+  playlists = playlistsResult.result?.success
+    ? playlistsResult.result.data
+    : [];
+}
+
+// Return raw converted nodes for frontend processing
+return {
+  success: true,
+  data: {
+    channel: channelData,
+    playlists,
+    statistics: {
+      totalPlaylists: playlists.length,
+      userSavedPlaylists: playlists.length  // All returned playlists are user-saved
+    },
+    userId: user.id,
+    ownershipId
+  },
+  message: `Found ${playlists.length} saved playlist${playlists.length !== 1 ? 's' : ''} in channel`
+};
 '''
         key: getChannelContents
       }

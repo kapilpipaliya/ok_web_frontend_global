@@ -134,7 +134,7 @@ const loadCustomPlaylists = async () => {
     if (result?.result?.success) {
       setCustomPlaylists(result.result.data || []);
     } else {
-      args.showErrorToast("Failed to load playlists");
+      args.showErrorToast(result?.result?.message || result?.error || "Failed to load playlists");
     }
   } catch (error) {
     console.error("Error loading playlists:", error);
@@ -161,8 +161,8 @@ const saveToNewPlaylist = async (playlistName) => {
       description: `Created from queue with ${queue.length} videos`
     });
 
-    if (!createResult?.result?.success) {
-      args.showErrorToast(createResult?.result?.message || "Failed to create playlist");
+    if (!createResult?.result?.success || createResult?.error) {
+      args.showErrorToast(createResult?.result?.message || createResult?.error || "Failed to create playlist");
       return;
     }
 
@@ -181,7 +181,7 @@ const saveToNewPlaylist = async (playlistName) => {
         args.showSuccessToast(`Playlist "${playlistName}" created with ${addResult.result.data.addedCount} videos`);
         setShowPlaylistSelector(false);
       } else {
-        args.showErrorToast(addResult?.result?.message || "Playlist created but failed to add videos");
+        args.showErrorToast(addResult?.result?.message || addResult?.error || "Playlist created but failed to add videos");
       }
     } else {
       args.showSuccessToast(`Playlist "${playlistName}" created`);
@@ -223,7 +223,7 @@ const saveToExistingPlaylist = async (playlistId) => {
       args.showSuccessToast(`Added ${addResult.result.data.addedCount} videos to "${playlistName}"`);
       setShowPlaylistSelector(false);
     } else {
-      args.showErrorToast(addResult?.result?.message || "Failed to add videos to playlist");
+      args.showErrorToast(addResult?.result?.message || addResult?.error || "Failed to add videos to playlist");
     }
   } catch (error) {
     console.error("Error saving to existing playlist:", error);
@@ -624,7 +624,7 @@ return {
         } else {
           // Rollback on error
           setVideoQueue(queue);
-          args.showErrorToast(result?.result?.message || "Failed to remove videos from queue");
+          args.showErrorToast(result?.result?.message || result?.error || "Failed to remove videos from queue");
         }
       } catch (error) {
         // Rollback on error
@@ -995,7 +995,7 @@ return `._id {
 }`;
 '''
         displayOrder: 3
-        componentName: Card
+        componentName: VideoCard
         props:
           '''
 const item = args.contextData.loopItem;

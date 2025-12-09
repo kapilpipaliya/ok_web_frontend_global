@@ -14,6 +14,7 @@ import {
   buildSuccessResponse,
   createSchemaImportActivityLog,
 } from "~/lib/schema/importSchemas";
+import { runMigration } from "~/lib/schema/runMigration";
 import type { Session, Transaction } from "neo4j-driver";
 
 async function validateUserAndPermissions(
@@ -83,12 +84,47 @@ export async function GET({ request }: APIEvent) {
 
       await tx.commit();
 
-      return buildSuccessResponse(
+      // Build response
+      const response = buildSuccessResponse(
         websiteName,
         stats,
         deletedItems,
         websiteSchemas,
       );
+
+      // Run migrations after schema import
+      console.log("[Schema Import] Running migrations after import...");
+      const migrationResult = await runMigration(dbSession, subDomain, user, {
+        dryRun: false,
+      });
+
+      // Add migration result to response if migration was attempted
+      if (migrationResult.functionName) {
+        return new Response(
+          JSON.stringify({
+            ...response,
+            migration: {
+              success: migrationResult.success,
+              functionName: migrationResult.functionName,
+              error: migrationResult.error,
+              data: migrationResult.data,
+            },
+          }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      }
+
+      return new Response(JSON.stringify(response), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     } catch (error: unknown) {
       await tx.rollback();
       throw error;

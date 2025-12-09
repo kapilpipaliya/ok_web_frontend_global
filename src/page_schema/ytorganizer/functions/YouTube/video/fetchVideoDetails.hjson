@@ -58,28 +58,36 @@ const fetchVideoFromYouTube = async (videoId) => {
   });
 
   if (!videoResponse.data.items || videoResponse.data.items.length === 0) {
-    throw new Error('Video not found or is private/deleted');
+    return null;
   }
 
   return videoResponse.data.items[0];
 };
 
-try {
   // Extract input parameters from the request
   const { videoUrl, ownershipId } = args.contextData;
 
   if (!videoUrl) {
-    throw new Error("Video URL is required");
+    return {
+      success: false,
+      message: "Video URL is required"
+    };
   }
 
   if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+    return {
+      success: false,
+      message: "YouTube Ownership ID is required. Please select a YouTube account."
+    };
   }
 
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
   if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
+    return {
+      success: false,
+      message: "User session not found. Please log in and try again."
+    };
   }
 
   // Get effective user (handles admin impersonation)
@@ -92,13 +100,19 @@ try {
   `, { userUuid: user.P.uuid, ownershipId });
 
   if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
+    return {
+      success: false,
+      message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+    };
   }
 
   // Extract video ID from the provided URL
   const videoId = extractVideoId(videoUrl);
   if (!videoId) {
-    throw new Error("Invalid YouTube video URL. Please provide a valid video URL.");
+    return {
+      success: false,
+      message: "Invalid YouTube video URL. Please provide a valid video URL."
+    };
   }
 
   // NEW SCHEMA v4.0: Check if this ownership already owns the video
@@ -121,6 +135,13 @@ try {
   } else {
     // Video not owned by this ownership, fetch from YouTube API and save
     const youtubeVideo = await fetchVideoFromYouTube(videoId);
+
+    if (!youtubeVideo) {
+      return {
+        success: false,
+        message: "Video not found. Please check the URL and make sure the video is public."
+      };
+    }
 
     const videoKey = `video_${videoId}`;
 
@@ -196,39 +217,6 @@ try {
       userId: user.id
     }
   };
-
-} catch (error) {
-  console.error("Error fetching video details:", error);
-
-  // Handle specific YouTube API errors
-  let userMessage = "Failed to fetch video details. Please try again.";
-
-  if (error.message.includes("Video not found")) {
-    userMessage = "Video not found. Please check the URL and make sure the video exists and is public.";
-  } else if (error.message.includes("Invalid YouTube video URL")) {
-    userMessage = "Invalid video URL. Please provide a valid YouTube video URL.";
-  } else if (error.message.includes("quota")) {
-    userMessage = "YouTube API quota exceeded. Please try again later.";
-  } else if (error.message.includes("API key")) {
-    userMessage = "YouTube API configuration error. Please contact support.";
-  } else if (error.message.includes("private")) {
-    userMessage = "This video is private and cannot be accessed.";
-  } else if (error.code === 404) {
-    userMessage = "Video not found or has been deleted.";
-  } else if (error.code === 403) {
-    userMessage = "Access denied. The video may be private or restricted.";
-  }
-
-  return {
-    success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "YouTubeAPIError",
-      details: error.message,
-      code: error.code || null
-    }
-  };
-}
 '''
         key: fetchVideoDetails
       }

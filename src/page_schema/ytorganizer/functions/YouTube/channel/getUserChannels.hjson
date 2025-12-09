@@ -4,88 +4,157 @@
       id: "1"
       L: Function
       P: {
-        description: Fetches all channels saved by the current user with their custom setting. Supports multi-ownership model with optional ownership filtering.
+        description: Fetches all channels saved by the current user or public channels for public access. Supports multi-ownership model with optional ownership filtering. Supports public access mode with username parameter.
         body:
           '''
-try {
+// Extract parameters including public access mode
+const { ownershipId = null, sortBy = "title_asc", username, isPublicAccess = false } = args.contextData;
+
+let user;
+let targetUserUuid;
+let requiresAuth = true;
+
+// Handle public access mode
+if (isPublicAccess) {
+  if (!username) {
+    return {
+      success: false,
+      message: "Username is required for public access",
+      data: {
+        channels: [],
+        totalCount: 0
+      }
+    };
+  }
+
+  // Find user by username
+  const userResult = await args.session.run(
+    `MATCH (u:User {username: $username}) RETURN u`,
+    { username }
+  );
+
+  if (userResult.records.length === 0) {
+    return {
+      success: false,
+      message: "User not found.",
+      data: {
+        channels: [],
+        totalCount: 0
+      }
+    };
+  }
+
+  const userNode = userResult.records[0].get('u');
+  user = args.convertNodeToJson(userNode);
+  targetUserUuid = user.P.uuid;
+
+  // For public access, we only return public channels
+  // Check if any channels require authentication
+  const publicChannelsCheck = await args.session.run(
+    `MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+     WHERE c.isPublic = true
+     RETURN c.allowUnauthenticatedAccess as allowUnauthenticatedAccess LIMIT 1`,
+    { userUuid: targetUserUuid }
+  );
+
+  // If there are public channels that don't allow unauthenticated access, check auth
+  if (publicChannelsCheck.records.length > 0) {
+    const allowUnauthenticated = publicChannelsCheck.records[0].get('allowUnauthenticatedAccess') === true;
+    if (!allowUnauthenticated) {
+      const actualUser = await args.getUserFromSession();
+      if (!actualUser) {
+        return {
+          success: false,
+          message: "Some channels require authentication. Please log in to view them.",
+          data: {
+            channels: [],
+            totalCount: 0
+          }
+        };
+      }
+      requiresAuth = true;
+    } else {
+      requiresAuth = false;
+    }
+  } else {
+    requiresAuth = false;
+  }
+} else {
+  // Normal authenticated access
   // Get current authenticated user from session
   const actualUser = await args.getUserFromSession();
   if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
+    return {
+      success: false,
+      message: "Please log in to view your channels.",
+      data: {
+        channels: [],
+        totalCount: 0
+      }
+    };
   }
 
   // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  targetUserUuid = user.P.uuid;
+}
 
-  // Optional ownership filter from context
-  const { ownershipId = null, sortBy = "title_asc" } = args.contextData;
+// Parse sortBy parameter using shared utility
+const parseSortResult = await args.executeNamedServerFunction({
+  functionName: "parseSortByUtil",
+  contextData: { sortBy, contentType: "channels" }
+});
 
-  // Parse sortBy parameter using shared utility
-  const parseSortResult = await args.executeNamedServerFunction({
-    functionName: "parseSortByUtil",
-    contextData: { sortBy, contentType: "channels" }
-  });
-
-  if (!parseSortResult.result) {
-    throw new Error("Failed to parse sort parameters");
-  }
-
-  const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
-
-  // Use helper function to fetch channels with video counts
-  const result = await args.executeNamedServerFunction({
-    functionName: "getChannelsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Optional: filter by specific ownership
-      orderBy,
-      orderDirection,
-      secondaryOrderBy  // Pass secondary sort for multi-field sorting
-    }
-  });
-
-  if (!result.result || !result.result.success) {
-    throw new Error(result.result?.message || "Failed to fetch channels");
-  }
-
-  const channels = result.result.data;
-
-  return {
-    success: true,
-    data: {
-      channels,
-      totalCount: channels.length,
-      userId: user.id,
-      ownershipId  // Include ownership context if filtered
-    },
-    message: `Found ${channels.length} channels`
-  };
-
-} catch (error) {
-  console.error("Error fetching user channels:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to fetch channels. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to view your channels.";
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+if (!parseSortResult.result) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    },
+    message: "Failed to fetch channels. Please try again.",
     data: {
       channels: [],
       totalCount: 0
     }
   };
 }
+
+const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
+
+// Use helper function to fetch channels with video counts
+const result = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: targetUserUuid,
+    ownershipId,  // Optional: filter by specific ownership
+    orderBy,
+    orderDirection,
+    secondaryOrderBy,  // Pass secondary sort for multi-field sorting
+    isPublicAccess: isPublicAccess
+  }
+});
+
+if (!result.result || !result.result.success) {
+  return {
+    success: false,
+    message: result.result?.message || "Failed to fetch channels. Please try again.",
+    data: {
+      channels: [],
+      totalCount: 0
+    }
+  };
+}
+
+const channels = result.result.data;
+
+return {
+  success: true,
+  data: {
+    channels,
+    totalCount: channels.length,
+    userId: user.id,
+    ownershipId  // Include ownership context if filtered
+  },
+  message: `Found ${channels.length} channels`
+};
 '''
         key: getUserChannels
       }

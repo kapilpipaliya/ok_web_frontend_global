@@ -12,14 +12,13 @@
 
 const { workerName, level = 'info', message, metadata = {} } = args.contextData;
 
-if (!workerName || !message) {
-  return {
-    success: false,
-    error: 'workerName and message are required'
-  };
-}
+  if (!workerName || !message) {
+    return {
+      success: false,
+      message: 'workerName and message are required'
+    };
+  }
 
-try {
   const session = args.session;
 
   // Create a WorkerLog node
@@ -52,14 +51,6 @@ try {
   return {
     success: true
   };
-} catch (error) {
-  // Fallback to console if database logging fails
-  console.error(`Failed to log worker message: ${error.message}`);
-  return {
-    success: false,
-    error: error.message
-  };
-}
 '''
         key: logWorkerMessage
       }

@@ -173,18 +173,17 @@ return {
       id: "6"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: value
+        type: boolean
+        key: autoFocus
+        defValue: false
       }
     }
     {
       id: "7"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: disabled
+        type: function
+        key: onFocus
       }
     }
     {
@@ -192,7 +191,7 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onBlur
+        key: onChange
       }
     }
     {
@@ -200,24 +199,25 @@ return {
       L: ComponentVariant
       P: {
         type: boolean
-        defValue: false
         key: readOnly
+        defValue: false
       }
     }
     {
       id: "10"
       L: ComponentVariant
       P: {
-        type: function
-        key: onInput
+        type: string
+        defValue: ""
+        key: value
       }
     }
     {
       id: "11"
       L: ComponentVariant
       P: {
-        type: function
-        key: onMount
+        type: string
+        key: rightIcon
       }
     }
     {
@@ -225,33 +225,34 @@ return {
       L: ComponentVariant
       P: {
         type: number
-        key: minLength
+        key: iconSize
+        defValue: 20
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: number
-        defValue: 20
-        key: iconSize
+        type: string
+        key: leftIcon
       }
     }
     {
       id: "14"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: autoFocus
+        type: string
+        key: placeholder
+        defValue: ""
       }
     }
     {
       id: "15"
       L: ComponentVariant
       P: {
-        type: string
-        key: rightIcon
+        type: boolean
+        key: required
+        defValue: false
       }
     }
     {
@@ -330,50 +331,49 @@ return {
       id: "24"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: required
+        type: function
+        key: onInput
       }
     }
     {
       id: "25"
       L: ComponentVariant
       P: {
-        type: string
-        key: leftIcon
+        type: function
+        key: onBlur
       }
     }
     {
       id: "26"
       L: ComponentVariant
       P: {
-        type: function
-        key: onChange
+        type: number
+        key: maxLength
       }
     }
     {
       id: "27"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: placeholder
+        type: function
+        key: onMount
       }
     }
     {
       id: "28"
       L: ComponentVariant
       P: {
-        type: function
-        key: onFocus
+        type: number
+        key: minLength
       }
     }
     {
       id: "29"
       L: ComponentVariant
       P: {
-        type: number
-        key: maxLength
+        type: boolean
+        key: disabled
+        defValue: false
       }
     }
   ]

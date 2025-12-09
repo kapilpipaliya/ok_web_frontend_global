@@ -7,181 +7,171 @@
         description: Send email alert to admins when shared YouTube API quota reaches critical levels (80%, 95%, or 100%)
         body:
           '''
-try {
-  const { level } = args.contextData;  // 'warning' (80%), 'critical' (95%), or 'exhausted' (100%)
+const { level } = args.contextData;  // 'warning' (80%), 'critical' (95%), or 'exhausted' (100%)
 
-  if (!level || !['warning', 'critical', 'exhausted'].includes(level)) {
-    throw new Error('Invalid alert level. Must be: warning, critical, or exhausted');
-  }
-
-  // Get current quota status
-  const usage = await args.getTodaySharedAPIUsage(args.session);
-
-  // Check if we already sent an alert for this level today
-  const today = new Date().toISOString().split('T')[0];
-  const alertCheckKey = `quota_alert_${level}_${today}`;
-
-  const existingAlert = await args.session.run(`
-    MATCH (setting:Setting {type: 'oauth'})-[:QuotaAlert]->(alert:QuotaAlertSent {alertKey: $alertKey})
-    RETURN alert
-  `, { alertKey: alertCheckKey });
-
-  if (existingAlert.records.length > 0) {
-    return {
-      success: true,
-      message: `Alert for ${level} level already sent today`,
-      alreadySent: true
-    };
-  }
-
-  // Get all admin users
-  const adminsResult = await args.session.run(`
-    MATCH (u:User)-[:UserRole]->(r:Role)
-    WHERE r.name = 'Admin'
-    RETURN u.email as email, u.username as username
-  `);
-
-  if (adminsResult.records.length === 0) {
-    return {
-      success: false,
-      message: 'No admin users found to send alerts to'
-    };
-  }
-
-  // Prepare email content based on level
-  let subject, message, urgency;
-
-  if (level === 'exhausted') {
-    subject = '🚨 CRITICAL: YouTube API Quota Exhausted';
-    message = `
-      <h2 style="color: #dc2626;">YouTube API Quota Exhausted</h2>
-      <p>The shared YouTube API quota has been <strong>completely exhausted</strong>.</p>
-      <p><strong>Current Status:</strong></p>
-      <ul>
-        <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
-        <li>Remaining: ${usage.remainingQuota} units</li>
-        <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
-      </ul>
-      <p><strong>Impact:</strong> All YouTube channel and playlist processing has been paused. Users cannot add new channels or playlists until quota resets at midnight UTC.</p>
-      <p><strong>Action Required:</strong> Monitor the quota status and inform users about the temporary limitation.</p>
-      <p>The quota will automatically reset at midnight UTC (${new Date(new Date().setUTCHours(24, 0, 0, 0)).toLocaleString()}).</p>
-      <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/ytorganizer/admin/quota-monitor" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Quota Monitor</a></p>
-    `;
-    urgency = 'high';
-  } else if (level === 'critical') {
-    subject = '⚠️ URGENT: YouTube API Quota at 95%';
-    message = `
-      <h2 style="color: #ea580c;">YouTube API Quota Critical</h2>
-      <p>The shared YouTube API quota has reached <strong>95% usage</strong>.</p>
-      <p><strong>Current Status:</strong></p>
-      <ul>
-        <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
-        <li>Remaining: ${usage.remainingQuota} units</li>
-        <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
-      </ul>
-      <p><strong>Warning:</strong> Quota is nearly exhausted. Adding channels/playlists may be paused soon to prevent complete exhaustion.</p>
-      <p><strong>Recommended Actions:</strong></p>
-      <ul>
-        <li>Monitor quota usage closely</li>
-        <li>Consider pausing non-critical operations</li>
-        <li>Inform users about potential temporary limitations</li>
-      </ul>
-      <p>The quota will reset at midnight UTC (${new Date(new Date().setUTCHours(24, 0, 0, 0)).toLocaleString()}).</p>
-      <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/ytorganizer/admin/quota-monitor" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Quota Monitor</a></p>
-    `;
-    urgency = 'medium';
-  } else {  // warning (80%)
-    subject = '⚠️ YouTube API Quota at 80%';
-    message = `
-      <h2 style="color: #f59e0b;">YouTube API Quota Warning</h2>
-      <p>The shared YouTube API quota has reached <strong>80% usage</strong>.</p>
-      <p><strong>Current Status:</strong></p>
-      <ul>
-        <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
-        <li>Remaining: ${usage.remainingQuota} units</li>
-        <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
-      </ul>
-      <p><strong>Note:</strong> The system is approaching the daily quota limit. Monitor usage to prevent service interruptions.</p>
-      <p>The quota will reset at midnight UTC (${new Date(new Date().setUTCHours(24, 0, 0, 0)).toLocaleString()}).</p>
-      <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/ytorganizer/admin/quota-monitor" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Quota Monitor</a></p>
-    `;
-    urgency = 'low';
-  }
-
-  // Add email to queue for each admin
-  let emailsQueued = 0;
-
-  for (const record of adminsResult.records) {
-    const email = record.get('email');
-    const username = record.get('username');
-
-    if (!email) continue;
-
-    // Add to email queue (simplified - using direct email sending or queue)
-    try {
-      await args.executeServerFunction('sendEmail', {
-        to: email,
-        subject: subject,
-        html: message,
-        priority: urgency === 'high' ? 'high' : 'normal'
-      });
-
-      emailsQueued++;
-    } catch (error) {
-      console.error(`Error queueing email for ${email}:`, error);
-    }
-  }
-
-  // Mark alert as sent
-  await args.session.run(`
-    MATCH (setting:Setting {type: 'oauth'})
-    WHERE setting.googleEnabled = true
-    WITH setting LIMIT 1
-
-    CREATE (alert:QuotaAlertSent {
-      alertKey: $alertKey,
-      level: $level,
-      percentUsed: $percentUsed,
-      unitsUsed: $unitsUsed,
-      unitsRemaining: $unitsRemaining,
-      emailsQueued: $emailsQueued,
-      sentAt: datetime()
-    })
-    CREATE (setting)-[:QuotaAlert]->(alert)
-
-    RETURN alert
-  `, {
-    alertKey: alertCheckKey,
-    level,
-    percentUsed: usage.quotaPercentUsed,
-    unitsUsed: usage.totalCost,
-    unitsRemaining: usage.remainingQuota,
-    emailsQueued
-  });
-
-  return {
-    success: true,
-    message: `Sent ${level} quota alert to ${emailsQueued} admin(s)`,
-    data: {
-      level,
-      emailsQueued,
-      percentUsed: Math.round(usage.quotaPercentUsed),
-      unitsUsed: usage.totalCost,
-      unitsRemaining: usage.remainingQuota
-    }
-  };
-
-} catch (error) {
-  console.error("Error sending quota alert email:", error);
+if (!level || !['warning', 'critical', 'exhausted'].includes(level)) {
   return {
     success: false,
-    message: "Failed to send quota alert email",
-    error: {
-      type: error.name || "QuotaAlertError",
-      details: error.message
-    }
+    message: 'Invalid alert level. Must be: warning, critical, or exhausted'
   };
 }
+
+// Get current quota status
+const usage = await args.getTodaySharedAPIUsage(args.session);
+
+// Check if we already sent an alert for this level today
+const today = new Date().toISOString().split('T')[0];
+const alertCheckKey = `quota_alert_${level}_${today}`;
+
+const existingAlert = await args.session.run(`
+  MATCH (setting:Setting {type: 'oauth'})-[:QuotaAlert]->(alert:QuotaAlertSent {alertKey: $alertKey})
+  RETURN alert
+`, { alertKey: alertCheckKey });
+
+if (existingAlert.records.length > 0) {
+  return {
+    success: true,
+    message: `Alert for ${level} level already sent today`,
+    alreadySent: true
+  };
+}
+
+// Get all admin users
+const adminsResult = await args.session.run(`
+  MATCH (u:User)-[:UserRole]->(r:Role)
+  WHERE r.name = 'Admin'
+  RETURN u.email as email, u.username as username
+`);
+
+if (adminsResult.records.length === 0) {
+  return {
+    success: false,
+    message: 'No admin users found to send alerts to'
+  };
+}
+
+// Prepare email content based on level
+let subject, message, urgency;
+
+if (level === 'exhausted') {
+  subject = '🚨 CRITICAL: YouTube API Quota Exhausted';
+  message = `
+    <h2 style="color: #dc2626;">YouTube API Quota Exhausted</h2>
+    <p>The shared YouTube API quota has been <strong>completely exhausted</strong>.</p>
+    <p><strong>Current Status:</strong></p>
+    <ul>
+      <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
+      <li>Remaining: ${usage.remainingQuota} units</li>
+      <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
+    </ul>
+    <p><strong>Impact:</strong> All YouTube channel and playlist processing has been paused. Users cannot add new channels or playlists until quota resets at midnight UTC.</p>
+    <p><strong>Action Required:</strong> Monitor the quota status and inform users about the temporary limitation.</p>
+    <p>The quota will automatically reset at midnight UTC (${new Date(new Date().setUTCHours(24, 0, 0, 0)).toLocaleString()}).</p>
+    <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/ytorganizer/admin/quota-monitor" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Quota Monitor</a></p>
+  `;
+  urgency = 'high';
+} else if (level === 'critical') {
+  subject = '⚠️ URGENT: YouTube API Quota at 95%';
+  message = `
+    <h2 style="color: #ea580c;">YouTube API Quota Critical</h2>
+    <p>The shared YouTube API quota has reached <strong>95% usage</strong>.</p>
+    <p><strong>Current Status:</strong></p>
+    <ul>
+      <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
+      <li>Remaining: ${usage.remainingQuota} units</li>
+      <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
+    </ul>
+    <p><strong>Warning:</strong> Quota is nearly exhausted. Adding channels/playlists may be paused soon to prevent complete exhaustion.</p>
+    <p><strong>Recommended Actions:</strong></p>
+    <ul>
+      <li>Monitor quota usage closely</li>
+      <li>Consider pausing non-critical operations</li>
+      <li>Inform users about potential temporary limitations</li>
+    </ul>
+    <p>The quota will reset at midnight UTC (${new Date(new Date().setUTCHours(24, 0, 0, 0)).toLocaleString()}).</p>
+    <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/ytorganizer/admin/quota-monitor" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Quota Monitor</a></p>
+  `;
+  urgency = 'medium';
+} else {  // warning (80%)
+  subject = '⚠️ YouTube API Quota at 80%';
+  message = `
+    <h2 style="color: #f59e0b;">YouTube API Quota Warning</h2>
+    <p>The shared YouTube API quota has reached <strong>80% usage</strong>.</p>
+    <p><strong>Current Status:</strong></p>
+    <ul>
+      <li>Used: ${usage.totalCost.toLocaleString()} / ${args.DAILY_QUOTA_LIMIT.toLocaleString()} units (${Math.round(usage.quotaPercentUsed)}%)</li>
+      <li>Remaining: ${usage.remainingQuota} units</li>
+      <li>Effective Remaining: ${usage.effectiveRemaining} units (after reservations)</li>
+    </ul>
+    <p><strong>Note:</strong> The system is approaching the daily quota limit. Monitor usage to prevent service interruptions.</p>
+    <p>The quota will reset at midnight UTC (${new Date(new Date().setUTCHours(24, 0, 0, 0)).toLocaleString()}).</p>
+    <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/ytorganizer/admin/quota-monitor" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">View Quota Monitor</a></p>
+  `;
+  urgency = 'low';
+}
+
+// Add email to queue for each admin
+let emailsQueued = 0;
+
+for (const record of adminsResult.records) {
+  const email = record.get('email');
+  const username = record.get('username');
+
+  if (!email) continue;
+
+  // Add to email queue (simplified - using direct email sending or queue)
+  const emailResult = await args.executeServerFunction('sendEmail', {
+    to: email,
+    subject: subject,
+    html: message,
+    priority: urgency === 'high' ? 'high' : 'normal'
+  });
+
+  if (emailResult && emailResult.success !== false) {
+    emailsQueued++;
+  } else {
+    console.error(`Error queueing email for ${email}:`, emailResult?.message || 'Unknown error');
+  }
+}
+
+// Mark alert as sent
+await args.session.run(`
+  MATCH (setting:Setting {type: 'oauth'})
+  WHERE setting.googleEnabled = true
+  WITH setting LIMIT 1
+
+  CREATE (alert:QuotaAlertSent {
+    alertKey: $alertKey,
+    level: $level,
+    percentUsed: $percentUsed,
+    unitsUsed: $unitsUsed,
+    unitsRemaining: $unitsRemaining,
+    emailsQueued: $emailsQueued,
+    sentAt: datetime()
+  })
+  CREATE (setting)-[:QuotaAlert]->(alert)
+
+  RETURN alert
+`, {
+  alertKey: alertCheckKey,
+  level,
+  percentUsed: usage.quotaPercentUsed,
+  unitsUsed: usage.totalCost,
+  unitsRemaining: usage.remainingQuota,
+  emailsQueued
+});
+
+return {
+  success: true,
+  message: `Sent ${level} quota alert to ${emailsQueued} admin(s)`,
+  data: {
+    level,
+    emailsQueued,
+    percentUsed: Math.round(usage.quotaPercentUsed),
+    unitsUsed: usage.totalCost,
+    unitsRemaining: usage.remainingQuota
+  }
+};
 '''
         key: sendQuotaAlertEmail
       }

@@ -1,4 +1,4 @@
-import { createAsync, query, useNavigate } from "@solidjs/router";
+import { createAsync, query, useLocation, useNavigate } from "@solidjs/router";
 import { Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
@@ -41,6 +41,7 @@ const fetchData = query(async () => {
 export function GetInitialData(props: GetInitialDataProps) {
   const graph = useGraph();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const setData = (
     initialData: ServerResult,
@@ -103,6 +104,7 @@ export function GetInitialData(props: GetInitialDataProps) {
       handleUserNavigation(
         userData,
         props.dontRedirectToLogin ? undefined : navigate,
+        location,
       );
     }
   };

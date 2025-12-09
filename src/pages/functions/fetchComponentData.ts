@@ -1,5 +1,6 @@
 import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
 import type { ServerResult } from "~/cypher/types/ServerResult";
+import {VertexMap} from "~/lib/graph/type/vertexMap";
 
 /**
  * Fetches component data for all components referenced in the provided graph data
@@ -7,9 +8,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
  * @param graphData The graph data containing vertices to scan for component references
  * @returns Array of component data results, empty array if no components found
  */
-export async function fetchComponentDataFromGraph(graphData?: {
-  graph?: { vertexes: Record<string, any> };
-}): Promise<ServerResult[]> {
+export async function fetchComponentDataFromGraph(graphData?:  ServerResult): Promise<ServerResult[]> {
   if (!graphData?.graph?.vertexes) {
     return [];
   }
@@ -19,18 +18,41 @@ export async function fetchComponentDataFromGraph(graphData?: {
 
   // Helper function to extract component names from vertices
   const extractComponentNames = (
-    vertices: Record<string, any>,
+    vertices: VertexMap,
   ): Set<string> => {
     const componentNames = new Set<string>();
 
     for (const vertex of Object.values(vertices)) {
+      // Extract from Attr or PageLayout L with componentName (excluding Html/Slot)
       if (
         (vertex.L.includes("Attr") || vertex.L.includes("PageLayout")) &&
         vertex.P.componentName
       ) {
-        // Skip "Html" and "Slot" components
         if (!["Html", "Slot"].includes(vertex.P.componentName)) {
           componentNames.add(vertex.P.componentName);
+        }
+      }
+
+      // Extract from Page or Component label with dynamicComponent property
+      if (
+        (vertex.L.includes("Page") || vertex.L.includes("Component"))
+      ) {
+        debugger
+        const dyn = vertex.P.dynamicComponent;
+        if (Array.isArray(dyn)) {
+          for (const name of dyn) {
+            if (typeof name === "string" && name.length > 0) {
+              componentNames.add(name);
+            }
+          }
+        } else if (typeof dyn === "string") {
+          // Split comma separated string (and trim)
+          for (const name of dyn.split(",")) {
+            const trimmed = name.trim();
+            if (trimmed.length > 0) {
+              componentNames.add(trimmed);
+            }
+          }
         }
       }
     }

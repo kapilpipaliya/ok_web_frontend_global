@@ -7,368 +7,372 @@
         description: Deletes playlists (array, 'all', or 'allInContext') from a specific ownership. Prevents deletion of playlists with active jobs to avoid orphaned video jobs. Removes pending BullMQ jobs, calls deleteVideo for all videos, then cleans up orphan playlist nodes. 'allInContext' deletes all playlists in the context channels. Supports multi-ownership model, batch processing, and special keywords.
         body:
           '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters - accepts array of items, 'all', or 'allInContext'
+const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
+
+if (itemType !== "playlist") {
+  return {
+    success: false,
+    message: "Invalid playlist data"
+  };
+}
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
+  };
+}
+
+// Verify ownership belongs to user (skip if called internally)
+if (!skipOwnershipCheck) {
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    return {
+      success: false,
+      message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+    };
+  }
+}
+
+// Handle contextItems array
+const contextItemArray = contextItems || [];
+
+// Prepare parameters for queries
+let playlistIds = null;
+let channelIds = null;
+
+if (items === 'all') {
+  // Will use subquery for all playlists in ownership
+  playlistIds = null;
+} else if (items === 'allInContext') {
+  // Validate context items
+  if (contextItemArray.length === 0) {
+    return {
+      success: false,
+      message: "Context channels are required when using 'allInContext'"
+    };
+  }
+  channelIds = contextItemArray.map(item => item.P?.youtubeId).filter(id => id);
+  if (channelIds.length === 0) {
+    return {
+      success: false,
+      message: "No valid context channel IDs found"
+    };
+  }
+} else {
+  // Extract playlist IDs from array
+  if (!items || items.length === 0) {
+    return {
+      success: false,
+      message: "No playlists provided to delete"
+    };
+  }
+  playlistIds = items.map(p => p.P?.youtubeId).filter(id => id);
+  if (playlistIds.length === 0) {
+    return {
+      success: false,
+      message: "No valid playlist IDs found"
+    };
+  }
+}
+
+// Step 1: Check for active playlist jobs in BullMQ queue
+// Prevent deletion if any playlist is actively being processed
+const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+if (!helpers.result?.success) {
+  return {
+    success: false,
+    message: 'Failed to initialize queue helpers'
+  };
+}
+
+const { QUEUE_NAMES, createJobId } = helpers.result.data;
+const { Queue } = args.bullmq;
+const connection = helpers.result.data.getRedisConnection();
+const playlistQueue = new Queue(QUEUE_NAMES.PLAYLIST, { connection });
+
 try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Extract parameters - accepts array of items, 'all', or 'allInContext'
-  const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
-
-  if (itemType !== "playlist") {
-    throw new Error("Invalid playlist data");
-  }
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Verify ownership belongs to user (skip if called internally)
-  if (!skipOwnershipCheck) {
-    const ownershipCheck = await args.session.run(`
-      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-      RETURN o
-    `, { userUuid: user.P.uuid, ownershipId });
-
-    if (ownershipCheck.records.length === 0) {
-      throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-    }
-  }
-
-  // Handle contextItems array
-  const contextItemArray = contextItems || [];
-
-  // Prepare parameters for queries
-  let playlistIds = null;
-  let channelIds = null;
+  // Get playlist IDs to check (either specific IDs, all in context channels, or all for ownership)
+  let playlistIdsToCheck = playlistIds;
 
   if (items === 'all') {
-    // Will use subquery for all playlists in ownership
-    playlistIds = null;
+    // Get all playlist IDs for this ownership
+    // NEW SCHEMA v4.0: Direct ownership
+    const allPlaylistsResult = await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+      RETURN p.youtubeId as playlistId
+    `, { ownershipId });
+
+    playlistIdsToCheck = allPlaylistsResult.records.map(r => r.get('playlistId'));
   } else if (items === 'allInContext') {
-    // Validate context items
-    if (contextItemArray.length === 0) {
-      throw new Error("Context channels are required when using 'allInContext'");
-    }
-    channelIds = contextItemArray.map(item => item.P?.youtubeId).filter(id => id);
-    if (channelIds.length === 0) {
-      throw new Error("No valid context channel IDs found");
-    }
-  } else {
-    // Extract playlist IDs from array
-    if (!items || items.length === 0) {
-      throw new Error("No playlists provided to delete");
-    }
-    playlistIds = items.map(p => p.P?.youtubeId).filter(id => id);
-    if (playlistIds.length === 0) {
-      throw new Error("No valid playlist IDs found");
-    }
-  }
-
-  // Step 1: Check for active playlist jobs in BullMQ queue
-  // Prevent deletion if any playlist is actively being processed
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-  if (!helpers.result?.success) {
-    throw new Error('Failed to initialize queue helpers');
-  }
-
-  const { QUEUE_NAMES, createJobId } = helpers.result.data;
-  const { Queue } = args.bullmq;
-  const connection = helpers.result.data.getRedisConnection();
-  const playlistQueue = new Queue(QUEUE_NAMES.PLAYLIST, { connection });
-
-  try {
-    // Get playlist IDs to check (either specific IDs, all in context channels, or all for ownership)
-    let playlistIdsToCheck = playlistIds;
-
-    if (items === 'all') {
-      // Get all playlist IDs for this ownership
-      // NEW SCHEMA v4.0: Direct ownership
-      const allPlaylistsResult = await args.session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist)
-        RETURN p.youtubeId as playlistId
-      `, { ownershipId });
-
-      playlistIdsToCheck = allPlaylistsResult.records.map(r => r.get('playlistId'));
-    } else if (items === 'allInContext') {
-      // Get all playlist IDs in the context channels (verify ownership)
-      // NEW SCHEMA v4.0: Verify both channel and playlist ownership
-      const contextPlaylistsResult = await args.session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
-        WHERE c.youtubeId IN $channelIds
-        MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-        MATCH (o)-[:YouTubeOwnershipPlaylist]->(p)
-        RETURN DISTINCT p.youtubeId as playlistId
-      `, { ownershipId, channelIds });
-
-      playlistIdsToCheck = contextPlaylistsResult.records.map(r => r.get('playlistId'));
-    }
-
-    // Check if any of these playlists have active jobs
-    const activeJobs = [];
-    const jobsToRemove = [];
-
-    for (const playlistId of playlistIdsToCheck) {
-      const jobId = createJobId('playlist', ownershipId, playlistId);
-      const job = await playlistQueue.getJob(jobId);
-
-      if (job) {
-        const state = await job.getState();
-
-        if (state === 'active') {
-          // Get playlist title for better error message (verify ownership)
-          const playlistResult = await args.session.run(`
-            MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
-            RETURN p.title as title
-          `, { ownershipId, playlistId });
-
-          const title = playlistResult.records[0]?.get('title') || playlistId;
-          activeJobs.push({ playlistId, title, jobId });
-        } else if (['waiting', 'delayed', 'failed'].includes(state)) {
-          // Track jobs that can be removed
-          jobsToRemove.push({ jobId, playlistId, state });
-        }
-      }
-    }
-
-    // If any active jobs exist, prevent deletion
-    if (activeJobs.length > 0) {
-      await playlistQueue.close();
-
-      const playlistList = activeJobs.map(j => `"${j.title}"`).join(', ');
-      const message = activeJobs.length === 1
-        ? `Cannot delete playlist ${playlistList} because it is currently being processed. This will spawn many video jobs that cannot be properly linked to the parent playlist. Please wait for processing to complete or pause the playlist first.`
-        : `Cannot delete ${activeJobs.length} playlist(s) (${playlistList}) because they are currently being processed. This will spawn many video jobs that cannot be properly linked to the parent playlists. Please wait for processing to complete or pause the playlists first.`;
-
-      return {
-        success: false,
-        message: message,
-        error: {
-          type: "ActiveJobsError",
-          details: "Cannot delete playlists with active jobs",
-          activeJobs: activeJobs.map(j => ({ playlistId: j.playlistId, title: j.title }))
-        }
-      };
-    }
-
-    // Step 2: Remove pending/waiting jobs from the queue
-    let removedJobsCount = 0;
-    for (const jobInfo of jobsToRemove) {
-      try {
-        const job = await playlistQueue.getJob(jobInfo.jobId);
-        if (job) {
-          await job.remove();
-          removedJobsCount++;
-          console.log(`[deletePlaylist] Removed ${jobInfo.state} job for playlist ${jobInfo.playlistId}`);
-        }
-      } catch (error) {
-        console.error(`[deletePlaylist] Error removing job ${jobInfo.jobId}:`, error.message);
-        // Continue with deletion even if job removal fails
-      }
-    }
-
-    if (removedJobsCount > 0) {
-      console.log(`[deletePlaylist] Removed ${removedJobsCount} pending job(s) from queue`);
-    }
-
-  } finally {
-    // Always close the queue connection
-    await playlistQueue.close();
-  }
-
-  // Step 3: Delete all videos in these playlists using deleteVideo function with 'allInContext'
-  let deletedVideos = 0;
-
-  // Create minimal playlist objects for contextItems (only need youtubeId)
-  let playlistContextItems;
-  if (items === 'all' || items === 'allInContext') {
-    // For 'all' modes, pass empty array - deleteVideo will fetch videos directly via query
-    playlistContextItems = items === 'all' ? [] : contextItemArray;
-  } else {
-    // For array mode, create minimal objects from IDs
-    playlistContextItems = playlistIds.map(id => ({ P: { youtubeId: id } }));
-  }
-
-  try {
-    const deleteResult = await args.executeNamedServerFunction({
-      functionName: 'deleteVideo',
-      contextData: {
-        videos: 'allInContext',  // Use allInContext to delete all videos in these playlists
-        contextType: 'playlist',
-        contextItems: playlistContextItems,  // Pass minimal playlist objects for context
-        ownershipId: ownershipId,
-        skipOwnershipCheck: true  // Already checked in parent
-      }
-    });
-
-    if (deleteResult?.result?.success) {
-      deletedVideos = deleteResult.result.data?.deletedVideos || 0;
-    }
-  } catch (videoError) {
-    console.error(`Failed to delete videos from playlists:`, videoError);
-    // Continue with playlist deletion even if video deletion fails
-  }
-
-  // Step 4 & 5 COMBINED: Delete ownership relationships and orphaned playlists atomically
-  // NEW SCHEMA v4.0: With duplicate playlists per ownership, we track specific playlist instances
-  // Benefits: No global search, atomic operation, safer
-  let queryParams = { ownershipId };
-  let playlistMatchClause = '';
-
-  if (items === 'allInContext') {
-    queryParams.channelIds = channelIds;
-    // Match playlists via channel ownership
-    playlistMatchClause = `
+    // Get all playlist IDs in the context channels (verify ownership)
+    // NEW SCHEMA v4.0: Verify both channel and playlist ownership
+    const contextPlaylistsResult = await args.session.run(`
       MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
       WHERE c.youtubeId IN $channelIds
       MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
-      MATCH (o)-[ownershipRel:YouTubeOwnershipPlaylist]->(p)
-    `;
-  } else if (items === 'all') {
-    // Match all playlists for this ownership
-    playlistMatchClause = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipPlaylist]->(p:Playlist)
-    `;
-  } else {
-    queryParams.playlistIds = playlistIds;
-    // Match specific playlists by youtubeId for this ownership
-    playlistMatchClause = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipPlaylist]->(p:Playlist)
-      WHERE p.youtubeId IN $playlistIds
-    `;
+      MATCH (o)-[:YouTubeOwnershipPlaylist]->(p)
+      RETURN DISTINCT p.youtubeId as playlistId
+    `, { ownershipId, channelIds });
+
+    playlistIdsToCheck = contextPlaylistsResult.records.map(r => r.get('playlistId'));
   }
 
-  const deleteQuery = `
-    ${playlistMatchClause}
+  // Check if any of these playlists have active jobs
+  const activeJobs = [];
+  const jobsToRemove = [];
 
-    // Collect playlist info before deletion
-    WITH o, p, ownershipRel, elementId(p) as playlistNodeId
+  for (const playlistId of playlistIdsToCheck) {
+    const jobId = createJobId('playlist', ownershipId, playlistId);
+    const job = await playlistQueue.getJob(jobId);
 
-    // Delete optional PlaylistSetting if it exists (created on-demand when user customizes)
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+    if (job) {
+      const state = await job.getState();
 
-    // Delete setting and ownership relationship
-    DETACH DELETE ps, ownershipRel
+      if (state === 'active') {
+        // Get playlist title for better error message (verify ownership)
+        const playlistResult = await args.session.run(`
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+          RETURN p.title as title
+        `, { ownershipId, playlistId });
 
-    // Return the playlist instance ID for orphan check
-    RETURN collect(DISTINCT playlistNodeId) as playlistIds, count(DISTINCT p) as deletedOwnershipLinks
+        const title = playlistResult.records[0]?.get('title') || playlistId;
+        activeJobs.push({ playlistId, title, jobId });
+      } else if (['waiting', 'delayed', 'failed'].includes(state)) {
+        // Track jobs that can be removed
+        jobsToRemove.push({ jobId, playlistId, state });
+      }
+    }
+  }
+
+  // If any active jobs exist, prevent deletion
+  if (activeJobs.length > 0) {
+    await playlistQueue.close();
+
+    const playlistList = activeJobs.map(j => `"${j.title}"`).join(', ');
+    const message = activeJobs.length === 1
+      ? `Cannot delete playlist ${playlistList} because it is currently being processed. This will spawn many video jobs that cannot be properly linked to the parent playlist. Please wait for processing to complete or pause the playlist first.`
+      : `Cannot delete ${activeJobs.length} playlist(s) (${playlistList}) because they are currently being processed. This will spawn many video jobs that cannot be properly linked to the parent playlists. Please wait for processing to complete or pause the playlists first.`;
+
+    return {
+      success: false,
+      message: message,
+      error: {
+        type: "ActiveJobsError",
+        details: "Cannot delete playlists with active jobs",
+        activeJobs: activeJobs.map(j => ({ playlistId: j.playlistId, title: j.title }))
+      }
+    };
+  }
+
+  // Step 2: Remove pending/waiting jobs from the queue
+  let removedJobsCount = 0;
+  for (const jobInfo of jobsToRemove) {
+    try {
+      const job = await playlistQueue.getJob(jobInfo.jobId);
+      if (job) {
+        await job.remove();
+        removedJobsCount++;
+        console.log(`[deletePlaylist] Removed ${jobInfo.state} job for playlist ${jobInfo.playlistId}`);
+      }
+    } catch (error) {
+      console.error(`[deletePlaylist] Error removing job ${jobInfo.jobId}:`, error.message);
+      // Continue with deletion even if job removal fails
+    }
+  }
+
+  if (removedJobsCount > 0) {
+    console.log(`[deletePlaylist] Removed ${removedJobsCount} pending job(s) from queue`);
+  }
+
+} finally {
+  // Always close the queue connection
+  await playlistQueue.close();
+}
+
+// Step 3: Delete all videos in these playlists using deleteVideo function with 'allInContext'
+let deletedVideos = 0;
+
+// Create minimal playlist objects for contextItems (only need youtubeId)
+let playlistContextItems;
+if (items === 'all' || items === 'allInContext') {
+  // For 'all' modes, pass empty array - deleteVideo will fetch videos directly via query
+  playlistContextItems = items === 'all' ? [] : contextItemArray;
+} else {
+  // For array mode, create minimal objects from IDs
+  playlistContextItems = playlistIds.map(id => ({ P: { youtubeId: id } }));
+}
+
+try {
+  const deleteResult = await args.executeNamedServerFunction({
+    functionName: 'deleteVideo',
+    contextData: {
+      videos: 'allInContext',  // Use allInContext to delete all videos in these playlists
+      contextType: 'playlist',
+      contextItems: playlistContextItems,  // Pass minimal playlist objects for context
+      ownershipId: ownershipId,
+      skipOwnershipCheck: true  // Already checked in parent
+    }
+  });
+
+  if (deleteResult?.result?.success) {
+    deletedVideos = deleteResult.result.data?.deletedVideos || 0;
+  }
+} catch (videoError) {
+  console.error(`Failed to delete videos from playlists:`, videoError);
+  // Continue with playlist deletion even if video deletion fails
+}
+
+// Step 4 & 5 COMBINED: Delete ownership relationships and orphaned playlists atomically
+// NEW SCHEMA v4.0: With duplicate playlists per ownership, we track specific playlist instances
+// Benefits: No global search, atomic operation, safer
+let queryParams = { ownershipId };
+let playlistMatchClause = '';
+
+if (items === 'allInContext') {
+  queryParams.channelIds = channelIds;
+  // Match playlists via channel ownership
+  playlistMatchClause = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
+    WHERE c.youtubeId IN $channelIds
+    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
+    MATCH (o)-[ownershipRel:YouTubeOwnershipPlaylist]->(p)
   `;
-
-  const deleteResult = await args.session.run(deleteQuery, queryParams);
-
-  const deletedLinksRaw = deleteResult.records[0]?.get('deletedOwnershipLinks');
-  const deletedOwnershipLinks = deletedLinksRaw ? (typeof deletedLinksRaw.toNumber === 'function' ? deletedLinksRaw.toNumber() : Number(deletedLinksRaw)) : 0;
-
-  if (deletedOwnershipLinks === 0) {
-    throw new Error("Playlists not found or already deleted");
-  }
-
-  // Get the Neo4j internal IDs of playlists we deleted ownership from
-  const playlistNodeIds = deleteResult.records[0]?.get('playlistIds') || [];
-
-  // Step 5: Delete ONLY the specific playlist instances that are now orphaned
-  // NEW SCHEMA v4.0: No global search - only check the specific instances from Step 4
-  const deleteOrphanPlaylistsQuery = `
-    MATCH (p:Playlist)
-    WHERE elementId(p) IN $playlistNodeIds
-
-    // DEFENSIVE: Only delete if NO ownership references this playlist instance
-    // This ensures we don't delete playlists that are still owned by other ownerships
-    OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipPlaylist]->(p)
-
-    WITH p, count(anyO) as ownershipCount
-    WHERE ownershipCount = 0
-
-    // No ownership references this playlist, safe to delete
-    // First remove all Channel-[:ChannelPlaylist]->Playlist relationships
-    OPTIONAL MATCH (c:Channel)-[r:ChannelPlaylist]->(p)
-    DELETE r
-
-    // Also delete global Playlist->Video relationships
-    OPTIONAL MATCH (p)-[pv:PlaylistVideo]->(v:Video)
-    DELETE pv
-
-    // Then delete the playlist node
-    WITH p
-    DETACH DELETE p
-    RETURN count(p) as deletedPlaylists
+} else if (items === 'all') {
+  // Match all playlists for this ownership
+  playlistMatchClause = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipPlaylist]->(p:Playlist)
   `;
+} else {
+  queryParams.playlistIds = playlistIds;
+  // Match specific playlists by youtubeId for this ownership
+  playlistMatchClause = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipPlaylist]->(p:Playlist)
+    WHERE p.youtubeId IN $playlistIds
+  `;
+}
 
-  const playlistResult = await args.session.run(deleteOrphanPlaylistsQuery, { playlistNodeIds });
+const deleteQuery = `
+  ${playlistMatchClause}
 
-  const deletedPlaylistsRaw = playlistResult.records[0]?.get('deletedPlaylists');
-  const deletedPlaylists = deletedPlaylistsRaw ? (typeof deletedPlaylistsRaw.toNumber === 'function' ? deletedPlaylistsRaw.toNumber() : Number(deletedPlaylistsRaw)) : 0;
+  // Collect playlist info before deletion
+  WITH o, p, ownershipRel, elementId(p) as playlistNodeId
 
-  // Generate context name for message
-  let contextName = "account";
-  if (contextItemArray.length === 1) {
-    contextName = contextItemArray[0].P?.title || "channel";
-  } else if (contextItemArray.length > 1) {
-    contextName = `${contextItemArray.length} channels`;
-  }
+  // Delete optional PlaylistSetting if it exists (created on-demand when user customizes)
+  OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
 
-  let message;
-  const isAll = items === 'all';
-  const isAllInContext = items === 'allInContext';
-  const totalProcessed = deletedOwnershipLinks + deletedPlaylists;
+  // Delete setting and ownership relationship
+  DETACH DELETE ps, ownershipRel
 
-  if (isAll) {
-    message = `Successfully processed all playlists${totalProcessed > 0 ? ` (${totalProcessed} playlist(s))` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
-  } else if (isAllInContext) {
-    message = `Successfully processed all playlists in ${contextName}${totalProcessed > 0 ? ` (${totalProcessed} playlist(s))` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
-  } else if (items.length === 1) {
-    const playlistTitle = items[0].P?.title || "Playlist";
-    message = `Successfully deleted playlist "${playlistTitle}"${deletedVideos > 0 ? ` and ${deletedVideos} video(s)` : ''}`;
-  } else {
-    message = `Successfully processed ${items.length} playlist(s)${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
-  }
+  // Return the playlist instance ID for orphan check
+  RETURN collect(DISTINCT playlistNodeId) as playlistIds, count(DISTINCT p) as deletedOwnershipLinks
+`;
 
-  // Calculate total playlists processed
-  const totalPlaylists = isAll || isAllInContext ? totalProcessed : (items ? items.length : 0);
+const deleteResult = await args.session.run(deleteQuery, queryParams);
 
-  return {
-    success: true,
-    data: {
-      playlistIds: playlistIds,
-      deletedVideos: deletedVideos,
-      deletedPlaylists: deletedPlaylists,
-      totalPlaylists: totalPlaylists,
-      totalVideosInPlaylists: deletedVideos,
-      userId: user.id,
-      ownershipId: ownershipId
-    },
-    message: message
-  };
+const deletedLinksRaw = deleteResult.records[0]?.get('deletedOwnershipLinks');
+const deletedOwnershipLinks = deletedLinksRaw ? (typeof deletedLinksRaw.toNumber === 'function' ? deletedLinksRaw.toNumber() : Number(deletedLinksRaw)) : 0;
 
-} catch (error) {
-  console.error("Error deleting playlist:", error);
-
-  let userMessage = "Failed to delete playlist. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to delete playlists.";
-  } else if (error.message.includes("not found")) {
-    userMessage = error.message;
-  } else if (error.message.includes("Invalid playlist data")) {
-    userMessage = error.message;
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+if (deletedOwnershipLinks === 0) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    }
+    message: "Playlists not found or already deleted"
   };
 }
+
+// Get the Neo4j internal IDs of playlists we deleted ownership from
+const playlistNodeIds = deleteResult.records[0]?.get('playlistIds') || [];
+
+// Step 5: Delete ONLY the specific playlist instances that are now orphaned
+// NEW SCHEMA v4.0: No global search - only check the specific instances from Step 4
+const deleteOrphanPlaylistsQuery = `
+  MATCH (p:Playlist)
+  WHERE elementId(p) IN $playlistNodeIds
+
+  // DEFENSIVE: Only delete if NO ownership references this playlist instance
+  // This ensures we don't delete playlists that are still owned by other ownerships
+  OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipPlaylist]->(p)
+
+  WITH p, count(anyO) as ownershipCount
+  WHERE ownershipCount = 0
+
+  // No ownership references this playlist, safe to delete
+  // First remove all Channel-[:ChannelPlaylist]->Playlist relationships
+  OPTIONAL MATCH (c:Channel)-[r:ChannelPlaylist]->(p)
+  DELETE r
+
+  // Also delete global Playlist->Video relationships
+  OPTIONAL MATCH (p)-[pv:PlaylistVideo]->(v:Video)
+  DELETE pv
+
+  // Then delete the playlist node
+  WITH p
+  DETACH DELETE p
+  RETURN count(p) as deletedPlaylists
+`;
+
+const playlistResult = await args.session.run(deleteOrphanPlaylistsQuery, { playlistNodeIds });
+
+const deletedPlaylistsRaw = playlistResult.records[0]?.get('deletedPlaylists');
+const deletedPlaylists = deletedPlaylistsRaw ? (typeof deletedPlaylistsRaw.toNumber === 'function' ? deletedPlaylistsRaw.toNumber() : Number(deletedPlaylistsRaw)) : 0;
+
+// Generate context name for message
+let contextName = "account";
+if (contextItemArray.length === 1) {
+  contextName = contextItemArray[0].P?.title || "channel";
+} else if (contextItemArray.length > 1) {
+  contextName = `${contextItemArray.length} channels`;
+}
+
+let message;
+const isAll = items === 'all';
+const isAllInContext = items === 'allInContext';
+const totalProcessed = deletedOwnershipLinks + deletedPlaylists;
+
+if (isAll) {
+  message = `Successfully processed all playlists${totalProcessed > 0 ? ` (${totalProcessed} playlist(s))` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
+} else if (isAllInContext) {
+  message = `Successfully processed all playlists in ${contextName}${totalProcessed > 0 ? ` (${totalProcessed} playlist(s))` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
+} else if (items.length === 1) {
+  const playlistTitle = items[0].P?.title || "Playlist";
+  message = `Successfully deleted playlist "${playlistTitle}"${deletedVideos > 0 ? ` and ${deletedVideos} video(s)` : ''}`;
+} else {
+  message = `Successfully processed ${items.length} playlist(s)${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
+}
+
+// Calculate total playlists processed
+const totalPlaylists = isAll || isAllInContext ? totalProcessed : (items ? items.length : 0);
+
+return {
+  success: true,
+  data: {
+    playlistIds: playlistIds,
+    deletedVideos: deletedVideos,
+    deletedPlaylists: deletedPlaylists,
+    totalPlaylists: totalPlaylists,
+    totalVideosInPlaylists: deletedVideos,
+    userId: user.id,
+    ownershipId: ownershipId
+  },
+  message: message
+};
 '''
         key: deletePlaylist
       }

@@ -1,10 +1,10 @@
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function checkRole(
   role: string | string[],
-  dbSession: Session,
+  dbSession: Session | Transaction,
   user?: Vertex,
 ): Promise<boolean> {
   if (!user?.id) {

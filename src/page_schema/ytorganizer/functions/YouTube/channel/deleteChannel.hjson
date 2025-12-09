@@ -7,336 +7,334 @@
         description: Deletes channels (array, 'all', or 'allInContext') from a specific ownership. Prevents deletion of channels with active jobs to avoid orphaned playlist jobs. Removes pending BullMQ jobs, calls deletePlaylist for all playlists, then cleans up orphan channel nodes. For channels, 'allInContext' behaves like 'all' (deletes all channels for the ownership). Supports multi-ownership model, batch processing, and special keywords.
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Extract parameters - accepts array of items, 'all', or 'allInContext'
-  const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
-
-  if (itemType !== "channel") {
-    throw new Error("Invalid channel data");
-  }
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Verify ownership belongs to user (skip if called internally)
-  if (!skipOwnershipCheck) {
-    const ownershipCheck = await args.session.run(`
-      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-      RETURN o
-    `, { userUuid: user.P.uuid, ownershipId });
-
-    if (ownershipCheck.records.length === 0) {
-      throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-    }
-  }
-
-  // Handle contextItems array
-  const contextItemArray = contextItems || [];
-
-  // Prepare parameters for queries
-  let channelIds = null;
-
-  // Handle 'all', 'allInContext', or array of items
-  // Note: For channels, 'allInContext' behaves like 'all' since channels are top-level under ownership
-  if (items === 'all' || items === 'allInContext') {
-    // Will use subquery for all channels in ownership
-    channelIds = null;
-  } else {
-    // Extract channel IDs from array
-    if (!items || items.length === 0) {
-      throw new Error("No channels provided to delete");
-    }
-    channelIds = items.map(c => c.P?.youtubeId).filter(id => id);
-    if (channelIds.length === 0) {
-      throw new Error("No valid channel IDs found");
-    }
-  }
-
-  // Step 1: Check for active channel jobs in BullMQ queue
-  // Prevent deletion if any channel is actively being processed
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-  if (!helpers.result?.success) {
-    throw new Error('Failed to initialize queue helpers');
-  }
-
-  const { QUEUE_NAMES, createJobId } = helpers.result.data;
-  const { Queue } = args.bullmq;
-  const connection = helpers.result.data.getRedisConnection();
-  const channelQueue = new Queue(QUEUE_NAMES.CHANNEL, { connection });
-
-  try {
-    // Get channel IDs to check (either specific IDs or all channels for this ownership)
-    let channelIdsToCheck = channelIds;
-
-    if (items === 'all' || items === 'allInContext') {
-      // Get all channel IDs for this ownership
-      // NEW SCHEMA v4.0: Direct ownership
-      const allChannelsResult = await args.session.run(`
-        MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
-        RETURN c.youtubeId as channelId
-      `, { ownershipId });
-
-      channelIdsToCheck = allChannelsResult.records.map(r => r.get('channelId'));
-    }
-
-    // Check if any of these channels have active jobs
-    const activeJobs = [];
-    const jobsToRemove = [];
-
-    for (const channelId of channelIdsToCheck) {
-      const jobId = createJobId('channel', ownershipId, channelId);
-      const job = await channelQueue.getJob(jobId);
-
-      if (job) {
-        const state = await job.getState();
-
-        if (state === 'active') {
-          // Get channel title for better error message (verify ownership)
-          // NEW SCHEMA v4.0: Verify ownership before accessing channel
-          const channelResult = await args.session.run(`
-            MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
-            RETURN c.title as title
-          `, { ownershipId, channelId });
-
-          const title = channelResult.records[0]?.get('title') || channelId;
-          activeJobs.push({ channelId, title, jobId });
-        } else if (['waiting', 'delayed', 'failed'].includes(state)) {
-          // Track jobs that can be removed
-          jobsToRemove.push({ jobId, channelId, state });
-        }
-      }
-    }
-
-    // If any active jobs exist, prevent deletion
-    if (activeJobs.length > 0) {
-      await channelQueue.close();
-
-      const channelList = activeJobs.map(j => `"${j.title}"`).join(', ');
-      const message = activeJobs.length === 1
-        ? `Cannot delete channel ${channelList} because it is currently being processed. This will spawn many playlist jobs that cannot be properly linked to the parent channel. Please wait for processing to complete or pause the channel first.`
-        : `Cannot delete ${activeJobs.length} channel(s) (${channelList}) because they are currently being processed. This will spawn many playlist jobs that cannot be properly linked to the parent channels. Please wait for processing to complete or pause the channels first.`;
-
-      return {
-        success: false,
-        message: message,
-        error: {
-          type: "ActiveJobsError",
-          details: "Cannot delete channels with active jobs",
-          activeJobs: activeJobs.map(j => ({ channelId: j.channelId, title: j.title }))
-        }
-      };
-    }
-
-    // Step 2: Remove pending/waiting jobs from the queue
-    let removedJobsCount = 0;
-    for (const jobInfo of jobsToRemove) {
-      try {
-        const job = await channelQueue.getJob(jobInfo.jobId);
-        if (job) {
-          await job.remove();
-          removedJobsCount++;
-          console.log(`[deleteChannel] Removed ${jobInfo.state} job for channel ${jobInfo.channelId}`);
-        }
-      } catch (error) {
-        console.error(`[deleteChannel] Error removing job ${jobInfo.jobId}:`, error.message);
-        // Continue with deletion even if job removal fails
-      }
-    }
-
-    if (removedJobsCount > 0) {
-      console.log(`[deleteChannel] Removed ${removedJobsCount} pending job(s) from queue`);
-    }
-
-  } finally {
-    // Always close the queue connection
-    await channelQueue.close();
-  }
-
-  // Step 3: Delete all playlists in these channels using deletePlaylist function
-  // This will cascade delete videos and clean up orphans
-  let deletedPlaylists = 0;
-  let deletedVideos = 0;
-
-  // Determine which mode to use for deletePlaylist
-  let playlistDeleteMode;
-  let channelContextItems = [];
-
-  if (items === 'all' || items === 'allInContext') {
-    // For 'all' modes, tell deletePlaylist to delete all playlists
-    playlistDeleteMode = 'all';
-    channelContextItems = [];
-  } else {
-    // For array mode, use 'allInContext' and pass minimal channel objects
-    playlistDeleteMode = 'allInContext';
-    channelContextItems = channelIds.map(id => ({ P: { youtubeId: id } }));
-  }
-
-  try {
-    const deleteResult = await args.executeNamedServerFunction({
-      functionName: 'deletePlaylist',
-      contextData: {
-        items: playlistDeleteMode,
-        itemType: 'playlist',
-        contextItems: channelContextItems,  // Pass minimal channel objects for context
-        ownershipId: ownershipId,
-        skipOwnershipCheck: true  // Already checked in parent
-      }
-    });
-
-    if (deleteResult?.result?.success) {
-      const resultData = deleteResult.result.data;
-      deletedPlaylists = resultData?.deletedPlaylists || 0;
-      deletedVideos = resultData?.deletedVideos || 0;
-    }
-  } catch (playlistError) {
-    console.error(`Failed to delete playlists from channels:`, playlistError);
-    // Continue with channel deletion even if playlist deletion fails
-  }
-
-  // Step 4 & 5 COMBINED: Delete ownership relationships and orphaned channels atomically
-  // NEW SCHEMA v4.0: With duplicate channels per ownership, we track specific channel instances
-  // Benefits: No global search, atomic operation, safer
-  let queryParams = { ownershipId };
-  let channelMatchClause = '';
-
-  if (items === 'all' || items === 'allInContext') {
-    // Match all channels for this ownership
-    channelMatchClause = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipChannel]->(c:Channel)
-    `;
-  } else {
-    queryParams.channelIds = channelIds;
-    // Match specific channels by youtubeId for this ownership
-    channelMatchClause = `
-      MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipChannel]->(c:Channel)
-      WHERE c.youtubeId IN $channelIds
-    `;
-  }
-
-  const deleteQuery = `
-    ${channelMatchClause}
-
-    // Collect channel info before deletion
-    WITH o, c, ownershipRel, elementId(c) as channelNodeId
-
-    // Delete optional ChannelSetting if it exists (created on-demand when user customizes)
-    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-
-    // Delete setting and ownership relationship
-    DETACH DELETE cs, ownershipRel
-
-    // Return the channel instance ID for orphan check
-    RETURN collect(DISTINCT channelNodeId) as channelIds, count(DISTINCT c) as deletedOwnershipLinks
-  `;
-
-  const deleteResult = await args.session.run(deleteQuery, queryParams);
-
-  const deletedLinksRaw = deleteResult.records[0]?.get('deletedOwnershipLinks');
-  const deletedOwnershipLinks = deletedLinksRaw ? (typeof deletedLinksRaw.toNumber === 'function' ? deletedLinksRaw.toNumber() : Number(deletedLinksRaw)) : 0;
-
-  if (deletedOwnershipLinks === 0) {
-    throw new Error("Channels not found or already deleted");
-  }
-
-  // Get the Neo4j internal IDs of channels we deleted ownership from
-  const channelNodeIds = deleteResult.records[0]?.get('channelIds') || [];
-
-  // Step 5: Delete ONLY the specific channel instances that are now orphaned
-  // NEW SCHEMA v4.0: No global search - only check the specific instances from Step 4
-  const deleteOrphanChannelsQuery = `
-    MATCH (c:Channel)
-    WHERE elementId(c) IN $channelNodeIds
-
-    // DEFENSIVE: Only delete if NO ownership references this channel instance
-    // This ensures we don't delete channels that are still owned by other ownerships
-    OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipChannel]->(c)
-
-    WITH c, count(anyO) as ownershipCount
-    WHERE ownershipCount = 0
-
-    // No ownership references this channel, safe to delete
-    // First remove all Channel-[:ChannelPlaylist]->Playlist relationships
-    OPTIONAL MATCH (c)-[r:ChannelPlaylist]->(p:Playlist)
-    DELETE r
-
-    // Then delete the channel node
-    WITH c
-    DETACH DELETE c
-    RETURN count(c) as deletedChannels
-  `;
-
-  const channelResult = await args.session.run(deleteOrphanChannelsQuery, { channelNodeIds });
-
-  const deletedCRaw = channelResult.records[0]?.get('deletedChannels');
-  const deletedChannels = deletedCRaw ? (typeof deletedCRaw.toNumber === 'function' ? deletedCRaw.toNumber() : Number(deletedCRaw)) : 0;
-
-  let message;
-  const isAll = items === 'all';
-  const isAllInContext = items === 'allInContext';
-  const totalProcessed = deletedOwnershipLinks + deletedChannels;
-
-  if (isAll || isAllInContext) {
-    // For channels, both 'all' and 'allInContext' have the same behavior
-    message = `Successfully processed all channels${totalProcessed > 0 ? ` (${totalProcessed} channel(s))` : ''}${deletedChannels > 0 ? `, deleted ${deletedChannels} orphan channel(s)` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
-  } else if (items.length === 1) {
-    const channelTitle = items[0].P?.title || "Channel";
-    message = `Successfully deleted channel "${channelTitle}"${deletedPlaylists > 0 ? ` and ${deletedPlaylists} playlist(s)` : ''}${deletedVideos > 0 ? ` and ${deletedVideos} video(s)` : ''}`;
-  } else {
-    message = `Successfully processed ${items.length} channel(s)${deletedChannels > 0 ? `, deleted ${deletedChannels} orphan channel(s)` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
-  }
-
-  // Calculate total channels processed
-  const totalChannels = isAll || isAllInContext ? totalProcessed : (items ? items.length : 0);
-
-  return {
-    success: true,
-    data: {
-      channelIds: channelIds,
-      deletedChannels: deletedChannels,
-      deletedPlaylists: deletedPlaylists,
-      deletedVideos: deletedVideos,
-      totalChannels: totalChannels,
-      totalPlaylistsInChannels: deletedPlaylists,
-      userId: user.id,
-      ownershipId: ownershipId
-    },
-    message: message
-  };
-
-} catch (error) {
-  console.error("Error deleting channel:", error);
-
-  let userMessage = "Failed to delete channel. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to delete channels.";
-  } else if (error.message.includes("not found")) {
-    userMessage = error.message;
-  } else if (error.message.includes("Invalid channel data")) {
-    userMessage = error.message;
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again."
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters - accepts array of items, 'all', or 'allInContext'
+const { items, itemType, contextItems, ownershipId, skipOwnershipCheck } = args.contextData;
+
+if (itemType !== "channel") {
+  return {
+    success: false,
+    message: "Invalid channel data"
+  };
+}
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
+  };
+}
+
+// Verify ownership belongs to user (skip if called internally)
+if (!skipOwnershipCheck) {
+  const ownershipCheck = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+    RETURN o
+  `, { userUuid: user.P.uuid, ownershipId });
+
+  if (ownershipCheck.records.length === 0) {
+    return {
+      success: false,
+      message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+    };
+  }
+}
+
+// Handle contextItems array
+const contextItemArray = contextItems || [];
+
+// Prepare parameters for queries
+let channelIds = null;
+
+// Handle 'all', 'allInContext', or array of items
+// Note: For channels, 'allInContext' behaves like 'all' since channels are top-level under ownership
+if (items === 'all' || items === 'allInContext') {
+  // Will use subquery for all channels in ownership
+  channelIds = null;
+} else {
+  // Extract channel IDs from array
+  if (!items || items.length === 0) {
+    return {
+      success: false,
+      message: "No channels provided to delete"
+    };
+  }
+  channelIds = items.map(c => c.P?.youtubeId).filter(id => id);
+  if (channelIds.length === 0) {
+    return {
+      success: false,
+      message: "No valid channel IDs found"
+    };
+  }
+}
+
+// Step 1: Check for active channel jobs in BullMQ queue
+// Prevent deletion if any channel is actively being processed
+const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+if (!helpers.result?.success) {
+  return {
+    success: false,
+    message: 'Failed to initialize queue helpers'
+  };
+}
+
+const { QUEUE_NAMES, createJobId } = helpers.result.data;
+const { Queue } = args.bullmq;
+const connection = helpers.result.data.getRedisConnection();
+const channelQueue = new Queue(QUEUE_NAMES.CHANNEL, { connection });
+
+try {
+  // Get channel IDs to check (either specific IDs or all channels for this ownership)
+  let channelIdsToCheck = channelIds;
+
+  if (items === 'all' || items === 'allInContext') {
+    // Get all channel IDs for this ownership
+    // NEW SCHEMA v4.0: Direct ownership
+    const allChannelsResult = await args.session.run(`
+      MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel)
+      RETURN c.youtubeId as channelId
+    `, { ownershipId });
+
+    channelIdsToCheck = allChannelsResult.records.map(r => r.get('channelId'));
+  }
+
+  // Check if any of these channels have active jobs
+  const activeJobs = [];
+  const jobsToRemove = [];
+
+  for (const channelId of channelIdsToCheck) {
+    const jobId = createJobId('channel', ownershipId, channelId);
+    const job = await channelQueue.getJob(jobId);
+
+    if (job) {
+      const state = await job.getState();
+
+      if (state === 'active') {
+        // Get channel title for better error message (verify ownership)
+        // NEW SCHEMA v4.0: Verify ownership before accessing channel
+        const channelResult = await args.session.run(`
+          MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $channelId})
+          RETURN c.title as title
+        `, { ownershipId, channelId });
+
+        const title = channelResult.records[0]?.get('title') || channelId;
+        activeJobs.push({ channelId, title, jobId });
+      } else if (['waiting', 'delayed', 'failed'].includes(state)) {
+        // Track jobs that can be removed
+        jobsToRemove.push({ jobId, channelId, state });
+      }
+    }
+  }
+
+  // If any active jobs exist, prevent deletion
+  if (activeJobs.length > 0) {
+    await channelQueue.close();
+
+    const channelList = activeJobs.map(j => `"${j.title}"`).join(', ');
+    const message = activeJobs.length === 1
+      ? `Cannot delete channel ${channelList} because it is currently being processed. This will spawn many playlist jobs that cannot be properly linked to the parent channel. Please wait for processing to complete or pause the channel first.`
+      : `Cannot delete ${activeJobs.length} channel(s) (${channelList}) because they are currently being processed. This will spawn many playlist jobs that cannot be properly linked to the parent channels. Please wait for processing to complete or pause the channels first.`;
+
+    return {
+      success: false,
+      message: message,
+      error: {
+        type: "ActiveJobsError",
+        details: "Cannot delete channels with active jobs",
+        activeJobs: activeJobs.map(j => ({ channelId: j.channelId, title: j.title }))
+      }
+    };
+  }
+
+  // Step 2: Remove pending/waiting jobs from the queue
+  let removedJobsCount = 0;
+  for (const jobInfo of jobsToRemove) {
+    try {
+      const job = await channelQueue.getJob(jobInfo.jobId);
+      if (job) {
+        await job.remove();
+        removedJobsCount++;
+        console.log(`[deleteChannel] Removed ${jobInfo.state} job for channel ${jobInfo.channelId}`);
+      }
+    } catch (error) {
+      console.error(`[deleteChannel] Error removing job ${jobInfo.jobId}:`, error.message);
+      // Continue with deletion even if job removal fails
+    }
+  }
+
+  if (removedJobsCount > 0) {
+    console.log(`[deleteChannel] Removed ${removedJobsCount} pending job(s) from queue`);
+  }
+
+} finally {
+  // Always close the queue connection
+  await channelQueue.close();
+}
+
+// Step 3: Delete all playlists in these channels using deletePlaylist function
+// This will cascade delete videos and clean up orphans
+let deletedPlaylists = 0;
+let deletedVideos = 0;
+
+// Determine which mode to use for deletePlaylist
+let playlistDeleteMode;
+let channelContextItems = [];
+
+if (items === 'all' || items === 'allInContext') {
+  // For 'all' modes, tell deletePlaylist to delete all playlists
+  playlistDeleteMode = 'all';
+  channelContextItems = [];
+} else {
+  // For array mode, use 'allInContext' and pass minimal channel objects
+  playlistDeleteMode = 'allInContext';
+  channelContextItems = channelIds.map(id => ({ P: { youtubeId: id } }));
+}
+
+try {
+  const deleteResult = await args.executeNamedServerFunction({
+    functionName: 'deletePlaylist',
+    contextData: {
+      items: playlistDeleteMode,
+      itemType: 'playlist',
+      contextItems: channelContextItems,  // Pass minimal channel objects for context
+      ownershipId: ownershipId,
+      skipOwnershipCheck: true  // Already checked in parent
+    }
+  });
+
+  if (deleteResult?.result?.success) {
+    const resultData = deleteResult.result.data;
+    deletedPlaylists = resultData?.deletedPlaylists || 0;
+    deletedVideos = resultData?.deletedVideos || 0;
+  }
+} catch (playlistError) {
+  console.error(`Failed to delete playlists from channels:`, playlistError);
+  // Continue with channel deletion even if playlist deletion fails
+}
+
+// Step 4 & 5 COMBINED: Delete ownership relationships and orphaned channels atomically
+// NEW SCHEMA v4.0: With duplicate channels per ownership, we track specific channel instances
+// Benefits: No global search, atomic operation, safer
+let queryParams = { ownershipId };
+let channelMatchClause = '';
+
+if (items === 'all' || items === 'allInContext') {
+  // Match all channels for this ownership
+  channelMatchClause = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipChannel]->(c:Channel)
+  `;
+} else {
+  queryParams.channelIds = channelIds;
+  // Match specific channels by youtubeId for this ownership
+  channelMatchClause = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})-[ownershipRel:YouTubeOwnershipChannel]->(c:Channel)
+    WHERE c.youtubeId IN $channelIds
+  `;
+}
+
+const deleteQuery = `
+  ${channelMatchClause}
+
+  // Collect channel info before deletion
+  WITH o, c, ownershipRel, elementId(c) as channelNodeId
+
+  // Delete optional ChannelSetting if it exists (created on-demand when user customizes)
+  OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+
+  // Delete setting and ownership relationship
+  DETACH DELETE cs, ownershipRel
+
+  // Return the channel instance ID for orphan check
+  RETURN collect(DISTINCT channelNodeId) as channelIds, count(DISTINCT c) as deletedOwnershipLinks
+`;
+
+const deleteResult = await args.session.run(deleteQuery, queryParams);
+
+const deletedLinksRaw = deleteResult.records[0]?.get('deletedOwnershipLinks');
+const deletedOwnershipLinks = deletedLinksRaw ? (typeof deletedLinksRaw.toNumber === 'function' ? deletedLinksRaw.toNumber() : Number(deletedLinksRaw)) : 0;
+
+if (deletedOwnershipLinks === 0) {
+  return {
+    success: false,
+    message: "Channels not found or already deleted"
+  };
+}
+
+// Get the Neo4j internal IDs of channels we deleted ownership from
+const channelNodeIds = deleteResult.records[0]?.get('channelIds') || [];
+
+// Step 5: Delete ONLY the specific channel instances that are now orphaned
+// NEW SCHEMA v4.0: No global search - only check the specific instances from Step 4
+const deleteOrphanChannelsQuery = `
+  MATCH (c:Channel)
+  WHERE elementId(c) IN $channelNodeIds
+
+  // DEFENSIVE: Only delete if NO ownership references this channel instance
+  // This ensures we don't delete channels that are still owned by other ownerships
+  OPTIONAL MATCH (anyO:YouTubeOwnership)-[:YouTubeOwnershipChannel]->(c)
+
+  WITH c, count(anyO) as ownershipCount
+  WHERE ownershipCount = 0
+
+  // No ownership references this channel, safe to delete
+  // First remove all Channel-[:ChannelPlaylist]->Playlist relationships
+  OPTIONAL MATCH (c)-[r:ChannelPlaylist]->(p:Playlist)
+  DELETE r
+
+  // Then delete the channel node
+  WITH c
+  DETACH DELETE c
+  RETURN count(c) as deletedChannels
+`;
+
+const channelResult = await args.session.run(deleteOrphanChannelsQuery, { channelNodeIds });
+
+const deletedCRaw = channelResult.records[0]?.get('deletedChannels');
+const deletedChannels = deletedCRaw ? (typeof deletedCRaw.toNumber === 'function' ? deletedCRaw.toNumber() : Number(deletedCRaw)) : 0;
+
+let message;
+const isAll = items === 'all';
+const isAllInContext = items === 'allInContext';
+const totalProcessed = deletedOwnershipLinks + deletedChannels;
+
+if (isAll || isAllInContext) {
+  // For channels, both 'all' and 'allInContext' have the same behavior
+  message = `Successfully processed all channels${totalProcessed > 0 ? ` (${totalProcessed} channel(s))` : ''}${deletedChannels > 0 ? `, deleted ${deletedChannels} orphan channel(s)` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
+} else if (items.length === 1) {
+  const channelTitle = items[0].P?.title || "Channel";
+  message = `Successfully deleted channel "${channelTitle}"${deletedPlaylists > 0 ? ` and ${deletedPlaylists} playlist(s)` : ''}${deletedVideos > 0 ? ` and ${deletedVideos} video(s)` : ''}`;
+} else {
+  message = `Successfully processed ${items.length} channel(s)${deletedChannels > 0 ? `, deleted ${deletedChannels} orphan channel(s)` : ''}${deletedPlaylists > 0 ? `, deleted ${deletedPlaylists} orphan playlist(s)` : ''}${deletedVideos > 0 ? `, deleted ${deletedVideos} orphan video(s)` : ''}`;
+}
+
+// Calculate total channels processed
+const totalChannels = isAll || isAllInContext ? totalProcessed : (items ? items.length : 0);
+
+return {
+  success: true,
+  data: {
+    channelIds: channelIds,
+    deletedChannels: deletedChannels,
+    deletedPlaylists: deletedPlaylists,
+    deletedVideos: deletedVideos,
+    totalChannels: totalChannels,
+    totalPlaylistsInChannels: deletedPlaylists,
+    userId: user.id,
+    ownershipId: ownershipId
+  },
+  message: message
+};
 '''
         key: deleteChannel
       }

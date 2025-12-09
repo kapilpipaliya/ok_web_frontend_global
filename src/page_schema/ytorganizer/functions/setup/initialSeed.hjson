@@ -10,148 +10,145 @@
 // This function initializes the database with default settings using the unified Setting vertex format
 // It should only be run once during initial setup
 
+const results = {
+  generalSetting: null,
+  emailSetting: null,
+  oauthSetting: null
+};
+
+// 1. Create/Update General Setting
+const generalSettingData = {
+  appName: "YSaar",
+  redirectUrlAfterSignin: "/home"
+};
+
+const checkGeneral = await args.session.run(
+  "MATCH (s:GlobalSetting) RETURN s"
+);
+
+if (checkGeneral.records.length > 0) {
+  // Update existing
+  const updateGeneral = await args.session.run(
+    `MATCH (s:GlobalSetting)
+     SET s += $setting,
+         s.updatedAt = datetime()
+     RETURN s`,
+    { setting: generalSettingData }
+  );
+  results.generalSetting = updateGeneral.records[0]?.get("s").properties;
+} else {
+  // Create new
+  const createGeneral = await args.session.run(
+    `CREATE (s:GlobalSetting {
+      key: $key,
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    SET s += $setting
+    RETURN s`,
+    { key: "Default", setting: generalSettingData }
+  );
+  results.generalSetting = createGeneral.records[0]?.get("s").properties;
+}
+
+// 2. Create/Update Email Setting (using unified Setting format)
+const emailSettingData = {
+  active: "resend",
+  resendApiKey: "re_cHB3wryZ_9aGvavTVXqbMYVAndzQvcxNY",
+  fromEmail: "noreplay@updates.ysaar.com"
+};
+
+const checkEmail = await args.session.run(
+  "MATCH (s:Setting {type: 'email'}) RETURN s"
+);
+
+if (checkEmail.records.length > 0) {
+  // Update existing
+  const updateEmail = await args.session.run(
+    `MATCH (s:Setting {type: 'email'})
+     SET s += $setting,
+         s.updatedAt = datetime()
+     RETURN s`,
+    { setting: emailSettingData }
+  );
+  results.emailSetting = updateEmail.records[0]?.get("s").properties;
+} else {
+  // Create new with unified format
+  const createEmail = await args.session.run(
+    `CREATE (s:Setting {
+      key: $key,
+      type: 'email',
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    SET s += $setting
+    RETURN s`,
+    { key: "email_Default", setting: emailSettingData }
+  );
+  results.emailSetting = createEmail.records[0]?.get("s").properties;
+}
+
+// 3. Create/Update Google OAuth Setting (using unified Setting format)
+const googleClientSecret = "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";
+let encryptedGoogleSecret = "";
+
 try {
-  const results = {
-    generalSetting: null,
-    emailSetting: null,
-    oauthSetting: null
-  };
-
-  // 1. Create/Update General Setting
-  const generalSettingData = {
-    appName: "YSaar",
-    redirectUrlAfterSignin: "/home"
-  };
-
-  const checkGeneral = await args.session.run(
-    "MATCH (s:GlobalSetting) RETURN s"
-  );
-
-  if (checkGeneral.records.length > 0) {
-    // Update existing
-    const updateGeneral = await args.session.run(
-      `MATCH (s:GlobalSetting)
-       SET s += $setting,
-           s.updatedAt = datetime()
-       RETURN s`,
-      { setting: generalSettingData }
-    );
-    results.generalSetting = updateGeneral.records[0]?.get("s").properties;
-  } else {
-    // Create new
-    const createGeneral = await args.session.run(
-      `CREATE (s:GlobalSetting {
-        key: $key,
-        createdAt: datetime(),
-        updatedAt: datetime()
-      })
-      SET s += $setting
-      RETURN s`,
-      { key: "Default", setting: generalSettingData }
-    );
-    results.generalSetting = createGeneral.records[0]?.get("s").properties;
-  }
-
-  // 2. Create/Update Email Setting (using unified Setting format)
-  const emailSettingData = {
-    active: "resend",
-    resendApiKey: "re_cHB3wryZ_9aGvavTVXqbMYVAndzQvcxNY",
-    fromEmail: "noreplay@updates.ysaar.com"
-  };
-
-  const checkEmail = await args.session.run(
-    "MATCH (s:Setting {type: 'email'}) RETURN s"
-  );
-
-  if (checkEmail.records.length > 0) {
-    // Update existing
-    const updateEmail = await args.session.run(
-      `MATCH (s:Setting {type: 'email'})
-       SET s += $setting,
-           s.updatedAt = datetime()
-       RETURN s`,
-      { setting: emailSettingData }
-    );
-    results.emailSetting = updateEmail.records[0]?.get("s").properties;
-  } else {
-    // Create new with unified format
-    const createEmail = await args.session.run(
-      `CREATE (s:Setting {
-        key: $key,
-        type: 'email',
-        createdAt: datetime(),
-        updatedAt: datetime()
-      })
-      SET s += $setting
-      RETURN s`,
-      { key: "email_Default", setting: emailSettingData }
-    );
-    results.emailSetting = createEmail.records[0]?.get("s").properties;
-  }
-
-  // 3. Create/Update Google OAuth Setting (using unified Setting format)
-  const googleClientSecret = "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";
-  let encryptedGoogleSecret = "";
-
-  try {
-    encryptedGoogleSecret = args.encryptClientSecret(googleClientSecret);
-  } catch (error) {
-    console.error("Failed to encrypt Google client secret:", error);
-    throw new Error("Failed to encrypt OAuth client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured.");
-  }
-
-  const oauthSettingData = {
-    googleEnabled: true,
-    googleClientId: "39168961833-tu9lboivh4c7580q1paj70ccd0hlg1fb.apps.googleusercontent.com",
-    googleClientSecret: encryptedGoogleSecret
-  };
-
-  const checkOAuth = await args.session.run(
-    "MATCH (s:Setting {type: 'oauth'}) RETURN s"
-  );
-
-  if (checkOAuth.records.length > 0) {
-    // Update existing
-    const updateOAuth = await args.session.run(
-      `MATCH (s:Setting {type: 'oauth'})
-       SET s.googleClientId = $googleClientId,
-           s.googleClientSecret = $googleClientSecret,
-           s.googleEnabled = $googleEnabled,
-           s.updatedAt = datetime()
-       RETURN s`,
-      oauthSettingData
-    );
-    results.oauthSetting = updateOAuth.records[0]?.get("s").properties;
-  } else {
-    // Create new with unified format
-    const createOAuth = await args.session.run(
-      `CREATE (s:Setting {
-        key: 'oauth_Default',
-        type: 'oauth',
-        googleClientId: $googleClientId,
-        googleClientSecret: $googleClientSecret,
-        googleEnabled: $googleEnabled,
-        createdAt: datetime(),
-        updatedAt: datetime()
-      })
-      RETURN s`,
-      oauthSettingData
-    );
-    results.oauthSetting = createOAuth.records[0]?.get("s").properties;
-  }
-
-  return {
-    success: true,
-    message: "Initial seed completed successfully",
-    data: results
-  };
+  encryptedGoogleSecret = args.encryptClientSecret(googleClientSecret);
 } catch (error) {
-  console.error("Initial seed error:", error);
+  console.error("Failed to encrypt Google client secret:", error);
+}
+if (!encryptedGoogleSecret) {
   return {
     success: false,
-    error: error.message || "Failed to seed initial data"
+    message: "Failed to encrypt OAuth client secret. Please ensure TOKEN_ENCRYPTION_KEY is properly configured."
   };
 }
+
+const oauthSettingData = {
+  googleEnabled: true,
+  googleClientId: "39168961833-tu9lboivh4c7580q1paj70ccd0hlg1fb.apps.googleusercontent.com",
+  googleClientSecret: encryptedGoogleSecret
+};
+
+const checkOAuth = await args.session.run(
+  "MATCH (s:Setting {type: 'oauth'}) RETURN s"
+);
+
+if (checkOAuth.records.length > 0) {
+  // Update existing
+  const updateOAuth = await args.session.run(
+    `MATCH (s:Setting {type: 'oauth'})
+     SET s.googleClientId = $googleClientId,
+         s.googleClientSecret = $googleClientSecret,
+         s.googleEnabled = $googleEnabled,
+         s.updatedAt = datetime()
+     RETURN s`,
+    oauthSettingData
+  );
+  results.oauthSetting = updateOAuth.records[0]?.get("s").properties;
+} else {
+  // Create new with unified format
+  const createOAuth = await args.session.run(
+    `CREATE (s:Setting {
+      key: 'oauth_Default',
+      type: 'oauth',
+      googleClientId: $googleClientId,
+      googleClientSecret: $googleClientSecret,
+      googleEnabled: $googleEnabled,
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    RETURN s`,
+    oauthSettingData
+  );
+  results.oauthSetting = createOAuth.records[0]?.get("s").properties;
+}
+
+return {
+  success: true,
+  message: "Initial seed completed successfully",
+  data: results
+};
 '''
         key: initialSeed
       }

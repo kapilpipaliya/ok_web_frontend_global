@@ -19,131 +19,106 @@
  * - A user reports authentication issues
  */
 
-try {
-  console.log('[Manual Token Refresh] Starting manual refresh of YouTube OAuth tokens');
+console.log('[Manual Token Refresh] Starting manual refresh of YouTube OAuth tokens');
 
-  // Get all users with YouTube OAuth tokens
-  const usersResult = await args.session.run(`
-    MATCH (u:User)-[r:UserYouTubeToken]->(token:YouTubeToken)
-    WHERE token.accessToken IS NOT NULL
-      AND token.isRevoked = false
-    RETURN u.uuid as userUuid,
-           u.email as userEmail,
-           token.expiresAt as expiresAt,
-           token.refreshToken as refreshToken
-  `);
+// Get all users with YouTube OAuth tokens
+const usersResult = await args.session.run(`
+  MATCH (u:User)-[r:UserYouTubeToken]->(token:YouTubeToken)
+  WHERE token.accessToken IS NOT NULL
+    AND token.isRevoked = false
+  RETURN u.uuid as userUuid,
+         u.email as userEmail,
+         token.expiresAt as expiresAt,
+         token.refreshToken as refreshToken
+`);
 
-  if (usersResult.records.length === 0) {
-    console.log('[Manual Token Refresh] No users with YouTube tokens found');
-    return {
-      success: true,
-      message: 'No tokens to refresh',
-      data: {
-        totalUsers: 0,
-        tokensRefreshed: 0,
-        tokensFailed: 0
-      }
-    };
-  }
-
-  console.log(`[Manual Token Refresh] Found ${usersResult.records.length} users with YouTube tokens`);
-
-  let tokensRefreshed = 0;
-  let tokensFailed = 0;
-  const errors = [];
-
-  for (const record of usersResult.records) {
-    const userUuid = record.get('userUuid');
-    const userEmail = record.get('userEmail');
-    const expiresAt = record.get('expiresAt');
-    const refreshToken = record.get('refreshToken');
-
-    // Check if token needs refresh (expires in less than 1 hour or already expired)
-    const expiryTime = expiresAt ? new Date(expiresAt).getTime() : 0;
-    const now = Date.now();
-    const oneHourFromNow = now + (60 * 60 * 1000);
-
-    if (expiryTime > oneHourFromNow) {
-      // Token is still valid for more than 1 hour, skip
-      console.log(`[Manual Token Refresh] Token still valid for user ${userEmail} (expires in ${Math.round((expiryTime - now) / (60 * 1000))} minutes)`);
-      continue;
-    }
-
-    if (!refreshToken) {
-      console.warn(`[Manual Token Refresh] No refresh token available for user ${userEmail}`);
-      tokensFailed++;
-      errors.push({
-        userUuid,
-        userEmail,
-        error: 'No refresh token available'
-      });
-      continue;
-    }
-
-    // Refresh the token
-    try {
-      console.log(`[Manual Token Refresh] Refreshing token for user ${userEmail}`);
-
-      // Call the refresh token function
-      const refreshResult = await args.executeNamedServerFunction({
-        functionName: 'refreshYouTubeToken',
-        contextData: {
-          userUuid: userUuid
-        }
-      });
-
-      if (refreshResult.result?.success) {
-        tokensRefreshed++;
-        console.log(`[Manual Token Refresh] Successfully refreshed token for user ${userEmail}`);
-      } else {
-        tokensFailed++;
-        const errorMsg = refreshResult.result?.error || refreshResult.result?.message || 'Unknown error';
-        errors.push({
-          userUuid,
-          userEmail,
-          error: errorMsg
-        });
-        console.error(`[Manual Token Refresh] Failed to refresh token for user ${userEmail}:`, errorMsg);
-      }
-    } catch (error) {
-      tokensFailed++;
-      errors.push({
-        userUuid,
-        userEmail,
-        error: error.message
-      });
-      console.error(`[Manual Token Refresh] Error refreshing token for user ${userEmail}:`, error);
-    }
-  }
-
-  const message = `Successfully refreshed ${tokensRefreshed} token(s)${tokensFailed > 0 ? `, ${tokensFailed} failed` : ''}`;
-  console.log(`[Manual Token Refresh] ${message}`);
-
+if (usersResult.records.length === 0) {
+  console.log('[Manual Token Refresh] No users with YouTube tokens found');
   return {
     success: true,
-    message: message,
+    message: 'No tokens to refresh',
     data: {
-      totalUsers: usersResult.records.length,
-      tokensRefreshed,
-      tokensFailed,
-      errors: errors.length > 0 ? errors : undefined,
-      refreshedAt: new Date().toISOString()
-    }
-  };
-
-} catch (error) {
-  console.error('[Manual Token Refresh] Error:', error);
-
-  return {
-    success: false,
-    message: 'Error triggering manual token refresh',
-    error: {
-      type: error.name || 'ManualTokenRefreshError',
-      details: error.message,
-      stack: error.stack
+      totalUsers: 0,
+      tokensRefreshed: 0,
+      tokensFailed: 0
     }
   };
 }
+
+console.log(`[Manual Token Refresh] Found ${usersResult.records.length} users with YouTube tokens`);
+
+let tokensRefreshed = 0;
+let tokensFailed = 0;
+const errors = [];
+
+for (const record of usersResult.records) {
+  const userUuid = record.get('userUuid');
+  const userEmail = record.get('userEmail');
+  const expiresAt = record.get('expiresAt');
+  const refreshToken = record.get('refreshToken');
+
+  // Check if token needs refresh (expires in less than 1 hour or already expired)
+  const expiryTime = expiresAt ? new Date(expiresAt).getTime() : 0;
+  const now = Date.now();
+  const oneHourFromNow = now + (60 * 60 * 1000);
+
+  if (expiryTime > oneHourFromNow) {
+    // Token is still valid for more than 1 hour, skip
+    console.log(`[Manual Token Refresh] Token still valid for user ${userEmail} (expires in ${Math.round((expiryTime - now) / (60 * 1000))} minutes)`);
+    continue;
+  }
+
+  if (!refreshToken) {
+    console.warn(`[Manual Token Refresh] No refresh token available for user ${userEmail}`);
+    tokensFailed++;
+    errors.push({
+      userUuid,
+      userEmail,
+      error: 'No refresh token available'
+    });
+    continue;
+  }
+
+  // Refresh the token
+  console.log(`[Manual Token Refresh] Refreshing token for user ${userEmail}`);
+
+  // Call the refresh token function
+  const refreshResult = await args.executeNamedServerFunction({
+    functionName: 'refreshYouTubeToken',
+    contextData: {
+      userUuid: userUuid
+    }
+  });
+
+  if (refreshResult.result?.success) {
+    tokensRefreshed++;
+    console.log(`[Manual Token Refresh] Successfully refreshed token for user ${userEmail}`);
+  } else {
+    tokensFailed++;
+    const errorMsg = refreshResult.result?.message || 'Unknown error';
+    errors.push({
+      userUuid,
+      userEmail,
+      error: errorMsg
+    });
+    console.error(`[Manual Token Refresh] Failed to refresh token for user ${userEmail}:`, errorMsg);
+  }
+}
+
+const message = `Successfully refreshed ${tokensRefreshed} token(s)${tokensFailed > 0 ? `, ${tokensFailed} failed` : ''}`;
+console.log(`[Manual Token Refresh] ${message}`);
+
+return {
+  success: true,
+  message: message,
+  data: {
+    totalUsers: usersResult.records.length,
+    tokensRefreshed,
+    tokensFailed,
+    errors: errors.length > 0 ? errors : undefined,
+    refreshedAt: new Date().toISOString()
+  }
+};
 '''
         key: manualRefreshTokens
       }

@@ -7,55 +7,48 @@
         description: Get processing status for all channels and playlists for current user
         body:
           '''
-try {
-  // Get current authenticated user
-  const user = await args.getUserFromSession();
-  if (!user) {
-    throw new Error("User session not found");
-  }
-
-  const { ownershipId } = args.contextData;
-
-  // Use helper functions to fetch channels and playlists with video counts
-  // ownershipId is optional - if omitted, aggregates across all ownerships
-  const channelResult = await args.executeNamedServerFunction({
-    functionName: "getChannelsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership if provided
-      statusFilter: ['queued', 'processing']
-    }
-  });
-
-  const playlistResult = await args.executeNamedServerFunction({
-    functionName: "getPlaylistsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership if provided
-      statusFilter: ['queued', 'processing']
-    }
-  });
-
-  const channels = channelResult.result?.success ? channelResult.result.data : [];
-  const playlists = playlistResult.result?.success ? playlistResult.result.data : [];
-
-  return {
-    success: true,
-    data: {
-      channels,
-      playlists,
-      hasActiveProcessing: channels.length > 0 || playlists.length > 0
-    }
-  };
-
-} catch (error) {
-  console.error("Error fetching processing statuses:", error);
+// Get current authenticated user
+const user = await args.getUserFromSession();
+if (!user) {
   return {
     success: false,
-    message: "Failed to fetch processing statuses",
-    error: { details: error.message }
+    message: "User session not found"
   };
 }
+
+const { ownershipId } = args.contextData;
+
+// Use helper functions to fetch channels and playlists with video counts
+// ownershipId is optional - if omitted, aggregates across all ownerships
+const channelResult = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by ownership if provided
+    statusFilter: ['queued', 'processing']
+  }
+});
+
+const playlistResult = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by ownership if provided
+    statusFilter: ['queued', 'processing']
+  }
+});
+
+const channels = channelResult.result?.success ? channelResult.result.data : [];
+const playlists = playlistResult.result?.success ? playlistResult.result.data : [];
+
+return {
+  success: true,
+  data: {
+    channels,
+    playlists,
+    hasActiveProcessing: channels.length > 0 || playlists.length > 0
+  }
+};
 '''
         key: getAllProcessingStatus
       }

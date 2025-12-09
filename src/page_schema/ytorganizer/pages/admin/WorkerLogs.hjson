@@ -23,7 +23,10 @@ const fetchLogs = async () => {
       filterLevel: filterLevel()
     });
 
-    if (result?.result) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+      setLogs([]);
+    } else if (result?.result) {
       setLogs(result.result);
     } else {
       setLogs([]);
@@ -77,10 +80,10 @@ const clearAllLogs = async () => {
 
 // Watch for filter changes and reload logs
 args.createEffect(args.on(
-  () => [args.fns.filterWorker(), args.fns.filterLevel()],
+  () => [filterWorker(), filterLevel()],
   () => {
     // Fetch logs when filters change
-    args.fns.fetchLogs();
+    fetchLogs();
   }
 ));
 

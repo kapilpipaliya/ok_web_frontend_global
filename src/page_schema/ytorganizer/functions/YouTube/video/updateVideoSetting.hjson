@@ -7,105 +7,99 @@
         description: Updates video setting like custom name. Supports multi-ownership model - requires ownershipId.
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  const { youtubeId, customName, ownershipId } = args.contextData;
-
-  if (!youtubeId) {
-    throw new Error("Video ID is required");
-  }
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-  }
-
-  // NEW SCHEMA v4.0: Create or update VideoSetting
-  // VideoSettings store custom data (notes, favorites, custom names)
-  const videoSettingKey = `video_setting_${youtubeId}_${ownershipId}`;
-
-  const updateQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $youtubeId})
-    MERGE (v)-[:VideoVideoSetting]->(vs:VideoSetting {key: $settingKey})
-    ON CREATE SET vs.createdAt = datetime()
-    MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs)
-    SET vs.customName = $customName, vs.updatedAt = datetime()
-    RETURN v.youtubeId as youtubeId
-  `;
-
-  const updateResult = await args.session.run(updateQuery, {
-    ownershipId,
-    youtubeId,
-    customName: customName || null,
-    settingKey: videoSettingKey
-  });
-
-  if (updateResult.records.length === 0) {
-    throw new Error("Video not found for this ownership");
-  }
-
-  // Fetch updated video data with details using helper function
-  const fetchResult = await args.executeNamedServerFunction({
-    functionName: "getVideosWithDetails",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by specific ownership
-      videoIds: [youtubeId]
-    }
-  });
-
-  if (!fetchResult.result || !fetchResult.result.success || fetchResult.result.data.length === 0) {
-    throw new Error("Failed to fetch updated video data");
-  }
-
-  const videoData = fetchResult.result.data[0];
-
-  return {
-    success: true,
-    message: "Video setting updated successfully",
-    data: videoData
-  };
-
-} catch (error) {
-  console.error("Error updating video setting:", error);
-
-  let userMessage = "Failed to update video setting. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to update video setting.";
-  } else if (error.message.includes("Video not found")) {
-    userMessage = "Video not found.";
-  } else if (error.message.includes("Video ID is required")) {
-    userMessage = "Video ID is required.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "UpdateError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again."
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+const { youtubeId, customName, ownershipId } = args.contextData;
+
+if (!youtubeId) {
+  return {
+    success: false,
+    message: "Video ID is required"
+  };
+}
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, { userUuid: user.P.uuid, ownershipId });
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+  };
+}
+
+// NEW SCHEMA v4.0: Create or update VideoSetting
+// VideoSettings store custom data (notes, favorites, custom names)
+const videoSettingKey = `video_setting_${youtubeId}_${ownershipId}`;
+
+const updateQuery = `
+  MATCH (o:YouTubeOwnership {key: $ownershipId})
+  MATCH (o)-[:YouTubeOwnershipVideo]->(v:Video {youtubeId: $youtubeId})
+  MERGE (v)-[:VideoVideoSetting]->(vs:VideoSetting {key: $settingKey})
+  ON CREATE SET vs.createdAt = datetime()
+  MERGE (o)-[:YouTubeOwnershipVideoSetting]->(vs)
+  SET vs.customName = $customName, vs.updatedAt = datetime()
+  RETURN v.youtubeId as youtubeId
+`;
+
+const updateResult = await args.session.run(updateQuery, {
+  ownershipId,
+  youtubeId,
+  customName: customName || null,
+  settingKey: videoSettingKey
+});
+
+if (updateResult.records.length === 0) {
+  return {
+    success: false,
+    message: "Video not found."
+  };
+}
+
+// Fetch updated video data with details using helper function
+const fetchResult = await args.executeNamedServerFunction({
+  functionName: "getVideosWithDetails",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by specific ownership
+    videoIds: [youtubeId]
+  }
+});
+
+if (!fetchResult.result || !fetchResult.result.success || fetchResult.result.data.length === 0) {
+  return {
+    success: false,
+    message: "Failed to fetch updated video data"
+  };
+}
+
+const videoData = fetchResult.result.data[0];
+
+return {
+  success: true,
+  message: "Video setting updated successfully",
+  data: videoData
+};
 '''
         key: updateVideoSetting
       }

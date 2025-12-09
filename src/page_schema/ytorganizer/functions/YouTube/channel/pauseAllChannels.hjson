@@ -7,145 +7,135 @@
         description: Pause all queued/processing channels/playlists for a user
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
-
-  // Get all channels that will be paused across all ownerships (need IDs before updating status)
-  // NEW ARCHITECTURE: Queue status on Channel vertex
-  const channelsToDelete = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
-    WHERE c.queueStatus IN ['queued', 'processing']
-    RETURN c.youtubeId as channelId, o.key as ownershipId
-  `, { userUuid: user.P.uuid });
-
-  // Get all playlists that will be paused across all ownerships
-  // NEW ARCHITECTURE: Queue status on Playlist vertex
-  const playlistsToDelete = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
-    WHERE p.queueStatus IN ['queued', 'processing']
-    RETURN p.youtubeId as playlistId, o.key as ownershipId
-  `, { userUuid: user.P.uuid });
-
-  const channelJobs = channelsToDelete.records.map(r => ({
-    channelId: r.get('channelId'),
-    ownershipId: r.get('ownershipId')
-  }));
-  const playlistJobs = playlistsToDelete.records.map(r => ({
-    playlistId: r.get('playlistId'),
-    ownershipId: r.get('ownershipId')
-  }));
-
-  let jobsRemoved = 0;
-
-  // Remove channel jobs from BullMQ queue
-  if (channelJobs.length > 0) {
-    const channelQueue = helpers.result.data.createChannelQueue(args);
-
-    try {
-      // Get all waiting and delayed jobs
-      const waitingJobs = await channelQueue.getJobs(['waiting', 'delayed']);
-
-      // Filter and remove jobs that match this user's channels (by ownership and channelId)
-      for (const job of waitingJobs) {
-        if (job.data.userUuid === user.P.uuid) {
-          const matchingJob = channelJobs.find(
-            cj => cj.channelId === job.data.channelId && cj.ownershipId === job.data.ownershipId
-          );
-          if (matchingJob) {
-            await job.remove();
-            jobsRemoved++;
-          }
-        }
-      }
-    } finally {
-      await channelQueue.close();
-    }
-  }
-
-  // Remove playlist jobs from BullMQ queue
-  if (playlistJobs.length > 0) {
-    const playlistQueue = helpers.result.data.createPlaylistQueue(args);
-
-    try{
-      // Get all waiting and delayed jobs
-      const waitingJobs = await playlistQueue.getJobs(['waiting', 'delayed']);
-
-      // Filter and remove jobs that match this user's playlists (by ownership and playlistId)
-      for (const job of waitingJobs) {
-        if (job.data.userUuid === user.P.uuid) {
-          const matchingJob = playlistJobs.find(
-            pj => pj.playlistId === job.data.playlistId && pj.ownershipId === job.data.ownershipId
-          );
-          if (matchingJob) {
-            await job.remove();
-            jobsRemoved++;
-          }
-        }
-      }
-    } finally {
-      await playlistQueue.close();
-    }
-  }
-
-  // Now update database status to paused across all ownerships
-  // NEW ARCHITECTURE: Update queue status on Channel vertex
-  const result = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
-    WHERE c.queueStatus IN ['queued', 'processing']
-    SET c.queueStatus = 'paused',
-        c.pausedAt = datetime(),
-        c.updatedAt = datetime()
-    RETURN count(c) as pausedCount
-  `, { userUuid: user.P.uuid });
-
-  const playlistResult = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
-    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
-    WHERE p.queueStatus IN ['queued', 'processing']
-    SET p.queueStatus = 'paused',
-        p.pausedAt = datetime(),
-        p.updatedAt = datetime()
-    RETURN count(p) as pausedCount
-  `, { userUuid: user.P.uuid });
-
-  const channelsPaused = result.records[0]?.get('pausedCount') || 0;
-  const playlistsPaused = playlistResult.records[0]?.get('pausedCount') || 0;
-
-  console.log(`[Pause All] Paused ${channelsPaused} channels and ${playlistsPaused} playlists, removed ${jobsRemoved} jobs from queue`);
-
-  return {
-    success: true,
-    message: `Paused ${channelsPaused} channels and ${playlistsPaused} playlists`,
-    data: {
-      channelsPaused,
-      playlistsPaused,
-      jobsRemoved
-    }
-  };
-
-} catch (error) {
-  console.error("Error pausing channels:", error);
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: "Failed to pause channels",
-    error: {
-      type: error.name || "PauseError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again."
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+
+// Get all channels that will be paused across all ownerships (need IDs before updating status)
+// NEW ARCHITECTURE: Queue status on Channel vertex
+const channelsToDelete = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+  MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+  WHERE c.queueStatus IN ['queued', 'processing']
+  RETURN c.youtubeId as channelId, o.key as ownershipId
+`, { userUuid: user.P.uuid });
+
+// Get all playlists that will be paused across all ownerships
+// NEW ARCHITECTURE: Queue status on Playlist vertex
+const playlistsToDelete = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+  MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+  WHERE p.queueStatus IN ['queued', 'processing']
+  RETURN p.youtubeId as playlistId, o.key as ownershipId
+`, { userUuid: user.P.uuid });
+
+const channelJobs = channelsToDelete.records.map(r => ({
+  channelId: r.get('channelId'),
+  ownershipId: r.get('ownershipId')
+}));
+const playlistJobs = playlistsToDelete.records.map(r => ({
+  playlistId: r.get('playlistId'),
+  ownershipId: r.get('ownershipId')
+}));
+
+let jobsRemoved = 0;
+
+// Remove channel jobs from BullMQ queue
+if (channelJobs.length > 0) {
+  const channelQueue = helpers.result.data.createChannelQueue(args);
+
+  try {
+    // Get all waiting and delayed jobs
+    const waitingJobs = await channelQueue.getJobs(['waiting', 'delayed']);
+
+    // Filter and remove jobs that match this user's channels (by ownership and channelId)
+    for (const job of waitingJobs) {
+      if (job.data.userUuid === user.P.uuid) {
+        const matchingJob = channelJobs.find(
+          cj => cj.channelId === job.data.channelId && cj.ownershipId === job.data.ownershipId
+        );
+        if (matchingJob) {
+          await job.remove();
+          jobsRemoved++;
+        }
+      }
+    }
+  } finally {
+    await channelQueue.close();
+  }
+}
+
+// Remove playlist jobs from BullMQ queue
+if (playlistJobs.length > 0) {
+  const playlistQueue = helpers.result.data.createPlaylistQueue(args);
+
+  try{
+    // Get all waiting and delayed jobs
+    const waitingJobs = await playlistQueue.getJobs(['waiting', 'delayed']);
+
+    // Filter and remove jobs that match this user's playlists (by ownership and playlistId)
+    for (const job of waitingJobs) {
+      if (job.data.userUuid === user.P.uuid) {
+        const matchingJob = playlistJobs.find(
+          pj => pj.playlistId === job.data.playlistId && pj.ownershipId === job.data.ownershipId
+        );
+        if (matchingJob) {
+          await job.remove();
+          jobsRemoved++;
+        }
+      }
+    }
+  } finally {
+    await playlistQueue.close();
+  }
+}
+
+// Now update database status to paused across all ownerships
+// NEW ARCHITECTURE: Update queue status on Channel vertex
+const result = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+  MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+  WHERE c.queueStatus IN ['queued', 'processing']
+  SET c.queueStatus = 'paused',
+      c.pausedAt = datetime(),
+      c.updatedAt = datetime()
+  RETURN count(c) as pausedCount
+`, { userUuid: user.P.uuid });
+
+const playlistResult = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+  MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist)
+  WHERE p.queueStatus IN ['queued', 'processing']
+  SET p.queueStatus = 'paused',
+      p.pausedAt = datetime(),
+      p.updatedAt = datetime()
+  RETURN count(p) as pausedCount
+`, { userUuid: user.P.uuid });
+
+const channelsPaused = result.records[0]?.get('pausedCount') || 0;
+const playlistsPaused = playlistResult.records[0]?.get('pausedCount') || 0;
+
+console.log(`[Pause All] Paused ${channelsPaused} channels and ${playlistsPaused} playlists, removed ${jobsRemoved} jobs from queue`);
+
+return {
+  success: true,
+  message: `Paused ${channelsPaused} channels and ${playlistsPaused} playlists`,
+  data: {
+    channelsPaused,
+    playlistsPaused,
+    jobsRemoved
+  }
+};
 '''
         key: pauseAllChannels
       }

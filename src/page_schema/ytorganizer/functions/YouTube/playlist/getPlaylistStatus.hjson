@@ -7,59 +7,55 @@
         description: Get processing status for a specific playlist
         body:
           '''
-try {
-  const { playlistId, ownershipId } = args.contextData;
+const { playlistId, ownershipId } = args.contextData;
 
-  if (!playlistId) {
-    throw new Error("Playlist ID is required");
-  }
-
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Use helper function to fetch playlist with video count
-  const result = await args.executeNamedServerFunction({
-    functionName: "getPlaylistsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership if provided
-      playlistIds: [playlistId]
-    }
-  });
-
-  if (!result.result || !result.result.success || result.result.data.length === 0) {
-    return {
-      success: false,
-      message: "Playlist not found"
-    };
-  }
-
-  const playlistData = result.result.data[0];
-
-  return {
-    success: true,
-    data: {
-      playlist: playlistData.playlist,
-      playlistSetting: playlistData.playlistSetting,
-      ownership: playlistData.ownership,
-      channel: playlistData.channel
-    }
-  };
-
-} catch (error) {
-  console.error("Error fetching playlist status:", error);
+if (!playlistId) {
   return {
     success: false,
-    message: "Failed to fetch playlist status",
-    error: { details: error.message }
+    message: "Playlist ID is required"
   };
 }
+
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found"
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Use helper function to fetch playlist with video count
+const result = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by ownership if provided
+    playlistIds: [playlistId]
+  }
+});
+
+if (!result.result || !result.result.success || result.result.data.length === 0) {
+  return {
+    success: false,
+    message: "Playlist not found"
+  };
+}
+
+const playlistData = result.result.data[0];
+
+return {
+  success: true,
+  data: {
+    playlist: playlistData.playlist,
+    playlistSetting: playlistData.playlistSetting,
+    ownership: playlistData.ownership,
+    channel: playlistData.channel
+  }
+};
 '''
         key: getPlaylistStatus
       }

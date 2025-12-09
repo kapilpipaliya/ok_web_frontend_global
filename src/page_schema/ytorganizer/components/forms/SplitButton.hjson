@@ -194,13 +194,38 @@ return {
       id: "8"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: asc
-        key: direction
+        type: array
+        key: options
+        defValue: []
       }
     }
     {
       id: "9"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onDirectionToggle
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFieldChange
+      }
+    }
+    {
+      id: "12"
       L: ComponentVariant
       P: {
         type: string
@@ -209,37 +234,12 @@ return {
       }
     }
     {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onFieldChange
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: options
-        defValue: []
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        defValue: false
-        key: disabled
-      }
-    }
-    {
       id: "13"
       L: ComponentVariant
       P: {
-        type: function
-        key: onDirectionToggle
+        type: string
+        key: direction
+        defValue: asc
       }
     }
   ]

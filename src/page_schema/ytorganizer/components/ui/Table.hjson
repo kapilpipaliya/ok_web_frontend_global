@@ -1,0 +1,3707 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: Table
+        dynamicComponent: TomSelect
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
+const getContentType = () => args.contextData.props?.contentType;
+const getConfigFunction = () => args.contextData.props?.configFunction;
+const getSettingsFunction = () => {
+  const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting) {
+    return getGenericSettingsFunction();
+  }
+  return args.contextData.props?.settingsFunction;
+};
+const getSaveSettingsFunction = () => {
+  const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting) {
+    return getGenericSaveSettingsFunction();
+  }
+  return args.contextData.props?.saveSettingsFunction;
+};
+
+// Memoized config accessor (evaluates once per settings change)
+const [memoizedConfig, setMemoizedConfig] = args.createSignal(null);
+const [memoizedLoadFromSetting, setMemoizedLoadFromSetting] = args.createSignal(false);
+const [isSettingsModalOpen, setIsSettingsModalOpen] = args.createSignal(false);
+const [settings, setSettings] = args.createSignal(null);
+const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
+
+// Evaluate and cache config (memoized)
+const evaluateConfig = () => {
+  const cached = evaluatedConfig();
+  if (cached !== null) return cached;
+  
+  const loadFromSetting = getLoadFromSetting();
+  const currentSettings = settings();
+  let config = null;
+  
+  // If loadFromSetting is true, only use settings (no props fallback)
+  if (loadFromSetting) {
+    if (currentSettings && typeof currentSettings === 'string') {
+      try {
+        const configFunction = new Function(currentSettings);
+        config = configFunction();
+        if (config && typeof config === 'object') {
+          setEvaluatedConfig(config);
+          return config;
+        }
+      } catch (error) {
+        console.error("Error evaluating settings function body:", error);
+      }
+    }
+    // If loadFromSetting is true but no settings, return empty config
+    config = {};
+    setEvaluatedConfig(config);
+    return config;
+  }
+  
+  // If settings exist and it's a string (function body), evaluate it
+  if (currentSettings && typeof currentSettings === 'string') {
+    try {
+      const configFunction = new Function(currentSettings);
+      const evaluated = configFunction();
+      if (evaluated && typeof evaluated === 'object') {
+        config = {
+          columns: evaluated.columns,
+          formConfig: evaluated.formConfig,
+          uniqueKeys: evaluated.uniqueKeys || []
+        };
+        setEvaluatedConfig(config);
+        return config;
+      }
+    } catch (error) {
+      console.error("Error evaluating settings function body:", error);
+    }
+  }
+  
+  // Fallback to configFunction
+  const configFn = getConfigFunction();
+  if (configFn) {
+    try {
+      const evaluated = configFn();
+      if (evaluated && typeof evaluated === 'object') {
+        config = {
+          columns: evaluated.columns,
+          formConfig: evaluated.formConfig,
+          uniqueKeys: evaluated.uniqueKeys || []
+        };
+        setEvaluatedConfig(config);
+        return config;
+      }
+    } catch (error) {
+      console.error("Error evaluating config function:", error);
+    }
+  }
+  
+  // Fallback to props
+  config = {
+    columns: args.contextData.props?.columns || [],
+    formConfig: args.contextData.props?.formConfig,
+    uniqueKeys: []
+  };
+  setEvaluatedConfig(config);
+  return config;
+};
+
+// Update memoized values when settings change
+const updateMemoizedConfig = () => {
+  const config = evaluateConfig();
+  const loadFromSetting = getLoadFromSetting();
+  setMemoizedConfig(config);
+  setMemoizedLoadFromSetting(loadFromSetting);
+};
+
+// Get cached config (only evaluates if cache is invalid)
+const getCachedConfig = () => {
+  const cached = memoizedConfig();
+  if (cached !== null) {
+    return { config: cached, loadFromSetting: memoizedLoadFromSetting() };
+  }
+  updateMemoizedConfig();
+  return { config: memoizedConfig(), loadFromSetting: memoizedLoadFromSetting() };
+};
+
+// Get props from context or settings (optimized - single config evaluation per render)
+const prop = (p) => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config[p];
+  }
+  return args.contextData.props[p];
+};
+
+// Generic wrapper functions (used when loadFromSetting is true)
+const getGenericDataFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  
+  return async (filters = {}) => {
+    try {
+      const result = await args.fns.executeYTOFunction("getUserContent", {
+        contentType,
+        search: filters.search,
+        filters: filters.filters,
+        sort: filters.sort
+      });
+
+      if (result?.error) {
+        args.showErrorToast?.(result.error);
+        return { data: [] };
+      }
+
+      if (result?.result) {
+        if (result.result.error) {
+          args.showErrorToast?.(result.result.error);
+          return { data: [] };
+        }
+        if (result.result.success && result.result.data) {
+          return { data: Array.isArray(result.result.data) ? result.result.data : [] };
+        }
+      }
+
+      return { data: [] };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      args.showErrorToast?.("Failed to load data");
+      return { data: [] };
+    }
+  };
+};
+
+const getGenericSettingsFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  
+  return async () => {
+    try {
+      const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+        contentType,
+        key: `${contentType}_settings`
+      });
+      if (result?.result?.success && result.result.data?.setting) {
+        return result.result;
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+    }
+    return { success: false, data: { setting: null } };
+  };
+};
+
+const getGenericSaveSettingsFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  
+  return async (configText) => {
+    try {
+      const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
+        contentType,
+        key: `${contentType}_settings`,
+        config: configText
+      });
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return { success: true, message: result.result.message || "Settings saved successfully" };
+        }
+      }
+      return { success: false, message: "Failed to save settings" };
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      return { success: false, message: error?.message || "Failed to save settings" };
+    }
+  };
+};
+
+const getGenericImportFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  
+  return async ({ data }) => {
+    try {
+      const result = await args.fns.executeYTOFunction("importUserContent", {
+        contentType,
+        data
+      });
+
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return { success: true, message: result.result.message };
+        }
+      }
+
+      return { success: false, message: "Failed to import data" };
+    } catch (error) {
+      console.error("Error importing data:", error);
+      return { success: false, message: error.message || "Failed to import data" };
+    }
+  };
+};
+
+const getGenericExportFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  
+  return async ({ data, columns }) => {
+    try {
+      const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+      const result = await args.fns.executeYTOFunction("exportUserContent", {
+        contentType,
+        format: "csv",
+        data: data,
+        columns: sanitizedColumns
+      });
+
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return {
+            success: true,
+            data: result.result.data,
+            contentType: result.result.contentType,
+            filename: result.result.filename
+          };
+        }
+      }
+
+      return { success: false, message: "Failed to export data" };
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      return { success: false, message: error.message || "Failed to export data" };
+    }
+  };
+};
+
+const getGenericSaveFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  
+  return async ({ mode, data, originalRow }) => {
+    let uniqueKeys = [];
+    const config = evaluateConfig();
+    uniqueKeys = config?.uniqueKeys || [];
+    
+    try {
+      const result = await args.fns.executeYTOFunction("mutateUserContent", {
+        contentType,
+        operation: mode === "add" ? "create" : mode === "edit" ? "update" : "delete",
+        data: mode === "delete" ? {} : data,
+        elementId: originalRow?.id,
+        uniqueKeys: uniqueKeys
+      });
+
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return { success: true, data: result.result.data };
+        }
+        return { success: false, message: result.result.message || "Failed to save" };
+      }
+
+      return { success: false, message: "Failed to save" };
+    } catch (error) {
+      console.error("Error saving:", error);
+      return { success: false, message: error.message || "Failed to save" };
+    }
+  };
+};
+
+// Load settings
+const loadSettings = async () => {
+  const settingsFn = getSettingsFunction();
+  if (!settingsFn) return null;
+  
+  try {
+    const result = await settingsFn();
+    if (result?.success && result?.data?.setting) {
+      const settingData = result.data.setting.P || {};
+      // Get the raw config text (function body) - don't evaluate it
+      const configText = settingData.config;
+      if (typeof configText === 'string') {
+        setSettings(configText);
+        setEvaluatedConfig(null); // Clear evaluation cache
+        setMemoizedConfig(null); // Clear memoized cache
+        return configText;
+      }
+    }
+  } catch (error) {
+    console.error("Error loading settings:", error);
+  }
+  return null;
+};
+
+// Initialize settings on mount
+const initializeSettings = async () => {
+  const settingsFn = getSettingsFunction();
+  if (settingsFn) {
+    await loadSettings();
+    // Initialize memoized config after loading settings
+    updateMemoizedConfig();
+  } else {
+    // Initialize memoized config even without settings
+    updateMemoizedConfig();
+  }
+};
+
+const getColumns = () => prop('columns') || [];
+const getDataFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericDataFunction();
+  }
+  return prop('dataFunction') || args.contextData.props?.dataFunction;
+};
+const getRowHeight = () => prop('rowHeight') || 50;
+const getTitle = () => prop('title');
+const getSearchPlaceholder = () => prop('searchPlaceholder') || "Search...";
+const getAdditionalFilters = () => prop('additionalFilters') || [];
+const getCustomActions = () => prop('customActions') || [];
+const getBatchActions = () => prop('batchActions') || [];
+const getShowRowNumber = () => prop('showRowNumber') || false;
+const getHideColumns = () => prop('hideColumns') || [];
+const getFormConfig = () => {
+  const formConfig = prop('formConfig');
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting && formConfig && !formConfig.saveFunction) {
+    // Add generic save function to formConfig when loadFromSetting is true
+    return {
+      ...formConfig,
+      saveFunction: getGenericSaveFunction()
+    };
+  }
+  return formConfig;
+};
+const getUniqueKeys = () => prop('uniqueKeys') || [];
+const getShowAddButton = () => prop('showAddButton') ?? true;
+const getShowEditButton = () => prop('showEditButton') ?? true;
+const getImportFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericImportFunction();
+  }
+  return prop('importFunction') || args.contextData.props?.importFunction;
+};
+const getExportFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericExportFunction();
+  }
+  return prop('exportFunction') || args.contextData.props?.exportFunction;
+};
+const getShowSelection = () => prop('showSelection');
+const getShowActions = () => prop('showActions');
+const getResizableColumns = () => prop('resizableColumns') ?? true;
+
+const [data, setData] = args.createSignal([]);
+const [filteredData, setFilteredData] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(false);
+const [searchTerm, setSearchTerm] = args.createSignal("");
+const [columnFilters, setColumnFilters] = args.createStore({});
+const [sortConfig, setSortConfig] = args.createStore({ column: null, direction: null });
+const [selectedRows, setSelectedRows] = args.createSignal(new Set());
+const [isModalOpen, setIsModalOpen] = args.createSignal(false);
+const [modalMode, setModalMode] = args.createSignal("add"); // "add" or "edit"
+const [editingRow, setEditingRow] = args.createSignal(null);
+const [formData, setFormData] = args.createStore({});
+const [isImportModalOpen, setIsImportModalOpen] = args.createSignal(false);
+const [importData, setImportData] = args.createSignal("");
+const [columnWidths, setColumnWidths] = args.createStore({});
+const [isResizing, setIsResizing] = args.createSignal(false);
+
+// Initialize from query parameters
+const initializeFromQueryParams = () => {
+  const searchParams = args.searchParams || {};
+  if (searchParams.search) {
+    setSearchTerm(searchParams.search);
+  }
+  if (searchParams.filters) {
+    try {
+      const filters = JSON.parse(searchParams.filters);
+      setColumnFilters(filters);
+    } catch (e) {
+      console.error("Error parsing filters from query:", e);
+    }
+  }
+  if (searchParams.sort) {
+    try {
+      const sort = JSON.parse(searchParams.sort);
+      setSortConfig(sort);
+    } catch (e) {
+      console.error("Error parsing sort from query:", e);
+    }
+  }
+};
+
+// Update query parameters
+const updateQueryParams = () => {
+  const params = {};
+  // Handle searchTerm
+  if (searchTerm()) {
+    params.search = searchTerm();
+  } else {
+    // Clear search param if searchTerm is empty
+    params.search = undefined;
+  }
+  // Handle filters
+  const filters = Object.keys(columnFilters).length > 0 ? JSON.stringify(columnFilters) : null;
+  if (filters) {
+    params.filters = filters;
+  } else {
+    // Clear filters param if no filters
+    params.filters = undefined;
+  }
+  // Handle sort
+  const sort = sortConfig.column ? JSON.stringify(sortConfig) : null;
+  if (sort) {
+    params.sort = sort;
+  } else {
+    // Clear sort param if no sort
+    params.sort = undefined;
+  }
+  args.setSearchParams?.(params, { replace: true });
+};
+
+// Fetch data from server
+const fetchData = async (applyFilters = false) => {
+  const dataFn = getDataFunction();
+  if (!dataFn) return;
+
+  setLoading(true);
+  try {
+    const result = await dataFn({
+      search: applyFilters ? searchTerm() : undefined,
+      filters: applyFilters ? columnFilters : undefined,
+      sort: applyFilters ? sortConfig : undefined
+    });
+
+    if (result?.data) {
+      setData(result.data);
+      applyLocalFilters(result.data);
+    }
+  } catch (error) {
+    console.error("Error fetching table data:", error);
+    args.showErrorToast?.("Failed to load table data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Apply local filters (for table header row filters)
+const applyLocalFilters = (dataToFilter = null) => {
+  const dataSource = dataToFilter || data();
+  let filtered = [...dataSource];
+
+  // Apply search term
+  if (searchTerm()) {
+    const term = searchTerm().toLowerCase();
+    const columns = getColumns().filter(col => !shouldHideColumn(col));
+
+    filtered = filtered.filter(row => {
+      // Only check values for visible columns, not keys
+      for (const col of columns) {
+        // Skip special/row number columns
+        if (col.key === "__rowNumber" || col.type === "rowNumber") {
+          continue;
+        }
+        const cellValue = getCellValue(row, col);
+        if (
+          cellValue !== null &&
+          cellValue !== undefined &&
+          String(cellValue).toLowerCase().includes(term)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
+  // Apply column filters
+  const columns = getColumns();
+  filtered = filtered.filter(row => {
+    for (const col of columns) {
+      const filterValue = columnFilters[col.key];
+      if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
+        // Skip rowNumber filter - it's calculated, not a property
+        if (col.key === "__rowNumber" || col.type === "rowNumber") {
+          continue;
+        }
+        const cellValue = getCellValue(row, col);
+        if (col.type === "text") {
+          if (!String(cellValue || "").toLowerCase().includes(String(filterValue).toLowerCase())) {
+            return false;
+          }
+        } else if (col.type === "select") {
+          if (cellValue !== filterValue) {
+            return false;
+          }
+        } else if (col.type === "checkbox") {
+          if (cellValue !== filterValue) {
+            return false;
+          }
+        } else if (col.type === "date" || col.type === "isoDateTime") {
+          // Date filtering logic
+          const filterDate = new Date(filterValue);
+          const cellDate = new Date(cellValue);
+          if (isNaN(filterDate.getTime()) || isNaN(cellDate.getTime())) {
+            return false;
+          }
+          // Simple date comparison - can be enhanced
+          if (Math.abs(cellDate - filterDate) > 86400000) { // More than 1 day difference
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  });
+
+  // Apply sorting
+  if (sortConfig.column) {
+    const sortColumn = columns.find(col => col.key === sortConfig.column);
+    if (sortColumn) {
+      filtered.sort((a, b) => {
+        const aVal = getCellValue(a, sortColumn);
+        const bVal = getCellValue(b, sortColumn);
+        if (aVal === bVal) return 0;
+        const comparison = aVal > bVal ? 1 : -1;
+        return sortConfig.direction === "asc" ? comparison : -comparison;
+      });
+    }
+  }
+
+  setFilteredData(filtered);
+};
+
+const debouncedSetSearchTerm = args.debounce(value => {
+  setSearchTerm(value);
+  applyLocalFilters();
+  updateQueryParams();
+}, 500);
+
+// Get cell value from row
+const getCellValue = (row, column) => {
+  if (column.valueAccessor) {
+    return column.valueAccessor(row);
+  }
+  if (column.key.includes(".")) {
+    const keys = column.key.split(".");
+    let value = row;
+    for (const key of keys) {
+      value = value?.[key];
+      if (value === undefined) return null;
+    }
+    return value;
+  }
+  if (row.P) {
+    return row.P[column.key];
+  }
+  return row[column.key];
+};
+
+// Render cell content based on column type
+const renderCellContent = (row, column, rowIndex) => {
+  const value = getCellValue(row, column);
+
+  if (column.type === "rowNumber") {
+    return rowIndex + 1;
+  }
+
+  if (column.render) {
+    return column.render(value, row, column);
+  }
+
+  if (column.type === "checkbox") {
+    return value ? "✓" : "";
+  }
+
+  if (column.type === "image" || column.type === "imagePreview") {
+    const imageUrl = value || column.defaultImage;
+    return imageUrl ? { type: "image", url: imageUrl, alt: column.alt || "" } : "";
+  }
+
+  if (column.type === "youtubeLink") {
+    const videoId = value || column.videoIdAccessor?.(row);
+    if (!videoId) return "";
+    return { type: "youtubeLink", videoId };
+  }
+
+  if (column.type === "downloadLink") {
+    const url = value || column.urlAccessor?.(row);
+    const icon = column.icon || "carbon:download";
+    if (!url) return "";
+    return { type: "downloadLink", url, icon };
+  }
+
+  if (column.type === "duration") {
+    if (!value) return "";
+    const seconds = typeof value === "number" ? value : parseInt(value);
+    if (isNaN(seconds)) return value;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${minutes}:${String(secs).padStart(2, "0")}`;
+  }
+
+  if (column.type === "date") {
+    if (!value) return "";
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+    return date.toLocaleDateString();
+  }
+
+  if (column.type === "isoDateTime") {
+    if (!value) return "";
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+    return date.toLocaleString();
+  }
+
+  if (column.type === "join") {
+    if (!value || !Array.isArray(value)) return "";
+    const separator = column.separator || ", ";
+    const displayKey = column.displayKey || "name";
+    return value.map(item => {
+      if (typeof item === "string") return item;
+      if (item.P) return item.P[displayKey] || item.P.name || "";
+      return item[displayKey] || item.name || "";
+    }).join(separator);
+  }
+
+  if (column.type === "actions") {
+    return { type: "actions", row, column };
+  }
+
+  // Default: return as string
+  return value !== null && value !== undefined ? String(value) : "";
+};
+
+// Handle sort
+const handleSort = (column) => {
+  // Don't allow sorting for rowNumber columns
+  if (column.type === "rowNumber" || column.key === "__rowNumber") return;
+  if (column.sortable === false) return;
+
+  // If clicking the same column that's already sorted
+  if (sortConfig.column === column.key) {
+    // If currently ascending, switch to descending
+    if (sortConfig.direction === "asc") {
+      setSortConfig({ column: column.key, direction: "desc" });
+    } 
+    // If currently descending, clear the sort
+    else if (sortConfig.direction === "desc") {
+      setSortConfig({ column: null, direction: null });
+    }
+  } else {
+    // New column, start with ascending
+    setSortConfig({ column: column.key, direction: "asc" });
+  }
+  
+  applyLocalFilters();
+  updateQueryParams();
+};
+
+// Get unique values for a column
+const getUniqueColumnValues = (column) => {
+  const allData = data();
+  const uniqueValues = new Set();
+  
+  allData.forEach(row => {
+    const value = getCellValue(row, column);
+    if (value !== null && value !== undefined && value !== "") {
+      uniqueValues.add(String(value));
+    }
+  });
+  
+  return Array.from(uniqueValues).sort();
+};
+
+// Handle column filter change
+const handleColumnFilterChange = (columnKey, value) => {
+  // Clear filter if value is "All" or empty
+  const filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
+  
+  if (filterValue === undefined) {
+    // Remove the filter key from columnFilters
+    setColumnFilters(columnKey, undefined);
+  } else {
+    setColumnFilters(columnKey, filterValue );
+  }
+  
+  applyLocalFilters();
+  updateQueryParams();
+};
+
+// Handle search
+const handleSearch = () => {
+  fetchData(true);
+};
+
+// Handle row selection
+const toggleRowSelection = (rowIndex) => {
+  const newSelected = new Set(selectedRows());
+  if (newSelected.has(rowIndex)) {
+    newSelected.delete(rowIndex);
+  } else {
+    newSelected.add(rowIndex);
+  }
+  setSelectedRows(newSelected);
+};
+
+const selectAllRows = () => {
+  const allIndices = new Set(filteredData().map((_, i) => i));
+  setSelectedRows(allIndices);
+};
+
+const clearSelection = () => {
+  setSelectedRows(new Set());
+};
+
+// Handle add/edit
+const handleAdd = () => {
+  setModalMode("add");
+  setEditingRow(null);
+  setFormData({});
+  setIsModalOpen(true);
+};
+
+const handleEdit = (row) => {
+  setModalMode("edit");
+  setEditingRow(row);
+  // Initialize form data from row
+  const columns = getColumns();
+  const initialData = {};
+  columns.forEach(col => {
+    if (col.editable !== false) {
+      initialData[col.key] = getCellValue(row, col);
+    }
+  });
+  setFormData(initialData);
+  setIsModalOpen(true);
+};
+
+const handleSave = async (formDataToSave) => {
+  const formConfig = getFormConfig();
+  if (!formConfig?.saveFunction) {
+    args.showErrorToast?.("Save function not configured");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const result = await formConfig.saveFunction({
+      mode: modalMode(),
+      data: formDataToSave,
+      originalRow: editingRow()
+    });
+
+    if (result?.success) {
+      args.showSuccessToast?.(
+        modalMode() === "add" ? "Item added successfully" : "Item updated successfully"
+      );
+      setIsModalOpen(false);
+      // Optimistic update
+      if (modalMode() === "add") {
+        setData([...data(), result.data]);
+      } else {
+        const updated = data().map(row => 
+          row.id === editingRow()?.id ? result.data : row
+        );
+        setData(updated);
+      }
+      applyLocalFilters();
+    } else {
+      const errorMsg = result?.message || result?.error || "Failed to save";
+      args.showErrorToast?.(errorMsg);
+    }
+  } catch (error) {
+    console.error("Error saving:", error);
+    const errorMsg = error?.message || error?.error || "Failed to save item";
+    args.showErrorToast?.(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Handle delete
+const handleDelete = async (row) => {
+  const formConfig = getFormConfig();
+  if (!formConfig?.saveFunction) {
+    args.showErrorToast?.("Delete function not configured");
+    return;
+  }
+
+  // Use rbConfirm if available
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm || args.fns?.rbConfirm;
+  if (rbConfirm) {
+    const confirmed = await rbConfirm({
+      title: "Delete Item",
+      message: "Are you sure you want to delete this item? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+    if (!confirmed) {
+      return;
+    }
+  } else {
+    // Fallback to browser confirm
+    if (!confirm("Are you sure you want to delete this item?")) {
+      return;
+    }
+  }
+
+  try {
+    setLoading(true);
+    const result = await formConfig.saveFunction({
+      mode: "delete",
+      data: {},
+      originalRow: row
+    });
+
+    if (result?.success) {
+      args.showSuccessToast?.("Item deleted successfully");
+      // Remove from data
+      const updated = data().filter(item => item.id !== row.id);
+      setData(updated);
+      applyLocalFilters(updated);
+    } else {
+      const errorMsg = result?.message || result?.error || "Failed to delete";
+      args.showErrorToast?.(errorMsg);
+    }
+  } catch (error) {
+    console.error("Error deleting:", error);
+    const errorMsg = error?.message || error?.error || "Failed to delete item";
+    args.showErrorToast?.(errorMsg);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Handle export (all data)
+const handleExport = async (data = null) => {
+  const exportFn = getExportFunction();
+  if (!exportFn) {
+    args.showErrorToast?.("Export function not configured");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const columns = getColumns();
+    const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+    const result = await exportFn({ data, columns: sanitizedColumns }); // null means export all data
+    if (result?.success && result?.data) {
+      // Fix line endings: replace '\n' with real newlines for CSV/text exports
+      let exportData = result.data;
+      if (
+        typeof exportData === "string" &&
+        (result.contentType === "text/csv" || result.contentType === "text/plain" || !result.contentType)
+      ) {
+        exportData = exportData.replace(/\\n/g, "\n");
+      }
+      const blob = new Blob([exportData], { type: result.contentType || "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename || "export.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      args.showSuccessToast?.("Export completed successfully");
+    } else {
+      args.showErrorToast?.(result?.message || "Failed to export data");
+    }
+  } catch (error) {
+    console.error("Error exporting:", error);
+    args.showErrorToast?.("Failed to export data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+// Handle settings open
+const handleOpenSettings = async () => {
+  await loadSettings();
+  setIsSettingsModalOpen(true);
+};
+
+// Handle settings save
+const handleSaveSettings = async (configText) => {
+  const saveFn = getSaveSettingsFunction();
+  if (!saveFn) {
+    args.showErrorToast?.("Save settings function not configured");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    // Save the raw function body text, not the evaluated config
+    const result = await saveFn(configText);
+    if (result?.success) {
+      args.showSuccessToast?.(result.message || "Settings saved successfully");
+      setIsSettingsModalOpen(false);
+      setSettings(configText); // Store the raw text
+      setEvaluatedConfig(null); // Clear evaluation cache
+      setMemoizedConfig(null); // Clear memoized cache
+      // Reload data to apply new settings
+      await fetchData(false);
+    } else {
+      args.showErrorToast?.(result?.message || "Failed to save settings");
+    }
+  } catch (error) {
+    console.error("Error saving settings:", error);
+    args.showErrorToast?.("Failed to save settings");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+// Handle import
+const handleImport = async () => {
+  const importFn = getImportFunction();
+  if (!importFn) {
+    args.showErrorToast?.("Import function not configured");
+    return;
+  }
+
+  const dataToImport = importData().trim();
+  if (!dataToImport) {
+    args.showErrorToast?.("Please provide data to import");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const result = await importFn({ data: dataToImport });
+    if (result?.success) {
+      args.showSuccessToast?.(result.message || "Import completed successfully");
+      setIsImportModalOpen(false);
+      setImportData("");
+      // Refresh data
+      await fetchData(false);
+    } else {
+      args.showErrorToast?.(result?.message || result?.error || "Failed to import data");
+    }
+  } catch (error) {
+    console.error("Error importing:", error);
+    args.showErrorToast?.(error?.message || "Failed to import data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Check if column should be hidden
+const shouldHideColumn = (column) => {
+  const hideColumns = getHideColumns();
+  if (typeof hideColumns === "function") {
+    return hideColumns(column);
+  }
+  return hideColumns.includes(column.key);
+};
+
+// Get column width (from state or config)
+const getColumnWidth = (columnKey) => {
+  const storedWidth = columnWidths[columnKey];
+  if (storedWidth) {
+    return storedWidth;
+  }
+  const columns = getColumns();
+  const column = columns.find(col => col.key === columnKey);
+  return column?.width || "100px";
+};
+
+// Get grid template columns
+const getGridTemplateColumns = () => {
+  const columns = getColumns();
+  const showRowNumber = getShowRowNumber();
+  const showSelection = getShowSelection();
+  const showActions = getShowActions();
+  let template = "";
+
+  // Add selection column if enabled
+  if (showSelection) {
+    template += `${getColumnWidth("__selection") || "50px"} `;
+  }
+
+  // Add actions column if enabled and form config exists
+  if (showActions && getFormConfig()) {
+    template += `${getColumnWidth("__actions") || "120px"} `;
+  }
+
+  if (showRowNumber) {
+    template += `${getColumnWidth("__rowNumber") || "50px"} `;
+  }
+
+  columns.forEach(col => {
+    if (!shouldHideColumn(col)) {
+      template += `${getColumnWidth(col.key)} `;
+    }
+  });
+
+  return template.trim();
+};
+
+// Create resize handler for a column
+const createResizeHandler = (columnKey) => {
+  return (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Get current width
+    const currentWidth = getColumnWidth(columnKey);
+    let startWidth = 50;
+    if (currentWidth && currentWidth !== "1fr") {
+      const match = currentWidth.match(/(\d+)px/);
+      if (match) {
+        startWidth = parseInt(match[1]);
+      }
+    }
+
+    const startX = e.clientX || e.touches?.[0]?.clientX || 0;
+
+    const handleMouseMove = (moveEvent) => {
+      const clientX = moveEvent.clientX || moveEvent.touches?.[0]?.clientX || startX;
+      const deltaX = clientX - startX;
+      const newWidth = Math.max(50, startWidth + deltaX); // Minimum 50px
+      setColumnWidths({ ...columnWidths, [columnKey]: `${newWidth}px` });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleMouseMove);
+      document.removeEventListener('touchend', handleMouseUp);
+      setIsResizing(false);
+    };
+
+    setIsResizing(true);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleMouseMove);
+    document.addEventListener('touchend', handleMouseUp);
+  };
+};
+
+return {
+  getColumns,
+  getRowHeight,
+  getTitle,
+  getSearchPlaceholder,
+  getAdditionalFilters,
+  getCustomActions,
+  getBatchActions,
+  getShowRowNumber,
+  getHideColumns,
+  getFormConfig,
+  getShowAddButton,
+  getShowEditButton,
+  getImportFunction,
+  getExportFunction,
+  getShowSelection,
+  getShowActions,
+  getResizableColumns,
+  getLoadFromSetting,
+  getContentType,
+  getConfigFunction,
+  getSettingsFunction,
+  getSaveSettingsFunction,
+  evaluateConfig,
+  setEvaluatedConfig,
+  getCachedConfig,
+  updateMemoizedConfig,
+  getColumnWidth,
+  createResizeHandler,
+  columnWidths,
+  setColumnWidths,
+  isResizing,
+  isSettingsModalOpen,
+  setIsSettingsModalOpen,
+  settings,
+  setSettings,
+  loadSettings,
+  initializeSettings,
+  handleOpenSettings,
+  handleSaveSettings,
+  handleDelete,
+  handleExport,
+  handleImport,
+  isImportModalOpen,
+  setIsImportModalOpen,
+  importData,
+  setImportData,
+  data,
+  setData,
+  filteredData,
+  setFilteredData,
+  loading,
+  setLoading,
+  searchTerm,
+  setSearchTerm,
+  debouncedSetSearchTerm,
+  columnFilters,
+  setColumnFilters,
+  sortConfig,
+  setSortConfig,
+  selectedRows,
+  setSelectedRows,
+  isModalOpen,
+  setIsModalOpen,
+  modalMode,
+  setModalMode,
+  editingRow,
+  setEditingRow,
+  formData,
+  setFormData,
+  initializeFromQueryParams,
+  updateQueryParams,
+  fetchData,
+  applyLocalFilters,
+  getCellValue,
+  getUniqueColumnValues,
+  handleSort,
+  handleColumnFilterChange,
+  handleSearch,
+  toggleRowSelection,
+  selectAllRows,
+  clearSelection,
+  handleAdd,
+  handleEdit,
+  handleSave,
+  shouldHideColumn,
+  getGridTemplateColumns,
+  renderCellContent
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onMount: async () => {
+    await args.fns.initializeSettings();
+    args.fns.initializeFromQueryParams();
+    args.fns.fetchData();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        slotName: header
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+  max-width: 1024px;
+  margin: 0 auto;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const title = args.fns.getTitle();
+return {
+  as: "div",
+  text: title,
+  hide: !title
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        slotName: customActions
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const hasImport = !!args.fns.getImportFunction();
+const hasExport = !!args.fns.getExportFunction();
+
+return {
+  as: "div",
+  hide: !hasImport && !hasExport
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleExport,
+  text: "Export All",
+  leftIcon: "carbon:download",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction()
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.fns.setIsImportModalOpen(true),
+  text: "Import",
+  leftIcon: "carbon:upload",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getImportFunction()
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.fns.handleExport(args.fns.filteredData()),
+  text: "Export Filtered",
+  leftIcon: "carbon:filter",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction()
+};
+'''
+      }
+    }
+    {
+      id: "13a"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleOpenSettings,
+  text: "Settings",
+  leftIcon: "carbon:settings",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getSettingsFunction()
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const showAddButton = args.fns.getShowAddButton();
+const formConfig = args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !showAddButton || !formConfig
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleAdd,
+  text: "Add"
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        slotName: additionalFilters
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex: 1;
+  min-width: 200px;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+return {
+  placeholder: args.fns.getSearchPlaceholder(),
+  value: args.fns.searchTerm(),
+  onInput: (e) => {
+    args.fns.debouncedSetSearchTerm(e.target.value);
+  },
+  leftIcon: "carbon:search"
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleSearch,
+  text: "Search",
+  disabled: args.fns.loading()
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''
+const isResizing = args.fns.isResizing();
+
+return [`._id {
+  height: calc(100vh - 200px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    height: calc(100vh - 72px - 32px);
+  }
+}`,`._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-template-rows: auto auto 1fr;
+  justify-content:center;
+  user-select: ${isResizing ? "none" : "auto"};
+}`];
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-column: 1 / -1;
+  grid-row: 1;
+  background: ${args.theme.var.color.background_light_100};
+  border-top: 1px solid ${args.theme.var.color.border};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return {
+  as: "div",
+  hide: !showSelection,
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const selected = args.fns.selectedRows();
+const filtered = args.fns.filteredData();
+const allSelected = selected.size === filtered.length && filtered.length > 0;
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: allSelected,
+  onChange: () => {
+    if (allSelected) {
+      args.fns.clearSelection();
+    } else {
+      args.fns.selectAllRows();
+    }
+  },
+  hide: !showSelection,
+  style: "cursor: pointer; width: 20px; height: 20px;"
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+const resizableColumns = args.fns.getResizableColumns();
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary};
+      opacity: 0.5;
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary};
+    opacity: 0.7;
+  }
+  
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const resizableColumns = args.fns.getResizableColumns();
+
+const resizeHandler = args.fns.createResizeHandler("__selection");
+
+return {
+  as: "div",
+  hide: !resizableColumns || !showSelection,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  text: "Actions",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const resizableColumns = args.fns.getResizableColumns();
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary};
+      opacity: 0.5;
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary};
+    opacity: 0.7;
+  }
+
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const resizableColumns = args.fns.getResizableColumns();
+
+const resizeHandler = args.fns.createResizeHandler("__actions");
+
+return {
+  as: "div",
+  hide: !resizableColumns || !hasFormConfig || !showActions,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.key !== "__rowNumber") ? "pointer" : "default"};
+  user-select: none;
+  position: relative;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.fns.sortConfig;
+const shouldHide = args.fns.shouldHideColumn(column);
+const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+
+return {
+  as: "div",
+  hide: shouldHide,
+  onClick: () => {
+    if (!isRowNumber && column.sortable !== false) {
+      args.fns.handleSort(column);
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
+const sortConfig = args.fns.sortConfig;
+const column = args.contextData.column;
+
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.fns.sortConfig;
+const isSorted = sortConfig.column === column.key;
+
+return {
+  as: "div",
+  text: column.label || column.key,
+  hide: column.type === "rowNumber"
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+const sortConfig = args.fns.sortConfig;
+const column = args.contextData.column;
+const isSorted = sortConfig.column === column.key;
+const direction = sortConfig.direction;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  opacity: ${isSorted ? 1 : 0.3};
+  transition: opacity 0.2s ease;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.fns.sortConfig;
+const isSorted = sortConfig.column === column.key;
+const direction = sortConfig.direction;
+const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+
+return {
+  as: "icon",
+  icon: direction === "asc" ? "carbon:chevron-up" : "carbon:chevron-down",
+  width: 16,
+  height: 16,
+  hide: !isSorted || column.sortable === false || isRowNumber
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const resizableColumns = args.fns.getResizableColumns();
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease;
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary};
+      opacity: 0.5;
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary};
+    opacity: 0.7;
+  }
+
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const resizableColumns = args.fns.getResizableColumns();
+const shouldHide = args.fns.shouldHideColumn(column);
+
+// Determine column key for resize
+const getColumnKey = () => {
+  if (column.key === "__rowNumber" || column.type === "rowNumber") {
+    return "__rowNumber";
+  }
+  return column.key;
+};
+
+const columnKey = getColumnKey();
+const resizeHandler = args.fns.createResizeHandler(columnKey);
+
+return {
+  as: "div",
+  hide: !resizableColumns || shouldHide,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-column: 1 / -1;
+  grid-row: 2;
+  background: ${args.theme.var.color.background_light_200};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return {
+  as: "div",
+  hide: !showSelection
+};
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return {
+  as: "div",
+  hide: shouldHide || column.filterable === false
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.fns.columnFilters;
+const filterValue = columnFilters[column.key] || "";
+
+return `._id {
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.fns.columnFilters;
+const filterValue = columnFilters[column.key] || "";
+
+// Skip filter for rowNumber
+if (column.key === "__rowNumber" || column.type === "rowNumber") {
+  return { as: "div", hide: true };
+}
+
+// Render appropriate filter component based on column type
+if (column.type === "select" && column.options) {
+  return {
+    componentName: "TomSelect",
+    value: filterValue || "",
+    onChange: (newValue) => args.fns.handleColumnFilterChange(column.key, newValue),
+    options: [{ value: "_All_VALUES_", label: "All" }, ...column.options],
+    placeholder: "Filter...",
+    search: false
+  };
+}
+
+if (column.type === "checkbox") {
+  return {
+    componentName: "Html",
+    as: "input",
+    type: "checkbox",
+    checked: filterValue === true || filterValue === "true",
+    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.checked),
+    style: "cursor: pointer; width: 20px; height: 20px;"
+  };
+}
+
+if (column.type === "date" || column.type === "isoDateTime") {
+  return {
+    componentName: "TextInput",
+    type: "date",
+    value: filterValue || "",
+    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value),
+    placeholder: "Filter..."
+  };
+}
+
+// Determine filter type (default: "select" for text columns)
+const filterType = column.filterType || (column.type === "text" || !column.type ? "select" : "text");
+
+// If filterType is "select", show select with unique values
+if (filterType === "select") {
+  const uniqueValues = args.fns.getUniqueColumnValues(column);
+  const options = [{ value: "_All_VALUES_", label: "All" }, ...uniqueValues.map(val => ({ value: val, label: val }))];
+  
+  return {
+    componentName: "TomSelect",
+    value: filterValue || "",
+    onChange: (newValue) => args.fns.handleColumnFilterChange(column.key, newValue),
+    options: options,
+    placeholder: "Filter...",
+    search: true
+  };
+}
+
+// Default: text input (applies filter immediately on change)
+return {
+  componentName: "TextInput",
+  type: "text",
+  placeholder: "Filter...",
+  value: filterValue || "",
+  onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+`;
+'''
+        displayOrder: 3
+        componentName: VirtualList
+        props:
+          '''
+return {
+  items: args.fns.filteredData(),
+  itemHeight: args.fns.getRowHeight(),
+  containerClass: "table-body-list"
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        slotName: children
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const selectedRows = args.fns.selectedRows();
+const isSelected = selectedRows.has(rowIndex);
+
+return [
+`._id {
+  position: absolute;
+  top: ${virtualItem.start}px;
+  left: 0;
+  width: 100%;
+  height: ${virtualItem.size}px;
+}`,
+`._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-column: 1 / -1;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${isSelected ? args.theme.var.color.primary_light_200 : args.theme.var.color.background};
+  transition: background 0.2s ease;
+
+
+  &:hover {
+    background: ${isSelected ? args.theme.var.color.primary_light_300 : args.theme.var.color.background_light_100};
+  }
+}`];
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+
+const showSelection = args.fns.getShowSelection();
+
+return {
+  as: "div",
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const selectedRows = args.fns.selectedRows();
+const isSelected = selectedRows.has(rowIndex);
+
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const selectedRows = args.fns.selectedRows();
+const isSelected = selectedRows.has(rowIndex);
+
+return {
+  as: "div",
+  hide: !showSelection,
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const selectedRows = args.fns.selectedRows();
+const isSelected = selectedRows.has(rowIndex);
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: isSelected,
+  onChange: (e) => {
+    e.stopPropagation();
+    args.fns.toggleRowSelection(rowIndex);
+  },
+  onClick: (e) => {
+    e.stopPropagation();
+  },
+  hide: !showSelection,
+  style: "cursor: pointer; width: 20px; height: 20px; pointer-events: auto; z-index: 10; position: relative;"
+};
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.filteredData()[virtualItem.index];
+
+return {
+  as: "div",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: IconButton
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.filteredData()[virtualItem.index];
+
+return {
+  icon: "carbon:edit",
+  variant: "ghost",
+  size: "sm",
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.handleEdit(rowData);
+  },
+  ariaLabel: "Edit",
+  title: "Edit",
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton()
+};
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: IconButton
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.filteredData()[virtualItem.index];
+
+return {
+  icon: "carbon:trash-can",
+  variant: "danger",
+  size: "sm",
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.handleDelete(rowData);
+  },
+  ariaLabel: "Delete",
+  title: "Delete",
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton()
+};
+'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.filteredData()[virtualItem.index];
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.filteredData()[virtualItem.index];
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return {
+  as: "div",
+  hide: shouldHide
+};
+'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        slotName: cell
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.filteredData()[virtualItem.index];
+const cellContent = args.fns.renderCellContent(rowData, column, rowIndex);
+
+// Handle different content types
+if (typeof cellContent === "object" && cellContent !== null) {
+  if (cellContent.type === "image") {
+    return {
+      as: "img",
+      src: cellContent.url,
+      alt: cellContent.alt,
+      style: "max-width: 100px; max-height: 50px; object-fit: cover; border-radius: 4px;"
+    };
+  }
+  if (cellContent.type === "youtubeLink") {
+    return {
+      as: "a",
+      href: `https://www.youtube.com/watch?v=${cellContent.videoId}`,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: "Watch",
+      style: "color: " + args.theme.var.color.primary + "; text-decoration: none;"
+    };
+  }
+  if (cellContent.type === "downloadLink") {
+    return {
+      as: "a",
+      href: cellContent.url,
+      download: true,
+      style: "color: " + args.theme.var.color.primary + "; text-decoration: none; display: flex; align-items: center; gap: 4px;"
+    };
+  }
+  if (cellContent.type === "actions") {
+    const showEditButton = args.fns.getShowEditButton();
+    const formConfig = args.fns.getFormConfig();
+    const row = cellContent.row;
+
+    return {
+      as: "div",
+      style: "display: flex; gap: 8px; align-items: center;"
+    };
+  }
+}
+
+// Add edit button if actions column and edit is enabled
+if (column.type === "actions" && args.fns.getShowEditButton() && args.fns.getFormConfig()) {
+  return {
+    as: "div",
+    style: "display: flex; gap: 8px; align-items: center;"
+  };
+}
+
+// Default text rendering
+return {
+  as: "div",
+  text: typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : ""
+};
+'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        slotName: footer
+        displayOrder: 5
+        componentName: Slot
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: TableModal
+        props:
+          '''
+return {
+  isOpen: args.fns.isModalOpen(),
+  onClose: () => args.fns.setIsModalOpen(false),
+  mode: args.fns.modalMode(),
+  formConfig: args.fns.getFormConfig(),
+  initialData: args.fns.formData,
+  onSave: args.fns.handleSave
+};
+'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}`;
+'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.isImportModalOpen(),
+  onClick: () => args.fns.setIsImportModalOpen(false)
+};
+'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.xl};
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.isImportModalOpen(),
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Import Data"
+};
+'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border-left: 3px solid ${args.theme.var.color.info};
+  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Data Format: Paste CSV or JSON data. For CSV, first row should be headers. For JSON, provide an array of objects."
+};
+'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.sm};
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Sample CSV header:"
+};
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
+const columns = args.fns.getColumns();
+const getSampleCSVHeader = () => {
+  if (!columns || columns.length === 0) return "";
+  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  return headers.join(",");
+};
+
+const sampleHeader = getSampleCSVHeader();
+
+return `._id {
+  margin-top: ${args.theme.var.spacing.xs};
+  background: rgba(0,0,0,0.1);
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-family: monospace;
+  font-size: ${args.theme.var.fontSize.xs};
+  word-break: break-all;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const getSampleCSVHeader = () => {
+  if (!columns || columns.length === 0) return "";
+  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  return headers.join(",");
+};
+
+return {
+  as: "code",
+  text: getSampleCSVHeader()
+};
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextArea
+        props:
+          '''
+return {
+  value: args.fns.importData(),
+  onChange: (e) => args.fns.setImportData(e.target.value),
+  placeholder: "Paste your data here (CSV or JSON format)...",
+  rows: 10,
+  style: "font-family: monospace; font-size: 12px;"
+};
+'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  justify-content: flex-end;
+  margin-top: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+  },
+  text: "Cancel",
+  disabled: args.fns.loading()
+};
+'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleImport,
+  text: "Import",
+  disabled: args.fns.loading() || !args.fns.importData().trim()
+};
+'''
+      }
+    }
+    {
+      id: "62"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+      }
+    }
+    {
+      id: "63"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: searchPlaceholder
+        defValue: Search...
+      }
+    }
+    {
+      id: "64"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: dataFunction
+      }
+    }
+    {
+      id: "65"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showAddButton
+        defValue: true
+      }
+    }
+    {
+      id: "66"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showEditButton
+        defValue: true
+      }
+    }
+    {
+      id: "67"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: rowHeight
+        defValue: 50
+      }
+    }
+    {
+      id: "68"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showActions
+        defValue: true
+      }
+    }
+    {
+      id: "69"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: customActions
+        defValue: []
+      }
+    }
+    {
+      id: "70"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: columns
+        defValue: []
+      }
+    }
+    {
+      id: "71"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: importFunction
+      }
+    }
+    {
+      id: "72"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showRowNumber
+        defValue: false
+      }
+    }
+    {
+      id: "73"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: batchActions
+        defValue: []
+      }
+    }
+    {
+      id: "74"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showSelection
+        defValue: true
+      }
+    }
+    {
+      id: "75"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: hideColumns
+        defValue: []
+      }
+    }
+    {
+      id: "76"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: additionalFilters
+        defValue: []
+      }
+    }
+    {
+      id: "77"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: exportFunction
+      }
+    }
+    {
+      id: "78"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "79"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: configFunction
+      }
+    }
+    {
+      id: "80"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: settingsFunction
+      }
+    }
+    {
+      id: "81"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: saveSettingsFunction
+      }
+    }
+    {
+      id: "82"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loadFromSetting
+        defValue: false
+      }
+    }
+    {
+      id: "83"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: contentType
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: TableSettingsModal
+        props:
+          '''
+const evaluateConfig = args.fns.evaluateConfig;
+const config = evaluateConfig();
+const getConfigFunction = args.fns.getConfigFunction;
+
+// Get initial config as function body string (from settings or configFunction)
+let initialConfig = "";
+try {
+  const currentSettings = args.fns.settings();
+  // If settings exist and it's a string (raw function body), use it
+  if (currentSettings && typeof currentSettings === 'string') {
+    initialConfig = currentSettings;
+  } else {
+    // Fallback to configFunction
+    const configFn = getConfigFunction();
+    if (configFn) {
+      // Get the function as string to extract its body
+      const fnString = configFn.toString();
+      // Extract function body (everything between { and })
+      const match = fnString.match(/\{([\s\S]*)\}/);
+      if (match && match[1]) {
+        initialConfig = match[1].trim();
+      } else {
+        // Fallback: call function and convert to return statement
+        const configObj = configFn();
+        if (configObj) {
+          initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
+        }
+      }
+    } else {
+      // Use current effective config as function body
+      const configObj = {
+        columns: config.columns || [],
+        formConfig: config.formConfig || {},
+        uniqueKeys: config.uniqueKeys || []
+      };
+      initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
+    }
+  }
+} catch (e) {
+  console.error("Error getting initial config:", e);
+  initialConfig = "return {};";
+}
+
+return {
+  isOpen: args.fns.isSettingsModalOpen(),
+  onClose: () => args.fns.setIsSettingsModalOpen(false),
+  initialConfig: initialConfig,
+  onSave: args.fns.handleSaveSettings,
+  contentType: args.fns.getContentType()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "62"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "63"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "64"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "65"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "66"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "67"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "68"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "69"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "70"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "71"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "72"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "73"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "74"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "75"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "76"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "77"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "78"
+    }
+    {
+      id: e19
+      T: ComponentVariant
+      S: "1"
+      E: "79"
+    }
+    {
+      id: e20
+      T: ComponentVariant
+      S: "1"
+      E: "80"
+    }
+    {
+      id: e21
+      T: ComponentVariant
+      S: "1"
+      E: "81"
+    }
+    {
+      id: e21a
+      T: ComponentVariant
+      S: "1"
+      E: "82"
+    }
+    {
+      id: e21b
+      T: ComponentVariant
+      S: "1"
+      E: "83"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "2"
+      E: "50"
+    }
+    {
+      id: e20a
+      T: Attr
+      S: "2"
+      E: "62"
+    }
+    {
+      id: e20a
+      T: Attr
+      S: "16"
+      E: "13a"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "2"
+      E: "51"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "3"
+      E: "21"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "3"
+      E: "49"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "5"
+      E: "16"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "8"
+      E: "14"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "10"
+      E: "13"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e37a
+      T: Attr
+      S: "16"
+      E: "13a"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "21"
+      E: "33"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "21"
+      E: "39"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "22"
+      E: "26"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "22"
+      E: "28"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "29"
+      E: "31"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "29"
+      E: "32"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "33"
+      E: "35"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "33"
+      E: "36"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "36"
+      E: "37"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "40"
+      E: "43"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "40"
+      E: "46"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "43"
+      E: "44"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "43"
+      E: "45"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "47"
+      E: "48"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "51"
+      E: "52"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "52"
+      E: "53"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "52"
+      E: "54"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "52"
+      E: "58"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "52"
+      E: "59"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "54"
+      E: "55"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "54"
+      E: "56"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "54"
+      E: "57"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "59"
+      E: "60"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "59"
+      E: "61"
+    }
+  ]
+}

@@ -21,36 +21,6 @@ export function usePermissions(
   props: Readonly<PageViewWrapperProps>,
   options: UsePermissionsOptions,
 ) {
-  const getDynamicFns = () => {
-    try {
-      const evaluateFns = (
-        fns:
-          | ((args: FunctionArgumentType) => Record<string, unknown>)
-          | string
-          | undefined
-          | null,
-      ) => {
-        if (typeof fns === "function") {
-          return fns({} as FunctionArgumentType) || {};
-        }
-        if (typeof fns === "string") {
-          try {
-            return new Function("args", fns)({} as FunctionArgumentType) || {};
-          } catch (error) {
-            console.error("Error evaluating fns:", error);
-            return {};
-          }
-        }
-        return {};
-      };
-
-      return evaluateFns(options.metaVertex()?.P.fns);
-    } catch (error) {
-      console.error("Error in dynamicFns:", error);
-      return {};
-    }
-  };
-
   const allConfiguredPermission = () =>
     getConfiguredPermissions(
       getGlobalStore(options.graph).P.userRoles,
@@ -95,7 +65,6 @@ export function usePermissions(
   return {
     permissions,
     checkAuthError,
-    getDynamicFns,
     allConfiguredPermission,
   };
 }

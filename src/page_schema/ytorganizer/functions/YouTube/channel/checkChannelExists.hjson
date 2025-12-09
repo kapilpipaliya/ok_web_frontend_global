@@ -7,121 +7,122 @@
         description: Check if a channel already exists for a specific ownership
         body:
           '''
-try {
-  const { youtubeId, ownershipId } = args.contextData;
+const { youtubeId, ownershipId } = args.contextData;
 
-  if (!youtubeId) {
-    throw new Error("YouTube ID is required");
-  }
+if (!youtubeId) {
+  return {
+    success: false,
+    exists: false,
+    message: "YouTube ID is required"
+  };
+}
 
-  if (!ownershipId) {
-    throw new Error("Ownership ID is required");
-  }
+if (!ownershipId) {
+  return {
+    success: false,
+    exists: false,
+    message: "Ownership ID is required"
+  };
+}
 
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found");
-  }
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    exists: false,
+    message: "User session not found"
+  };
+}
 
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
-  // Determine if youtubeId is a handle (doesn't start with UC) or actual channel ID
-  const isHandle = !youtubeId.startsWith('UC');
-  let actualChannelId = youtubeId;
+// Determine if youtubeId is a handle (doesn't start with UC) or actual channel ID
+const isHandle = !youtubeId.startsWith('UC');
+let actualChannelId = youtubeId;
 
-  // If it's a handle, we need to check using customUrl instead
-  if (isHandle) {
-    // Check if channel exists by customUrl (handle)
-    // Note: customUrl is stored with @ prefix and lowercase, so we need case-insensitive comparison
-    // NEW SCHEMA v4.0: Direct ownership + optional settings
-    const handleQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-      MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
-      WHERE toLower(c.customUrl) = toLower($handle) OR toLower(c.customUrl) = toLower($handleWithAt)
-      OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-      RETURN c, cs
-      LIMIT 1
-    `;
-
-    const handleParams = {
-      userUuid: user.P.uuid,
-      ownershipId,
-      handle: youtubeId,
-      handleWithAt: '@' + youtubeId
-    };
-
-    const handleResult = await args.session.run(handleQuery, handleParams);
-
-    if (handleResult.records.length > 0) {
-      // Handle optional ChannelSetting (might be null if user hasn't customized)
-      const record = handleResult.records[0];
-      const channelSettingNode = record.get('cs');
-      return {
-        success: true,
-        exists: true,
-        data: {
-          channel: args.convertNodeToJson(record.get('c')),
-          channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
-        }
-      };
-    }
-
-    // If not found by handle, return not exists
-    return {
-      success: true,
-      exists: false,
-      data: null
-    };
-  }
-
-  // Check if channel exists for this ownership by channel ID
+// If it's a handle, we need to check using customUrl instead
+if (isHandle) {
+  // Check if channel exists by customUrl (handle)
+  // Note: customUrl is stored with @ prefix and lowercase, so we need case-insensitive comparison
   // NEW SCHEMA v4.0: Direct ownership + optional settings
-  const query = `
+  const handleQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
+    WHERE toLower(c.customUrl) = toLower($handle) OR toLower(c.customUrl) = toLower($handleWithAt)
     OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
     RETURN c, cs
     LIMIT 1
   `;
 
-  const params = {
+  const handleParams = {
     userUuid: user.P.uuid,
     ownershipId,
-    youtubeId: actualChannelId
+    handle: youtubeId,
+    handleWithAt: '@' + youtubeId
   };
 
-  const result = await args.session.run(query, params);
+  const handleResult = await args.session.run(handleQuery, handleParams);
 
-  const exists = result.records.length > 0;
-
-  // Handle optional ChannelSetting (might be null if user hasn't customized)
-  let data = null;
-  if (exists) {
-    const record = result.records[0];
+  if (handleResult.records.length > 0) {
+    // Handle optional ChannelSetting (might be null if user hasn't customized)
+    const record = handleResult.records[0];
     const channelSettingNode = record.get('cs');
-    data = {
-      channel: args.convertNodeToJson(record.get('c')),
-      channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
+    return {
+      success: true,
+      exists: true,
+      data: {
+        channel: args.convertNodeToJson(record.get('c')),
+        channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
+      }
     };
   }
 
+  // If not found by handle, return not exists
   return {
     success: true,
-    exists,
-    data
-  };
-
-} catch (error) {
-  console.error("Error checking if channel exists:", error);
-  return {
-    success: false,
     exists: false,
-    message: "Failed to check if channel exists",
-    error: { details: error.message }
+    data: null
   };
 }
+
+// Check if channel exists for this ownership by channel ID
+// NEW SCHEMA v4.0: Direct ownership + optional settings
+const query = `
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+  OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+  RETURN c, cs
+  LIMIT 1
+`;
+
+const params = {
+  userUuid: user.P.uuid,
+  ownershipId,
+  youtubeId: actualChannelId
+};
+
+const result = await args.session.run(query, params);
+
+const exists = result.records.length > 0;
+
+// Handle optional ChannelSetting (might be null if user hasn't customized)
+let data = null;
+if (exists) {
+  const record = result.records[0];
+  const channelSettingNode = record.get('cs');
+  data = {
+    channel: args.convertNodeToJson(record.get('c')),
+    channelSetting: channelSettingNode ? args.convertNodeToJson(channelSettingNode) : null
+  };
+}
+
+return {
+  success: true,
+  exists,
+  data
+};
 '''
         key: checkChannelExists
       }

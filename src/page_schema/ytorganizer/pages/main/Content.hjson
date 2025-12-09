@@ -4,12 +4,14 @@
       id: "1"
       L: Page
       P: {
-        signinRequired: true
         fns:
           '''
 const contentType = args.createMemo(() => args.searchParams?.type || "channels");
 const detailId = args.createMemo(() => args.searchParams?.id || null);
 const searchQuery = args.createMemo(() => args.searchParams?.q || "");
+
+const isPublicView = args.createMemo(() => args.searchParams?.page === "public");
+const publicUsername = args.createMemo(() => args.searchParams?.username || null);
 
 const isSearchView = args.createMemo(() => contentType() === "search");
 const isFavouritesView = args.createMemo(() => contentType() === "favourites");
@@ -142,7 +144,10 @@ const loadUserSetting = async (skipSortUpdate = false) => {
   try {
     const result = await args.fns.executeYTOFunction("getYTOUserSetting", {});
 
-    if (result?.result?.success && result?.result?.data?.setting) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+      settingLoaded(true);
+    } else if (result?.result?.success && result?.result?.data?.setting) {
       const settingVertex = result.result.data.setting;
       userSetting(settingVertex);
 
@@ -397,24 +402,40 @@ const loadData = async () => {
   loading(true);
   loadError(null); // Clear any previous errors
   try {
+    const publicView = isPublicView();
+    const username = publicUsername();
+
+    // Validate public view parameters
+    if (publicView && !username) {
+      loadError("Username is required for public access");
+      loading(false);
+      return;
+    }
+
     let fnName;
     let fnArgs = {};
+
+    if (publicView && username) {
+      fnArgs.isPublicAccess = true;
+      fnArgs.username = username;
+    }
     let onSuccess = () => { };
     if (isPlaylists()) {
       fnName = "getUserPlaylists";
-      fnArgs = { sortBy: sortBy() };
+      fnArgs = { ...fnArgs, sortBy: sortBy() };
       onSuccess = (data) => {
         items(data.playlists || []);
       };
     } else if (isChannels()) {
       fnName = "getUserChannels";
-      fnArgs = { sortBy: sortBy() };
+      fnArgs = { ...fnArgs, sortBy: sortBy() };
       onSuccess = (data) => {
         items(data.channels || []);
       }
     } else if (isPlaylistDetail()) {
       fnName = "getPlaylistVideos";
       fnArgs = {
+        ...fnArgs,
         ["playlistId"]: detailId(),
         sortBy: sortBy()
       };
@@ -422,6 +443,7 @@ const loadData = async () => {
     } else if (isChannelDetail()) {
       fnName = "getChannelContents";
       fnArgs = {
+        ...fnArgs,
         ["channelId"]: detailId(),
         sortBy: sortBy()
       };
@@ -434,6 +456,7 @@ const loadData = async () => {
       }
       fnName = "searchUserContent";
       fnArgs = {
+        ...fnArgs,
         query: searchQuery().trim(),
         type: "all",
         sortBy: sortBy()
@@ -442,6 +465,7 @@ const loadData = async () => {
     } else if (isFavouritesView()) {
       fnName = "getUserFavourites";
       fnArgs = {
+        ...fnArgs,
         sortBy: sortBy()
       };
       onSuccess = (data) => items(data);
@@ -453,6 +477,7 @@ const loadData = async () => {
       }
       fnName = "checkPageItemsExistence";
       fnArgs = {
+        ...fnArgs,
         channels: content.channels || [],
         playlists: content.playlists || [],
         videos: content.videos || []
@@ -521,6 +546,8 @@ args.createEffect(
       args.searchParams?.type,
       args.searchParams?.id,
       args.searchParams?.q,
+      args.searchParams?.page,
+      args.searchParams?.username,
       sortBy(),
       args.fns.selectedOwnership?.(),
       args.fns.ownershipsLoading?.(),
@@ -528,13 +555,31 @@ args.createEffect(
       settingLoaded()
     ],
     (
-      [currentType, currentId, currentQuery, currentSort, currentOwnership, currentOwnershipsLoading, currentPageContent, currUserSettingsLoaded],
-      [prevType, prevId, prevQuery, prevSort, prevOwnership, prevOwnershipsLoading, prevPageContent, prevUserSettingsLoaded] = []
+      [currentType, currentId, currentQuery, currentPage, currentUsername, currentSort, currentOwnership, currentOwnershipsLoading, currentPageContent, currUserSettingsLoaded],
+      [prevType, prevId, prevQuery, prevPage, prevUsername, prevSort, prevOwnership, prevOwnershipsLoading, prevPageContent, prevUserSettingsLoaded] = []
     ) => {
       // Save the combined string when data is successfully loaded
       loadedDataKey(getDataKey());
+
+      const isPublic = currentPage === "public";
+
       // Wait for settings to be loaded before fetching data
       if (!currUserSettingsLoaded) {
+        return;
+      }
+
+      // In public view, skip ownership checks
+      if (isPublic) {
+        const urlParamsChanged = currentType !== prevType || currentId !== prevId || currentQuery !== prevQuery || currentPage !== prevPage || currentUsername !== prevUsername;
+        const sortChanged = currentSort !== prevSort;
+        const settingsJustLoaded = currUserSettingsLoaded && !prevUserSettingsLoaded;
+
+        // Handle data loading for public view
+        if (settingsJustLoaded || urlParamsChanged) {
+          loadData();
+        } else if (sortChanged) {
+          loadData();
+        }
         return;
       }
 
@@ -552,7 +597,7 @@ args.createEffect(
         return;
       }
 
-      // Determine what changed
+      // Determine what changed (for authenticated view)
       const urlParamsChanged = currentType !== prevType || currentId !== prevId || currentQuery !== prevQuery;
       const sortChanged = currentSort !== prevSort;
       const ownershipChanged = currentOwnership !== prevOwnership || currentOwnershipsLoading !== prevOwnershipsLoading;
@@ -779,7 +824,9 @@ const pollProcessingStatus = async () => {
       playlistIds
     });
 
-    if (result?.result?.success && result?.result?.data) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+    } else if (result?.result?.success && result?.result?.data) {
       const data = result.result.data;
 
       // Convert arrays to objects keyed by ID for easier lookup
@@ -981,7 +1028,7 @@ const syncCurrentItem = async () => {
         args.showSuccessToast(result.result.message || "Playlist synced successfully");
         await loadData();
       } else {
-        args.showErrorToast(result?.result?.message || "Failed to sync playlist");
+        args.showErrorToast(result?.result?.message || result?.error || "Failed to sync playlist");
       }
     } else if (isChannelDetail()) {
       const channel = data.channel?.channel;
@@ -999,7 +1046,7 @@ const syncCurrentItem = async () => {
         args.showSuccessToast(result.result.message || "Channel synced successfully");
         await loadData();
       } else {
-        args.showErrorToast(result?.result?.message || "Failed to sync channel");
+        args.showErrorToast(result?.result?.message || result?.error || "Failed to sync channel");
       }
     }
   } catch (error) {
@@ -1275,6 +1322,7 @@ return {
   isPlaylistDetail,
   isPlaylists,
   isChannels,
+  isPublicView,
   searchTerm,
   searchInput,
   pageContent,
@@ -1329,12 +1377,13 @@ return {
   getYouTubeUrl
 };
 '''
-        url: /content
         key: Content
+        url: /content
         props:
           '''
 return {
   isNoPermissionCheck: true,
+  signinRequired: !args.fns.isPublicView(),
   onMount: () => {
     // Initialize sort from URL (highest priority)
     const hasURLSort = args.fns.initializeSortFromURL();
@@ -1363,13 +1412,13 @@ return {
       L: File
       P: {
         originalFileName: preview.png
-        fileName: preview_v2_2025-12-03T18:50:21.297Z.png
-        fileSize: 93367
+        fileName: preview_v4_2025-12-07T10:37:33.380Z.png
+        fileSize: 101248
         subDomain: ytorganizer
-        filePath: /Users/kapil/UploadFiles/ytorganizer/2025/12/03/preview_v2_2025-12-03T18:50:21.297Z.png
-        checksum: 6a75cd4612f7e4e822b0d1715fc1f6c6f8fec95045dc80edfafea068d4739bed
+        filePath: /Users/kapil/UploadFiles/ytorganizer/2025/12/07/preview_v4_2025-12-07T10:37:33.380Z.png
+        checksum: fad57fd10d6c4bbd28558e6ad1a9b57141000eaf6e67ccdeb708270c09379ca6
         mimeType: image/png
-        version: 2
+        version: 4
       }
     }
     {
@@ -2061,7 +2110,7 @@ const ownerships = args.fns.ownerships?.() || [];
 const hasNoOwnerships = ownerships.length === 0;
 
 return {
-  hide: args.fns.loading() || !hasNoOwnerships
+  hide: args.fns.loading() || !hasNoOwnerships || args.fns.isPublicView()
 };
 '''
       }
@@ -2198,7 +2247,7 @@ const saveNote = async (data) => {
 
       return result.result;
     } else {
-      const errorMessage = result?.result?.message || "Failed to save note";
+      const errorMessage = result?.result?.message || result?.error || "Failed to save note";
       args.showErrorToast(errorMessage);
       const error = new Error(errorMessage);
       error.toastShown = true;
@@ -2227,7 +2276,7 @@ const toggleFavourite = async (item) => {
 
       return result.result;
     } else {
-      const errorMessage = result?.result?.message || "Failed to toggle favourite";
+      const errorMessage = result?.result?.message || result?.error || "Failed to toggle favourite";
       args.showErrorToast(errorMessage);
       const error = new Error(errorMessage);
       error.toastShown = true;
@@ -2344,7 +2393,7 @@ const deleteItem = async (item) => {
         args.showSuccessToast(result.result.message);
         await config.onSuccess();
       } else {
-        args.showErrorToast(result?.result?.message || `Failed to delete ${itemType}`);
+        args.showErrorToast(result?.result?.message || result?.error || `Failed to delete ${itemType}`);
       }
     } catch (error) {
       console.error(`Error deleting ${itemType}:`, error);
@@ -2417,16 +2466,26 @@ return {
       L: Attr
       P: {
         slotName: children
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+
+return `._id {
+  position: absolute;
+  top: ${virtualItem.start}px;
+  left: 0;
+  width: 100%;
+  height: ${virtualItem.size}px;
+}`;
+'''
         displayOrder: 1
-        componentName: Card
+        componentName: VideoCard
         props:
           '''
 // VirtualList provides item context with {item, virtualItem, index}
-const itemContext = args.contextData.item;
-if (!itemContext) return {};
-
-// Get the actual data from the context
-const itemData = itemContext.item;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const itemData = args.fns.getItems()[virtualItem.index];
 if (!itemData) return {};
 
 let item, itemSetting, itemType, processingStatus, showTypeBadge, itemId;

@@ -98,7 +98,9 @@ return {
 try {
   const result = await args.fns.executeYTOFunction("getUserPlaylists", {});
 
-  if (result?.result?.success && result?.result?.data) {
+  if (result?.error) {
+    args.showErrorToast(result.error);
+  } else if (result?.result?.success && result?.result?.data) {
     return result.result.data;
   }
 

@@ -902,7 +902,7 @@ return {
         if (result?.result?.success) {
           args.fns.showMessage('success', result.result.message || "All data cleared successfully");
         } else {
-          args.fns.showMessage('error', result?.result?.message || "Failed to clear data");
+          args.fns.showMessage('error', result?.result?.message || result?.error || "Failed to clear data");
         }
       } catch (error) {
         console.error("Error clearing data:", error);
@@ -1008,7 +1008,7 @@ return {
               args.navigate("/auth/logout");
             }, 2000);
           } else {
-            args.fns.showMessage('error', result?.result?.message || "Failed to delete account");
+            args.fns.showMessage('error', result?.result?.message || result?.error || "Failed to delete account");
           }
         } catch (error) {
           console.error("Error deleting account:", error);

@@ -38,6 +38,7 @@ export async function handleInsert(
       }
     }
   } catch (error) {
+    console.error(insert, error);
     throw new Error(
       `Can't insert due to an internal server error: ${(error as Error).message}`,
     );

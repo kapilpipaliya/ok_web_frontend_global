@@ -7,43 +7,26 @@
         description: Gets the total count of users using YSaar
         body:
           '''
-try {
-  // Query to count unique users who have YouTube ownerships (connected accounts)
-  const query = `
-    MATCH (u:User)
-    WHERE EXISTS((u)-[:UserYouTubeOwnership]->(:YouTubeOwnership))
-    RETURN COUNT(DISTINCT u) as totalUsers
-  `;
+// Query to count unique users who have YouTube ownerships (connected accounts)
+const query = `
+  MATCH (u:User)
+  WHERE EXISTS((u)-[:UserYouTubeOwnership]->(:YouTubeOwnership))
+  RETURN COUNT(DISTINCT u) as totalUsers
+`;
 
-  const result = await args.session.run(query);
+const result = await args.session.run(query);
 
-  const totalUsers = result.records[0]?.get('totalUsers');
-  const userCount = totalUsers ? (typeof totalUsers.toNumber === 'function' ? totalUsers.toNumber() : Number(totalUsers)) : 0;
+const totalUsers = result.records[0]?.get('totalUsers');
+const userCount = totalUsers ? (typeof totalUsers.toNumber === 'function' ? totalUsers.toNumber() : Number(totalUsers)) : 0;
 
-  return {
-    success: true,
-    data: {
-      totalUsers: userCount,
-      timestamp: new Date().toISOString()
-    },
-    message: `Found ${userCount} active users`
-  };
-
-} catch (error) {
-  console.error("Error getting user count:", error);
-
-  return {
-    success: false,
-    message: "Failed to get user count",
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    },
-    data: {
-      totalUsers: 0
-    }
-  };
-}
+return {
+  success: true,
+  data: {
+    totalUsers: userCount,
+    timestamp: new Date().toISOString()
+  },
+  message: `Found ${userCount} active users`
+};
 '''
         key: getUserCount
       }

@@ -92,22 +92,18 @@ try {
   // Map key format: "ownershipId:channelId" -> channel title
   const channelNameMap = {};
   if (channelRequests.length > 0) {
-    try {
-      // Build UNWIND query for batch processing with ownership verification
-      const channelResult = await args.session.run(
-        `UNWIND $channelRequests AS req
-         MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: req.channelId})
-         RETURN req.ownershipId as ownershipId, c`,
-        { channelRequests }
-      );
-      for (const record of channelResult.records) {
-        const ownershipId = record.get('ownershipId');
-        const channel = args.convertNodeToJson(record.get('c'));
-        const key = `${ownershipId}:${channel.P.youtubeId}`;
-        channelNameMap[key] = channel.P.title;
-      }
-    } catch (err) {
-      console.error('Error batch fetching channel names:', err);
+    // Build UNWIND query for batch processing with ownership verification
+    const channelResult = await args.session.run(
+      `UNWIND $channelRequests AS req
+       MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: req.channelId})
+       RETURN req.ownershipId as ownershipId, c`,
+      { channelRequests }
+    );
+    for (const record of channelResult.records) {
+      const ownershipId = record.get('ownershipId');
+      const channel = args.convertNodeToJson(record.get('c'));
+      const key = `${ownershipId}:${channel.P.youtubeId}`;
+      channelNameMap[key] = channel.P.title;
     }
   }
 
@@ -115,39 +111,31 @@ try {
   // Map key format: "ownershipId:playlistId" -> playlist title
   const playlistNameMap = {};
   if (playlistRequests.length > 0) {
-    try {
-      // Build UNWIND query for batch processing with ownership verification
-      const playlistResult = await args.session.run(
-        `UNWIND $playlistRequests AS req
-         MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: req.playlistId})
-         RETURN req.ownershipId as ownershipId, p`,
-        { playlistRequests }
-      );
-      for (const record of playlistResult.records) {
-        const ownershipId = record.get('ownershipId');
-        const playlist = args.convertNodeToJson(record.get('p'));
-        const key = `${ownershipId}:${playlist.P.youtubeId}`;
-        playlistNameMap[key] = playlist.P.title;
-      }
-    } catch (err) {
-      console.error('Error batch fetching playlist names:', err);
+    // Build UNWIND query for batch processing with ownership verification
+    const playlistResult = await args.session.run(
+      `UNWIND $playlistRequests AS req
+       MATCH (o:YouTubeOwnership {key: req.ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: req.playlistId})
+       RETURN req.ownershipId as ownershipId, p`,
+      { playlistRequests }
+    );
+    for (const record of playlistResult.records) {
+      const ownershipId = record.get('ownershipId');
+      const playlist = args.convertNodeToJson(record.get('p'));
+      const key = `${ownershipId}:${playlist.P.youtubeId}`;
+      playlistNameMap[key] = playlist.P.title;
     }
   }
 
   // Batch fetch usernames
   const usernameMap = {};
   if (userUuids.length > 0) {
-    try {
-      const userResult = await args.session.run(
-        'UNWIND $userUuids AS userUuid MATCH (u:User {uuid: userUuid}) RETURN u',
-        { userUuids }
-      );
-      for (const record of userResult.records) {
-        const user = args.convertNodeToJson(record.get('u'));
-        usernameMap[user.P.uuid] = user.P.username;
-      }
-    } catch (err) {
-      console.error('Error batch fetching usernames:', err);
+    const userResult = await args.session.run(
+      'UNWIND $userUuids AS userUuid MATCH (u:User {uuid: userUuid}) RETURN u',
+      { userUuids }
+    );
+    for (const record of userResult.records) {
+      const user = args.convertNodeToJson(record.get('u'));
+      usernameMap[user.P.uuid] = user.P.username;
     }
   }
 

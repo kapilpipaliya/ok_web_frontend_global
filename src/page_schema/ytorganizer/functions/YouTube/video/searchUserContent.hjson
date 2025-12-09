@@ -7,200 +7,28 @@
         description: Search across user's channels, playlists, and videos with optional filters
         body:
           '''
-try {
-  // Extract search parameters from request
-  const { query, type, isRegex = false, ownershipId, sortBy = "relevance" } = args.contextData;
+// Extract search parameters from request
+const { query, type, isRegex = false, ownershipId, sortBy = "relevance" } = args.contextData;
 
-  if (!query || query.trim().length === 0) {
-    return {
-      success: true,
-      data: {
-        channels: [],
-        playlists: [],
-        videos: [],
-        totalCount: 0
-      },
-      message: "Please enter a search query"
-    };
-  }
-
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Helper function to parse sortBy using shared utility
-  const parseSortBy = async (sortBy, contentType) => {
-    const parseSortResult = await args.executeNamedServerFunction({
-      functionName: "parseSortByUtil",
-      contextData: { sortBy, contentType }
-    });
-
-    if (!parseSortResult.result) {
-      throw new Error("Failed to parse sort parameters");
-    }
-
-    return parseSortResult.result;
-  };
-
-  // Prepare search pattern for case-insensitive matching
-  const trimmedQuery = query.trim();
-  let searchPattern;
-  let searchText; // For CONTAINS-based search
-
-  if (isRegex) {
-    // Use query as-is for regex search
-    searchPattern = `(?i)${trimmedQuery}`;
-    searchText = null;
-  } else {
-    // Escape special regex characters for literal string matching
-    const escapedQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    searchPattern = `(?i).*${escapedQuery}.*`;
-    // Also prepare lowercase text for CONTAINS fallback
-    searchText = trimmedQuery.toLowerCase();
-  }
-
-  const results = {
-    channels: [],
-    playlists: [],
-    videos: []
-  };
-
-  // SEARCH CHANNELS
-  if (!type || type === 'all' || type === 'channels') {
-    const { orderBy, orderDirection, secondaryOrderBy } = await parseSortBy(sortBy, "channels");
-
-    // Use helper function with custom filter for regex search
-    const channelsResult = await args.executeNamedServerFunction({
-      functionName: "getChannelsWithVideoCount",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,  // Filter by ownership if provided
-        customFilter: 'c.title =~ $pattern OR (c.description IS NOT NULL AND c.description =~ $pattern) OR (cs IS NOT NULL AND cs.customName =~ $pattern)',
-        customFilterParams: { pattern: searchPattern },
-        orderBy,
-        orderDirection,
-        secondaryOrderBy  // Pass secondary sort
-      }
-    });
-
-    results.channels = (channelsResult.result?.success ? channelsResult.result.data : [])
-      .map(item => ({
-        ...item,
-        matchType: 'channel'
-      }));
-  }
-
-  // SEARCH PLAYLISTS
-  if (!type || type === 'all' || type === 'playlists') {
-    const { orderBy, orderDirection, secondaryOrderBy } = await parseSortBy(sortBy, "playlists");
-
-    // Use helper function with custom filter for regex search
-    const playlistsResult = await args.executeNamedServerFunction({
-      functionName: "getPlaylistsWithVideoCount",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,  // Filter by ownership if provided
-        customFilter: 'p.title =~ $pattern OR (p.description IS NOT NULL AND p.description =~ $pattern) OR (ps IS NOT NULL AND ps.customName =~ $pattern)',
-        customFilterParams: { pattern: searchPattern },
-        orderBy,
-        orderDirection,
-        secondaryOrderBy  // Pass secondary sort
-      }
-    });
-
-    results.playlists = (playlistsResult.result?.success ? playlistsResult.result.data : [])
-      .map(item => ({
-        ...item,
-        matchType: 'playlist'
-      }));
-  }
-
-  // SEARCH VIDEOS
-  if (!type || type === 'all' || type === 'videos') {
-    const { orderBy, orderDirection, secondaryOrderBy } = await parseSortBy(sortBy, "videos");
-
-    // Use helper function with custom filter for regex search
-    const videosResult = await args.executeNamedServerFunction({
-      functionName: "getVideosWithDetails",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,  // Filter by ownership if provided
-        customFilter: searchText 
-          ? 'toLower(v.title) CONTAINS $searchText OR (v.description IS NOT NULL AND toLower(v.description) CONTAINS $searchText) OR toLower(v.channelTitle) CONTAINS $searchText OR (vs IS NOT NULL AND toLower(vs.note) CONTAINS $searchText)'
-          : 'v.title =~ $pattern OR (v.description IS NOT NULL AND v.description =~ $pattern) OR v.channelTitle =~ $pattern OR (vs IS NOT NULL AND vs.note =~ $pattern)',
-        customFilterParams: searchText 
-          ? { searchText: searchText }
-          : { pattern: searchPattern },
-        includePlaylist: true,
-        orderBy,
-        orderDirection,
-        secondaryOrderBy  // Pass secondary sort
-      }
-    });
-
-    results.videos = (videosResult.result?.success ? videosResult.result.data : [])
-      .map(item => ({
-        ...item,
-        matchType: 'video'
-      }));
-  }
-
-  // Calculate total results
-  const channelsCount = results.channels.length;
-  const playlistsCount = results.playlists.length;
-  const videosCount = results.videos.length;
-  const totalCount = channelsCount + playlistsCount + videosCount;
-
-  // Prepare summary message
-  let message = `Found ${totalCount} total result${totalCount !== 1 ? 's' : ''}`;
-  const parts = [];
-  if (channelsCount > 0) parts.push(`${channelsCount} channel${channelsCount !== 1 ? 's' : ''}`);
-  if (playlistsCount > 0) parts.push(`${playlistsCount} playlist${playlistsCount !== 1 ? 's' : ''}`);
-  if (videosCount > 0) parts.push(`${videosCount} video${videosCount !== 1 ? 's' : ''}`);
-
-  if (parts.length > 0) {
-    message += `: ${parts.join(', ')}`;
-  }
-
+if (!query || query.trim().length === 0) {
   return {
     success: true,
     data: {
-      channels: results.channels,
-      playlists: results.playlists,
-      videos: results.videos,
-      totalCount,
-      query,
-      type: type || 'all',
-      userId: user.id,
-      ownershipId: ownershipId
+      channels: [],
+      playlists: [],
+      videos: [],
+      totalCount: 0
     },
-    message
+    message: "Please enter a search query"
   };
+}
 
-} catch (error) {
-  console.error("Error searching content:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to search content. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to search your content.";
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "SearchError",
-      details: error.message
-    },
+    message: "Please log in to search your content.",
     data: {
       channels: [],
       playlists: [],
@@ -209,6 +37,197 @@ try {
     }
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Helper function to parse sortBy using shared utility
+const parseSortBy = async (sortBy, contentType) => {
+  const parseSortResult = await args.executeNamedServerFunction({
+    functionName: "parseSortByUtil",
+    contextData: { sortBy, contentType }
+  });
+
+  if (!parseSortResult.result) {
+    return null;
+  }
+
+  return parseSortResult.result;
+};
+
+// Prepare search pattern for case-insensitive matching
+const trimmedQuery = query.trim();
+let searchPattern;
+let searchText; // For CONTAINS-based search
+
+if (isRegex) {
+  // Use query as-is for regex search
+  searchPattern = `(?i)${trimmedQuery}`;
+  searchText = null;
+} else {
+  // Escape special regex characters for literal string matching
+  const escapedQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  searchPattern = `(?i).*${escapedQuery}.*`;
+  // Also prepare lowercase text for CONTAINS fallback
+  searchText = trimmedQuery.toLowerCase();
+}
+
+const results = {
+  channels: [],
+  playlists: [],
+  videos: []
+};
+
+// SEARCH CHANNELS
+if (!type || type === 'all' || type === 'channels') {
+  const sortParams = await parseSortBy(sortBy, "channels");
+  if (!sortParams) {
+    return {
+      success: false,
+      message: "Failed to search content. Please try again.",
+      data: {
+        channels: [],
+        playlists: [],
+        videos: [],
+        totalCount: 0
+      }
+    };
+  }
+  const { orderBy, orderDirection, secondaryOrderBy } = sortParams;
+
+  // Use helper function with custom filter for regex search
+  const channelsResult = await args.executeNamedServerFunction({
+    functionName: "getChannelsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
+      customFilter: 'c.title =~ $pattern OR (c.description IS NOT NULL AND c.description =~ $pattern) OR (cs IS NOT NULL AND cs.customName =~ $pattern)',
+      customFilterParams: { pattern: searchPattern },
+      orderBy,
+      orderDirection,
+      secondaryOrderBy  // Pass secondary sort
+    }
+  });
+
+  results.channels = (channelsResult.result?.success ? channelsResult.result.data : [])
+    .map(item => ({
+      ...item,
+      matchType: 'channel'
+    }));
+}
+
+// SEARCH PLAYLISTS
+if (!type || type === 'all' || type === 'playlists') {
+  const sortParams = await parseSortBy(sortBy, "playlists");
+  if (!sortParams) {
+    return {
+      success: false,
+      message: "Failed to search content. Please try again.",
+      data: {
+        channels: [],
+        playlists: [],
+        videos: [],
+        totalCount: 0
+      }
+    };
+  }
+  const { orderBy, orderDirection, secondaryOrderBy } = sortParams;
+
+  // Use helper function with custom filter for regex search
+  const playlistsResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
+      customFilter: 'p.title =~ $pattern OR (p.description IS NOT NULL AND p.description =~ $pattern) OR (ps IS NOT NULL AND ps.customName =~ $pattern)',
+      customFilterParams: { pattern: searchPattern },
+      orderBy,
+      orderDirection,
+      secondaryOrderBy  // Pass secondary sort
+    }
+  });
+
+  results.playlists = (playlistsResult.result?.success ? playlistsResult.result.data : [])
+    .map(item => ({
+      ...item,
+      matchType: 'playlist'
+    }));
+}
+
+// SEARCH VIDEOS
+if (!type || type === 'all' || type === 'videos') {
+  const sortParams = await parseSortBy(sortBy, "videos");
+  if (!sortParams) {
+    return {
+      success: false,
+      message: "Failed to search content. Please try again.",
+      data: {
+        channels: [],
+        playlists: [],
+        videos: [],
+        totalCount: 0
+      }
+    };
+  }
+  const { orderBy, orderDirection, secondaryOrderBy } = sortParams;
+
+  // Use helper function with custom filter for regex search
+  const videosResult = await args.executeNamedServerFunction({
+    functionName: "getVideosWithDetails",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,  // Filter by ownership if provided
+      customFilter: searchText 
+        ? 'toLower(v.title) CONTAINS $searchText OR (v.description IS NOT NULL AND toLower(v.description) CONTAINS $searchText) OR toLower(v.channelTitle) CONTAINS $searchText OR (vs IS NOT NULL AND toLower(vs.note) CONTAINS $searchText)'
+        : 'v.title =~ $pattern OR (v.description IS NOT NULL AND v.description =~ $pattern) OR v.channelTitle =~ $pattern OR (vs IS NOT NULL AND vs.note =~ $pattern)',
+      customFilterParams: searchText 
+        ? { searchText: searchText }
+        : { pattern: searchPattern },
+      includePlaylist: true,
+      orderBy,
+      orderDirection,
+      secondaryOrderBy  // Pass secondary sort
+    }
+  });
+
+  results.videos = (videosResult.result?.success ? videosResult.result.data : [])
+    .map(item => ({
+      ...item,
+      matchType: 'video'
+    }));
+}
+
+// Calculate total results
+const channelsCount = results.channels.length;
+const playlistsCount = results.playlists.length;
+const videosCount = results.videos.length;
+const totalCount = channelsCount + playlistsCount + videosCount;
+
+// Prepare summary message
+let message = `Found ${totalCount} total result${totalCount !== 1 ? 's' : ''}`;
+const parts = [];
+if (channelsCount > 0) parts.push(`${channelsCount} channel${channelsCount !== 1 ? 's' : ''}`);
+if (playlistsCount > 0) parts.push(`${playlistsCount} playlist${playlistsCount !== 1 ? 's' : ''}`);
+if (videosCount > 0) parts.push(`${videosCount} video${videosCount !== 1 ? 's' : ''}`);
+
+if (parts.length > 0) {
+  message += `: ${parts.join(', ')}`;
+}
+
+return {
+  success: true,
+  data: {
+    channels: results.channels,
+    playlists: results.playlists,
+    videos: results.videos,
+    totalCount,
+    query,
+    type: type || 'all',
+    userId: user.id,
+    ownershipId: ownershipId
+  },
+  message
+};
 '''
         key: searchUserContent
       }

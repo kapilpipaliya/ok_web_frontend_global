@@ -273,6 +273,44 @@ return {
       id: "9"
       L: ComponentVariant
       P: {
+        description: Type of item: channel or playlist
+        type: string
+        key: type
+        defValue: channel
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Playlist processing
+        value: playlist
+        key: playlist
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Channel processing
+        value: channel
+        key: channel
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        description: Progress percentage (0-100)
+        type: number
+        key: progress
+        defValue: 0
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
         description: Error message for failed queueStatus
         type: string
         defValue: ""
@@ -280,27 +318,7 @@ return {
       }
     }
     {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        description: Progress percentage (0-100)
-        type: number
-        defValue: 0
-        key: progress
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        description: Additional processing details
-        type: string
-        defValue: ""
-        key: details
-      }
-    }
-    {
-      id: "12"
+      id: "14"
       L: ComponentVariant
       P: {
         description: Processing queueStatus: queued, processing, pending_quota, paused, completed, completed_with_errors, failed
@@ -310,52 +328,7 @@ return {
       }
     }
     {
-      id: "13"
-      L: ComponentVariantOption
-      P: {
-        description: Paused by user
-        value: paused
-        key: paused
-      }
-    }
-    {
-      id: "14"
-      L: ComponentVariantOption
-      P: {
-        description: Processing completed successfully
-        value: completed
-        key: completed
-      }
-    }
-    {
       id: "15"
-      L: ComponentVariantOption
-      P: {
-        description: Completed with some errors
-        value: completed_with_errors
-        key: completed_with_errors
-      }
-    }
-    {
-      id: "16"
-      L: ComponentVariantOption
-      P: {
-        description: Processing failed with error
-        value: failed
-        key: failed
-      }
-    }
-    {
-      id: "17"
-      L: ComponentVariantOption
-      P: {
-        description: Item is currently being processed
-        value: processing
-        key: processing
-      }
-    }
-    {
-      id: "18"
       L: ComponentVariantOption
       P: {
         description: Waiting for quota reset
@@ -364,7 +337,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "16"
       L: ComponentVariantOption
       P: {
         description: Item is queued for processing
@@ -373,31 +346,58 @@ return {
       }
     }
     {
-      id: "20"
-      L: ComponentVariant
+      id: "17"
+      L: ComponentVariantOption
       P: {
-        description: Type of item: channel or playlist
-        type: string
-        defValue: channel
-        key: type
+        description: Processing failed with error
+        value: failed
+        key: failed
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariantOption
+      P: {
+        description: Processing completed successfully
+        value: completed
+        key: completed
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariantOption
+      P: {
+        description: Paused by user
+        value: paused
+        key: paused
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariantOption
+      P: {
+        description: Completed with some errors
+        value: completed_with_errors
+        key: completed_with_errors
       }
     }
     {
       id: "21"
       L: ComponentVariantOption
       P: {
-        description: Playlist processing
-        value: playlist
-        key: playlist
+        description: Item is currently being processed
+        value: processing
+        key: processing
       }
     }
     {
       id: "22"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Channel processing
-        value: channel
-        key: channel
+        description: Additional processing details
+        type: string
+        key: details
+        defValue: ""
       }
     }
   ]
@@ -418,25 +418,25 @@ return {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "10"
+      E: "12"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "11"
+      E: "13"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "12"
+      E: "14"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "20"
+      E: "22"
     }
     {
       id: e7
@@ -477,56 +477,56 @@ return {
     {
       id: e13
       T: ComponentVariantOption
-      S: "12"
-      E: "13"
+      S: "9"
+      E: "10"
     }
     {
       id: e14
       T: ComponentVariantOption
-      S: "12"
-      E: "14"
+      S: "9"
+      E: "11"
     }
     {
       id: e15
       T: ComponentVariantOption
-      S: "12"
+      S: "14"
       E: "15"
     }
     {
       id: e16
       T: ComponentVariantOption
-      S: "12"
+      S: "14"
       E: "16"
     }
     {
       id: e17
       T: ComponentVariantOption
-      S: "12"
+      S: "14"
       E: "17"
     }
     {
       id: e18
       T: ComponentVariantOption
-      S: "12"
+      S: "14"
       E: "18"
     }
     {
       id: e19
       T: ComponentVariantOption
-      S: "12"
+      S: "14"
       E: "19"
     }
     {
       id: e20
       T: ComponentVariantOption
-      S: "20"
-      E: "21"
+      S: "14"
+      E: "20"
     }
     {
       id: e21
       T: ComponentVariantOption
-      S: "20"
-      E: "22"
+      S: "14"
+      E: "21"
     }
   ]
 }

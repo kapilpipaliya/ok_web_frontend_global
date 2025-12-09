@@ -4,7 +4,7 @@
       id: "1"
       L: Component
       P: {
-        key: Card
+        key: VideoCard
       }
     }
     {
@@ -24,10 +24,8 @@ return `._id {
   flex-wrap: nowrap;
   align-items: flex-start;
   gap: 0.5rem;
-  height: 100%;
   box-sizing: border-box;
   border-bottom: 1px solid ${args.theme.var.color.background_light_200};
-  position: relative;
 
   &:hover {
     background: ${args.theme.var.color.background_light_100};
@@ -109,15 +107,22 @@ const thumbnailUrl = item?.P?.thumbnailMaxres ||
 
 const youtubeId = item?.P?.youtubeId || "";
 
+// Check if we're in public view and preserve those parameters
+const isPublicView = args.searchParams?.page === "public";
+const publicUsername = args.searchParams?.username || null;
+const publicParams = isPublicView && publicUsername 
+  ? `&page=public&username=${encodeURIComponent(publicUsername)}` 
+  : "";
+
 let href, target;
 if (itemType === "video") {
   href = args.fns.getYouTubeUrl?.(item, itemType);
   target = "_blank";
 } else if (itemType === "playlist") {
-  href = `/content?type=playlists&id=${youtubeId}`;
+  href = `/content?type=playlists&id=${youtubeId}${publicParams}`;
   target = "_self";
 } else {
-  href = `/content?type=channels&id=${youtubeId}`;
+  href = `/content?type=channels&id=${youtubeId}${publicParams}`;
   target = "_self";
 }
 
@@ -156,7 +161,13 @@ return {
       if (notAdded) {
         args.fns.openYouTubeInParentTab(youtubeUrl);
       } else {
-        args.navigate(`/content?type=${contentType}&id=${youtubeId}`);
+        // Preserve public view parameters if in public view
+        const isPublicView = args.searchParams?.page === "public";
+        const publicUsername = args.searchParams?.username || null;
+        const publicParams = isPublicView && publicUsername 
+          ? `&page=public&username=${encodeURIComponent(publicUsername)}` 
+          : "";
+        args.navigate(`/content?type=${contentType}&id=${youtubeId}${publicParams}`);
       }
     }
   }
@@ -1596,6 +1607,190 @@ return {
       L: Attr
       P: {
         slotName: menu-items
+        displayOrder: 3.5
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+const isPublic = item?.P?.isPublic === true;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+// Only show for public channels and playlists
+if ((itemType !== "channel" && itemType !== "playlist") || !isPublic || notSaved) {
+  return { hide: true };
+}
+
+return {
+  icon: "carbon:share",
+  text: "Share",
+  onClick: async (e) => {
+    e?.stopPropagation();
+
+    const username = args.user?.P?.username;
+    if (!username) {
+      args.showErrorToast("Unable to get username");
+      args.contextData.floatingMenuContext?.closeMenu?.();
+      return;
+    }
+
+    const itemId = item?.P?.youtubeId;
+    const contentType = itemType === "channel" ? "channels" : "playlists";
+    const publicUrl = `${window.location.origin}/content?page=public&username=${encodeURIComponent(username)}&type=${contentType}&id=${itemId}`;
+
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      args.showSuccessToast("Public URL copied to clipboard");
+    } catch (error) {
+      args.showErrorToast("Failed to copy URL to clipboard");
+    }
+
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 3.6
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+const isPublic = item?.P?.isPublic === true;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+// Only show for channels and playlists
+if ((itemType !== "channel" && itemType !== "playlist") || notSaved) {
+  return { hide: true };
+}
+
+const youtubeId = item?.P?.youtubeId;
+const ownershipId = args.fns.getSelectedOwnershipId?.();
+
+if (!youtubeId || !ownershipId) {
+  return { hide: true };
+}
+
+const functionName = itemType === "channel" ? "updateChannelSetting" : "updatePlaylistSetting";
+const itemTypeName = itemType === "channel" ? "Channel" : "Playlist";
+
+return {
+  icon: isPublic ? "carbon:view-off" : "carbon:view",
+  text: isPublic ? "Make Private" : "Make Public",
+  onClick: async (e) => {
+    e?.stopPropagation();
+
+    try {
+      const response = await args.fns.executeYTOFunction(functionName, {
+        youtubeId,
+        ownershipId,
+        isPublic: !isPublic
+      });
+
+      if (response.result?.success) {
+        args.showSuccessToast(response.result.message || `${itemTypeName} setting updated successfully`);
+        // Reload data to reflect changes
+        if (args.fns.loadData) {
+          await args.fns.loadData();
+        }
+      } else {
+        args.showErrorToast(response.result?.message || || response?.error || `Failed to update ${itemTypeName.toLowerCase()} setting`);
+      }
+    } catch (error) {
+      args.showErrorToast(`Error updating ${itemTypeName.toLowerCase()} setting: ` + error.message);
+    }
+
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        slotName: menu-items
+        displayOrder: 3.7
+        componentName: MenuItem
+        props:
+          '''
+const item = args.contextData.props?.item;
+const itemType = args.contextData.props?.itemType;
+const isPublic = item?.P?.isPublic === true;
+const allowUnauthenticatedAccess = item?.P?.allowUnauthenticatedAccess === true;
+
+// Check if this is an unsaved extension item
+const isExtensionItem = item?.P?.extensionExists !== undefined;
+const notSaved = isExtensionItem && !item?.P?.extensionExists;
+
+// Only show for public channels and playlists
+if ((itemType !== "channel" && itemType !== "playlist") || !isPublic || notSaved) {
+  return { hide: true };
+}
+
+const youtubeId = item?.P?.youtubeId;
+const ownershipId = args.fns.getSelectedOwnershipId?.();
+
+if (!youtubeId || !ownershipId) {
+  return { hide: true };
+}
+
+const functionName = itemType === "channel" ? "updateChannelSetting" : "updatePlaylistSetting";
+const itemTypeName = itemType === "channel" ? "Channel" : "Playlist";
+
+return {
+  icon: allowUnauthenticatedAccess ? "carbon:user-multiple" : "carbon:user",
+  text: allowUnauthenticatedAccess ? "Require Login" : "Allow Public Access",
+  onClick: async (e) => {
+    e?.stopPropagation();
+
+    try {
+      const response = await args.fns.executeYTOFunction(functionName, {
+        youtubeId,
+        ownershipId,
+        isPublic: true, // Keep it public
+        allowUnauthenticatedAccess: !allowUnauthenticatedAccess
+      });
+
+      if (response?.error) {
+        args.showErrorToast(response.error);
+      } else if (response.result?.success) {
+        args.showSuccessToast(response.result.message || `${itemTypeName} setting updated successfully`);
+        // Reload data to reflect changes
+        if (args.fns.loadData) {
+          await args.fns.loadData();
+        }
+      } else {
+        args.showErrorToast(response.result?.message || `Failed to update ${itemTypeName.toLowerCase()} setting`);
+      }
+    } catch (error) {
+      args.showErrorToast(`Error updating ${itemTypeName.toLowerCase()} setting: ` + error.message);
+    }
+
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        slotName: menu-items
         displayOrder: 4
         componentName: MenuItem
         props:
@@ -1607,7 +1802,7 @@ return {
       }
     }
     {
-      id: "38"
+      id: "41"
       L: Attr
       P: {
         slotName: menu-items
@@ -1633,7 +1828,7 @@ return {
       }
     }
     {
-      id: "39"
+      id: "42"
       L: Attr
       P: {
         slotName: menu-items
@@ -1665,7 +1860,7 @@ return {
       }
     }
     {
-      id: "40"
+      id: "43"
       L: Attr
       P: {
         slotName: menu-items
@@ -1710,7 +1905,9 @@ return {
 
       const response = await args.fns.executeYTOFunction(functionName, contextData);
 
-      if (response.result?.success) {
+      if (response?.error) {
+        args.showErrorToast(response.error);
+      } else if (response.result?.success) {
         args.showSuccessToast(response.result.message || "Processing retry queued successfully");
       } else {
         args.showErrorToast(response.result?.message || "Failed to retry processing");
@@ -1726,7 +1923,7 @@ return {
       }
     }
     {
-      id: "41"
+      id: "44"
       L: Attr
       P: {
         slotName: menu-items
@@ -1999,6 +2196,24 @@ return {
       T: Attr
       S: "32"
       E: "41"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "32"
+      E: "42"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "32"
+      E: "43"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "32"
+      E: "44"
     }
   ]
 }

@@ -4,112 +4,16 @@
       id: "1"
       L: Function
       P: {
-        description: Fetches a single playlist's videos for the current user
+        description: Fetches a single playlist's videos for the current user or public access. Supports public access mode with username parameter. Verifies playlist is public OR belongs to a public channel. If channel is public, all its playlists and videos are accessible.
         body:
           '''
-try {
-  // Extract playlist ID, ownership, and sort from request parameters
-  const { playlistId, ownershipId, sortBy = "position_asc" } = args.contextData;
+// Extract playlist ID, ownership, sort, and public access parameters
+const { playlistId, ownershipId: initialOwnershipId, sortBy = "position_asc", username, isPublicAccess = false } = args.contextData;
 
-  if (!playlistId) {
-    throw new Error("Playlist ID is required");
-  }
-
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Parse sortBy parameter using shared utility
-  const parseSortResult = await args.executeNamedServerFunction({
-    functionName: "parseSortByUtil",
-    contextData: { sortBy, contentType: "videos" }
-  });
-
-  if (!parseSortResult.result) {
-    throw new Error("Failed to parse sort parameters");
-  }
-
-  const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
-
-  // Verify user has access to this playlist and get video count using helper function
-  const playlistResult = await args.executeNamedServerFunction({
-    functionName: "getPlaylistsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership
-      playlistIds: [playlistId]
-    }
-  });
-
-  if (!playlistResult.result || !playlistResult.result.success || playlistResult.result.data.length === 0) {
-    throw new Error("Playlist not found or access denied");
-  }
-
-  const playlistData = playlistResult.result.data[0];
-  const playlist = playlistData.playlist;
-  const playlistSetting = playlistData.playlistSetting;
-  const ownership = playlistData.ownership;
-  const parentChannel = playlistData.channel; // Channel info is already included from getPlaylistsWithVideoCount
-
-  // Fetch all videos in this playlist using helper function
-  const videosResult = await args.executeNamedServerFunction({
-    functionName: "getVideosWithDetails",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership
-      playlistId: playlistId,
-      orderBy,
-      orderDirection,
-      secondaryOrderBy
-    }
-  });
-
-  const videos = videosResult.result?.success ? videosResult.result.data : [];
-
-  return {
-    success: true,
-    data: {
-      playlist: {
-        playlist,
-        playlistSetting,
-        ownership,
-        channel: parentChannel // Channel vertex from getPlaylistsWithVideoCount
-      },
-      videos,
-      userId: user.id,
-      ownershipId: ownershipId
-    },
-    message: `Found ${videos.length} videos in playlist`
-  };
-
-} catch (error) {
-  console.error("Error fetching playlist videos:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to fetch playlist videos. Please try again.";
-
-  if (error.message.includes("Playlist ID is required")) {
-    userMessage = "Playlist ID is required.";
-  } else if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to view playlist videos.";
-  } else if (error.message.includes("Playlist not found or access denied")) {
-    userMessage = "Playlist not found or you don't have access to it.";
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+if (!playlistId) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    },
+    message: "Playlist ID is required.",
     data: {
       playlist: null,
       videos: [],
@@ -122,6 +26,286 @@ try {
     }
   };
 }
+
+let user;
+let targetUserUuid;
+let requiresAuth = true;
+let ownershipId = initialOwnershipId;
+
+// Handle public access mode
+if (isPublicAccess) {
+  if (!username) {
+    return {
+      success: false,
+      message: "Username is required for public access",
+      data: {
+        playlist: null,
+        videos: [],
+        statistics: {
+          totalVideos: 0,
+          watchedVideos: 0,
+          unwatchedVideos: 0,
+          videosWithNotes: 0
+        }
+      }
+    };
+  }
+
+  // Find user by username
+  const userResult = await args.session.run(
+    `MATCH (u:User {username: $username}) RETURN u`,
+    { username }
+  );
+
+  if (userResult.records.length === 0) {
+    return {
+      success: false,
+      message: "User not found.",
+      data: {
+        playlist: null,
+        videos: [],
+        statistics: {
+          totalVideos: 0,
+          watchedVideos: 0,
+          unwatchedVideos: 0,
+          videosWithNotes: 0
+        }
+      }
+    };
+  }
+
+  const userNode = userResult.records[0].get('u');
+  user = args.convertNodeToJson(userNode);
+  targetUserUuid = user.P.uuid;
+
+  // Verify playlist is public OR belongs to a public channel
+  // If channel is public, all its playlists and videos are accessible
+  const playlistCheck = await args.session.run(
+    `MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership)
+     MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+     OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
+     OPTIONAL MATCH (o)-[:YouTubeOwnershipChannel]->(c)
+     RETURN p.isPublic as playlistIsPublic, 
+            p.allowUnauthenticatedAccess as playlistAllowUnauthenticatedAccess,
+            c.isPublic as channelIsPublic,
+            c.allowUnauthenticatedAccess as channelAllowUnauthenticatedAccess,
+            o.key as ownershipId LIMIT 1`,
+    { userUuid: targetUserUuid, playlistId }
+  );
+
+  if (playlistCheck.records.length === 0) {
+    return {
+      success: false,
+      message: "Playlist not found or you don't have access to it.",
+      data: {
+        playlist: null,
+        videos: [],
+        statistics: {
+          totalVideos: 0,
+          watchedVideos: 0,
+          unwatchedVideos: 0,
+          videosWithNotes: 0
+        }
+      }
+    };
+  }
+
+  const playlistProps = playlistCheck.records[0];
+  const playlistIsPublic = playlistProps.get('playlistIsPublic') === true;
+  const playlistAllowUnauthenticatedAccess = playlistProps.get('playlistAllowUnauthenticatedAccess') === true;
+  const channelIsPublic = playlistProps.get('channelIsPublic') === true;
+  const channelAllowUnauthenticatedAccess = playlistProps.get('channelAllowUnauthenticatedAccess') === true;
+
+  // Allow access if playlist is public OR if it belongs to a public channel
+  const isAccessible = playlistIsPublic || channelIsPublic;
+
+  if (!isAccessible) {
+    return {
+      success: false,
+      message: "This playlist is not public.",
+      data: {
+        playlist: null,
+        videos: [],
+        statistics: {
+          totalVideos: 0,
+          watchedVideos: 0,
+          unwatchedVideos: 0,
+          videosWithNotes: 0
+        }
+      }
+    };
+  }
+
+  // Determine authentication requirement:
+  // - If playlist is public, use playlist's allowUnauthenticatedAccess
+  // - If only channel is public, use channel's allowUnauthenticatedAccess
+  const allowUnauthenticatedAccess = playlistIsPublic 
+    ? playlistAllowUnauthenticatedAccess 
+    : channelAllowUnauthenticatedAccess;
+
+  // If allowUnauthenticatedAccess is false, still require authentication
+  if (!allowUnauthenticatedAccess) {
+    const actualUser = await args.getUserFromSession();
+    if (!actualUser) {
+      return {
+        success: false,
+        message: "This playlist requires authentication. Please log in to view it.",
+        data: {
+          playlist: null,
+          videos: [],
+          statistics: {
+            totalVideos: 0,
+            watchedVideos: 0,
+            unwatchedVideos: 0,
+            videosWithNotes: 0
+          }
+        }
+      };
+    }
+    requiresAuth = true;
+  } else {
+    requiresAuth = false;
+  }
+
+  ownershipId = playlistProps.get('ownershipId');
+} else {
+  // Normal authenticated access
+  if (!ownershipId) {
+    return {
+      success: false,
+      message: "Please log in to view playlist videos.",
+      data: {
+        playlist: null,
+        videos: [],
+        statistics: {
+          totalVideos: 0,
+          watchedVideos: 0,
+          unwatchedVideos: 0,
+          videosWithNotes: 0
+        }
+      }
+    };
+  }
+
+  // Get current authenticated user from session
+  const actualUser = await args.getUserFromSession();
+  if (!actualUser) {
+    return {
+      success: false,
+      message: "Please log in to view playlist videos.",
+      data: {
+        playlist: null,
+        videos: [],
+        statistics: {
+          totalVideos: 0,
+          watchedVideos: 0,
+          unwatchedVideos: 0,
+          videosWithNotes: 0
+        }
+      }
+    };
+  }
+
+  // Get effective user (handles admin impersonation)
+  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  targetUserUuid = user.P.uuid;
+}
+
+// Parse sortBy parameter using shared utility
+const parseSortResult = await args.executeNamedServerFunction({
+  functionName: "parseSortByUtil",
+  contextData: { sortBy, contentType: "videos" }
+});
+
+if (!parseSortResult.result) {
+  return {
+    success: false,
+    message: "Failed to fetch playlist videos. Please try again.",
+    data: {
+      playlist: null,
+      videos: [],
+      statistics: {
+        totalVideos: 0,
+        watchedVideos: 0,
+        unwatchedVideos: 0,
+        videosWithNotes: 0
+      }
+    }
+  };
+}
+
+const { orderBy, orderDirection, secondaryOrderBy } = parseSortResult.result;
+
+// Verify user has access to this playlist and get video count using helper function
+// Note: When accessing via public channel, don't filter by playlist public status
+// The channel's public status is what matters here
+const playlistResult = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: targetUserUuid,
+    ownershipId,  // Filter by ownership
+    playlistIds: [playlistId],
+    // Don't filter by playlist public status when accessing via public channel
+    isPublicAccess: false
+  }
+});
+
+if (!playlistResult.result || !playlistResult.result.success || playlistResult.result.data.length === 0) {
+  return {
+    success: false,
+    message: "Playlist not found or you don't have access to it.",
+    data: {
+      playlist: null,
+      videos: [],
+      statistics: {
+        totalVideos: 0,
+        watchedVideos: 0,
+        unwatchedVideos: 0,
+        videosWithNotes: 0
+      }
+    }
+  };
+}
+
+const playlistData = playlistResult.result.data[0];
+const playlist = playlistData.playlist;
+const playlistSetting = playlistData.playlistSetting;
+const ownership = playlistData.ownership;
+const parentChannel = playlistData.channel; // Channel info is already included from getPlaylistsWithVideoCount
+
+// Fetch all videos in this playlist using helper function
+// Note: When accessing via public channel, show all videos (channel's public status applies)
+const videosResult = await args.executeNamedServerFunction({
+  functionName: "getVideosWithDetails",
+  contextData: {
+    userUuid: targetUserUuid,
+    ownershipId,  // Filter by ownership
+    playlistId: playlistId,
+    orderBy,
+    orderDirection,
+    secondaryOrderBy,
+    // Don't filter by public status when accessing via public channel
+    isPublicAccess: false
+  }
+});
+
+const videos = videosResult.result?.success ? videosResult.result.data : [];
+
+return {
+  success: true,
+  data: {
+    playlist: {
+      playlist,
+      playlistSetting,
+      ownership,
+      channel: parentChannel // Channel vertex from getPlaylistsWithVideoCount
+    },
+    videos,
+    userId: user.id,
+    ownershipId: ownershipId
+  },
+  message: `Found ${videos.length} videos in playlist`
+};
 '''
         key: getPlaylistVideos
       }

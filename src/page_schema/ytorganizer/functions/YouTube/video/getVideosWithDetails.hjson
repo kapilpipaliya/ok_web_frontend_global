@@ -31,7 +31,6 @@
  * Returns:
  * - Array of {video: Vertex, videoSetting: Vertex, parentPlaylist: {playlist: Vertex, playlistSetting: Vertex}|null}
  */
-try {
   const {
     userUuid,
     ownershipId,
@@ -50,11 +49,19 @@ try {
   } = args.contextData;
 
   if (!userUuid) {
-    throw new Error("User UUID is required");
+    return {
+      success: false,
+      message: "User UUID is required",
+      data: []
+    };
   }
 
   if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+    return {
+      success: false,
+      message: "YouTube Ownership ID is required. Please select a YouTube account.",
+      data: []
+    };
   }
 
   // Build WHERE clause for video IDs if provided
@@ -209,19 +216,6 @@ try {
     success: true,
     data: videos
   };
-
-} catch (error) {
-  console.error('Error fetching videos with details:', error);
-  return {
-    success: false,
-    message: "Failed to fetch videos",
-    error: {
-      type: "DatabaseError",
-      details: error.message
-    },
-    data: []
-  };
-}
 '''
         key: getVideosWithDetails
       }

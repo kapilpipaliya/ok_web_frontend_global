@@ -29,7 +29,7 @@ const loadAPIKeys = async () => {
     if (result?.result?.success && result?.result?.data) {
       setApiKeys(result.result.data.apiKeys || []);
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to load API keys");
+      args.showErrorToast(result?.result?.message || result?.error || "Failed to load API keys");
     }
   } catch (error) {
     console.error("Error loading API keys:", error);
@@ -63,7 +63,7 @@ const handleAddAPIKey = async () => {
       setFormData({ apiKey: '', name: '', dailyLimit: 10000, priority: 100 });
       await loadAPIKeys();
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to add API key");
+      args.showErrorToast(result?.result?.message || result?.error || "Failed to add API key");
     }
   } catch (error) {
     console.error("Error adding API key:", error);
@@ -130,7 +130,7 @@ const handleBulkImport = async () => {
           successCount++;
         } else {
           failCount++;
-          console.error(`Failed to import key: ${result?.result?.message}`);
+          console.error(`Failed to import key: ${result?.result?.message || result?.error}`);
         }
       } catch (error) {
         failCount++;
@@ -187,7 +187,7 @@ const handleRemoveAPIKey = async (keyId, keyName) => {
       args.showSuccessToast(result.result.message);
       await loadAPIKeys();
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to remove API key");
+      args.showErrorToast(result?.result?.message || result?.error || "Failed to remove API key");
     }
   } catch (error) {
     console.error("Error removing API key:", error);
@@ -208,7 +208,7 @@ const handleToggleActive = async (keyId, currentStatus) => {
       args.showSuccessToast(result.result.message);
       await loadAPIKeys();
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to update API key");
+      args.showErrorToast(result?.result?.message || result?.error || "Failed to update API key");
     }
   } catch (error) {
     console.error("Error updating API key:", error);
@@ -240,7 +240,7 @@ const handleResetCounts = async () => {
       args.showSuccessToast(result.result.message);
       await loadAPIKeys();
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to reset counts");
+      args.showErrorToast(result?.result?.message || result?.error || "Failed to reset counts");
     }
   } catch (error) {
     console.error("Error resetting counts:", error);

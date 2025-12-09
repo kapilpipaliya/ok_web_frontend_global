@@ -182,7 +182,7 @@ const addVideosToPlaylist = async () => {
       onSuccess?.();
       closeModal();
     } else {
-      const errorMsg = result?.result?.message || "Failed to add videos to playlist";
+      const errorMsg = result?.result?.message || result?.error || "Failed to add videos to playlist";
       setFormError(errorMsg);
       args.showErrorToast(errorMsg);
     }
@@ -775,7 +775,7 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: isOpen
+        key: onSuccess
       }
     }
     {
@@ -783,7 +783,7 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onSuccess
+        key: isOpen
       }
     }
     {
@@ -807,8 +807,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: ""
         key: videoUrl
+        defValue: ""
       }
     }
   ]

@@ -1,0 +1,103 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user content settings (column and form configuration) for Books or AudioVideo
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { contentType, key } = args.contextData;
+
+if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+  return {
+    success: false,
+    message: "Invalid contentType. Must be 'book' or 'audioVideo'"
+  };
+}
+
+// Build setting key
+const settingKey = key || `${contentType}_settings`;
+
+// Query for user's content setting using (User)-[UserSetting]->(Setting) with key in Setting
+const query = `
+  MATCH (u:User {uuid: $userUuid})-[:UserSetting]->(s:Setting {key: $settingKey})
+  RETURN s
+  LIMIT 1
+`;
+
+const result = await args.session.run(query, {
+  userUuid: user.P.uuid,
+  settingKey: settingKey
+});
+
+if (result.records.length === 0) {
+  // No user setting found, try to get default setting
+  const defaultKey = `${contentType}_settings_default`;
+  const defaultQuery = `
+    MATCH (s:Setting {key: $defaultKey})
+    RETURN s
+    LIMIT 1
+  `;
+
+  const defaultResult = await args.session.run(defaultQuery, {
+    defaultKey: defaultKey
+  });
+
+  if (defaultResult.records.length > 0) {
+    // Return default setting
+    const defaultNode = defaultResult.records[0].get('s');
+    const defaultVertex = args.convertNodeToJson(defaultNode);
+    return {
+      success: true,
+      data: {
+        setting: defaultVertex,
+        isDefault: true
+      },
+      message: "Using default configuration."
+    };
+  }
+
+  // No setting found, return null
+  return {
+    success: true,
+    data: {
+      setting: null,
+      isDefault: true
+    },
+    message: "No custom settings found. Using default configuration."
+  };
+}
+
+// Setting exists - convert to vertex format
+const settingNode = result.records[0].get('s');
+const settingVertex = args.convertNodeToJson(settingNode);
+
+return {
+  success: true,
+  data: {
+    setting: settingVertex,
+    isDefault: false
+  },
+  message: "Settings loaded successfully"
+};
+'''
+        key: getUserContentSetting
+      }
+    }
+  ]
+  edges: []
+}

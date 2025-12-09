@@ -90,7 +90,7 @@ export function CreateGridHeaders(
     const column = { ...attribute } as unknown as ColumnDef<Vertex>;
     if (
       attribute.hideInGrid ||
-      attribute.componentName === "Table" ||
+      attribute.componentName === "TableField" ||
       attribute.componentName === "DynamicTable"
     ) {
       continue;

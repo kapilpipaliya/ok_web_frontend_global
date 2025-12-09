@@ -7,68 +7,63 @@
         description: Load video queue from database for the current ownership
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession(args.request);
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Get ownershipId from contextData
-  const { ownershipId } = args.contextData;
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, {
-    userUuid: user.P.uuid,
-    ownershipId
-  });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("YouTube ownership not found or access denied");
-  }
-
-  // Load queue from database ordered by position
-  const queueResult = await args.session.run(`
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
-    RETURN vq, v
-    ORDER BY vq.position ASC
-  `, {
-    ownershipId
-  });
-
-  // Convert to vertex format
-  const queue = queueResult.records.map(record => {
-    return args.convertNodeToJson(record.get('v'));
-  });
-
-  return {
-    success: true,
-    message: `Loaded ${queue.length} videos from queue`,
-    data: queue
-  };
-
-} catch (error) {
-  console.error("Error loading video queue:", error);
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession(args.request);
+if (!actualUser) {
   return {
     success: false,
-    message: error.message || "Failed to load video queue",
-    error: {
-      type: error.name || "LoadQueueError",
-      details: error.message
-    }
+    message: "User session not found. Please log in and try again.",
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Get ownershipId from contextData
+const { ownershipId } = args.contextData;
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account.",
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, {
+  userUuid: user.P.uuid,
+  ownershipId
+});
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "YouTube ownership not found or access denied",
+  };
+}
+
+// Load queue from database ordered by position
+const queueResult = await args.session.run(`
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipVideoQueue]->(vq:VideoQueue)-[:VideoQueueVideo]->(v:Video)
+  RETURN vq, v
+  ORDER BY vq.position ASC
+`, {
+  ownershipId
+});
+
+// Convert to vertex format
+const queue = queueResult.records.map(record => {
+  return args.convertNodeToJson(record.get('v'));
+});
+
+return {
+  success: true,
+  message: `Loaded ${queue.length} videos from queue`,
+  data: queue
+};
 '''
         key: loadVideoQueue
       }

@@ -20,9 +20,7 @@ import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId"
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { NotFound } from "~/components/404";
-import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
 import { AuthRequired } from "~/components/auth/AuthRequired";
-import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
 
 import type {
   PageViewWrapperProps,
@@ -61,59 +59,6 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const dataVertex = () => graph.vertexes[formStore().P.formDataId!];
 
   const [previewStore] = usePreviewContext();
-
-  // Setup function proxy for page-level functions
-  const { getFunctionArgumentWithValue } = useFunctionProxy({
-    props: {
-      get meta() {
-        return metaVertex();
-      },
-      get data() {
-        return dataVertex();
-      },
-    },
-    componentName: () => "Html",
-    formVertex: () => formStore() as any,
-    formId: formStore().id,
-    updateValue: () => {},
-    onChange: () => {},
-    isNoPermissionCheck: () => props.isNoPermissionCheck,
-    isViewMode: () => false,
-    hasFullPermission: () => true,
-    hasEditPermission: () => true,
-    hasCreatePermission: () => true,
-    hasViewPermission: () => true,
-  });
-
-  // Evaluate dynamic props from metaVertex
-  const dynamicProps = () => {
-    // cant use createMemo, as it is giving error: tempate is not defined during ssr. must fix letter
-    const meta = metaVertex();
-    if (!meta) return {};
-
-    return createDynamicPropsMemo(
-      { meta },
-      {
-        graph,
-        getFunctionArgumentWithValue,
-      },
-    )();
-  };
-
-  const isNoPermissionCheck = () =>
-    props.isNoPermissionCheck ||
-    dynamicProps().isNoPermissionCheck ||
-    metaVertex()?.P.isNoPermissionCheck ||
-    previewStore.isNoPermissionCheck;
-
-  // Initialize permissions
-  const { permissions, checkAuthError, getDynamicFns } = usePermissions(props, {
-    graph,
-    metaVertex,
-    isNoPermissionCheck,
-    id,
-    previewStore,
-  });
 
   const constants = (): PageViewConstants => ({
     get dataId() {
@@ -161,125 +106,47 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     previewStore,
   });
 
-  // Initialize form data handling
-  const { handleFormData } = useFormData(props, {
-    graph,
-    setGraph,
-    id,
-    setFormStore,
-    formStore,
-    metaVertex,
-    createErrorVertex,
-  });
-
-  // Initialize lifecycle hooks
-  const { onConfirmExit } = useLifecycle(props, {
-    graph,
-    setGraph,
-    formStore,
-    setFormStore,
-    metaTxnId,
-  });
-
-  function validateMetaVertex(): string {
-    if (
-      formStore().P.formMetaId &&
-      !isNoPermissionCheck() &&
-      ["Page"].includes(metaVertex()?.L[0])
-    ) {
-      const dynamicFns = getDynamicFns();
-      const enabled =
-        typeof dynamicFns.enabled === "function"
-          ? dynamicFns.enabled()
-          : dynamicFns.enabled;
-
-      if (!enabled) {
-        const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
-        setFormStore("error", errorMsg);
-        return errorMsg;
-      }
-    }
-
-    if (!metaVertex()) {
-      const errorMsg = "No Page found";
-      setFormStore("error", errorMsg);
-      return errorMsg;
-    }
-
-    if (!metaVertex()?.P.key) {
-      const errorMsg = `No key for the ${props.pageVertexName}`;
-      setFormStore("error", errorMsg);
-      return errorMsg;
-    }
-
-    const authError = checkAuthError();
-    if (authError) {
-      setFormStore("error", authError);
-      return authError;
-    }
-
-    return "";
-  }
-
   props.initializeFormStoreParent?.(formStore().id);
 
-  const processResult = (result?: {
-    formMetaId?: string;
-    metaResult?: FetchFormMetaDataResult;
-    dataResult?: FetchFormDataResult;
-    error?: string;
-  }) => {
-    if (result) {
-      batch(() => {
-        setFormStore("error", "");
-        if (result.error) {
-          setFormStore("error", result.error);
-        } else {
-          setFormMetaData(result?.metaResult, result?.formMetaId);
-          const validationError = validateMetaVertex();
-          if (!validationError) {
+  const ContentSSR = () => {
+    // Initialize form data handling
+    const { handleFormData } = useFormData(props, {
+      graph,
+      setGraph,
+      id,
+      setFormStore,
+      formStore,
+      metaVertex,
+      createErrorVertex,
+    });
+    const processResult = (result?: {
+      formMetaId?: string;
+      metaResult?: FetchFormMetaDataResult;
+      dataResult?: FetchFormDataResult;
+      error?: string;
+    }) => {
+      if (result) {
+        batch(() => {
+          setFormStore("error", "");
+          if (result.error) {
+            setFormStore("error", result.error);
+          } else {
+            setFormMetaData(result?.metaResult, result?.formMetaId);
+            // const error = validationError();
+            // if (error) {
+            //   setFormStore("error", error);
+            // } else {
+            //   handleFormData(result?.dataResult);
+            // }
             handleFormData(result?.dataResult);
           }
-        }
-      });
-    }
-  };
+        });
+      }
+    };
 
-  const Content = () => (
-    <Switch>
-      <Match when={metaVertex()?.P?.signinRequired}>
-        <AuthRequired>
-          <PageView
-            context={props.context}
-            data={dataVertex()}
-            hasFullPermission={permissions.full()}
-            hasEditPermission={permissions.edit()}
-            hasCreatePermission={permissions.create()}
-            hasViewPermission={permissions.view()}
-            id={id()}
-            isNoPermissionCheck={isNoPermissionCheck()}
-            metaVertex={metaVertex()!}
-          />
-        </AuthRequired>
-      </Match>
-      <Match when={!metaVertex()?.P?.signinRequired}>
-        <PageView
-          context={props.context}
-          data={dataVertex()}
-          hasFullPermission={permissions.full()}
-          hasEditPermission={permissions.edit()}
-          hasCreatePermission={permissions.create()}
-          hasViewPermission={permissions.view()}
-          id={id()}
-          isNoPermissionCheck={isNoPermissionCheck()}
-          metaVertex={metaVertex()!}
-        />
-      </Match>
-    </Switch>
-  );
-
-  const ContentSSR = () => {
+    // Initial Data Set:
     processResult(metaData());
+    // when refetched data, set it to state again:
     createEffect(
       on(
         metaData,
@@ -291,6 +158,32 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
         },
         { defer: true },
       ),
+    );
+
+
+
+
+    // Initialize lifecycle hooks
+    const { onConfirmExit } = useLifecycle(props, {
+      graph,
+      setGraph,
+      formStore,
+      setFormStore,
+      metaTxnId,
+    });
+
+
+
+    const Content = () => (
+          <PageView
+            context={props.context}
+            data={dataVertex()}
+            id={id()}
+            isNoPermissionCheck={props.isNoPermissionCheck}
+            metaVertex={metaVertex()!}
+            pageVertexName={props.pageVertexName}
+            parentPreviewStore={previewStore}
+          />
     );
     return (
       <>
@@ -337,7 +230,6 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
                 <Content />
                 <Show
                   when={
-                    isNoPermissionCheck() &&
                     !(props.hideSaveCancelButton ?? true)
                   }
                 >

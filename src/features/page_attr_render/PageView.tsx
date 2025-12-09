@@ -4,9 +4,10 @@ import {
   Show,
   Switch,
   createSignal,
-  onCleanup, createEffect, createComputed,
+  onCleanup,
+  type Accessor,
 } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
@@ -30,6 +31,9 @@ import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks
 import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
 import { HtmlField } from "~/components/fields/HtmlField";
 import { DataInternal } from "~/components/fields/data/DataInternal";
+import { SimpleAlert } from "~/components/styled/SimpleAlert";
+import { usePermissions } from "~/pages/PageViewWrapper/usePermissions";
+import { AuthRequired } from "~/components/auth/AuthRequired";
 
 export function PageView(
   props: Readonly<{
@@ -43,11 +47,11 @@ export function PageView(
     isDesignMode?: boolean;
     isNoPermissionCheck?: boolean;
     metaVertex?: Vertex;
+    pageVertexName?: string;
+    parentPreviewStore?: PreviewStoreObject;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-
-  const [previewStore2] = usePreviewContext();
 
   const isViewOnlyForm = createMemo(() => {
     if (!(props.id || props.hasCreatePermission)) {
@@ -110,41 +114,7 @@ export function PageView(
     return [];
   });
 
-  const previewStore = createStore<PreviewStoreObject>({
-    get context() {
-      return props.context;
-    },
-    get hasFullPermission() {
-      return props.hasFullPermission;
-    },
-    get hasEditPermission() {
-      return props.hasEditPermission;
-    },
-    get hasCreatePermission() {
-      return props.hasCreatePermission;
-    },
-    get hasViewPermission() {
-      return props.hasViewPermission;
-    },
-    get id() {
-      return props.id;
-    },
-    get isDesignMode() {
-      return props.isDesignMode;
-    },
-    get isNoPermissionCheck() {
-      return props.isNoPermissionCheck;
-    },
-    get isViewOnly() {
-      return isViewOnlyForm();
-    },
-    get previewData() {
-      return props.data;
-    },
-    get previewMeta() {
-      return props.metaVertex;
-    },
-  });
+
 
   // Inner component to handle recursive layout rendering
   const LayoutRenderer = (innerProps: { index: number }) => {
@@ -199,6 +169,20 @@ export function PageView(
     const [graph] = useGraph();
     const [componentName] = createSignal<string>("Html");
 
+    const isNoPermissionCheck2 = createMemo(() =>
+      props.isNoPermissionCheck ||
+      props.metaVertex?.P.isNoPermissionCheck ||
+      props.parentPreviewStore?.isNoPermissionCheck
+    );
+    // Initialize permissions
+    const { permissions: permissions2 } = usePermissions(props, {
+      graph,
+      metaVertex: () => props.metaVertex!,
+      isNoPermissionCheck: isNoPermissionCheck2,
+      id: () => props.id,
+      previewStore: props.parentPreviewStore!,
+    });
+
     // Use the centralized function proxy hook
     const { functionProxy, getFunctionArgumentWithValue, setRef, setMounted } =
       useFunctionProxy({
@@ -218,17 +202,17 @@ export function PageView(
         value: () => undefined,
         updateValue: () => {},
         onChange: () => {},
-        hasFullPermission: () => props.hasFullPermission ?? true,
-        hasEditPermission: () => props.hasEditPermission ?? true,
-        hasCreatePermission: () => props.hasCreatePermission ?? true,
-        hasViewPermission: () => props.hasViewPermission ?? true,
+        hasFullPermission: () => props.pageVertexName ? permissions2.full() : (props.hasFullPermission ?? true),
+        hasEditPermission: () => props.pageVertexName ? permissions2.edit() : (props.hasEditPermission ?? true),
+        hasCreatePermission: () => props.pageVertexName ? permissions2.create() : (props.hasCreatePermission ?? true),
+        hasViewPermission: () => props.pageVertexName ? permissions2.view() : (props.hasViewPermission ?? true),
       });
 
     // Evaluate dynamic props from metaVertex
     const dynamicProps = createDynamicPropsMemo(
       {
         get meta() {
-          return props.metaVertex;
+          return props.metaVertex!;
         },
       },
       {
@@ -236,6 +220,71 @@ export function PageView(
         getFunctionArgumentWithValue,
       },
     );
+
+    const isNoPermissionCheck = createMemo(() =>
+      props.isNoPermissionCheck ||
+      dynamicProps().isNoPermissionCheck ||
+      props.metaVertex?.P.isNoPermissionCheck ||
+      props.parentPreviewStore?.isNoPermissionCheck
+    );
+    // Initialize permissions
+    const { checkAuthError } = usePermissions(props, {
+      graph,
+      metaVertex: () => props.metaVertex!,
+      isNoPermissionCheck,
+      id: () => props.id,
+      previewStore: props.parentPreviewStore!,
+    });
+
+    const enabledValidationError = createMemo((): string => {
+      if (
+        !isNoPermissionCheck() &&
+        props.metaVertex &&
+        ["Page"].includes(props.metaVertex.L[0])
+      ) {
+        if (!props.pageVertexName) {
+          return "";
+        }
+        const proxy = functionProxy as any;
+        const enabled =
+          typeof proxy.enabled === "function"
+            ? proxy.enabled()
+            : proxy.enabled;
+
+        if (!enabled) {
+          return `${props.pageVertexName || "Page"} is not enabled. Please contact your administrator.`;
+        }
+      }
+      return "";
+    });
+
+    const validationError = createMemo((): string => {
+      if (!props.pageVertexName) {
+        return "";
+      }
+      // Use enabled validation error first
+      if (enabledValidationError()) {
+        return enabledValidationError();
+      }
+
+      if (!props.metaVertex) {
+        return "No Page found";
+      }
+
+      if (!props.metaVertex.P.key) {
+        return `No key for the ${props.pageVertexName || "Page"}`;
+      }
+
+      // Check auth error if provided
+      if (checkAuthError) {
+        const authError = checkAuthError();
+        if (authError) {
+          return authError;
+        }
+      }
+
+      return "";
+    });
 
     // Lifecycle setup using useComponentLifecycle hook
     useComponentLifecycle({
@@ -295,8 +344,11 @@ export function PageView(
       </Switch>
     );
 
-    return (
+    const PageViewContent = () => (
       <PageRenderContextProvider store={repeterStore}>
+        <Show when={validationError()}>
+          <SimpleAlert type="error" message={validationError()} />
+        </Show>
         <Switch>
           <Match
             when={
@@ -322,15 +374,60 @@ export function PageView(
         </Switch>
       </PageRenderContextProvider>
     );
+    const previewStore = createStore<PreviewStoreObject>({
+      get context() {
+        return props.context;
+      },
+      get hasFullPermission() {
+        return props.pageVertexName ? permissions2.full() : (props.hasFullPermission ?? true);
+      },
+      get hasEditPermission() {
+        return props.pageVertexName ? permissions2.edit() : (props.hasEditPermission ?? true);
+      },
+      get hasCreatePermission() {
+        return props.pageVertexName ? permissions2.create() : (props.hasCreatePermission ?? true);
+      },
+      get hasViewPermission() {
+        return props.pageVertexName ? permissions2.view() : (props.hasViewPermission ?? true);
+      },
+      get id() {
+        return props.id;
+      },
+      get isDesignMode() {
+        return props.isDesignMode;
+      },
+      get isNoPermissionCheck() {
+        return props.pageVertexName ? isNoPermissionCheck() : (props.isNoPermissionCheck ?? false);
+      },
+      get isViewOnly() {
+        return isViewOnlyForm();
+      },
+      get previewData() {
+        return props.data;
+      },
+      get previewMeta() {
+        return props.metaVertex;
+      },
+    });
+    return (
+      <PreviewContext.Provider value={previewStore}>
+        <Switch>
+          <Match when={props.metaVertex?.P?.signinRequired || dynamicProps().signinRequired}>
+            <AuthRequired><PageViewContent /></AuthRequired>
+          </Match>
+          <Match when={!props.metaVertex?.P?.signinRequired && !dynamicProps().signinRequired}>
+            <PageViewContent />
+          </Match>
+        </Switch>
+      </PreviewContext.Provider>
+    );
   };
 
   return (
     <Show when={props.metaVertex}>
-      <PreviewContext.Provider value={previewStore}>
         <Show when={layouts().length > 0} fallback={<MainContentDataWrapper />}>
           <LayoutRenderer index={0} />
         </Show>
-      </PreviewContext.Provider>
     </Show>
   );
 }

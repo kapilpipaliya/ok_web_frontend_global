@@ -7,117 +7,12 @@
         description: Adds a video to multiple playlists at once
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Extract parameters
-  const { video, playlistIds, ownershipId } = args.contextData;
-
-  if (!video) {
-    throw new Error("Video is required");
-  }
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  if (!playlistIds || !Array.isArray(playlistIds) || playlistIds.length === 0) {
-    throw new Error("At least one playlist ID is required");
-  }
-
-  // Get the video ID
-  const videoId = video.P?.youtubeId || video.P?.id;
-  if (!videoId) {
-    throw new Error("Video ID not found");
-  }
-
-  // Add video to each playlist
-  const results = [];
-  const errors = [];
-
-  for (const playlistId of playlistIds) {
-    try {
-      // Call the existing addVideoToPlaylist function for each playlist
-      const result = await args.executeNamedServerFunction({
-        functionName: "addVideoToPlaylist",
-        contextData: {
-          playlistId: playlistId,
-          videoYoutubeId: videoId,
-          ownershipId: ownershipId
-        }
-      });
-
-      if (result?.result?.success) {
-        results.push({
-          playlistId,
-          success: true,
-          message: result.result.message
-        });
-      } else {
-        errors.push({
-          playlistId,
-          success: false,
-          message: result?.result?.message || "Unknown error"
-        });
-      }
-    } catch (error) {
-      errors.push({
-        playlistId,
-        success: false,
-        message: error.message
-      });
-    }
-  }
-
-  const successCount = results.length;
-  const errorCount = errors.length;
-
-  // Return combined results
-  return {
-    success: successCount > 0,
-    data: {
-      video: video,
-      successfulPlaylists: results,
-      failedPlaylists: errors,
-      successCount,
-      errorCount,
-      totalCount: playlistIds.length
-    },
-    message: errorCount === 0
-      ? `Video added to ${successCount} playlist${successCount !== 1 ? 's' : ''}`
-      : `Video added to ${successCount} playlist${successCount !== 1 ? 's' : ''}, ${errorCount} failed`
-  };
-
-} catch (error) {
-  console.error("Error adding video to playlists:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to add video to playlists. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to add videos to playlists.";
-  } else if (error.message.includes("Video is required")) {
-    userMessage = error.message;
-  } else if (error.message.includes("playlist ID")) {
-    userMessage = error.message;
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    },
+    message: "Please log in to add videos to playlists.",
     data: {
       successfulPlaylists: [],
       failedPlaylists: [],
@@ -127,6 +22,127 @@ try {
     }
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { video, playlistIds, ownershipId } = args.contextData;
+
+if (!video) {
+  return {
+    success: false,
+    message: "Video is required",
+    data: {
+      successfulPlaylists: [],
+      failedPlaylists: [],
+      successCount: 0,
+      errorCount: 0,
+      totalCount: 0
+    }
+  };
+}
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account.",
+    data: {
+      successfulPlaylists: [],
+      failedPlaylists: [],
+      successCount: 0,
+      errorCount: 0,
+      totalCount: 0
+    }
+  };
+}
+
+if (!playlistIds || !Array.isArray(playlistIds) || playlistIds.length === 0) {
+  return {
+    success: false,
+    message: "At least one playlist ID is required",
+    data: {
+      successfulPlaylists: [],
+      failedPlaylists: [],
+      successCount: 0,
+      errorCount: 0,
+      totalCount: 0
+    }
+  };
+}
+
+// Get the video ID
+const videoId = video.P?.youtubeId || video.P?.id;
+if (!videoId) {
+  return {
+    success: false,
+    message: "Video ID not found",
+    data: {
+      successfulPlaylists: [],
+      failedPlaylists: [],
+      successCount: 0,
+      errorCount: 0,
+      totalCount: 0
+    }
+  };
+}
+
+// Add video to each playlist
+const results = [];
+const errors = [];
+
+for (const playlistId of playlistIds) {
+  try {
+    // Call the existing addVideoToPlaylist function for each playlist
+    const result = await args.executeNamedServerFunction({
+      functionName: "addVideoToPlaylist",
+      contextData: {
+        playlistId: playlistId,
+        videoYoutubeId: videoId,
+        ownershipId: ownershipId
+      }
+    });
+
+    if (result?.result?.success) {
+      results.push({
+        playlistId,
+        success: true,
+        message: result.result.message
+      });
+    } else {
+      errors.push({
+        playlistId,
+        success: false,
+        message: result?.result?.message || "Unknown error"
+      });
+    }
+  } catch (error) {
+    errors.push({
+      playlistId,
+      success: false,
+      message: error.message
+    });
+  }
+}
+
+const successCount = results.length;
+const errorCount = errors.length;
+
+// Return combined results
+return {
+  success: successCount > 0,
+  data: {
+    video: video,
+    successfulPlaylists: results,
+    failedPlaylists: errors,
+    successCount,
+    errorCount,
+    totalCount: playlistIds.length
+  },
+  message: errorCount === 0
+    ? `Video added to ${successCount} playlist${successCount !== 1 ? 's' : ''}`
+    : `Video added to ${successCount} playlist${successCount !== 1 ? 's' : ''}, ${errorCount} failed`
+};
 '''
         key: addVideoToPlaylists
       }

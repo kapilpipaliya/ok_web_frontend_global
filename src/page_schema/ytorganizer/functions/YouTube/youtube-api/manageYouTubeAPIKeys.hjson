@@ -7,175 +7,175 @@
         description: Add, remove, update, or list YouTube API keys
         body:
           '''
-try {
-  const { action, apiKey, keyId, name, dailyLimit, priority, isActive } = args.contextData;
+const { action, apiKey, keyId, name, dailyLimit, priority, isActive } = args.contextData;
 
-  // Get current user
-  const user = await args.getUserFromSession();
-  if (!user) {
-    throw new Error("User session not found. Please log in.");
-  }
-
-  // Check if user is admin (optional - you can add permission checks here)
-  // For now, allowing any authenticated user
-
-  if (action === 'add') {
-    // Validate input
-    if (!apiKey) {
-      throw new Error("API key is required");
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const keyName = name || `API Key ${Date.now()}`;
-    const limit = dailyLimit || 10000;
-    const keyPriority = priority !== undefined ? priority : 100;
-    const active = isActive !== undefined ? isActive : true;
-
-    // Generate unique key
-    const uniqueKey = `youtube_api_key_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Create API key vertex
-    await args.session.run(`
-      CREATE (ak:YouTubeAPIKey {
-        key: $key,
-        apiKey: $apiKey,
-        name: $name,
-        service: 'youtube',
-        dailyLimit: $dailyLimit,
-        currentCount: 0,
-        resetDate: $today,
-        priority: $priority,
-        isActive: $isActive,
-        createdAt: datetime(),
-        updatedAt: datetime(),
-        lastUsedAt: null
-      })
-    `, {
-      key: uniqueKey,
-      apiKey: apiKey,
-      name: keyName,
-      dailyLimit: limit,
-      today: today,
-      priority: keyPriority,
-      isActive: active
-    });
-
-    return {
-      success: true,
-      message: `API key "${keyName}" added successfully`,
-      data: {
-        keyId: uniqueKey,
-        name: keyName,
-        dailyLimit: limit,
-        priority: keyPriority
-      }
-    };
-
-  } else if (action === 'remove') {
-    if (!keyId) {
-      throw new Error("Key ID is required for removal");
-    }
-
-    // Delete API key
-    await args.session.run(`
-      MATCH (ak:YouTubeAPIKey {key: $keyId})
-      DELETE ak
-    `, { keyId });
-
-    return {
-      success: true,
-      message: "API key removed successfully"
-    };
-
-  } else if (action === 'update') {
-    if (!keyId) {
-      throw new Error("Key ID is required for update");
-    }
-
-    // Build update query dynamically
-    let setClause = 'SET ak.updatedAt = datetime()';
-    const params = { keyId };
-
-    if (name !== undefined) {
-      setClause += ', ak.name = $name';
-      params.name = name;
-    }
-    if (dailyLimit !== undefined) {
-      setClause += ', ak.dailyLimit = $dailyLimit';
-      params.dailyLimit = dailyLimit;
-    }
-    if (priority !== undefined) {
-      setClause += ', ak.priority = $priority';
-      params.priority = priority;
-    }
-    if (isActive !== undefined) {
-      setClause += ', ak.isActive = $isActive';
-      params.isActive = isActive;
-    }
-
-    await args.session.run(`
-      MATCH (ak:YouTubeAPIKey {key: $keyId})
-      ${setClause}
-      RETURN ak
-    `, params);
-
-    return {
-      success: true,
-      message: "API key updated successfully"
-    };
-
-  } else if (action === 'list') {
-    // Get all API keys with status
-    const result = await args.session.run(`
-      MATCH (ak:YouTubeAPIKey)
-      RETURN ak
-      ORDER BY ak.priority ASC, ak.createdAt ASC
-    `);
-
-    const apiKeys = result.records.map(record => {
-      const apiKeyData = args.convertNodeToJson(record.get('ak'));
-      return apiKeyData;
-    });
-
-    return {
-      success: true,
-      data: {
-        apiKeys: apiKeys,
-        totalKeys: apiKeys.length
-      }
-    };
-
-  } else if (action === 'reset') {
-    // Reset all API key counts (useful for manual reset or testing)
-    const today = new Date().toISOString().split('T')[0];
-
-    await args.session.run(`
-      MATCH (ak:YouTubeAPIKey)
-      SET ak.currentCount = 0,
-          ak.resetDate = $today,
-          ak.updatedAt = datetime()
-    `, { today });
-
-    return {
-      success: true,
-      message: "All API key counts reset successfully"
-    };
-
-  } else {
-    throw new Error(`Unknown action: ${action}`);
-  }
-
-} catch (error) {
-  console.error('Error managing API keys:', error);
+// Get current user
+const user = await args.getUserFromSession();
+if (!user) {
   return {
     success: false,
-    message: error.message || "Failed to manage API keys",
-    error: {
-      type: "ManagementError",
-      details: error.message
-    }
+    message: "User session not found. Please log in."
   };
 }
+
+// Check if user is admin (optional - you can add permission checks here)
+// For now, allowing any authenticated user
+
+if (action === 'add') {
+  // Validate input
+  if (!apiKey) {
+    return {
+      success: false,
+      message: "API key is required"
+    };
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const keyName = name || `API Key ${Date.now()}`;
+  const limit = dailyLimit || 10000;
+  const keyPriority = priority !== undefined ? priority : 100;
+  const active = isActive !== undefined ? isActive : true;
+
+  // Generate unique key
+  const uniqueKey = `youtube_api_key_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // Create API key vertex
+  await args.session.run(`
+    CREATE (ak:YouTubeAPIKey {
+      key: $key,
+      apiKey: $apiKey,
+      name: $name,
+      service: 'youtube',
+      dailyLimit: $dailyLimit,
+      currentCount: 0,
+      resetDate: $today,
+      priority: $priority,
+      isActive: $isActive,
+      createdAt: datetime(),
+      updatedAt: datetime(),
+      lastUsedAt: null
+    })
+  `, {
+    key: uniqueKey,
+    apiKey: apiKey,
+    name: keyName,
+    dailyLimit: limit,
+    today: today,
+    priority: keyPriority,
+    isActive: active
+  });
+
+  return {
+    success: true,
+    message: `API key "${keyName}" added successfully`,
+    data: {
+      keyId: uniqueKey,
+      name: keyName,
+      dailyLimit: limit,
+      priority: keyPriority
+    }
+  };
+
+} else if (action === 'remove') {
+  if (!keyId) {
+    return {
+      success: false,
+      message: "Key ID is required for removal"
+    };
+  }
+
+  // Delete API key
+  await args.session.run(`
+    MATCH (ak:YouTubeAPIKey {key: $keyId})
+    DELETE ak
+  `, { keyId });
+
+  return {
+    success: true,
+    message: "API key removed successfully"
+  };
+
+} else if (action === 'update') {
+  if (!keyId) {
+    return {
+      success: false,
+      message: "Key ID is required for update"
+    };
+  }
+
+  // Build update query dynamically
+  let setClause = 'SET ak.updatedAt = datetime()';
+  const params = { keyId };
+
+  if (name !== undefined) {
+    setClause += ', ak.name = $name';
+    params.name = name;
+  }
+  if (dailyLimit !== undefined) {
+    setClause += ', ak.dailyLimit = $dailyLimit';
+    params.dailyLimit = dailyLimit;
+  }
+  if (priority !== undefined) {
+    setClause += ', ak.priority = $priority';
+    params.priority = priority;
+  }
+  if (isActive !== undefined) {
+    setClause += ', ak.isActive = $isActive';
+    params.isActive = isActive;
+  }
+
+  await args.session.run(`
+    MATCH (ak:YouTubeAPIKey {key: $keyId})
+    ${setClause}
+    RETURN ak
+  `, params);
+
+  return {
+    success: true,
+    message: "API key updated successfully"
+  };
+
+} else if (action === 'list') {
+  // Get all API keys with status
+  const result = await args.session.run(`
+    MATCH (ak:YouTubeAPIKey)
+    RETURN ak
+    ORDER BY ak.priority ASC, ak.createdAt ASC
+  `);
+
+  const apiKeys = result.records.map(record => {
+    const apiKeyData = args.convertNodeToJson(record.get('ak'));
+    return apiKeyData;
+  });
+
+  return {
+    success: true,
+    data: {
+      apiKeys: apiKeys,
+      totalKeys: apiKeys.length
+    }
+  };
+
+} else if (action === 'reset') {
+  // Reset all API key counts (useful for manual reset or testing)
+  const today = new Date().toISOString().split('T')[0];
+
+  await args.session.run(`
+    MATCH (ak:YouTubeAPIKey)
+    SET ak.currentCount = 0,
+        ak.resetDate = $today,
+        ak.updatedAt = datetime()
+  `, { today });
+
+  return {
+    success: true,
+    message: "All API key counts reset successfully"
+  };
+
+} else {
+  throw new Error(`Unknown action: ${action}`);
+}
+
 '''
         key: manageYouTubeAPIKeys
       }

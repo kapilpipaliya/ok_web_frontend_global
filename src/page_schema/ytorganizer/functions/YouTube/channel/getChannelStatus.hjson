@@ -7,58 +7,54 @@
         description: Get processing status for a specific channel
         body:
           '''
-try {
-  const { channelId, ownershipId } = args.contextData;
+const { channelId, ownershipId } = args.contextData;
 
-  if (!channelId) {
-    throw new Error("Channel ID is required");
-  }
-
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Use helper function to fetch channel with video count
-  const result = await args.executeNamedServerFunction({
-    functionName: "getChannelsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by ownership if provided
-      channelIds: [channelId]
-    }
-  });
-
-  if (!result.result || !result.result.success || result.result.data.length === 0) {
-    return {
-      success: false,
-      message: "Channel not found"
-    };
-  }
-
-  const channelData = result.result.data[0];
-
-  return {
-    success: true,
-    data: {
-      channel: channelData.channel,
-      channelSetting: channelData.channelSetting,
-      ownership: channelData.ownership
-    }
-  };
-
-} catch (error) {
-  console.error("Error fetching channel status:", error);
+if (!channelId) {
   return {
     success: false,
-    message: "Failed to fetch channel status",
-    error: { details: error.message }
+    message: "Channel ID is required"
   };
 }
+
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found"
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Use helper function to fetch channel with video count
+const result = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by ownership if provided
+    channelIds: [channelId]
+  }
+});
+
+if (!result.result || !result.result.success || result.result.data.length === 0) {
+  return {
+    success: false,
+    message: "Channel not found"
+  };
+}
+
+const channelData = result.result.data[0];
+
+return {
+  success: true,
+  data: {
+    channel: channelData.channel,
+    channelSetting: channelData.channelSetting,
+    ownership: channelData.ownership
+  }
+};
 '''
         key: getChannelStatus
       }

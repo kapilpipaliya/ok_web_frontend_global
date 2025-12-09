@@ -7,68 +7,69 @@
         description: Check if a playlist already exists for a specific ownership
         body:
           '''
-try {
-  const { youtubeId, ownershipId } = args.contextData;
+const { youtubeId, ownershipId } = args.contextData;
 
-  if (!youtubeId) {
-    throw new Error("YouTube ID is required");
-  }
-
-  if (!ownershipId) {
-    throw new Error("Ownership ID is required");
-  }
-
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Check if playlist exists for this ownership
-  // NEW SCHEMA v4.0: Direct ownership + optional settings
-  const result = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $youtubeId})
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-    RETURN p, ps
-    LIMIT 1
-  `, {
-    userUuid: user.P.uuid,
-    ownershipId,
-    youtubeId
-  });
-
-  const exists = result.records.length > 0;
-
-  // Handle optional PlaylistSetting (might be null if user hasn't customized)
-  let data = null;
-  if (exists) {
-    const record = result.records[0];
-    const playlistSettingNode = record.get('ps');
-    data = {
-      playlist: args.convertNodeToJson(record.get('p')),
-      playlistSetting: playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null
-    };
-  }
-
-  return {
-    success: true,
-    exists,
-    data
-  };
-
-} catch (error) {
-  console.error("Error checking if playlist exists:", error);
+if (!youtubeId) {
   return {
     success: false,
     exists: false,
-    message: "Failed to check if playlist exists",
-    error: { details: error.message }
+    message: "YouTube ID is required"
   };
 }
+
+if (!ownershipId) {
+  return {
+    success: false,
+    exists: false,
+    message: "Ownership ID is required"
+  };
+}
+
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    exists: false,
+    message: "User session not found"
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Check if playlist exists for this ownership
+// NEW SCHEMA v4.0: Direct ownership + optional settings
+const result = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  MATCH (o)-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $youtubeId})
+  OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+  RETURN p, ps
+  LIMIT 1
+`, {
+  userUuid: user.P.uuid,
+  ownershipId,
+  youtubeId
+});
+
+const exists = result.records.length > 0;
+
+// Handle optional PlaylistSetting (might be null if user hasn't customized)
+let data = null;
+if (exists) {
+  const record = result.records[0];
+  const playlistSettingNode = record.get('ps');
+  data = {
+    playlist: args.convertNodeToJson(record.get('p')),
+    playlistSetting: playlistSettingNode ? args.convertNodeToJson(playlistSettingNode) : null
+  };
+}
+
+return {
+  success: true,
+  exists,
+  data
+};
 '''
         key: checkPlaylistExists
       }

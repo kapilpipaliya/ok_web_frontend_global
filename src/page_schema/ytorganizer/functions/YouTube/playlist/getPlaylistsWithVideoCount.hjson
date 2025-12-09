@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Helper function to fetch playlists with video counts for a user. Supports multi-ownership model with optional ownership filtering.
+        description: Helper function to fetch playlists with video counts for a user. Supports multi-ownership model with optional ownership filtering. Supports public access mode to return only public playlists.
         body:
           '''
 /**
@@ -29,7 +29,6 @@
  * Returns:
  * - Array of {playlist: Vertex, playlistSetting: Vertex, channel: Vertex|null, ownership: Vertex} with videoCount in playlistSetting.P
  */
-try {
   const {
     userUuid,
     ownershipId = null,  // Optional: filter by specific ownership
@@ -42,11 +41,16 @@ try {
     orderDirection = 'DESC',
     secondaryOrderBy = null,  // Optional: secondary sort
     limit = null,
-    skip = 0
+    skip = 0,
+    isPublicAccess = false  // Public access mode - only return playlists from public channels
   } = args.contextData;
 
   if (!userUuid) {
-    throw new Error("User UUID is required");
+    return {
+      success: false,
+      message: "User UUID is required",
+      data: []
+    };
   }
 
   // Build WHERE clause for playlist IDs if provided
@@ -68,6 +72,11 @@ try {
 
   // Build custom filter clause if provided
   const customFilterClause = customFilter ? `AND (${customFilter})` : '';
+
+  // Build public access filter - only return public playlists
+  const publicAccessFilter = isPublicAccess
+    ? 'AND p.isPublic = true'
+    : '';
 
   // Validate and build ORDER BY clause with secondary sort support
   // Allowed fields for ordering
@@ -118,7 +127,7 @@ try {
     OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
 
     WITH p, ps, c, o, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
-    WHERE 1=1 ${favouriteFilterClause} ${customFilterClause}
+    WHERE 1=1 ${favouriteFilterClause} ${customFilterClause} ${publicAccessFilter}
 
     RETURN p, ps, c, o, videoCount
     ORDER BY ${orderByClause}
@@ -157,19 +166,6 @@ try {
     success: true,
     data: playlists
   };
-
-} catch (error) {
-  console.error('Error fetching playlists with video count:', error);
-  return {
-    success: false,
-    message: "Failed to fetch playlists",
-    error: {
-      type: "DatabaseError",
-      details: error.message
-    },
-    data: []
-  };
-}
 '''
         key: getPlaylistsWithVideoCount
       }

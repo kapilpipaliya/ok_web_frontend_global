@@ -286,26 +286,26 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: triggerIcon
-        defValue: carbon:overflow-menu-vertical
+        key: placement
+        defValue: bottom-end
       }
     }
     {
       id: "9"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        defValue: bottom-end
-        key: placement
+        description: Bottom start placement
+        value: bottom-start
+        key: bottom-start
       }
     }
     {
       id: "10"
       L: ComponentVariantOption
       P: {
-        description: Bottom start placement
-        value: bottom-start
-        key: bottom-start
+        description: Top end placement
+        value: top-end
+        key: top-end
       }
     }
     {
@@ -321,18 +321,18 @@ return {
       id: "12"
       L: ComponentVariantOption
       P: {
-        description: Top end placement
-        value: top-end
-        key: top-end
+        description: Bottom end placement
+        value: bottom-end
+        key: bottom-end
       }
     }
     {
       id: "13"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Bottom end placement
-        value: bottom-end
-        key: bottom-end
+        type: string
+        key: triggerIcon
+        defValue: carbon:overflow-menu-vertical
       }
     }
   ]
@@ -353,7 +353,7 @@ return {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "13"
     }
     {
       id: e4
@@ -388,26 +388,26 @@ return {
     {
       id: e9
       T: ComponentVariantOption
-      S: "9"
-      E: "10"
+      S: "8"
+      E: "9"
     }
     {
       id: e10
       T: ComponentVariantOption
-      S: "9"
-      E: "11"
+      S: "8"
+      E: "10"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "9"
-      E: "12"
+      S: "8"
+      E: "11"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "9"
-      E: "13"
+      S: "8"
+      E: "12"
     }
   ]
 }

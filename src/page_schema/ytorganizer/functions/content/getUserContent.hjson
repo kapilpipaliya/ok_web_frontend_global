@@ -1,0 +1,113 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user content (Books or AudioVideo) with filtering, sorting, and search support
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: []
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { contentType, search, filters = {}, sort = {} } = args.contextData;
+
+if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+  return {
+    success: false,
+    message: "Invalid contentType. Must be 'book' or 'audioVideo'",
+    data: []
+  };
+}
+
+// Determine vertex label and relationship type based on contentType
+const vertexLabel = contentType === "book" ? "Book" : "AudioVideo";
+const relationshipType = contentType === "book" ? "UserBook" : "UserAudioVideo";
+
+// Build WHERE clause for filters
+const whereConditions = [];
+const queryParams = { userUuid: user.P.uuid };
+
+// Add search filter
+if (search && search.trim()) {
+  const searchTerm = search.trim().toLowerCase();
+  whereConditions.push(`(
+    toLower(COALESCE(c.name, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.description, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.title, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.subTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.event, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.language, '')) CONTAINS $searchTerm
+  )`);
+  queryParams.searchTerm = searchTerm;
+}
+
+// Add column filters
+if (filters && typeof filters === "object") {
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== null && value !== "") {
+      const paramKey = `filter_${key}`;
+      whereConditions.push(`c.${key} = $${paramKey}`);
+      queryParams[paramKey] = value;
+    }
+  }
+}
+
+const whereClause = whereConditions.length > 0 
+  ? "WHERE " + whereConditions.join(" AND ")
+  : "";
+
+// Build ORDER BY clause
+let orderByClause = "";
+if (sort && sort.column) {
+  const direction = sort.direction === "desc" ? "DESC" : "ASC";
+  orderByClause = `ORDER BY c.${sort.column} ${direction}`;
+} else {
+  // Default sorting
+  if (contentType === "book") {
+    orderByClause = "ORDER BY c.name ASC";
+  } else {
+    orderByClause = "ORDER BY c.title ASC";
+  }
+}
+
+// Optimized query with indexed user lookup first
+const query = `
+  MATCH (u:User {uuid: $userUuid})
+  MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
+  ${whereClause}
+  ${orderByClause}
+  RETURN c
+`;
+
+const result = await args.session.run(query, queryParams);
+
+// Convert to vertex format
+const items = result.records.map(record => {
+  const node = record.get('c');
+  return args.convertNodeToJson(node);
+});
+
+return {
+  success: true,
+  data: items,
+  message: `Found ${items.length} ${contentType === "book" ? "books" : "audio/video items"}`
+};
+'''
+        key: getUserContent
+      }
+    }
+  ]
+  edges: []
+}

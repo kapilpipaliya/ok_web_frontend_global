@@ -11,100 +11,109 @@
 const { playlistId, ownershipId } = args.contextData;
 
 if (!playlistId) {
-  throw new Error("Playlist ID is required");
+  return {
+    success: false,
+    message: "Playlist ID is required"
+  };
 }
 
 if (!ownershipId) {
-  throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
+  };
 }
 
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
 
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, { userUuid: user.P.uuid, ownershipId });
 
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-  }
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+  };
+}
 
-  const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
+const ownership = args.convertNodeToJson(ownershipCheck.records[0].get('o'));
 
-  // Check if the playlist exists and ownership has access to it
-  // NEW SCHEMA v4.0: Direct ownership + optional settings (verify ownership first)
-  const playlistQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-    RETURN p, ps
-  `;
+// Check if the playlist exists and ownership has access to it
+// NEW SCHEMA v4.0: Direct ownership + optional settings (verify ownership first)
+const playlistQuery = `
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+  OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+  RETURN p, ps
+`;
 
-  const playlistResult = await args.session.run(playlistQuery, {
-    playlistId: playlistId,
-    ownershipId
-  });
+const playlistResult = await args.session.run(playlistQuery, {
+  playlistId: playlistId,
+  ownershipId
+});
 
-  if (playlistResult.records.length === 0) {
-    throw new Error("Playlist not found or you don't have access to it");
-  }
+if (playlistResult.records.length === 0) {
+  return {
+    success: false,
+    message: "Playlist not found or you don't have access to it"
+  };
+}
 
-  const record = playlistResult.records[0];
-  const playlist = record.get('p');
-  const playlistSetting = record.get('ps');
+const record = playlistResult.records[0];
+const playlist = record.get('p');
+const playlistSetting = record.get('ps');
 
-  if (!playlistSetting) {
-    return {
-      success: true,
-      message: "No user setting found for this playlist",
-      data: {
-        playlistId: playlistId,
-        settingCleared: false
-      }
-    };
-  }
-
-  // Delete the PlaylistSetting instead of resetting
-  // NEW SCHEMA v4.0: Settings are optional and should be deleted if no longer needed
-  const deleteQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
-    OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
-    WITH ps
-    WHERE ps IS NOT NULL
-    DETACH DELETE ps
-    RETURN count(ps) as deletedCount
-  `;
-
-  const deleteResult = await args.session.run(deleteQuery, {
-    playlistId: playlistId,
-    ownershipId
-  });
-
-  const deletedCountRaw = deleteResult.records[0]?.get('deletedCount');
-  const deletedCount = deletedCountRaw ? (typeof deletedCountRaw.toNumber === 'function' ? deletedCountRaw.toNumber() : Number(deletedCountRaw)) : 0;
-
+if (!playlistSetting) {
   return {
     success: true,
-    message: deletedCount > 0 ? "Playlist setting have been cleared" : "No user setting found for this playlist",
+    message: "No user setting found for this playlist",
     data: {
       playlistId: playlistId,
-      settingCleared: deletedCount > 0,
-      deletedCount: deletedCount
+      settingCleared: false
     }
   };
-
-} catch (error) {
-  console.error('Error clearing playlist user setting:', error);
-  throw new Error(`Failed to clear playlist setting: ${error.message}`);
 }
+
+// Delete the PlaylistSetting instead of resetting
+// NEW SCHEMA v4.0: Settings are optional and should be deleted if no longer needed
+const deleteQuery = `
+  MATCH (o:YouTubeOwnership {key: $ownershipId})-[:YouTubeOwnershipPlaylist]->(p:Playlist {youtubeId: $playlistId})
+  OPTIONAL MATCH (p)-[:PlaylistPlaylistSetting]->(ps:PlaylistSetting)<-[:YouTubeOwnershipPlaylistSetting]-(o)
+  WITH ps
+  WHERE ps IS NOT NULL
+  DETACH DELETE ps
+  RETURN count(ps) as deletedCount
+`;
+
+const deleteResult = await args.session.run(deleteQuery, {
+  playlistId: playlistId,
+  ownershipId
+});
+
+const deletedCountRaw = deleteResult.records[0]?.get('deletedCount');
+const deletedCount = deletedCountRaw ? (typeof deletedCountRaw.toNumber === 'function' ? deletedCountRaw.toNumber() : Number(deletedCountRaw)) : 0;
+
+return {
+  success: true,
+  message: deletedCount > 0 ? "Playlist setting have been cleared" : "No user setting found for this playlist",
+  data: {
+    playlistId: playlistId,
+    settingCleared: deletedCount > 0,
+    deletedCount: deletedCount
+  }
+};
 '''
         key: clearPlaylistUserSetting
       }

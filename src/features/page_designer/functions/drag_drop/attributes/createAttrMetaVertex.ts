@@ -10,7 +10,7 @@ export function createAttrMetaVertex(
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   return newVertex(generateNewVertexId(graph, setGraph), [], {
-    componentName: "Table",
+    componentName: "TableField",
     key: "Attr",
     label: "Attr",
 

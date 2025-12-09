@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Helper function to fetch channels with video counts for a user. Supports multi-ownership model with optional ownership filtering.
+        description: Helper function to fetch channels with video counts for a user. Supports multi-ownership model with optional ownership filtering. Supports public access mode to return only public channels.
         body:
           '''
 /**
@@ -29,7 +29,6 @@
  * Returns:
  * - Array of {channel: Vertex, channelSetting: Vertex} with videoCount in channelSetting.P
  */
-try {
   const {
     userUuid,
     ownershipId = null,  // Optional: filter by specific ownership
@@ -42,11 +41,16 @@ try {
     orderDirection = 'DESC',
     secondaryOrderBy = null,  // Optional: secondary sort
     limit = null,
-    skip = 0
+    skip = 0,
+    isPublicAccess = false  // Public access mode - only return public channels
   } = args.contextData;
 
   if (!userUuid) {
-    throw new Error("User UUID is required");
+    return {
+      success: false,
+      message: "User UUID is required",
+      data: []
+    };
   }
 
   // Build WHERE clause for channel IDs if provided
@@ -67,6 +71,11 @@ try {
 
   // Build custom filter clause if provided
   const customFilterClause = customFilter ? `AND (${customFilter})` : '';
+
+  // Build public access filter - only return public channels
+  const publicAccessFilter = isPublicAccess
+    ? 'AND c.isPublic = true'
+    : '';
 
   // Validate and build ORDER BY clause with secondary sort support
   // Allowed fields for ordering
@@ -105,7 +114,7 @@ try {
     MATCH (u:User {uuid: $userUuid})
     ${ownershipMatchClause}
     MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel)
-    WHERE 1=1 ${channelIdFilter} ${statusFilterClause}
+    WHERE 1=1 ${channelIdFilter} ${statusFilterClause} ${publicAccessFilter}
 
     // Optional ChannelSetting (only exists if user has custom preferences)
     OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
@@ -153,19 +162,6 @@ try {
     success: true,
     data: channels
   };
-
-} catch (error) {
-  console.error('Error fetching channels with video count:', error);
-  return {
-    success: false,
-    message: "Failed to fetch channels",
-    error: {
-      type: "DatabaseError",
-      details: error.message
-    },
-    data: []
-  };
-}
 '''
         key: getChannelsWithVideoCount
       }

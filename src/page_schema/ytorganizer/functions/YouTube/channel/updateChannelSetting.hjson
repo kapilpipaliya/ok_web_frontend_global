@@ -4,124 +4,156 @@
       id: "1"
       L: Function
       P: {
-        description: Updates channel setting like custom name. Supports multi-ownership model - requires ownershipId.
+        description: Updates channel setting like custom name, isPublic, and allowUnauthenticatedAccess. Supports multi-ownership model - requires ownershipId.
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  const { youtubeId, customName, ownershipId } = args.contextData;
-
-  if (!youtubeId) {
-    throw new Error("Channel ID is required");
-  }
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-  }
-
-  // Step 1: Update ChannelSetting for specific ownership
-  // NEW SCHEMA v4.0: Create setting on-demand if custom name is provided
-  const channelSettingKey = `channel_setting_${youtubeId}_${ownershipId}`;
-
-  const updateQuery = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
-
-    // Create or update ChannelSetting only if custom name is provided
-    CALL apoc.do.when(
-      $customName IS NOT NULL,
-      '
-        MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $settingKey})
-        ON CREATE SET cs.createdAt = datetime()
-        MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
-        SET cs.customName = $customName, cs.updatedAt = datetime()
-        RETURN c.youtubeId as youtubeId
-      ',
-      '
-        OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
-        WITH c, cs
-        WHERE cs IS NOT NULL
-        DELETE cs
-        RETURN c.youtubeId as youtubeId
-      ',
-      {c: c, o: o, customName: $customName, settingKey: $settingKey}
-    ) YIELD value
-    RETURN value.youtubeId as youtubeId
-  `;
-
-  const updateResult = await args.session.run(updateQuery, {
-    ownershipId,
-    youtubeId,
-    customName: customName || null,
-    settingKey: channelSettingKey
-  });
-
-  if (updateResult.records.length === 0) {
-    throw new Error("Channel not found");
-  }
-
-  // Step 2: Fetch updated channel with video count using helper function
-  const fetchResult = await args.executeNamedServerFunction({
-    functionName: "getChannelsWithVideoCount",
-    contextData: {
-      userUuid: user.P.uuid,
-      ownershipId,  // Filter by specific ownership
-      channelIds: [youtubeId]
-    }
-  });
-
-  if (!fetchResult.result || !fetchResult.result.success || fetchResult.result.data.length === 0) {
-    throw new Error("Failed to fetch updated channel data");
-  }
-
-  const channelData = fetchResult.result.data[0];
-
-  return {
-    success: true,
-    message: "Channel setting updated successfully",
-    data: channelData
-  };
-
-} catch (error) {
-  console.error("Error updating channel setting:", error);
-
-  let userMessage = "Failed to update channel setting. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to update channel setting.";
-  } else if (error.message.includes("Channel not found")) {
-    userMessage = "Channel not found.";
-  } else if (error.message.includes("Channel ID is required")) {
-    userMessage = "Channel ID is required.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "UpdateError",
-      details: error.message
-    }
+    message: "Please log in to update channel setting."
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+const { youtubeId, customName, ownershipId, isPublic, allowUnauthenticatedAccess } = args.contextData;
+
+if (!youtubeId) {
+  return {
+    success: false,
+    message: "Channel ID is required."
+  };
+}
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, { userUuid: user.P.uuid, ownershipId });
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+  };
+}
+
+// Step 1: Update Channel public settings if provided
+const channelSettingKey = `channel_setting_${youtubeId}_${ownershipId}`;
+
+// Update Channel public settings only if isPublic or allowUnauthenticatedAccess is provided
+if (isPublic !== undefined || allowUnauthenticatedAccess !== undefined) {
+  const updatePublicSettingsQuery = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+    SET c.isPublic = COALESCE($isPublic, c.isPublic),
+        c.allowUnauthenticatedAccess = CASE 
+          WHEN $isPublic = false THEN false
+          WHEN $isPublic = true THEN COALESCE($allowUnauthenticatedAccess, c.allowUnauthenticatedAccess, false)
+          ELSE COALESCE($allowUnauthenticatedAccess, c.allowUnauthenticatedAccess, false)
+        END
+    RETURN c.youtubeId as youtubeId
+  `;
+
+  const updatePublicResult = await args.session.run(updatePublicSettingsQuery, {
+    ownershipId,
+    youtubeId,
+    isPublic: isPublic !== undefined ? isPublic : null,
+    allowUnauthenticatedAccess: allowUnauthenticatedAccess !== undefined ? allowUnauthenticatedAccess : null
+  });
+
+  if (updatePublicResult.records.length === 0) {
+    return {
+      success: false,
+      message: "Channel not found."
+    };
+  }
+} else {
+  // Verify channel exists if we're not updating public settings
+  const channelCheck = await args.session.run(`
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+    RETURN c.youtubeId as youtubeId
+  `, { ownershipId, youtubeId });
+
+  if (channelCheck.records.length === 0) {
+    return {
+      success: false,
+      message: "Channel not found."
+    };
+  }
+}
+
+// Step 2: Handle ChannelSetting (custom name) - create/update or delete
+if (customName !== null && customName !== undefined) {
+  // Create or update ChannelSetting
+  const createOrUpdateSettingQuery = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+    MERGE (c)-[:ChannelChannelSetting]->(cs:ChannelSetting {key: $settingKey})
+    ON CREATE SET cs.createdAt = datetime()
+    MERGE (o)-[:YouTubeOwnershipChannelSetting]->(cs)
+    SET cs.customName = $customName, cs.updatedAt = datetime()
+    RETURN c.youtubeId as youtubeId
+  `;
+
+  await args.session.run(createOrUpdateSettingQuery, {
+    ownershipId,
+    youtubeId,
+    customName,
+    settingKey: channelSettingKey
+  });
+} else {
+  // Delete ChannelSetting if it exists
+  const deleteSettingQuery = `
+    MATCH (o:YouTubeOwnership {key: $ownershipId})
+    MATCH (o)-[:YouTubeOwnershipChannel]->(c:Channel {youtubeId: $youtubeId})
+    OPTIONAL MATCH (c)-[:ChannelChannelSetting]->(cs:ChannelSetting)<-[:YouTubeOwnershipChannelSetting]-(o)
+    WHERE cs IS NOT NULL
+    DELETE cs
+    RETURN c.youtubeId as youtubeId
+  `;
+
+  await args.session.run(deleteSettingQuery, {
+    ownershipId,
+    youtubeId
+  });
+}
+
+// Step 3: Fetch updated channel with video count using helper function
+const fetchResult = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    ownershipId,  // Filter by specific ownership
+    channelIds: [youtubeId]
+  }
+});
+
+if (!fetchResult.result || !fetchResult.result.success || fetchResult.result.data.length === 0) {
+  return {
+    success: false,
+    message: "Failed to fetch updated channel data"
+  };
+}
+
+const channelData = fetchResult.result.data[0];
+
+return {
+  success: true,
+  message: "Channel setting updated successfully",
+  data: channelData
+};
 '''
         key: updateChannelSetting
       }

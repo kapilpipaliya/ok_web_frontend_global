@@ -7,167 +7,172 @@
         description: Create a Razorpay payment order for subscription
         body:
           '''
-try {
-  // Get authenticated user
-  const user = await args.getUserFromSession();
-  if (!user) {
-    throw new Error("User session not found. Please log in.");
-  }
-
-  const { plan, billingCycle } = args.contextData;
-
-  if (!plan || !billingCycle) {
-    throw new Error("Plan and billing cycle are required");
-  }
-
-  // Validate plan and billing cycle
-  const validPlans = ['free', 'basic', 'pro', 'unlimited'];
-  const validCycles = ['monthly', 'annual'];
-
-  if (!validPlans.includes(plan)) {
-    throw new Error("Invalid plan selected");
-  }
-
-  if (!validCycles.includes(billingCycle)) {
-    throw new Error("Invalid billing cycle");
-  }
-
-  // Don't create orders for free plan
-  if (plan === 'free') {
-    throw new Error("Free plan does not require payment");
-  }
-
-  // Calculate amount based on plan and billing cycle
-  const monthlyPrices = {
-    basic: 250,    // $2.50 = 250 cents
-    pro: 500,      // $5.00 = 500 cents
-    unlimited: 1000 // $10.00 = 1000 cents
-  };
-
-  let amount = monthlyPrices[plan];
-
-  if (billingCycle === 'annual') {
-    // Annual: 12 months - 2 months free = 10 months
-    amount = amount * 10;
-  }
-
-  // Calculate video quota based on plan
-  const quotaLimits = {
-    basic: 50000,
-    pro: 150000,
-    unlimited: 999999999
-  };
-
-  const videoQuota = quotaLimits[plan];
-
-  // Fetch Razorpay setting
-  const settingResult = await args.session.run(
-    "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
-  );
-
-  if (settingResult.records.length === 0) {
-    throw new Error("Payment system is not configured. Please contact support.");
-  }
-
-  const setting = settingResult.records[0].get("s").properties;
-
-  // Decrypt the key secret
-  const keySecret = Buffer.from(setting.razorpayKeySecret, "base64").toString("utf-8");
-
-  // Create Razorpay order using API
-  const Razorpay = (await import("razorpay")).default;
-  const razorpayInstance = new Razorpay({
-    key_id: setting.razorpayKeyId,
-    key_secret: keySecret
-  });
-
-  // Generate unique receipt ID
-  const receiptId = `rcpt_${plan}_${billingCycle}_${Date.now()}`;
-
-  const orderOptions = {
-    amount: amount,
-    currency: "USD",
-    receipt: receiptId,
-    notes: {
-      userId: user.P.uuid,
-      userEmail: user.P.email,
-      plan: plan,
-      billingCycle: billingCycle,
-      videoQuota: videoQuota
-    }
-  };
-
-  const razorpayOrder = await razorpayInstance.orders.create(orderOptions);
-
-  // Calculate expiry date
-  const currentDate = new Date();
-  const expiryDate = new Date(currentDate);
-
-  if (billingCycle === 'monthly') {
-    expiryDate.setMonth(expiryDate.getMonth() + 1);
-  } else {
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-  }
-
-  // Store order in database as pending subscription
-  const createSubscriptionQuery = `
-    MATCH (u:User {uuid: $userId})
-    CREATE (s:UserSubscription {
-      razorpayOrderId: $orderId,
-      razorpayPaymentId: null,
-      razorpaySubscriptionId: null,
-      razorpaySignature: null,
-      plan: $plan,
-      billingCycle: $billingCycle,
-      amount: $amount,
-      currency: $currency,
-      status: 'pending',
-      videoQuota: $videoQuota,
-      startDate: datetime(),
-      expiryDate: datetime($expiryDate),
-      createdAt: datetime(),
-      updatedAt: datetime()
-    })
-    CREATE (u)-[:UserSubscription]->(s)
-    RETURN s
-  `;
-
-  await args.session.run(createSubscriptionQuery, {
-    userId: user.P.uuid,
-    orderId: razorpayOrder.id,
-    plan: plan,
-    billingCycle: billingCycle,
-    amount: amount,
-    currency: "USD",
-    videoQuota: videoQuota,
-    expiryDate: expiryDate.toISOString()
-  });
-
-  return {
-    success: true,
-    data: {
-      orderId: razorpayOrder.id,
-      amount: amount,
-      currency: "USD",
-      keyId: setting.razorpayKeyId,
-      plan: plan,
-      billingCycle: billingCycle,
-      videoQuota: videoQuota
-    },
-    message: "Payment order created successfully"
-  };
-
-} catch (error) {
-  console.error("Error creating payment order:", error);
+// Get authenticated user
+const user = await args.getUserFromSession();
+if (!user) {
   return {
     success: false,
-    message: error.message || "Failed to create payment order",
-    error: {
-      type: error.name,
-      details: error.message
-    }
+    message: "User session not found. Please log in."
   };
 }
+
+const { plan, billingCycle } = args.contextData;
+
+if (!plan || !billingCycle) {
+  return {
+    success: false,
+    message: "Plan and billing cycle are required"
+  };
+}
+
+// Validate plan and billing cycle
+const validPlans = ['free', 'basic', 'pro', 'unlimited'];
+const validCycles = ['monthly', 'annual'];
+
+if (!validPlans.includes(plan)) {
+  return {
+    success: false,
+    message: "Invalid plan selected"
+  };
+}
+
+if (!validCycles.includes(billingCycle)) {
+  return {
+    success: false,
+    message: "Invalid billing cycle"
+  };
+}
+
+// Don't create orders for free plan
+if (plan === 'free') {
+  return {
+    success: false,
+    message: "Free plan does not require payment"
+  };
+}
+
+// Calculate amount based on plan and billing cycle
+const monthlyPrices = {
+  basic: 250,    // $2.50 = 250 cents
+  pro: 500,      // $5.00 = 500 cents
+  unlimited: 1000 // $10.00 = 1000 cents
+};
+
+let amount = monthlyPrices[plan];
+
+if (billingCycle === 'annual') {
+  // Annual: 12 months - 2 months free = 10 months
+  amount = amount * 10;
+}
+
+// Calculate video quota based on plan
+const quotaLimits = {
+  basic: 50000,
+  pro: 150000,
+  unlimited: 999999999
+};
+
+const videoQuota = quotaLimits[plan];
+
+// Fetch Razorpay setting
+const settingResult = await args.session.run(
+  "MATCH (s:Setting {type: 'razorpay'}) WHERE s.razorpayEnabled = true RETURN s LIMIT 1"
+);
+
+if (settingResult.records.length === 0) {
+  return {
+    success: false,
+    message: "Payment system is not configured. Please contact support."
+  };
+}
+
+const setting = settingResult.records[0].get("s").properties;
+
+// Decrypt the key secret
+const keySecret = Buffer.from(setting.razorpayKeySecret, "base64").toString("utf-8");
+
+// Create Razorpay order using API
+const Razorpay = (await import("razorpay")).default;
+const razorpayInstance = new Razorpay({
+  key_id: setting.razorpayKeyId,
+  key_secret: keySecret
+});
+
+// Generate unique receipt ID
+const receiptId = `rcpt_${plan}_${billingCycle}_${Date.now()}`;
+
+const orderOptions = {
+  amount: amount,
+  currency: "USD",
+  receipt: receiptId,
+  notes: {
+    userId: user.P.uuid,
+    userEmail: user.P.email,
+    plan: plan,
+    billingCycle: billingCycle,
+    videoQuota: videoQuota
+  }
+};
+
+const razorpayOrder = await razorpayInstance.orders.create(orderOptions);
+
+// Calculate expiry date
+const currentDate = new Date();
+const expiryDate = new Date(currentDate);
+
+if (billingCycle === 'monthly') {
+  expiryDate.setMonth(expiryDate.getMonth() + 1);
+} else {
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+}
+
+// Store order in database as pending subscription
+const createSubscriptionQuery = `
+  MATCH (u:User {uuid: $userId})
+  CREATE (s:UserSubscription {
+    razorpayOrderId: $orderId,
+    razorpayPaymentId: null,
+    razorpaySubscriptionId: null,
+    razorpaySignature: null,
+    plan: $plan,
+    billingCycle: $billingCycle,
+    amount: $amount,
+    currency: $currency,
+    status: 'pending',
+    videoQuota: $videoQuota,
+    startDate: datetime(),
+    expiryDate: datetime($expiryDate),
+    createdAt: datetime(),
+    updatedAt: datetime()
+  })
+  CREATE (u)-[:UserSubscription]->(s)
+  RETURN s
+`;
+
+await args.session.run(createSubscriptionQuery, {
+  userId: user.P.uuid,
+  orderId: razorpayOrder.id,
+  plan: plan,
+  billingCycle: billingCycle,
+  amount: amount,
+  currency: "USD",
+  videoQuota: videoQuota,
+  expiryDate: expiryDate.toISOString()
+});
+
+return {
+  success: true,
+  data: {
+    orderId: razorpayOrder.id,
+    amount: amount,
+    currency: "USD",
+    keyId: setting.razorpayKeyId,
+    plan: plan,
+    billingCycle: billingCycle,
+    videoQuota: videoQuota
+  },
+  message: "Payment order created successfully"
+};
 '''
         key: createPaymentOrder
       }

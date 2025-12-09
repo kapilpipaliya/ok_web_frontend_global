@@ -122,9 +122,9 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: disabled
+        type: string
+        key: type
+        defValue: button
       }
     }
     {
@@ -132,26 +132,26 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: Button
-        key: text
+        key: variant
+        defValue: primary
       }
     }
     {
       id: "5"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: boolean
-        defValue: false
-        key: fullWidth
+        description: Primary button with brand color
+        value: primary
+        key: primary
       }
     }
     {
       id: "6"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        defValue: primary
-        key: variant
+        description: Secondary button with border
+        value: secondary
+        key: secondary
       }
     }
     {
@@ -167,53 +167,53 @@ return {
       id: "8"
       L: ComponentVariantOption
       P: {
-        description: Secondary button with border
-        value: secondary
-        key: secondary
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariantOption
-      P: {
         description: Danger button with red color
         value: danger
         key: danger
       }
     }
     {
-      id: "10"
-      L: ComponentVariantOption
+      id: "9"
+      L: ComponentVariant
       P: {
-        description: Primary button with brand color
-        value: primary
-        key: primary
+        type: string
+        key: text
+        defValue: Button
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: fullWidth
+        defValue: false
       }
     }
     {
       id: "11"
       L: ComponentVariant
       P: {
-        type: function
-        key: onClick
+        type: boolean
+        key: loading
+        defValue: false
       }
     }
     {
       id: "12"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: button
-        key: type
+        type: boolean
+        key: disabled
+        defValue: false
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: boolean
-        defValue: false
-        key: loading
+        type: function
+        key: onClick
       }
     }
   ]
@@ -240,13 +240,13 @@ return {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "5"
+      E: "9"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "6"
+      E: "10"
     }
     {
       id: e6
@@ -269,26 +269,26 @@ return {
     {
       id: e9
       T: ComponentVariantOption
-      S: "6"
-      E: "7"
+      S: "4"
+      E: "5"
     }
     {
       id: e10
       T: ComponentVariantOption
-      S: "6"
-      E: "8"
+      S: "4"
+      E: "6"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "6"
-      E: "9"
+      S: "4"
+      E: "7"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "6"
-      E: "10"
+      S: "4"
+      E: "8"
     }
   ]
 }

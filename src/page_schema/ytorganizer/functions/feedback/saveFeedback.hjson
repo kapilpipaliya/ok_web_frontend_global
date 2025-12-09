@@ -7,139 +7,131 @@
         description: Saves user feedback to the database
         body:
           '''
-try {
-  // Extract parameters
-  const { feedback, category, email } = args.contextData;
+// Extract parameters
+const { feedback, category, email } = args.contextData;
 
-  if (!feedback || typeof feedback !== 'string') {
-    throw new Error("Feedback text is required");
-  }
-
-  const feedbackText = feedback.trim();
-  if (feedbackText.length === 0) {
-    throw new Error("Feedback cannot be empty");
-  }
-
-  if (feedbackText.length > 1000) {
-    throw new Error("Feedback exceeds maximum length of 1000 characters");
-  }
-
-  // Validate category
-  const validCategories = ["general", "bug", "feature", "improvement", "other"];
-  const feedbackCategory = category || "general";
-
-  if (!validCategories.includes(feedbackCategory)) {
-    throw new Error("Invalid feedback category");
-  }
-
-  // Get current authenticated user from session (may be null for anonymous feedback)
-  const user = await args.getUserFromSession();
-
-  let query, params;
-
-  if (user) {
-    // Authenticated user feedback
-    query = `
-      MATCH (u:User {uuid: $userUuid})
-      CREATE (f:Feedback {
-        feedback: $feedback,
-        category: $category,
-        createdAt: datetime(),
-        status: 'pending'
-      })
-      CREATE (u)-[:UserFeedback]->(f)
-      RETURN f, u
-    `;
-
-    params = {
-      userUuid: user.P.uuid,
-      feedback: feedbackText,
-      category: feedbackCategory
-    };
-  } else {
-    // Anonymous feedback with email
-    if (!email || typeof email !== 'string') {
-      throw new Error("Email is required for anonymous feedback");
-    }
-
-    const emailTrimmed = email.trim();
-    if (emailTrimmed.length === 0) {
-      throw new Error("Email cannot be empty");
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailTrimmed)) {
-      throw new Error("Please provide a valid email address");
-    }
-
-    query = `
-      CREATE (f:Feedback {
-        feedback: $feedback,
-        category: $category,
-        email: $email,
-        createdAt: datetime(),
-        status: 'pending'
-      })
-      RETURN f
-    `;
-
-    params = {
-      feedback: feedbackText,
-      category: feedbackCategory,
-      email: emailTrimmed
-    };
-  }
-
-  // Execute the query
-  const result = await args.session.run(query, params);
-
-  if (result.records.length === 0) {
-    throw new Error("Failed to save feedback");
-  }
-
-  const savedFeedback = args.convertNodeToJson(result.records[0].get('f'));
-  const feedbackUser = user ? args.convertNodeToJson(result.records[0].get('u')) : null;
-
-  return {
-    success: true,
-    data: {
-      feedback: savedFeedback,
-      user: feedbackUser
-    },
-    message: "Thank you for your feedback! We'll review it soon."
-  };
-
-} catch (error) {
-  console.error("Error saving feedback:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to submit feedback. Please try again.";
-
-  if (error.message.includes("Email is required") ||
-      error.message.includes("Email cannot be empty") ||
-      error.message.includes("valid email address")) {
-    userMessage = error.message;
-  } else if (error.message.includes("Feedback text is required") ||
-             error.message.includes("Feedback cannot be empty")) {
-    userMessage = error.message;
-  } else if (error.message.includes("exceeds maximum length")) {
-    userMessage = "Your feedback is too long. Please keep it under 1000 characters.";
-  } else if (error.message.includes("Invalid feedback category")) {
-    userMessage = "Invalid feedback category selected.";
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+if (!feedback || typeof feedback !== 'string') {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    }
+    message: "Feedback text is required"
   };
 }
+
+const feedbackText = feedback.trim();
+if (feedbackText.length === 0) {
+  return {
+    success: false,
+    message: "Feedback cannot be empty"
+  };
+}
+
+if (feedbackText.length > 1000) {
+  return {
+    success: false,
+    message: "Your feedback is too long. Please keep it under 1000 characters."
+  };
+}
+
+// Validate category
+const validCategories = ["general", "bug", "feature", "improvement", "other"];
+const feedbackCategory = category || "general";
+
+if (!validCategories.includes(feedbackCategory)) {
+  return {
+    success: false,
+    message: "Invalid feedback category selected."
+  };
+}
+
+// Get current authenticated user from session (may be null for anonymous feedback)
+const user = await args.getUserFromSession();
+
+let query, params;
+
+if (user) {
+  // Authenticated user feedback
+  query = `
+    MATCH (u:User {uuid: $userUuid})
+    CREATE (f:Feedback {
+      feedback: $feedback,
+      category: $category,
+      createdAt: datetime(),
+      status: 'pending'
+    })
+    CREATE (u)-[:UserFeedback]->(f)
+    RETURN f, u
+  `;
+
+  params = {
+    userUuid: user.P.uuid,
+    feedback: feedbackText,
+    category: feedbackCategory
+  };
+} else {
+  // Anonymous feedback with email
+  if (!email || typeof email !== 'string') {
+    return {
+      success: false,
+      message: "Email is required for anonymous feedback"
+    };
+  }
+
+  const emailTrimmed = email.trim();
+  if (emailTrimmed.length === 0) {
+    return {
+      success: false,
+      message: "Email cannot be empty"
+    };
+  }
+
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(emailTrimmed)) {
+    return {
+      success: false,
+      message: "Please provide a valid email address"
+    };
+  }
+
+  query = `
+    CREATE (f:Feedback {
+      feedback: $feedback,
+      category: $category,
+      email: $email,
+      createdAt: datetime(),
+      status: 'pending'
+    })
+    RETURN f
+  `;
+
+  params = {
+    feedback: feedbackText,
+    category: feedbackCategory,
+    email: emailTrimmed
+  };
+}
+
+// Execute the query
+const result = await args.session.run(query, params);
+
+if (result.records.length === 0) {
+  return {
+    success: false,
+    message: "Failed to submit feedback. Please try again."
+  };
+}
+
+const savedFeedback = args.convertNodeToJson(result.records[0].get('f'));
+const feedbackUser = user ? args.convertNodeToJson(result.records[0].get('u')) : null;
+
+return {
+  success: true,
+  data: {
+    feedback: savedFeedback,
+    user: feedbackUser
+  },
+  message: "Thank you for your feedback! We'll review it soon."
+};
 '''
         key: saveFeedback
       }

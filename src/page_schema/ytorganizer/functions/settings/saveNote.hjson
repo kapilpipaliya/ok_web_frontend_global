@@ -7,183 +7,177 @@
         description: Saves or updates a note for a video, channel, or playlist
         body:
           '''
-try {
-  // Get current authenticated user from session
-  const actualUser = await args.getUserFromSession();
-  if (!actualUser) {
-    throw new Error("User session not found. Please log in and try again.");
-  }
-
-  // Get effective user (handles admin impersonation)
-  const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-
-  // Extract parameters
-  const { item, note, ownershipId } = args.contextData;
-
-  if (!item) {
-    throw new Error("Item is required");
-  }
-
-  if (!ownershipId) {
-    throw new Error("YouTube Ownership ID is required. Please select a YouTube account.");
-  }
-
-  // Infer itemType from the item labels
-  let itemType;
-  if (item.L?.includes('Video')) {
-    itemType = 'video';
-  } else if (item.L?.includes('Channel')) {
-    itemType = 'channel';
-  } else if (item.L?.includes('Playlist')) {
-    itemType = 'playlist';
-  } else {
-    throw new Error("Cannot determine item type from labels. Item must be a video, channel, or playlist.");
-  }
-
-  // Verify ownership belongs to user
-  const ownershipCheck = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
-    RETURN o
-  `, { userUuid: user.P.uuid, ownershipId });
-
-  if (ownershipCheck.records.length === 0) {
-    throw new Error("Invalid YouTube ownership. This account doesn't belong to you or no longer exists.");
-  }
-
-  // Get the item ID
-  const itemId = item.P?.youtubeId;
-  if (!itemId) {
-    throw new Error("Item ID not found");
-  }
-
-  // NEW SCHEMA v4.0: Direct ownership with optional settings
-  // Settings are created on-demand when users add notes
-  let nodeLabel, settingLabel, settingKey;
-
-  if (itemType === "video") {
-    nodeLabel = "Video";
-    settingLabel = "VideoSetting";
-    settingKey = `video_setting_${itemId}_${ownershipId}`;
-  } else if (itemType === "channel") {
-    nodeLabel = "Channel";
-    settingLabel = "ChannelSetting";
-    settingKey = `channel_setting_${itemId}_${ownershipId}`;
-  } else {
-    nodeLabel = "Playlist";
-    settingLabel = "PlaylistSetting";
-    settingKey = `playlist_setting_${itemId}_${ownershipId}`;
-  }
-
-  // Query to create or update the setting node with note
-  // NEW SCHEMA v4.0: Direct ownership + on-demand setting creation
-  const query = `
-    MATCH (o:YouTubeOwnership {key: $ownershipId})
-    MATCH (o)-[:YouTubeOwnership${nodeLabel}]->(item:${nodeLabel} {youtubeId: $itemId})
-
-    MERGE (item)-[:${nodeLabel}${settingLabel}]->(setting:${settingLabel} {key: $settingKey})
-    ON CREATE SET
-      setting.createdAt = datetime()
-    MERGE (o)-[:YouTubeOwnership${settingLabel}]->(setting)
-
-    SET
-      setting.note = $note,
-      setting.noteUpdatedAt = datetime(),
-      setting.updatedAt = datetime()
-    RETURN setting, item
-  `;
-
-  // Execute the query
-  const result = await args.session.run(query, {
-    ownershipId,
-    itemId: itemId,
-    note: note || "",
-    settingKey: settingKey
-  });
-
-  if (result.records.length === 0) {
-    throw new Error(`${itemType} not found for this ownership`);
-  }
-
-  // Fetch updated data with video counts using helper functions
-  let itemData;
-
-  if (itemType === 'channel') {
-    const channelResult = await args.executeNamedServerFunction({
-      functionName: "getChannelsWithVideoCount",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,
-        channelIds: [itemId]
-      }
-    });
-
-    if (channelResult.result?.success && channelResult.result.data.length > 0) {
-      itemData = channelResult.result.data[0];
-    }
-  } else if (itemType === 'playlist') {
-    const playlistResult = await args.executeNamedServerFunction({
-      functionName: "getPlaylistsWithVideoCount",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,
-        playlistIds: [itemId]
-      }
-    });
-
-    if (playlistResult.result?.success && playlistResult.result.data.length > 0) {
-      itemData = playlistResult.result.data[0];
-    }
-  } else {
-    // For videos, fetch using helper
-    const videoResult = await args.executeNamedServerFunction({
-      functionName: "getVideosWithDetails",
-      contextData: {
-        userUuid: user.P.uuid,
-        ownershipId,
-        videoIds: [itemId]
-      }
-    });
-
-    if (videoResult.result?.success && videoResult.result.data.length > 0) {
-      itemData = videoResult.result.data[0];
-    }
-  }
-
-  return {
-    success: true,
-    data: {
-      ...itemData,
-      userId: user.id,
-      ownershipId: ownershipId
-    },
-    message: note ? `Note saved for ${itemType}` : `Note cleared for ${itemType}`
-  };
-
-} catch (error) {
-  console.error("Error saving note:", error);
-
-  // Handle specific error types
-  let userMessage = "Failed to save note. Please try again.";
-
-  if (error.message.includes("User session not found")) {
-    userMessage = "Please log in to save notes.";
-  } else if (error.message.includes("not found")) {
-    userMessage = error.message;
-  } else if (error.message.includes("Invalid item type")) {
-    userMessage = error.message;
-  } else if (error.message.includes("database")) {
-    userMessage = "Database connection error. Please try again later.";
-  }
-
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
   return {
     success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "DatabaseError",
-      details: error.message
-    }
+    message: "Please log in to save notes."
   };
 }
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { item, note, ownershipId } = args.contextData;
+
+if (!item) {
+  return {
+    success: false,
+    message: "Item is required"
+  };
+}
+
+if (!ownershipId) {
+  return {
+    success: false,
+    message: "YouTube Ownership ID is required. Please select a YouTube account."
+  };
+}
+
+// Infer itemType from the item labels
+let itemType;
+if (item.L?.includes('Video')) {
+  itemType = 'video';
+} else if (item.L?.includes('Channel')) {
+  itemType = 'channel';
+} else if (item.L?.includes('Playlist')) {
+  itemType = 'playlist';
+} else {
+  return {
+    success: false,
+    message: "Cannot determine item type from labels. Item must be a video, channel, or playlist."
+  };
+}
+
+// Verify ownership belongs to user
+const ownershipCheck = await args.session.run(`
+  MATCH (u:User {uuid: $userUuid})-[:UserYouTubeOwnership]->(o:YouTubeOwnership {key: $ownershipId})
+  RETURN o
+`, { userUuid: user.P.uuid, ownershipId });
+
+if (ownershipCheck.records.length === 0) {
+  return {
+    success: false,
+    message: "Invalid YouTube ownership. This account doesn't belong to you or no longer exists."
+  };
+}
+
+// Get the item ID
+const itemId = item.P?.youtubeId;
+if (!itemId) {
+  return {
+    success: false,
+    message: "Item ID not found"
+  };
+}
+
+// NEW SCHEMA v4.0: Direct ownership with optional settings
+// Settings are created on-demand when users add notes
+let nodeLabel, settingLabel, settingKey;
+
+if (itemType === "video") {
+  nodeLabel = "Video";
+  settingLabel = "VideoSetting";
+  settingKey = `video_setting_${itemId}_${ownershipId}`;
+} else if (itemType === "channel") {
+  nodeLabel = "Channel";
+  settingLabel = "ChannelSetting";
+  settingKey = `channel_setting_${itemId}_${ownershipId}`;
+} else {
+  nodeLabel = "Playlist";
+  settingLabel = "PlaylistSetting";
+  settingKey = `playlist_setting_${itemId}_${ownershipId}`;
+}
+
+// Query to create or update the setting node with note
+// NEW SCHEMA v4.0: Direct ownership + on-demand setting creation
+const query = `
+  MATCH (o:YouTubeOwnership {key: $ownershipId})
+  MATCH (o)-[:YouTubeOwnership${nodeLabel}]->(item:${nodeLabel} {youtubeId: $itemId})
+
+  MERGE (item)-[:${nodeLabel}${settingLabel}]->(setting:${settingLabel} {key: $settingKey})
+  ON CREATE SET
+    setting.createdAt = datetime()
+  MERGE (o)-[:YouTubeOwnership${settingLabel}]->(setting)
+
+  SET
+    setting.note = $note,
+    setting.noteUpdatedAt = datetime(),
+    setting.updatedAt = datetime()
+  RETURN setting, item
+`;
+
+// Execute the query
+const result = await args.session.run(query, {
+  ownershipId,
+  itemId: itemId,
+  note: note || "",
+  settingKey: settingKey
+});
+
+if (result.records.length === 0) {
+  return {
+    success: false,
+    message: `${itemType} not found for this ownership`
+  };
+}
+
+// Fetch updated data with video counts using helper functions
+let itemData;
+
+if (itemType === 'channel') {
+  const channelResult = await args.executeNamedServerFunction({
+    functionName: "getChannelsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,
+      channelIds: [itemId]
+    }
+  });
+
+  if (channelResult.result?.success && channelResult.result.data.length > 0) {
+    itemData = channelResult.result.data[0];
+  }
+} else if (itemType === 'playlist') {
+  const playlistResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,
+      playlistIds: [itemId]
+    }
+  });
+
+  if (playlistResult.result?.success && playlistResult.result.data.length > 0) {
+    itemData = playlistResult.result.data[0];
+  }
+} else {
+  // For videos, fetch using helper
+  const videoResult = await args.executeNamedServerFunction({
+    functionName: "getVideosWithDetails",
+    contextData: {
+      userUuid: user.P.uuid,
+      ownershipId,
+      videoIds: [itemId]
+    }
+  });
+
+  if (videoResult.result?.success && videoResult.result.data.length > 0) {
+    itemData = videoResult.result.data[0];
+  }
+}
+
+return {
+  success: true,
+  data: {
+    ...itemData,
+    userId: user.id,
+    ownershipId: ownershipId
+  },
+  message: note ? `Note saved for ${itemType}` : `Note cleared for ${itemType}`
+};
 '''
         key: saveNote
       }

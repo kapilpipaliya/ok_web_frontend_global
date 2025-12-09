@@ -1,6 +1,7 @@
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphData } from "~/cypher/types/ServerResult";
 import { API } from "~/lib/api/endpoints";
+import { useLocation, useNavigate } from "@solidjs/router";
 
 // Type for the user data response
 export interface UserData {
@@ -15,11 +16,18 @@ export interface UserData {
 // Function to handle navigation after user data fetch
 export function handleUserNavigation(
   userData: null | UserData,
-  navigate?: (path: string) => void,
+  navigate?: ReturnType<typeof useNavigate>,
+  location?: ReturnType<typeof useLocation>,
 ) {
   if (!userData?.user) {
     // TODO: add support for redirect to same page after signIn
-    navigate?.(API.urls.admin.signIn);
+    if (location && navigate) { 
+    const params = new URLSearchParams(location.search);
+    params.set("redirectUrl", location.pathname);
+      navigate(`${API.urls.admin.signIn}?${params.toString()}`, {
+        replace: true,
+      });
+    }
     return false;
   }
   return true;

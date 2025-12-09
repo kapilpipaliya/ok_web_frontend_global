@@ -21,7 +21,6 @@
  * Any partially completed playlists will be re-processed
  */
 
-try {
   const { channelId, ownershipId } = args.contextData;
 
   if (!channelId) {
@@ -196,33 +195,6 @@ try {
       newStatus: 'queued'
     }
   };
-
-} catch (error) {
-  console.error("Error retrying channel:", error);
-
-  // Provide user-friendly error messages based on error type
-  let userMessage = "Failed to retry channel processing. Please try again.";
-
-  if (error.message.includes("quota")) {
-    userMessage = "Cannot retry: API quota has been exhausted. Please try again tomorrow.";
-  } else if (error.message.includes("authorization") || error.message.includes("OAuth")) {
-    userMessage = "Cannot retry: YouTube authorization expired. Please reconnect your YouTube account.";
-  } else if (error.message.includes("network") || error.message.includes("ECONNREFUSED")) {
-    userMessage = "Network error. Please check your connection and try again.";
-  } else if (error.message.includes("Redis") || error.message.includes("queue")) {
-    userMessage = "Queue service unavailable. Please try again in a moment.";
-  }
-
-  return {
-    success: false,
-    message: userMessage,
-    error: {
-      type: error.name || "RetryChannelError",
-      details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    }
-  };
-}
 '''
         key: retryChannel
       }

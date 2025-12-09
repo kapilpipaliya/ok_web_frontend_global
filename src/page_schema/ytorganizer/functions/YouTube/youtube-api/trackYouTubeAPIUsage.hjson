@@ -7,49 +7,42 @@
         description: Increment the usage count for a YouTube API key
         body:
           '''
-try {
-  const { keyId, cost = 1 } = args.contextData;
+const { keyId, cost = 1 } = args.contextData;
 
-  if (!keyId) {
-    throw new Error("API key ID is required");
-  }
-
-  // Increment the usage count
-  const result = await args.session.run(`
-    MATCH (ak:YouTubeAPIKey {key: $keyId})
-    SET ak.currentCount = coalesce(ak.currentCount, 0) + $cost,
-        ak.lastUsedAt = datetime(),
-        ak.updatedAt = datetime()
-    RETURN ak
-  `, { keyId, cost });
-
-  if (result.records.length === 0) {
-    throw new Error("API key not found");
-  }
-
-  const apiKey = args.convertNodeToJson(result.records[0].get('ak'));
-
-  return {
-    success: true,
-    data: {
-      keyId: apiKey.P.key,
-      currentCount: apiKey.P.currentCount,
-      dailyLimit: apiKey.P.dailyLimit,
-      remainingCalls: apiKey.P.dailyLimit - apiKey.P.currentCount
-    }
-  };
-
-} catch (error) {
-  console.error('Error tracking API usage:', error);
+if (!keyId) {
   return {
     success: false,
-    message: "Failed to track API usage",
-    error: {
-      type: "DatabaseError",
-      details: error.message
-    }
+    message: "API key ID is required"
   };
 }
+
+// Increment the usage count
+const result = await args.session.run(`
+  MATCH (ak:YouTubeAPIKey {key: $keyId})
+  SET ak.currentCount = coalesce(ak.currentCount, 0) + $cost,
+      ak.lastUsedAt = datetime(),
+      ak.updatedAt = datetime()
+  RETURN ak
+`, { keyId, cost });
+
+if (result.records.length === 0) {
+  return {
+    success: false,
+    message: "API key not found"
+  };
+}
+
+const apiKey = args.convertNodeToJson(result.records[0].get('ak'));
+
+return {
+  success: true,
+  data: {
+    keyId: apiKey.P.key,
+    currentCount: apiKey.P.currentCount,
+    dailyLimit: apiKey.P.dailyLimit,
+    remainingCalls: apiKey.P.dailyLimit - apiKey.P.currentCount
+  }
+};
 '''
         key: trackYouTubeAPIUsage
       }

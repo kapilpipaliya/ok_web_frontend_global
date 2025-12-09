@@ -117,11 +117,14 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
     parentRenderContext,
   );
 
+  const getFunctionArgumentWithValueTemp =
+    createFunctionArgumentGetter(tempFunctionProxy);
+
   // Create dynamicFns first using temp function arguments
   const dynamicFns = createDynamicFunctions(
     graph,
     () => options.props.meta,
-    createFunctionArgumentGetter(tempFunctionProxy),
+    getFunctionArgumentWithValueTemp,
     parentRenderContext,
     options.componentName,
   );
@@ -138,6 +141,7 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
 
   return {
     functionProxy,
+    getFunctionArgumentWithValueTemp,
     getFunctionArgumentWithValue,
     ref,
     setRef,

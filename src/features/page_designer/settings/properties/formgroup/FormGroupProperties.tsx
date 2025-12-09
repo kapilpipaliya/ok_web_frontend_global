@@ -556,7 +556,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
             />
           </Show>
         </Match>
-        <Match when={props.meta.P.componentName === "Table"}>
+        <Match when={props.meta.P.componentName === "TableField"}>
           <h3>
             <Label meta={props.meta} />
           </h3>

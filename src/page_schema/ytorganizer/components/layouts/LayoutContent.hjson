@@ -213,7 +213,9 @@ const fetchQuotaUsage = async () => {
   setQuotaLoading(true);
   try {
     const result = await args.fns.executeYTOFunction?.('getSharedQuotaStatus', {});
-    if (result?.result?.data) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+    } else if (result?.result?.data) {
       setQuotaUsage(result.result.data);
     }
   } catch (error) {
@@ -268,7 +270,9 @@ const getQuotaUsagePercentage = () => {
 const loadCardFieldSetting = async () => {
   try {
     const result = await args.fns.executeYTOFunction?.('getYTOUserSetting', {});
-    if (result?.result?.success && result?.result?.data?.setting) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+    } else if (result?.result?.success && result?.result?.data?.setting) {
       const setting = result.result.data.setting;
       if (setting.P.cardFieldSetting) {
         const parsed = typeof setting.P.cardFieldSetting === 'string'
@@ -308,7 +312,10 @@ const saveCardFieldSetting = async (newSetting) => {
       }
     });
 
-    if (result?.result?.success) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+      return false;
+    } else if (result?.result?.success) {
       args.showSuccessToast('Card field setting saved successfully');
       return true;
     } else {
@@ -333,7 +340,9 @@ const playPlaylist = async (playlist) => {
     // Get playlist videos
     const result = await args.fns.executeYTOFunction?.("getPlaylistVideos", { playlistId });
 
-    if (result?.result?.success && result?.result?.data?.videos) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+    } else if (result?.result?.success && result?.result?.data?.videos) {
       const videos = result.result.data.videos;
 
       if (videos.length === 0) {
@@ -377,7 +386,9 @@ const addPlaylistToQueue = async (playlist) => {
     // Get playlist videos
     const result = await args.fns.executeYTOFunction?.("getPlaylistVideos", { playlistId });
 
-    if (result?.result?.success && result?.result?.data?.videos) {
+    if (result?.error) {
+      args.showErrorToast(result.error);
+    } else if (result?.result?.success && result?.result?.data?.videos) {
       const videos = result.result.data.videos;
 
       if (videos.length === 0) {
@@ -428,7 +439,7 @@ const addVideoToPlaylists = async (data) => {
       args.showSuccessToast(result.result.message);
       return result.result;
     } else {
-      const errorMessage = result?.result?.message || "Failed to add video to playlists";
+      const errorMessage = result?.result?.message || result?.error || "Failed to add video to playlists";
       args.showErrorToast(errorMessage);
       const error = new Error(errorMessage);
       error.toastShown = true;

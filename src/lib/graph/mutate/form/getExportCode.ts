@@ -32,7 +32,7 @@ export function getExportCode(
       ["MultiSelect", "Select"].includes(meta.P.componentName),
     );
     const tableMetaVertexes = metaVertexes.filter((meta) =>
-      ["Table"].includes(meta.P.componentName),
+      ["TableField"].includes(meta.P.componentName),
     );
 
     for (const metaVertex of selectMetaVertexes) {
