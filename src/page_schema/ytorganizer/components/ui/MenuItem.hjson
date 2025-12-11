@@ -149,8 +149,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        defValue: ""
-        key: icon
+        key: text
+        defValue: Menu Item
       }
     }
     {
@@ -185,8 +185,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: text
-        defValue: Menu Item
+        defValue: ""
+        key: icon
       }
     }
   ]

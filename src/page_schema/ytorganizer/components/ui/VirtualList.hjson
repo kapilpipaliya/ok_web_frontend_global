@@ -159,13 +159,22 @@ return {
       id: "6"
       L: ComponentVariant
       P: {
-        type: array
-        key: items
-        defValue: []
+        type: number
+        key: itemHeight
+        defValue: 90
       }
     }
     {
       id: "7"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: overscan
+        defValue: 5
+      }
+    }
+    {
+      id: "8"
       L: ComponentVariant
       P: {
         type: string
@@ -174,7 +183,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "9"
       L: ComponentVariant
       P: {
         type: function
@@ -182,21 +191,12 @@ return {
       }
     }
     {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: itemHeight
-        defValue: 90
-      }
-    }
-    {
       id: "10"
       L: ComponentVariant
       P: {
-        type: number
-        key: overscan
-        defValue: 5
+        type: array
+        key: items
+        defValue: []
       }
     }
   ]

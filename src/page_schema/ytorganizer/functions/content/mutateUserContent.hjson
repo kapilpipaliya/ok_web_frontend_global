@@ -20,7 +20,20 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { contentType, operation, data = {}, elementId, uniqueKeys = [] } = args.contextData;
+// Format: data is an object with { vertex, relationships }
+const inputData = args.contextData.data || {};
+const vertex = inputData.vertex;
+const relationships = inputData.relationships || {};
+const { contentType, operation, elementId, uniqueKeys = [] } = args.contextData;
+
+// Extract form data from vertex
+if (!vertex || !vertex.P) {
+  return {
+    success: false,
+    message: "Vertex data is required"
+  };
+}
+const formData = vertex.P;
 
 if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
   return {
@@ -64,15 +77,15 @@ try {
 
         const checkParams = { userUuid: user.P.uuid };
         uniqueKeys.forEach(key => {
-          if (data[key] !== null && data[key] !== undefined && data[key] !== "") {
-            checkParams[`unique_${key}`] = data[key];
+          if (formData[key] !== null && formData[key] !== undefined && formData[key] !== "") {
+            checkParams[`unique_${key}`] = formData[key];
           }
         });
 
         const checkResult = await args.session.run(checkQuery, checkParams);
         if (checkResult.records.length > 0) {
           const conflictingKeys = uniqueKeys.filter(key => 
-            data[key] !== null && data[key] !== undefined && data[key] !== ""
+            formData[key] !== null && formData[key] !== undefined && formData[key] !== ""
           );
           return {
             success: false,
@@ -82,8 +95,8 @@ try {
       }
     }
 
-    // Build properties object (exclude id/elementId from data)
-    const { id, elementId: dataElementId, ...dataWithoutId } = data;
+    // Build properties object (exclude id/elementId from formData)
+    const { id, elementId: dataElementId, ...dataWithoutId } = formData;
     const properties = {
       ...dataWithoutId,
       createdAt: new Date().toISOString(),
@@ -112,6 +125,36 @@ try {
 
     const node = result.records[0].get('c');
     const createdContent = args.convertNodeToJson(node);
+    const createdElementId = node.elementId;
+
+    // Handle relationships if provided
+    // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
+    if (relationships && typeof relationships === "object") {
+      for (const [fieldKey, relConfig] of Object.entries(relationships)) {
+        if (relConfig && relConfig.targetId && relConfig.relationshipType && relConfig.targetLabel) {
+          try {
+            // Create relationship: FormVertex -[relationshipType]-> TargetVertex
+            const relQuery = `
+              MATCH (c:${vertexLabel})
+              WHERE elementId(c) = $contentId
+              MATCH (target:${relConfig.targetLabel})
+              WHERE elementId(target) = $targetId
+              MERGE (c)-[r:${relConfig.relationshipType}]->(target)
+              ON CREATE SET r.createdAt = datetime()
+              RETURN r
+            `;
+
+            await args.session.run(relQuery, {
+              contentId: createdElementId,
+              targetId: relConfig.targetId
+            });
+          } catch (relError) {
+            console.error(`Error creating relationship for ${fieldKey}:`, relError);
+            // Don't fail the whole operation if relationship creation fails
+          }
+        }
+      }
+    }
 
     return {
       success: true,
@@ -121,7 +164,9 @@ try {
 
   } else if (operation === "update") {
     // Update existing content
-    if (!elementId) {
+    // Get elementId from vertex if available, otherwise use elementId parameter
+    const updateElementId = elementId || vertex?.id;
+    if (!updateElementId) {
       return {
         success: false,
         message: "elementId is required for update operation"
@@ -131,7 +176,7 @@ try {
     // Validate unique keys if provided (excluding current record)
     if (uniqueKeys && Array.isArray(uniqueKeys) && uniqueKeys.length > 0) {
       const uniqueConditions = uniqueKeys.map(key => {
-        const value = data[key];
+        const value = formData[key];
         if (value === null || value === undefined || value === "") {
           return null;
         }
@@ -147,17 +192,17 @@ try {
           LIMIT 1
         `;
 
-        const checkParams = { userUuid: user.P.uuid, elementId };
+        const checkParams = { userUuid: user.P.uuid, elementId: updateElementId };
         uniqueKeys.forEach(key => {
-          if (data[key] !== null && data[key] !== undefined && data[key] !== "") {
-            checkParams[`unique_${key}`] = data[key];
+          if (formData[key] !== null && formData[key] !== undefined && formData[key] !== "") {
+            checkParams[`unique_${key}`] = formData[key];
           }
         });
 
         const checkResult = await args.session.run(checkQuery, checkParams);
         if (checkResult.records.length > 0) {
           const conflictingKeys = uniqueKeys.filter(key => 
-            data[key] !== null && data[key] !== undefined && data[key] !== ""
+            formData[key] !== null && formData[key] !== undefined && formData[key] !== ""
           );
           return {
             success: false,
@@ -168,7 +213,7 @@ try {
     }
 
     // Build update properties (exclude id, elementId, createdAt)
-    const { id, elementId: dataElementId, createdAt, ...dataWithoutId } = data;
+    const { id, elementId: dataElementId, createdAt, ...dataWithoutId } = formData;
     const updateProperties = {
       ...dataWithoutId,
       updatedAt: new Date().toISOString()
@@ -192,7 +237,7 @@ try {
 
     const result = await args.session.run(updateQuery, {
       userUuid: user.P.uuid,
-      elementId,
+      elementId: updateElementId,
       properties: cleanProperties
     });
 
@@ -206,6 +251,44 @@ try {
     const node = result.records[0].get('c');
     const updatedContent = args.convertNodeToJson(node);
 
+    // Handle relationships if provided
+    // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
+    if (relationships && typeof relationships === "object") {
+      for (const [fieldKey, relConfig] of Object.entries(relationships)) {
+        if (relConfig && relConfig.targetId && relConfig.relationshipType && relConfig.targetLabel) {
+          try {
+            // Delete existing relationships for this field
+            const deleteRelQuery = `
+              MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
+              WHERE elementId(c) = $contentId
+              DELETE r
+            `;
+            await args.session.run(deleteRelQuery, { contentId: updateElementId });
+
+            // Create new relationship
+            const createRelQuery = `
+              MATCH (c:${vertexLabel})
+              WHERE elementId(c) = $contentId
+              MATCH (target:${relConfig.targetLabel})
+              WHERE elementId(target) = $targetId
+              MERGE (c)-[r:${relConfig.relationshipType}]->(target)
+              ON CREATE SET r.createdAt = datetime()
+              ON MATCH SET r.updatedAt = datetime()
+              RETURN r
+            `;
+
+            await args.session.run(createRelQuery, {
+              contentId: updateElementId,
+              targetId: relConfig.targetId
+            });
+          } catch (relError) {
+            console.error(`Error updating relationship for ${fieldKey}:`, relError);
+            // Don't fail the whole operation if relationship update fails
+          }
+        }
+      }
+    }
+
     return {
       success: true,
       data: updatedContent,
@@ -213,8 +296,8 @@ try {
     };
 
   } else if (operation === "delete") {
-    // Delete content - elementId can come from elementId parameter or data.elementId or data.id
-    const deleteElementId = elementId || data?.elementId || data?.id;
+    // Delete content - elementId can come from elementId parameter or vertex.id/vertex.elementId
+    const deleteElementId = elementId || (vertex ? (vertex.elementId || vertex.id) : null);
     if (!deleteElementId) {
       return {
         success: false,

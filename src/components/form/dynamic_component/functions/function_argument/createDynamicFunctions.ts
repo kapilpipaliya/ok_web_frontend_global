@@ -12,7 +12,6 @@ export function createDynamicFunctions(
   meta: () => Vertex | undefined,
   getFunctionArgumentWithValue: Accessor<FunctionArgumentType>,
   parentRenderContext: () => { context: FunctionArgumentType } | undefined,
-  componentName: Accessor<string>,
 ): Record<string, unknown> {
   try {
     // Helper to evaluate fns from a vertex
@@ -59,26 +58,6 @@ export function createDynamicFunctions(
       return currentMeta ? evaluateFns(currentMeta.P.fns) : undefined;
     });
 
-    // Memoize component vertex lookup - only when componentName changes
-    // Skip lookup if meta is already a Component vertex to avoid duplicate evaluation
-    const componentVertexMemo = createMemo(() => {
-      const currentMeta = meta();
-      // If meta is already a Component vertex, return undefined to skip duplicate evaluation
-      if (currentMeta?.L?.[0] === "Component") {
-        return undefined;
-      }
-      const name = componentName();
-      return untrack(() =>
-        findVertexByLabelAndUniqueId(graph, "Component", "key", name),
-      );
-    });
-
-    // Memoize component functions - only re-evaluate when component vertex changes
-    const componentFnsMemo = createMemo(() => {
-      const vertex = componentVertexMemo();
-      return vertex ? evaluateFns(vertex.P.fns) : undefined;
-    });
-
     return new Proxy(
       {},
       {
@@ -87,12 +66,6 @@ export function createDynamicFunctions(
           const metaFns = metaFnsMemo();
           if (metaFns && key in metaFns) {
             return metaFns[key];
-          }
-
-          // Check component functions
-          const componentFns = componentFnsMemo();
-          if (componentFns && key in componentFns) {
-            return componentFns[key];
           }
 
           // Fallback to parent context

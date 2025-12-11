@@ -887,17 +887,18 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: object
-        key: functionContext
+        type: string
+        key: labelKey
+        defValue: title
       }
     }
     {
       id: "4"
       L: ComponentVariant
       P: {
-        type: array
-        key: options
-        defValue: []
+        type: string
+        key: dataKey
+        defValue: ""
       }
     }
     {
@@ -905,35 +906,34 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: placeholder
-        defValue: Select an option...
+        key: subType
+        defValue: ""
       }
     }
     {
       id: "6"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: required
-        defValue: false
+        type: object
+        key: functionContext
       }
     }
     {
       id: "7"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: value
+        type: array
+        key: plugins
+        defValue: []
       }
     }
     {
       id: "8"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: multiple
-        defValue: false
+        type: string
+        key: placeholder
+        defValue: Select an option...
       }
     }
     {
@@ -949,31 +949,13 @@ return {
       id: "10"
       L: ComponentVariant
       P: {
-        type: string
-        key: valueKey
-        defValue: id
+        type: array
+        key: options
+        defValue: []
       }
     }
     {
       id: "11"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: labelKey
-        defValue: title
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: disabled
-        defValue: false
-      }
-    }
-    {
-      id: "13"
       L: ComponentVariant
       P: {
         type: number
@@ -981,11 +963,28 @@ return {
       }
     }
     {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: value
+      }
+    }
+    {
       id: "14"
       L: ComponentVariant
       P: {
         type: string
-        key: dataKey
+        key: pluralName
         defValue: ""
       }
     }
@@ -1003,7 +1002,7 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: pluralName
+        key: singularName
         defValue: ""
       }
     }
@@ -1011,13 +1010,22 @@ return {
       id: "17"
       L: ComponentVariant
       P: {
-        type: string
-        key: subType
-        defValue: ""
+        type: boolean
+        key: disabled
+        defValue: false
       }
     }
     {
       id: "18"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: required
+        defValue: false
+      }
+    }
+    {
+      id: "19"
       L: ComponentVariant
       P: {
         type: boolean
@@ -1026,20 +1034,12 @@ return {
       }
     }
     {
-      id: "19"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: plugins
-        defValue: []
-      }
-    }
-    {
       id: "20"
       L: ComponentVariant
       P: {
-        type: function
-        key: onChange
+        type: boolean
+        key: multiple
+        defValue: false
       }
     }
     {
@@ -1047,8 +1047,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: singularName
-        defValue: ""
+        key: valueKey
+        defValue: id
       }
     }
   ]

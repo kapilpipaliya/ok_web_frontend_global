@@ -1,9 +1,9 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
-import { useParams } from "@solidjs/router";
+import { useParams, useSearchParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { type IDBPDatabase, openDB } from "idb";
-import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
+import { createEffect, createSignal, type JSX, onCleanup, onMount, Show } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
@@ -20,14 +20,18 @@ import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { getTitle } from "~/lib/graph/get/sync/theme/getTitle";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { Title } from "@solidjs/meta";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
 export function PageDesignerWrapper(): JSX.Element {
   const params = useParams();
+  const [searchParams] = useSearchParams();
   const initialStore = getInitialDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
+  const [isDataReady, setIsDataReady] = createSignal(false);
 
   let dbPromise: Promise<IDBPDatabase<unknown>> | undefined;
   if (!isServer) {
@@ -40,10 +44,47 @@ export function PageDesignerWrapper(): JSX.Element {
 
   const formId = uuidv7();
 
+  // Get tabs from query parameter (format: entity:key,entity:key) or use params
+  const tabsFromQuery = searchParams.tabs;
+  interface TabInfo {
+    entity: string;
+    key: string;
+  }
+  let tabsToLoad: TabInfo[] = [];
+  
+  if (tabsFromQuery) {
+    // Parse query parameter tabs
+    const tabsArray = Array.isArray(tabsFromQuery) 
+      ? tabsFromQuery 
+      : tabsFromQuery.split(",");
+    
+    for (const tab of tabsArray) {
+      if (!tab) continue;
+      const [entity, key] = tab.split(":");
+      if (entity && key) {
+        tabsToLoad.push({ entity, key });
+      }
+    }
+  } else if (params.id && params.entity) {
+    // Fall back to path parameter
+    tabsToLoad = [{ entity: params.entity, key: params.id }];
+  }
+  
+  // Ensure params is included if it exists and not already in the list
+  if (params.id && params.entity) {
+    const currentTab = `${params.entity}:${params.id}`;
+    const exists = tabsToLoad.some(t => `${t.entity}:${t.key}` === currentTab);
+    if (!exists) {
+      tabsToLoad.unshift({ entity: params.entity, key: params.id });
+    }
+  }
+
+  // Initialize with first tab, will be updated if we need to fetch from DB
+  const firstTab = tabsToLoad[0] || { entity: params.entity || "", key: params.id || "" };
   const newOpenVertex = newVertex(uuidv7(), ["OpenForm"], {
-    dataId: params.id,
+    dataId: firstTab.key,
     formId,
-    label: params.entity,
+    label: firstTab.entity,
     mainPanel: initialStore.mainPanel[0],
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
@@ -85,7 +126,114 @@ export function PageDesignerWrapper(): JSX.Element {
 
   onMount(async () => {
     if (isServer) {
+      setIsDataReady(true);
       return;
+    }
+    const openedFormIds: string[] = [newOpenVertex.id];
+    let activeFormId = formId;
+
+    // Group tabs by entity and separate keys from IDs
+    const entityGroups = new Map<string, { keys: string[]; ids: Array<{ key: string; index: number }> }>();
+    
+    tabsToLoad.forEach((tab, index) => {
+      if (!entityGroups.has(tab.entity)) {
+        entityGroups.set(tab.entity, { keys: [], ids: [] });
+      }
+      const group = entityGroups.get(tab.entity)!;
+      
+      // Check if it's a key (no '-') or an ID (with '-')
+      if (tab.key && !tab.key.includes("-")) {
+        group.keys.push(tab.key);
+      } else {
+        group.ids.push({ key: tab.key, index });
+      }
+    });
+
+    // Fetch keys for each entity separately
+    const idMap = new Map<string, string>(); // Map entity:key -> id
+    
+    for (const [entity, group] of entityGroups.entries()) {
+      if (group.keys.length > 0) {
+        try {
+          const data = await fetchDataFromDB(
+            {
+              expression: `g:'${entity}[$keyFilter]'`,
+            },
+            {
+              nodes: {},
+              relationships: {},
+              $keyFilter: { filter: { key: { $in: group.keys } } },
+            },
+          );
+
+          if (isValidResponse(data) && data.result && Array.isArray(data.result)) {
+            // Map fetched vertices: entity:key -> id
+            for (const vertex of data.result as Vertex[]) {
+              if (vertex?.P?.key && vertex?.id) {
+                idMap.set(`${entity}:${vertex.P.key}`, vertex.id);
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching vertices for entity ${entity}:`, error);
+        }
+      }
+    }
+
+    // Process all tabs and create/update OpenForm vertices
+    for (let i = 0; i < tabsToLoad.length; i++) {
+      const tab = tabsToLoad[i];
+      if (!tab.entity || !tab.key) continue;
+
+      // Get actual ID: if it's a key, use the mapped ID, otherwise use the key directly
+      const mapKey = `${tab.entity}:${tab.key}`;
+      const actualId = tab.key.includes("-")
+        ? tab.key
+        : idMap.get(mapKey) || tab.key;
+
+      if (i === 0) {
+        // Update the first OpenForm vertex with the actual ID and entity
+        mergeVertexProperties(
+          0,
+          newOpenVertex.id,
+          graph,
+          setGraph,
+          {
+            dataId: actualId,
+            label: tab.entity,
+          },
+        );
+      } else {
+        // Create additional OpenForm vertices for other tabs
+        const additionalFormId = uuidv7();
+        const additionalOpenVertex = newVertex(uuidv7(), ["OpenForm"], {
+          dataId: actualId,
+          formId: additionalFormId,
+          label: tab.entity,
+          mainPanel: initialStore.mainPanel[0],
+        });
+        addNewVertex(0, additionalOpenVertex, graph, setGraph);
+        openedFormIds.push(additionalOpenVertex.id);
+      }
+    }
+
+    // Always update the layout store with all opened form IDs
+    // Ensure we have all the OpenForm vertices in the graph before updating
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      initialStore.id,
+      graph,
+      setGraph,
+      {
+        openedFormIds,
+        [`mainPanel${initialStore.mainPanel[0]}Tab`]: activeFormId,
+        formId: activeFormId,
+      },
+    );
+    
+    // Log for debugging - can be removed later
+    if (openedFormIds.length > 1) {
+      console.log("Loaded tabs:", openedFormIds.length, openedFormIds);
     }
 
     if (dbPromise) {
@@ -105,6 +253,9 @@ export function PageDesignerWrapper(): JSX.Element {
 
     handleResize(); // Initial check
     makeEventListener(window, "resize", debouncedHandleResize);
+    
+    // Mark data as ready after all async operations complete
+    setIsDataReady(true);
     // fetchCompExamples();
   });
 
@@ -173,7 +324,9 @@ export function PageDesignerWrapper(): JSX.Element {
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
         <Title>{getTitle(`${params.entity} Builder`, graph)}</Title>
-        <RenderMainContent />
+        <Show when={isDataReady()} fallback={<div>Loading...</div>}>
+          <RenderMainContent />
+        </Show>
       </DesignerLayoutStoreContext.Provider>
     </ZIndex>
   );

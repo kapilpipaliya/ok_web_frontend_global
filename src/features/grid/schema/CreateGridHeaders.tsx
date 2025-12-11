@@ -398,8 +398,10 @@ export function CreateGridHeaders(
                       }
                     }\`;`}
                     onClick={() => {
+                      const useKey =
+                        tableId === "Page" || tableId === "Component";
                       return navigate(
-                        `/admin/${tableId}/${info.row.original.id}`,
+                        `/admin/${tableId}/${useKey ? info.row.original.P.key : info.row.original.id}`,
                       );
                     }}
                     size={21}

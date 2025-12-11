@@ -157,11 +157,19 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: ariaLabel
+        key: title
       }
     }
     {
       id: "5"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClick
+      }
+    }
+    {
+      id: "6"
       L: ComponentVariant
       P: {
         type: string
@@ -170,23 +178,13 @@ return {
       }
     }
     {
-      id: "6"
+      id: "7"
       L: ComponentVariantOption
       P: {
         displayOrder: 3
         description: Large size (24px icon)
         value: lg
         key: lg
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariantOption
-      P: {
-        displayOrder: 2
-        description: Medium size (20px icon)
-        value: md
-        key: md
       }
     }
     {
@@ -201,11 +199,12 @@ return {
     }
     {
       id: "9"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: boolean
-        key: disabled
-        defValue: false
+        displayOrder: 2
+        description: Medium size (20px icon)
+        value: md
+        key: md
       }
     }
     {
@@ -231,20 +230,20 @@ return {
       id: "12"
       L: ComponentVariantOption
       P: {
-        displayOrder: 1
-        description: Transparent background with hover effect
-        value: ghost
-        key: ghost
+        displayOrder: 3
+        description: Primary variant with primary color
+        value: primary
+        key: primary
       }
     }
     {
       id: "13"
       L: ComponentVariantOption
       P: {
-        displayOrder: 3
-        description: Primary variant with primary color
-        value: primary
-        key: primary
+        displayOrder: 1
+        description: Transparent background with hover effect
+        value: ghost
+        key: ghost
       }
     }
     {
@@ -259,16 +258,17 @@ return {
       id: "15"
       L: ComponentVariant
       P: {
-        type: function
-        key: onClick
+        type: string
+        key: ariaLabel
       }
     }
     {
       id: "16"
       L: ComponentVariant
       P: {
-        type: string
-        key: title
+        type: boolean
+        key: disabled
+        defValue: false
       }
     }
   ]
@@ -295,7 +295,7 @@ return {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "6"
     }
     {
       id: e5
@@ -330,20 +330,20 @@ return {
     {
       id: e10
       T: ComponentVariantOption
-      S: "5"
-      E: "6"
+      S: "6"
+      E: "7"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "5"
-      E: "7"
+      S: "6"
+      E: "8"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "5"
-      E: "8"
+      S: "6"
+      E: "9"
     }
     {
       id: e13

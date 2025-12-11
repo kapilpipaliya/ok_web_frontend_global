@@ -461,29 +461,22 @@ return {
       id: "12"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: isOpen
-        defValue: false
+        type: string
+        key: title
+        defValue: Confirm Action
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: function
-        key: onConfirm
+        type: boolean
+        key: isOpen
+        defValue: false
       }
     }
     {
       id: "14"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onCancel
-      }
-    }
-    {
-      id: "15"
       L: ComponentVariant
       P: {
         type: string
@@ -492,25 +485,7 @@ return {
       }
     }
     {
-      id: "16"
-      L: ComponentVariantOption
-      P: {
-        description: Red confirmation button for destructive actions
-        value: danger
-        key: danger
-      }
-    }
-    {
-      id: "17"
-      L: ComponentVariantOption
-      P: {
-        description: Warning colored confirmation button
-        value: warning
-        key: warning
-      }
-    }
-    {
-      id: "18"
+      id: "15"
       L: ComponentVariantOption
       P: {
         description: Primary colored confirmation button
@@ -519,16 +494,25 @@ return {
       }
     }
     {
-      id: "19"
-      L: ComponentVariant
+      id: "16"
+      L: ComponentVariantOption
       P: {
-        type: string
-        key: confirmText
-        defValue: Confirm
+        description: Warning colored confirmation button
+        value: warning
+        key: warning
       }
     }
     {
-      id: "20"
+      id: "17"
+      L: ComponentVariantOption
+      P: {
+        description: Red confirmation button for destructive actions
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "18"
       L: ComponentVariant
       P: {
         type: string
@@ -537,12 +521,28 @@ return {
       }
     }
     {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onConfirm
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onCancel
+      }
+    }
+    {
       id: "21"
       L: ComponentVariant
       P: {
-        type: string
-        key: title
-        defValue: Confirm Action
+        type: boolean
+        key: loading
+        defValue: false
       }
     }
     {
@@ -558,9 +558,9 @@ return {
       id: "23"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: loading
-        defValue: false
+        type: string
+        key: confirmText
+        defValue: Confirm
       }
     }
   ]
@@ -593,7 +593,7 @@ return {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "15"
+      E: "18"
     }
     {
       id: e6
@@ -682,20 +682,20 @@ return {
     {
       id: e20
       T: ComponentVariantOption
-      S: "15"
-      E: "16"
+      S: "14"
+      E: "15"
     }
     {
       id: e21
       T: ComponentVariantOption
-      S: "15"
-      E: "17"
+      S: "14"
+      E: "16"
     }
     {
       id: e22
       T: ComponentVariantOption
-      S: "15"
-      E: "18"
+      S: "14"
+      E: "17"
     }
   ]
 }

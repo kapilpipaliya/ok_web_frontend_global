@@ -123,75 +123,21 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: type
-        defValue: button
+        key: text
+        defValue: Button
       }
     }
     {
       id: "4"
       L: ComponentVariant
       P: {
-        type: string
-        key: variant
-        defValue: primary
-      }
-    }
-    {
-      id: "5"
-      L: ComponentVariantOption
-      P: {
-        description: Primary button with brand color
-        value: primary
-        key: primary
-      }
-    }
-    {
-      id: "6"
-      L: ComponentVariantOption
-      P: {
-        description: Secondary button with border
-        value: secondary
-        key: secondary
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariantOption
-      P: {
-        description: Success button with green color
-        value: success
-        key: success
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariantOption
-      P: {
-        description: Danger button with red color
-        value: danger
-        key: danger
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: text
-        defValue: Button
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariant
-      P: {
         type: boolean
-        key: fullWidth
+        key: disabled
         defValue: false
       }
     }
     {
-      id: "11"
+      id: "5"
       L: ComponentVariant
       P: {
         type: boolean
@@ -200,11 +146,65 @@ return {
       }
     }
     {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: type
+        defValue: button
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: variant
+        defValue: primary
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariantOption
+      P: {
+        description: Primary button with brand color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        description: Success button with green color
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Secondary button with border
+        value: secondary
+        key: secondary
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Danger button with red color
+        value: danger
+        key: danger
+      }
+    }
+    {
       id: "12"
       L: ComponentVariant
       P: {
         type: boolean
-        key: disabled
+        key: fullWidth
         defValue: false
       }
     }
@@ -240,19 +240,19 @@ return {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "5"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "10"
+      E: "6"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "11"
+      E: "7"
     }
     {
       id: e7
@@ -269,26 +269,26 @@ return {
     {
       id: e9
       T: ComponentVariantOption
-      S: "4"
-      E: "5"
+      S: "7"
+      E: "8"
     }
     {
       id: e10
       T: ComponentVariantOption
-      S: "4"
-      E: "6"
+      S: "7"
+      E: "9"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "4"
-      E: "7"
+      S: "7"
+      E: "10"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "4"
-      E: "8"
+      S: "7"
+      E: "11"
     }
   ]
 }

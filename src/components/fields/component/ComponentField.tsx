@@ -5,15 +5,20 @@ import {
   useContext,
   Switch,
   Match,
+  onCleanup,
 } from "solid-js";
 import { createAsync } from "@solidjs/router";
+import { createStore } from "solid-js/store";
 
 import {
   SlotContext,
   type SlotContextType,
 } from "~/components/fields/component/contexts/SlotContext";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
-import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import {
+  usePageRenderContext,
+  PageRenderContextProvider,
+} from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
   PreviewContext,
@@ -33,6 +38,9 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVe
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 import type { JSX } from "solid-js";
+import { useFunctionProxy } from "~/components/form/dynamic_component/hooks/useFunctionProxy";
+import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
+import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
 
 // MOST Important: Component Field just render PageAttrRender, it render Children Attr of Component, there will be one root Attr where we define fns, its run inside <DynamicComponent/> so it will work with nested functions too.
 export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
@@ -161,15 +169,79 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
       },
     });
 
+    // Inner component that uses function proxy after DataContext is provided
+    const ComponentContent = () => {
+      // Setup function proxy for component functions
+      // Now useFunctionProxy is called inside DataContext.Provider context
+      // so useDataContext() will return newDataContext with props
+      const { getFunctionArgumentWithValue, setRef, setMounted } = useFunctionProxy({
+        props: {
+          get meta() {
+            return getCompVertex() as Vertex;
+          },
+          get data() {
+            return data();
+          },
+        },
+        value: () => data(),
+        componentName: () => componentName() as string,
+        isNoPermissionCheck: () =>
+          parentRenderContext()?.context.isNoPermissionCheck,
+        isViewMode: () => false,
+        hasFullPermission: () => true,
+        hasEditPermission: () => true,
+        hasCreatePermission: () => true,
+        hasViewPermission: () => true,
+      });
+
+      // Evaluate dynamic props from metaVertex
+      const dynamicProps = createDynamicPropsMemo(
+        {
+          get meta() {
+            return getCompVertex() as Vertex;
+          },
+        },
+        {
+          graph,
+          getFunctionArgumentWithValue,
+        },
+      );
+
+      // Lifecycle setup
+      useComponentLifecycle({
+        dynamicProps,
+        getFunctionArgumentWithValue,
+        setMounted,
+      });
+
+      onCleanup(() => {
+        setRef(null);
+        setMounted(false);
+      });
+
+      // Create PageRenderContext store for this component's entire function argument
+      const componentRenderStore = createStore({
+        get context() {
+          return getFunctionArgumentWithValue();
+        },
+      });
+
+      return (
+        <PageRenderContextProvider store={componentRenderStore}>
+          <PageAttrRender
+            data={data()}
+            metaVertex={getCompVertex() as Vertex}
+            isNoPermissionCheck={
+              parentRenderContext()?.context.isNoPermissionCheck
+            }
+          />
+        </PageRenderContextProvider>
+      );
+    };
+
     return (
       <DataContext.Provider value={newDataContext}>
-        <PageAttrRender
-          data={data()}
-          metaVertex={getCompVertex() as Vertex}
-          isNoPermissionCheck={
-            parentRenderContext()?.context.isNoPermissionCheck
-          }
-        />
+        <ComponentContent />
       </DataContext.Provider>
     );
   };

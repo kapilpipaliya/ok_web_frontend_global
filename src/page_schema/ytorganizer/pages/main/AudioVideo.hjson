@@ -43,8 +43,9 @@ return {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Table
+        displayOrder: 2
+        componentName: DynamicPage
+        key: unique_1
         props:
           '''
 return {

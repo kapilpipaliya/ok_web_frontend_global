@@ -255,10 +255,11 @@ const loadQueueFromDatabase = async () => {
   try {
     const result = await executeYTOFunction("loadVideoQueue");
 
-    if (response?.error) {
-      args.showErrorToast(response.error);
-    } else if (result?.result?.success) {
+    if (result?.result?.success) {
       setVideoQueue(result.result.data || []);
+    } else {
+      const errorMsg = result?.result?.message || result?.error || `Failed to load video queue`;
+      setFormError(errorMsg);
     }
   } catch (error) {
     console.error("Error loading queue from database:", error);

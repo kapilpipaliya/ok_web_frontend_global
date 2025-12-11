@@ -230,7 +230,7 @@ const handleSave = () => {
     }
 
     // Save the raw text (function body), not the evaluated result
-    onSave(text);
+    onSave(text, args.fns.handleSearch());
   } catch (error) {
     console.error("Error validating config:", error);
     // Use alert as fallback if showErrorToast is not available
@@ -326,45 +326,59 @@ const getDetailedExample = () => {
     }
   ],
 
-  // Form configuration
+  // Form configuration (nested structure)
   formConfig: {
-    gridColumns: 2, // Number of columns in form grid
-    fields: [
+    gridColumns: 1, // Default columns for groups that don't specify
+    groups: [
       {
-        key: "name",
-        label: "Name",
-        type: "text",
-        required: true,
-        gridSpan: 2 // Span across 2 columns
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2, // This group uses 2 columns
+        fields: [
+          {
+            key: "name",
+            label: "Name",
+            type: "text",
+            required: true,
+            colSpan: 2 // Span across 2 columns within the group
+          },
+          {
+            key: "description",
+            label: "Description",
+            type: "textArea",
+            required: false,
+            colSpan: 2
+          },
+          {
+            key: "year",
+            label: "Year",
+            type: "number",
+            required: false,
+            colSpan: 1
+          },
+          {
+            key: "language",
+            label: "Language",
+            type: "select",
+            required: false,
+            options: ["English", "Spanish", "French"],
+            colSpan: 1
+          }
+        ]
       },
       {
-        key: "description",
-        label: "Description",
-        type: "textarea",
-        required: false,
-        gridSpan: 2
-      },
-      {
-        key: "year",
-        label: "Year",
-        type: "number",
-        required: false,
-        gridSpan: 1
-      },
-      {
-        key: "language",
-        label: "Language",
-        type: "select",
-        required: false,
-        options: ["English", "Spanish", "French"],
-        gridSpan: 1
-      },
-      {
-        key: "isActive",
-        label: "Active",
-        type: "checkbox",
-        required: false,
-        gridSpan: 1
+        key: "status",
+        title: "Status",
+        gridColumns: 1, // This group uses 1 column
+        fields: [
+          {
+            key: "isActive",
+            label: "Active",
+            type: "checkbox",
+            required: false,
+            colSpan: 1
+          }
+        ]
       }
     ],
     saveFunction: null // Optional: custom save function

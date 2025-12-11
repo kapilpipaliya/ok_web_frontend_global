@@ -82,26 +82,55 @@ if (sort && sort.column) {
   }
 }
 
-// Optimized query with indexed user lookup first
+// Optimized query with indexed user lookup first and related vertices
 const query = `
   MATCH (u:User {uuid: $userUuid})
   MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
   ${whereClause}
+  OPTIONAL MATCH (c)-[r]->(related)
   ${orderByClause}
-  RETURN c
+  RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
 `;
 
 const result = await args.session.run(query, queryParams);
 
-// Convert to vertex format
-const items = result.records.map(record => {
+// Convert to vertex format with relationships
+const itemsMap = new Map();
+result.records.forEach(record => {
   const node = record.get('c');
-  return args.convertNodeToJson(node);
+  const vertex = args.convertNodeToJson(node);
+  const elementId = node.elementId;
+
+  if (!itemsMap.has(elementId)) {
+    // Initialize vertex with OUT relationships structure
+    vertex.OUT = {};
+    itemsMap.set(elementId, vertex);
+  }
+
+  // Add relationships
+  const relationships = record.get('relationships') || [];
+  relationships.forEach(relData => {
+    if (relData.rel && relData.target) {
+      const targetVertex = args.convertNodeToJson(relData.target);
+      if (!itemsMap.get(elementId).OUT[relData.rel]) {
+        itemsMap.get(elementId).OUT[relData.rel] = [];
+      }
+      itemsMap.get(elementId).OUT[relData.rel].push(relData.target.elementId);
+
+      // Also store the related vertex for easy access
+      if (!itemsMap.has(relData.target.elementId)) {
+        itemsMap.set(relData.target.elementId, targetVertex);
+      }
+    }
+  });
 });
+
+const items = Array.from(itemsMap.values()).filter(v => v.L.includes(vertexLabel));
 
 return {
   success: true,
   data: items,
+  relatedVertices: Array.from(itemsMap.values()).filter(v => !v.L.includes(vertexLabel)),
   message: `Found ${items.length} ${contentType === "book" ? "books" : "audio/video items"}`
 };
 '''

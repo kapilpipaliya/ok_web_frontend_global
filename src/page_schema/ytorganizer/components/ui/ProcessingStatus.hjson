@@ -301,26 +301,6 @@ return {
       id: "12"
       L: ComponentVariant
       P: {
-        description: Progress percentage (0-100)
-        type: number
-        key: progress
-        defValue: 0
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariant
-      P: {
-        description: Error message for failed queueStatus
-        type: string
-        defValue: ""
-        key: error
-      }
-    }
-    {
-      id: "14"
-      L: ComponentVariant
-      P: {
         description: Processing queueStatus: queued, processing, pending_quota, paused, completed, completed_with_errors, failed
         type: string
         key: queueStatus
@@ -328,25 +308,7 @@ return {
       }
     }
     {
-      id: "15"
-      L: ComponentVariantOption
-      P: {
-        description: Waiting for quota reset
-        value: pending_quota
-        key: pending_quota
-      }
-    }
-    {
-      id: "16"
-      L: ComponentVariantOption
-      P: {
-        description: Item is queued for processing
-        value: queued
-        key: queued
-      }
-    }
-    {
-      id: "17"
+      id: "13"
       L: ComponentVariantOption
       P: {
         description: Processing failed with error
@@ -355,25 +317,16 @@ return {
       }
     }
     {
-      id: "18"
+      id: "14"
       L: ComponentVariantOption
       P: {
-        description: Processing completed successfully
-        value: completed
-        key: completed
+        description: Waiting for quota reset
+        value: pending_quota
+        key: pending_quota
       }
     }
     {
-      id: "19"
-      L: ComponentVariantOption
-      P: {
-        description: Paused by user
-        value: paused
-        key: paused
-      }
-    }
-    {
-      id: "20"
+      id: "15"
       L: ComponentVariantOption
       P: {
         description: Completed with some errors
@@ -382,7 +335,25 @@ return {
       }
     }
     {
-      id: "21"
+      id: "16"
+      L: ComponentVariantOption
+      P: {
+        description: Paused by user
+        value: paused
+        key: paused
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariantOption
+      P: {
+        description: Item is queued for processing
+        value: queued
+        key: queued
+      }
+    }
+    {
+      id: "18"
       L: ComponentVariantOption
       P: {
         description: Item is currently being processed
@@ -391,13 +362,42 @@ return {
       }
     }
     {
-      id: "22"
+      id: "19"
+      L: ComponentVariantOption
+      P: {
+        description: Processing completed successfully
+        value: completed
+        key: completed
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        description: Progress percentage (0-100)
+        type: number
+        key: progress
+        defValue: 0
+      }
+    }
+    {
+      id: "21"
       L: ComponentVariant
       P: {
         description: Additional processing details
         type: string
         key: details
         defValue: ""
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariant
+      P: {
+        description: Error message for failed queueStatus
+        type: string
+        defValue: ""
+        key: error
       }
     }
   ]
@@ -424,13 +424,13 @@ return {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "13"
+      E: "20"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "14"
+      E: "21"
     }
     {
       id: e6
@@ -489,44 +489,44 @@ return {
     {
       id: e15
       T: ComponentVariantOption
-      S: "14"
-      E: "15"
+      S: "12"
+      E: "13"
     }
     {
       id: e16
       T: ComponentVariantOption
-      S: "14"
-      E: "16"
+      S: "12"
+      E: "14"
     }
     {
       id: e17
       T: ComponentVariantOption
-      S: "14"
-      E: "17"
+      S: "12"
+      E: "15"
     }
     {
       id: e18
       T: ComponentVariantOption
-      S: "14"
-      E: "18"
+      S: "12"
+      E: "16"
     }
     {
       id: e19
       T: ComponentVariantOption
-      S: "14"
-      E: "19"
+      S: "12"
+      E: "17"
     }
     {
       id: e20
       T: ComponentVariantOption
-      S: "14"
-      E: "20"
+      S: "12"
+      E: "18"
     }
     {
       id: e21
       T: ComponentVariantOption
-      S: "14"
-      E: "21"
+      S: "12"
+      E: "19"
     }
   ]
 }

@@ -276,87 +276,6 @@ return {
       P: {
         css:
           '''
-return `._id {
-  background: ${args.theme.var.color.info_light_100};
-  border: 1px solid ${args.theme.var.color.info};
-  border-radius: ${args.theme.var.borderRadius.md};
-  padding: ${args.theme.var.spacing.md};
-  margin-bottom: ${args.theme.var.spacing.lg};
-  display: flex;
-  gap: ${args.theme.var.spacing.md};
-  align-items: flex-start;
-
-  @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm};
-    gap: ${args.theme.var.spacing.sm};
-  }
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.info_light_100_text};
-  flex-shrink: 0;
-  margin-top: 2px;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "icon",
-  icon: "ph:info",
-  width: "20px",
-  height: "20px"
-};
-'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  margin: 0;
-  color: ${args.theme.var.color.info_light_100_text};
-  font-size: ${args.theme.var.fontSize.sm};
-  line-height: 1.5;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
-};
-'''
-      }
-    }
-    {
-      id: "9"
-      L: Attr
-      P: {
-        css:
-          '''
 const messageState = args.fns.messageState;
 const isError = messageState?.type === 'error';
 
@@ -402,7 +321,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "7"
       L: Attr
       P: {
         css:
@@ -433,7 +352,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -453,7 +372,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -486,7 +405,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -530,7 +449,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "11"
       L: Attr
       P: {
         displayOrder: 1
@@ -542,6 +461,87 @@ return {
   icon: "ph:x",
   width: "20px",
   height: "20px"
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.sm};
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.info_light_100_text};
+  flex-shrink: 0;
+  margin-top: 2px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:info",
+  width: "20px",
+  height: "20px"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.info_light_100_text};
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.5;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Each YouTube channel requires a separate connection. If you have 5 brand accounts, click 'Add YouTube Account' 5 times and select a different channel each time."
 };
 '''
       }
@@ -605,6 +605,125 @@ return {
         css:
           '''
 return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xxl};
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 2px dashed ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.isLoading?.();
+const ownerships = args.fns.ownerships?.() || [];
+const hasAccounts = ownerships.length > 0;
+
+return {
+  as: "div",
+  hide: isLoading || hasAccounts
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:youtube-logo",
+  width: 64,
+  height: 64
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h3",
+  text: "No YouTube Channels Connected"
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Connect your YouTube channels to start organizing your content. Each channel requires a separate connection."
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Button
+        props:
+          '''
+const isConnecting = args.fns.isConnecting?.();
+
+return {
+  text: isConnecting ? "Connecting..." : "Connect YouTube Channel",
+  variant: "primary",
+  onClick: args.fns.connectAccount,
+  disabled: isConnecting
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
   overflow-x: auto;
   background: ${args.theme.var.color.background};
   border: 1px solid ${args.theme.var.color.border};
@@ -626,7 +745,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "23"
       L: Attr
       P: {
         css:
@@ -648,7 +767,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "24"
       L: Attr
       P: {
         css:
@@ -669,7 +788,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "25"
       L: Attr
       P: {
         displayOrder: 1
@@ -683,7 +802,7 @@ return {
       }
     }
     {
-      id: "21"
+      id: "26"
       L: Attr
       P: {
         css:
@@ -707,7 +826,7 @@ return {
       }
     }
     {
-      id: "22"
+      id: "27"
       L: Attr
       P: {
         css:
@@ -731,7 +850,7 @@ return {
       }
     }
     {
-      id: "23"
+      id: "28"
       L: Attr
       P: {
         css:
@@ -755,7 +874,7 @@ return {
       }
     }
     {
-      id: "24"
+      id: "29"
       L: Attr
       P: {
         css:
@@ -779,7 +898,7 @@ return {
       }
     }
     {
-      id: "25"
+      id: "30"
       L: Attr
       P: {
         css:
@@ -803,7 +922,7 @@ return {
       }
     }
     {
-      id: "26"
+      id: "31"
       L: Attr
       P: {
         css:
@@ -827,7 +946,7 @@ return {
       }
     }
     {
-      id: "27"
+      id: "32"
       L: Attr
       P: {
         css:
@@ -852,7 +971,7 @@ return {
       }
     }
     {
-      id: "28"
+      id: "33"
       L: Attr
       P: {
         contextName: account
@@ -871,7 +990,7 @@ return {
       }
     }
     {
-      id: "29"
+      id: "34"
       L: Attr
       P: {
         css:
@@ -900,7 +1019,7 @@ return {
       }
     }
     {
-      id: "30"
+      id: "35"
       L: Attr
       P: {
         css:
@@ -927,7 +1046,7 @@ return {
       }
     }
     {
-      id: "31"
+      id: "36"
       L: Attr
       P: {
         css:
@@ -953,7 +1072,7 @@ return {
       }
     }
     {
-      id: "32"
+      id: "37"
       L: Attr
       P: {
         css:
@@ -981,7 +1100,7 @@ return {
       }
     }
     {
-      id: "33"
+      id: "38"
       L: Attr
       P: {
         css:
@@ -1002,7 +1121,7 @@ return {
       }
     }
     {
-      id: "34"
+      id: "39"
       L: Attr
       P: {
         css:
@@ -1041,7 +1160,7 @@ return {
       }
     }
     {
-      id: "35"
+      id: "40"
       L: Attr
       P: {
         css:
@@ -1068,7 +1187,7 @@ return {
       }
     }
     {
-      id: "36"
+      id: "41"
       L: Attr
       P: {
         css:
@@ -1110,7 +1229,7 @@ return {
       }
     }
     {
-      id: "37"
+      id: "42"
       L: Attr
       P: {
         css:
@@ -1131,7 +1250,7 @@ return {
       }
     }
     {
-      id: "38"
+      id: "43"
       L: Attr
       P: {
         css:
@@ -1153,7 +1272,7 @@ return {
       }
     }
     {
-      id: "39"
+      id: "44"
       L: Attr
       P: {
         displayOrder: 1
@@ -1175,7 +1294,7 @@ return {
       }
     }
     {
-      id: "40"
+      id: "45"
       L: Attr
       P: {
         displayOrder: 2
@@ -1196,125 +1315,6 @@ return {
   onClick: () => args.fns.disconnectAccount(ownershipId, channelName),
   disabled: isDisconnecting,
   hide: !isConnected
-};
-'''
-      }
-    }
-    {
-      id: "41"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  text-align: center;
-  padding: ${args.theme.var.spacing.xxl};
-  background: ${args.theme.var.color.background_dark_50};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  border: 2px dashed ${args.theme.var.color.border};
-}`;
-'''
-        displayOrder: 5
-        componentName: Html
-        props:
-          '''
-const isLoading = args.fns.isLoading?.();
-const ownerships = args.fns.ownerships?.() || [];
-const hasAccounts = ownerships.length > 0;
-
-return {
-  as: "div",
-  hide: isLoading || hasAccounts
-};
-'''
-      }
-    }
-    {
-      id: "42"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: ${args.theme.var.spacing.md};
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "icon",
-  icon: "ph:youtube-logo",
-  width: 64,
-  height: 64
-};
-'''
-      }
-    }
-    {
-      id: "43"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.sm} 0;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "h3",
-  text: "No YouTube Channels Connected"
-};
-'''
-      }
-    }
-    {
-      id: "44"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.md};
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 ${args.theme.var.spacing.lg} 0;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "p",
-  text: "Connect your YouTube channels to start organizing your content. Each channel requires a separate connection."
-};
-'''
-      }
-    }
-    {
-      id: "45"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: Button
-        props:
-          '''
-const isConnecting = args.fns.isConnecting?.();
-
-return {
-  text: isConnecting ? "Connecting..." : "Connect YouTube Channel",
-  variant: "primary",
-  onClick: args.fns.connectAccount,
-  disabled: isConnecting
 };
 '''
       }
@@ -1372,7 +1372,7 @@ return {
       id: e6
       T: Attr
       S: "2"
-      E: "9"
+      E: "12"
     }
     {
       id: e7
@@ -1396,7 +1396,7 @@ return {
       id: e10
       T: Attr
       S: "2"
-      E: "41"
+      E: "22"
     }
     {
       id: e11
@@ -1425,31 +1425,31 @@ return {
     {
       id: e15
       T: Attr
-      S: "9"
+      S: "6"
       E: "10"
     }
     {
       id: e16
       T: Attr
-      S: "9"
-      E: "11"
+      S: "8"
+      E: "9"
     }
     {
       id: e17
       T: Attr
-      S: "9"
-      E: "13"
+      S: "10"
+      E: "11"
     }
     {
       id: e18
       T: Attr
-      S: "11"
-      E: "12"
+      S: "12"
+      E: "13"
     }
     {
       id: e19
       T: Attr
-      S: "13"
+      S: "12"
       E: "14"
     }
     {
@@ -1461,157 +1461,157 @@ return {
     {
       id: e21
       T: Attr
-      S: "18"
+      S: "17"
       E: "19"
     }
     {
       id: e22
       T: Attr
-      S: "18"
-      E: "28"
+      S: "17"
+      E: "20"
     }
     {
       id: e23
       T: Attr
-      S: "19"
-      E: "20"
+      S: "17"
+      E: "21"
     }
     {
       id: e24
       T: Attr
-      S: "20"
-      E: "21"
+      S: "22"
+      E: "23"
     }
     {
       id: e25
       T: Attr
-      S: "20"
-      E: "22"
+      S: "23"
+      E: "24"
     }
     {
       id: e26
       T: Attr
-      S: "20"
-      E: "23"
+      S: "23"
+      E: "33"
     }
     {
       id: e27
       T: Attr
-      S: "20"
-      E: "24"
+      S: "24"
+      E: "25"
     }
     {
       id: e28
       T: Attr
-      S: "20"
-      E: "25"
+      S: "25"
+      E: "26"
     }
     {
       id: e29
       T: Attr
-      S: "20"
-      E: "26"
+      S: "25"
+      E: "27"
     }
     {
       id: e30
       T: Attr
-      S: "20"
-      E: "27"
+      S: "25"
+      E: "28"
     }
     {
       id: e31
       T: Attr
-      S: "28"
+      S: "25"
       E: "29"
     }
     {
       id: e32
       T: Attr
-      S: "29"
+      S: "25"
       E: "30"
     }
     {
       id: e33
       T: Attr
-      S: "29"
+      S: "25"
       E: "31"
     }
     {
       id: e34
       T: Attr
-      S: "29"
+      S: "25"
       E: "32"
     }
     {
       id: e35
       T: Attr
-      S: "29"
-      E: "33"
+      S: "33"
+      E: "34"
     }
     {
       id: e36
       T: Attr
-      S: "29"
+      S: "34"
       E: "35"
     }
     {
       id: e37
       T: Attr
-      S: "29"
+      S: "34"
       E: "36"
     }
     {
       id: e38
       T: Attr
-      S: "29"
+      S: "34"
       E: "37"
     }
     {
       id: e39
       T: Attr
-      S: "33"
-      E: "34"
+      S: "34"
+      E: "38"
     }
     {
       id: e40
       T: Attr
-      S: "37"
-      E: "38"
+      S: "34"
+      E: "40"
     }
     {
       id: e41
+      T: Attr
+      S: "34"
+      E: "41"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "34"
+      E: "42"
+    }
+    {
+      id: e43
       T: Attr
       S: "38"
       E: "39"
     }
     {
-      id: e42
-      T: Attr
-      S: "38"
-      E: "40"
-    }
-    {
-      id: e43
-      T: Attr
-      S: "41"
-      E: "42"
-    }
-    {
       id: e44
       T: Attr
-      S: "41"
+      S: "42"
       E: "43"
     }
     {
       id: e45
       T: Attr
-      S: "41"
+      S: "43"
       E: "44"
     }
     {
       id: e46
       T: Attr
-      S: "41"
+      S: "43"
       E: "45"
     }
   ]

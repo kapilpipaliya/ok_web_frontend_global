@@ -1,0 +1,154 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Sample migration function demonstrating how to create and run migrations. This is a template that can be customized for specific migration needs.
+        body:
+          '''
+/**
+ * Sample Migration Function
+ *
+ * This is a template migration function that demonstrates the structure
+ * and pattern for creating database migrations.
+ *
+ * Parameters (via args.contextData):
+ * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
+ * - customParam: any (optional) - Example of custom parameters you can pass
+ *
+ * Returns:
+ * - Statistics about the migration
+ */
+
+const { dryRun = false, customParam } = args.contextData;
+
+console.log(`🚀 Starting sample migration (dryRun: ${dryRun})`);
+
+const stats = {
+  itemsProcessed: 0,
+  itemsUpdated: 0,
+  itemsCreated: 0,
+  errors: []
+};
+
+// ==========================================
+// STEP 1: Find items to migrate
+// ==========================================
+console.log('\n📋 Step 1: Finding items to migrate...');
+
+const findQuery = `
+  // Example: Find items that need migration
+  MATCH (item:ExampleNode)
+  WHERE item.needsMigration = true OR item.version < 2
+  RETURN item
+  LIMIT 100
+`;
+
+const result = await args.session.run(findQuery);
+console.log(`Found ${result.records.length} items to migrate`);
+
+if (result.records.length === 0) {
+  return {
+    success: true,
+    message: "No items found that need migration",
+    data: stats
+  };
+}
+
+// ==========================================
+// STEP 2: Process each item
+// ==========================================
+console.log('\n⚙️ Step 2: Processing items...');
+
+if (!dryRun) {
+  for (const record of result.records) {
+    const item = record.get('item');
+
+    try {
+      // Example: Update item properties
+      const updateQuery = `
+        MATCH (item:ExampleNode)
+        WHERE elementId(item) = $itemId
+        SET item.version = 2,
+            item.migratedAt = datetime(),
+            item.needsMigration = false
+        RETURN item
+      `;
+
+      await args.session.run(updateQuery, {
+        itemId: item.elementId
+      });
+
+      stats.itemsUpdated++;
+      stats.itemsProcessed++;
+    } catch (error) {
+      console.error(`Error migrating item ${item.elementId}:`, error);
+      stats.errors.push({
+        itemId: item.elementId,
+        error: error.message
+      });
+    }
+  }
+} else {
+  // In dry run, just count items
+  stats.itemsProcessed = result.records.length;
+  console.log(`Would process ${stats.itemsProcessed} items`);
+}
+
+// ==========================================
+// STEP 3: Create new items (if needed)
+// ==========================================
+if (!dryRun && customParam) {
+  console.log('\n➕ Step 3: Creating new items...');
+
+  const createQuery = `
+    CREATE (item:ExampleNode {
+      key: $key,
+      version: 2,
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    RETURN item
+  `;
+
+  const createResult = await args.session.run(createQuery, {
+    key: `migrated_${Date.now()}`
+  });
+
+  if (createResult.records.length > 0) {
+    stats.itemsCreated++;
+  }
+}
+
+// ==========================================
+// Summary
+// ==========================================
+console.log('\n📊 Migration Summary:');
+console.log('==========================================');
+console.log(`Items processed: ${stats.itemsProcessed}`);
+console.log(`Items updated: ${stats.itemsUpdated}`);
+console.log(`Items created: ${stats.itemsCreated}`);
+if (stats.errors.length > 0) {
+  console.log(`Errors: ${stats.errors.length}`);
+  console.log('Errors:', stats.errors);
+}
+console.log('==========================================');
+
+return {
+  success: true,
+  message: dryRun
+    ? "Dry run completed - no changes made"
+    : "Sample migration completed successfully",
+  data: {
+    ...stats,
+    dryRun
+  }
+};
+'''
+        key: samplemigration
+      }
+    }
+  ]
+  edges: []
+}

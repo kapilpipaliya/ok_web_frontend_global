@@ -194,30 +194,13 @@ return {
       id: "8"
       L: ComponentVariant
       P: {
-        type: array
-        key: options
-        defValue: []
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
         type: boolean
         key: disabled
         defValue: false
       }
     }
     {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onDirectionToggle
-      }
-    }
-    {
-      id: "11"
+      id: "9"
       L: ComponentVariant
       P: {
         type: function
@@ -225,12 +208,29 @@ return {
       }
     }
     {
-      id: "12"
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: options
+        defValue: []
+      }
+    }
+    {
+      id: "11"
       L: ComponentVariant
       P: {
         type: string
-        defValue: ""
-        key: field
+        key: direction
+        defValue: asc
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onDirectionToggle
       }
     }
     {
@@ -238,8 +238,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: direction
-        defValue: asc
+        defValue: ""
+        key: field
       }
     }
   ]

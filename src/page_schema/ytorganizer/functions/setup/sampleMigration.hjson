@@ -64,7 +64,7 @@ console.log('\n⚙️ Step 2: Processing items...');
 if (!dryRun) {
   for (const record of result.records) {
     const item = record.get('item');
-    
+
     try {
       // Example: Update item properties
       const updateQuery = `
@@ -75,11 +75,11 @@ if (!dryRun) {
             item.needsMigration = false
         RETURN item
       `;
-      
+
       await args.session.run(updateQuery, {
         itemId: item.elementId
       });
-      
+
       stats.itemsUpdated++;
       stats.itemsProcessed++;
     } catch (error) {
@@ -101,7 +101,7 @@ if (!dryRun) {
 // ==========================================
 if (!dryRun && customParam) {
   console.log('\n➕ Step 3: Creating new items...');
-  
+
   const createQuery = `
     CREATE (item:ExampleNode {
       key: $key,
@@ -111,11 +111,11 @@ if (!dryRun && customParam) {
     })
     RETURN item
   `;
-  
+
   const createResult = await args.session.run(createQuery, {
     key: `migrated_${Date.now()}`
   });
-  
+
   if (createResult.records.length > 0) {
     stats.itemsCreated++;
   }
@@ -152,4 +152,3 @@ return {
   ]
   edges: []
 }
-

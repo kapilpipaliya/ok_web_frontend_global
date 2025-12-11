@@ -294,9 +294,9 @@ return {
       id: "9"
       L: ComponentVariantOption
       P: {
-        description: Bottom start placement
-        value: bottom-start
-        key: bottom-start
+        description: Top start placement
+        value: top-start
+        key: top-start
       }
     }
     {
@@ -312,18 +312,18 @@ return {
       id: "11"
       L: ComponentVariantOption
       P: {
-        description: Top start placement
-        value: top-start
-        key: top-start
+        description: Bottom end placement
+        value: bottom-end
+        key: bottom-end
       }
     }
     {
       id: "12"
       L: ComponentVariantOption
       P: {
-        description: Bottom end placement
-        value: bottom-end
-        key: bottom-end
+        description: Bottom start placement
+        value: bottom-start
+        key: bottom-start
       }
     }
     {

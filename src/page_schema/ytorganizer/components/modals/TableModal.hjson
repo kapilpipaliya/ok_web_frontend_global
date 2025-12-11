@@ -44,18 +44,16 @@ return `._id {
         displayOrder: 1
         componentName: Html
         props:
-          '''
-const isOpen = args.contextData.props?.isOpen || false;
-const onClose = args.contextData.props?.onClose;
+          '''const isOpen = args.contextData.props?.isOpen || false;
 
 return {
   as: "div",
   hide: !isOpen,
   onClick: (e) => {
-    if (e.target === e.currentTarget && onClose) {
-      onClose();
+    if (e.target === e.currentTarget) {
+      args.contextData.props?.onClose();
     }
-  }
+  },
 };
 '''
       }
@@ -113,106 +111,22 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-const getFormConfig = () => args.contextData.props?.formConfig;
-const getInitialData = () => args.contextData.props?.initialData || {};
-const getMode = () => args.contextData.props?.mode || "add";
+// Track form txnId for cleanup
+const [formTxnId, setFormTxnId] = args.createSignal(0);
 
-// Form state
-const [formData, setFormData] = args.createStore({});
-const [errors, setErrors] = args.createStore({});
-const [isSubmitting, setIsSubmitting] = args.createSignal(false);
-
-// Initialize form data
-const initializeForm = () => {
-  const formConfig = getFormConfig();
-  const initialData = getInitialData() || {};
-  const mode = getMode();
-
-  if (!formConfig?.fields) {
-    setFormData({});
-    return;
-  }
-
-  const initial = {};
-  formConfig.fields.forEach(field => {
-    if (mode === "edit" && initialData[field.key] !== undefined) {
-      initial[field.key] = initialData[field.key];
-    } else {
-      initial[field.key] = field.defaultValue !== undefined ? field.defaultValue : "";
-    }
-  });
-
-  setFormData(initial);
-  setErrors({});
-};
-
-// Validate form
-const validate = () => {
-  const formConfig = getFormConfig();
-  if (!formConfig?.fields) return true;
-
-  const newErrors = {};
-  formConfig.fields.forEach(field => {
-    const value = formData[field.key];
-
-    if (field.required && (value === undefined || value === null || value === "")) {
-      newErrors[field.key] = `${field.label || field.key} is required`;
-    }
-
-    if (field.type === "email" && value && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value)) {
-      newErrors[field.key] = "Invalid email format";
-    }
-
-    if (field.minLength && value && String(value).length < field.minLength) {
-      newErrors[field.key] = `Must be at least ${field.minLength} characters`;
-    }
-
-    if (field.maxLength && value && String(value).length > field.maxLength) {
-      newErrors[field.key] = `Must be at most ${field.maxLength} characters`;
-    }
-  });
-
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
-
-// Handle save
-const handleSave = async () => {
-  if (!validate()) {
-    args.showErrorToast?.("Please fix form errors");
-    return;
-  }
-
-  const onSave = args.contextData.props?.onSave;
-  if (!onSave) {
-    args.showErrorToast?.("Save function not provided");
-    return;
-  }
-
-  setIsSubmitting(true);
-  try {
-    await onSave(formData);
-  } catch (error) {
-    console.error("Error saving:", error);
-    args.showErrorToast?.("Failed to save");
-  } finally {
-    setIsSubmitting(false);
+// Cleanup function to revert transaction
+const cleanup = () => {
+  const txnId = formTxnId();
+  if (txnId && txnId > 0) {
+    args.revertTransaction(txnId);
+    setFormTxnId(0);
   }
 };
 
 return {
-  getFormConfig,
-  getInitialData,
-  getMode,
-  formData,
-  setFormData,
-  errors,
-  setErrors,
-  isSubmitting,
-  setIsSubmitting,
-  initializeForm,
-  validate,
-  handleSave
+  formTxnId,
+  setFormTxnId,
+  cleanup
 };
 '''
         componentName: Html
@@ -220,7 +134,10 @@ return {
           '''
 return {
   as: "div",
-  onClick: (e) => e.stopPropagation()
+  onClick: (e) => e.stopPropagation(),
+  onCleanup: () => {
+    args.fns.cleanup();
+  }
 };
 '''
       }
@@ -295,14 +212,20 @@ return `._id {
         componentName: Html
         props:
           '''
-const onClose = args.contextData.props?.onClose;
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  const onClose = args.contextData.props?.onClose;
+  if (onClose) {
+    onClose();
+  }
+};
 
 return {
   as: "icon",
   icon: "carbon:close",
   width: 24,
   height: 24,
-  onClick: onClose
+  onClick: wrappedOnClose
 };
 '''
       }
@@ -313,304 +236,69 @@ return {
       P: {
         css:
           '''
-const formConfig = args.fns.getFormConfig();
-const gridColumns = formConfig?.gridColumns || 1;
-
 return `._id {
   flex: 1;
   overflow-y: auto;
   padding: ${args.theme.var.spacing.lg};
-  display: grid;
-  grid-template-columns: repeat(${gridColumns}, 1fr);
-  gap: ${args.theme.var.spacing.md};
 }`;
 '''
         displayOrder: 2
-        componentName: Html
+        componentName: FormManagement
         props:
           '''
-return {
-  as: "div",
-  onMount: () => {
-    args.fns.initializeForm();
+const formConfig = args.contextData.props?.formConfig;
+const mode = args.contextData.props?.mode || "add";
+const contentType = args.contextData.props?.contentType;
+const initialVertex = args.contextData.props?.initialVertex;
+const onSave = args.contextData.props?.onSave;
+const onClose = args.contextData.props?.onClose;
+
+// Wrap onSave to track txnId and handle cleanup
+const wrappedOnSave = async (saveData) => {
+  // Get txnId from FormManagement (will be set via onFnsReady)
+  const txnId = args.fns?.formTxnId?.();
+  if (txnId && txnId > 0) {
+    args.fns.setFormTxnId(txnId);
   }
+
+  // Call original onSave with vertex format
+  if (onSave) {
+    await onSave(saveData);
+  }
+
+  // Cleanup transaction after successful save
+  args.fns.cleanup();
+};
+
+// Wrap onClose to cleanup transaction
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  if (onClose) {
+    onClose();
+  }
+};
+
+return {
+  formConfig: formConfig,
+  initialVertex: initialVertex,
+  mode: mode,
+  contentType: contentType,
+  onSave: wrappedOnSave,
+  onClose: wrappedOnClose
 };
 '''
       }
     }
     {
       id: "8"
-      L: Attr
+      L: ComponentVariant
       P: {
-        contextName: field
-        loop: true
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const formConfig = args.fns.getFormConfig();
-const fields = formConfig?.fields || [];
-
-return {
-  data: fields
-};
-'''
+        type: function
+        key: onSave
       }
     }
     {
       id: "9"
-      L: Attr
-      P: {
-        css:
-          '''
-const formConfig = args.fns.getFormConfig();
-const field = args.contextData.field;
-const fieldSpan = field.gridSpan || 1;
-const gridColumns = formConfig?.gridColumns || 1;
-
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: ${args.theme.var.spacing.xs};
-  grid-column: span ${Math.min(fieldSpan, gridColumns)};
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const field = args.contextData.field;
-const error = args.fns.errors[field.key];
-
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "10"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.sm};
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const field = args.contextData.field;
-const label = field.label || field.key;
-
-return {
-  as: "label",
-  text: label + (field.required ? " *" : "")
-};
-'''
-      }
-    }
-    {
-      id: "11"
-      L: Attr
-      P: {
-        css:
-          '''
-const field = args.contextData.field;
-const formData = args.fns.formData;
-const value = formData[field.key] || "";
-
-return `._id {
-  width: 100%;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const field = args.contextData.field;
-const formData = args.fns.formData;
-const value = formData[field.key] || "";
-const setFormData = args.fns.setFormData;
-
-// Render appropriate input based on field type
-if (field.type === "textArea") {
-  return {
-    componentName: "TextArea",
-    value: value,
-    onChange: (e) => { setFormData({  [field.key]: e.target.value });     },
-    placeholder: field.placeholder || "",
-    required: field.required || false,
-    maxLength: field.maxLength
-  };
-}
-
-if (field.type === "select" && field.options) {
-  return {
-    componentName: "TomSelect",
-
-      value: value,
-      onChange: (newValue) => {
-        setFormData({  [field.key]: newValue });
-      },
-      options: field.options,
-      placeholder: field.placeholder || "Select...",
-      required: field.required || false
-
-  };
-}
-
-if (field.type === "checkbox") {
-  return {
-    as: "input",
-    type: "checkbox",
-    checked: value === true || value === "true",
-    onChange: (e) => {
-      setFormData({  [field.key]: e.target.checked });
-    }
-  };
-}
-
-if (field.type === "date") {
-  return {
-    as: "input",
-    type: "date",
-    value: value,
-    onChange: (e) => {
-      setFormData({  [field.key]: e.target.value });
-    },
-    required: field.required || false
-  };
-}
-
-if (field.type === "number") {
-  return {
-    componentName: "TextInput",
-      type: "number",
-      value: value,
-      onChange: (e) => {
-        setFormData({  [field.key]: e.target.value });
-      },
-      placeholder: field.placeholder || "",
-      required: field.required || false,
-      min: field.min,
-      max: field.max
-  };
-}
-
-// Default: text input
-return {
-  componentName: "TextInput",
-    type: field.type === "email" ? "email" : "text",
-    value: value,
-    onChange: (e) => {
-      setFormData({  [field.key]: e.target.value });
-    },
-    placeholder: field.placeholder || "",
-    required: field.required || false,
-    maxLength: field.maxLength,
-    minLength: field.minLength
-};
-'''
-      }
-    }
-    {
-      id: "12"
-      L: Attr
-      P: {
-        css:
-          '''
-const field = args.contextData.field;
-const error = args.fns.errors[field.key];
-
-return `._id {
-  font-size: ${args.theme.var.fontSize.xs};
-  color: ${args.theme.var.color.error};
-  min-height: 1.25rem;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-const field = args.contextData.field;
-const error = args.fns.errors[field.key];
-
-return {
-  as: "div",
-  text: error || "",
-  hide: !error
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
-  border-top: 1px solid ${args.theme.var.color.border};
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: ${args.theme.var.spacing.md};
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Button
-        props:
-          '''
-const onClose = args.contextData.props?.onClose;
-
-return {
-  variant: "secondary",
-  onClick: onClose,
-  text: "Cancel",
-  disabled: args.fns.isSubmitting()
-};
-'''
-      }
-    }
-    {
-      id: "15"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "primary",
-  onClick: args.fns.handleSave,
-  text: "Save",
-  disabled: args.fns.isSubmitting()
-};
-'''
-      }
-    }
-    {
-      id: "16"
       L: ComponentVariant
       P: {
         type: boolean
@@ -619,7 +307,31 @@ return {
       }
     }
     {
-      id: "17"
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: contentType
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClose
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "13"
       L: ComponentVariant
       P: {
         type: string
@@ -628,35 +340,11 @@ return {
       }
     }
     {
-      id: "18"
+      id: "14"
       L: ComponentVariant
       P: {
         type: object
-        key: formConfig
-      }
-    }
-    {
-      id: "19"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: initialData
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onClose
-      }
-    }
-    {
-      id: "21"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onSave
+        key: initialVertex
       }
     }
   ]
@@ -671,61 +359,61 @@ return {
       id: e2
       T: ComponentVariant
       S: "1"
-      E: "16"
+      E: "8"
     }
     {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "17"
+      E: "9"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "18"
+      E: "10"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "19"
+      E: "11"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "20"
+      E: "12"
     }
     {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "21"
+      E: "13"
     }
     {
       id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e9
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e9
+      id: e10
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e10
-      T: Attr
-      S: "3"
-      E: "7"
-    }
-    {
       id: e11
       T: Attr
       S: "3"
-      E: "13"
+      E: "7"
     }
     {
       id: e12
@@ -738,48 +426,6 @@ return {
       T: Attr
       S: "4"
       E: "6"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "7"
-      E: "8"
-    }
-    {
-      id: e15
-      T: Attr
-      S: "8"
-      E: "9"
-    }
-    {
-      id: e16
-      T: Attr
-      S: "9"
-      E: "10"
-    }
-    {
-      id: e17
-      T: Attr
-      S: "9"
-      E: "11"
-    }
-    {
-      id: e18
-      T: Attr
-      S: "9"
-      E: "12"
-    }
-    {
-      id: e19
-      T: Attr
-      S: "13"
-      E: "14"
-    }
-    {
-      id: e20
-      T: Attr
-      S: "13"
-      E: "15"
     }
   ]
 }

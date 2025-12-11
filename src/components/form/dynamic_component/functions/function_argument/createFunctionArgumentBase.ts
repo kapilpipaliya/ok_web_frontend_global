@@ -23,6 +23,9 @@ import { deleteTxnIdAndCreateNew } from "~/components/form/functions/deleteTxnId
 import { ensureData } from "~/components/form/functions/ensureData";
 import { evalExpression } from "~/lib/expression_eval";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { removeTxnIdAndCreateNew } from "~/components/form/functions/removeTxnIdAndCreateNew";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
@@ -42,6 +45,14 @@ import { debounce } from "@solid-primitives/scheduled";
 import * as focusTrap from "focus-trap";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { atom } from "~/lib/solid/atom";
+import {addNewVertex} from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import {deleteVertex} from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import {isVertex} from "~/lib/graph/mutate/core/vertex/isVertex";
+import {setGraphData} from "~/lib/graph/mutate/core/setGraphData";
+import {addNewEdge} from "~/lib/graph/mutate/core/edge/addNewEdge";
+import {deleteEdge} from "~/lib/graph/mutate/core/edge/deleteEdge";
+import {newEdge} from "~/lib/graph/mutate/core/edge/newEdge";
+import {klona} from "klona";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -279,6 +290,20 @@ export function createFunctionArgumentBase(
     debounce,
     focusTrap,
     KeepAwake,
-    atom
+    atom,
+    // Vertex utilities
+    newVertex,
+    generateNewVertexId,
+    generateNewTxnId,
+    addNewVertex,
+    deleteVertex,
+    isVertex,
+    replaceVertexProperties,
+    addNewEdge,
+    deleteEdge,
+    newEdge,
+
+    // setGraphData,
+    klona
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

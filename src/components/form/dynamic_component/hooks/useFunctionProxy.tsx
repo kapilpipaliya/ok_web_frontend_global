@@ -126,7 +126,6 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
     () => options.props.meta,
     getFunctionArgumentWithValueTemp,
     parentRenderContext,
-    options.componentName,
   );
 
   // Now create the real function proxy with actual dynamicFns

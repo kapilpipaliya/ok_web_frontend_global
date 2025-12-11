@@ -169,16 +169,16 @@ return {
       P: {
         type: string
         defValue: ""
-        key: icon
+        key: title
       }
     }
     {
       id: "8"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: noPadding
-        defValue: false
+        type: string
+        defValue: ""
+        key: icon
       }
     }
     {
@@ -230,9 +230,9 @@ return {
       id: "14"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: title
+        type: boolean
+        key: noPadding
+        defValue: false
       }
     }
   ]

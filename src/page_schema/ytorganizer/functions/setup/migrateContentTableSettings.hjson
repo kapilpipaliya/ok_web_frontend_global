@@ -82,43 +82,63 @@ const settingsConfigs = [
   resizableColumns: true,
   formConfig: {
     gridColumns: 1,
-    fields: [
+    groups: [
       {
-        key: "name",
-        label: "Name",
-        type: "text",
-        required: true,
-        maxLength: 255
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "name",
+            label: "Name",
+            type: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "description",
+            label: "Description",
+            type: "textArea",
+            maxLength: 1000,
+            colSpan: 2
+          },
+          {
+            key: "year",
+            label: "Year",
+            type: "text",
+            maxLength: 4,
+            colSpan: 1
+          },
+          {
+            key: "language",
+            label: "Language",
+            type: "text",
+            maxLength: 50,
+            colSpan: 1
+          }
+        ]
       },
       {
-        key: "description",
-        label: "Description",
-        type: "textArea",
-        maxLength: 1000
-      },
-      {
-        key: "year",
-        label: "Year",
-        type: "text",
-        maxLength: 4
-      },
-      {
-        key: "language",
-        label: "Language",
-        type: "text",
-        maxLength: 50
-      },
-      {
-        key: "preview",
-        label: "Preview Image URL",
-        type: "text",
-        maxLength: 500
-      },
-      {
-        key: "downloadUrl",
-        label: "Download URL",
-        type: "text",
-        maxLength: 500
+        key: "media",
+        title: "Media",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "preview",
+            label: "Preview Image URL",
+            type: "text",
+            maxLength: 500,
+            colSpan: 2
+          },
+          {
+            key: "downloadUrl",
+            label: "Download URL",
+            type: "text",
+            maxLength: 500,
+            colSpan: 2
+          }
+        ]
       }
     ]
   },
@@ -208,67 +228,91 @@ const settingsConfigs = [
   resizableColumns: true,
   formConfig: {
     gridColumns: 1,
-    fields: [
+    groups: [
       {
-        key: "event",
-        label: "Event",
-        type: "text",
-        maxLength: 255
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "event",
+            label: "Event",
+            type: "text",
+            maxLength: 255,
+            colSpan: 1
+          },
+          {
+            key: "title",
+            label: "Title",
+            type: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "subTitle",
+            label: "SubTitle",
+            type: "text",
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "volume",
+            label: "Volume",
+            type: "text",
+            maxLength: 50,
+            colSpan: 1
+          },
+          {
+            key: "location",
+            label: "Location",
+            type: "text",
+            maxLength: 255,
+            colSpan: 1
+          },
+          {
+            key: "year",
+            label: "Year",
+            type: "text",
+            maxLength: 4,
+            colSpan: 1
+          },
+          {
+            key: "language",
+            label: "Language",
+            type: "text",
+            maxLength: 50,
+            colSpan: 1
+          }
+        ]
       },
       {
-        key: "title",
-        label: "Title",
-        type: "text",
-        required: true,
-        maxLength: 255
-      },
-      {
-        key: "subTitle",
-        label: "SubTitle",
-        type: "text",
-        maxLength: 255
-      },
-      {
-        key: "volume",
-        label: "Volume",
-        type: "text",
-        maxLength: 50
-      },
-      {
-        key: "location",
-        label: "Location",
-        type: "text",
-        maxLength: 255
-      },
-      {
-        key: "year",
-        label: "Year",
-        type: "text",
-        maxLength: 4
-      },
-      {
-        key: "language",
-        label: "Language",
-        type: "text",
-        maxLength: 50
-      },
-      {
-        key: "duration",
-        label: "Duration (seconds)",
-        type: "number",
-        min: 0
-      },
-      {
-        key: "audioDownloadUrl",
-        label: "Audio Download URL",
-        type: "text",
-        maxLength: 500
-      },
-      {
-        key: "youtubeVideoId",
-        label: "YouTube Video ID",
-        type: "text",
-        maxLength: 50
+        key: "media",
+        title: "Media",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "duration",
+            label: "Duration (seconds)",
+            type: "number",
+            min: 0,
+            colSpan: 1
+          },
+          {
+            key: "audioDownloadUrl",
+            label: "Audio Download URL",
+            type: "text",
+            maxLength: 500,
+            colSpan: 2
+          },
+          {
+            key: "youtubeVideoId",
+            label: "YouTube Video ID",
+            type: "text",
+            maxLength: 50,
+            colSpan: 2
+          }
+        ]
       }
     ]
   },
@@ -280,17 +324,17 @@ const settingsConfigs = [
 // Helper function to process a single setting
 async function processSetting(setting) {
   const { key, contentType, icon, name, config } = setting;
-  
+
   console.log(`\n${icon} Processing ${name} settings...`);
-  
+
   // Check if setting exists
   const checkResult = await args.session.run(
     `MATCH (s:Setting {key: $key}) RETURN s`,
     { key }
   );
-  
+
   const exists = checkResult.records.length > 0;
-  
+
   if (!dryRun) {
     if (exists) {
       // Update existing
@@ -345,7 +389,7 @@ const stats = {
 for (let i = 0; i < settingsConfigs.length; i++) {
   const setting = settingsConfigs[i];
   const result = await processSetting(setting);
-  
+
   // Update stats based on setting type
   if (setting.contentType === 'book') {
     stats.bookSettingsCreated += result.created;
@@ -382,4 +426,3 @@ return {
   ]
   edges: []
 }
-

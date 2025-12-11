@@ -151,10 +151,7 @@ const handleSave = async () => {
       result = await args.fns.executeYTOFunction(functionName, params);
     }
 
-    if (result?.error) {
-      const errorMsg = result.error;
-      setFormError(errorMsg);
-    } else if (result?.result?.success) {
+    if (result?.result?.success) {
       const action = editMode ? "updated" : "added";
       const itemTypeName = actualType === "videos" ? "Video" : ((editMode ? actualType : contentType) === "playlists" ? "Playlist" : "Channel");
       args.showSuccessToast(result.result.message || `${itemTypeName} ${action} successfully`);
@@ -172,7 +169,7 @@ const handleSave = async () => {
 
       onClose();
     } else {
-      const errorMsg = result?.result?.message || result?.result?.error || `Failed to ${editMode ? "update" : "add"} item`;
+      const errorMsg = result?.result?.message || result?.error || `Failed to ${editMode ? "update" : "add"} item`;
       setFormError(errorMsg);
     }
   } catch (error) {

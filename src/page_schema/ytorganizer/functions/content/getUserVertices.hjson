@@ -1,0 +1,90 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user's vertices of a specific label with optional search and relationship filtering
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: []
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { label, userUuid, search = "", limit = 100, relationshipType } = args.contextData;
+
+if (!label) {
+  return {
+    success: false,
+    message: "Label is required",
+    data: []
+  };
+}
+
+// Use provided userUuid or current user's uuid
+const targetUserUuid = userUuid || user.P.uuid;
+
+// Build query
+let query;
+let params = { userUuid: targetUserUuid, limit };
+
+if (relationshipType) {
+  // Query with specific relationship type
+  query = `
+    MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(v:${label})
+  `;
+} else {
+  // Auto-detect relationship: User + Label (e.g., UserBook, UserAudioVideo)
+  const autoRelationship = `User${label}`;
+  query = `
+    MATCH (u:User {uuid: $userUuid})-[:${autoRelationship}]->(v:${label})
+  `;
+}
+
+// Add search filter if provided
+if (search && search.trim()) {
+  const searchTerm = search.trim().toLowerCase();
+  query += `
+    WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.title, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.description, '')) CONTAINS $searchTerm
+  `;
+  params.searchTerm = searchTerm;
+}
+
+query += `
+  RETURN v
+  ORDER BY COALESCE(v.name, v.title, '') ASC
+  LIMIT $limit
+`;
+
+const result = await args.session.run(query, params);
+
+// Convert to vertex format
+const vertices = result.records.map(record => {
+  const node = record.get('v');
+  return args.convertNodeToJson(node);
+});
+
+return {
+  success: true,
+  data: vertices,
+  message: `Found ${vertices.length} ${label} vertices`
+};
+'''
+        key: getUserVertices
+      }
+    }
+  ]
+  edges: []
+}

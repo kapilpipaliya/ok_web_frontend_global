@@ -37,7 +37,6 @@ export async function fetchComponentDataFromGraph(graphData?:  ServerResult): Pr
       if (
         (vertex.L.includes("Page") || vertex.L.includes("Component"))
       ) {
-        debugger
         const dyn = vertex.P.dynamicComponent;
         if (Array.isArray(dyn)) {
           for (const name of dyn) {
