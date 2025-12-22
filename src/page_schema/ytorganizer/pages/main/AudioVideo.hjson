@@ -11,8 +11,8 @@ return {
   enabled: true
 };
 '''
-        url: /audiovideo
         key: AudioVideo
+        url: /audiovideo
         props:
           '''
 return {

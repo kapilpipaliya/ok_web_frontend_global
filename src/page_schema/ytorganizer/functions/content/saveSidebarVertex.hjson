@@ -1,0 +1,225 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Generic function to create or update a vertex with parent relationship. Works with any sidebar configuration. Returns vertex in Vertex format using convertNodeToJSON.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: null
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { 
+  vertexId, 
+  name, 
+  key, 
+  parentId, 
+  parentVertexLabel, 
+  toParentEdgeType, 
+  rootKeys = {},
+  properties = {}
+} = args.contextData;
+
+if (!name || !name.trim()) {
+  return {
+    success: false,
+    message: "Name is required",
+    data: null
+  };
+}
+
+if (!parentVertexLabel || !toParentEdgeType) {
+  return {
+    success: false,
+    message: "parentVertexLabel and toParentEdgeType are required",
+    data: null
+  };
+}
+
+// Determine relationship type for user filtering
+const userRelationshipType = `User${parentVertexLabel}`;
+const userUuid = user.P.uuid;
+
+const isUpdate = Boolean(vertexId);
+const vertexName = name.trim();
+const vertexKey = key || vertexName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+
+// Get root key from config
+const rootKey = rootKeys.key || 'root';
+
+// Prevent deletion/update of root vertex
+if (isUpdate) {
+  const existingCheck = await args.session.run(
+    `MATCH (v:${parentVertexLabel})
+     WHERE elementId(v) = $vertexId
+     RETURN v.key as key`,
+    { vertexId }
+  );
+
+  if (existingCheck.records.length > 0) {
+    const existingKey = existingCheck.records[0].get('key');
+    if (existingKey === rootKey) {
+      return {
+        success: false,
+        message: "Root vertex cannot be modified or deleted",
+        data: null
+      };
+    }
+  }
+}
+
+// Prevent creating vertex with root key
+if (!isUpdate && vertexKey === rootKey) {
+  return {
+    success: false,
+    message: `Cannot create vertex with key '${rootKey}'. This key is reserved.`,
+    data: null
+  };
+}
+
+// Check for duplicate names for the same user
+const duplicateCheckQuery = `
+  MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+  WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
+  ${isUpdate ? 'AND elementId(v) <> $vertexId' : ''}
+  RETURN v
+`;
+
+const duplicateResult = await args.session.run(duplicateCheckQuery, {
+  userUuid,
+  name: vertexName,
+  ...(isUpdate && { vertexId })
+});
+
+if (duplicateResult.records.length > 0) {
+  return {
+    success: false,
+    message: "A vertex with this name already exists",
+    data: null
+  };
+}
+
+let vertexNode;
+let vertexElementId;
+
+// Merge properties with name and key
+const vertexProperties = {
+  name: vertexName,
+  key: vertexKey,
+  ...properties
+};
+
+if (isUpdate) {
+  // Update existing vertex
+  const setClause = Object.keys(vertexProperties).map((prop, index) => {
+    return `v.${prop} = $prop${index}`;
+  }).join(', ');
+
+  const updateQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+    WHERE elementId(v) = $vertexId
+    SET ${setClause},
+        v.updatedAt = datetime()
+    RETURN v, elementId(v) as elementId
+  `;
+
+  const updateParams = {
+    userUuid,
+    vertexId,
+    ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+  };
+
+  const updateResult = await args.session.run(updateQuery, updateParams);
+
+  if (updateResult.records.length === 0) {
+    return {
+      success: false,
+      message: "Vertex not found or you don't have permission to update it",
+      data: null
+    };
+  }
+
+  vertexNode = updateResult.records[0].get('v');
+  vertexElementId = updateResult.records[0].get('elementId');
+
+  // Handle parent relationship update if parentId is provided
+  if (parentId) {
+    // Remove existing parent relationships
+    await args.session.run(
+      `MATCH (v:${parentVertexLabel})-[r:${toParentEdgeType}]->()
+       WHERE elementId(v) = $vertexId
+       DELETE r`,
+      { vertexId: vertexElementId }
+    );
+
+    // Create new parent relationship
+    await args.session.run(
+      `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+       WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+       MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
+       CREATE (p)-[:${toParentEdgeType}]->(v)`,
+      { vertexId: vertexElementId, parentId, userUuid }
+    );
+  }
+} else {
+  // Create new vertex
+  const propertyKeys = Object.keys(vertexProperties);
+  const propertyAssignments = propertyKeys.map((key, index) => `v.${key} = $prop${index}`).join(', ');
+
+  const createQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    CREATE (u)-[:${userRelationshipType}]->(v:${parentVertexLabel})
+    SET ${propertyAssignments},
+        v.createdAt = datetime(),
+        v.updatedAt = datetime()
+    RETURN v, elementId(v) as elementId
+  `;
+
+  const createParams = {
+    userUuid,
+    ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+  };
+
+  const createResult = await args.session.run(createQuery, createParams);
+
+  vertexNode = createResult.records[0].get('v');
+  vertexElementId = createResult.records[0].get('elementId');
+
+  // Create parent relationship if parentId is provided
+  if (parentId) {
+    await args.session.run(
+      `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+       WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+       MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
+       CREATE (p)-[:${toParentEdgeType}]->(v)`,
+      { vertexId: vertexElementId, parentId, userUuid }
+    );
+  }
+}
+
+const vertex = args.convertNodeToJson(vertexNode);
+
+return {
+  success: true,
+  message: isUpdate ? "Vertex updated successfully" : "Vertex created successfully",
+  data: vertex
+};
+'''
+        key: saveSidebarVertex
+      }
+    }
+  ]
+  edges: []
+}

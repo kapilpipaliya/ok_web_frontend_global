@@ -774,8 +774,8 @@ return {
       id: "24"
       L: ComponentVariant
       P: {
-        type: object
-        key: playlist
+        type: function
+        key: isOpen
       }
     }
     {
@@ -783,15 +783,16 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onSuccess
+        key: onClose
       }
     }
     {
       id: "26"
       L: ComponentVariant
       P: {
-        type: function
-        key: isOpen
+        type: string
+        key: videoUrl
+        defValue: ""
       }
     }
     {
@@ -799,16 +800,15 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onClose
+        key: onSuccess
       }
     }
     {
       id: "28"
       L: ComponentVariant
       P: {
-        type: string
-        key: videoUrl
-        defValue: ""
+        type: object
+        key: playlist
       }
     }
   ]

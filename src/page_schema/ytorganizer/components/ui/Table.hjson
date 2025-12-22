@@ -589,6 +589,15 @@ const createResizeHandler = (columnKey) => {
     document.addEventListener('touchend', handleMouseUp);
   };
 };
+// Watch for sidebar selection changes and refresh table
+const selectedSidebarItem = args.fns.selectedSidebarItem;
+args.createEffect(() => {
+  const item = selectedSidebarItem?.();
+  // When sidebar selection changes, refresh table data
+  if (item !== undefined) {
+    handleSearch();
+  }
+});
 
 return {
   getColumns,
@@ -1073,7 +1082,7 @@ return [`._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
   grid-template-rows: auto auto 1fr;
-  justify-content:center;
+
   user-select: ${isResizing ? "none" : "auto"};
 }`];
 '''
@@ -2457,29 +2466,22 @@ return {
       id: "64"
       L: ComponentVariant
       P: {
-        type: function
-        key: saveSettingsFunction
+        type: boolean
+        key: showRowNumber
+        defValue: false
       }
     }
     {
       id: "65"
       L: ComponentVariant
       P: {
-        type: function
-        key: settingsFunction
-      }
-    }
-    {
-      id: "66"
-      L: ComponentVariant
-      P: {
         type: array
-        key: additionalFilters
+        key: hideColumns
         defValue: []
       }
     }
     {
-      id: "67"
+      id: "66"
       L: ComponentVariant
       P: {
         type: object
@@ -2487,34 +2489,15 @@ return {
       }
     }
     {
+      id: "67"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: contentType
+      }
+    }
+    {
       id: "68"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: batchActions
-        defValue: []
-      }
-    }
-    {
-      id: "69"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: showSelection
-        defValue: true
-      }
-    }
-    {
-      id: "70"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: customActions
-        defValue: []
-      }
-    }
-    {
-      id: "71"
       L: ComponentVariant
       P: {
         type: boolean
@@ -2523,15 +2506,7 @@ return {
       }
     }
     {
-      id: "72"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: exportFunction
-      }
-    }
-    {
-      id: "73"
+      id: "69"
       L: ComponentVariant
       P: {
         type: number
@@ -2540,11 +2515,45 @@ return {
       }
     }
     {
+      id: "70"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: settingsFunction
+      }
+    }
+    {
+      id: "71"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: importFunction
+      }
+    }
+    {
+      id: "72"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showSelection
+        defValue: true
+      }
+    }
+    {
+      id: "73"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: additionalFilters
+        defValue: []
+      }
+    }
+    {
       id: "74"
       L: ComponentVariant
       P: {
         type: function
-        key: dataFunction
+        key: exportFunction
       }
     }
     {
@@ -2561,7 +2570,7 @@ return {
       L: ComponentVariant
       P: {
         type: array
-        key: columns
+        key: batchActions
         defValue: []
       }
     }
@@ -2569,12 +2578,21 @@ return {
       id: "77"
       L: ComponentVariant
       P: {
+        type: array
+        key: columns
+        defValue: []
+      }
+    }
+    {
+      id: "78"
+      L: ComponentVariant
+      P: {
         type: function
         key: configFunction
       }
     }
     {
-      id: "78"
+      id: "79"
       L: ComponentVariant
       P: {
         type: boolean
@@ -2583,32 +2601,32 @@ return {
       }
     }
     {
-      id: "79"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: showRowNumber
-        defValue: false
-      }
-    }
-    {
       id: "80"
       L: ComponentVariant
       P: {
         type: function
-        key: importFunction
+        key: saveSettingsFunction
       }
     }
     {
       id: "81"
       L: ComponentVariant
       P: {
-        type: string
-        key: contentType
+        type: boolean
+        key: showActions
+        defValue: true
       }
     }
     {
       id: "82"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: dataFunction
+      }
+    }
+    {
+      id: "83"
       L: ComponentVariant
       P: {
         type: string
@@ -2617,21 +2635,12 @@ return {
       }
     }
     {
-      id: "83"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: hideColumns
-        defValue: []
-      }
-    }
-    {
       id: "84"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: showActions
-        defValue: true
+        type: array
+        key: customActions
+        defValue: []
       }
     }
   ]

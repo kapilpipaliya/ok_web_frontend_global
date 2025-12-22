@@ -142,7 +142,130 @@ const settingsConfigs = [
       }
     ]
   },
-  uniqueKeys: []
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Category",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: {},
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "key",
+              label: "Key",
+              type: "text",
+              maxLength: 100,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: 'category_settings_default',
+    contentType: 'category',
+    icon: '📁',
+    name: 'Category',
+    config: `return {
+  title: "Categories",
+  columns: [
+    {
+      key: "name",
+      label: "Name",
+      type: "text",
+      width: "200px",
+      required: true
+    },
+    {
+      key: "key",
+      label: "Key",
+      type: "text",
+      width: "150px"
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: true,
+  showActions: true,
+  resizableColumns: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "name",
+            label: "Name",
+            type: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "key",
+            label: "Key",
+            type: "text",
+            maxLength: 100,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Category",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: {},
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "key",
+              label: "Key",
+              type: "text",
+              maxLength: 100,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  }
 };`
   },
   {
@@ -316,7 +439,40 @@ const settingsConfigs = [
       }
     ]
   },
-  uniqueKeys: []
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Category",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: {},
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "key",
+              label: "Key",
+              type: "text",
+              maxLength: 100,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  }
 };`
   }
 ];
@@ -383,7 +539,9 @@ const stats = {
   bookSettingsCreated: 0,
   bookSettingsUpdated: 0,
   audioVideoSettingsCreated: 0,
-  audioVideoSettingsUpdated: 0
+  audioVideoSettingsUpdated: 0,
+  categorySettingsCreated: 0,
+  categorySettingsUpdated: 0
 };
 
 for (let i = 0; i < settingsConfigs.length; i++) {
@@ -397,6 +555,9 @@ for (let i = 0; i < settingsConfigs.length; i++) {
   } else if (setting.contentType === 'audioVideo') {
     stats.audioVideoSettingsCreated += result.created;
     stats.audioVideoSettingsUpdated += result.updated;
+  } else if (setting.contentType === 'category') {
+    stats.categorySettingsCreated += result.created;
+    stats.categorySettingsUpdated += result.updated;
   }
 }
 
@@ -407,6 +568,7 @@ console.log('\n📊 Migration Summary:');
 console.log('==========================================');
 console.log(`Book settings - Created: ${stats.bookSettingsCreated}, Updated: ${stats.bookSettingsUpdated}`);
 console.log(`AudioVideo settings - Created: ${stats.audioVideoSettingsCreated}, Updated: ${stats.audioVideoSettingsUpdated}`);
+console.log(`Category settings - Created: ${stats.categorySettingsCreated}, Updated: ${stats.categorySettingsUpdated}`);
 console.log('==========================================');
 
 return {

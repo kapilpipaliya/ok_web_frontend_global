@@ -11,8 +11,8 @@ return {
   enabled: true
 };
 '''
-        url: /yto/admin/users
         key: AdminUsers
+        url: /yto/admin/users
         props:
           '''
 return {

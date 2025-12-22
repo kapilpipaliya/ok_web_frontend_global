@@ -461,27 +461,26 @@ return {
       id: "12"
       L: ComponentVariant
       P: {
-        type: string
-        key: title
-        defValue: Confirm Action
+        type: function
+        key: onConfirm
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: isOpen
-        defValue: false
+        type: string
+        key: variant
+        defValue: danger
       }
     }
     {
       id: "14"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        key: variant
-        defValue: danger
+        description: Red confirmation button for destructive actions
+        value: danger
+        key: danger
       }
     }
     {
@@ -504,15 +503,32 @@ return {
     }
     {
       id: "17"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Red confirmation button for destructive actions
-        value: danger
-        key: danger
+        type: function
+        key: onCancel
       }
     }
     {
       id: "18"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: isOpen
+        defValue: false
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loading
+        defValue: false
+      }
+    }
+    {
+      id: "20"
       L: ComponentVariant
       P: {
         type: string
@@ -521,28 +537,12 @@ return {
       }
     }
     {
-      id: "19"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onConfirm
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onCancel
-      }
-    }
-    {
       id: "21"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: loading
-        defValue: false
+        type: string
+        key: confirmText
+        defValue: Confirm
       }
     }
     {
@@ -559,8 +559,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: confirmText
-        defValue: Confirm
+        key: title
+        defValue: Confirm Action
       }
     }
   ]
@@ -587,7 +587,7 @@ return {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "14"
+      E: "17"
     }
     {
       id: e5
@@ -682,20 +682,20 @@ return {
     {
       id: e20
       T: ComponentVariantOption
-      S: "14"
-      E: "15"
+      S: "13"
+      E: "14"
     }
     {
       id: e21
       T: ComponentVariantOption
-      S: "14"
-      E: "16"
+      S: "13"
+      E: "15"
     }
     {
       id: e22
       T: ComponentVariantOption
-      S: "14"
-      E: "17"
+      S: "13"
+      E: "16"
     }
   ]
 }

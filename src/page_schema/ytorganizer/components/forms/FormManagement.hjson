@@ -922,9 +922,9 @@ return {
       id: "17"
       L: ComponentVariant
       P: {
-        displayOrder: 2
-        type: object
-        key: initialVertex
+        displayOrder: 5
+        type: function
+        key: onSave
       }
     }
     {
@@ -940,27 +940,27 @@ return {
       id: "19"
       L: ComponentVariant
       P: {
-        displayOrder: 6
-        type: function
-        key: onClose
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariant
-      P: {
         displayOrder: 4
         type: string
         key: contentType
       }
     }
     {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        displayOrder: 2
+        type: object
+        key: initialVertex
+      }
+    }
+    {
       id: "21"
       L: ComponentVariant
       P: {
-        displayOrder: 5
+        displayOrder: 6
         type: function
-        key: onSave
+        key: onClose
       }
     }
     {

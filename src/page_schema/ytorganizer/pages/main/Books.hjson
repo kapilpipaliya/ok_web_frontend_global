@@ -11,8 +11,8 @@ return {
   enabled: true
 };
 '''
-        url: /books
         key: Books
+        url: /books
         props:
           '''
 return {

@@ -1,0 +1,536 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SidebarAddChildModal
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: flex-end;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const isOpen = args.contextData.props?.isOpen || false;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.contextData.props?.onClose();
+    }
+  },
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    animation: slideUpMobile 0.3s ease;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+// Track form txnId for cleanup
+const [formTxnId, setFormTxnId] = args.createSignal(0);
+
+// Cleanup function to revert transaction
+const cleanup = () => {
+  const txnId = formTxnId();
+  if (txnId && txnId > 0) {
+    args.revertTransaction(txnId);
+    setFormTxnId(0);
+  }
+};
+
+return {
+  formTxnId,
+  setFormTxnId,
+  cleanup
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation(),
+  onCleanup: () => {
+    args.fns.cleanup();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const mode = args.contextData.props?.mode || "add";
+const title = mode === "add" ? "Add New Child" : "Edit Item";
+
+return {
+  as: "div",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  color: ${args.theme.var.color.muted};
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  const onClose = args.contextData.props?.onClose;
+  if (onClose) {
+    onClose();
+  }
+};
+
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24,
+  onClick: wrappedOnClose
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  padding: ${args.theme.var.spacing.lg};
+}`;
+'''
+        displayOrder: 2
+        componentName: FormManagement
+        props:
+          '''
+const formConfig = args.contextData.props?.formConfig;
+const parentId = args.contextData.props?.parentId;
+const vertexId = args.contextData.props?.vertexId;
+const initialVertex = args.contextData.props?.initialVertex;
+const mode = args.contextData.props?.mode || "add";
+const parentVertexLabel = args.contextData.props?.parentVertexLabel;
+const toParentEdgeType = args.contextData.props?.toParentEdgeType;
+const rootKeys = args.contextData.props?.rootKeys || {};
+const onSave = args.contextData.props?.onSave;
+const onClose = args.contextData.props?.onClose;
+
+// Wrap onSave to track txnId, handle cleanup, and call saveSidebarVertex
+const wrappedOnSave = async (saveData) => {
+  // Get txnId from FormManagement (will be set via onFnsReady)
+  const txnId = args.fns?.formTxnId?.();
+  if (txnId && txnId > 0) {
+    args.fns.setFormTxnId(txnId);
+  }
+
+  // Extract vertex and properties from saveData
+  const vertex = saveData.vertex;
+  if (!vertex) {
+    args.showErrorToast?.("No vertex data to save");
+    return;
+  }
+
+  // Get name and key from vertex properties
+  const name = vertex.P?.name || vertex.P?.title || "";
+  const key = vertex.P?.key || "";
+
+  if (!name || !name.trim()) {
+    args.showErrorToast?.("Name is required");
+    return;
+  }
+
+  // Call saveSidebarVertex function
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "saveSidebarVertex",
+      contextData: {
+        vertexId: vertexId || null,
+        name: name.trim(),
+        key: key || name.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+        parentId: parentId,
+        parentVertexLabel: parentVertexLabel,
+        toParentEdgeType: toParentEdgeType,
+        rootKeys: rootKeys,
+        properties: vertex.P
+      }
+    });
+
+    if (result?.result?.success) {
+      args.showSuccessToast?.(result.result.message || "Vertex created successfully");
+      // Cleanup transaction after successful save
+      args.fns.cleanup();
+      // Call original onSave if provided
+      if (onSave) {
+        await onSave(result.result.data);
+      }
+      // Close modal
+      if (onClose) {
+        onClose();
+      }
+    } else {
+      args.showErrorToast?.(result?.result?.message || result?.error || "Failed to create vertex");
+    }
+  } catch (error) {
+    console.error("Error saving vertex:", error);
+    args.showErrorToast?.("Failed to create vertex");
+  }
+};
+
+// Wrap onClose to cleanup transaction
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  if (onClose) {
+    onClose();
+  }
+};
+
+return {
+  formConfig: formConfig,
+  initialVertex: initialVertex || null,
+  mode: mode,
+  contentType: null,
+  onSave: wrappedOnSave,
+  onClose: wrappedOnClose
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: initialVertex
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: parentVertexLabel
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSave
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: isOpen
+        defValue: false
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: toParentEdgeType
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClose
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: parentId
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: rootKeys
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: add
+        key: mode
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: vertexId
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "18"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+  ]
+}
+

@@ -293,21 +293,13 @@ return {
       id: "8"
       L: ComponentVariant
       P: {
-        type: function
-        key: onSave
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
         type: boolean
         key: isOpen
         defValue: false
       }
     }
     {
-      id: "10"
+      id: "9"
       L: ComponentVariant
       P: {
         type: string
@@ -315,23 +307,15 @@ return {
       }
     }
     {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onClose
-      }
-    }
-    {
-      id: "12"
+      id: "10"
       L: ComponentVariant
       P: {
         type: object
-        key: formConfig
+        key: initialVertex
       }
     }
     {
-      id: "13"
+      id: "11"
       L: ComponentVariant
       P: {
         type: string
@@ -340,11 +324,27 @@ return {
       }
     }
     {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSave
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClose
+      }
+    }
+    {
       id: "14"
       L: ComponentVariant
       P: {
         type: object
-        key: initialVertex
+        key: formConfig
       }
     }
   ]

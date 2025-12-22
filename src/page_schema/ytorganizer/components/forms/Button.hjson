@@ -122,18 +122,17 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: string
-        key: text
-        defValue: Button
+        type: function
+        key: onClick
       }
     }
     {
       id: "4"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: disabled
-        defValue: false
+        type: string
+        key: text
+        defValue: Button
       }
     }
     {
@@ -149,27 +148,27 @@ return {
       id: "6"
       L: ComponentVariant
       P: {
-        type: string
-        key: type
-        defValue: button
+        type: boolean
+        key: fullWidth
+        defValue: false
       }
     }
     {
       id: "7"
       L: ComponentVariant
       P: {
-        type: string
-        key: variant
-        defValue: primary
+        type: boolean
+        key: disabled
+        defValue: false
       }
     }
     {
       id: "8"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Primary button with brand color
-        value: primary
-        key: primary
+        type: string
+        key: variant
+        defValue: primary
       }
     }
     {
@@ -185,13 +184,22 @@ return {
       id: "10"
       L: ComponentVariantOption
       P: {
+        description: Primary button with brand color
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
         description: Secondary button with border
         value: secondary
         key: secondary
       }
     }
     {
-      id: "11"
+      id: "12"
       L: ComponentVariantOption
       P: {
         description: Danger button with red color
@@ -200,20 +208,12 @@ return {
       }
     }
     {
-      id: "12"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: fullWidth
-        defValue: false
-      }
-    }
-    {
       id: "13"
       L: ComponentVariant
       P: {
-        type: function
-        key: onClick
+        type: string
+        key: type
+        defValue: button
       }
     }
   ]
@@ -258,7 +258,7 @@ return {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "12"
+      E: "8"
     }
     {
       id: e8
@@ -269,26 +269,26 @@ return {
     {
       id: e9
       T: ComponentVariantOption
-      S: "7"
-      E: "8"
+      S: "8"
+      E: "9"
     }
     {
       id: e10
       T: ComponentVariantOption
-      S: "7"
-      E: "9"
+      S: "8"
+      E: "10"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "7"
-      E: "10"
+      S: "8"
+      E: "11"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "7"
-      E: "11"
+      S: "8"
+      E: "12"
     }
   ]
 }

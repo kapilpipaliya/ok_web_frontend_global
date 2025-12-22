@@ -1,0 +1,695 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''
+// Get props from context
+const getItem = () => args.contextData.props?.item;
+const getExpandedKeys = () => args.contextData.props?.expandedKeys || [];
+const getSelectedItem = () => args.contextData.props?.selectedItem;
+const getOnToggleExpand = () => args.contextData.props?.onToggleExpand;
+const getOnItemSelect = () => args.contextData.props?.onItemSelect;
+const getFetchChildren = () => args.contextData.props?.fetchChildren;
+const getParentVertexLabel = () => args.contextData.props?.parentVertexLabel;
+const getToParentEdgeType = () => args.contextData.props?.toParentEdgeType;
+
+// State
+const [children, setChildren] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(false);
+const [hasCheckedChildren, setHasCheckedChildren] = args.createSignal(false);
+
+// Check if item is expanded - make it reactive by accessing the signal
+const isExpanded = () => {
+  const item = getItem();
+  if (!item) return false;
+  // Access expandedKeys as a signal to make it reactive
+  const expandedKeys = getExpandedKeys();
+  return Array.isArray(expandedKeys) && expandedKeys.includes(item.id);
+};
+
+// Check if item is selected
+const isSelected = () => {
+  const item = getItem();
+  const selectedItem = getSelectedItem();
+  if (!item || !selectedItem) return false;
+  return item.id === selectedItem.id;
+};
+
+// Fetch children on mount if expanded
+const fetchChildrenIfNeeded = async () => {
+  const item = getItem();
+  if (!item) return;
+
+  const expanded = isExpanded();
+  if (expanded && children().length === 0 && !hasCheckedChildren()) {
+    setLoading(true);
+    try {
+      const fetchedChildren = await getFetchChildren()(item.id);
+      setChildren(fetchedChildren || []);
+      setHasCheckedChildren(true);
+    } catch (error) {
+      console.error("Error fetching children:", error);
+      setHasCheckedChildren(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+};
+
+// Handle expand toggle
+const handleToggleExpand = async () => {
+  const item = getItem();
+  if (!item) return;
+
+  const onToggleExpand = getOnToggleExpand();
+  if (onToggleExpand) {
+    const wasExpanded = isExpanded();
+    await onToggleExpand(item.id);
+    // Fetch children if expanding and we don't have them yet
+    if (!wasExpanded && (children().length === 0 || !hasCheckedChildren())) {
+      await fetchChildrenIfNeeded();
+    }
+  }
+};
+
+// Handle item click
+const handleItemClick = () => {
+  const item = getItem();
+  const onItemSelect = getOnItemSelect();
+  if (item && onItemSelect) {
+    onItemSelect(item);
+  }
+};
+
+// Get item display name
+const getItemName = () => {
+  const item = getItem();
+  if (!item) return "";
+  return item.P?.key || item.P?.name || item.P?.title || "No name";
+};
+
+// Get item icon
+const getItemIcon = () => {
+  const item = getItem();
+  if (!item) return "ph:circle";
+  return item.P?.icon || "ph:circle";
+};
+
+// Check if item has children
+// Show expand button if:
+// 1. We have children loaded, OR
+// 2. We haven't checked yet (allows expand button on initial load)
+const hasChildren = () => {
+  const childrenList = children();
+  // If we have children loaded, return true
+  if (childrenList.length > 0) {
+    return true;
+  }
+  // If we haven't checked yet, assume it might have children (show expand button)
+  // After checking, if no children, this will return false
+  if (!hasCheckedChildren()) {
+    return true;
+  }
+  // We've checked and found no children
+  return false;
+};
+
+// Modal state
+const [isAddModalOpen, setIsAddModalOpen] = args.createSignal(false);
+const [isEditModalOpen, setIsEditModalOpen] = args.createSignal(false);
+
+// Get formConfig from props
+const getFormConfig = () => args.contextData.props?.formConfig;
+
+// Handle opening add modal
+const handleOpenAddModal = (e) => {
+  e.stopPropagation();
+  setIsAddModalOpen(true);
+};
+
+// Handle closing add modal
+const handleCloseAddModal = () => {
+  setIsAddModalOpen(false);
+};
+
+// Handle opening edit modal
+const handleOpenEditModal = (e) => {
+  e.stopPropagation();
+  setIsEditModalOpen(true);
+};
+
+// Handle closing edit modal
+const handleCloseEditModal = () => {
+  setIsEditModalOpen(false);
+};
+
+// Handle save callback - refresh children after adding
+const handleAddChildSave = async (newVertex) => {
+  const item = getItem();
+  if (!item) return;
+
+  // Clear cache for parent to force refresh
+  const fetchChildrenFn = getFetchChildren();
+  if (fetchChildrenFn) {
+    // Refresh children - force refresh to get latest data
+    // Note: fetchChildren function signature: (parentId, forceRefresh = false)
+    const refreshedChildren = await fetchChildrenFn(item.id, true);
+    setChildren(refreshedChildren || []);
+    setHasCheckedChildren(true);
+    // Expand parent if not already expanded
+    const onToggleExpand = getOnToggleExpand();
+    if (onToggleExpand) {
+      const expanded = getExpandedKeys();
+      if (!expanded.includes(item.id)) {
+        await onToggleExpand(item.id);
+      }
+    }
+  }
+
+  handleCloseAddModal();
+};
+
+// Handle save callback - refresh after editing
+const handleEditSave = async (updatedVertex) => {
+  const item = getItem();
+  if (!item) return;
+
+  handleCloseEditModal();
+
+  // Refresh the entire tree by clearing cache and re-fetching
+  // This ensures the updated item data is reflected
+  // The parent Sidebar component will handle the refresh
+};
+
+return {
+  getItem,
+  getExpandedKeys,
+  getSelectedItem,
+  getOnToggleExpand,
+  getOnItemSelect,
+  getFetchChildren,
+  isExpanded,
+  isSelected,
+  children,
+  setChildren,
+  loading,
+  setLoading,
+  hasCheckedChildren,
+  setHasCheckedChildren,
+  fetchChildrenIfNeeded,
+  handleToggleExpand,
+  handleItemClick,
+  getItemName,
+  getItemIcon,
+  hasChildren,
+  isAddModalOpen,
+  setIsAddModalOpen,
+  handleOpenAddModal,
+  handleCloseAddModal,
+  handleAddChildSave,
+  isEditModalOpen,
+  setIsEditModalOpen,
+  handleOpenEditModal,
+  handleCloseEditModal,
+  handleEditSave,
+  getFormConfig
+};
+'''
+        key: SidebarTreeItem
+        props: ""
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+const isHovered = args.fns.isSelected();
+return `._id {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: tree_item_container
+        props:
+          '''
+// Watch for expansion changes and fetch children when expanded
+// Access expandedKeys prop directly to make it reactive
+args.createEffect(() => {
+  const item = args.fns.getItem();
+  if (!item) return;
+
+  // Access expandedKeys prop to make effect reactive to prop changes
+  const expandedKeys = args.contextData.props?.expandedKeys || [];
+  const isExpanded = Array.isArray(expandedKeys) && expandedKeys.includes(item.id);
+
+  const children = args.fns.children();
+  const hasChecked = args.fns.hasCheckedChildren();
+
+  // If expanded and we haven't fetched children yet, fetch them
+  if (isExpanded && children.length === 0 && !hasChecked) {
+    args.fns.fetchChildrenIfNeeded();
+  }
+});
+
+return {
+  as: "div",
+  class: args.contextData.props.class,
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+const isHovered = args.fns.isSelected();
+return `._id {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 0.375rem;
+  font-size: 14px;
+  font-weight: ${args.fns.hasChildren() ? "bold" : "normal"};
+  width: 100%;
+  border-radius: ${args.fns.hasChildren() ? "5px" : "0 5px 5px 0"};
+  ${isHovered ? `background-color: ${args.theme.var.color.background_light_150};` : ""}
+  padding: 2px 0;
+  transition: all 0.15s ease-in-out;
+  ${args.fns.hasChildren() ? "" : "border-left: 1px dashed ${args.theme.var.color.border}; padding-left: 10px;"}
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: tree_item_content
+        props:
+          '''
+return {
+  as: "div",
+  onClick: args.fns.handleItemClick
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+const expanded = args.fns.isExpanded();
+return `._id {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  ${!args.fns.hasChildren() ? "visibility: hidden;" : ""}
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: tree_item_expand_button
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.handleToggleExpand();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: tree_item_expand_icon
+        props:
+          '''
+return {
+  as: "icon",
+  icon: args.fns.isExpanded() ? "ph:caret-down" : "ph:caret-right",
+  height: 12,
+  width: 12
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-right: 5px;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: tree_item_icon
+        props:
+          '''
+return {
+  as: "icon",
+  icon: args.fns.getItemIcon(),
+  height: 16,
+  width: 16
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        key: tree_item_name
+        props:
+          '''
+return {
+  as: "span",
+  text: args.fns.getItemName()
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-left: 4px;
+  cursor: pointer;
+  color: ${args.theme.var.color.primary};
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  &:hover {
+    opacity: 1;
+  }
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        key: tree_item_actions
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  color: ${args.theme.var.color.primary};
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  &:hover {
+    opacity: 1;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: tree_item_add_button
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:plus",
+  height: 14,
+  width: 14,
+  onClick: args.fns.handleOpenAddModal
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  color: ${args.theme.var.color.primary};
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  &:hover {
+    opacity: 1;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: tree_item_edit_button
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "ph:pencil",
+  height: 14,
+  width: 14,
+  onClick: args.fns.handleOpenEditModal
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding-left: 8px;
+  padding-top: 5px;
+  list-style: none;
+  padding: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: tree_item_children
+        props:
+          '''
+const expanded = args.fns.isExpanded();
+return {
+  as: "ul",
+  loop: expanded && args.fns.children().length > 0,
+  contextName: "childItem",
+  data: expanded ? args.fns.children() : [],
+  hide: !expanded || args.fns.children().length === 0
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  padding-left: 8px;
+}`;'''
+        displayOrder: 1
+        componentName: SidebarTreeItem
+        key: tree_item_child
+        props:
+          '''
+return {
+  item: args.contextData.childItem,
+  expandedKeys: args.contextData.props?.expandedKeys || [],
+  selectedItem: args.contextData.props?.selectedItem,
+  onToggleExpand: args.contextData.props?.onToggleExpand,
+  onItemSelect: args.contextData.props?.onItemSelect,
+  fetchChildren: args.contextData.props?.fetchChildren,
+  parentVertexLabel: args.contextData.props?.parentVertexLabel,
+  toParentEdgeType: args.contextData.props?.toParentEdgeType,
+  formConfig: args.contextData.props?.formConfig,
+  rootKeys: args.contextData.props?.rootKeys
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: SidebarAddChildModal
+        key: tree_item_add_modal
+        props:
+          '''
+const item = args.fns.getItem();
+const formConfig = args.fns.getFormConfig();
+const parentVertexLabel = args.contextData.props?.parentVertexLabel;
+const toParentEdgeType = args.contextData.props?.toParentEdgeType;
+const rootKeys = args.contextData.props?.rootKeys || {};
+
+return {
+  isOpen: args.fns.isAddModalOpen(),
+  formConfig: formConfig,
+  parentId: item?.id,
+  parentVertexLabel: parentVertexLabel,
+  toParentEdgeType: toParentEdgeType,
+  rootKeys: rootKeys,
+  onSave: args.fns.handleAddChildSave,
+  onClose: args.fns.handleCloseAddModal
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: SidebarAddChildModal
+        key: tree_item_edit_modal
+        props:
+          '''
+const item = args.fns.getItem();
+const formConfig = args.fns.getFormConfig();
+const parentVertexLabel = args.contextData.props?.parentVertexLabel;
+const toParentEdgeType = args.contextData.props?.toParentEdgeType;
+const rootKeys = args.contextData.props?.rootKeys || {};
+
+// For edit mode, we don't need parentId since we're just updating the vertex
+// The parent relationship should remain unchanged unless explicitly changed
+return {
+  isOpen: args.fns.isEditModalOpen(),
+  formConfig: formConfig,
+  vertexId: item?.id,
+  parentId: null, // Don't change parent on edit
+  parentVertexLabel: parentVertexLabel,
+  toParentEdgeType: toParentEdgeType,
+  rootKeys: rootKeys,
+  initialVertex: item,
+  mode: "edit",
+  onSave: args.fns.handleEditSave,
+  onClose: args.fns.handleCloseEditModal
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+  ]
+}

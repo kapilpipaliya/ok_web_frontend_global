@@ -5,10 +5,31 @@
       L: Component
       P: {
         fns:
-          '''const getContentType = () => args.contextData.props?.contentType;
+          '''// Memoized signals are defined first to ensure all dependent functions can use them.
+const [memoizedConfig, setMemoizedConfig] = args.createSignal(null);
+const [memoizedLoadFromSetting, setMemoizedLoadFromSetting] = args.createSignal(false);
+const [isSettingsModalOpen, setIsSettingsModalOpen] = args.createSignal(false);
+const [settings, setSettings] = args.createSignal(null);
+const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+const [selectedSidebarItem, setSelectedSidebarItem] = args.createSignal(null);
+
+// Basic context/prop accessors
+const getContentType = () => args.contextData.props?.contentType;
 const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
 const getConfigFunction = () => args.contextData.props?.configFunction;
-// Get props from context or settings (optimized - single config evaluation per render)
+
+// Helper to get cached config (and trigger memo evaluation if needed)
+const getCachedConfig = () => {
+  const cached = memoizedConfig();
+  if (cached !== null) {
+    return { config: cached, loadFromSetting: memoizedLoadFromSetting() };
+  }
+  updateMemoizedConfig();
+  return { config: memoizedConfig(), loadFromSetting: memoizedLoadFromSetting() };
+};
+
+// Get props from context or evaluated config (optimized - single config evaluation per render)
 const prop = (p) => {
   const { config, loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
@@ -17,19 +38,273 @@ const prop = (p) => {
   return args.contextData.props[p];
 };
 
+// Functions invoked by "get*" which must be defined before their usages
+const getGenericSettingsFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  return async () => {
+    try {
+      const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+        contentType,
+        key: `${contentType}_settings`
+      });
+      if (result?.result?.success && result.result.data?.setting) {
+        return result.result;
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+    }
+    return { success: false, data: { setting: null } };
+  };
+};
+const getGenericDataFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  return async (filters = {}) => {
+    try {
+      const sidebarItem = selectedSidebarItem();
+      const sidebarConfig = getSidebarConfig();
+      
+      // Build filter parameters
+      const filterParams = {
+        contentType,
+        search: filters.search,
+        filters: filters.filters,
+        sort: filters.sort
+      };
+      
+      // Add sidebar filtering if item is selected
+      if (sidebarItem && sidebarConfig) {
+        const rootKeys = sidebarConfig.rootKeys || {};
+        const rootKey = rootKeys.key || 'root';
+        
+        // If root key is selected, show items without any category relationship
+        if (sidebarItem.P?.key === rootKey) {
+          filterParams.showUnassigned = true;
+          filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+          filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+        } else {
+          // Filter by selected category
+          filterParams.categoryId = sidebarItem.id;
+          filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+          filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+        }
+      }
+      
+      const result = await args.fns.executeYTOFunction("getUserContent", filterParams);
+      if (result?.error) {
+        args.showErrorToast?.(result.error);
+        return { data: [] };
+      }
+      if (result?.result) {
+        if (result.result.error) {
+          args.showErrorToast?.(result.result.error);
+          return { data: [] };
+        }
+        if (result.result.success && result.result.data) {
+          return { data: Array.isArray(result.result.data) ? result.result.data : [] };
+        }
+      }
+      return { data: [] };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      args.showErrorToast?.("Failed to load data");
+      return { data: [] };
+    }
+  };
+};
+const getGenericSaveFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  return async ({ mode, data, originalRow }) => {
+    let uniqueKeys = [];
+    const config = evaluateConfig();
+    uniqueKeys = config?.uniqueKeys || [];
+    try {
+      let apiData;
+      if (mode === "delete") {
+        if (originalRow && (originalRow.L || originalRow.id)) {
+          apiData = {
+            vertex: originalRow,
+            relationships: {}
+          };
+        } else {
+          apiData = {
+            vertex: {
+              id: originalRow?.id,
+              L: originalRow?.L || [],
+              P: originalRow?.P || originalRow || {},
+              IN: originalRow?.IN || {},
+              OUT: originalRow?.OUT || {}
+            },
+            relationships: {}
+          };
+        }
+      } else {
+        apiData = data;
+      }
+      
+      const result = await args.fns.executeYTOFunction("mutateUserContent", {
+        contentType,
+        operation: mode === "add" ? "create" : mode === "edit" ? "update" : "delete",
+        data: apiData,
+        elementId: originalRow?.id,
+        uniqueKeys: uniqueKeys
+      });
+      
+      // If adding a new item and sidebar item is selected, add relationship FROM sidebar item TO new content
+      if (mode === "add" && result?.result?.success && result.result.data) {
+        const sidebarItem = selectedSidebarItem();
+        const sidebarConfig = getSidebarConfig();
+        
+        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
+          const rootKeys = sidebarConfig.rootKeys || {};
+          const rootKey = rootKeys.key || 'root';
+          
+          // Don't add relationship if root key is selected
+          if (sidebarItem.P?.key !== rootKey) {
+            // Create relationship: Category -[toParentEdgeType]-> ContentItem
+            try {
+              const newContentId = result.result.data.id;
+              await args.fns.executeYTOFunction("createSidebarContentRelationship", {
+                categoryId: sidebarItem.id,
+                contentId: newContentId,
+                relationshipType: sidebarConfig.toParentEdgeType,
+                categoryLabel: sidebarConfig.parentVertexLabel,
+                contentLabel: contentType === "book" ? "Book" : "AudioVideo"
+              });
+            } catch (relError) {
+              console.error("Error creating sidebar relationship:", relError);
+              // Don't fail the whole operation if relationship creation fails
+            }
+          }
+        }
+      }
+      
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return { success: true, data: result.result.data };
+        }
+        return { success: false, message: result.result.message || "Failed to save" };
+      }
+      return { success: false, message: "Failed to save" };
+    } catch (error) {
+      console.error("Error saving:", error);
+      return { success: false, message: error.message || "Failed to save" };
+    }
+  };
+};
+const getGenericSaveSettingsFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  return async (configText) => {
+    try {
+      const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
+        contentType,
+        key: `${contentType}_settings`,
+        config: configText
+      });
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return { success: true, message: result.result.message || "Settings saved successfully" };
+        }
+      }
+      return { success: false, message: "Failed to save settings" };
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      return { success: false, message: error?.message || "Failed to save settings" };
+    }
+  };
+};
+const getGenericImportFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  return async ({ data }) => {
+    try {
+      const result = await args.fns.executeYTOFunction("importUserContent", {
+        contentType,
+        data
+      });
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return { success: true, message: result.result.message };
+        }
+      }
+      return { success: false, message: "Failed to import data" };
+    } catch (error) {
+      console.error("Error importing data:", error);
+      return { success: false, message: error.message || "Failed to import data" };
+    }
+  };
+};
+const getGenericExportFunction = () => {
+  const contentType = getContentType();
+  if (!contentType) return null;
+  return async ({ data, columns }) => {
+    try {
+      const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+      const result = await args.fns.executeYTOFunction("exportUserContent", {
+        contentType,
+        format: "csv",
+        data: data,
+        columns: sanitizedColumns
+      });
+      if (result?.error) {
+        return { success: false, message: result.error };
+      }
+      if (result?.result) {
+        if (result.result.error) {
+          return { success: false, message: result.result.error };
+        }
+        if (result.result.success) {
+          return {
+            success: true,
+            data: result.result.data,
+            contentType: result.result.contentType,
+            filename: result.result.filename
+          };
+        }
+      }
+      return { success: false, message: "Failed to export data" };
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      return { success: false, message: error.message || "Failed to export data" };
+    }
+  };
+};
+
+// Functions that may depend on previous definitions
 const getDataFunction = () => {
   const { loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
     return getGenericDataFunction();
   }
-  return prop('dataFunction') || args.contextData.props?.dataFunction;
+  return prop('dataFunction');
 };
 const getSettingsFunction = () => {
   const loadFromSetting = getLoadFromSetting();
   if (loadFromSetting) {
     return getGenericSettingsFunction();
   }
-  return args.contextData.props?.settingsFunction;
+  return prop('settingsFunction');
 };
 const getFormConfig = () => {
   const formConfig = prop('formConfig');
@@ -43,28 +318,134 @@ const getFormConfig = () => {
   }
   return formConfig;
 };
-
 const getSaveSettingsFunction = () => {
-    const loadFromSetting = getLoadFromSetting();
-    if (loadFromSetting) {
-      return getGenericSaveSettingsFunction();
-    }
-    return args.contextData.props?.saveSettingsFunction;
-  };
+  const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting) {
+    return getGenericSaveSettingsFunction();
+  }
+  return prop('saveSettingsFunction');
+};
 const getImportFunction = () => {
   const { loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
     return getGenericImportFunction();
   }
-  return prop('importFunction') || args.contextData.props?.importFunction;
+  return prop('importFunction');
 };
 const getExportFunction = () => {
   const { loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
     return getGenericExportFunction();
   }
-  return prop('exportFunction') || args.contextData.props?.exportFunction;
+  return prop('exportFunction');
 };
+
+// Core config evaluation and memo update functions
+const evaluateConfig = () => {
+  const cached = evaluatedConfig();
+  if (cached !== null) return cached;
+
+  const loadFromSetting = getLoadFromSetting();
+  const currentSettings = settings();
+  let config = null;
+
+  // If loadFromSetting is true, only use settings (no props fallback)
+  if (loadFromSetting) {
+    if (currentSettings && typeof currentSettings === 'string') {
+      try {
+        const configFunction = new Function(currentSettings);
+        config = configFunction();
+        if (config && typeof config === 'object') {
+          setEvaluatedConfig(config);
+          return config;
+        }
+      } catch (error) {
+        console.error("Error evaluating settings function body:", error);
+      }
+    }
+    // If loadFromSetting is true but no settings, return empty config
+    config = {};
+    setEvaluatedConfig(config);
+    return config;
+  }
+
+  // If settings exist and it's a string (function body), evaluate it
+  if (currentSettings && typeof currentSettings === 'string') {
+    try {
+      const configFunction = new Function(currentSettings);
+      const evaluated = configFunction();
+      if (evaluated && typeof evaluated === 'object') {
+        config = {
+          columns: evaluated.columns,
+          formConfig: evaluated.formConfig,
+          uniqueKeys: evaluated.uniqueKeys || []
+        };
+        setEvaluatedConfig(config);
+        return config;
+      }
+    } catch (error) {
+      console.error("Error evaluating settings function body:", error);
+    }
+  }
+
+  // Fallback to configFunction
+  const configFn = getConfigFunction();
+  if (configFn) {
+    try {
+      const evaluated = configFn();
+      if (evaluated && typeof evaluated === 'object') {
+        config = {
+          columns: evaluated.columns,
+          formConfig: evaluated.formConfig,
+          uniqueKeys: evaluated.uniqueKeys || []
+        };
+        setEvaluatedConfig(config);
+        return config;
+      }
+    } catch (error) {
+      console.error("Error evaluating config function:", error);
+    }
+  }
+
+  // Fallback to props
+  config = {
+    columns: args.contextData.props?.columns || [],
+    formConfig: args.contextData.props?.formConfig,
+    uniqueKeys: []
+  };
+  setEvaluatedConfig(config);
+  return config;
+};
+const updateMemoizedConfig = () => {
+  const config = evaluateConfig();
+  const loadFromSetting = getLoadFromSetting();
+  setMemoizedConfig(config);
+  setMemoizedLoadFromSetting(loadFromSetting);
+};
+
+// Fetch data from server
+const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
+  const dataFn = getDataFunction();
+  if (!dataFn) return;
+  setLoading(true);
+  try {
+    const result = await dataFn({
+      search: searchTerm,
+      filters: columnFilters,
+      sort: sortConfig
+    });
+    if (result?.data) {
+      callback(result.data);
+    }
+  } catch (error) {
+    console.error("Error fetching table data:", error);
+    args.showErrorToast?.("Failed to load table data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 // Handle import
 const handleImport = async (callback) => {
   const importFn = getImportFunction();
@@ -72,13 +453,11 @@ const handleImport = async (callback) => {
     args.showErrorToast?.("Import function not configured");
     return;
   }
-
   const dataToImport = importData().trim();
   if (!dataToImport) {
     args.showErrorToast?.("Please provide data to import");
     return;
   }
-
   try {
     setLoading(true);
     const result = await importFn({ data: dataToImport });
@@ -106,7 +485,6 @@ const handleExport = async (data = null) => {
     args.showErrorToast?.("Export function not configured");
     return;
   }
-
   try {
     setLoading(true);
     const columns = getColumns();
@@ -142,340 +520,57 @@ const handleExport = async (data = null) => {
   }
 };
 
-  // Memoized config accessor (evaluates once per settings change)
-const [memoizedConfig, setMemoizedConfig] = args.createSignal(null);
-const [memoizedLoadFromSetting, setMemoizedLoadFromSetting] = args.createSignal(false);
-const [isSettingsModalOpen, setIsSettingsModalOpen] = args.createSignal(false);
-const [settings, setSettings] = args.createSignal(null);
-const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
-const [loading, setLoading] = args.createSignal(false);
-
-// Evaluate and cache config (memoized)
-const evaluateConfig = () => {
-    const cached = evaluatedConfig();
-    if (cached !== null) return cached;
-
-    const loadFromSetting = getLoadFromSetting();
-    const currentSettings = settings();
-    let config = null;
-
-    // If loadFromSetting is true, only use settings (no props fallback)
-    if (loadFromSetting) {
-      if (currentSettings && typeof currentSettings === 'string') {
-        try {
-          const configFunction = new Function(currentSettings);
-          config = configFunction();
-          if (config && typeof config === 'object') {
-            setEvaluatedConfig(config);
-            return config;
-          }
-        } catch (error) {
-          console.error("Error evaluating settings function body:", error);
-        }
-      }
-      // If loadFromSetting is true but no settings, return empty config
-      config = {};
-      setEvaluatedConfig(config);
-      return config;
-    }
-
-    // If settings exist and it's a string (function body), evaluate it
-    if (currentSettings && typeof currentSettings === 'string') {
-      try {
-        const configFunction = new Function(currentSettings);
-        const evaluated = configFunction();
-        if (evaluated && typeof evaluated === 'object') {
-          config = {
-            columns: evaluated.columns,
-            formConfig: evaluated.formConfig,
-            uniqueKeys: evaluated.uniqueKeys || []
-          };
-          setEvaluatedConfig(config);
-          return config;
-        }
-      } catch (error) {
-        console.error("Error evaluating settings function body:", error);
-      }
-    }
-
-    // Fallback to configFunction
-    const configFn = getConfigFunction();
-    if (configFn) {
-      try {
-        const evaluated = configFn();
-        if (evaluated && typeof evaluated === 'object') {
-          config = {
-            columns: evaluated.columns,
-            formConfig: evaluated.formConfig,
-            uniqueKeys: evaluated.uniqueKeys || []
-          };
-          setEvaluatedConfig(config);
-          return config;
-        }
-      } catch (error) {
-        console.error("Error evaluating config function:", error);
-      }
-    }
-
-    // Fallback to props
-    config = {
-      columns: args.contextData.props?.columns || [],
-      formConfig: args.contextData.props?.formConfig,
-      uniqueKeys: []
-    };
-    setEvaluatedConfig(config);
-    return config;
-  };
-
-  // Update memoized values when settings change
-  const updateMemoizedConfig = () => {
-    const config = evaluateConfig();
-    const loadFromSetting = getLoadFromSetting();
-    setMemoizedConfig(config);
-    setMemoizedLoadFromSetting(loadFromSetting);
-  };
-
-  // Get cached config (only evaluates if cache is invalid)
-  const getCachedConfig = () => {
-    const cached = memoizedConfig();
-    if (cached !== null) {
-      return { config: cached, loadFromSetting: memoizedLoadFromSetting() };
-    }
-    updateMemoizedConfig();
-    return { config: memoizedConfig(), loadFromSetting: memoizedLoadFromSetting() };
-  };
-
-  const getGenericSettingsFunction = () => {
-    const contentType = getContentType();
-    if (!contentType) return null;
-
-    return async () => {
-      try {
-        const result = await args.fns.executeYTOFunction("getUserContentSetting", {
-          contentType,
-          key: `${contentType}_settings`
-        });
-        if (result?.result?.success && result.result.data?.setting) {
-          return result.result;
-        }
-      } catch (error) {
-        console.error("Error loading settings:", error);
-      }
-      return { success: false, data: { setting: null } };
-    };
-  };
-
-// Generic wrapper functions (used when loadFromSetting is true)
-const getGenericDataFunction = () => {
-  const contentType = getContentType();
-  if (!contentType) return null;
-
-  return async (filters = {}) => {
-    try {
-      const result = await args.fns.executeYTOFunction("getUserContent", {
-        contentType,
-        search: filters.search,
-        filters: filters.filters,
-        sort: filters.sort
-      });
-
-      if (result?.error) {
-        args.showErrorToast?.(result.error);
-        return { data: [] };
-      }
-
-      if (result?.result) {
-        if (result.result.error) {
-          args.showErrorToast?.(result.result.error);
-          return { data: [] };
-        }
-        if (result.result.success && result.result.data) {
-          return { data: Array.isArray(result.result.data) ? result.result.data : [] };
-        }
-      }
-
-      return { data: [] };
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      args.showErrorToast?.("Failed to load data");
-      return { data: [] };
-    }
-  };
-};
-// Fetch data from server
-const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
-  const dataFn = getDataFunction();
-  if (!dataFn) return;
-
-  setLoading(true);
-  try {
-    const result = await dataFn({
-      search: searchTerm,
-      filters: columnFilters,
-      sort: sortConfig
-    });
-
-    if (result?.data) {
-      callback(result.data);
-    }
-  } catch (error) {
-    console.error("Error fetching table data:", error);
-    args.showErrorToast?.("Failed to load table data");
-  } finally {
-    setLoading(false);
-  }
-};
-const getGenericSaveFunction = () => {
-  const contentType = getContentType();
-  if (!contentType) return null;
-
-  return async ({ mode, data, originalRow }) => {
-    let uniqueKeys = [];
-    const config = evaluateConfig();
-    uniqueKeys = config?.uniqueKeys || [];
-
-    try {
-      // Format data for mutateUserContent API
-      // New format: { vertex, relationships }
-      let apiData;
-      if (mode === "delete") {
-        // For delete, pass the vertex from originalRow
-        if (originalRow && (originalRow.L || originalRow.id)) {
-          apiData = {
-            vertex: originalRow,
-            relationships: {}
-          };
-        } else {
-          // Fallback: create vertex-like object from row
-          apiData = {
-            vertex: {
-              id: originalRow?.id,
-              L: originalRow?.L || [],
-              P: originalRow?.P || originalRow || {},
-              IN: originalRow?.IN || {},
-              OUT: originalRow?.OUT || {}
-            },
-            relationships: {}
-          };
-        }
-      } else {
-        // For create/update, data already has { vertex, relationships } format
-        apiData = data;
-      }
-
-      const result = await args.fns.executeYTOFunction("mutateUserContent", {
-        contentType,
-        operation: mode === "add" ? "create" : mode === "edit" ? "update" : "delete",
-        data: apiData,
-        elementId: originalRow?.id,
-        uniqueKeys: uniqueKeys
-      });
-
-      if (result?.error) {
-        return { success: false, message: result.error };
-      }
-
-      if (result?.result) {
-        if (result.result.error) {
-          return { success: false, message: result.result.error };
-        }
-        if (result.result.success) {
-          return { success: true, data: result.result.data };
-        }
-        return { success: false, message: result.result.message || "Failed to save" };
-      }
-
-      return { success: false, message: "Failed to save" };
-    } catch (error) {
-      console.error("Error saving:", error);
-      return { success: false, message: error.message || "Failed to save" };
-    }
-  };
-};
-
-  const getGenericSaveSettingsFunction = () => {
-    const contentType = getContentType();
-    if (!contentType) return null;
-
-    return async (configText) => {
-      try {
-        const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
-          contentType,
-          key: `${contentType}_settings`,
-          config: configText
-        });
-        if (result?.error) {
-          return { success: false, message: result.error };
-        }
-        if (result?.result) {
-          if (result.result.error) {
-            return { success: false, message: result.result.error };
-          }
-          if (result.result.success) {
-            return { success: true, message: result.result.message || "Settings saved successfully" };
-          }
-        }
-        return { success: false, message: "Failed to save settings" };
-      } catch (error) {
-        console.error("Error saving settings:", error);
-        return { success: false, message: error?.message || "Failed to save settings" };
-      }
-    };
-  };
-
+// Settings management functions
 
 // Load settings
 const loadSettings = async () => {
-    const settingsFn = getSettingsFunction();
-    if (!settingsFn) return null;
-
-    try {
-      const result = await settingsFn();
-      if (result?.success && result?.data?.setting) {
-        const settingData = result.data.setting.P || {};
-        // Get the raw config text (function body) - don't evaluate it
-        const configText = settingData.config;
-        if (typeof configText === 'string') {
-          setSettings(configText);
-          setEvaluatedConfig(null); // Clear evaluation cache
-          setMemoizedConfig(null); // Clear memoized cache
-          return configText;
-        }
+  const settingsFn = getSettingsFunction();
+  if (!settingsFn) return null;
+  try {
+    const result = await settingsFn();
+    if (result?.success && result?.data?.setting) {
+      const settingData = result.data.setting.P || {};
+      // Get the raw config text (function body) - don't evaluate it
+      const configText = settingData.config;
+      if (typeof configText === 'string') {
+        setSettings(configText);
+        setEvaluatedConfig(null); // Clear evaluation cache
+        setMemoizedConfig(null); // Clear memoized cache
+        return configText;
       }
-    } catch (error) {
-      console.error("Error loading settings:", error);
     }
-    return null;
-  };
+  } catch (error) {
+    console.error("Error loading settings:", error);
+  }
+  return null;
+};
 
-  // Initialize settings on mount
-  const initializeSettings = async () => {
-    const settingsFn = getSettingsFunction();
-    if (settingsFn) {
-      await loadSettings();
-      // Initialize memoized config after loading settings
-      updateMemoizedConfig();
-    } else {
-      // Initialize memoized config even without settings
-      updateMemoizedConfig();
-    }
-  };
-
-
-// Handle settings open
-const handleOpenSettings = async () => {
+// Initialize settings on mount
+const initializeSettings = async () => {
+  const settingsFn = getSettingsFunction();
+  if (settingsFn) {
     await loadSettings();
-    setIsSettingsModalOpen(true);
-  };
+    // Initialize memoized config after loading settings
+    updateMemoizedConfig();
+  } else {
+    // Initialize memoized config even without settings
+    updateMemoizedConfig();
+  }
+};
 
-// Handle settings save
+// Handle opening settings modal
+const handleOpenSettings = async () => {
+  await loadSettings();
+  setIsSettingsModalOpen(true);
+};
+
+// Handle saving settings
 const handleSaveSettings = async (configText, callback) => {
   const saveFn = getSaveSettingsFunction();
   if (!saveFn) {
     args.showErrorToast?.("Save settings function not configured");
     return;
   }
-
   try {
     setLoading(true);
     // Save the raw function body text, not the evaluated config
@@ -499,110 +594,66 @@ const handleSaveSettings = async (configText, callback) => {
   }
 };
 
-const getGenericImportFunction = () => {
-  const contentType = getContentType();
-  if (!contentType) return null;
-
-  return async ({ data }) => {
-    try {
-      const result = await args.fns.executeYTOFunction("importUserContent", {
-        contentType,
-        data
-      });
-
-      if (result?.error) {
-        return { success: false, message: result.error };
-      }
-
-      if (result?.result) {
-        if (result.result.error) {
-          return { success: false, message: result.result.error };
-        }
-        if (result.result.success) {
-          return { success: true, message: result.result.message };
-        }
-      }
-
-      return { success: false, message: "Failed to import data" };
-    } catch (error) {
-      console.error("Error importing data:", error);
-      return { success: false, message: error.message || "Failed to import data" };
-    }
-  };
-};
-
-const getGenericExportFunction = () => {
-  const contentType = getContentType();
-  if (!contentType) return null;
-
-  return async ({ data, columns }) => {
-    try {
-      const sanitizedColumns = JSON.parse(JSON.stringify(columns));
-      const result = await args.fns.executeYTOFunction("exportUserContent", {
-        contentType,
-        format: "csv",
-        data: data,
-        columns: sanitizedColumns
-      });
-
-      if (result?.error) {
-        return { success: false, message: result.error };
-      }
-
-      if (result?.result) {
-        if (result.result.error) {
-          return { success: false, message: result.result.error };
-        }
-        if (result.result.success) {
-          return {
-            success: true,
-            data: result.result.data,
-            contentType: result.result.contentType,
-            filename: result.result.filename
-          };
-        }
-      }
-
-      return { success: false, message: "Failed to export data" };
-    } catch (error) {
-      console.error("Error exporting data:", error);
-      return { success: false, message: error.message || "Failed to export data" };
-    }
-  };
-};
-
-  return {
-    prop,
-    getContentType,
-    getLoadFromSetting,
-    getConfigFunction,
-    getSettingsFunction,
-    getFormConfig,
-    getSaveSettingsFunction,
-    evaluateConfig,
-    setEvaluatedConfig,
-    getCachedConfig,
-    updateMemoizedConfig,
-    fetchData,
-    isSettingsModalOpen,
-    setIsSettingsModalOpen,
-    settings,
-    setSettings,
-    loading,
-    setLoading,
-    loadSettings,
-    initializeSettings,
-    handleOpenSettings,
-    handleSaveSettings,
-    getGenericDataFunction,
-    getGenericSaveFunction,
-    getGenericImportFunction,
-    getGenericExportFunction,
-    getImportFunction,
-    getExportFunction,
-    handleImport,
-    handleExport,
+// Sidebar config
+const getSidebarConfig = () => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config?.sidebar;
   }
+  return args.contextData.props?.sidebar || config?.sidebar;
+};
+
+// Check if sidebar is enabled
+const hasSidebar = () => {
+  const sidebarConfig = getSidebarConfig();
+  return sidebarConfig && (sidebarConfig.enabled !== false);
+};
+
+// Handle sidebar item selection
+const handleSidebarItemSelect = (item) => {
+  setSelectedSidebarItem(item);
+  // Trigger table refresh by calling fetchData if available
+  // The table component should react to sidebar selection changes
+};
+
+// Exported API
+return {
+  prop,
+  getContentType,
+  getLoadFromSetting,
+  getConfigFunction,
+  getSettingsFunction,
+  getFormConfig,
+  getSaveSettingsFunction,
+  evaluateConfig,
+  setEvaluatedConfig,
+  getCachedConfig,
+  updateMemoizedConfig,
+  fetchData,
+  isSettingsModalOpen,
+  setIsSettingsModalOpen,
+  settings,
+  setSettings,
+  loading,
+  setLoading,
+  loadSettings,
+  initializeSettings,
+  handleOpenSettings,
+  handleSaveSettings,
+  getGenericDataFunction,
+  getGenericSaveFunction,
+  getGenericImportFunction,
+  getGenericExportFunction,
+  getImportFunction,
+  getExportFunction,
+  handleImport,
+  handleExport,
+  getSidebarConfig,
+  hasSidebar,
+  selectedSidebarItem,
+  setSelectedSidebarItem,
+  handleSidebarItemSelect
+}
 
 '''
         key: DynamicPage
@@ -613,13 +664,91 @@ const getGenericExportFunction = () => {
       id: "2"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  height: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: dynamic_page_wrapper
+        props:
+          '''
+const hasSidebar = args.fns.hasSidebar();
+return {
+  as: "div",
+  hide: !hasSidebar
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Sidebar
+        key: sidebar_component
+        props:
+          '''
+const sidebarConfig = args.fns.getSidebarConfig();
+return {
+  parentVertexLabel: sidebarConfig?.parentVertexLabel,
+  toParentEdgeType: sidebarConfig?.toParentEdgeType,
+  rootKeys: sidebarConfig?.rootKeys || {},
+  formConfig: sidebarConfig?.formConfig,
+  onItemSelect: args.fns.handleSidebarItemSelect
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        slotName: main
         displayOrder: 1
         fns: ""
         componentName: Table
         key: unique_1
         props:
-          '''const a = args;
-debugger
+          '''
+return {
+  selectedSidebarItem: args.fns.selectedSidebarItem(),
+  onMount: async () => {
+    await args.fns.initializeSettings();
+  }
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: dynamic_page_no_sidebar_wrapper
+        props:
+          '''
+const hasSidebar = args.fns.hasSidebar();
+return {
+  as: "div",
+  hide: hasSidebar
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns: ""
+        componentName: Table
+        key: unique_2
+        props:
+          '''
 return {
   onMount: async () => {
     await args.fns.initializeSettings();
@@ -635,6 +764,30 @@ return {
       T: Attr
       S: "1"
       E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "5"
+      E: "6"
     }
   ]
 }

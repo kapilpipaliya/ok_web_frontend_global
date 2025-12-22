@@ -172,8 +172,8 @@ return {
   planQuotas
 };
 '''
-        url: /checkout
         key: Checkout
+        url: /checkout
         props:
           '''
 return {

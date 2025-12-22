@@ -1,4 +1,4 @@
-import { createAsync } from "@solidjs/router";
+import { query, createAsync } from "@solidjs/router";
 import { untrack } from "solid-js";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { isObject } from "~/lib/data_structure/object/isObject";
@@ -15,7 +15,6 @@ import type { PageViewConstants, PageViewWrapperProps } from "./types";
 import type { PreviewStoreObject } from "~/features/page_designer/context/PreviewContext";
 import type { SetStoreFunction } from "solid-js/store";
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 interface UseMetadataOptions {
   graph: GraphInterface;
@@ -24,6 +23,68 @@ interface UseMetadataOptions {
   setFormStore: (key: string, value: unknown) => void;
   metaTxnId: number;
   previewStore: PreviewStoreObject;
+}
+
+interface FetchFormMetaDataParams {
+  pageVertexName?: string;
+  formId?: string;
+  expression?: string;
+  isDesignMode?: boolean;
+  pageKeyName?: string;
+  url?: string;
+}
+
+interface FetchFormDataParams {
+  metaResult: FetchFormMetaDataResult;
+  formDataId?: string;
+  id?: string;
+  isNoPermissionCheck?: boolean;
+  hasRequiredPermissions?: boolean;
+  pageVertexName?: string;
+}
+
+const fetchFormMetaDataQuery = query(
+  async (params: FetchFormMetaDataParams) => {
+    const metaResult = await fetchFormMetaData(
+      params.pageVertexName,
+      params.formId,
+      params.expression,
+      params.isDesignMode,
+      params.pageKeyName,
+      params.url,
+    );
+    if (!metaResult) {
+      return { error: "404" } as FetchFormMetaDataResult;
+    }
+    return metaResult;
+  },
+  "fetchFormMetaData",
+);
+
+const fetchFormDataQuery = query(
+  async (params: FetchFormDataParams) => {
+    return await fetchFormData(
+      params.metaResult,
+      params.formDataId,
+      params.id,
+      params.isNoPermissionCheck,
+      params.hasRequiredPermissions,
+      params.pageVertexName,
+    );
+  },
+  "fetchFormData",
+);
+
+const fetchCustomFormDataQuery = async (getFormData: () => Promise<ServerResult>) => {
+  try {
+    const data = await getFormData();
+    if (!data || data.error) {
+      return { error: data?.error || "Error fetching form data" };
+    }
+    return { dataResult: { data } };
+  } catch (error) {
+    return { error: (error as Error).message };
+  }
 }
 
 export function useMetadata(
@@ -36,36 +97,28 @@ export function useMetadata(
       if (constants.pageKeyName === "favicon.ico") {
         return { error: "No meta data found" };
       }
-      const fetchFormMetaDataArgs = [
-        constants.pageVertexName,
-        constants.formId,
-        constants.expression,
-        constants.isDesignMode,
-        constants.pageKeyName,
-        constants.url,
-      ] as const;
+
+      // Access reactive values to track them, after first await call we cant track
+      const metaResultParams: FetchFormMetaDataParams = {
+        pageVertexName: constants.pageVertexName,
+        formId: constants.formId,
+        expression: constants.expression,
+        isDesignMode: constants.isDesignMode,
+        pageKeyName: constants.pageKeyName,
+        url: constants.url,
+      };
       if (constants.formMetaId) {
         if (props.getFormData) {
-          try {
-            const data = await props.getFormData();
-            if (!data || data.error) {
-              return { error: data?.error || "Error fetching form data" };
-            }
-            return { dataResult: { data } };
-          } catch (error) {
-            return { error: (error as Error).message };
-          }
+          return await fetchCustomFormDataQuery(props.getFormData);
         }
         return {};
       }
-      const metaResult = await fetchFormMetaData(...fetchFormMetaDataArgs);
-      if (!metaResult) {
-        return { error: "404" };
-      }
+      const metaResult = await fetchFormMetaDataQuery(metaResultParams);
       if (metaResult.error) {
         return metaResult;
       }
 
+      // Extract formMetaId from metaResult
       let formMetaId = constants.formMetaId;
       if (metaResult.data) {
         if (Array.isArray(metaResult.data.result)) {
@@ -77,6 +130,7 @@ export function useMetadata(
         }
       }
 
+      // Determine isNoPermissionCheck
       const metaVertex = constants.formMetaId
         ? options.graph.vertexes[constants.formMetaId]
         : metaResult.data?.graph?.vertexes[formMetaId!];
@@ -86,43 +140,38 @@ export function useMetadata(
         metaVertex?.P?.isNoPermissionCheck ||
         options.previewStore.isNoPermissionCheck;
 
-      const idLocal = constants.dataId === "new" ? undefined : constants.dataId;
-
-      if (idLocal && !constants.getFormData) {
-        const dataResult = await fetchFormData(
-          options.graph,
-          metaResult,
-          constants.formDataId,
-          idLocal,
-          isNoPermissionCheck,
-          true,
-          constants.pageVertexName,
-        );
-        return { dataResult, formMetaId, metaResult };
-      }
-
-      let result: {
+      // Fetch form data if needed
+      const result: {
         formMetaId?: string;
         metaResult?: FetchFormMetaDataResult;
         dataResult?: FetchFormDataResult;
         error?: string;
       } = { formMetaId, metaResult };
 
+      if (constants.dataId && constants.dataId !== "new" && !constants.getFormData) {
+        const idLocal = constants.dataId === "new" ? undefined : constants.dataId;
+        const formDataParams: FetchFormDataParams = {
+          metaResult,
+          formDataId: constants.formDataId,
+          id: idLocal,
+          isNoPermissionCheck,
+          hasRequiredPermissions: true,
+          pageVertexName: constants.pageVertexName,
+        };
+        const dataResult = await fetchFormDataQuery(formDataParams);
+        return { ...result, dataResult };
+      }
+
+      // Use custom getFormData if provided
       if (props.getFormData) {
-        try {
-          const data = await props.getFormData();
-          if (!data || data.error) {
-            result = {
-              ...result,
-              error: data.error || "Error fetching form data",
-            };
-          } else {
-            result = { ...result, dataResult: { data } };
-          }
-        } catch (error) {
-          result = { ...result, error: (error as Error).message };
+        const customDataResult = await fetchCustomFormDataQuery(props.getFormData);
+        if (customDataResult.error) {
+          result.error = customDataResult.error;
+        } else {
+          result.dataResult = customDataResult.dataResult;
         }
       }
+
       return result;
     },
     { deferStream: true },

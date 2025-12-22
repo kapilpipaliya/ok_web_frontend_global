@@ -5,8 +5,8 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        url: /test
         key: Test
+        url: /test
         props:
           '''return {
   isNoPermissionCheck: true

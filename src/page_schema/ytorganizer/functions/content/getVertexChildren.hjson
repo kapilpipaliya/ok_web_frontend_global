@@ -1,0 +1,107 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Generic function to fetch children vertices of a parent vertex using parentVertexLabel and toParentEdgeType. Returns vertices in Vertex format using convertNodeToJSON.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: []
+  };
+}
+
+// Extract parameters
+const { parentVertexLabel, toParentEdgeType, parentId, rootKeys } = args.contextData;
+
+if (!parentVertexLabel || !toParentEdgeType) {
+  return {
+    success: false,
+    message: "parentVertexLabel and toParentEdgeType are required",
+    data: []
+  };
+}
+
+// If parentId is provided, fetch children of that parent
+if (parentId) {
+  const query = `
+    MATCH (parent:${parentVertexLabel})-[r:${toParentEdgeType}]->(child:${parentVertexLabel})
+    WHERE elementId(parent) = $parentId
+    RETURN child
+    ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+  `;
+
+  const result = await args.session.run(query, { parentId });
+
+  const vertices = result.records.map(record => {
+    const node = record.get('child');
+    return args.convertNodeToJson(node);
+  });
+
+  return {
+    success: true,
+    data: vertices,
+    message: `Found ${vertices.length} children`
+  };
+}
+
+// If rootKeys is provided, fetch root vertices
+if (rootKeys) {
+  // Build filter conditions from rootKeys
+  const filterConditions = [];
+  const params = {};
+  let paramIndex = 0;
+
+  for (const [key, value] of Object.entries(rootKeys)) {
+    paramIndex++;
+    const paramName = `filter${paramIndex}`;
+    filterConditions.push(`v.${key} = $${paramName}`);
+    params[paramName] = value;
+  }
+
+  const filterClause = filterConditions.length > 0 
+    ? ` AND ${filterConditions.join(' AND ')}`
+    : '';
+
+  const query = `
+    MATCH (v:${parentVertexLabel})
+    WHERE NOT EXISTS {
+      MATCH (v)<-[:${toParentEdgeType}]-(:${parentVertexLabel})
+    }${filterClause}
+    RETURN v
+    ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+  `;
+
+  const result = await args.session.run(query, params);
+
+  const vertices = result.records.map(record => {
+    const node = record.get('v');
+    return args.convertNodeToJson(node);
+  });
+
+  return {
+    success: true,
+    data: vertices,
+    message: `Found ${vertices.length} root vertices`
+  };
+}
+
+// Default: return empty array
+return {
+  success: true,
+  data: [],
+  message: "No parentId or rootKeys provided"
+};
+'''
+        key: getVertexChildren
+      }
+    }
+  ]
+  edges: []
+}

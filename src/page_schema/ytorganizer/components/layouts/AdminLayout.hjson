@@ -153,8 +153,8 @@ return {
       P: {
         displayOrder: 1
         description: Renders the page content
-        componentName: Slot
         slot: children
+        componentName: Slot
       }
     }
   ]

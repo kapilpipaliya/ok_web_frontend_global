@@ -1,0 +1,85 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Creates a relationship from a sidebar category to a content item (Category -[relationshipType]-> ContentItem)
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { categoryId, contentId, relationshipType, categoryLabel, contentLabel } = args.contextData;
+
+if (!categoryId || !contentId || !relationshipType || !categoryLabel || !contentLabel) {
+  return {
+    success: false,
+    message: "categoryId, contentId, relationshipType, categoryLabel, and contentLabel are required"
+  };
+}
+
+const userUuid = user.P.uuid;
+
+// Verify that both category and content belong to the user
+// For category: User -[UserCategory]-> Category
+// For content: User -[UserBook/UserAudioVideo]-> Content
+const userCategoryRelType = `User${categoryLabel}`;
+const contentRelType = contentLabel === "Book" ? "UserBook" : "UserAudioVideo";
+
+try {
+  // Create relationship: Category -[relationshipType]-> ContentItem
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+    WHERE elementId(cat) = $categoryId
+    MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+    WHERE elementId(content) = $contentId
+    MERGE (cat)-[r:${relationshipType}]->(content)
+    ON CREATE SET r.createdAt = datetime()
+    RETURN r
+  `;
+
+  const result = await args.session.run(query, {
+    userUuid,
+    categoryId,
+    contentId
+  });
+
+  if (result.records.length > 0) {
+    return {
+      success: true,
+      message: "Relationship created successfully"
+    };
+  } else {
+    return {
+      success: false,
+      message: "Failed to create relationship. Category or content not found or not accessible."
+    };
+  }
+} catch (error) {
+  console.error("Error creating sidebar content relationship:", error);
+  return {
+    success: false,
+    message: error.message || "Failed to create relationship"
+  };
+}
+'''
+        key: createSidebarContentRelationship
+      }
+    }
+  ]
+  edges: []
+}
+
+

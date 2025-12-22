@@ -149,8 +149,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: text
-        defValue: Menu Item
+        defValue: ""
+        key: icon
       }
     }
     {
@@ -158,17 +158,17 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: type
-        defValue: default
+        key: text
+        defValue: Menu Item
       }
     }
     {
       id: "7"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Default menu item
-        value: default
-        key: default
+        type: string
+        key: type
+        defValue: default
       }
     }
     {
@@ -182,11 +182,11 @@ return {
     }
     {
       id: "9"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        defValue: ""
-        key: icon
+        description: Default menu item
+        value: default
+        key: default
       }
     }
   ]
@@ -213,7 +213,7 @@ return {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "7"
     }
     {
       id: e5
@@ -230,14 +230,14 @@ return {
     {
       id: e7
       T: ComponentVariantOption
-      S: "6"
-      E: "7"
+      S: "7"
+      E: "8"
     }
     {
       id: e8
       T: ComponentVariantOption
-      S: "6"
-      E: "8"
+      S: "7"
+      E: "9"
     }
   ]
 }

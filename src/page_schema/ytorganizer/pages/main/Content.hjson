@@ -2119,6 +2119,166 @@ return {
       id: "24"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 3rem 2rem;
+  text-align: center;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+// Check if no ownerships exist - don't show this state if no accounts
+const ownerships = args.fns.ownerships?.() || [];
+const hasNoOwnerships = ownerships.length === 0;
+
+const hasItems =  args.fns.filteredItems().length > 0;
+
+return {
+  as: "div",
+  hide: args.fns.loading() || hasItems || hasNoOwnerships
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+let icon;
+if (args.fns.isPlaylists()) {
+  icon = "mdi:playlist-play";
+} else if (args.fns.isChannels()) {
+  icon = "mdi:youtube";
+} else if (args.fns.isChannelDetail()) {
+  icon = "mdi:playlist-remove";
+} else if (args.fns.isPlaylistDetail()) {
+  icon = "mdi:video-off";
+} else if (args.fns.isSearchView()) {
+  icon = "mdi:magnify";
+} else if (args.fns.isFavouritesView()) {
+  icon = "carbon:favorite";
+} else if (args.fns.isExtensionView()) {
+  icon = "carbon:data-1";
+}
+
+return {
+  as: "icon",
+  icon,
+  width: 64,
+  height: 64
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const hasSearchTerm = args.fns.searchTerm().length > 0;
+const query = args.searchParams?.q || "";
+
+let title;
+if (hasSearchTerm) {
+  title = "No results found";
+} else if (args.fns.isChannels()) {
+  title = "No channels yet";
+} else if (args.fns.isPlaylists()) {
+  title = "No playlists yet";
+} else if (args.fns.isChannelDetail()) {
+  title = "No playlists found";
+} else if (args.fns.isPlaylistDetail()) {
+  title = "No videos found";
+} else if (args.fns.isSearchView()) {
+  title = "Enter a search query";
+} else if (args.fns.isFavouritesView()) {
+  title = "No favourite items yet";
+} else if (args.fns.isExtensionView()) {
+  title = "No Content Found";
+}
+
+return {
+  as: "h3",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const hasSearchTerm = args.fns.searchTerm().length > 0;
+let text;
+if (hasSearchTerm) {
+  text = "Try adjusting your search terms";
+} else if (args.fns.isChannels()) {
+  text = "Start by adding some YouTube channels to track your content";
+} else if (args.fns.isPlaylists()) {
+  text = "Start by adding some YouTube playlists to organize your content";
+} else if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
+  text = ""; // Detail view doesn't show description (only has 2 children)
+} else if (args.fns.isSearchView()) {
+  text = "to find channels, playlists, and videos";
+} else if (args.fns.isFavouritesView()) {
+  text = "Start by adding channels, playlists, or videos to your favourites!";
+} else if (args.fns.isExtensionView()) {
+  text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
+}
+
+return {
+  as: "p",
+  text,
+  hide: args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
         displayOrder: 3
         fns:
           '''
@@ -2429,7 +2589,7 @@ return {
       }
     }
     {
-      id: "25"
+      id: "29"
       L: Attr
       P: {
         css:
@@ -2462,7 +2622,7 @@ return {
       }
     }
     {
-      id: "26"
+      id: "30"
       L: Attr
       P: {
         slotName: children
@@ -2547,7 +2707,7 @@ return {
       }
     }
     {
-      id: "27"
+      id: "31"
       L: Attr
       P: {
         displayOrder: 2
@@ -2572,7 +2732,7 @@ return {
       }
     }
     {
-      id: "28"
+      id: "32"
       L: Attr
       P: {
         displayOrder: 3
@@ -2590,7 +2750,7 @@ return {
       }
     }
     {
-      id: "29"
+      id: "33"
       L: Attr
       P: {
         displayOrder: 4
@@ -2641,166 +2801,6 @@ return {
   playlist: playlist,
   videoUrl: videoUrl,
   onSuccess: onSuccess
-};
-'''
-      }
-    }
-    {
-      id: "30"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 3rem 2rem;
-  text-align: center;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-// Check if no ownerships exist - don't show this state if no accounts
-const ownerships = args.fns.ownerships?.() || [];
-const hasNoOwnerships = ownerships.length === 0;
-
-const hasItems =  args.fns.filteredItems().length > 0;
-
-return {
-  as: "div",
-  hide: args.fns.loading() || hasItems || hasNoOwnerships
-};
-'''
-      }
-    }
-    {
-      id: "31"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}`;
-'''
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-let icon;
-if (args.fns.isPlaylists()) {
-  icon = "mdi:playlist-play";
-} else if (args.fns.isChannels()) {
-  icon = "mdi:youtube";
-} else if (args.fns.isChannelDetail()) {
-  icon = "mdi:playlist-remove";
-} else if (args.fns.isPlaylistDetail()) {
-  icon = "mdi:video-off";
-} else if (args.fns.isSearchView()) {
-  icon = "mdi:magnify";
-} else if (args.fns.isFavouritesView()) {
-  icon = "carbon:favorite";
-} else if (args.fns.isExtensionView()) {
-  icon = "carbon:data-1";
-}
-
-return {
-  as: "icon",
-  icon,
-  width: 64,
-  height: 64
-};
-'''
-      }
-    }
-    {
-      id: "32"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 0.5rem 0;
-}`;
-'''
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const hasSearchTerm = args.fns.searchTerm().length > 0;
-const query = args.searchParams?.q || "";
-
-let title;
-if (hasSearchTerm) {
-  title = "No results found";
-} else if (args.fns.isChannels()) {
-  title = "No channels yet";
-} else if (args.fns.isPlaylists()) {
-  title = "No playlists yet";
-} else if (args.fns.isChannelDetail()) {
-  title = "No playlists found";
-} else if (args.fns.isPlaylistDetail()) {
-  title = "No videos found";
-} else if (args.fns.isSearchView()) {
-  title = "Enter a search query";
-} else if (args.fns.isFavouritesView()) {
-  title = "No favourite items yet";
-} else if (args.fns.isExtensionView()) {
-  title = "No Content Found";
-}
-
-return {
-  as: "h3",
-  text: title
-};
-'''
-      }
-    }
-    {
-      id: "33"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-const hasSearchTerm = args.fns.searchTerm().length > 0;
-let text;
-if (hasSearchTerm) {
-  text = "Try adjusting your search terms";
-} else if (args.fns.isChannels()) {
-  text = "Start by adding some YouTube channels to track your content";
-} else if (args.fns.isPlaylists()) {
-  text = "Start by adding some YouTube playlists to organize your content";
-} else if (args.fns.isChannelDetail() || args.fns.isPlaylistDetail()) {
-  text = ""; // Detail view doesn't show description (only has 2 children)
-} else if (args.fns.isSearchView()) {
-  text = "to find channels, playlists, and videos";
-} else if (args.fns.isFavouritesView()) {
-  text = "Start by adding channels, playlists, or videos to your favourites!";
-} else if (args.fns.isExtensionView()) {
-  text = "Open this page on a YouTube video, channel, or playlist page to see content here.";
-}
-
-return {
-  as: "p",
-  text,
-  hide: args.fns.isChannelDetail() || args.fns.isPlaylistDetail()
 };
 '''
       }
@@ -2965,7 +2965,7 @@ return {
       id: e24
       T: Attr
       S: "19"
-      E: "30"
+      E: "28"
     }
     {
       id: e25
@@ -2989,43 +2989,43 @@ return {
       id: e28
       T: Attr
       S: "24"
-      E: "27"
+      E: "26"
     }
     {
       id: e29
       T: Attr
       S: "24"
-      E: "28"
+      E: "27"
     }
     {
       id: e30
       T: Attr
-      S: "24"
+      S: "28"
       E: "29"
     }
     {
       id: e31
       T: Attr
-      S: "25"
-      E: "26"
+      S: "28"
+      E: "31"
     }
     {
       id: e32
       T: Attr
-      S: "30"
-      E: "31"
+      S: "28"
+      E: "32"
     }
     {
       id: e33
       T: Attr
-      S: "30"
-      E: "32"
+      S: "28"
+      E: "33"
     }
     {
       id: e34
       T: Attr
-      S: "30"
-      E: "33"
+      S: "29"
+      E: "30"
     }
   ]
 }

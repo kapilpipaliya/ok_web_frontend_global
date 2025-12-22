@@ -1,0 +1,334 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''
+// Get props from context
+const getParentVertexLabel = () => args.contextData.props?.parentVertexLabel;
+const getToParentEdgeType = () => args.contextData.props?.toParentEdgeType;
+const getRootKeys = () => args.contextData.props?.rootKeys || {};
+
+// State management
+const [root, setRoot] = args.createSignal([]);
+const [expandedKeys, setExpandedKeys] = args.createSignal([]);
+const [selectedItem, setSelectedItem] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+const [childrenCache, setChildrenCache] = args.createSignal({});
+
+// Fetch root vertices
+const fetchRoot = async () => {
+  const parentVertexLabel = getParentVertexLabel();
+  const toParentEdgeType = getToParentEdgeType();
+  const rootKeys = getRootKeys();
+
+  if (!parentVertexLabel || !toParentEdgeType) {
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getVertexChildren",
+      contextData: {
+        parentVertexLabel,
+        toParentEdgeType,
+        rootKeys
+      }
+    });
+
+    if (result?.result?.success && result.result.data) {
+      const rootItems = result.result.data;
+      setRoot(rootItems);
+      // Auto-expand root items
+      const rootIds = rootItems.map(v => v.id);
+      setExpandedKeys(rootIds);
+      // Fetch children for all root items
+      for (const rootItem of rootItems) {
+        await fetchChildren(rootItem.id);
+      }
+    } else {
+      args.showErrorToast?.(result?.result?.message || result?.error || "Failed to load root vertices");
+    }
+  } catch (error) {
+    console.error("Error fetching root:", error);
+    args.showErrorToast?.("Failed to load sidebar data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Fetch children for a specific parent
+const fetchChildren = async (parentId, forceRefresh = false) => {
+  const parentVertexLabel = getParentVertexLabel();
+  const toParentEdgeType = getToParentEdgeType();
+
+  if (!parentVertexLabel || !toParentEdgeType || !parentId) {
+    return [];
+  }
+
+  // Check cache first (unless forcing refresh)
+  if (!forceRefresh) {
+    const cache = childrenCache();
+    if (cache[parentId]) {
+      return cache[parentId];
+    }
+  }
+
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getVertexChildren",
+      contextData: {
+        parentVertexLabel,
+        toParentEdgeType,
+        parentId
+      }
+    });
+
+    if (result?.result?.success && result.result.data) {
+      const children = result.result.data;
+      // Update cache
+      const cache = childrenCache();
+      setChildrenCache({ ...cache, [parentId]: children });
+      return children;
+    }
+  } catch (error) {
+    console.error("Error fetching children:", error);
+  }
+
+  return [];
+};
+
+// Toggle expand/collapse
+const toggleExpand = async (itemId) => {
+  const currentExpanded = expandedKeys();
+  const isExpanded = currentExpanded.includes(itemId);
+
+  if (isExpanded) {
+    setExpandedKeys(currentExpanded.filter(id => id !== itemId));
+  } else {
+    setExpandedKeys([...currentExpanded, itemId]);
+    // Always fetch children when expanding (cache will be checked inside fetchChildren)
+    await fetchChildren(itemId);
+  }
+};
+
+// Handle item selection
+const handleItemSelect = (item) => {
+  setSelectedItem(item);
+  // Call onItemSelect if provided via props
+  if (args.contextData.props?.onItemSelect) {
+    args.contextData.props.onItemSelect(item);
+  }
+};
+
+// Initialize on mount
+const initialize = async () => {
+  await fetchRoot();
+};
+
+return {
+  root,
+  setRoot,
+  expandedKeys,
+  setExpandedKeys,
+  selectedItem,
+  setSelectedItem,
+  loading,
+  setLoading,
+  childrenCache,
+  setChildrenCache,
+  fetchRoot,
+  fetchChildren,
+  toggleExpand,
+  handleItemSelect,
+  initialize,
+  getParentVertexLabel,
+  getToParentEdgeType,
+  getRootKeys
+};
+'''
+        key: Sidebar
+        props: ""
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(2, 20% calc(80% - 4px));
+  height: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_container
+        props:
+          '''
+return {
+  as: "div",
+  onMount: () => {
+    args.fns.initialize();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  overflow-y: auto;
+  padding: 8px;
+  border-right: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_tree
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_tree_list
+        props:
+          '''
+return {
+  as: "ul",
+  loop: true,
+  contextName: "sidebarItem",
+  data: args.fns.root()
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SidebarTreeItem
+        key: sidebar_tree_item
+        props:
+          '''
+return {
+  item: args.contextData.sidebarItem,
+  expandedKeys: args.fns.expandedKeys(),
+  selectedItem: args.fns.selectedItem(),
+  onToggleExpand: args.fns.toggleExpand,
+  onItemSelect: args.fns.handleItemSelect,
+  fetchChildren: args.fns.fetchChildren,
+  parentVertexLabel: args.fns.getParentVertexLabel(),
+  toParentEdgeType: args.fns.getToParentEdgeType(),
+  formConfig: args.contextData.props?.formConfig,
+  rootKeys: args.fns.getRootKeys()
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Slot
+        slot: main
+        key: sidebar_main_content
+        props:
+          '''
+return {
+
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  overflow-y: auto;
+  padding: 8px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_main_wrapper
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+  ]
+}

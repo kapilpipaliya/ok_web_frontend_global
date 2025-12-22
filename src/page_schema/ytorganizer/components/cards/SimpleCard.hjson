@@ -169,7 +169,7 @@ return {
       P: {
         type: string
         defValue: ""
-        key: title
+        key: icon
       }
     }
     {
@@ -178,11 +178,20 @@ return {
       P: {
         type: string
         defValue: ""
-        key: icon
+        key: title
       }
     }
     {
       id: "9"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: noPadding
+        defValue: false
+      }
+    }
+    {
+      id: "10"
       L: ComponentVariant
       P: {
         type: string
@@ -191,34 +200,7 @@ return {
       }
     }
     {
-      id: "10"
-      L: ComponentVariantOption
-      P: {
-        description: Default card style with standard background and border
-        value: default
-        key: default
-      }
-    }
-    {
       id: "11"
-      L: ComponentVariantOption
-      P: {
-        description: Error state with red border and light red background
-        value: error
-        key: error
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariantOption
-      P: {
-        description: Warning state with yellow border and light yellow background
-        value: warning
-        key: warning
-      }
-    }
-    {
-      id: "13"
       L: ComponentVariantOption
       P: {
         description: Success state with green border and light green background
@@ -227,12 +209,30 @@ return {
       }
     }
     {
-      id: "14"
-      L: ComponentVariant
+      id: "12"
+      L: ComponentVariantOption
       P: {
-        type: boolean
-        key: noPadding
-        defValue: false
+        description: Error state with red border and light red background
+        value: error
+        key: error
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Warning state with yellow border and light yellow background
+        value: warning
+        key: warning
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        description: Default card style with standard background and border
+        value: default
+        key: default
       }
     }
   ]
@@ -265,7 +265,7 @@ return {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "14"
+      E: "10"
     }
     {
       id: e6
@@ -294,26 +294,26 @@ return {
     {
       id: e10
       T: ComponentVariantOption
-      S: "9"
-      E: "10"
+      S: "10"
+      E: "11"
     }
     {
       id: e11
       T: ComponentVariantOption
-      S: "9"
-      E: "11"
+      S: "10"
+      E: "12"
     }
     {
       id: e12
       T: ComponentVariantOption
-      S: "9"
-      E: "12"
+      S: "10"
+      E: "13"
     }
     {
       id: e13
       T: ComponentVariantOption
-      S: "9"
-      E: "13"
+      S: "10"
+      E: "14"
     }
   ]
 }

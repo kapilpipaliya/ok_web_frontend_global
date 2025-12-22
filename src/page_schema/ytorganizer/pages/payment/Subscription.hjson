@@ -66,8 +66,8 @@ return {
   getPlanColor
 };
 '''
-        url: /subscription
         key: Subscription
+        url: /subscription
         props:
           '''
 return {

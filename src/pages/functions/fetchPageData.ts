@@ -3,7 +3,6 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";
 import type { Id } from "~/lib/graph/type/id";
-import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { fetchComponentDataFromGraph } from "./fetchComponentData";
 
 export interface FetchFormDataResult {
@@ -22,7 +21,6 @@ export interface FetchFormMetaDataResult {
 }
 
 export async function fetchFormData(
-  graph: GraphInterface,
   metaResult: {
     data?: ServerResult;
     form?: IFormMetaData;
@@ -53,7 +51,7 @@ export async function fetchFormData(
   }
 
   try {
-    const formDataResult = await getFormData(graph, metaResult, id);
+    const formDataResult = await getFormData(metaResult, id);
 
     if (
       formDataResult.error ||

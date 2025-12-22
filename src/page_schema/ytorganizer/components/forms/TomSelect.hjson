@@ -887,22 +887,12 @@ return {
       id: "3"
       L: ComponentVariant
       P: {
-        type: string
-        key: labelKey
-        defValue: title
+        type: function
+        key: onChange
       }
     }
     {
       id: "4"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: dataKey
-        defValue: ""
-      }
-    }
-    {
-      id: "5"
       L: ComponentVariant
       P: {
         type: string
@@ -911,20 +901,30 @@ return {
       }
     }
     {
+      id: "5"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: labelKey
+        defValue: title
+      }
+    }
+    {
       id: "6"
       L: ComponentVariant
       P: {
-        type: object
-        key: functionContext
+        type: string
+        defValue: ""
+        key: value
       }
     }
     {
       id: "7"
       L: ComponentVariant
       P: {
-        type: array
-        key: plugins
-        defValue: []
+        type: string
+        key: functionName
+        defValue: ""
       }
     }
     {
@@ -940,52 +940,53 @@ return {
       id: "9"
       L: ComponentVariant
       P: {
-        type: string
-        key: functionName
-        defValue: ""
+        type: array
+        key: plugins
+        defValue: []
       }
     }
     {
       id: "10"
       L: ComponentVariant
       P: {
-        type: array
-        key: options
-        defValue: []
+        type: string
+        key: pluralName
+        defValue: ""
       }
     }
     {
       id: "11"
       L: ComponentVariant
       P: {
-        type: number
-        key: maxItems
+        type: boolean
+        key: search
+        defValue: true
       }
     }
     {
       id: "12"
       L: ComponentVariant
       P: {
-        type: function
-        key: onChange
+        type: boolean
+        key: multiple
+        defValue: false
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: value
+        type: object
+        key: functionContext
       }
     }
     {
       id: "14"
       L: ComponentVariant
       P: {
-        type: string
-        key: pluralName
-        defValue: ""
+        type: array
+        key: options
+        defValue: []
       }
     }
     {
@@ -1011,7 +1012,7 @@ return {
       L: ComponentVariant
       P: {
         type: boolean
-        key: disabled
+        key: required
         defValue: false
       }
     }
@@ -1019,18 +1020,18 @@ return {
       id: "18"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: required
-        defValue: false
+        type: string
+        key: dataKey
+        defValue: ""
       }
     }
     {
       id: "19"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: search
-        defValue: true
+        type: string
+        key: valueKey
+        defValue: id
       }
     }
     {
@@ -1038,7 +1039,7 @@ return {
       L: ComponentVariant
       P: {
         type: boolean
-        key: multiple
+        key: disabled
         defValue: false
       }
     }
@@ -1046,9 +1047,8 @@ return {
       id: "21"
       L: ComponentVariant
       P: {
-        type: string
-        key: valueKey
-        defValue: id
+        type: number
+        key: maxItems
       }
     }
   ]

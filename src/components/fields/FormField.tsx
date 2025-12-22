@@ -127,7 +127,7 @@ export function FormField(
     try {
       return;
       // TODO: make this work
-      const { data, error } = await getFormData(graph, { form: meta() }, id()!);
+      const { data, error } = await getFormData({ form: meta() }, id()!);
 
       if (error || !Array.isArray(data?.result) || data.result.length === 0) {
         setFormStore("error", `No ${label()} found`);

@@ -151,26 +151,25 @@ return {
       L: Attr
       P: {
         displayOrder: 2
-        componentName: Slot
         slot: children
+        componentName: Slot
       }
     }
     {
       id: "6"
       L: ComponentVariant
       P: {
-        type: number
-        key: itemHeight
-        defValue: 90
+        type: array
+        key: items
+        defValue: []
       }
     }
     {
       id: "7"
       L: ComponentVariant
       P: {
-        type: number
-        key: overscan
-        defValue: 5
+        type: function
+        key: onScroll
       }
     }
     {
@@ -186,17 +185,18 @@ return {
       id: "9"
       L: ComponentVariant
       P: {
-        type: function
-        key: onScroll
+        type: number
+        key: overscan
+        defValue: 5
       }
     }
     {
       id: "10"
       L: ComponentVariant
       P: {
-        type: array
-        key: items
-        defValue: []
+        type: number
+        key: itemHeight
+        defValue: 90
       }
     }
   ]

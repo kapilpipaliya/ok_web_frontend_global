@@ -21,7 +21,16 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { contentType, search, filters = {}, sort = {} } = args.contextData;
+const { 
+  contentType, 
+  search, 
+  filters = {}, 
+  sort = {},
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType
+} = args.contextData;
 
 if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
   return {
@@ -82,15 +91,53 @@ if (sort && sort.column) {
   }
 }
 
+// Build category filter if provided
+let categoryFilter = "";
+if (categoryId && parentVertexLabel && toParentEdgeType) {
+  // Filter by category relationship - items that have this category as parent
+  categoryFilter = `
+  MATCH (cat:${parentVertexLabel})
+  WHERE elementId(cat) = $categoryId
+  MATCH (cat)-[:${toParentEdgeType}]->(c)`;
+  queryParams.categoryId = categoryId;
+} else if (showUnassigned && parentVertexLabel && toParentEdgeType) {
+  // Show items without any category relationship
+  const unassignedCondition = `NOT EXISTS {
+    MATCH (cat:${parentVertexLabel})-[:${toParentEdgeType}]->(c)
+  }`;
+  if (whereClause) {
+    whereClause = whereClause + " AND " + unassignedCondition;
+  } else {
+    whereClause = "WHERE " + unassignedCondition;
+  }
+}
+
 // Optimized query with indexed user lookup first and related vertices
-const query = `
+let query = "";
+if (categoryId && parentVertexLabel && toParentEdgeType) {
+  // Query with category filter - match category first, then user relationship
+  query = `
+  MATCH (u:User {uuid: $userUuid})
+  MATCH (cat:${parentVertexLabel})
+  WHERE elementId(cat) = $categoryId
+  MATCH (cat)-[:${toParentEdgeType}]->(c:${vertexLabel})
+  MATCH (u)-[:${relationshipType}]->(c)
+  ${whereClause}
+  OPTIONAL MATCH (c)-[r]->(related)
+  ${orderByClause}
+  RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
+  `;
+} else {
+  // Standard query without category filter
+  query = `
   MATCH (u:User {uuid: $userUuid})
   MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
   ${whereClause}
   OPTIONAL MATCH (c)-[r]->(related)
   ${orderByClause}
   RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
-`;
+  `;
+}
 
 const result = await args.session.run(query, queryParams);
 
