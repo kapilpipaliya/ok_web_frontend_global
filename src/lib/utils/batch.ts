@@ -33,7 +33,7 @@ export interface BatchOptions {
 export async function batchProcess<T, R>(
   items: T[],
   processor: (item: T, index: number) => Promise<R>,
-  options: BatchOptions = {}
+  options: BatchOptions = {},
 ): Promise<BatchResult<R>> {
   const {
     batchSize = 100,
@@ -95,7 +95,7 @@ export async function batchProcess<T, R>(
  */
 async function processWithConcurrency<T>(
   promises: Promise<T>[],
-  concurrency: number
+  concurrency: number,
 ): Promise<T[]> {
   const results: T[] = [];
   const executing: Promise<void>[] = [];
@@ -111,7 +111,7 @@ async function processWithConcurrency<T>(
       await Promise.race(executing);
       executing.splice(
         executing.findIndex((e) => e === p),
-        1
+        1,
       );
     }
   }
@@ -127,7 +127,7 @@ export async function batchCreateVertices<T extends Record<string, any>>(
   session: Session | Transaction,
   label: string,
   items: T[],
-  options: BatchOptions = {}
+  options: BatchOptions = {},
 ): Promise<BatchResult<any>> {
   const processor = async (item: T) => {
     const keys = Object.keys(item);
@@ -152,7 +152,7 @@ export async function batchUpdateVertices<T extends Record<string, any>>(
   session: Session | Transaction,
   label: string,
   items: Array<{ id: string; updates: T }>,
-  options: BatchOptions = {}
+  options: BatchOptions = {},
 ): Promise<BatchResult<any>> {
   const processor = async (item: { id: string; updates: T }) => {
     const keys = Object.keys(item.updates);
@@ -181,7 +181,7 @@ export async function batchDeleteVertices(
   session: Session | Transaction,
   label: string,
   ids: string[],
-  options: BatchOptions = {}
+  options: BatchOptions = {},
 ): Promise<BatchResult<boolean>> {
   const processor = async (id: string) => {
     const query = `
@@ -203,7 +203,7 @@ export async function batchDeleteVertices(
 export async function parallelMap<T, R>(
   items: T[],
   mapper: (item: T, index: number) => Promise<R>,
-  concurrency: number = 5
+  concurrency = 5,
 ): Promise<R[]> {
   const results: R[] = [];
   const executing: Promise<void>[] = [];
@@ -219,7 +219,7 @@ export async function parallelMap<T, R>(
       await Promise.race(executing);
       executing.splice(
         executing.findIndex((e) => e === p),
-        1
+        1,
       );
     }
   }
@@ -247,7 +247,7 @@ export function chunk<T>(array: T[], size: number): T[][] {
 export async function processInChunks<T, R>(
   items: T[],
   processor: (chunk: T[], chunkIndex: number) => Promise<R[]>,
-  chunkSize: number = 100
+  chunkSize = 100,
 ): Promise<R[]> {
   const chunks = chunk(items, chunkSize);
   const results: R[] = [];
@@ -270,14 +270,9 @@ export async function retry<T>(
     delay?: number;
     backoff?: number;
     onRetry?: (attempt: number, error: any) => void;
-  } = {}
+  } = {},
 ): Promise<T> {
-  const {
-    maxAttempts = 3,
-    delay = 1000,
-    backoff = 2,
-    onRetry,
-  } = options;
+  const { maxAttempts = 3, delay = 1000, backoff = 2, onRetry } = options;
 
   let lastError: any;
 
@@ -296,7 +291,7 @@ export async function retry<T>(
       }
 
       // Wait with exponential backoff
-      const waitTime = delay * Math.pow(backoff, attempt - 1);
+      const waitTime = delay * backoff ** (attempt - 1);
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   }
@@ -309,7 +304,7 @@ export async function retry<T>(
  */
 export function debounce<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   let timeoutId: NodeJS.Timeout | null = null;
 
@@ -331,7 +326,7 @@ export function debounce<T extends (...args: any[]) => any>(
  */
 export function throttle<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   let lastRun = 0;
 
@@ -344,10 +339,13 @@ export function throttle<T extends (...args: any[]) => any>(
     }
 
     return new Promise((resolve) => {
-      setTimeout(() => {
-        lastRun = Date.now();
-        resolve(fn(...args));
-      }, delay - (now - lastRun));
+      setTimeout(
+        () => {
+          lastRun = Date.now();
+          resolve(fn(...args));
+        },
+        delay - (now - lastRun),
+      );
     });
   };
 }
@@ -358,7 +356,7 @@ export function throttle<T extends (...args: any[]) => any>(
 export async function raceWithTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
-  timeoutError: string = "Operation timeout"
+  timeoutError = "Operation timeout",
 ): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => reject(new Error(timeoutError)), timeoutMs);

@@ -109,7 +109,10 @@ export class Logger {
   /**
    * Start performance timer
    */
-  startTimer(label: string, metadata: Record<string, any> = {}): PerformanceTimer {
+  startTimer(
+    label: string,
+    metadata: Record<string, any> = {},
+  ): PerformanceTimer {
     return new PerformanceTimer(label, { ...this.context, ...metadata });
   }
 
@@ -151,14 +154,22 @@ export class Logger {
   /**
    * Log with trace ID
    */
-  trace(requestId: string, message: string, context?: Record<string, any>): void {
+  trace(
+    requestId: string,
+    message: string,
+    context?: Record<string, any>,
+  ): void {
     this.log("info", message, { ...context, requestId });
   }
 
   /**
    * Core log method
    */
-  private log(level: LogLevel, message: string, context?: Record<string, any>): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    context?: Record<string, any>,
+  ): void {
     // Check if should log based on level
     if (!this.shouldLog(level)) {
       return;
@@ -260,7 +271,7 @@ export class Logger {
           userId: entry.userId || null,
           duration: entry.duration || null,
           error: entry.error ? JSON.stringify(entry.error) : null,
-        }
+        },
       );
     } catch (error) {
       // Silent fail - don't break app because of logging
@@ -277,7 +288,10 @@ let globalLogger: Logger | null = null;
 /**
  * Create logger
  */
-export function createLogger(config?: LoggerConfig, context?: Record<string, any>): Logger {
+export function createLogger(
+  config?: LoggerConfig,
+  context?: Record<string, any>,
+): Logger {
   return new Logger(config, context);
 }
 
@@ -340,7 +354,11 @@ export const logger = {
     getLogger().fatal(message, error, context);
   },
 
-  trace: (requestId: string, message: string, context?: Record<string, any>) => {
+  trace: (
+    requestId: string,
+    message: string,
+    context?: Record<string, any>,
+  ) => {
     getLogger().trace(requestId, message, context);
   },
 
@@ -364,7 +382,7 @@ export async function queryLogs(
     fromDate?: string;
     toDate?: string;
     limit?: number;
-  } = {}
+  } = {},
 ): Promise<LogEntry[]> {
   const conditions: string[] = [];
   const params: Record<string, any> = {};
@@ -399,7 +417,8 @@ export async function queryLogs(
     params.toDate = filters.toDate;
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   const limitClause = filters.limit ? `LIMIT ${filters.limit}` : "";
 
   const query = `
@@ -432,7 +451,7 @@ export async function queryLogs(
  */
 export async function clearOldLogs(
   session: Session,
-  olderThanDays: number = 30
+  olderThanDays = 30,
 ): Promise<number> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
@@ -442,7 +461,7 @@ export async function clearOldLogs(
      WHERE l.timestamp < $cutoffDate
      DELETE l
      RETURN count(l) as deleted`,
-    { cutoffDate: cutoffDate.toISOString() }
+    { cutoffDate: cutoffDate.toISOString() },
   );
 
   return result.records[0]?.get("deleted").toNumber() || 0;

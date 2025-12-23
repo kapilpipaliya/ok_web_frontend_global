@@ -110,16 +110,15 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
 
     // Memoize component default values to avoid recalculation
     const defaultValuesMemo = createMemo(() =>
-      getComponentDefaultValues(
-        getCompVertex()!,
-        graph,
-        setGraph,
-      )
+      getComponentDefaultValues(getCompVertex()!, graph, setGraph),
     );
 
     // Merge defaults with props once
     const propsMemo = createMemo(() => {
-      return { ...defaultValuesMemo(), ...removeUndefinedProperties(otherProps) };
+      return {
+        ...defaultValuesMemo(),
+        ...removeUndefinedProperties(otherProps),
+      };
     });
 
     const valuesProxy = new Proxy(
@@ -142,7 +141,9 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
             return propValue;
           }
           // Use memoized defaults instead of recalculating
-          return defaultValuesMemo()[key as keyof ReturnType<typeof defaultValuesMemo>];
+          return defaultValuesMemo()[
+            key as keyof ReturnType<typeof defaultValuesMemo>
+          ];
         },
         ownKeys() {
           return Reflect.ownKeys(propsMemo());
@@ -174,25 +175,26 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
       // Setup function proxy for component functions
       // Now useFunctionProxy is called inside DataContext.Provider context
       // so useDataContext() will return newDataContext with props
-      const { getFunctionArgumentWithValue, setRef, setMounted } = useFunctionProxy({
-        props: {
-          get meta() {
-            return getCompVertex() as Vertex;
+      const { getFunctionArgumentWithValue, setRef, setMounted } =
+        useFunctionProxy({
+          props: {
+            get meta() {
+              return getCompVertex() as Vertex;
+            },
+            get data() {
+              return data();
+            },
           },
-          get data() {
-            return data();
-          },
-        },
-        value: () => data(),
-        componentName: () => componentName() as string,
-        isNoPermissionCheck: () =>
-          parentRenderContext()?.context.isNoPermissionCheck,
-        isViewMode: () => false,
-        hasFullPermission: () => true,
-        hasEditPermission: () => true,
-        hasCreatePermission: () => true,
-        hasViewPermission: () => true,
-      });
+          value: () => data(),
+          componentName: () => componentName() as string,
+          isNoPermissionCheck: () =>
+            parentRenderContext()?.context.isNoPermissionCheck,
+          isViewMode: () => false,
+          hasFullPermission: () => true,
+          hasEditPermission: () => true,
+          hasCreatePermission: () => true,
+          hasViewPermission: () => true,
+        });
 
       // Evaluate dynamic props from metaVertex
       const dynamicProps = createDynamicPropsMemo(

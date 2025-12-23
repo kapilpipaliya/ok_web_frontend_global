@@ -3,7 +3,14 @@ import { debounce } from "@solid-primitives/scheduled";
 import { useParams, useSearchParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { type IDBPDatabase, openDB } from "idb";
-import { createEffect, createSignal, type JSX, onCleanup, onMount, Show } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  type JSX,
+  onCleanup,
+  onMount,
+  Show,
+} from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
@@ -51,13 +58,13 @@ export function PageDesignerWrapper(): JSX.Element {
     key: string;
   }
   let tabsToLoad: TabInfo[] = [];
-  
+
   if (tabsFromQuery) {
     // Parse query parameter tabs
-    const tabsArray = Array.isArray(tabsFromQuery) 
-      ? tabsFromQuery 
+    const tabsArray = Array.isArray(tabsFromQuery)
+      ? tabsFromQuery
       : tabsFromQuery.split(",");
-    
+
     for (const tab of tabsArray) {
       if (!tab) continue;
       const [entity, key] = tab.split(":");
@@ -69,18 +76,23 @@ export function PageDesignerWrapper(): JSX.Element {
     // Fall back to path parameter
     tabsToLoad = [{ entity: params.entity, key: params.id }];
   }
-  
+
   // Ensure params is included if it exists and not already in the list
   if (params.id && params.entity) {
     const currentTab = `${params.entity}:${params.id}`;
-    const exists = tabsToLoad.some(t => `${t.entity}:${t.key}` === currentTab);
+    const exists = tabsToLoad.some(
+      (t) => `${t.entity}:${t.key}` === currentTab,
+    );
     if (!exists) {
       tabsToLoad.unshift({ entity: params.entity, key: params.id });
     }
   }
 
   // Initialize with first tab, will be updated if we need to fetch from DB
-  const firstTab = tabsToLoad[0] || { entity: params.entity || "", key: params.id || "" };
+  const firstTab = tabsToLoad[0] || {
+    entity: params.entity || "",
+    key: params.id || "",
+  };
   const newOpenVertex = newVertex(uuidv7(), ["OpenForm"], {
     dataId: firstTab.key,
     formId,
@@ -130,17 +142,20 @@ export function PageDesignerWrapper(): JSX.Element {
       return;
     }
     const openedFormIds: string[] = [newOpenVertex.id];
-    let activeFormId = formId;
+    const activeFormId = formId;
 
     // Group tabs by entity and separate keys from IDs
-    const entityGroups = new Map<string, { keys: string[]; ids: Array<{ key: string; index: number }> }>();
-    
+    const entityGroups = new Map<
+      string,
+      { keys: string[]; ids: Array<{ key: string; index: number }> }
+    >();
+
     tabsToLoad.forEach((tab, index) => {
       if (!entityGroups.has(tab.entity)) {
         entityGroups.set(tab.entity, { keys: [], ids: [] });
       }
       const group = entityGroups.get(tab.entity)!;
-      
+
       // Check if it's a key (no '-') or an ID (with '-')
       if (tab.key && !tab.key.includes("-")) {
         group.keys.push(tab.key);
@@ -151,7 +166,7 @@ export function PageDesignerWrapper(): JSX.Element {
 
     // Fetch keys for each entity separately
     const idMap = new Map<string, string>(); // Map entity:key -> id
-    
+
     for (const [entity, group] of entityGroups.entries()) {
       if (group.keys.length > 0) {
         try {
@@ -166,7 +181,11 @@ export function PageDesignerWrapper(): JSX.Element {
             },
           );
 
-          if (isValidResponse(data) && data.result && Array.isArray(data.result)) {
+          if (
+            isValidResponse(data) &&
+            data.result &&
+            Array.isArray(data.result)
+          ) {
             // Map fetched vertices: entity:key -> id
             for (const vertex of data.result as Vertex[]) {
               if (vertex?.P?.key && vertex?.id) {
@@ -183,7 +202,7 @@ export function PageDesignerWrapper(): JSX.Element {
     // Process all tabs and create/update OpenForm vertices
     for (let i = 0; i < tabsToLoad.length; i++) {
       const tab = tabsToLoad[i];
-      if (!tab.entity || !tab.key) continue;
+      if (!(tab.entity && tab.key)) continue;
 
       // Get actual ID: if it's a key, use the mapped ID, otherwise use the key directly
       const mapKey = `${tab.entity}:${tab.key}`;
@@ -193,16 +212,10 @@ export function PageDesignerWrapper(): JSX.Element {
 
       if (i === 0) {
         // Update the first OpenForm vertex with the actual ID and entity
-        mergeVertexProperties(
-          0,
-          newOpenVertex.id,
-          graph,
-          setGraph,
-          {
-            dataId: actualId,
-            label: tab.entity,
-          },
-        );
+        mergeVertexProperties(0, newOpenVertex.id, graph, setGraph, {
+          dataId: actualId,
+          label: tab.entity,
+        });
       } else {
         // Create additional OpenForm vertices for other tabs
         const additionalFormId = uuidv7();
@@ -230,7 +243,7 @@ export function PageDesignerWrapper(): JSX.Element {
         formId: activeFormId,
       },
     );
-    
+
     // Log for debugging - can be removed later
     if (openedFormIds.length > 1) {
       console.log("Loaded tabs:", openedFormIds.length, openedFormIds);
@@ -253,7 +266,7 @@ export function PageDesignerWrapper(): JSX.Element {
 
     handleResize(); // Initial check
     makeEventListener(window, "resize", debouncedHandleResize);
-    
+
     // Mark data as ready after all async operations complete
     setIsDataReady(true);
     // fetchCompExamples();

@@ -91,7 +91,7 @@ async function findUserInternal(
   dbSession: Session,
   uuid: null | string,
   emailOrUsername: null | string,
-  addOptionalData = false
+  addOptionalData = false,
 ): Promise<null | Result<RecordShape>> {
   if (!(emailOrUsername || uuid)) {
     return null;
@@ -137,9 +137,7 @@ export async function findUserVertexSimple(
   dbSession: Session,
   uuid: string,
   emailOrUsername: null | string,
-  
 ): Promise<null | Vertex> {
-
   const result = await findUserInternal(dbSession, uuid, emailOrUsername);
   if (!result || result.records.length === 0) {
     return null;

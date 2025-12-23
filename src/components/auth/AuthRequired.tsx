@@ -69,7 +69,13 @@ export function AuthRequired(props: ParentProps) {
     return (
       <Show
         when={authData() && !("error" in authData()!)}
-        fallback={<ErrorMessage message={(authData() as APIErrorResponse)?.error || "Not authenticated"} />}
+        fallback={
+          <ErrorMessage
+            message={
+              (authData() as APIErrorResponse)?.error || "Not authenticated"
+            }
+          />
+        }
       >
         {props.children}
       </Show>

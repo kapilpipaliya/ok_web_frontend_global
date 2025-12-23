@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 import { join } from "path";
-import type {Node, Session} from "neo4j-driver";
+import type { Node, Session } from "neo4j-driver";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
@@ -11,8 +11,11 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Edge } from "~/lib/graph/type/edge";
 
 import { validateUserAndPermissions } from "~/routes/api/schema/export/validation/validateUserAndPermissions";
-import {ExportType, writeSchemaToFile} from "./export/utils/writeSchemaToFile";
-import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
+import {
+  type ExportType,
+  writeSchemaToFile,
+} from "./export/utils/writeSchemaToFile";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export interface ExportStats {
   exportedComponents: string[];
@@ -26,15 +29,16 @@ export interface ExportStats {
 async function fetchEntities(
   dbSession: Session,
   entityType: "Component" | "Page" | "Theme" | "Function",
-  skipKeys: string[] = []
+  skipKeys: string[] = [],
 ): Promise<Record<string, ExportedSchema>> {
-  const result = await dbSession.run(`
+  const result = await dbSession.run(
+    `
     MATCH (entity:${entityType})
     WHERE NOT entity.key IN $skipKeys
     RETURN entity
     ORDER BY entity.key
   `,
-    { skipKeys }
+    { skipKeys },
   );
 
   const entities: Record<string, ExportedSchema> = {};
@@ -100,13 +104,13 @@ async function fetchEntities(
 }
 
 async function exportEntityGroup({
-                                   entities,
-                                   basePath,
-                                   subDomain,
-                                   folderName,
-                                   statsArray,
-                                   stats
-                                 }: {
+  entities,
+  basePath,
+  subDomain,
+  folderName,
+  statsArray,
+  stats,
+}: {
   entities: Record<string, ExportedSchema>;
   basePath: string;
   subDomain: string;
@@ -152,7 +156,7 @@ export async function GET({ request }: APIEvent) {
       subDomain,
       folderName: "components",
       statsArray: stats.exportedComponents,
-      stats
+      stats,
     });
 
     // ---- PAGES ----
@@ -163,7 +167,7 @@ export async function GET({ request }: APIEvent) {
       subDomain,
       folderName: "pages",
       statsArray: stats.exportedPages,
-      stats
+      stats,
     });
 
     // ---- THEMES ----
@@ -174,7 +178,7 @@ export async function GET({ request }: APIEvent) {
       subDomain,
       folderName: "themes",
       statsArray: stats.exportedThemes,
-      stats
+      stats,
     });
 
     // ---- FUNCTIONS ----
@@ -185,7 +189,7 @@ export async function GET({ request }: APIEvent) {
       subDomain,
       folderName: "functions",
       statsArray: stats.exportedFunctions,
-      stats
+      stats,
     });
 
     // ---- Log activity ----
@@ -197,7 +201,7 @@ export async function GET({ request }: APIEvent) {
         "Schema",
         subDomain,
         user.P.email,
-        `Exported schema types for subdomain ${subDomain}`
+        `Exported schema types for subdomain ${subDomain}`,
       );
       await tx.commit();
     } catch (err) {
@@ -209,7 +213,7 @@ export async function GET({ request }: APIEvent) {
       success: true,
       message: "Export completed for Components, Pages, Themes, Functions.",
       exportPath: join(exportBasePath, subDomain),
-      details: stats
+      details: stats,
     };
   } catch (error) {
     return handleAPIError(error);

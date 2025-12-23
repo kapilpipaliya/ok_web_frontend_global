@@ -45,7 +45,8 @@ export function createDynamicFunctions(
 
       // If owner is available, run within that context; otherwise throw error
       if (!owner) {
-        const error = "Owner context is required but not found in function arguments."
+        const error =
+          "Owner context is required but not found in function arguments.";
         console.error(error, args);
         throw new Error(error);
       }

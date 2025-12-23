@@ -74,7 +74,9 @@ export async function fetchFormMetaData(
   const componentDataResults = await fetchComponentDataFromGraph(data);
 
   for (const componentData of componentDataResults) {
-    for (const [, vertex] of Object.entries(componentData.graph?.vertexes || {})) {
+    for (const [, vertex] of Object.entries(
+      componentData.graph?.vertexes || {},
+    )) {
       delete vertex.P.createdAt;
       delete vertex.P.updatedAt;
     }

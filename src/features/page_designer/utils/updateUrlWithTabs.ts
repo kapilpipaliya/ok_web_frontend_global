@@ -20,7 +20,9 @@ export function updateUrlWithOpenedTabs(
     return;
   }
 
-  const layoutStore = graph.vertexes[layoutStoreId]?.P as PageLayoutObject | undefined;
+  const layoutStore = graph.vertexes[layoutStoreId]?.P as
+    | PageLayoutObject
+    | undefined;
   if (!layoutStore) {
     return;
   }
@@ -50,7 +52,9 @@ export function updateUrlWithOpenedTabs(
   const firstTab = allTabs[0];
   const [firstEntity, firstKey] = firstTab.split(":");
   const pathParts = currentUrl.pathname.split("/");
-  const entityIndex = pathParts.findIndex((part) => part && !part.includes("("));
+  const entityIndex = pathParts.findIndex(
+    (part) => part && !part.includes("("),
+  );
 
   // Build new path with first tab's entity and key
   if (entityIndex !== -1 && firstEntity && firstKey) {

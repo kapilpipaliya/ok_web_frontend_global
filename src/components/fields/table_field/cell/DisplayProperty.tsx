@@ -171,7 +171,9 @@ export function DisplayProperty(
         </As>
       </Match>
       <Match
-        when={componentName() === "TableField" || componentName() === "DynamicTable"}
+        when={
+          componentName() === "TableField" || componentName() === "DynamicTable"
+        }
       >
         <As
           as="td"

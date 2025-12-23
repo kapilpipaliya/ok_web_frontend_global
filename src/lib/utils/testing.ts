@@ -111,14 +111,21 @@ export function createMockUser(options: MockUserOptions = {}): any {
       role: options.role || "user",
       roles: options.roles || [options.role || "user"],
       permissions: options.permissions || [],
-      isAdmin: options.isAdmin || false,
+      isAdmin: options.isAdmin,
       ...Object.fromEntries(
         Object.entries(options).filter(
           ([key]) =>
-            !["id", "uuid", "email", "name", "role", "roles", "permissions", "isAdmin"].includes(
-              key
-            )
-        )
+            ![
+              "id",
+              "uuid",
+              "email",
+              "name",
+              "role",
+              "roles",
+              "permissions",
+              "isAdmin",
+            ].includes(key),
+        ),
       ),
     },
   };
@@ -130,7 +137,7 @@ export function createMockUser(options: MockUserOptions = {}): any {
 export function createMockVertex(
   id: string,
   labels: string[],
-  properties: Record<string, any> = {}
+  properties: Record<string, any> = {},
 ): Vertex {
   return {
     id,
@@ -149,7 +156,7 @@ export function createMockEdge(
   type: string,
   startId: string,
   endId: string,
-  properties: Record<string, any> = {}
+  properties: Record<string, any> = {},
 ): Edge {
   return {
     id,
@@ -169,7 +176,7 @@ export class FixtureGenerator {
   /**
    * Generate unique ID
    */
-  id(prefix: string = "test"): string {
+  id(prefix = "test"): string {
     return `${prefix}_${Date.now()}_${this.counter++}`;
   }
 
@@ -201,7 +208,7 @@ export class FixtureGenerator {
     type: string,
     startId: string,
     endId: string,
-    properties: Record<string, any> = {}
+    properties: Record<string, any> = {},
   ): Edge {
     return createMockEdge(this.id("edge"), type, startId, endId, properties);
   }
@@ -227,7 +234,7 @@ export function createFixtureGenerator(): FixtureGenerator {
 export async function seedTestData(
   session: Session,
   label: string,
-  data: Array<Record<string, any>>
+  data: Array<Record<string, any>>,
 ): Promise<Vertex[]> {
   const vertices: Vertex[] = [];
 
@@ -262,7 +269,7 @@ export async function seedTestData(
  */
 export async function clearTestData(
   session: Session,
-  labels?: string | string[]
+  labels?: string | string[],
 ): Promise<number> {
   let query: string;
 
@@ -296,7 +303,7 @@ export const assert = {
 
     if (value !== undefined && vertex.P[property] !== value) {
       throw new Error(
-        `Expected property ${property} to be ${value}, got ${vertex.P[property]}`
+        `Expected property ${property} to be ${value}, got ${vertex.P[property]}`,
       );
     }
   },
@@ -316,7 +323,7 @@ export const assert = {
   connects(edge: Edge, startId: string, endId: string): void {
     if (edge.S !== startId || edge.E !== endId) {
       throw new Error(
-        `Edge does not connect ${startId} to ${endId}, got ${edge.S} to ${edge.E}`
+        `Edge does not connect ${startId} to ${endId}, got ${edge.S} to ${edge.E}`,
       );
     }
   },
@@ -324,7 +331,10 @@ export const assert = {
   /**
    * Assert query was called
    */
-  queryWasCalled(mockSession: MockSession, queryPattern: string | RegExp): void {
+  queryWasCalled(
+    mockSession: MockSession,
+    queryPattern: string | RegExp,
+  ): void {
     if (!mockSession.wasQueryCalled(queryPattern)) {
       throw new Error(`Query was not called: ${queryPattern}`);
     }
@@ -338,9 +348,7 @@ export const assert = {
     const expectedStr = JSON.stringify(expected);
 
     if (actualStr !== expectedStr) {
-      throw new Error(
-        `Expected ${expectedStr}, got ${actualStr}`
-      );
+      throw new Error(`Expected ${expectedStr}, got ${actualStr}`);
     }
   },
 };
@@ -350,8 +358,8 @@ export const assert = {
  */
 export async function waitFor(
   condition: () => boolean | Promise<boolean>,
-  timeoutMs: number = 5000,
-  intervalMs: number = 100
+  timeoutMs = 5000,
+  intervalMs = 100,
 ): Promise<void> {
   const startTime = Date.now();
 

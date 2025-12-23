@@ -10,7 +10,10 @@ import { readdir, stat } from "fs/promises";
 export type ExportType = "components" | "pages" | "themes" | "functions";
 
 // ---- NEW: recursively search for existing target file ----
-async function findExistingSchemaFile(baseDir: string, key: string): Promise<string | null> {
+async function findExistingSchemaFile(
+  baseDir: string,
+  key: string,
+): Promise<string | null> {
   const files = await readdir(baseDir, { withFileTypes: true });
 
   for (const file of files) {

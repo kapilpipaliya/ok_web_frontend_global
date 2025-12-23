@@ -61,21 +61,20 @@ const fetchFormMetaDataQuery = query(
   "fetchFormMetaData",
 );
 
-const fetchFormDataQuery = query(
-  async (params: FetchFormDataParams) => {
-    return await fetchFormData(
-      params.metaResult,
-      params.formDataId,
-      params.id,
-      params.isNoPermissionCheck,
-      params.hasRequiredPermissions,
-      params.pageVertexName,
-    );
-  },
-  "fetchFormData",
-);
+const fetchFormDataQuery = query(async (params: FetchFormDataParams) => {
+  return await fetchFormData(
+    params.metaResult,
+    params.formDataId,
+    params.id,
+    params.isNoPermissionCheck,
+    params.hasRequiredPermissions,
+    params.pageVertexName,
+  );
+}, "fetchFormData");
 
-const fetchCustomFormDataQuery = async (getFormData: () => Promise<ServerResult>) => {
+const fetchCustomFormDataQuery = async (
+  getFormData: () => Promise<ServerResult>,
+) => {
   try {
     const data = await getFormData();
     if (!data || data.error) {
@@ -85,7 +84,7 @@ const fetchCustomFormDataQuery = async (getFormData: () => Promise<ServerResult>
   } catch (error) {
     return { error: (error as Error).message };
   }
-}
+};
 
 export function useMetadata(
   props: Readonly<PageViewWrapperProps>,
@@ -148,8 +147,13 @@ export function useMetadata(
         error?: string;
       } = { formMetaId, metaResult };
 
-      if (constants.dataId && constants.dataId !== "new" && !constants.getFormData) {
-        const idLocal = constants.dataId === "new" ? undefined : constants.dataId;
+      if (
+        constants.dataId &&
+        constants.dataId !== "new" &&
+        !constants.getFormData
+      ) {
+        const idLocal =
+          constants.dataId === "new" ? undefined : constants.dataId;
         const formDataParams: FetchFormDataParams = {
           metaResult,
           formDataId: constants.formDataId,
@@ -164,7 +168,9 @@ export function useMetadata(
 
       // Use custom getFormData if provided
       if (props.getFormData) {
-        const customDataResult = await fetchCustomFormDataQuery(props.getFormData);
+        const customDataResult = await fetchCustomFormDataQuery(
+          props.getFormData,
+        );
         if (customDataResult.error) {
           result.error = customDataResult.error;
         } else {

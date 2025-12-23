@@ -1,0 +1,171 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        title: ShopifyLayout
+        key: ShopifyLayout
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: meta
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  name: "shopify-api-key",
+  content: "eaf60f5e8e2b08bb73601c89368304e8"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        as: script
+        displayOrder: 2
+        componentName: Html
+        key: unique_2
+        props:
+          '''return {
+  src: "https://cdn.shopify.com/shopifycloud/app-bridge.js"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        as: script
+        displayOrder: 3
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  src: "https://cdn.shopify.com/shopifycloud/polaris.js"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        contextName: auth
+        as: div
+        displayOrder: 4
+        fns:
+          '''return {
+
+}'''
+        componentName: Html
+        key: unique_4
+        props:
+          '''return {
+  serverFunction: `
+    // This server function runs on the server and authenticates the Shopify admin app
+    // It calls the named server function "authShopifyAdminRequest"
+
+    const searchParams = ${JSON.stringify({ ...args.searchParams })};
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "authShopifyAdminRequest",
+      contextData: {
+        searchParams,
+      },
+    });
+
+    if (result?.error || result?.result?.success === false) {
+      console.error("Shopify auth failed:", result?.error || result?.result?.error);
+      return {
+        data: null,
+        error: result?.error || result?.result?.error || "Shopify auth failed",
+        needsOAuth: result?.result?.needsOAuth || false,
+        redirectUrl: result?.result?.redirectUrl,
+      };
+    }
+
+    return {
+      data: result?.result,
+      needsOAuth: result?.result?.needsOAuth || false,
+      redirectUrl: result?.result?.redirectUrl,
+    };
+  `,
+  onMount: () => {
+    // Check if OAuth redirect is needed after server function completes
+    const authData = args.contextData?.auth;
+    if (authData?.needsOAuth && authData?.redirectUrl) {
+      // Redirect to OAuth begin endpoint
+      window.location.href = authData.redirectUrl;
+    }
+  }
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        componentName: Html
+        key: unique_6
+        props:
+          '''return {
+  text: "Sample"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Slot
+        key: unique_5
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+  ]
+}

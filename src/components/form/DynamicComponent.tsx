@@ -112,29 +112,35 @@ export function DynamicComponent(props: DynamicComponentProps) {
   const [previewStore] = usePreviewContext();
 
   // Setup function proxy with all necessary context
-  const { functionProxy, getFunctionArgumentWithValue, ref, setRef, mounted, setMounted } =
-    useFunctionProxy({
-      props: {
-        get meta() {
-          return props.meta;
-        },
-        get data() {
-          return props.data;
-        },
+  const {
+    functionProxy,
+    getFunctionArgumentWithValue,
+    ref,
+    setRef,
+    mounted,
+    setMounted,
+  } = useFunctionProxy({
+    props: {
+      get meta() {
+        return props.meta;
       },
-      componentName,
-      formVertex,
-      formId,
-      isNoPermissionCheck,
-      isViewMode,
-      value,
-      updateValue,
-      onChange,
-      hasFullPermission,
-      hasEditPermission,
-      hasCreatePermission,
-      hasViewPermission,
-    });
+      get data() {
+        return props.data;
+      },
+    },
+    componentName,
+    formVertex,
+    formId,
+    isNoPermissionCheck,
+    isViewMode,
+    value,
+    updateValue,
+    onChange,
+    hasFullPermission,
+    hasEditPermission,
+    hasCreatePermission,
+    hasViewPermission,
+  });
 
   const dynamicProps = createDynamicPropsMemo(props, {
     graph,
@@ -231,10 +237,12 @@ export function DynamicComponent(props: DynamicComponentProps) {
   );
 
   return (
-    <ErrorBoundary fallback={(err) => {
-      console.error(err);
-      return <div>Error: {err.message}</div>;
-    }}>
+    <ErrorBoundary
+      fallback={(err) => {
+        console.error(err);
+        return <div>Error: {err.message}</div>;
+      }}
+    >
       <Suspense>
         <Show when={cssStyle()} keyed>
           <Style2 cssContent={cssStyle()!} />

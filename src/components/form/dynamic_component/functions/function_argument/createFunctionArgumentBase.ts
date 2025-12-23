@@ -45,14 +45,14 @@ import { debounce } from "@solid-primitives/scheduled";
 import * as focusTrap from "focus-trap";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { atom } from "~/lib/solid/atom";
-import {addNewVertex} from "~/lib/graph/mutate/core/vertex/addNewVertex";
-import {deleteVertex} from "~/lib/graph/mutate/core/vertex/deleteVertex";
-import {isVertex} from "~/lib/graph/mutate/core/vertex/isVertex";
-import {setGraphData} from "~/lib/graph/mutate/core/setGraphData";
-import {addNewEdge} from "~/lib/graph/mutate/core/edge/addNewEdge";
-import {deleteEdge} from "~/lib/graph/mutate/core/edge/deleteEdge";
-import {newEdge} from "~/lib/graph/mutate/core/edge/newEdge";
-import {klona} from "klona";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { isVertex } from "~/lib/graph/mutate/core/vertex/isVertex";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
+import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
+import { klona } from "klona";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -304,6 +304,6 @@ export function createFunctionArgumentBase(
     newEdge,
 
     // setGraphData,
-    klona
+    klona,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

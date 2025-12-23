@@ -22,7 +22,7 @@ export interface ValidationResult<T> {
  */
 export function validate<T>(
   data: unknown,
-  schema: z.ZodSchema<T>
+  schema: z.ZodSchema<T>,
 ): ValidationResult<T> {
   const result = schema.safeParse(data);
 
@@ -74,13 +74,11 @@ export const schema = {
   nullable: <T extends z.ZodTypeAny>(schema: T) => schema.nullable(),
   enum: <T extends [string, ...string[]]>(values: T) => z.enum(values),
   union: <T extends [z.ZodTypeAny, z.ZodTypeAny, ...z.ZodTypeAny[]]>(
-    schemas: T
+    schemas: T,
   ) => z.union(schemas),
   literal: <T extends z.Primitive>(value: T) => z.literal(value),
-  record: <K extends z.ZodTypeAny, V extends z.ZodTypeAny>(
-    key: K,
-    value: V
-  ) => z.record(key, value),
+  record: <K extends z.ZodTypeAny, V extends z.ZodTypeAny>(key: K, value: V) =>
+    z.record(key, value),
   tuple: <T extends [z.ZodTypeAny, ...z.ZodTypeAny[]]>(schemas: T) =>
     z.tuple(schemas),
   any: () => z.any(),
@@ -101,8 +99,7 @@ export const schema = {
     z.number().nonnegative("Must be a non-negative number"),
   positiveInt: () => z.number().int().positive("Must be a positive integer"),
   nonEmptyString: () => z.string().min(1, "Cannot be empty"),
-  isoDate: () =>
-    z.string().datetime("Invalid ISO date format").or(z.date()),
+  isoDate: () => z.string().datetime("Invalid ISO date format").or(z.date()),
 
   // Custom validators
   phoneNumber: () =>
@@ -112,19 +109,17 @@ export const schema = {
   hexColor: () =>
     z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid hex color"),
   json: () =>
-    z
-      .string()
-      .transform((str, ctx) => {
-        try {
-          return JSON.parse(str);
-        } catch {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Invalid JSON",
-          });
-          return z.NEVER;
-        }
-      }),
+    z.string().transform((str, ctx) => {
+      try {
+        return JSON.parse(str);
+      } catch {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid JSON",
+        });
+        return z.NEVER;
+      }
+    }),
 
   // Pagination schema
   pagination: () =>
@@ -139,7 +134,7 @@ export const schema = {
       .string()
       .regex(
         /^([0-9]+:[a-z]+:.+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i,
-        "Invalid ID format"
+        "Invalid ID format",
       ),
 };
 

@@ -43,7 +43,7 @@ export function normalizeSchema(schema: ExportedSchema): ExportedSchema {
     orderedIds.push(vertexId);
 
     // Sort children (Attr and PageLayout by displayOrder)
-    let children = (childrenMap.get(vertexId) || []).sort((a, b) => {
+    const children = (childrenMap.get(vertexId) || []).sort((a, b) => {
       const va = vertexById.get(a);
       const vb = vertexById.get(b);
 
@@ -83,11 +83,13 @@ export function normalizeSchema(schema: ExportedSchema): ExportedSchema {
     idMap.set(vertex.id, String(idCounter++));
   });
 
-  const normalizedVertexes: ExportedVertex[] = orderedVertices.map((vertex) => ({
-    id: idMap.get(vertex.id)!,
-    L: vertex.L,
-    P: vertex.P,
-  }));
+  const normalizedVertexes: ExportedVertex[] = orderedVertices.map(
+    (vertex) => ({
+      id: idMap.get(vertex.id)!,
+      L: vertex.L,
+      P: vertex.P,
+    }),
+  );
 
   // ------ NEW PART: Sort edges based on DFS vertex order ------
   // Edges are sorted by:
@@ -113,7 +115,7 @@ export function normalizeSchema(schema: ExportedSchema): ExportedSchema {
     T: edge.T,
     S: idMap.get(edge.S) || edge.S,
     E: idMap.get(edge.E) || edge.E,
-    ...(edge.P ? { P: edge.P } : {}) as { P: Record<string, unknown> },
+    ...((edge.P ? { P: edge.P } : {}) as { P: Record<string, unknown> }),
   }));
 
   return {

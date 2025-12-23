@@ -47,7 +47,7 @@ export function now(): string {
  * Utility to add timestamps to create payload
  */
 export function withTimestamps<T extends object>(
-  data: T
+  data: T,
 ): T & { createdAt: string; updatedAt: string } {
   return {
     ...data,
@@ -60,7 +60,7 @@ export function withTimestamps<T extends object>(
  * Utility to update updatedAt timestamp
  */
 export function touchTimestamp<T extends object>(
-  data: T
+  data: T,
 ): T & { updatedAt: string } {
   return {
     ...data,
@@ -75,7 +75,7 @@ export class ModelError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
     this.name = "ModelError";

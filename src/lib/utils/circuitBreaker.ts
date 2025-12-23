@@ -39,12 +39,12 @@ export interface CircuitStats {
  */
 export class CircuitBreaker {
   private state: CircuitState = "closed";
-  private failures: number = 0;
-  private successes: number = 0;
-  private totalCalls: number = 0;
+  private failures = 0;
+  private successes = 0;
+  private totalCalls = 0;
   private lastFailureTime?: number;
   private nextAttemptTime?: number;
-  private halfOpenAttempts: number = 0;
+  private halfOpenAttempts = 0;
 
   constructor(private options: CircuitBreakerOptions) {
     if (!options.successThreshold) {
@@ -68,7 +68,7 @@ export class CircuitBreaker {
           ? Math.ceil((this.nextAttemptTime - Date.now()) / 1000)
           : 0;
         throw new Error(
-          `Circuit breaker is open. Try again in ${waitTime} seconds.`
+          `Circuit breaker is open. Try again in ${waitTime} seconds.`,
         );
       }
     }
@@ -94,7 +94,7 @@ export class CircuitBreaker {
    */
   private async executeWithTimeout<T>(
     fn: () => Promise<T>,
-    timeoutMs: number
+    timeoutMs: number,
   ): Promise<T> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
@@ -252,7 +252,7 @@ const globalBreakers = new Map<string, CircuitBreaker>();
  */
 export function createCircuitBreaker(
   name: string,
-  options: CircuitBreakerOptions
+  options: CircuitBreakerOptions,
 ): CircuitBreaker {
   const breaker = new CircuitBreaker(options);
   globalBreakers.set(name, breaker);
@@ -272,14 +272,14 @@ export function getCircuitBreaker(name: string): CircuitBreaker | undefined {
 export async function callWithCircuitBreaker<T>(
   name: string,
   fn: () => Promise<T>,
-  options?: CircuitBreakerOptions
+  options?: CircuitBreakerOptions,
 ): Promise<T> {
   let breaker = globalBreakers.get(name);
 
   if (!breaker) {
     if (!options) {
       throw new Error(
-        `Circuit breaker "${name}" not found and no options provided`
+        `Circuit breaker "${name}" not found and no options provided`,
       );
     }
     breaker = createCircuitBreaker(name, options);

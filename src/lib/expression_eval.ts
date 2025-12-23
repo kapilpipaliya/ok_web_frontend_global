@@ -508,9 +508,7 @@ function parseSortToken(token: string) {
 // not tested
 // ^ operator: sort `first` by the field & direction from `sort`
 addBinaryOp("^", 12, true, (first, sort) => {
-  const { field, order } = parseSortToken(
-    Array.isArray(sort) ? sort[0] : sort
-  );
+  const { field, order } = parseSortToken(Array.isArray(sort) ? sort[0] : sort);
 
   const direction = order === "desc" ? -1 : 1;
 
@@ -527,8 +525,10 @@ addBinaryOp("^", 12, true, (first, sort) => {
     if (av > bv) return 1 * direction;
     return 0;
   });
-  if (sorted.find(x => x.id === "4:e776509e-3240-4c03-b321-79103c6829b0:1379")) {
-    console.log(sorted.map(x=>x.id))
+  if (
+    sorted.find((x) => x.id === "4:e776509e-3240-4c03-b321-79103c6829b0:1379")
+  ) {
+    console.log(sorted.map((x) => x.id));
   }
 
   return sorted;

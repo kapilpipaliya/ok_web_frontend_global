@@ -38,7 +38,7 @@ export async function GET({ request }: APIEvent) {
     const functionName = url.searchParams.get("functionName");
     const dryRunParam = url.searchParams.get("dryRun");
     const dryRun = dryRunParam === "true" || dryRunParam === "1";
-    
+
     // Parse additional context data from query params (if any)
     const contextData: Record<string, any> = {};
     for (const [key, value] of url.searchParams.entries()) {
@@ -97,4 +97,3 @@ export async function GET({ request }: APIEvent) {
     await dbSession.close();
   }
 }
-

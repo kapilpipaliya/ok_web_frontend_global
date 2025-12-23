@@ -78,7 +78,7 @@ function generateAuditId(): string {
  */
 export async function logAudit(
   session: Session,
-  entry: Omit<AuditEntry, "id" | "timestamp">
+  entry: Omit<AuditEntry, "id" | "timestamp">,
 ): Promise<AuditEntry> {
   const auditEntry: AuditEntry = {
     id: generateAuditId(),
@@ -111,12 +111,14 @@ export async function logAudit(
       resourceType: auditEntry.resourceType || null,
       resourceId: auditEntry.resourceId || null,
       changes: auditEntry.changes ? JSON.stringify(auditEntry.changes) : null,
-      metadata: auditEntry.metadata ? JSON.stringify(auditEntry.metadata) : null,
+      metadata: auditEntry.metadata
+        ? JSON.stringify(auditEntry.metadata)
+        : null,
       ipAddress: auditEntry.ipAddress || null,
       userAgent: auditEntry.userAgent || null,
       success: auditEntry.success,
       errorMessage: auditEntry.errorMessage || null,
-    }
+    },
   );
 
   return auditEntry;
@@ -127,7 +129,7 @@ export async function logAudit(
  */
 export async function queryAudit(
   session: Session,
-  filters: AuditQueryFilters = {}
+  filters: AuditQueryFilters = {},
 ): Promise<AuditEntry[]> {
   const conditions: string[] = [];
   const params: Record<string, any> = {};
@@ -172,7 +174,8 @@ export async function queryAudit(
     params.success = filters.success;
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   const skipClause = filters.offset ? `SKIP ${filters.offset}` : "";
   const limitClause = filters.limit ? `LIMIT ${filters.limit}` : "LIMIT 100";
 
@@ -211,11 +214,11 @@ export async function queryAudit(
  * Audit decorator for tracking changes
  */
 export function auditTrail(action: AuditAction, resourceType?: string) {
-  return function (
+  return (
     target: any,
     propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+    descriptor: PropertyDescriptor,
+  ) => {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -242,7 +245,8 @@ export function auditTrail(action: AuditAction, resourceType?: string) {
           action,
           resourceType,
           success: false,
-          errorMessage: error instanceof Error ? error.message : "Unknown error",
+          errorMessage:
+            error instanceof Error ? error.message : "Unknown error",
           userId: options?.userId,
           userName: options?.userName,
           metadata: options?.metadata,
@@ -261,7 +265,7 @@ export function auditTrail(action: AuditAction, resourceType?: string) {
  */
 export function trackChanges(
   oldObj: Record<string, any>,
-  newObj: Record<string, any>
+  newObj: Record<string, any>,
 ): Record<string, { old: any; new: any }> {
   const changes: Record<string, { old: any; new: any }> = {};
 
@@ -297,7 +301,7 @@ export async function getAuditStats(
     userId?: string;
     fromDate?: string;
     toDate?: string;
-  } = {}
+  } = {},
 ): Promise<{
   total: number;
   byAction: Record<string, number>;
@@ -322,7 +326,8 @@ export async function getAuditStats(
     params.toDate = filters.toDate;
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
   // Get total and success count
   const totalQuery = `
@@ -377,7 +382,7 @@ export async function getAuditStats(
  */
 export async function clearOldAudits(
   session: Session,
-  olderThanDays: number = 90
+  olderThanDays = 90,
 ): Promise<number> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
@@ -387,7 +392,7 @@ export async function clearOldAudits(
      WHERE a.timestamp < $cutoffDate
      DELETE a
      RETURN count(a) as deleted`,
-    { cutoffDate: cutoffDate.toISOString() }
+    { cutoffDate: cutoffDate.toISOString() },
   );
 
   return result.records[0]?.get("deleted").toNumber() || 0;
@@ -429,7 +434,7 @@ export const audit = {
     session: Session,
     resourceType: string,
     resourceId: string,
-    options?: AuditOptions
+    options?: AuditOptions,
   ) => {
     return logAudit(session, {
       action: "create",
@@ -445,7 +450,7 @@ export const audit = {
     resourceType: string,
     resourceId: string,
     changes: Record<string, { old: any; new: any }>,
-    options?: AuditOptions
+    options?: AuditOptions,
   ) => {
     return logAudit(session, {
       action: "update",
@@ -461,7 +466,7 @@ export const audit = {
     session: Session,
     resourceType: string,
     resourceId: string,
-    options?: AuditOptions
+    options?: AuditOptions,
   ) => {
     return logAudit(session, {
       action: "delete",
@@ -476,7 +481,7 @@ export const audit = {
     session: Session,
     resourceType: string,
     resourceId: string,
-    options?: AuditOptions
+    options?: AuditOptions,
   ) => {
     return logAudit(session, {
       action: "access",
@@ -487,7 +492,11 @@ export const audit = {
     });
   },
 
-  logLogin: async (session: Session, userId: string, options?: AuditOptions) => {
+  logLogin: async (
+    session: Session,
+    userId: string,
+    options?: AuditOptions,
+  ) => {
     return logAudit(session, {
       action: "login",
       userId,
@@ -496,7 +505,11 @@ export const audit = {
     });
   },
 
-  logLogout: async (session: Session, userId: string, options?: AuditOptions) => {
+  logLogout: async (
+    session: Session,
+    userId: string,
+    options?: AuditOptions,
+  ) => {
     return logAudit(session, {
       action: "logout",
       userId,

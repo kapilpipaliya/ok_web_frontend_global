@@ -78,7 +78,7 @@ class CacheStore {
   /**
    * Set value in cache
    */
-  set<T>(key: string, value: T, ttlSeconds: number = 60): void {
+  set<T>(key: string, value: T, ttlSeconds = 60): void {
     const expiresAt = Date.now() + ttlSeconds * 1000;
 
     // Update size if new key
@@ -209,7 +209,7 @@ export function cacheGet<T>(key: string, options: CacheOptions = {}): T | null {
 export function cacheSet<T>(
   key: string,
   value: T,
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): void {
   const cacheKey = createKey(key, options.namespace);
   const ttl = options.ttl || 60;
@@ -257,7 +257,7 @@ export function cacheClear(namespace?: string): void {
 export async function cacheGetOrSet<T>(
   key: string,
   factory: () => T | Promise<T>,
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): Promise<T> {
   const cached = cacheGet<T>(key, options);
 
@@ -277,10 +277,9 @@ export function cacheMemoize<T extends (...args: any[]) => any>(
   fn: T,
   options: CacheOptions & {
     keyFn?: (...args: Parameters<T>) => string;
-  } = {}
+  } = {},
 ): T {
-  const keyFn =
-    options.keyFn || ((...args: any[]) => JSON.stringify(args));
+  const keyFn = options.keyFn || ((...args: any[]) => JSON.stringify(args));
 
   return ((...args: Parameters<T>) => {
     const key = keyFn(...args);
@@ -320,16 +319,20 @@ export function cacheSize(): number {
  * Cache decorator for class methods
  */
 export function Cached(options: CacheOptions = {}) {
-  return function (
+  return (
     target: any,
     propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+    descriptor: PropertyDescriptor,
+  ) => {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       const key = `${target.constructor.name}.${propertyKey}:${JSON.stringify(args)}`;
-      return cacheGetOrSet(key, () => originalMethod.apply(this, args), options);
+      return cacheGetOrSet(
+        key,
+        () => originalMethod.apply(this, args),
+        options,
+      );
     };
 
     return descriptor;
@@ -365,7 +368,7 @@ export class CacheManager {
   async getOrSet<T>(
     key: string,
     factory: () => T | Promise<T>,
-    ttl?: number
+    ttl?: number,
   ): Promise<T> {
     return cacheGetOrSet(key, factory, { namespace: this.namespace, ttl });
   }
@@ -373,7 +376,7 @@ export class CacheManager {
   memoize<T extends (...args: any[]) => any>(
     fn: T,
     keyFn?: (...args: Parameters<T>) => string,
-    ttl?: number
+    ttl?: number,
   ): T {
     return cacheMemoize(fn, {
       namespace: this.namespace,
@@ -466,6 +469,6 @@ if (typeof setInterval !== "undefined") {
         console.log(`[Cache] Cleared ${cleared} expired entries`);
       }
     },
-    5 * 60 * 1000
+    5 * 60 * 1000,
   );
 }

@@ -105,10 +105,10 @@ function escapeCSV(value: string): string {
  */
 export function parseCSV(
   csv: string,
-  options: ImportOptions = {}
+  options: ImportOptions = {},
 ): ImportResult {
   const delimiter = options.delimiter || ",";
-  const skipHeader = options.skipHeader || false;
+  const skipHeader = options.skipHeader;
 
   const lines = csv.split("\n").filter((line) => line.trim());
   const result: ImportResult = {
@@ -210,10 +210,7 @@ function parseCSVLine(line: string, delimiter: string): string[] {
 /**
  * Convert to JSON
  */
-export function toJSON(
-  data: any[],
-  options: ExportOptions = {}
-): string {
+export function toJSON(data: any[], options: ExportOptions = {}): string {
   let exportData = data;
 
   // Apply field filtering
@@ -240,7 +237,7 @@ export function toJSON(
  */
 export function parseJSON<T = any>(
   json: string,
-  options: ImportOptions = {}
+  options: ImportOptions = {},
 ): ImportResult<T> {
   const result: ImportResult<T> = {
     success: true,
@@ -310,7 +307,7 @@ export function parseJSON<T = any>(
 export function exportData(
   data: any[],
   format: ExportFormat,
-  options: ExportOptions = {}
+  options: ExportOptions = {},
 ): string {
   switch (format) {
     case "csv":
@@ -332,7 +329,7 @@ export function exportData(
 export function importData<T = any>(
   content: string,
   format: ExportFormat,
-  options: ImportOptions = {}
+  options: ImportOptions = {},
 ): ImportResult<T> {
   switch (format) {
     case "csv":
@@ -351,7 +348,7 @@ export function importData<T = any>(
 export function downloadFile(
   content: string,
   filename: string,
-  mimeType: string = "text/plain"
+  mimeType = "text/plain",
 ): void {
   if (typeof window === "undefined") {
     throw new Error("downloadFile only works in browser");
@@ -392,7 +389,7 @@ export const dataExport = {
     data: any[],
     filename: string,
     format: ExportFormat = "csv",
-    options?: ExportOptions
+    options?: ExportOptions,
   ) => {
     const content = exportData(data, format, options);
     const mimeTypes = {
@@ -423,7 +420,11 @@ export const dataImport = {
   /**
    * Read from file (browser only)
    */
-  fromFile: async (file: File, format: ExportFormat, options?: ImportOptions) => {
+  fromFile: async (
+    file: File,
+    format: ExportFormat,
+    options?: ImportOptions,
+  ) => {
     const content = await file.text();
     return importData(content, format, options);
   },

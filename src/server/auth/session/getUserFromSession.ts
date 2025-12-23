@@ -8,6 +8,17 @@ import { getDriver } from "~/cypher/core/driver";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getAdminUser } from "~/cypher/permissions/utils/getAdminUser";
 
+export async function getSessionUser(): Promise<undefined | Vertex> {
+  try {
+    const httpSession = await getHttpsSession();
+    const sessionUser = httpSession?.data?.user;
+    if (!sessionUser) return;
+    return sessionUser;
+  } catch {
+    return;
+  }
+}
+
 // Note: this return user from 'admin' database. so use uuid to find user from current subdomain.
 export async function getUserFromSession(
   request?: APIEvent["request"],
@@ -16,8 +27,7 @@ export async function getUserFromSession(
   let adminDbSession = null;
 
   try {
-    const httpSession = await getHttpsSession();
-    const sessionUser = httpSession?.data?.user;
+    const sessionUser = await getSessionUser();
 
     if (!sessionUser) {
       return;

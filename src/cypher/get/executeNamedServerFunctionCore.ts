@@ -5,7 +5,10 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Session } from "neo4j-driver";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getDriver } from "~/cypher/core/driver";
-import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import {
+  getUserFromSession,
+  getSessionUser,
+} from "~/server/auth/session/getUserFromSession";
 import {
   convertNodeToJson,
   neo4jConvert,
@@ -60,11 +63,7 @@ import * as crypto from "crypto";
 import * as path from "path";
 import { getNeogmaInstance } from "~/cypher/core/driver";
 // Enhanced server function utilities
-import {
-  errors,
-  isAppError,
-  errorToResponse,
-} from "~/lib/utils/errorClasses";
+import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
 import {
   validate,
   validateOrThrow,
@@ -145,10 +144,10 @@ import {
   type BatchResult,
   type BatchOptions,
 } from "~/lib/utils/batch";
-import {audit} from "~/lib/utils/audit";
-import {circuitBreaker} from "~/lib/utils/circuitBreaker";
-import {dataExport, dataImport} from "~/lib/utils/exportImport";
-import {files} from "~/lib/utils/files";
+import { audit } from "~/lib/utils/audit";
+import { circuitBreaker } from "~/lib/utils/circuitBreaker";
+import { dataExport, dataImport } from "~/lib/utils/exportImport";
+import { files } from "~/lib/utils/files";
 import {
   clearOldLogs,
   logger,
@@ -156,13 +155,19 @@ import {
   PerformanceTimer,
   queryLogs,
 } from "~/lib/utils/logger";
+import { rateLimit, RateLimiter } from "~/lib/utils/rateLimiter";
+import { schedule } from "~/lib/utils/scheduler";
+import { test } from "~/lib/utils/testing";
+import { webhooks } from "~/lib/utils/webhooks";
+import { updateSession } from "~/server/auth/session/updateSession";
+import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import {
-  rateLimit, RateLimiter,
-} from "~/lib/utils/rateLimiter";
-import {schedule} from "~/lib/utils/scheduler";
-import {test} from "~/lib/utils/testing";
-import {webhooks} from "~/lib/utils/webhooks";
-import {updateSession} from "~/server/auth/session/updateSession";
+  verifyShopifyAdminRequest,
+  ensureShopDatabaseAndMigrate,
+  getDBSessionForShop,
+  getDatabaseNameForShop,
+} from "~/lib/shopify/shopifyHelpers";
+import { getShopifyClient } from "~/lib/shopify/shopifyHelpers";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -455,7 +460,16 @@ export async function executeNamedServerFunctionCore(
       schedule,
       test,
       webhooks,
-      updateSession
+      updateSession,
+      // Generic server function executor (functionBody-based)
+      executeServerFunction,
+      // Shopify helpers
+      verifyShopifyAdminRequest,
+      ensureShopDatabaseAndMigrate,
+      getDBSessionForShop,
+      getDatabaseNameForShop,
+      getShopifyClient,
+      getSessionUser,
     };
 
     // Execute the function
@@ -479,7 +493,6 @@ export async function executeNamedServerFunctionCore(
     // Neo4j driver errors contain non-serializable objects (functions, circular refs)
     // We extract only serializable information for the API response
     let errorMessage = error.message || "Unknown error";
-    let errorType = "ExecutionError";
 
     // Detect database connection errors and provide helpful messages
     // These patterns indicate Neo4j server is unavailable or unreachable
@@ -490,7 +503,6 @@ export async function executeNamedServerFunctionCore(
       errorMessage.includes("database") ||
       error.code === "ServiceUnavailable"
     ) {
-      errorType = "DatabaseConnectionError";
       errorMessage =
         "Unable to connect to the database. Please ensure the database is running and try again.";
     }
@@ -499,7 +511,6 @@ export async function executeNamedServerFunctionCore(
     // This prevents H3Error: "The value [object Function] cannot be parsed/serialized"
     return {
       error: `Failed to execute function '${request.functionName}': ${errorMessage}`,
-      errorType,
     };
   } finally {
     // CRITICAL: Session cleanup to prevent leaks

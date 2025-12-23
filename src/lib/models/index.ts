@@ -74,7 +74,10 @@ export type ModelRegistry = typeof Models;
  * ```
  */
 
-export function registerModel(modelName: string, modelFactory: () => any): void {
+export function registerModel(
+  modelName: string,
+  modelFactory: () => any,
+): void {
   if (Models[modelName]) {
     console.warn(`Model "${modelName}" is already registered. Overwriting.`);
   }

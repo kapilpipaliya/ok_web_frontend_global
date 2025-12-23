@@ -7,7 +7,10 @@
 /**
  * Rate limit strategy
  */
-export type RateLimitStrategy = "fixed-window" | "sliding-window" | "token-bucket";
+export type RateLimitStrategy =
+  | "fixed-window"
+  | "sliding-window"
+  | "token-bucket";
 
 /**
  * Rate limit options
@@ -102,7 +105,7 @@ const globalStore = new RateLimitStore();
 function fixedWindow(
   key: string,
   options: RateLimitOptions,
-  store: RateLimitStore = globalStore
+  store: RateLimitStore = globalStore,
 ): RateLimitResult {
   const now = Date.now();
   const windowMs = options.window * 1000;
@@ -122,7 +125,9 @@ function fixedWindow(
 
   const allowed = record.count <= options.max;
   const remaining = Math.max(0, options.max - record.count);
-  const retryAfter = allowed ? undefined : Math.ceil((record.resetAt - now) / 1000);
+  const retryAfter = allowed
+    ? undefined
+    : Math.ceil((record.resetAt - now) / 1000);
 
   return {
     allowed,
@@ -138,7 +143,7 @@ function fixedWindow(
 function slidingWindow(
   key: string,
   options: RateLimitOptions,
-  store: RateLimitStore = globalStore
+  store: RateLimitStore = globalStore,
 ): RateLimitResult {
   const now = Date.now();
   const windowMs = options.window * 1000;
@@ -154,7 +159,9 @@ function slidingWindow(
   }
 
   // Remove requests outside window
-  record.requests = (record.requests || []).filter((time) => time > now - windowMs);
+  record.requests = (record.requests || []).filter(
+    (time) => time > now - windowMs,
+  );
 
   // Add current request
   record.requests.push(now);
@@ -187,7 +194,7 @@ function tokenBucket(
   key: string,
   tokens: number,
   options: RateLimitOptions,
-  store: RateLimitStore = globalStore
+  store: RateLimitStore = globalStore,
 ): RateLimitResult {
   const now = Date.now();
   const capacity = options.capacity || options.max;
@@ -237,7 +244,7 @@ function tokenBucket(
  */
 export function checkRateLimit(
   key: string,
-  options: RateLimitOptions
+  options: RateLimitOptions,
 ): RateLimitResult {
   const strategy = options.strategy || "fixed-window";
 
@@ -259,7 +266,7 @@ export function checkRateLimit(
 export function consumeTokens(
   key: string,
   tokens: number,
-  options: RateLimitOptions
+  options: RateLimitOptions,
 ): RateLimitResult {
   if (options.strategy !== "token-bucket") {
     throw new Error("consumeTokens only works with token-bucket strategy");
@@ -321,7 +328,11 @@ export class RateLimiter {
   /**
    * Consume tokens
    */
-  consume(key: string, tokens: number, options?: Partial<RateLimitOptions>): RateLimitResult {
+  consume(
+    key: string,
+    tokens: number,
+    options?: Partial<RateLimitOptions>,
+  ): RateLimitResult {
     const mergedOptions = { ...this.defaultOptions, ...options };
     if (mergedOptions.strategy !== "token-bucket") {
       throw new Error("consume only works with token-bucket strategy");
@@ -408,7 +419,11 @@ export const rateLimit = {
       strategy: "sliding-window" as RateLimitStrategy,
     }),
 
-    tokenBucket: (capacity: number, refillRate: number, window: number = 60) => ({
+    tokenBucket: (
+      capacity: number,
+      refillRate: number,
+      window = 60,
+    ) => ({
       max: capacity,
       window,
       strategy: "token-bucket" as RateLimitStrategy,
@@ -426,6 +441,6 @@ if (typeof setInterval !== "undefined") {
     () => {
       cleanupExpiredRateLimits();
     },
-    5 * 60 * 1000
+    5 * 60 * 1000,
   );
 }

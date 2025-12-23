@@ -11,8 +11,8 @@ export class AppError extends Error {
   constructor(
     message: string,
     public code: string,
-    public statusCode: number = 500,
-    public details?: any
+    public statusCode = 500,
+    public details?: any,
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -43,7 +43,7 @@ export class ValidationError extends AppError {
  * Authentication error (401)
  */
 export class AuthenticationError extends AppError {
-  constructor(message: string = "Authentication required", details?: any) {
+  constructor(message = "Authentication required", details?: any) {
     super(message, "AuthenticationError", 401, details);
   }
 }
@@ -52,7 +52,7 @@ export class AuthenticationError extends AppError {
  * Authorization/Forbidden error (403)
  */
 export class ForbiddenError extends AppError {
-  constructor(message: string = "Access denied", details?: any) {
+  constructor(message = "Access denied", details?: any) {
     super(message, "ForbiddenError", 403, details);
   }
 }
@@ -82,7 +82,7 @@ export class ConflictError extends AppError {
  * Rate limit error (429)
  */
 export class RateLimitError extends AppError {
-  constructor(message: string = "Rate limit exceeded", retryAfter?: number) {
+  constructor(message = "Rate limit exceeded", retryAfter?: number) {
     super(message, "RateLimitError", 429, { retryAfter });
   }
 }
@@ -105,7 +105,7 @@ export class ExternalServiceError extends AppError {
       message || `External service "${service}" is unavailable`,
       "ExternalServiceError",
       502,
-      { service }
+      { service },
     );
   }
 }

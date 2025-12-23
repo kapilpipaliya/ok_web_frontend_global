@@ -49,7 +49,7 @@ export interface TransformOptions {
  */
 export function success<T>(
   data: T,
-  options: TransformOptions = {}
+  options: TransformOptions = {},
 ): StandardResponse<T> {
   const response: StandardResponse<T> = {
     success: true,
@@ -69,9 +69,9 @@ export function success<T>(
  */
 export function error(
   message: string,
-  errorType: string = "Error",
-  statusCode: number = 500,
-  details?: any
+  errorType = "Error",
+  statusCode = 500,
+  details?: any,
 ): StandardResponse {
   return {
     success: false,
@@ -90,7 +90,7 @@ export function paginated<T>(
   page: number,
   limit: number,
   total: number,
-  options: TransformOptions = {}
+  options: TransformOptions = {},
 ): PaginatedResponse<T> {
   const totalPages = Math.ceil(total / limit);
 
@@ -132,7 +132,7 @@ export function verticesToObjects(vertices: Vertex[]): any[] {
  */
 export function omit<T extends Record<string, any>>(
   obj: T,
-  keys: string[]
+  keys: string[],
 ): Partial<T> {
   const result = { ...obj };
   for (const key of keys) {
@@ -146,7 +146,7 @@ export function omit<T extends Record<string, any>>(
  */
 export function pick<T extends Record<string, any>, K extends keyof T>(
   obj: T,
-  keys: K[]
+  keys: K[],
 ): Pick<T, K> {
   const result = {} as Pick<T, K>;
   for (const key of keys) {
@@ -176,10 +176,7 @@ export function vertexOmit(vertex: Vertex, fields: string[]): any {
 /**
  * Transform nested data structure
  */
-export function transform<T, R>(
-  data: T,
-  transformer: (item: T) => R
-): R {
+export function transform<T, R>(data: T, transformer: (item: T) => R): R {
   return transformer(data);
 }
 
@@ -188,7 +185,7 @@ export function transform<T, R>(
  */
 export function transformArray<T, R>(
   data: T[],
-  transformer: (item: T, index: number) => R
+  transformer: (item: T, index: number) => R,
 ): R[] {
   return data.map(transformer);
 }
@@ -198,7 +195,7 @@ export function transformArray<T, R>(
  */
 export function groupBy<T>(
   array: T[],
-  keyFn: (item: T) => string
+  keyFn: (item: T) => string,
 ): Record<string, T[]> {
   return array.reduce(
     (groups, item) => {
@@ -209,7 +206,7 @@ export function groupBy<T>(
       groups[key].push(item);
       return groups;
     },
-    {} as Record<string, T[]>
+    {} as Record<string, T[]>,
   );
 }
 
@@ -218,14 +215,14 @@ export function groupBy<T>(
  */
 export function keyBy<T>(
   array: T[],
-  keyFn: (item: T) => string
+  keyFn: (item: T) => string,
 ): Record<string, T> {
   return array.reduce(
     (map, item) => {
       map[keyFn(item)] = item;
       return map;
     },
-    {} as Record<string, T>
+    {} as Record<string, T>,
   );
 }
 
@@ -247,7 +244,7 @@ export function compact<T extends Record<string, any>>(obj: T): Partial<T> {
  */
 export function flatten(
   obj: Record<string, any>,
-  prefix: string = ""
+  prefix = "",
 ): Record<string, any> {
   const result: Record<string, any> = {};
 
@@ -293,13 +290,13 @@ export const responses = {
   /**
    * Unauthorized error (401)
    */
-  unauthorized: (message: string = "Authentication required") =>
+  unauthorized: (message = "Authentication required") =>
     error(message, "Unauthorized", 401),
 
   /**
    * Forbidden error (403)
    */
-  forbidden: (message: string = "Access denied") =>
+  forbidden: (message = "Access denied") =>
     error(message, "Forbidden", 403),
 
   /**
@@ -321,7 +318,7 @@ export const responses = {
   /**
    * Server error (500)
    */
-  serverError: (message: string = "Internal server error", details?: any) =>
+  serverError: (message = "Internal server error", details?: any) =>
     error(message, "ServerError", 500, details),
 
   /**
@@ -332,7 +329,7 @@ export const responses = {
     page: number,
     limit: number,
     total: number,
-    options?: TransformOptions
+    options?: TransformOptions,
   ) => paginated(data, page, limit, total, options),
 };
 

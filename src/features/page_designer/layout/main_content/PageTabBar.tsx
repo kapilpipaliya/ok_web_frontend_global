@@ -26,10 +26,10 @@ export function PageTabBar(props: {
   const [graph] = useGraph();
   onMount(() => {
     updateUrlWithOpenedTabs(layoutStoreId, graph);
-  })
+  });
   onCleanup(() => {
     updateUrlWithOpenedTabs(layoutStoreId, graph);
-  })
+  });
   return (
     <As as="header" css={toolBarCss}>
       <As

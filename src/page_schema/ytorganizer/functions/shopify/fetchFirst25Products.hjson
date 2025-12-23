@@ -1,0 +1,195 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: fetchFirst25Products
+        description: Fetches first 25 Shopify products for the current shop using Admin GraphQL API
+        body:
+          '''
+// Fetch first 25 products from Shopify Admin GraphQL API.
+// For embedded apps, uses shopify session management to get session from request.
+
+// Try to resolve current user from session (if available) to get shop info
+let sessionUser;
+try {
+  // sessionUser = await args.getUserFromSession(args.request);
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("fetchFirst25Products: getUserFromSession failed", e);
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  return {
+    success: false,
+    error: "Shop domain is missing",
+  };
+}
+
+// Get Shopify params from session (saved during authentication)
+const shopifyParams = sessionUser?.P?.shopifyParams || {};
+
+// Get Shopify API object (configured via env vars with Neo4j session store)
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+// This verifies the OAuth session and ensures the user has proper permissions
+let admin;
+try {
+  // Construct a URL using the origin from request and the query params from session
+  const origin = args.request ? new URL(args.request.url).origin : "https://ysaar.com";
+  const url = new URL(`${origin}/shopify`);
+  for (const [key, value] of Object.entries(shopifyParams)) {
+    if (typeof value !== "undefined" && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  }
+
+  // Create a minimal request-like object with query (params), url, and headers
+  // Shopify's authenticate.admin expects a headers-like object with a .get(name) method (Map-like)
+  const request = {
+    query: shopifyParams,
+    url: url.toString(),
+    headers: {
+      get(name) {
+        // If shopifyParams.headers exists and name exists in it, return, otherwise undefined
+        if (shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined") {
+          return shopifyParams.headers[name];
+        }
+        return undefined;
+      },
+      // Optionally, support .has as well if needed by Shopify SDK
+      has(name) {
+        return shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined";
+      }
+    },
+  };
+
+
+  // Use unauthenticated.admin to get admin client (for public/unauthenticated requests)
+  // https://github.com/Shopify/shopify-app-js/issues/2355#issuecomment-2830824535
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("fetchFirst25Products: Shopify authentication failed", authError);
+  // Build OAuth begin URL for redirect
+  const host = shopifyParams.host || "";
+  const origin = args.request ? new URL(args.request.url).origin : "https://localhost:3000";
+  const oauthBeginUrl = new URL("/api/shopify/auth/begin", origin);
+  oauthBeginUrl.searchParams.set("shop", shop);
+  if (host) {
+    oauthBeginUrl.searchParams.set("host", host);
+  }
+
+  return {
+    success: false,
+    error:
+      "Shopify authentication failed. The shop needs to complete OAuth authentication to access the Admin API.",
+    needsOAuth: true,
+    oauthUrl: oauthBeginUrl.toString(),
+    shop,
+    message: "Please complete OAuth authentication to continue.",
+  };
+}
+
+const query = `
+  query FirstProducts {
+    products(first: 25) {
+      edges {
+        cursor
+        node {
+          id
+          title
+          handle
+          status
+          createdAt
+          updatedAt
+          variants(first: 10) {
+            edges {
+              node {
+                id
+                title
+                price
+                sku
+              }
+            }
+          }
+          media(first: 10) {
+            edges {
+              node {
+                id
+                mediaContentType
+                alt
+                preview {
+                  image {
+                    url
+                  }
+                }
+              }
+            }
+          }
+          metafields(first: 10) {
+            edges {
+              node {
+                id
+                key
+                namespace
+                value
+                type
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+// Use admin.graphql() to make the GraphQL request
+const response = await admin.graphql(query);
+
+// Handle Response object - extract JSON if it's a Response
+let apiResponse;
+if (response instanceof Response) {
+  apiResponse = await response.json();
+} else {
+  apiResponse = response;
+}
+
+if (apiResponse.errors && apiResponse.errors.length > 0) {
+  console.error("Shopify Admin GraphQL errors:", apiResponse.errors);
+  return {
+    success: false,
+    error: "Failed to fetch products from Shopify Admin API",
+    details: apiResponse.errors,
+  };
+}
+
+// Transform the nested edges structure to flatten it
+const data = apiResponse.data;
+const transformedProducts = data.products.edges.map((edge) => {
+  const node = edge.node;
+  return {
+    ...node,
+    variants: node.variants?.edges?.map((v) => v.node) || [],
+    media: node.media?.edges?.map((m) => m.node) || [],
+    metafields: node.metafields?.edges?.map((m) => m.node) || []
+  };
+});
+
+return {
+  success: true,
+  shop,
+  products: transformedProducts,
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
+
+

@@ -90,7 +90,8 @@ export async function deleteCloudBackup(
           deletedAt: new Date().toISOString(),
         },
       };
-    }if (storageType === "gcs") {
+    }
+    if (storageType === "gcs") {
       // Google Cloud Storage Delete
       const projectId = process.env.GCS_PROJECT_ID;
       const bucketName = process.env.GCS_BUCKET;
@@ -130,7 +131,7 @@ export async function deleteCloudBackup(
         },
       };
     }
-      throw new Error(`Unsupported storage type: ${storageType}`);
+    throw new Error(`Unsupported storage type: ${storageType}`);
   } catch (error: any) {
     console.error("[Storage] Delete error:", error);
 

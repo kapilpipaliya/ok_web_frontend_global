@@ -39,7 +39,7 @@ export interface PipelineContext {
  */
 export type Middleware = (
   ctx: PipelineContext,
-  next: () => Promise<any>
+  next: () => Promise<any>,
 ) => Promise<any>;
 
 /**
@@ -49,7 +49,11 @@ interface PipelineConfig {
   session: Session;
   request?: any;
   getUserFromSession?: () => Promise<any>;
-  getEffectiveUser?: (session: Session, user: any, contextData: any) => Promise<any>;
+  getEffectiveUser?: (
+    session: Session,
+    user: any,
+    contextData: any,
+  ) => Promise<any>;
 }
 
 /**
@@ -115,17 +119,19 @@ export class Pipeline {
   authorize(...roles: string[]): this {
     return this.use(async (ctx, next) => {
       if (!ctx.user) {
-        throw new AuthenticationError("Authentication required for authorization");
+        throw new AuthenticationError(
+          "Authentication required for authorization",
+        );
       }
 
       const userRoles = ctx.user.P?.roles || [];
       const hasRole = roles.some((role) => userRoles.includes(role));
 
       if (!hasRole) {
-        throw new ForbiddenError(
-          `Required role: ${roles.join(" or ")}`,
-          { required: roles, user: userRoles }
-        );
+        throw new ForbiddenError(`Required role: ${roles.join(" or ")}`, {
+          required: roles,
+          user: userRoles,
+        });
       }
 
       ctx.metadata.authorizedRoles = roles;
@@ -140,7 +146,10 @@ export class Pipeline {
     return this.use(async (ctx, next) => {
       // Simple in-memory rate limiting
       const key =
-        options.key || ctx.user?.P?.uuid || ctx.request?.headers?.get("x-forwarded-for") || "anonymous";
+        options.key ||
+        ctx.user?.P?.uuid ||
+        ctx.request?.headers?.get("x-forwarded-for") ||
+        "anonymous";
       const now = Date.now();
       const windowMs = options.window * 1000;
 
@@ -164,7 +173,7 @@ export class Pipeline {
         const retryAfter = Math.ceil((record.resetAt - now) / 1000);
         throw new RateLimitError(
           `Rate limit exceeded. Try again in ${retryAfter} seconds`,
-          retryAfter
+          retryAfter,
         );
       }
 
@@ -201,7 +210,9 @@ export class Pipeline {
   /**
    * Execute pipeline with handler
    */
-  async execute<T>(handler: (ctx: PipelineContext) => T | Promise<T>): Promise<any> {
+  async execute<T>(
+    handler: (ctx: PipelineContext) => T | Promise<T>,
+  ): Promise<any> {
     try {
       // Build middleware chain
       const executeChain = async (index: number): Promise<any> => {
@@ -238,7 +249,7 @@ export class Pipeline {
  */
 export function createPipeline(
   initialData: any,
-  config: PipelineConfig
+  config: PipelineConfig,
 ): Pipeline {
   return new Pipeline(initialData, config);
 }

@@ -116,7 +116,8 @@ export async function downloadBackupFromCloud(
           downloadedAt: new Date().toISOString(),
         },
       };
-    }if (storageType === "gcs") {
+    }
+    if (storageType === "gcs") {
       // Google Cloud Storage Download
       const projectId = process.env.GCS_PROJECT_ID;
       const bucketName = process.env.GCS_BUCKET;
@@ -165,7 +166,7 @@ export async function downloadBackupFromCloud(
         },
       };
     }
-      throw new Error(`Unsupported storage type: ${storageType}`);
+    throw new Error(`Unsupported storage type: ${storageType}`);
   } catch (error: any) {
     console.error("[Storage] Download error:", error);
 

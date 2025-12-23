@@ -38,10 +38,7 @@ export interface Job<T = any> {
 /**
  * Job handler function
  */
-export type JobHandler<T = any> = (
-  data: T,
-  job: Job<T>
-) => Promise<any> | any;
+export type JobHandler<T = any> = (data: T, job: Job<T>) => Promise<any> | any;
 
 /**
  * Job options
@@ -71,9 +68,9 @@ class JobQueue {
   private jobs: Map<string, Job> = new Map();
   private handlers: Map<string, JobHandler> = new Map();
   private processing: Set<string> = new Set();
-  private maxConcurrent: number = 5;
-  private isRunning: boolean = false;
-  private jobCounter: number = 0;
+  private maxConcurrent = 5;
+  private isRunning = false;
+  private jobCounter = 0;
 
   /**
    * Register job handler
@@ -88,7 +85,7 @@ class JobQueue {
   async add<T = any>(
     name: string,
     data: T,
-    options: JobOptions = {}
+    options: JobOptions = {},
   ): Promise<string> {
     const jobId = `${name}-${Date.now()}-${this.jobCounter++}`;
 
@@ -192,14 +189,14 @@ class JobQueue {
       if (job.attempts < job.maxAttempts) {
         job.status = "pending";
         console.warn(
-          `[Jobs] Job ${job.id} failed (attempt ${job.attempts}/${job.maxAttempts}): ${errorMessage}`
+          `[Jobs] Job ${job.id} failed (attempt ${job.attempts}/${job.maxAttempts}): ${errorMessage}`,
         );
       } else {
         job.status = "failed";
         job.completedAt = Date.now();
         job.error = errorMessage;
         console.error(
-          `[Jobs] Job ${job.id} failed permanently: ${errorMessage}`
+          `[Jobs] Job ${job.id} failed permanently: ${errorMessage}`,
         );
       }
     } finally {
@@ -228,7 +225,7 @@ class JobQueue {
   /**
    * Wait for job completion
    */
-  async waitFor(jobId: string, timeoutMs: number = 30000): Promise<Job> {
+  async waitFor(jobId: string, timeoutMs = 30000): Promise<Job> {
     const startTime = Date.now();
 
     return new Promise((resolve, reject) => {
@@ -359,7 +356,7 @@ const globalQueue = new JobQueue();
  */
 export function registerJobHandler<T = any>(
   name: string,
-  handler: JobHandler<T>
+  handler: JobHandler<T>,
 ): void {
   globalQueue.register(name, handler);
 }
@@ -370,7 +367,7 @@ export function registerJobHandler<T = any>(
 export async function addJob<T = any>(
   name: string,
   data: T,
-  options?: JobOptions
+  options?: JobOptions,
 ): Promise<string> {
   return globalQueue.add(name, data, options);
 }
@@ -394,7 +391,7 @@ export function getJobStatus(jobId: string): JobStatus | null {
  */
 export async function waitForJob(
   jobId: string,
-  timeoutMs?: number
+  timeoutMs?: number,
 ): Promise<Job> {
   return globalQueue.waitFor(jobId, timeoutMs);
 }
@@ -524,6 +521,6 @@ if (typeof setInterval !== "undefined") {
         console.log(`[Jobs] Cleared ${cleared} completed jobs`);
       }
     },
-    10 * 60 * 1000
+    10 * 60 * 1000,
   );
 }

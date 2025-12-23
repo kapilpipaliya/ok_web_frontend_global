@@ -110,7 +110,7 @@ class ScheduleManager {
     // Get job from database
     const result = await this.session.run(
       "MATCH (j:ScheduledJob {id: $id}) RETURN j",
-      { id: jobId }
+      { id: jobId },
     );
 
     if (result.records.length === 0) {
@@ -193,7 +193,10 @@ class ScheduleManager {
   /**
    * Update job after run
    */
-  private async updateJobAfterRun(jobId: string, schedule: string): Promise<void> {
+  private async updateJobAfterRun(
+    jobId: string,
+    schedule: string,
+  ): Promise<void> {
     if (!this.session) return;
 
     const now = new Date().toISOString();
@@ -210,7 +213,7 @@ class ScheduleManager {
         lastRun: now,
         nextRun,
         updatedAt: now,
-      }
+      },
     );
   }
 
@@ -229,7 +232,7 @@ class ScheduleManager {
         id: jobId,
         lastRun: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      }
+      },
     );
 
     this.stop(jobId);
@@ -244,7 +247,7 @@ class ScheduleManager {
     }
 
     const result = await this.session.run(
-      "MATCH (j:ScheduledJob {enabled: true}) RETURN j.id as id"
+      "MATCH (j:ScheduledJob {enabled: true}) RETURN j.id as id",
     );
 
     for (const record of result.records) {
@@ -276,7 +279,7 @@ export async function registerCronJob(
   name: string,
   schedule: string,
   handler: string,
-  data?: any
+  data?: any,
 ): Promise<ScheduledJob> {
   const now = new Date().toISOString();
   const job: ScheduledJob = {
@@ -319,7 +322,7 @@ export async function registerCronJob(
       runCount: job.runCount,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
-    }
+    },
   );
 
   return job;
@@ -333,7 +336,7 @@ export async function registerOnceJob(
   name: string,
   runAt: Date,
   handler: string,
-  data?: any
+  data?: any,
 ): Promise<ScheduledJob> {
   const now = new Date().toISOString();
   const job: ScheduledJob = {
@@ -376,7 +379,7 @@ export async function registerOnceJob(
       runCount: job.runCount,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
-    }
+    },
   );
 
   return job;
@@ -387,11 +390,11 @@ export async function registerOnceJob(
  */
 export async function getScheduledJob(
   session: Session,
-  jobId: string
+  jobId: string,
 ): Promise<ScheduledJob | null> {
   const result = await session.run(
     "MATCH (j:ScheduledJob {id: $id}) RETURN j",
-    { id: jobId }
+    { id: jobId },
   );
 
   if (result.records.length === 0) {
@@ -420,11 +423,11 @@ export async function getScheduledJob(
  */
 export async function listScheduledJobs(
   session: Session,
-  enabledOnly: boolean = false
+  enabledOnly = false,
 ): Promise<ScheduledJob[]> {
   const whereClause = enabledOnly ? "{enabled: true}" : "";
   const result = await session.run(
-    `MATCH (j:ScheduledJob ${whereClause}) RETURN j ORDER BY j.createdAt DESC`
+    `MATCH (j:ScheduledJob ${whereClause}) RETURN j ORDER BY j.createdAt DESC`,
   );
 
   return result.records.map((record) => {
@@ -452,7 +455,7 @@ export async function listScheduledJobs(
 export async function toggleScheduledJob(
   session: Session,
   jobId: string,
-  enabled: boolean
+  enabled: boolean,
 ): Promise<void> {
   await session.run(
     `MATCH (j:ScheduledJob {id: $id})
@@ -461,7 +464,7 @@ export async function toggleScheduledJob(
       id: jobId,
       enabled,
       updatedAt: new Date().toISOString(),
-    }
+    },
   );
 
   if (enabled) {
@@ -476,13 +479,10 @@ export async function toggleScheduledJob(
  */
 export async function deleteScheduledJob(
   session: Session,
-  jobId: string
+  jobId: string,
 ): Promise<void> {
   globalManager.stop(jobId);
-  await session.run(
-    "MATCH (j:ScheduledJob {id: $id}) DELETE j",
-    { id: jobId }
-  );
+  await session.run("MATCH (j:ScheduledJob {id: $id}) DELETE j", { id: jobId });
 }
 
 /**

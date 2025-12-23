@@ -70,12 +70,7 @@ export async function DELETE({ request }: APIEvent) {
 
     // Broadcast force stop command to all other cluster nodes and wait for acknowledgments
     try {
-      const result = await broadcastStopWorkers(
-        key,
-        undefined,
-        10000,
-        true,
-      ); // subdomain, workerKey (undefined = all), timeout, force
+      const result = await broadcastStopWorkers(key, undefined, 10000, true); // subdomain, workerKey (undefined = all), timeout, force
 
       if (result.totalNodes > 0) {
         console.log(

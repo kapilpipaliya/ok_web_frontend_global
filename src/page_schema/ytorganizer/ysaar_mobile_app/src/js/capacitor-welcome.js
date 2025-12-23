@@ -90,7 +90,6 @@ window.customElements.define(
     }
 
     connectedCallback() {
-
       this.shadowRoot
         .querySelector("#take-photo")
         .addEventListener("click", async (e) => {

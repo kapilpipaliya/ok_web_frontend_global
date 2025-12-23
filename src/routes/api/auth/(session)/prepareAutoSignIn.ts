@@ -35,7 +35,11 @@ export async function GET({ request }: APIEvent) {
     }
 
     const user = await getUserFromSession(request);
-    const existingUser = await findUserVertexSimple(dbSession, user?.P?.uuid, user?.P?.email || user?.P?.username);
+    const existingUser = await findUserVertexSimple(
+      dbSession,
+      user?.P?.uuid,
+      user?.P?.email || user?.P?.username,
+    );
 
     const validatedUser = validateUser(existingUser);
 

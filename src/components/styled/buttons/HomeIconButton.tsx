@@ -10,7 +10,8 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 export const HomeIconButton = () => {
   const [graph] = useGraph();
   const navigate = useNavigate();
-  const isAdminSubDomain = () => getMemberVertex(graph)?.P.subDomain === "admin";
+  const isAdminSubDomain = () =>
+    getMemberVertex(graph)?.P.subDomain === "admin";
 
   const context = () => {
     if (isAdminSubDomain()) {

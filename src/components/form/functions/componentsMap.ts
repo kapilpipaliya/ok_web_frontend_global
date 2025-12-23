@@ -7,7 +7,7 @@ import { ZIndex } from "~/components/fields/ZIndex";
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
 import { FileUploader } from "../../styled/FileUploader";
-import {FilePickerModal} from "~/components/file_picker/FilePickerModal";
+import { FilePickerModal } from "~/components/file_picker/FilePickerModal";
 
 export const componentsMap: Record<string, any> = {
   // Button: ButtonField,
@@ -26,5 +26,5 @@ export const componentsMap: Record<string, any> = {
   Transition,
   TransitionGroup,
   ZIndex,
-  FilePickerModal
+  FilePickerModal,
 };

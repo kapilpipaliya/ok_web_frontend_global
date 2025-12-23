@@ -160,9 +160,6 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
       ),
     );
 
-
-
-
     // Initialize lifecycle hooks
     const { onConfirmExit } = useLifecycle(props, {
       graph,
@@ -172,18 +169,16 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
       metaTxnId,
     });
 
-
-
     const Content = () => (
-          <PageView
-            context={props.context}
-            data={dataVertex()}
-            id={id()}
-            isNoPermissionCheck={props.isNoPermissionCheck}
-            metaVertex={metaVertex()!}
-            pageVertexName={props.pageVertexName}
-            parentPreviewStore={previewStore}
-          />
+      <PageView
+        context={props.context}
+        data={dataVertex()}
+        id={id()}
+        isNoPermissionCheck={props.isNoPermissionCheck}
+        metaVertex={metaVertex()!}
+        pageVertexName={props.pageVertexName}
+        parentPreviewStore={previewStore}
+      />
     );
     return (
       <>
@@ -228,11 +223,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
                 }
               >
                 <Content />
-                <Show
-                  when={
-                    !(props.hideSaveCancelButton ?? true)
-                  }
-                >
+                <Show when={!(props.hideSaveCancelButton ?? true)}>
                   <SaveCancelButton
                     closePopUp={props.closePopUp}
                     disabled={isDisabledTxn(formStore().P.txnId, graph)}

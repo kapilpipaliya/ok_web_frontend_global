@@ -103,7 +103,8 @@ export async function getDriver(): Promise<Driver> {
     });
 
     // Create Neogma instance with optimized connection pool settings
-    const neogma = new Neogma({
+    const neogma = new Neogma(
+      {
         url: `bolt://localhost:${boltPort}`,
         username,
         password,
@@ -140,7 +141,8 @@ export async function getDriver(): Promise<Driver> {
         // Maximum time (ms) to retry transient errors (e.g., deadlocks, timeouts)
         // Default: 30000 (30 seconds)
         // Driver automatically retries failed transactions within this window
-      });
+      },
+    );
 
     logger.info("Neo4j connection pool created successfully with Neogma");
     driverState.neogmaInstance = neogma;

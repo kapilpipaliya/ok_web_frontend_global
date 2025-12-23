@@ -341,7 +341,7 @@ export function RedisManagement() {
         const matchesData = JSON.stringify(job.data)
           .toLowerCase()
           .includes(searchQuery);
-        if (!((matchesId || matchesName ) || matchesData)) {
+        if (!(matchesId || matchesName || matchesData)) {
           return false;
         }
       }

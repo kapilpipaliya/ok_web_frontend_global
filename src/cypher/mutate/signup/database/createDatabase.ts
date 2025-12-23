@@ -6,7 +6,7 @@ export async function createDatabase(subdomain: string) {
 
   try {
     // Create a new database with the subdomain name
-    await session.run(`CREATE DATABASE ${subdomain}`);
+    await session.run(`CREATE DATABASE ${subdomain} IF NOT EXISTS`);
   } catch (error) {
     console.error(`Failed to create database ${subdomain}:`, error);
     throw error;

@@ -43,7 +43,7 @@ export interface TransactionOptions {
 export async function transaction<T>(
   session: Session,
   fn: (tx: Transaction) => Promise<T>,
-  options: TransactionOptions = {}
+  options: TransactionOptions = {},
 ): Promise<T> {
   const tx = session.beginTransaction({
     timeout: options.timeout,
@@ -61,7 +61,7 @@ export async function transaction<T>(
       {
         originalError: error,
         metadata: options.metadata,
-      }
+      },
     );
   }
 }
@@ -86,7 +86,7 @@ export async function transaction<T>(
 export async function transactionBatch<T extends any[]>(
   session: Session,
   operations: Array<(tx: Transaction) => Promise<any>>,
-  options: TransactionOptions = {}
+  options: TransactionOptions = {},
 ): Promise<T> {
   return transaction(
     session,
@@ -98,7 +98,7 @@ export async function transactionBatch<T extends any[]>(
       }
       return results as T;
     },
-    options
+    options,
   );
 }
 
@@ -114,8 +114,8 @@ export async function transactionBatch<T extends any[]>(
 export async function transactionWithRetry<T>(
   session: Session,
   fn: (tx: Transaction) => Promise<T>,
-  maxRetries: number = 3,
-  retryDelay: number = 1000
+  maxRetries = 3,
+  retryDelay = 1000,
 ): Promise<T> {
   let lastError: Error | undefined;
 
@@ -138,7 +138,7 @@ export async function transactionWithRetry<T>(
 
       // Wait before retry with exponential backoff
       await new Promise((resolve) =>
-        setTimeout(resolve, retryDelay * Math.pow(2, attempt - 1))
+        setTimeout(resolve, retryDelay * 2 ** (attempt - 1)),
       );
     }
   }

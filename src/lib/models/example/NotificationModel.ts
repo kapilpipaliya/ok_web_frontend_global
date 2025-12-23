@@ -8,7 +8,13 @@
 import { ModelFactory } from "neogma";
 import type { Session } from "neo4j-driver";
 import type { ModelRelatedNodesI } from "neogma";
-import { now, withTimestamps, touchTimestamp, ErrorCodes, ModelError } from "~/lib/models";
+import {
+  now,
+  withTimestamps,
+  touchTimestamp,
+  ErrorCodes,
+  ModelError,
+} from "~/lib/models";
 import type { TimestampProperties } from "~/lib/models";
 
 /**
@@ -34,15 +40,7 @@ export interface NotificationProperties extends TimestampProperties {
  *
  * Define relationships to other models (currently none for simplicity)
  */
-export interface NotificationRelationships {
-  // Example relationship (commented out):
-  // belongsToUser: ModelRelatedNodesI<
-  //   typeof UserModel,
-  //   UserProperties,
-  //   {},
-  //   false
-  // >;
-}
+export type NotificationRelationships = {}
 
 /**
  * Notification Static Methods Interface
@@ -59,7 +57,7 @@ export interface NotificationStatics {
       session?: Session;
       unreadOnly?: boolean;
       limit?: number;
-    }
+    },
   ): Promise<NotificationInstance[]>;
 
   /**
@@ -72,7 +70,7 @@ export interface NotificationStatics {
    */
   deleteOldReadNotifications(
     daysOld: number,
-    session?: Session
+    session?: Session,
   ): Promise<number>;
 
   /**
@@ -112,7 +110,7 @@ export interface NotificationMethods {
       actionUrl?: string;
       actionText?: string;
     },
-    session?: Session
+    session?: Session,
   ): Promise<void>;
 }
 
@@ -129,7 +127,7 @@ function createNotificationModel() {
 
   if (!neogma) {
     throw new Error(
-      "Neogma instance not initialized. Ensure getDriver() has been called."
+      "Neogma instance not initialized. Ensure getDriver() has been called.",
     );
   }
 
@@ -194,7 +192,7 @@ function createNotificationModel() {
         // },
       },
     },
-    neogma
+    neogma,
   );
 
   // ==================== STATIC METHODS ====================
@@ -203,10 +201,7 @@ function createNotificationModel() {
     const { session, unreadOnly = false, limit } = options;
 
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     const where: any = { userId };
@@ -225,10 +220,7 @@ function createNotificationModel() {
 
   model.markAllAsReadForUser = async (userId, session) => {
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     const result = await session.run(
@@ -237,7 +229,7 @@ function createNotificationModel() {
       SET n.read = true, n.updatedAt = $updatedAt
       RETURN count(n) as count
       `,
-      { userId, updatedAt: now() }
+      { userId, updatedAt: now() },
     );
 
     return result.records[0]?.get("count")?.toNumber() || 0;
@@ -245,10 +237,7 @@ function createNotificationModel() {
 
   model.deleteOldReadNotifications = async (daysOld, session) => {
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     const cutoffDate = new Date();
@@ -262,7 +251,7 @@ function createNotificationModel() {
       DELETE n
       RETURN count(n) as count
       `,
-      { cutoffDate: cutoffIso }
+      { cutoffDate: cutoffIso },
     );
 
     return result.records[0]?.get("count")?.toNumber() || 0;
@@ -270,10 +259,7 @@ function createNotificationModel() {
 
   model.getUnreadCount = async (userId, session) => {
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     const result = await session.run(
@@ -281,7 +267,7 @@ function createNotificationModel() {
       MATCH (n:Notification {userId: $userId, read: false})
       RETURN count(n) as count
       `,
-      { userId }
+      { userId },
     );
 
     return result.records[0]?.get("count")?.toNumber() || 0;
@@ -291,10 +277,7 @@ function createNotificationModel() {
 
   model.prototype.markAsRead = async function (session) {
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     await this.update(
@@ -302,16 +285,13 @@ function createNotificationModel() {
         read: true,
         updatedAt: now(),
       },
-      session
+      session,
     );
   };
 
   model.prototype.markAsUnread = async function (session) {
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     await this.update(
@@ -319,16 +299,13 @@ function createNotificationModel() {
         read: false,
         updatedAt: now(),
       },
-      session
+      session,
     );
   };
 
   model.prototype.delete = async function (session) {
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     await this.delete(session);
@@ -336,10 +313,7 @@ function createNotificationModel() {
 
   model.prototype.updateContent = async function (data, session) {
     if (!session) {
-      throw new ModelError(
-        "Session is required",
-        ErrorCodes.SESSION_REQUIRED
-      );
+      throw new ModelError("Session is required", ErrorCodes.SESSION_REQUIRED);
     }
 
     const updates = touchTimestamp(data);
@@ -374,7 +348,7 @@ export type NotificationModelType = typeof NotificationModel;
  */
 export async function createNotification(
   data: Omit<NotificationProperties, "id" | "createdAt" | "updatedAt" | "read">,
-  session: Session
+  session: Session,
 ): Promise<NotificationInstance> {
   const model = getNotificationModel();
 

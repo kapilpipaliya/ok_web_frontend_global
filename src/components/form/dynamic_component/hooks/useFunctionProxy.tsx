@@ -65,7 +65,7 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
       // Continue even if meta is undefined - provide maximum possible result
       // Access props reactively so changes are tracked
       return createFunctionArgumentBase(
-        options.props as { meta: Vertex; data?: Vertex},
+        options.props as { meta: Vertex; data?: Vertex },
         {
           formVertex: options.formVertex || (() => undefined),
           formId: options.formId,
@@ -104,10 +104,7 @@ export function useFunctionProxy(options: UseFunctionProxyOptions) {
     };
 
     return createMemo(() =>
-      createFunctionArgumentWithValue(
-        getFunctionArg,
-        options.value,
-      ),
+      createFunctionArgumentWithValue(getFunctionArg, options.value),
     );
   };
 

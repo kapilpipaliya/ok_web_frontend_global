@@ -58,8 +58,11 @@ function generateWebhookId(): string {
 /**
  * Calculate retry delay with exponential backoff
  */
-function calculateRetryDelay(attempt: number, baseDelay: number = 1000): number {
-  return baseDelay * Math.pow(2, attempt);
+function calculateRetryDelay(
+  attempt: number,
+  baseDelay = 1000,
+): number {
+  return baseDelay * 2 ** attempt;
 }
 
 /**
@@ -77,7 +80,7 @@ export async function registerWebhook(
   session: Session,
   event: string,
   url: string,
-  options: Omit<WebhookOptions, "maxAttempts" | "retryDelay" | "timeout"> = {}
+  options: Omit<WebhookOptions, "maxAttempts" | "retryDelay" | "timeout"> = {},
 ): Promise<WebhookRegistration> {
   const registration: WebhookRegistration = {
     id: generateWebhookId(),
@@ -103,11 +106,13 @@ export async function registerWebhook(
       id: registration.id,
       event: registration.event,
       url: registration.url,
-      headers: registration.headers ? JSON.stringify(registration.headers) : null,
+      headers: registration.headers
+        ? JSON.stringify(registration.headers)
+        : null,
       secret: registration.secret || null,
       active: registration.active,
       createdAt: registration.createdAt,
-    }
+    },
   );
 
   return registration;
@@ -119,7 +124,7 @@ export async function registerWebhook(
 export async function getWebhooks(
   session: Session,
   event: string,
-  activeOnly: boolean = true
+  activeOnly = true,
 ): Promise<WebhookRegistration[]> {
   const query = `
     MATCH (w:Webhook {event: $event${activeOnly ? ", active: true" : ""}})
@@ -149,7 +154,7 @@ export async function triggerWebhooks(
   session: Session,
   event: string,
   payload: any,
-  options: Pick<WebhookOptions, "maxAttempts" | "retryDelay"> = {}
+  options: Pick<WebhookOptions, "maxAttempts" | "retryDelay"> = {},
 ): Promise<WebhookEvent[]> {
   const webhooks = await getWebhooks(session, event);
   const events: WebhookEvent[] = [];
@@ -185,20 +190,25 @@ export async function triggerWebhooks(
         event: webhookEvent.event,
         url: webhookEvent.url,
         payload: JSON.stringify(webhookEvent.payload),
-        headers: webhookEvent.headers ? JSON.stringify(webhookEvent.headers) : null,
+        headers: webhookEvent.headers
+          ? JSON.stringify(webhookEvent.headers)
+          : null,
         createdAt: webhookEvent.createdAt,
         attempts: webhookEvent.attempts,
         maxAttempts: webhookEvent.maxAttempts,
         status: webhookEvent.status,
-      }
+      },
     );
 
     // Trigger webhook (async, don't wait)
-    deliverWebhook(session, webhookEvent.id, webhook.secret, options.retryDelay).catch(
-      (err) => {
-        console.error(`Failed to deliver webhook ${webhookEvent.id}:`, err);
-      }
-    );
+    deliverWebhook(
+      session,
+      webhookEvent.id,
+      webhook.secret,
+      options.retryDelay,
+    ).catch((err) => {
+      console.error(`Failed to deliver webhook ${webhookEvent.id}:`, err);
+    });
 
     events.push(webhookEvent);
   }
@@ -213,12 +223,12 @@ async function deliverWebhook(
   session: Session,
   webhookEventId: string,
   secret?: string,
-  retryDelay: number = 1000
+  retryDelay = 1000,
 ): Promise<void> {
   // Get webhook event
   const result = await session.run(
     "MATCH (e:WebhookEvent {id: $id}) RETURN e",
-    { id: webhookEventId }
+    { id: webhookEventId },
   );
 
   if (result.records.length === 0) {
@@ -287,14 +297,15 @@ async function deliverWebhook(
           attempts: webhookEvent.attempts,
           status: webhookEvent.status,
           lastAttemptAt: webhookEvent.lastAttemptAt,
-        }
+        },
       );
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
   } catch (error) {
     // Failed
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     webhookEvent.lastError = errorMessage;
 
     if (webhookEvent.attempts >= webhookEvent.maxAttempts) {
@@ -302,9 +313,7 @@ async function deliverWebhook(
     } else {
       // Schedule retry
       const delay = calculateRetryDelay(webhookEvent.attempts, retryDelay);
-      webhookEvent.nextRetryAt = new Date(
-        Date.now() + delay
-      ).toISOString();
+      webhookEvent.nextRetryAt = new Date(Date.now() + delay).toISOString();
     }
 
     await session.run(
@@ -321,16 +330,18 @@ async function deliverWebhook(
         lastAttemptAt: webhookEvent.lastAttemptAt,
         lastError: webhookEvent.lastError,
         nextRetryAt: webhookEvent.nextRetryAt || null,
-      }
+      },
     );
 
     // Retry if not at max attempts
     if (webhookEvent.attempts < webhookEvent.maxAttempts) {
       const delay = calculateRetryDelay(webhookEvent.attempts, retryDelay);
       setTimeout(() => {
-        deliverWebhook(session, webhookEventId, secret, retryDelay).catch((err) => {
-          console.error(`Retry failed for webhook ${webhookEventId}:`, err);
-        });
+        deliverWebhook(session, webhookEventId, secret, retryDelay).catch(
+          (err) => {
+            console.error(`Retry failed for webhook ${webhookEventId}:`, err);
+          },
+        );
       }, delay);
     }
   }
@@ -345,7 +356,7 @@ export async function retryFailedWebhooks(session: Session): Promise<number> {
      WHERE e.status = 'failed' OR (e.status = 'pending' AND e.nextRetryAt < $now)
      RETURN e.id as id, e.url as url
      LIMIT 100`,
-    { now: new Date().toISOString() }
+    { now: new Date().toISOString() },
   );
 
   let retried = 0;
@@ -357,7 +368,7 @@ export async function retryFailedWebhooks(session: Session): Promise<number> {
     const webhookResult = await session.run(
       `MATCH (w:Webhook {url: $url})
        RETURN w.secret as secret`,
-      { url: record.get("url") }
+      { url: record.get("url") },
     );
 
     const secret = webhookResult.records[0]?.get("secret") || undefined;
@@ -375,12 +386,11 @@ export async function retryFailedWebhooks(session: Session): Promise<number> {
  */
 export async function deactivateWebhook(
   session: Session,
-  webhookId: string
+  webhookId: string,
 ): Promise<void> {
-  await session.run(
-    "MATCH (w:Webhook {id: $id}) SET w.active = false",
-    { id: webhookId }
-  );
+  await session.run("MATCH (w:Webhook {id: $id}) SET w.active = false", {
+    id: webhookId,
+  });
 }
 
 /**
@@ -388,12 +398,9 @@ export async function deactivateWebhook(
  */
 export async function deleteWebhook(
   session: Session,
-  webhookId: string
+  webhookId: string,
 ): Promise<void> {
-  await session.run(
-    "MATCH (w:Webhook {id: $id}) DELETE w",
-    { id: webhookId }
-  );
+  await session.run("MATCH (w:Webhook {id: $id}) DELETE w", { id: webhookId });
 }
 
 /**
@@ -401,7 +408,7 @@ export async function deleteWebhook(
  */
 export async function getWebhookStats(
   session: Session,
-  event?: string
+  event?: string,
 ): Promise<{
   total: number;
   pending: number;

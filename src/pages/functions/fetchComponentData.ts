@@ -1,6 +1,6 @@
 import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import {VertexMap} from "~/lib/graph/type/vertexMap";
+import type { VertexMap } from "~/lib/graph/type/vertexMap";
 
 /**
  * Fetches component data for all components referenced in the provided graph data
@@ -8,7 +8,9 @@ import {VertexMap} from "~/lib/graph/type/vertexMap";
  * @param graphData The graph data containing vertices to scan for component references
  * @returns Array of component data results, empty array if no components found
  */
-export async function fetchComponentDataFromGraph(graphData?:  ServerResult): Promise<ServerResult[]> {
+export async function fetchComponentDataFromGraph(
+  graphData?: ServerResult,
+): Promise<ServerResult[]> {
   if (!graphData?.graph?.vertexes) {
     return [];
   }
@@ -17,9 +19,7 @@ export async function fetchComponentDataFromGraph(graphData?:  ServerResult): Pr
   const componentDataResults: ServerResult[] = [];
 
   // Helper function to extract component names from vertices
-  const extractComponentNames = (
-    vertices: VertexMap,
-  ): Set<string> => {
+  const extractComponentNames = (vertices: VertexMap): Set<string> => {
     const componentNames = new Set<string>();
 
     for (const vertex of Object.values(vertices)) {
@@ -34,9 +34,7 @@ export async function fetchComponentDataFromGraph(graphData?:  ServerResult): Pr
       }
 
       // Extract from Page or Component label with dynamicComponent property
-      if (
-        (vertex.L.includes("Page") || vertex.L.includes("Component"))
-      ) {
+      if (vertex.L.includes("Page") || vertex.L.includes("Component")) {
         const dyn = vertex.P.dynamicComponent;
         if (Array.isArray(dyn)) {
           for (const name of dyn) {

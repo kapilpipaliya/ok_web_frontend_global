@@ -375,7 +375,12 @@ async function importSchemasForSubdomain(
 
   // If no schemas found, try loading from default website
   if (
-    !(((websiteSchemas.components ||websiteSchemas.pages ) ||websiteSchemas.themes ) ||websiteSchemas.functions)
+    !(
+      websiteSchemas.components ||
+      websiteSchemas.pages ||
+      websiteSchemas.themes ||
+      websiteSchemas.functions
+    )
   ) {
     console.log(
       `[Subdomain Create] No schemas found for ${subdomainKey}, trying default...`,
@@ -383,7 +388,12 @@ async function importSchemasForSubdomain(
     const defaultSchemas = getWebsiteSchemasSync("default");
 
     if (
-      !(((defaultSchemas.components ||defaultSchemas.pages ) ||defaultSchemas.themes ) ||defaultSchemas.functions)
+      !(
+        defaultSchemas.components ||
+        defaultSchemas.pages ||
+        defaultSchemas.themes ||
+        defaultSchemas.functions
+      )
     ) {
       console.log(
         `[Subdomain Create] No schemas found for ${subdomainKey} or default, skipping import`,

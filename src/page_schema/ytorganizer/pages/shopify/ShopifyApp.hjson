@@ -1,0 +1,74 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: ShopifyApp
+        url: /shopify
+        key: ShopifyApp
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        fns:
+          '''return {
+
+}'''
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Load 25 products",
+  onClick: async () => {
+    // const selected = await shopify.resourcePicker({ type: 'product' });
+    // console.log(selected);
+
+    // Call named server function to fetch first 25 products from Shopify
+    const response = await args.executeNamedServerFunction({
+      functionName: "fetchFirst25Products",
+      contextData: {
+        // Prefer shop from searchParams (Shopify installs) or from current user/session
+        shop: args.searchParams?.shop || args.user?.P?.shop,
+      },
+    });
+
+    console.log("fetchFirst25Products result:", response?.result);
+  }
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "3"
+    }
+  ]
+}

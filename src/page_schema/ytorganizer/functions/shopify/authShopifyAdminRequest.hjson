@@ -1,0 +1,118 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: authShopifyAdminRequest
+        description: Authenticates a Shopify admin app request, ensures per-shop database and migration, and updates session
+        body:
+          '''
+// Context data is expected to contain the raw searchParams from Shopify
+// e.g. {
+//   embedded: "1",
+//   hmac: "...",
+//   host: "...",
+//   id_token: "...",
+//   locale: "en",
+//   session: "...",
+//   shop: "productsmanagestore.myshopify.com",
+//   timestamp: "1766394587",
+// }
+
+const params = args.contextData?.searchParams || {};
+
+const { valid, shop, error } = args.verifyShopifyAdminRequest(params);
+
+if (!valid || !shop) {
+  return {
+    success: false,
+    error: error || "Invalid Shopify admin app request",
+  };
+}
+
+const shopify = args.getShopifyClient();
+
+// Since we don't have a request object, create it from available data.
+// Construct a URL using "https://ysaar.com/shopify" and the query params from Shopify.
+const url = new URL("https://ysaar.com/shopify");
+for (const [key, value] of Object.entries(params)) {
+  if (typeof value !== "undefined") {
+    url.searchParams.append(key, value);
+  }
+}
+
+// Create a minimal request-like object with query (params), url, and headers
+// Shopify's authenticate.admin expects a headers-like object with a .get(name) method (Map-like)
+const request = {
+  query: params,
+  url: url.toString(),
+  headers: {
+    get(name) {
+      // If params.headers exists and name exists in it, return, otherwise undefined
+      if (params.headers && typeof params.headers[name] !== "undefined") {
+        return params.headers[name];
+      }
+      return undefined;
+    },
+    // Optionally, support .has as well if needed by Shopify SDK
+    has(name) {
+      return params.headers && typeof params.headers[name] !== "undefined";
+    }
+  },
+  // Add any other fields needed by authenticate.admin if necessary
+};
+
+// Authenticate the request using Shopify's admin authentication
+// This verifies the OAuth session and ensures the user has proper permissions
+// If authentication fails, the user will be redirected to login
+await shopify.authenticate.admin(request);
+
+
+// Ensure dedicated database for this shop and run migration
+const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
+  dryRun: false,
+  contextData: {
+    searchParams: params,
+  },
+});
+
+try {
+  // Create a synthetic user vertex representing the shop/admin for session
+  const user = {
+    id: shop,
+    L: "User",
+    P: {
+      email: shop,
+      uuid: shop,
+      shop,
+      shopDb: subDomain,
+      shopifySession: params.session,
+      shopifyHost: params.host,
+      shopifyLocale: params.locale,
+      shopifyEmbedded: params.embedded,
+      shopifyParams: params, // Save all Shopify params for authentication in other functions
+    },
+  };
+
+  // Update HTTP session with this user
+  await args.updateSession(user);
+
+  return {
+    success: true,
+    shop,
+    subDomain,
+    message: "Shopify admin app request authenticated",
+  };
+} finally {
+  // Close the dedicated session we created for this shop
+  await dbSession.close();
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}
+
+

@@ -101,7 +101,11 @@ export function slugify(str: string): string {
 /**
  * Truncate string to max length
  */
-export function truncate(str: string, maxLength: number, suffix = "..."): string {
+export function truncate(
+  str: string,
+  maxLength: number,
+  suffix = "...",
+): string {
   if (str.length <= maxLength) return str;
   return str.substring(0, maxLength - suffix.length) + suffix;
 }
@@ -197,7 +201,7 @@ export function isNullOrUndefined(value: any): value is null | undefined {
 export function createVertex<P extends object = any>(
   id: string,
   labels: string[],
-  properties: P
+  properties: P,
 ): Vertex<P> {
   return {
     id,
@@ -216,7 +220,7 @@ export function createEdge(
   type: string,
   startId: string,
   endId: string,
-  properties: Record<string, any> = {}
+  properties: Record<string, any> = {},
 ): Edge {
   return {
     id,
@@ -233,9 +237,9 @@ export function createEdge(
 export function getVertexProperty<T = any>(
   vertex: Vertex | null | undefined,
   propertyName: string,
-  defaultValue?: T
+  defaultValue?: T,
 ): T | undefined {
-  if (!vertex || !vertex.P) return defaultValue;
+  if (!(vertex && vertex.P)) return defaultValue;
   return vertex.P[propertyName] ?? defaultValue;
 }
 
@@ -320,7 +324,7 @@ export function createPaginatedResponse<T>(params: {
 export function createErrorResponse(
   error: string | Error,
   errorType = "Error",
-  details?: any
+  details?: any,
 ) {
   const message = typeof error === "string" ? error : error.message;
   return {
@@ -338,7 +342,7 @@ export function createErrorResponse(
 export function createSuccessResponse<T = any>(
   data: T,
   message?: string,
-  meta?: any
+  meta?: any,
 ) {
   return {
     success: true,
@@ -351,10 +355,7 @@ export function createSuccessResponse<T = any>(
 /**
  * Safe JSON parse with fallback
  */
-export function safeJsonParse<T = any>(
-  jsonString: string,
-  fallback: T
-): T {
+export function safeJsonParse<T = any>(jsonString: string, fallback: T): T {
   try {
     return JSON.parse(jsonString);
   } catch {
@@ -365,10 +366,7 @@ export function safeJsonParse<T = any>(
 /**
  * Safe JSON stringify
  */
-export function safeJsonStringify(
-  value: any,
-  fallback = "{}"
-): string {
+export function safeJsonStringify(value: any, fallback = "{}"): string {
   try {
     return JSON.stringify(value);
   } catch {
@@ -401,16 +399,19 @@ export function chunk<T>(array: T[], size: number): T[][] {
  */
 export function groupBy<T>(
   array: T[],
-  keyFn: (item: T) => string
+  keyFn: (item: T) => string,
 ): Record<string, T[]> {
-  return array.reduce((groups, item) => {
-    const key = keyFn(item);
-    if (!groups[key]) {
-      groups[key] = [];
-    }
-    groups[key].push(item);
-    return groups;
-  }, {} as Record<string, T[]>);
+  return array.reduce(
+    (groups, item) => {
+      const key = keyFn(item);
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(item);
+      return groups;
+    },
+    {} as Record<string, T[]>,
+  );
 }
 
 /**
@@ -419,7 +420,7 @@ export function groupBy<T>(
 export function sortBy<T>(
   array: T[],
   keyFn: (item: T) => any,
-  order: "asc" | "desc" = "asc"
+  order: "asc" | "desc" = "asc",
 ): T[] {
   return [...array].sort((a, b) => {
     const aVal = keyFn(a);
@@ -437,7 +438,7 @@ export function sortBy<T>(
  */
 export function pick<T extends object, K extends keyof T>(
   obj: T,
-  keys: K[]
+  keys: K[],
 ): Pick<T, K> {
   const result = {} as Pick<T, K>;
   for (const key of keys) {
@@ -453,7 +454,7 @@ export function pick<T extends object, K extends keyof T>(
  */
 export function omit<T extends object, K extends keyof T>(
   obj: T,
-  keys: K[]
+  keys: K[],
 ): Omit<T, K> {
   const result = { ...obj };
   for (const key of keys) {
@@ -497,7 +498,7 @@ export function formatNumber(num: number): string {
  * Round to N decimal places
  */
 export function roundTo(num: number, decimals: number): number {
-  const factor = Math.pow(10, decimals);
+  const factor = 10 ** decimals;
   return Math.round(num * factor) / factor;
 }
 
@@ -526,7 +527,7 @@ export async function retry<T>(
     maxAttempts?: number;
     delayMs?: number;
     backoff?: boolean;
-  } = {}
+  } = {},
 ): Promise<T> {
   const { maxAttempts = 3, delayMs = 1000, backoff = true } = options;
 
@@ -537,7 +538,7 @@ export async function retry<T>(
       if (attempt === maxAttempts) {
         throw error;
       }
-      const delay = backoff ? delayMs * Math.pow(2, attempt - 1) : delayMs;
+      const delay = backoff ? delayMs * 2 ** (attempt - 1) : delayMs;
       await sleep(delay);
     }
   }
@@ -551,7 +552,7 @@ export async function retry<T>(
 export async function batchExecute<T, R>(
   items: T[],
   fn: (item: T) => Promise<R>,
-  concurrency = 5
+  concurrency = 5,
 ): Promise<R[]> {
   const results: R[] = [];
   const executing: Promise<void>[] = [];

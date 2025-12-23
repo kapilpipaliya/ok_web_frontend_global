@@ -155,7 +155,8 @@ export async function listCloudBackups(): Promise<ListBackupsResult> {
           bucket,
         },
       };
-    }if (storageType === "gcs") {
+    }
+    if (storageType === "gcs") {
       // Google Cloud Storage List
       const projectId = process.env.GCS_PROJECT_ID;
       const bucketName = process.env.GCS_BUCKET;
@@ -235,7 +236,7 @@ export async function listCloudBackups(): Promise<ListBackupsResult> {
         },
       };
     }
-      throw new Error(`Unsupported storage type: ${storageType}`);
+    throw new Error(`Unsupported storage type: ${storageType}`);
   } catch (error: any) {
     console.error("[Storage] List error:", error);
 

@@ -87,13 +87,18 @@ export async function checkPermissions(
     getUserFromSession: () => Promise<any>;
     session: Session;
     contextData: any;
-  }
+  },
 ): Promise<PermissionResult> {
   try {
     // Get user if authenticated check is required
     let user: any = null;
 
-    if (requirement.authenticated || requirement.roles || requirement.permissions || requirement.ownership) {
+    if (
+      requirement.authenticated ||
+      requirement.roles ||
+      requirement.permissions ||
+      requirement.ownership
+    ) {
       user = await context.getUserFromSession();
 
       if (!user) {
@@ -105,7 +110,7 @@ export async function checkPermissions(
     if (requirement.roles && requirement.roles.length > 0) {
       const userRoles = user.P?.roles || [];
       const hasRole = requirement.roles.some((role) =>
-        userRoles.includes(role)
+        userRoles.includes(role),
       );
 
       if (!hasRole) {
@@ -114,7 +119,7 @@ export async function checkPermissions(
           {
             required: requirement.roles,
             userRoles,
-          }
+          },
         );
       }
     }
@@ -123,7 +128,7 @@ export async function checkPermissions(
     if (requirement.permissions && requirement.permissions.length > 0) {
       const userPermissions = user.P?.permissions || [];
       const hasPermission = requirement.permissions.some((perm) =>
-        userPermissions.includes(perm)
+        userPermissions.includes(perm),
       );
 
       if (!hasPermission) {
@@ -132,7 +137,7 @@ export async function checkPermissions(
           {
             required: requirement.permissions,
             userPermissions,
-          }
+          },
         );
       }
     }
@@ -142,9 +147,7 @@ export async function checkPermissions(
       const { resource, field, resourceId } = requirement.ownership;
 
       if (!resourceId) {
-        throw new Error(
-          "Resource ID must be provided for ownership check"
-        );
+        throw new Error("Resource ID must be provided for ownership check");
       }
 
       // Query to check ownership
@@ -159,7 +162,7 @@ export async function checkPermissions(
         userId: user.P.uuid || user.id,
       });
 
-      const isOwner = result.records[0]?.get("isOwner") || false;
+      const isOwner = result.records[0]?.get("isOwner");
 
       if (!isOwner) {
         throw new ForbiddenError(
@@ -167,7 +170,7 @@ export async function checkPermissions(
           {
             resource,
             resourceId,
-          }
+          },
         );
       }
     }
@@ -210,7 +213,7 @@ export async function requirePermissions(
     getUserFromSession: () => Promise<any>;
     session: Session;
     contextData: any;
-  }
+  },
 ): Promise<{ user: any }> {
   const result = await checkPermissions(requirement, context);
 
@@ -254,7 +257,7 @@ export async function isOwner(
   session: Session,
   userId: string,
   resourceId: string,
-  ownerField: string = "userId"
+  ownerField = "userId",
 ): Promise<boolean> {
   const query = `
     MATCH (resource {id: $resourceId})
@@ -263,5 +266,5 @@ export async function isOwner(
   `;
 
   const result = await session.run(query, { resourceId, userId });
-  return result.records[0]?.get("isOwner") || false;
+  return result.records[0]?.get("isOwner");
 }

@@ -15,7 +15,7 @@ export async function POST({ request }: APIEvent) {
 
     // Get the first file from the multipart data
     const file = data[0];
-    if (!((file && file.filename ) && file.data)) {
+    if (!(file && file.filename && file.data)) {
       throw new APIError("Invalid file data", 400);
     }
 

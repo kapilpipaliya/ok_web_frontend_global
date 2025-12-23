@@ -19,7 +19,7 @@ export interface MigrationResult {
 
 /**
  * Common function to run migrations
- * 
+ *
  * @param dbSession - Database session
  * @param subDomain - Subdomain name
  * @param user - User vertex

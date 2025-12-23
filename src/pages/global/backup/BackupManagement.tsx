@@ -301,8 +301,8 @@ export function BackupManagement() {
               updated[index] = result.data;
               return updated;
             }
-              // Add new
-              return [...prev, result.data];
+            // Add new
+            return [...prev, result.data];
           });
         } else {
           // Note was deleted (empty note)
@@ -1057,10 +1057,7 @@ export function BackupManagement() {
 }\`;`}
                   >
                     <As as="span">⏳</As>
-                    <As
-                      as="span"
-                      css={"return `._id { font-weight: 500; }`;"}
-                    >
+                    <As as="span" css={"return `._id { font-weight: 500; }`;"}>
                       Backup in progress...
                     </As>
                   </As>
@@ -3855,7 +3852,7 @@ export function BackupManagement() {
                     as="button"
                     onClick={handleUploadBackup}
                     disabled={
-                      !(uploadFile() && uploadTargetDb() ) || isUploading()
+                      !(uploadFile() && uploadTargetDb()) || isUploading()
                     }
                     css={`return \`._id {
   padding: 0.5rem 1rem;

@@ -52,7 +52,7 @@ export function validateFile(
     size: number;
     type: string;
   },
-  options: FileValidationOptions = {}
+  options: FileValidationOptions = {},
 ): { valid: boolean; error?: string } {
   // Check size
   if (options.maxSize && file.size > options.maxSize) {
@@ -116,9 +116,11 @@ export function getMimeType(filename: string): string {
     ".webp": "image/webp",
     ".pdf": "application/pdf",
     ".doc": "application/msword",
-    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".docx":
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     ".xls": "application/vnd.ms-excel",
-    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".xlsx":
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ".txt": "text/plain",
     ".csv": "text/csv",
     ".json": "application/json",
@@ -136,7 +138,7 @@ export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
 
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  const size = bytes / Math.pow(1024, i);
+  const size = bytes / 1024 ** i;
 
   return `${size.toFixed(2)} ${sizes[i]}`;
 }
@@ -146,7 +148,7 @@ export function formatFileSize(bytes: number): string {
  */
 export async function storeFileMetadata(
   session: Session,
-  metadata: Omit<FileMetadata, "id" | "uploadedAt">
+  metadata: Omit<FileMetadata, "id" | "uploadedAt">,
 ): Promise<FileMetadata> {
   const fileMetadata: FileMetadata = {
     id: `file_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`,
@@ -177,8 +179,10 @@ export async function storeFileMetadata(
       url: fileMetadata.url || null,
       uploadedBy: fileMetadata.uploadedBy || null,
       uploadedAt: fileMetadata.uploadedAt,
-      metadata: fileMetadata.metadata ? JSON.stringify(fileMetadata.metadata) : null,
-    }
+      metadata: fileMetadata.metadata
+        ? JSON.stringify(fileMetadata.metadata)
+        : null,
+    },
   );
 
   return fileMetadata;
@@ -189,12 +193,11 @@ export async function storeFileMetadata(
  */
 export async function getFile(
   session: Session,
-  fileId: string
+  fileId: string,
 ): Promise<FileMetadata | null> {
-  const result = await session.run(
-    "MATCH (f:File {id: $id}) RETURN f",
-    { id: fileId }
-  );
+  const result = await session.run("MATCH (f:File {id: $id}) RETURN f", {
+    id: fileId,
+  });
 
   if (result.records.length === 0) {
     return null;
@@ -225,7 +228,7 @@ export async function listFiles(
     uploadedBy?: string;
     mimeType?: string;
     limit?: number;
-  } = {}
+  } = {},
 ): Promise<FileMetadata[]> {
   const conditions: string[] = [];
   const params: Record<string, any> = {};
@@ -240,7 +243,8 @@ export async function listFiles(
     params.mimeType = filters.mimeType;
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   const limitClause = filters.limit ? `LIMIT ${filters.limit}` : "LIMIT 100";
 
   const query = `
@@ -275,12 +279,9 @@ export async function listFiles(
  */
 export async function deleteFileMetadata(
   session: Session,
-  fileId: string
+  fileId: string,
 ): Promise<void> {
-  await session.run(
-    "MATCH (f:File {id: $id}) DELETE f",
-    { id: fileId }
-  );
+  await session.run("MATCH (f:File {id: $id}) DELETE f", { id: fileId });
 }
 
 /**
@@ -288,7 +289,7 @@ export async function deleteFileMetadata(
  */
 export async function getFileStats(
   session: Session,
-  userId?: string
+  userId?: string,
 ): Promise<{
   totalFiles: number;
   totalSize: number;

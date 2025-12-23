@@ -45,7 +45,11 @@ export async function GET({ request }: APIEvent) {
     }
 
     const { uuid, email, username } = decodeUserData(userData);
-    const existingUser = await findUserVertexSimple(dbSession, uuid, email || username!);
+    const existingUser = await findUserVertexSimple(
+      dbSession,
+      uuid,
+      email || username!,
+    );
 
     if (!existingUser) {
       return new Response(null, {

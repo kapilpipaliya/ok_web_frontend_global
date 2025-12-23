@@ -63,7 +63,7 @@ export interface PaginatedResponse<T> {
  */
 export function modelToVertex<P extends object>(
   instance: any,
-  label?: string
+  label?: string,
 ): Vertex<P> {
   return {
     id: instance.id || instance.elementId,
@@ -79,7 +79,7 @@ export function modelToVertex<P extends object>(
  */
 export function modelsToVertices<P extends object>(
   instances: any[],
-  label?: string
+  label?: string,
 ): Vertex<P>[] {
   return instances.map((instance) => modelToVertex<P>(instance, label));
 }
@@ -95,9 +95,9 @@ export function isSession(value: any): value is Session {
  * Helper to ensure session is provided for multi-tenant operations
  */
 export function requireSession(session?: Session): Session {
-  if (!session || !isSession(session)) {
+  if (!(session && isSession(session))) {
     throw new Error(
-      "Session is required for database operations in multi-tenant architecture"
+      "Session is required for database operations in multi-tenant architecture",
     );
   }
   return session;

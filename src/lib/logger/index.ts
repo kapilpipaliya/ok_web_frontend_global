@@ -105,62 +105,62 @@ function createTransport() {
       },
     });
   }
-    // Production: Write to files with rotation
-    if (enableLogRotation) {
-      return pino.transport({
-        targets: [
-          // Application logs with rotation
-          {
-            target: "pino-roll",
-            options: {
-              file: path.join(logsDir, "application"),
-              frequency: "daily",
-              size: "100M",
-              extension: ".log",
-              mkdir: true,
-            },
+  // Production: Write to files with rotation
+  if (enableLogRotation) {
+    return pino.transport({
+      targets: [
+        // Application logs with rotation
+        {
+          target: "pino-roll",
+          options: {
+            file: path.join(logsDir, "application"),
+            frequency: "daily",
+            size: "100M",
+            extension: ".log",
+            mkdir: true,
           },
-          // Error logs separately
-          {
-            target: "pino-roll",
-            level: "error",
-            options: {
-              file: path.join(logsDir, "error"),
-              frequency: "daily",
-              size: "100M",
-              extension: ".log",
-              mkdir: true,
-            },
+        },
+        // Error logs separately
+        {
+          target: "pino-roll",
+          level: "error",
+          options: {
+            file: path.join(logsDir, "error"),
+            frequency: "daily",
+            size: "100M",
+            extension: ".log",
+            mkdir: true,
           },
-          // Console output (minimal)
-          {
-            target: "pino/file",
-            level: "info",
-            options: {
-              destination: 1, // stdout
-            },
+        },
+        // Console output (minimal)
+        {
+          target: "pino/file",
+          level: "info",
+          options: {
+            destination: 1, // stdout
           },
-        ],
-      });
-    }
-      // Production without rotation: simple file output
-      return pino.transport({
-        targets: [
-          {
-            target: "pino/file",
-            options: {
-              destination: path.join(logsDir, "application.log"),
-            },
-          },
-          {
-            target: "pino/file",
-            level: "error",
-            options: {
-              destination: path.join(logsDir, "error.log"),
-            },
-          },
-        ],
-      });
+        },
+      ],
+    });
+  }
+  // Production without rotation: simple file output
+  return pino.transport({
+    targets: [
+      {
+        target: "pino/file",
+        options: {
+          destination: path.join(logsDir, "application.log"),
+        },
+      },
+      {
+        target: "pino/file",
+        level: "error",
+        options: {
+          destination: path.join(logsDir, "error.log"),
+        },
+      },
+    ],
+  });
 }
 
 // Create the base logger instance

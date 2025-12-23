@@ -132,7 +132,8 @@ export async function uploadBackupToCloud(
           uploadedAt: new Date().toISOString(),
         },
       };
-    }if (storageType === "gcs") {
+    }
+    if (storageType === "gcs") {
       // Google Cloud Storage Upload
       const projectId = process.env.GCS_PROJECT_ID;
       const bucketName = process.env.GCS_BUCKET;
@@ -189,7 +190,7 @@ export async function uploadBackupToCloud(
         },
       };
     }
-      throw new Error(`Unsupported storage type: ${storageType}`);
+    throw new Error(`Unsupported storage type: ${storageType}`);
   } catch (error: any) {
     console.error("[Storage] Upload error:", error);
 

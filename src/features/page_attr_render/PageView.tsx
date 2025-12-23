@@ -114,8 +114,6 @@ export function PageView(
     return [];
   });
 
-
-
   // Inner component to handle recursive layout rendering
   const LayoutRenderer = (innerProps: { index: number }) => {
     const currentLayout = createMemo(() =>
@@ -169,10 +167,11 @@ export function PageView(
     const [graph] = useGraph();
     const [componentName] = createSignal<string>("Html");
 
-    const isNoPermissionCheck2 = createMemo(() =>
-      props.isNoPermissionCheck ||
-      props.metaVertex?.P.isNoPermissionCheck ||
-      props.parentPreviewStore?.isNoPermissionCheck
+    const isNoPermissionCheck2 = createMemo(
+      () =>
+        props.isNoPermissionCheck ||
+        props.metaVertex?.P.isNoPermissionCheck ||
+        props.parentPreviewStore?.isNoPermissionCheck,
     );
     // Initialize permissions
     const { permissions: permissions2 } = usePermissions(props, {
@@ -202,10 +201,22 @@ export function PageView(
         value: () => undefined,
         updateValue: () => {},
         onChange: () => {},
-        hasFullPermission: () => props.pageVertexName ? permissions2.full() : (props.hasFullPermission ?? true),
-        hasEditPermission: () => props.pageVertexName ? permissions2.edit() : (props.hasEditPermission ?? true),
-        hasCreatePermission: () => props.pageVertexName ? permissions2.create() : (props.hasCreatePermission ?? true),
-        hasViewPermission: () => props.pageVertexName ? permissions2.view() : (props.hasViewPermission ?? true),
+        hasFullPermission: () =>
+          props.pageVertexName
+            ? permissions2.full()
+            : (props.hasFullPermission ?? true),
+        hasEditPermission: () =>
+          props.pageVertexName
+            ? permissions2.edit()
+            : (props.hasEditPermission ?? true),
+        hasCreatePermission: () =>
+          props.pageVertexName
+            ? permissions2.create()
+            : (props.hasCreatePermission ?? true),
+        hasViewPermission: () =>
+          props.pageVertexName
+            ? permissions2.view()
+            : (props.hasViewPermission ?? true),
       });
 
     // Evaluate dynamic props from metaVertex
@@ -221,11 +232,12 @@ export function PageView(
       },
     );
 
-    const isNoPermissionCheck = createMemo(() =>
-      props.isNoPermissionCheck ||
-      dynamicProps().isNoPermissionCheck ||
-      props.metaVertex?.P.isNoPermissionCheck ||
-      props.parentPreviewStore?.isNoPermissionCheck
+    const isNoPermissionCheck = createMemo(
+      () =>
+        props.isNoPermissionCheck ||
+        dynamicProps().isNoPermissionCheck ||
+        props.metaVertex?.P.isNoPermissionCheck ||
+        props.parentPreviewStore?.isNoPermissionCheck,
     );
     // Initialize permissions
     const { checkAuthError } = usePermissions(props, {
@@ -247,9 +259,7 @@ export function PageView(
         }
         const proxy = functionProxy as any;
         const enabled =
-          typeof proxy.enabled === "function"
-            ? proxy.enabled()
-            : proxy.enabled;
+          typeof proxy.enabled === "function" ? proxy.enabled() : proxy.enabled;
 
         if (!enabled) {
           return `${props.pageVertexName || "Page"} is not enabled. Please contact your administrator.`;
@@ -379,16 +389,24 @@ export function PageView(
         return props.context;
       },
       get hasFullPermission() {
-        return props.pageVertexName ? permissions2.full() : (props.hasFullPermission ?? true);
+        return props.pageVertexName
+          ? permissions2.full()
+          : (props.hasFullPermission ?? true);
       },
       get hasEditPermission() {
-        return props.pageVertexName ? permissions2.edit() : (props.hasEditPermission ?? true);
+        return props.pageVertexName
+          ? permissions2.edit()
+          : (props.hasEditPermission ?? true);
       },
       get hasCreatePermission() {
-        return props.pageVertexName ? permissions2.create() : (props.hasCreatePermission ?? true);
+        return props.pageVertexName
+          ? permissions2.create()
+          : (props.hasCreatePermission ?? true);
       },
       get hasViewPermission() {
-        return props.pageVertexName ? permissions2.view() : (props.hasViewPermission ?? true);
+        return props.pageVertexName
+          ? permissions2.view()
+          : (props.hasViewPermission ?? true);
       },
       get id() {
         return props.id;
@@ -397,7 +415,9 @@ export function PageView(
         return props.isDesignMode;
       },
       get isNoPermissionCheck() {
-        return props.pageVertexName ? isNoPermissionCheck() : (props.isNoPermissionCheck ?? false);
+        return props.pageVertexName
+          ? isNoPermissionCheck()
+          : (props.isNoPermissionCheck ?? false);
       },
       get isViewOnly() {
         return isViewOnlyForm();
@@ -412,10 +432,21 @@ export function PageView(
     return (
       <PreviewContext.Provider value={previewStore}>
         <Switch>
-          <Match when={props.metaVertex?.P?.signinRequired || dynamicProps().signinRequired}>
-            <AuthRequired><PageViewContent /></AuthRequired>
+          <Match
+            when={
+              props.metaVertex?.P?.signinRequired ||
+              dynamicProps().signinRequired
+            }
+          >
+            <AuthRequired>
+              <PageViewContent />
+            </AuthRequired>
           </Match>
-          <Match when={!props.metaVertex?.P?.signinRequired && !dynamicProps().signinRequired}>
+          <Match
+            when={
+              !(props.metaVertex?.P?.signinRequired ||dynamicProps().signinRequired)
+            }
+          >
             <PageViewContent />
           </Match>
         </Switch>
@@ -425,9 +456,9 @@ export function PageView(
 
   return (
     <Show when={props.metaVertex}>
-        <Show when={layouts().length > 0} fallback={<MainContentDataWrapper />}>
-          <LayoutRenderer index={0} />
-        </Show>
+      <Show when={layouts().length > 0} fallback={<MainContentDataWrapper />}>
+        <LayoutRenderer index={0} />
+      </Show>
     </Show>
   );
 }

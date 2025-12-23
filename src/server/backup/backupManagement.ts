@@ -490,10 +490,10 @@ export async function uploadAndRestoreBackup(
         data: uploadResult.data,
       };
     }
-      return {
-        success: false,
-        error: uploadResult.error || "Upload failed",
-      };
+    return {
+      success: false,
+      error: uploadResult.error || "Upload failed",
+    };
   } catch (error: any) {
     return {
       success: false,

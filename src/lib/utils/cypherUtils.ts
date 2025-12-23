@@ -11,7 +11,7 @@
  */
 export function buildWhereClause(
   filters: Record<string, any>,
-  nodeAlias = "n"
+  nodeAlias = "n",
 ): { clause: string; params: Record<string, any> } {
   const conditions: string[] = [];
   const params: Record<string, any> = {};
@@ -32,7 +32,8 @@ export function buildWhereClause(
     }
   }
 
-  const clause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  const clause =
+    conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
   return { clause, params };
 }
@@ -43,7 +44,7 @@ export function buildWhereClause(
 export function buildOrderByClause(
   orderBy?: string,
   orderDirection: "ASC" | "DESC" = "DESC",
-  nodeAlias = "n"
+  nodeAlias = "n",
 ): string {
   if (!orderBy) return "";
 
@@ -62,13 +63,18 @@ export function buildPaginationClauses(params: {
   page?: number;
   limit?: number;
   skip?: number;
-}): { skipClause: string; limitClause: string; params: Record<string, number> } {
+}): {
+  skipClause: string;
+  limitClause: string;
+  params: Record<string, number>;
+} {
   const { page, limit, skip } = params;
 
-  const skipValue = skip !== undefined ? skip : page && limit ? (page - 1) * limit : 0;
+  const skipValue =
+    skip !== undefined ? skip : page && limit ? (page - 1) * limit : 0;
 
-  const skipClause = skipValue > 0 ? `SKIP $skip` : "";
-  const limitClause = limit ? `LIMIT $limit` : "";
+  const skipClause = skipValue > 0 ? "SKIP $skip" : "";
+  const limitClause = limit ? "LIMIT $limit" : "";
 
   const queryParams: Record<string, number> = {};
   if (skipValue > 0) queryParams.skip = skipValue;
@@ -83,7 +89,7 @@ export function buildPaginationClauses(params: {
 export function buildMatchPattern(
   nodeLabel: string,
   nodeAlias = "n",
-  properties?: Record<string, any>
+  properties?: Record<string, any>,
 ): { pattern: string; params: Record<string, any> } {
   const params: Record<string, any> = {};
   let propsPattern = "";
@@ -226,7 +232,10 @@ export function escapeCypherString(str: string): string {
 /**
  * Build regex pattern for case-insensitive search
  */
-export function buildRegexPattern(searchTerm: string, caseInsensitive = true): string {
+export function buildRegexPattern(
+  searchTerm: string,
+  caseInsensitive = true,
+): string {
   const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const prefix = caseInsensitive ? "(?i)" : "";
   return `${prefix}.*${escaped}.*`;
@@ -238,10 +247,12 @@ export function buildRegexPattern(searchTerm: string, caseInsensitive = true): s
 export function buildSearchCondition(
   fields: string[],
   searchTerm: string,
-  nodeAlias = "n"
+  nodeAlias = "n",
 ): { condition: string; params: Record<string, any> } {
   const pattern = buildRegexPattern(searchTerm);
-  const conditions = fields.map((field) => `${nodeAlias}.${field} =~ $searchPattern`);
+  const conditions = fields.map(
+    (field) => `${nodeAlias}.${field} =~ $searchPattern`,
+  );
   const condition = conditions.join(" OR ");
 
   return {
@@ -258,12 +269,12 @@ export function buildSearchCondition(
 export function buildCountQuery(
   nodeLabel: string,
   filters?: Record<string, any>,
-  nodeAlias = "n"
+  nodeAlias = "n",
 ): { query: string; params: Record<string, any> } {
   const { pattern, params: matchParams } = buildMatchPattern(
     nodeLabel,
     nodeAlias,
-    filters
+    filters,
   );
 
   const query = `
@@ -280,12 +291,12 @@ export function buildCountQuery(
 export function buildExistsQuery(
   nodeLabel: string,
   filters: Record<string, any>,
-  nodeAlias = "n"
+  nodeAlias = "n",
 ): { query: string; params: Record<string, any> } {
   const { pattern, params: matchParams } = buildMatchPattern(
     nodeLabel,
     nodeAlias,
-    filters
+    filters,
   );
 
   const query = `
@@ -303,16 +314,18 @@ export function buildDeleteQuery(
   nodeLabel: string,
   filters: Record<string, any>,
   nodeAlias = "n",
-  detachDelete = true
+  detachDelete = true,
 ): { query: string; params: Record<string, any> } {
   const { pattern, params: matchParams } = buildMatchPattern(
     nodeLabel,
     nodeAlias,
-    filters
+    filters,
   );
 
   if (Object.keys(filters).length === 0) {
-    throw new Error("Delete query requires at least one filter to prevent accidental deletion of all nodes");
+    throw new Error(
+      "Delete query requires at least one filter to prevent accidental deletion of all nodes",
+    );
   }
 
   const deleteClause = detachDelete ? "DETACH DELETE" : "DELETE";
