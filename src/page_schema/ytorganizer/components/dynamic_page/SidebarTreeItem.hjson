@@ -84,11 +84,20 @@ const handleItemClick = () => {
   }
 };
 
-// Get item display name
+// Get item display name (with child count)
 const getItemName = () => {
   const item = getItem();
   if (!item) return "";
-  return item.P?.key || item.P?.name || item.P?.title || "No name";
+
+  const baseName = item.P?.key || item.P?.name || item.P?.title || "No name";
+
+  // Use loaded children count; if not loaded yet, show just the name
+  const count = children().length;
+  if (count > 0) {
+    return `${baseName} (${count})`;
+  }
+
+  return baseName;
 };
 
 // Get item icon
