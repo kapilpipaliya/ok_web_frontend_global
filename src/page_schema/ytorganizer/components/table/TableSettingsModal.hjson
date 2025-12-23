@@ -102,7 +102,7 @@ return `._id {
         fns:
           '''
 const getInitialConfig = () => args.contextData.props?.initialConfig || "";
-const getContentType = () => args.contextData.props?.contentType;
+const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
 const onSave = args.contextData.props?.onSave;
 const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
 
@@ -141,8 +141,8 @@ const handleLoadDefault = async () => {
     return;
   }
 
-  const contentType = getContentType();
-  if (!contentType) {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) {
     if (args.showErrorToast) {
       args.showErrorToast("Content type not available");
     }
@@ -167,8 +167,8 @@ const handleLoadDefault = async () => {
 
     // Fetch default settings
     const result = await args.fns.executeYTOFunction("getUserContentSetting", {
-      contentType,
-      key: `${contentType}_settings_default`
+      tableVertexLabel,
+      key: `${tableVertexLabel}_settings_default`
     });
 
     if (result?.error) {

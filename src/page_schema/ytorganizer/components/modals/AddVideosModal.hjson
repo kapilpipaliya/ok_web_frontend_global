@@ -775,7 +775,7 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: isOpen
+        key: onClose
       }
     }
     {
@@ -783,11 +783,19 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onClose
+        key: isOpen
       }
     }
     {
       id: "26"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: playlist
+      }
+    }
+    {
+      id: "27"
       L: ComponentVariant
       P: {
         type: string
@@ -796,19 +804,11 @@ return {
       }
     }
     {
-      id: "27"
+      id: "28"
       L: ComponentVariant
       P: {
         type: function
         key: onSuccess
-      }
-    }
-    {
-      id: "28"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: playlist
       }
     }
   ]

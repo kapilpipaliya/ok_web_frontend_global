@@ -20,12 +20,12 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { contentType, format = "csv", data, columns } = args.contextData;
+const { tableVertexLabel, format = "csv", data, columns } = args.contextData;
 
-if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+if (!tableVertexLabel) {
   return {
     success: false,
-    message: "Invalid contentType. Must be 'book' or 'audioVideo'"
+    message: "Invalid tableVertexLabel. Must not be empty."
   };
 }
 
@@ -40,7 +40,7 @@ if (data && Array.isArray(data) && data.length > 0) {
   const getUserContentResult = await args.executeNamedServerFunction({
     functionName: "getUserContent",
     contextData: {
-      contentType,
+      tableVertexLabel,
       search: undefined,
       filters: {},
       sort: {}
@@ -135,7 +135,7 @@ if (format === "csv") {
     success: true,
     data: csv,
     contentType: "text/csv",
-    filename: `${contentType}_export_${new Date().toISOString().split("T")[0]}.csv`
+    filename: `${tableVertexLabel}_export_${new Date().toISOString().split("T")[0]}.csv`
   };
 }
 
@@ -154,7 +154,7 @@ if (format === "json") {
     success: true,
     data: JSON.stringify(jsonData, null, 2),
     contentType: "application/json",
-    filename: `${contentType}_export_${new Date().toISOString().split("T")[0]}.json`
+    filename: `${tableVertexLabel}_export_${new Date().toISOString().split("T")[0]}.json`
   };
 }
 

@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Creates, updates, or deletes user content (Books or AudioVideo)
+        description: Creates, updates, or deletes user content. Works with any tableVertexLabel.
         body:
           '''
 // Get current authenticated user from session
@@ -24,7 +24,7 @@ const user = await args.getEffectiveUser(args.session, actualUser, args.contextD
 const inputData = args.contextData.data || {};
 const vertex = inputData.vertex;
 const relationships = inputData.relationships || {};
-const { contentType, operation, elementId, uniqueKeys = [] } = args.contextData;
+const { tableVertexLabel, operation, elementId, uniqueKeys = [] } = args.contextData;
 
 // Extract form data from vertex
 if (!vertex || !vertex.P) {
@@ -35,10 +35,10 @@ if (!vertex || !vertex.P) {
 }
 const formData = vertex.P;
 
-if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   return {
     success: false,
-    message: "Invalid contentType. Must be 'book' or 'audioVideo'"
+    message: "tableVertexLabel is required and must be a string"
   };
 }
 
@@ -49,9 +49,10 @@ if (!operation || !["create", "update", "delete"].includes(operation)) {
   };
 }
 
-// Determine vertex label and relationship type
-const vertexLabel = contentType === "book" ? "Book" : "AudioVideo";
-const relationshipType = contentType === "book" ? "UserBook" : "UserAudioVideo";
+// Determine vertex label and relationship type based on tableVertexLabel
+const vertexLabel = tableVertexLabel;
+// Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
+const relationshipType = `User${vertexLabel}`;
 
 try {
   if (operation === "create") {
@@ -159,7 +160,7 @@ try {
     return {
       success: true,
       data: createdContent,
-      message: `${contentType === "book" ? "Book" : "Audio/Video"} created successfully`
+      message: `${vertexLabel} created successfully`
     };
 
   } else if (operation === "update") {
@@ -292,7 +293,7 @@ try {
     return {
       success: true,
       data: updatedContent,
-      message: `${contentType === "book" ? "Book" : "Audio/Video"} updated successfully`
+      message: `${vertexLabel} updated successfully`
     };
 
   } else if (operation === "delete") {
@@ -329,14 +330,14 @@ try {
 
     return {
       success: true,
-      message: `${contentType === "book" ? "Book" : "Audio/Video"} deleted successfully`
+      message: `${vertexLabel} deleted successfully`
     };
   }
 } catch (error) {
   console.error(`Error in mutateUserContent (${operation}):`, error);
   return {
     success: false,
-    message: error.message || `Failed to ${operation} ${contentType}`
+    message: error.message || `Failed to ${operation} ${tableVertexLabel}`
   };
 }
 '''

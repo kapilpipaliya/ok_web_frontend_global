@@ -1,7 +1,5 @@
 import * as crypto from "crypto";
 import type { Session } from "neo4j-driver";
-import { shopifyApi } from "@shopify/shopify-api";
-import { Neo4jSessionStore } from "./neo4jSessionStore";
 import "@shopify/shopify-api/adapters/node";
 import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
@@ -110,7 +108,16 @@ export function getDatabaseNameForShop(shop: string): string {
  */
 export async function ensureShopDatabaseAndMigrate(
   shop: string,
-  options: { dryRun?: boolean; contextData?: Record<string, any> } = {},
+  options: {
+    dryRun?: boolean;
+    contextData?: Record<string, any>;
+    /**
+     * Optional: database (subdomain) to use for discovering the migration function.
+     * The migration function will be *executed* against the shop database, but
+     * its key can be looked up from a different database (e.g. a global/admin DB).
+     */
+    migrationSubDomain?: string;
+  } = {},
 ): Promise<{ dbSession: Session; subDomain: string }> {
   const subDomain = getDatabaseNameForShop(shop);
 
@@ -140,24 +147,25 @@ export async function ensureShopDatabaseAndMigrate(
     } as any,
   };
 
-  //   const migrationResult = await runMigration(dbSession, subDomain, user, {
-  //     dryRun: options.dryRun ?? false,
-  //     contextData: {
-  //       shop,
-  //       ...options.contextData,
-  //     },
-  //   });
+  const migrationResult = await runMigration(dbSession, subDomain, user, {
+    dryRun: options.dryRun ?? false,
+    contextData: {
+      shop,
+      ...options.contextData,
+    },
+    migrationSubDomain: options.migrationSubDomain,
+  });
 
-  //   if (!migrationResult.success) {
-  //     console.error(
-  //       `[Shopify] Migration failed for shop ${shop}:`,
-  //       migrationResult.error,
-  //     );
-  //     throw new Error(
-  //       migrationResult.error ||
-  //         `Migration failed for shop ${shop} (function: ${migrationResult.functionName})`,
-  //     );
-  //   }
+  if (!migrationResult.success) {
+    console.error(
+      `[Shopify] Migration failed for shop ${shop}:`,
+      migrationResult.error,
+    );
+    throw new Error(
+      migrationResult.error ||
+        `Migration failed for shop ${shop} (function: ${migrationResult.functionName})`,
+    );
+  }
 
   return { dbSession, subDomain };
 }

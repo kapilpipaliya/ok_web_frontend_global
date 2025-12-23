@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Fetches user content (Books or AudioVideo) with filtering, sorting, and search support
+        description: Fetches user content with filtering, sorting, and search support. Works with any tableVertexLabel.
         body:
           '''
 // Get current authenticated user from session
@@ -22,7 +22,7 @@ const user = await args.getEffectiveUser(args.session, actualUser, args.contextD
 
 // Extract parameters
 const { 
-  contentType, 
+  tableVertexLabel, 
   search, 
   filters = {}, 
   sort = {},
@@ -32,17 +32,18 @@ const {
   toParentEdgeType
 } = args.contextData;
 
-if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   return {
     success: false,
-    message: "Invalid contentType. Must be 'book' or 'audioVideo'",
+    message: "tableVertexLabel is required and must be a string",
     data: []
   };
 }
 
-// Determine vertex label and relationship type based on contentType
-const vertexLabel = contentType === "book" ? "Book" : "AudioVideo";
-const relationshipType = contentType === "book" ? "UserBook" : "UserAudioVideo";
+// Determine vertex label and relationship type based on tableVertexLabel
+const vertexLabel = tableVertexLabel;
+// Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
+const relationshipType = `User${vertexLabel}`;
 
 // Build WHERE clause for filters
 const whereConditions = [];
@@ -83,12 +84,8 @@ if (sort && sort.column) {
   const direction = sort.direction === "desc" ? "DESC" : "ASC";
   orderByClause = `ORDER BY c.${sort.column} ${direction}`;
 } else {
-  // Default sorting
-  if (contentType === "book") {
-    orderByClause = "ORDER BY c.name ASC";
-  } else {
-    orderByClause = "ORDER BY c.title ASC";
-  }
+  // Default sorting - try name first, then title, then createdAt
+  orderByClause = "ORDER BY COALESCE(c.name, c.title, '') ASC, c.createdAt DESC";
 }
 
 // Build category filter if provided
@@ -178,7 +175,7 @@ return {
   success: true,
   data: items,
   relatedVertices: Array.from(itemsMap.values()).filter(v => !v.L.includes(vertexLabel)),
-  message: `Found ${items.length} ${contentType === "book" ? "books" : "audio/video items"}`
+  message: `Found ${items.length} ${tableVertexLabel} item${items.length !== 1 ? 's' : ''}`
 };
 '''
         key: getUserContent

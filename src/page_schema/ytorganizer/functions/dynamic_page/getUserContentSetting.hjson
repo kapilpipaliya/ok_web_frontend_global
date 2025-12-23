@@ -20,17 +20,17 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { contentType, key } = args.contextData;
+const { tableVertexLabel, key } = args.contextData;
 
-if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+if (!tableVertexLabel) {
   return {
     success: false,
-    message: "Invalid contentType. Must be 'book' or 'audioVideo'"
+    message: "Invalid tableVertexLabel. Must not be empty."
   };
 }
 
 // Build setting key
-const settingKey = key || `${contentType}_settings`;
+const settingKey = key || `${tableVertexLabel}_settings`;
 
 // Query for user's content setting using (User)-[UserSetting]->(Setting) with key in Setting
 const query = `
@@ -46,7 +46,7 @@ const result = await args.session.run(query, {
 
 if (result.records.length === 0) {
   // No user setting found, try to get default setting
-  const defaultKey = `${contentType}_settings_default`;
+  const defaultKey = `${tableVertexLabel}_settings_default`;
   const defaultQuery = `
     MATCH (s:Setting {key: $defaultKey})
     RETURN s

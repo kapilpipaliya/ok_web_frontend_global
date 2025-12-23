@@ -49,7 +49,7 @@ return {
         props:
           '''
 return {
-  contentType: "audioVideo",
+  tableVertexLabel: "AudioVideo",
   loadFromSetting: true
 };
 '''

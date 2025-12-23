@@ -204,7 +204,7 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onDirectionToggle
+        key: onFieldChange
       }
     }
     {
@@ -229,17 +229,17 @@ return {
       id: "12"
       L: ComponentVariant
       P: {
-        type: function
-        key: onFieldChange
+        type: boolean
+        key: disabled
+        defValue: false
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: disabled
-        defValue: false
+        type: function
+        key: onDirectionToggle
       }
     }
   ]

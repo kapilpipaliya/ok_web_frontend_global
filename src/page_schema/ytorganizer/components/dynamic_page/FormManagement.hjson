@@ -27,10 +27,8 @@ return `._id {
 const getFormConfig = () => args.contextData.props?.formConfig;
 const getInitialVertex = () => args.contextData.props?.initialVertex;
 const getMode = () => args.contextData.props?.mode || "add";
-const getContentType = () => args.contextData.props?.contentType;
 const getVertexLabel = () => {
-  const contentType = getContentType();
-  return contentType === "book" ? "Book" : contentType === "audioVideo" ? "AudioVideo" : "FormData";
+  return args.contextData.props?.vertexLabel || "FormData";
 };
 
 // Form vertex ID - vertex will be read from graph
@@ -390,7 +388,6 @@ return {
   getFormConfig,
   getInitialVertex,
   getMode,
-  getContentType,
   getVertexLabel,
   getFormVertex,
   getAllFields,
@@ -922,27 +919,28 @@ return {
       id: "17"
       L: ComponentVariant
       P: {
-        displayOrder: 5
-        type: function
-        key: onSave
+        displayOrder: 3
+        type: string
+        defValue: add
+        key: mode
       }
     }
     {
       id: "18"
       L: ComponentVariant
       P: {
-        displayOrder: 1
-        type: object
-        key: formConfig
+        displayOrder: 4
+        type: string
+        key: vertexLabel
       }
     }
     {
       id: "19"
       L: ComponentVariant
       P: {
-        displayOrder: 4
-        type: string
-        key: contentType
+        displayOrder: 6
+        type: function
+        key: onClose
       }
     }
     {
@@ -958,19 +956,18 @@ return {
       id: "21"
       L: ComponentVariant
       P: {
-        displayOrder: 6
-        type: function
-        key: onClose
+        displayOrder: 1
+        type: object
+        key: formConfig
       }
     }
     {
       id: "22"
       L: ComponentVariant
       P: {
-        displayOrder: 3
-        type: string
-        defValue: add
-        key: mode
+        displayOrder: 5
+        type: function
+        key: onSave
       }
     }
   ]

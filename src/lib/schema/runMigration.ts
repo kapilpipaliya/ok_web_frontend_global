@@ -1,11 +1,18 @@
 import type { Session } from "neo4j-driver";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
+import { getDriver } from "~/cypher/core/driver";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export interface MigrationOptions {
   functionName?: string;
   dryRun?: boolean;
   contextData?: Record<string, any>;
+  /**
+   * Optional: database (subdomain) to use for discovering the migration function.
+   * If provided, the migration function key will be looked up in this database,
+   * but executed against the target database (subDomain passed to runMigration).
+   */
+  migrationSubDomain?: string;
 }
 
 export interface MigrationResult {
@@ -32,7 +39,12 @@ export async function runMigration(
   user: Vertex,
   options: MigrationOptions = {},
 ): Promise<MigrationResult> {
-  const { functionName, dryRun = false, contextData = {} } = options;
+  const {
+    functionName,
+    dryRun = false,
+    contextData = {},
+    migrationSubDomain,
+  } = options;
 
   try {
     let migrationFunctionKey: string;
@@ -41,12 +53,13 @@ export async function runMigration(
       // Use provided function name
       migrationFunctionKey = functionName;
     } else {
-      // Auto-detect migration function
+      // Auto-detect migration function. We can optionally look it up in a
+      // different database than the target execution database.
+      const lookupDb = migrationSubDomain || subDomain;
       console.log(
-        `[Schema Migrate] Checking for migration function in subdomain: ${subDomain}`,
+        `[Schema Migrate] Checking for migration function in subdomain (lookupDb: ${lookupDb}, targetDb: ${subDomain})`,
       );
 
-      // Check if a migration function exists
       const query = `
         MATCH (f:Function)
         WHERE f.key CONTAINS 'migrate' OR f.key CONTAINS 'migration'
@@ -55,20 +68,37 @@ export async function runMigration(
         LIMIT 1
       `;
 
-      const result = await dbSession.run(query);
+      // If lookupDb is the same as the target subDomain, reuse dbSession.
+      // Otherwise, open a temporary session to the lookupDb.
+      let lookupSession: Session | undefined;
+      try {
+        if (lookupDb === subDomain) {
+          lookupSession = dbSession;
+        } else {
+          const driver = await getDriver();
+          lookupSession = driver.session({ database: lookupDb });
+        }
 
-      if (result.records.length === 0) {
-        return {
-          success: false,
-          error: `No migration function found for subdomain: ${subDomain}`,
-          status: 404,
-        };
+        const result = await lookupSession.run(query);
+
+        if (result.records.length === 0) {
+          return {
+            success: false,
+            error: `No migration function found for subdomain: ${lookupDb}`,
+            status: 404,
+          };
+        }
+
+        migrationFunctionKey = result.records[0].get("functionKey");
+        console.log(
+          `[Schema Migrate] Found migration function: ${migrationFunctionKey} (lookupDb: ${lookupDb}, targetDb: ${subDomain})`,
+        );
+      } finally {
+        // Only close the lookup session if we opened a separate one
+        if (lookupSession && lookupSession !== dbSession) {
+          await lookupSession.close();
+        }
       }
-
-      migrationFunctionKey = result.records[0].get("functionKey");
-      console.log(
-        `[Schema Migrate] Found migration function: ${migrationFunctionKey}`,
-      );
     }
 
     // Prepare context data for the migration function

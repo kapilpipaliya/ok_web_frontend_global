@@ -92,90 +92,12 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: resize
-        defValue: vertical
+        key: placeholder
+        defValue: ""
       }
     }
     {
       id: "4"
-      L: ComponentVariantOption
-      P: {
-        description: No resize handle
-        value: none
-        key: none
-      }
-    }
-    {
-      id: "5"
-      L: ComponentVariantOption
-      P: {
-        description: Resize both horizontally and vertically
-        value: both
-        key: both
-      }
-    }
-    {
-      id: "6"
-      L: ComponentVariantOption
-      P: {
-        description: Resize horizontally only
-        value: horizontal
-        key: horizontal
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariantOption
-      P: {
-        description: Resize vertically only
-        value: vertical
-        key: vertical
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onBlur
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: maxLength
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: readOnly
-        defValue: false
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onFocus
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: disabled
-        defValue: false
-      }
-    }
-    {
-      id: "13"
       L: ComponentVariant
       P: {
         type: function
@@ -183,24 +105,7 @@ return {
       }
     }
     {
-      id: "14"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: placeholder
-        defValue: ""
-      }
-    }
-    {
-      id: "15"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: minLength
-      }
-    }
-    {
-      id: "16"
+      id: "5"
       L: ComponentVariant
       P: {
         type: number
@@ -208,7 +113,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "6"
       L: ComponentVariant
       P: {
         type: boolean
@@ -217,16 +122,57 @@ return {
       }
     }
     {
-      id: "18"
+      id: "7"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: ""
-        key: value
+        type: number
+        key: minLength
       }
     }
     {
-      id: "19"
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxLength
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFocus
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: autoFocus
+        defValue: false
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onBlur
+      }
+    }
+    {
+      id: "13"
       L: ComponentVariant
       P: {
         type: number
@@ -235,11 +181,65 @@ return {
       }
     }
     {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: resize
+        defValue: vertical
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        description: No resize handle
+        value: none
+        key: none
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariantOption
+      P: {
+        description: Resize both horizontally and vertically
+        value: both
+        key: both
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariantOption
+      P: {
+        description: Resize horizontally only
+        value: horizontal
+        key: horizontal
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariantOption
+      P: {
+        description: Resize vertically only
+        value: vertical
+        key: vertical
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: ""
+        key: value
+      }
+    }
+    {
       id: "20"
       L: ComponentVariant
       P: {
         type: boolean
-        key: autoFocus
+        key: readOnly
         defValue: false
       }
     }
@@ -261,67 +261,67 @@ return {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "8"
+      E: "4"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "5"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "10"
+      E: "6"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "11"
+      E: "7"
     }
     {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "12"
+      E: "8"
     }
     {
       id: e8
       T: ComponentVariant
       S: "1"
-      E: "13"
+      E: "9"
     }
     {
       id: e9
       T: ComponentVariant
       S: "1"
-      E: "14"
+      E: "10"
     }
     {
       id: e10
       T: ComponentVariant
       S: "1"
-      E: "15"
+      E: "11"
     }
     {
       id: e11
       T: ComponentVariant
       S: "1"
-      E: "16"
+      E: "12"
     }
     {
       id: e12
       T: ComponentVariant
       S: "1"
-      E: "17"
+      E: "13"
     }
     {
       id: e13
       T: ComponentVariant
       S: "1"
-      E: "18"
+      E: "14"
     }
     {
       id: e14
@@ -338,26 +338,26 @@ return {
     {
       id: e16
       T: ComponentVariantOption
-      S: "3"
-      E: "4"
+      S: "14"
+      E: "15"
     }
     {
       id: e17
       T: ComponentVariantOption
-      S: "3"
-      E: "5"
+      S: "14"
+      E: "16"
     }
     {
       id: e18
       T: ComponentVariantOption
-      S: "3"
-      E: "6"
+      S: "14"
+      E: "17"
     }
     {
       id: e19
       T: ComponentVariantOption
-      S: "3"
-      E: "7"
+      S: "14"
+      E: "18"
     }
   ]
 }

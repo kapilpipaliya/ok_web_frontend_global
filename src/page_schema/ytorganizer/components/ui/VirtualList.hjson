@@ -159,30 +159,22 @@ return {
       id: "6"
       L: ComponentVariant
       P: {
-        type: array
-        key: items
-        defValue: []
-      }
-    }
-    {
-      id: "7"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onScroll
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariant
-      P: {
         type: string
         key: containerClass
         defValue: ""
       }
     }
     {
-      id: "9"
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: itemHeight
+        defValue: 90
+      }
+    }
+    {
+      id: "8"
       L: ComponentVariant
       P: {
         type: number
@@ -191,12 +183,20 @@ return {
       }
     }
     {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onScroll
+      }
+    }
+    {
       id: "10"
       L: ComponentVariant
       P: {
-        type: number
-        key: itemHeight
-        defValue: 90
+        type: array
+        key: items
+        defValue: []
       }
     }
   ]

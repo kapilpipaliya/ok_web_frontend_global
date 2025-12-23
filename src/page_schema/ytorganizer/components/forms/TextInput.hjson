@@ -173,168 +173,12 @@ return {
       id: "6"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: autoFocus
-        defValue: false
+        type: function
+        key: onInput
       }
     }
     {
       id: "7"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: maxLength
-      }
-    }
-    {
-      id: "8"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: rightIcon
-      }
-    }
-    {
-      id: "9"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: leftIcon
-      }
-    }
-    {
-      id: "10"
-      L: ComponentVariant
-      P: {
-        type: string
-        defValue: text
-        key: type
-      }
-    }
-    {
-      id: "11"
-      L: ComponentVariantOption
-      P: {
-        description: Standard text input
-        value: text
-        key: text
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariantOption
-      P: {
-        description: Email input with validation
-        value: email
-        key: email
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariantOption
-      P: {
-        description: Password input (hidden text)
-        value: password
-        key: password
-      }
-    }
-    {
-      id: "14"
-      L: ComponentVariantOption
-      P: {
-        description: Numeric input
-        value: number
-        key: number
-      }
-    }
-    {
-      id: "15"
-      L: ComponentVariantOption
-      P: {
-        description: Telephone number input
-        value: tel
-        key: tel
-      }
-    }
-    {
-      id: "16"
-      L: ComponentVariantOption
-      P: {
-        description: URL input with validation
-        value: url
-        key: url
-      }
-    }
-    {
-      id: "17"
-      L: ComponentVariantOption
-      P: {
-        description: Search input
-        value: search
-        key: search
-      }
-    }
-    {
-      id: "18"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: required
-        defValue: false
-      }
-    }
-    {
-      id: "19"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: disabled
-        defValue: false
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onChange
-      }
-    }
-    {
-      id: "21"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onMount
-      }
-    }
-    {
-      id: "22"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onFocus
-      }
-    }
-    {
-      id: "23"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: readOnly
-        defValue: false
-      }
-    }
-    {
-      id: "24"
-      L: ComponentVariant
-      P: {
-        type: number
-        key: minLength
-      }
-    }
-    {
-      id: "25"
       L: ComponentVariant
       P: {
         type: string
@@ -343,24 +187,88 @@ return {
       }
     }
     {
-      id: "26"
+      id: "8"
       L: ComponentVariant
       P: {
         type: string
-        key: placeholder
-        defValue: ""
+        defValue: text
+        key: type
       }
     }
     {
-      id: "27"
+      id: "9"
+      L: ComponentVariantOption
+      P: {
+        description: Standard text input
+        value: text
+        key: text
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariantOption
+      P: {
+        description: Email input with validation
+        value: email
+        key: email
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariantOption
+      P: {
+        description: Password input (hidden text)
+        value: password
+        key: password
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Numeric input
+        value: number
+        key: number
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariantOption
+      P: {
+        description: Telephone number input
+        value: tel
+        key: tel
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        description: URL input with validation
+        value: url
+        key: url
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariantOption
+      P: {
+        description: Search input
+        value: search
+        key: search
+      }
+    }
+    {
+      id: "16"
       L: ComponentVariant
       P: {
-        type: function
-        key: onInput
+        type: boolean
+        key: required
+        defValue: false
       }
     }
     {
-      id: "28"
+      id: "17"
       L: ComponentVariant
       P: {
         type: number
@@ -369,11 +277,103 @@ return {
       }
     }
     {
-      id: "29"
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onChange
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: placeholder
+        defValue: ""
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: minLength
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: readOnly
+        defValue: false
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: leftIcon
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onFocus
+      }
+    }
+    {
+      id: "24"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: maxLength
+      }
+    }
+    {
+      id: "25"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: rightIcon
+      }
+    }
+    {
+      id: "26"
       L: ComponentVariant
       P: {
         type: function
         key: onBlur
+      }
+    }
+    {
+      id: "27"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "28"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onMount
+      }
+    }
+    {
+      id: "29"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: autoFocus
+        defValue: false
       }
     }
   ]
@@ -406,13 +406,13 @@ return {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "9"
+      E: "16"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "10"
+      E: "17"
     }
     {
       id: e7
@@ -507,44 +507,44 @@ return {
     {
       id: e22
       T: ComponentVariantOption
-      S: "10"
-      E: "11"
+      S: "8"
+      E: "9"
     }
     {
       id: e23
       T: ComponentVariantOption
-      S: "10"
-      E: "12"
+      S: "8"
+      E: "10"
     }
     {
       id: e24
       T: ComponentVariantOption
-      S: "10"
-      E: "13"
+      S: "8"
+      E: "11"
     }
     {
       id: e25
       T: ComponentVariantOption
-      S: "10"
-      E: "14"
+      S: "8"
+      E: "12"
     }
     {
       id: e26
       T: ComponentVariantOption
-      S: "10"
-      E: "15"
+      S: "8"
+      E: "13"
     }
     {
       id: e27
       T: ComponentVariantOption
-      S: "10"
-      E: "16"
+      S: "8"
+      E: "14"
     }
     {
       id: e28
       T: ComponentVariantOption
-      S: "10"
-      E: "17"
+      S: "8"
+      E: "15"
     }
   ]
 }

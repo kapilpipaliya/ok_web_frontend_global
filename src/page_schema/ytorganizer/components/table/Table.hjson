@@ -923,11 +923,11 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: () => args.fns.handleExport(args.fns.filteredData()),
-  text: "Export Filtered",
-  leftIcon: "carbon:filter",
+  onClick: () => args.fns.setIsImportModalOpen(true),
+  text: "Import",
+  leftIcon: "carbon:upload",
   disabled: args.fns.loading(),
-  hide: !args.fns.getExportFunction()
+  hide: !args.fns.getImportFunction()
 };
 '''
       }
@@ -942,11 +942,11 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: () => args.fns.setIsImportModalOpen(true),
-  text: "Import",
-  leftIcon: "carbon:upload",
+  onClick: () => args.fns.handleExport(args.fns.filteredData()),
+  text: "Export Filtered",
+  leftIcon: "carbon:filter",
   disabled: args.fns.loading(),
-  hide: !args.fns.getImportFunction()
+  hide: !args.fns.getExportFunction()
 };
 '''
       }
@@ -2394,7 +2394,11 @@ return {
           '''
 return {
   variant: "primary",
-  onClick: () => args.fns.handleImport(args.fns.handleSearch()),
+  onClick: () => args.fns.handleImport(args.fns.importData().trim(), () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+    args.fns.handleSearch();
+  }),
   text: "Import",
   disabled: args.fns.loading() || !args.fns.importData().trim()
 };
@@ -2457,7 +2461,7 @@ return {
   onClose: () => args.fns.setIsSettingsModalOpen(false),
   initialConfig: initialConfig,
   onSave: args.fns.handleSaveSettings,
-  contentType: args.fns.getContentType()
+  tableVertexLabel: args.fns.getTableVertexLabel()
 };
 '''
       }
@@ -2466,38 +2470,29 @@ return {
       id: "64"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: showRowNumber
-        defValue: false
+        type: object
+        key: formConfig
       }
     }
     {
       id: "65"
       L: ComponentVariant
       P: {
-        type: array
-        key: hideColumns
-        defValue: []
+        type: boolean
+        key: showEditButton
+        defValue: true
       }
     }
     {
       id: "66"
       L: ComponentVariant
       P: {
-        type: object
-        key: formConfig
+        type: function
+        key: settingsFunction
       }
     }
     {
       id: "67"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: contentType
-      }
-    }
-    {
-      id: "68"
       L: ComponentVariant
       P: {
         type: boolean
@@ -2506,32 +2501,24 @@ return {
       }
     }
     {
+      id: "68"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: saveSettingsFunction
+      }
+    }
+    {
       id: "69"
       L: ComponentVariant
       P: {
-        type: number
-        key: rowHeight
-        defValue: 50
+        type: array
+        key: batchActions
+        defValue: []
       }
     }
     {
       id: "70"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: settingsFunction
-      }
-    }
-    {
-      id: "71"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: importFunction
-      }
-    }
-    {
-      id: "72"
       L: ComponentVariant
       P: {
         type: boolean
@@ -2540,12 +2527,29 @@ return {
       }
     }
     {
+      id: "71"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: tableVertexLabel
+      }
+    }
+    {
+      id: "72"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showActions
+        defValue: true
+      }
+    }
+    {
       id: "73"
       L: ComponentVariant
       P: {
-        type: array
-        key: additionalFilters
-        defValue: []
+        type: number
+        key: rowHeight
+        defValue: 50
       }
     }
     {
@@ -2560,65 +2564,13 @@ return {
       id: "75"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: loadFromSetting
-        defValue: false
+        type: array
+        key: additionalFilters
+        defValue: []
       }
     }
     {
       id: "76"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: batchActions
-        defValue: []
-      }
-    }
-    {
-      id: "77"
-      L: ComponentVariant
-      P: {
-        type: array
-        key: columns
-        defValue: []
-      }
-    }
-    {
-      id: "78"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: configFunction
-      }
-    }
-    {
-      id: "79"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: showEditButton
-        defValue: true
-      }
-    }
-    {
-      id: "80"
-      L: ComponentVariant
-      P: {
-        type: function
-        key: saveSettingsFunction
-      }
-    }
-    {
-      id: "81"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: showActions
-        defValue: true
-      }
-    }
-    {
-      id: "82"
       L: ComponentVariant
       P: {
         type: function
@@ -2626,7 +2578,16 @@ return {
       }
     }
     {
-      id: "83"
+      id: "77"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: customActions
+        defValue: []
+      }
+    }
+    {
+      id: "78"
       L: ComponentVariant
       P: {
         type: string
@@ -2635,11 +2596,54 @@ return {
       }
     }
     {
+      id: "79"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loadFromSetting
+        defValue: false
+      }
+    }
+    {
+      id: "80"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: columns
+        defValue: []
+      }
+    }
+    {
+      id: "81"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: configFunction
+      }
+    }
+    {
+      id: "82"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showRowNumber
+        defValue: false
+      }
+    }
+    {
+      id: "83"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: importFunction
+      }
+    }
+    {
       id: "84"
       L: ComponentVariant
       P: {
         type: array
-        key: customActions
+        key: hideColumns
         defValue: []
       }
     }

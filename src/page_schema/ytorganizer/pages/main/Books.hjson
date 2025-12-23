@@ -48,7 +48,7 @@ return {
         props:
           '''
 return {
-  contentType: "book",
+  tableVertexLabel: "Book",
   loadFromSetting: true
 };
 '''

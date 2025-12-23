@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: fetchFirst25Products
         description: Fetches first 25 Shopify products for the current shop using Admin GraphQL API
         body:
           '''
@@ -186,10 +185,9 @@ return {
   products: transformedProducts,
 };
 '''
+        key: fetchFirst25Products
       }
     }
   ]
   edges: []
 }
-
-

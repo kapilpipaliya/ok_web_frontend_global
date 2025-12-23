@@ -27,8 +27,8 @@ console.log(`🚀 Starting content table settings migration (dryRun: ${dryRun})`
 // Define settings configurations
 const settingsConfigs = [
   {
-    key: 'book_settings_default',
-    contentType: 'book',
+    key: 'Book_settings_default',
+    tableVertexLabel: 'Book',
     icon: '📚',
     name: 'Book',
     config: `return {
@@ -179,8 +179,8 @@ const settingsConfigs = [
 };`
   },
   {
-    key: 'category_settings_default',
-    contentType: 'category',
+    key: 'Category_settings_default',
+    tableVertexLabel: 'Category',
     icon: '📁',
     name: 'Category',
     config: `return {
@@ -269,8 +269,8 @@ const settingsConfigs = [
 };`
   },
   {
-    key: 'audioVideo_settings_default',
-    contentType: 'audioVideo',
+    key: 'AudioVideo_settings_default',
+    tableVertexLabel: 'AudioVideo',
     icon: '🎬',
     name: 'AudioVideo',
     config: `return {
@@ -479,7 +479,7 @@ const settingsConfigs = [
 
 // Helper function to process a single setting
 async function processSetting(setting) {
-  const { key, contentType, icon, name, config } = setting;
+  const { key, tableVertexLabel, icon, name, config } = setting;
 
   console.log(`\n${icon} Processing ${name} settings...`);
 
@@ -498,10 +498,10 @@ async function processSetting(setting) {
         `MATCH (s:Setting {key: $key})
          SET s.config = $config,
              s.type = 'table_config',
-             s.contentType = $contentType,
+             s.tableVertexLabel = $tableVertexLabel,
              s.updatedAt = datetime()
          RETURN s`,
-        { key, config, contentType }
+        { key, config, tableVertexLabel }
       );
       console.log(`✅ Updated existing ${name} settings`);
       return { created: 0, updated: 1 };
@@ -511,13 +511,13 @@ async function processSetting(setting) {
         `CREATE (s:Setting {
           key: $key,
           type: 'table_config',
-          contentType: $contentType,
+          tableVertexLabel: $tableVertexLabel,
           config: $config,
           createdAt: datetime(),
           updatedAt: datetime()
         })
         RETURN s`,
-        { key, config, contentType }
+        { key, config, tableVertexLabel }
       );
       console.log(`✅ Created new ${name} settings`);
       return { created: 1, updated: 0 };
@@ -549,13 +549,13 @@ for (let i = 0; i < settingsConfigs.length; i++) {
   const result = await processSetting(setting);
 
   // Update stats based on setting type
-  if (setting.contentType === 'book') {
+  if (setting.tableVertexLabel === 'book') {
     stats.bookSettingsCreated += result.created;
     stats.bookSettingsUpdated += result.updated;
-  } else if (setting.contentType === 'audioVideo') {
+  } else if (setting.tableVertexLabel === 'audioVideo') {
     stats.audioVideoSettingsCreated += result.created;
     stats.audioVideoSettingsUpdated += result.updated;
-  } else if (setting.contentType === 'category') {
+  } else if (setting.tableVertexLabel === 'category') {
     stats.categorySettingsCreated += result.created;
     stats.categorySettingsUpdated += result.updated;
   }

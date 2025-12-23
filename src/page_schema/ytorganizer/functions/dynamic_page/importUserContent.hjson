@@ -20,12 +20,12 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { contentType, data } = args.contextData;
+const { tableVertexLabel, data } = args.contextData;
 
-if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+if (!tableVertexLabel) {
   return {
     success: false,
-    message: "Invalid contentType. Must be 'book' or 'audioVideo'"
+    message: "Invalid tableVertexLabel. Must not be empty."
   };
 }
 
@@ -37,8 +37,8 @@ if (!data || !data.trim()) {
 }
 
 // Determine vertex label and relationship type
-const vertexLabel = contentType === "book" ? "Book" : "AudioVideo";
-const relationshipType = contentType === "book" ? "UserBook" : "UserAudioVideo";
+const vertexLabel = tableVertexLabel;
+const relationshipType = `User${vertexLabel}`;
 
 // Parse data (try JSON first, then CSV)
 let items = [];
@@ -51,7 +51,7 @@ try {
     items = Array.isArray(parsed) ? parsed : [parsed];
   } else {
     // Parse CSV
-    const lines = dataTrimmed.split("\\n").filter(line => line.trim());
+    const lines = dataTrimmed.split("\n").filter(line => line.trim());
     if (lines.length === 0) {
       return {
         success: false,
@@ -116,7 +116,8 @@ try {
     items: batchItems
   });
 
-  successCount = result.records[0]?.get('created')?.toNumber() || 0;
+  const createdValue = result.records[0]?.get('created');
+  successCount = createdValue ? args.neo4jConvert.toNumber(createdValue) : 0;
 } catch (error) {
   errorCount = items.length;
   errors.push(`Batch import failed: ${error.message}`);
@@ -124,7 +125,7 @@ try {
 
 return {
   success: true,
-  message: `Imported ${successCount} ${contentType === "book" ? "books" : "audio/video items"}${errorCount > 0 ? `, ${errorCount} failed` : ""}`,
+  message: `Imported ${successCount} ${tableVertexLabel}s${errorCount > 0 ? `, ${errorCount} failed` : ""}`,
   data: {
     successCount,
     errorCount,

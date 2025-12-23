@@ -330,7 +330,7 @@ return {
   formConfig: formConfig,
   initialVertex: initialVertex || null,
   mode: mode,
-  contentType: null,
+  vertexLabel: null,
   onSave: wrappedOnSave,
   onClose: wrappedOnClose
 };
@@ -342,19 +342,11 @@ return {
       L: ComponentVariant
       P: {
         type: object
-        key: formConfig
+        key: rootKeys
       }
     }
     {
       id: "9"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: initialVertex
-      }
-    }
-    {
-      id: "10"
       L: ComponentVariant
       P: {
         type: string
@@ -362,15 +354,15 @@ return {
       }
     }
     {
-      id: "11"
+      id: "10"
       L: ComponentVariant
       P: {
-        type: function
-        key: onSave
+        type: string
+        key: parentId
       }
     }
     {
-      id: "12"
+      id: "11"
       L: ComponentVariant
       P: {
         type: boolean
@@ -379,15 +371,7 @@ return {
       }
     }
     {
-      id: "13"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: toParentEdgeType
-      }
-    }
-    {
-      id: "14"
+      id: "12"
       L: ComponentVariant
       P: {
         type: function
@@ -395,23 +379,7 @@ return {
       }
     }
     {
-      id: "15"
-      L: ComponentVariant
-      P: {
-        type: string
-        key: parentId
-      }
-    }
-    {
-      id: "16"
-      L: ComponentVariant
-      P: {
-        type: object
-        key: rootKeys
-      }
-    }
-    {
-      id: "17"
+      id: "13"
       L: ComponentVariant
       P: {
         type: string
@@ -420,11 +388,43 @@ return {
       }
     }
     {
-      id: "18"
+      id: "14"
       L: ComponentVariant
       P: {
         type: string
         key: vertexId
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: toParentEdgeType
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: initialVertex
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSave
       }
     }
   ]
@@ -533,4 +533,3 @@ return {
     }
   ]
 }
-

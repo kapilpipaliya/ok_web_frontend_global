@@ -462,51 +462,51 @@ return {
       L: ComponentVariant
       P: {
         type: function
-        key: onConfirm
+        key: onCancel
       }
     }
     {
       id: "13"
       L: ComponentVariant
       P: {
-        type: string
-        key: variant
-        defValue: danger
+        type: function
+        key: onConfirm
       }
     }
     {
       id: "14"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Red confirmation button for destructive actions
-        value: danger
-        key: danger
+        type: string
+        key: cancelText
+        defValue: Cancel
       }
     }
     {
       id: "15"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Primary colored confirmation button
-        value: primary
-        key: primary
+        type: string
+        key: message
+        defValue: Are you sure you want to proceed?
       }
     }
     {
       id: "16"
-      L: ComponentVariantOption
+      L: ComponentVariant
       P: {
-        description: Warning colored confirmation button
-        value: warning
-        key: warning
+        type: boolean
+        key: loading
+        defValue: false
       }
     }
     {
       id: "17"
       L: ComponentVariant
       P: {
-        type: function
-        key: onCancel
+        type: string
+        key: title
+        defValue: Confirm Action
       }
     }
     {
@@ -522,36 +522,36 @@ return {
       id: "19"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: loading
-        defValue: false
+        type: string
+        key: variant
+        defValue: danger
       }
     }
     {
       id: "20"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        key: message
-        defValue: Are you sure you want to proceed?
+        description: Primary colored confirmation button
+        value: primary
+        key: primary
       }
     }
     {
       id: "21"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        key: confirmText
-        defValue: Confirm
+        description: Warning colored confirmation button
+        value: warning
+        key: warning
       }
     }
     {
       id: "22"
-      L: ComponentVariant
+      L: ComponentVariantOption
       P: {
-        type: string
-        key: cancelText
-        defValue: Cancel
+        description: Red confirmation button for destructive actions
+        value: danger
+        key: danger
       }
     }
     {
@@ -559,8 +559,8 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: title
-        defValue: Confirm Action
+        key: confirmText
+        defValue: Confirm
       }
     }
   ]
@@ -587,37 +587,37 @@ return {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "17"
+      E: "14"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "18"
+      E: "15"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "19"
+      E: "16"
     }
     {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "20"
+      E: "17"
     }
     {
       id: e8
       T: ComponentVariant
       S: "1"
-      E: "21"
+      E: "18"
     }
     {
       id: e9
       T: ComponentVariant
       S: "1"
-      E: "22"
+      E: "19"
     }
     {
       id: e10
@@ -682,20 +682,20 @@ return {
     {
       id: e20
       T: ComponentVariantOption
-      S: "13"
-      E: "14"
+      S: "19"
+      E: "20"
     }
     {
       id: e21
       T: ComponentVariantOption
-      S: "13"
-      E: "15"
+      S: "19"
+      E: "21"
     }
     {
       id: e22
       T: ComponentVariantOption
-      S: "13"
-      E: "16"
+      S: "19"
+      E: "22"
     }
   ]
 }

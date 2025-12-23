@@ -248,7 +248,7 @@ return `._id {
           '''
 const formConfig = args.contextData.props?.formConfig;
 const mode = args.contextData.props?.mode || "add";
-const contentType = args.contextData.props?.contentType;
+const tableVertexLabel = args.contextData.props?.tableVertexLabel;
 const initialVertex = args.contextData.props?.initialVertex;
 const onSave = args.contextData.props?.onSave;
 const onClose = args.contextData.props?.onClose;
@@ -282,7 +282,7 @@ return {
   formConfig: formConfig,
   initialVertex: initialVertex,
   mode: mode,
-  contentType: contentType,
+  vertexLabel: tableVertexLabel,
   onSave: wrappedOnSave,
   onClose: wrappedOnClose
 };
@@ -303,24 +303,23 @@ return {
       L: ComponentVariant
       P: {
         type: string
-        key: contentType
+        key: tableVertexLabel
       }
     }
     {
       id: "10"
       L: ComponentVariant
       P: {
-        type: object
-        key: initialVertex
+        type: function
+        key: onClose
       }
     }
     {
       id: "11"
       L: ComponentVariant
       P: {
-        type: string
-        defValue: add
-        key: mode
+        type: object
+        key: initialVertex
       }
     }
     {
@@ -335,16 +334,17 @@ return {
       id: "13"
       L: ComponentVariant
       P: {
-        type: function
-        key: onClose
+        type: object
+        key: formConfig
       }
     }
     {
       id: "14"
       L: ComponentVariant
       P: {
-        type: object
-        key: formConfig
+        type: string
+        defValue: add
+        key: mode
       }
     }
   ]

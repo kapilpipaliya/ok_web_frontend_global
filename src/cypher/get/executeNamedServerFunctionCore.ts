@@ -168,6 +168,7 @@ import {
   getDatabaseNameForShop,
 } from "~/lib/shopify/shopifyHelpers";
 import { getShopifyClient } from "~/lib/shopify/shopifyHelpers";
+import { runMigration } from "~/lib/schema/runMigration";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -249,13 +250,28 @@ export async function executeNamedServerFunctionCore(
       subDomain = context.subDomain;
     } else {
       // Create new session
-      // If getDBSessionForSubdomain() fails (e.g., Neo4j down), error is caught below
-      const sessionData = await getDBSessionForSubdomain();
-      dbSession = sessionData.dbSession;
-      subDomain = sessionData.subDomain;
-      sessionCreatedLocally = true;
-      context.dbSession = dbSession;
-      context.subDomain = subDomain;
+      // Prefer shop-specific database if session user has a shop
+      const sessionUser = await getSessionUser();
+
+      if (sessionUser?.P?.shop) {
+        // Derive database name for this shop
+        subDomain = getDatabaseNameForShop(sessionUser.P.shop);
+        dbSession = (await getDriver()).session({
+          database: subDomain,
+        });
+        sessionCreatedLocally = true;
+        context.dbSession = dbSession;
+        context.subDomain = subDomain;
+      } else {
+        // Fallback: use standard subdomain-based session resolution
+        // If getDBSessionForSubdomain() fails (e.g., Neo4j down), error is caught below
+        const sessionData = await getDBSessionForSubdomain();
+        dbSession = sessionData.dbSession;
+        subDomain = sessionData.subDomain;
+        sessionCreatedLocally = true;
+        context.dbSession = dbSession;
+        context.subDomain = subDomain;
+      }
     }
     // Query to find the Function vertex with the given key
     const query = `
@@ -470,6 +486,7 @@ export async function executeNamedServerFunctionCore(
       getDatabaseNameForShop,
       getShopifyClient,
       getSessionUser,
+      runMigration,
     };
 
     // Execute the function

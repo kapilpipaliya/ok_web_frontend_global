@@ -4,7 +4,6 @@
       id: "1"
       L: Function
       P: {
-        key: authShopifyAdminRequest
         description: Authenticates a Shopify admin app request, ensures per-shop database and migration, and updates session
         body:
           '''
@@ -75,6 +74,7 @@ const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
   contextData: {
     searchParams: params,
   },
+  migrationSubDomain: "ytorganizer"
 });
 
 try {
@@ -109,10 +109,9 @@ try {
   await dbSession.close();
 }
 '''
+        key: authShopifyAdminRequest
       }
     }
   ]
   edges: []
 }
-
-

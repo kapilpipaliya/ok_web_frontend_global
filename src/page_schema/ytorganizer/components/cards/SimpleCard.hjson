@@ -203,36 +203,36 @@ return {
       id: "11"
       L: ComponentVariantOption
       P: {
-        description: Success state with green border and light green background
-        value: success
-        key: success
-      }
-    }
-    {
-      id: "12"
-      L: ComponentVariantOption
-      P: {
-        description: Error state with red border and light red background
-        value: error
-        key: error
-      }
-    }
-    {
-      id: "13"
-      L: ComponentVariantOption
-      P: {
         description: Warning state with yellow border and light yellow background
         value: warning
         key: warning
       }
     }
     {
-      id: "14"
+      id: "12"
+      L: ComponentVariantOption
+      P: {
+        description: Success state with green border and light green background
+        value: success
+        key: success
+      }
+    }
+    {
+      id: "13"
       L: ComponentVariantOption
       P: {
         description: Default card style with standard background and border
         value: default
         key: default
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariantOption
+      P: {
+        description: Error state with red border and light red background
+        value: error
+        key: error
       }
     }
   ]

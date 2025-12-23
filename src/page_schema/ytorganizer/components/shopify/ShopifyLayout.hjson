@@ -4,6 +4,18 @@
       id: "1"
       L: Component
       P: {
+        fns:
+          '''const executeYTOFunction = async (functionName, contextData = {}) => {
+  return await args.executeNamedServerFunction({
+    functionName,
+    contextData: {
+      ...contextData,
+    }
+  });
+};
+return {
+  executeYTOFunction
+}'''
         title: ShopifyLayout
         key: ShopifyLayout
       }
@@ -55,9 +67,35 @@
       id: "5"
       L: Attr
       P: {
+        displayOrder: 6
+        componentName: ConfirmProvider
+        key: unique_7
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_8
+        props:
+          '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
         contextName: auth
         as: div
-        displayOrder: 4
+        displayOrder: 2
         fns:
           '''return {
 
@@ -107,7 +145,7 @@
       }
     }
     {
-      id: "6"
+      id: "8"
       L: Attr
       P: {
         as: div
@@ -121,12 +159,30 @@
       }
     }
     {
-      id: "7"
+      id: "9"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 3
         componentName: Slot
-        key: unique_5
+        slot: 1children
+        key: unique_9
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: FeedbackModal
+        key: unique_12
+        props:
+          '''
+return {
+  isOpen: args.fns.isFeedbackModalOpen,
+  onClose: args.fns.closeFeedbackModal,
+  onSubmit: args.fns.submitFeedback
+};
+'''
       }
     }
   ]
@@ -158,14 +214,32 @@
     {
       id: e5
       T: Attr
-      S: "1"
-      E: "7"
+      S: "5"
+      E: "6"
     }
     {
       id: e6
       T: Attr
       S: "5"
-      E: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "10"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
+      E: "8"
     }
   ]
 }

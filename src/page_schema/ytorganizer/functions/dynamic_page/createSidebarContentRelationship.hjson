@@ -35,7 +35,7 @@ const userUuid = user.P.uuid;
 // For category: User -[UserCategory]-> Category
 // For content: User -[UserBook/UserAudioVideo]-> Content
 const userCategoryRelType = `User${categoryLabel}`;
-const contentRelType = contentLabel === "Book" ? "UserBook" : "UserAudioVideo";
+const contentRelType = `User${contentLabel}`;;
 
 try {
   // Create relationship: Category -[relationshipType]-> ContentItem
@@ -81,5 +81,3 @@ try {
   ]
   edges: []
 }
-
-

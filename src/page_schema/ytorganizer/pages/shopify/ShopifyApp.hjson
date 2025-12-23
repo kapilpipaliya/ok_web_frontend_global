@@ -51,6 +51,22 @@
     }
     {
       id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: DynamicPage
+        key: unique_2
+        props:
+          '''
+return {
+  tableVertexLabel: "ShopifyProduct",
+  loadFromSetting: true
+};
+'''
+      }
+    }
+    {
+      id: "4"
       L: PageLayout
       P: {
         componentName: ShopifyLayout
@@ -66,9 +82,15 @@
     }
     {
       id: e2
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "3"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "4"
     }
   ]
 }

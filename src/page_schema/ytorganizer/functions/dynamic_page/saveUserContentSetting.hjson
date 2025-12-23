@@ -20,17 +20,17 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { contentType, config, key } = args.contextData;
+const { tableVertexLabel, config, key } = args.contextData;
 
-if (!contentType || (contentType !== "book" && contentType !== "audioVideo")) {
+if (!tableVertexLabel) {
   return {
     success: false,
-    message: "Invalid contentType. Must be 'book' or 'audioVideo'"
+    message: "Invalid tableVertexLabel. Must not be empty."
   };
 }
 
 // Build setting key
-const settingKey = key || `${contentType}_settings`;
+const settingKey = key || `${tableVertexLabel}_settings`;
 
 // Store config as JSON string for Neo4j compatibility
 const configString = config ? (typeof config === 'string' ? config : JSON.stringify(config)) : null;
