@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Creates a relationship from a sidebar category to a content item (Category -[relationshipType]-> ContentItem)
+        description: Creates a relationship from a content item to a sidebar category (ContentItem -[relationshipType]-> Category)
         body:
           '''
 // Get current authenticated user from session
@@ -38,14 +38,14 @@ const userCategoryRelType = `User${categoryLabel}`;
 const contentRelType = `User${contentLabel}`;;
 
 try {
-  // Create relationship: Category -[relationshipType]-> ContentItem
+  // Create relationship: ContentItem -[relationshipType]-> Category (content points to category)
   const query = `
     MATCH (u:User {uuid: $userUuid})
     MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
     WHERE elementId(cat) = $categoryId
     MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
     WHERE elementId(content) = $contentId
-    MERGE (cat)-[r:${relationshipType}]->(content)
+    MERGE (content)-[r:${relationshipType}]->(cat)
     ON CREATE SET r.createdAt = datetime()
     RETURN r
   `;
@@ -57,6 +57,8 @@ try {
   });
 
   if (result.records.length > 0) {
+    // Use processResult to populate graph structure with the relationship
+    args.processResult(result.records, args.context, [], 'r');
     return {
       success: true,
       message: "Relationship created successfully"

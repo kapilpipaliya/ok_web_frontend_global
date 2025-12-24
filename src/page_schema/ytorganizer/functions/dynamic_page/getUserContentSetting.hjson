@@ -58,9 +58,9 @@ if (result.records.length === 0) {
   });
 
   if (defaultResult.records.length > 0) {
-    // Return default setting
-    const defaultNode = defaultResult.records[0].get('s');
-    const defaultVertex = args.convertNodeToJson(defaultNode);
+    // Use processResult to populate graph structure
+    const defaultVertices = args.processResult(defaultResult.records, args.context, 's');
+    const defaultVertex = defaultVertices[0];
     return {
       success: true,
       data: {
@@ -82,9 +82,9 @@ if (result.records.length === 0) {
   };
 }
 
-// Setting exists - convert to vertex format
-const settingNode = result.records[0].get('s');
-const settingVertex = args.convertNodeToJson(settingNode);
+// Use processResult to populate graph structure
+const settingVertices = args.processResult(result.records, args.context, 's');
+const settingVertex = settingVertices[0];
 
 return {
   success: true,

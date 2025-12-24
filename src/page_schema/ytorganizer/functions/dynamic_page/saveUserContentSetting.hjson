@@ -69,9 +69,9 @@ if (result.records.length === 0) {
   };
 }
 
-// Convert saved node to vertex format
-const savedNode = result.records[0].get('s');
-const savedVertex = args.convertNodeToJson(savedNode);
+// Use processResult to populate graph structure
+const savedVertices = args.processResult(result.records, args.context, 's');
+const savedVertex = savedVertices[0];
 
 return {
   success: true,

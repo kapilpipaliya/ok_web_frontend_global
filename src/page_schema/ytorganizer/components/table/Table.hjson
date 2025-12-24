@@ -732,7 +732,6 @@ return `._id {
   flex-direction: column;
   gap: ${args.theme.var.spacing.md};
   max-width: 1024px;
-  margin: 0 auto;
 }`;
 '''
         displayOrder: 2

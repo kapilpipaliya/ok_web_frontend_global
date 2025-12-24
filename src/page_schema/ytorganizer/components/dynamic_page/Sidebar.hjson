@@ -11,14 +11,18 @@ const getParentVertexLabel = () => args.contextData.props?.parentVertexLabel;
 const getToParentEdgeType = () => args.contextData.props?.toParentEdgeType;
 const getRootKeys = () => args.contextData.props?.rootKeys || {};
 
-// State management
-const [root, setRoot] = args.createSignal([]);
+// State management - using graph for data, signals only for UI state
 const [expandedKeys, setExpandedKeys] = args.createSignal([]);
 const [selectedItem, setSelectedItem] = args.createSignal(null);
 const [loading, setLoading] = args.createSignal(false);
-const [childrenCache, setChildrenCache] = args.createSignal({});
+const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
+const [rootVertices, setRootVertices] = args.createSignal([]);
 
-// Fetch root vertices
+// Graph namespace for sidebar data
+const SIDEBAR_NAMESPACE = "sidebar";
+const getSidebarNamespace = (key) => `${SIDEBAR_NAMESPACE}_${key}`;
+
+// Fetch root vertices and store in graph
 const fetchRoot = async () => {
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
@@ -41,7 +45,15 @@ const fetchRoot = async () => {
 
     if (result?.result?.success && result.result.data) {
       const rootItems = result.result.data;
-      setRoot(rootItems);
+      
+      // Store root items in graph
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+      
+      // Store root items IDs in signal
+      setRootVertices(rootItems.map(v => v.id));
+      
       // Auto-expand root items
       const rootIds = rootItems.map(v => v.id);
       setExpandedKeys(rootIds);
@@ -60,7 +72,7 @@ const fetchRoot = async () => {
   }
 };
 
-// Fetch children for a specific parent
+// Fetch children for a specific parent and store in graph
 const fetchChildren = async (parentId, forceRefresh = false) => {
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
@@ -69,11 +81,19 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
     return [];
   }
 
-  // Check cache first (unless forcing refresh)
+  // Check graph first using evalExpression (unless forcing refresh)
   if (!forceRefresh) {
-    const cache = childrenCache();
-    if (cache[parentId]) {
-      return cache[parentId];
+    const parentVertex = args.graph.vertexes[parentId];
+    if (parentVertex) {
+      // Use evalExpression to get children from graph
+      // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
+      const children = args.evalExpression(
+        `<-${toParentEdgeType}`,
+        { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+      ) || [];
+      if (children.length > 0) {
+        return children;
+      }
     }
   }
 
@@ -88,17 +108,64 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
     });
 
     if (result?.result?.success && result.result.data) {
-      const children = result.result.data;
-      // Update cache
-      const cache = childrenCache();
-      setChildrenCache({ ...cache, [parentId]: children });
-      return children;
+      // Store children in graph
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+      
+      // Return children using evalExpression from graph
+      // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
+      const parentVertex = args.graph.vertexes[parentId];
+      if (parentVertex) {
+        const children = args.evalExpression(
+          `<-${toParentEdgeType}`,
+          { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+        ) || [];
+        return children;
+      }
     }
   } catch (error) {
     console.error("Error fetching children:", error);
   }
 
   return [];
+};
+
+// Get children for a specific parent using evalExpression (reactive)
+const getChildren = (parentId) => {
+  if (!parentId) return [];
+  const toParentEdgeType = getToParentEdgeType();
+  // Access graph reactively
+  const graph = args.graph;
+  const parentVertex = graph.vertexes[parentId];
+  if (!parentVertex) return [];
+  
+  // Use evalExpression to get children via incoming edge
+  // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
+  // Expression format: ->EdgeType (outgoing) or <-EdgeType (incoming)
+  const children = args.evalExpression(
+    `<-${toParentEdgeType}`,
+    { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+  ) || [];
+  
+  return children;
+};
+
+// Get loading state - not needed with graph, but kept for compatibility
+const getLoadingState = (parentId) => {
+  return false; // Graph updates are synchronous
+};
+
+// Get root items from signal mapped to graph vertices (reactive)
+const getRoot = () => {
+  // Get root vertex IDs from signal
+  const rootIds = rootVertices();
+  // Access graph reactively
+  const graph = args.graph;
+  // Map IDs to vertices from graph and filter out blank results
+  return rootIds
+    .map(id => graph.vertexes[id])
+    .filter(v => v !== undefined && v !== null);
 };
 
 // Toggle expand/collapse
@@ -124,22 +191,102 @@ const handleItemSelect = (item) => {
   }
 };
 
+// Handle opening add root modal
+const handleOpenAddRootModal = () => {
+  setIsAddRootModalOpen(true);
+};
+
+// Handle closing add root modal
+const handleCloseAddRootModal = () => {
+  setIsAddRootModalOpen(false);
+};
+
+// Handle saving root item
+const handleAddRootSave = async (savedVertex) => {
+  // Add to root vertices signal (store only ID)
+  const currentRootIds = rootVertices();
+  if (!currentRootIds.includes(savedVertex.id)) {
+    setRootVertices([...currentRootIds, savedVertex.id]);
+  }
+  
+  // Refresh root items from server to ensure graph is updated
+  await fetchRoot();
+  setIsAddRootModalOpen(false);
+};
+
+// Update a specific item in the tree (for edits) - graph is automatically updated
+const updateItemInTree = (updatedVertex) => {
+  if (!updatedVertex || !updatedVertex.id) return;
+
+  // Update vertex in graph using replaceVertexProperties
+  args.replaceVertexProperties(0, updatedVertex.id, args.graph, args.setGraph, { ...updatedVertex.P });
+
+  // Root vertices signal only stores IDs, so no need to update it on edit
+  // The graph update will automatically reflect in getRoot() since it reads from graph
+
+  // Update selectedItem if it's the currently selected item
+  const currentSelected = selectedItem();
+  if (currentSelected && currentSelected.id === updatedVertex.id) {
+    setSelectedItem(updatedVertex);
+  }
+};
+
+
+// Remove a specific item from the tree (for deletes) - using graph
+const removeItemFromTree = (itemId) => {
+  if (!itemId) return;
+
+  // Find parent of deleted item using graph traversal
+  const toParentEdgeType = getToParentEdgeType();
+  const deletedVertex = args.graph.vertexes[itemId];
+  let parentItem = null;
+  
+  if (deletedVertex && deletedVertex.IN && deletedVertex.IN[toParentEdgeType]) {
+    const parentIds = deletedVertex.IN[toParentEdgeType];
+    if (parentIds.length > 0) {
+      parentItem = args.graph.vertexes[parentIds[0]];
+    }
+  }
+
+  // Remove vertex from graph
+  args.deleteVertex(0, itemId, args.graph, args.setGraph);
+
+  // Remove from root vertices signal if it's a root item (signal stores IDs)
+  const currentRootIds = rootVertices();
+  if (currentRootIds.includes(itemId)) {
+    setRootVertices(currentRootIds.filter(id => id !== itemId));
+  }
+
+  // Select parent item if it exists, otherwise clear selection
+  const currentSelected = selectedItem();
+  if (currentSelected && currentSelected.id === itemId) {
+    if (parentItem) {
+      setSelectedItem(parentItem);
+      // Also call onItemSelect if provided
+      if (args.contextData.props?.onItemSelect) {
+        args.contextData.props.onItemSelect(parentItem);
+      }
+    } else {
+      setSelectedItem(null);
+    }
+  }
+};
+
 // Initialize on mount
 const initialize = async () => {
   await fetchRoot();
 };
 
 return {
-  root,
-  setRoot,
+  getRoot,
+  rootVertices,
+  setRootVertices,
   expandedKeys,
   setExpandedKeys,
   selectedItem,
   setSelectedItem,
   loading,
   setLoading,
-  childrenCache,
-  setChildrenCache,
   fetchRoot,
   fetchChildren,
   toggleExpand,
@@ -147,7 +294,16 @@ return {
   initialize,
   getParentVertexLabel,
   getToParentEdgeType,
-  getRootKeys
+  getRootKeys,
+  isAddRootModalOpen,
+  setIsAddRootModalOpen,
+  handleOpenAddRootModal,
+  handleCloseAddRootModal,
+  handleAddRootSave,
+  updateItemInTree,
+  removeItemFromTree,
+  getChildren,
+  getLoadingState
 };
 '''
         key: Sidebar
@@ -191,6 +347,9 @@ return `._id {
   overflow-y: auto;
   padding: 8px;
   border-right: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }`;
 '''
         displayOrder: 1
@@ -200,6 +359,124 @@ return `._id {
           '''
 return {
   as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin-bottom: 8px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_add_root_button_container
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.background};
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_400};
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_add_root_button
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  onClick: () => {
+    args.fns.handleOpenAddRootModal();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 16px;
+  height: 16px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_add_root_icon
+        props:
+          '''
+return {
+  as: "icon",
+  icon: "carbon:add",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: sidebar_add_root_text
+        props:
+          '''
+return {
+  as: "span",
+  text: "Add Root Item"
 };
 '''
       }
@@ -225,7 +502,7 @@ return {
   as: "ul",
   loop: true,
   contextName: "sidebarItem",
-  data: args.fns.root()
+  data: args.fns.getRoot()
 };
 '''
       }
@@ -239,8 +516,12 @@ return {
         key: sidebar_tree_item
         props:
           '''
+const item = args.contextData.sidebarItem;
+// Get children from graph (reactive)
+const children = args.fns.getChildren(item?.id);
+
 return {
-  item: args.contextData.sidebarItem,
+  item: item,
   expandedKeys: args.fns.expandedKeys(),
   selectedItem: args.fns.selectedItem(),
   onToggleExpand: args.fns.toggleExpand,
@@ -249,7 +530,12 @@ return {
   parentVertexLabel: args.fns.getParentVertexLabel(),
   toParentEdgeType: args.fns.getToParentEdgeType(),
   formConfig: args.contextData.props?.formConfig,
-  rootKeys: args.fns.getRootKeys()
+  rootKeys: args.fns.getRootKeys(),
+  onItemUpdate: args.fns.updateItemInTree,
+  onItemDelete: args.fns.removeItemFromTree,
+  childItems: children,
+  loading: false,
+  getChildren: args.fns.getChildren
 };
 '''
       }
@@ -292,6 +578,31 @@ return {
 '''
       }
     }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: SidebarAddChildModal
+        key: sidebar_add_root_modal
+        props:
+          '''
+return {
+  isOpen: args.fns.isAddRootModalOpen(),
+  formConfig: args.contextData.props?.formConfig,
+  parentId: null,
+  vertexId: null,
+  initialVertex: null,
+  mode: "add",
+  parentVertexLabel: args.fns.getParentVertexLabel(),
+  toParentEdgeType: args.fns.getToParentEdgeType(),
+  rootKeys: args.fns.getRootKeys(),
+  onSave: args.fns.handleAddRootSave,
+  onClose: args.fns.handleCloseAddRootModal
+};
+'''
+      }
+    }
   ]
   edges: [
     {
@@ -316,16 +627,46 @@ return {
       id: e4
       T: Attr
       S: "3"
-      E: "4"
+      E: "8"
     }
     {
       id: e5
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e10
       T: Attr
       S: "4"
       E: "5"
     }
     {
-      id: e6
+      id: e11
       T: Attr
       S: "6"
       E: "7"

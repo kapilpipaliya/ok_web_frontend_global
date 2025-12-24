@@ -70,11 +70,8 @@ query += `
 
 const result = await args.session.run(query, params);
 
-// Convert to vertex format
-const vertices = result.records.map(record => {
-  const node = record.get('v');
-  return args.convertNodeToJson(node);
-});
+// Use processResult to populate graph structure
+const vertices = args.processResult(result.records, args.context, 'v');
 
 return {
   success: true,

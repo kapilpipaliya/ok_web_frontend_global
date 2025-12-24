@@ -91,16 +91,16 @@ if (sort && sort.column) {
 // Build category filter if provided
 let categoryFilter = "";
 if (categoryId && parentVertexLabel && toParentEdgeType) {
-  // Filter by category relationship - items that have this category as parent
+  // Filter by category relationship - content points to category: content-[toParentEdgeType]->category
   categoryFilter = `
   MATCH (cat:${parentVertexLabel})
   WHERE elementId(cat) = $categoryId
-  MATCH (cat)-[:${toParentEdgeType}]->(c)`;
+  MATCH (c)-[:${toParentEdgeType}]->(cat)`;
   queryParams.categoryId = categoryId;
 } else if (showUnassigned && parentVertexLabel && toParentEdgeType) {
   // Show items without any category relationship
   const unassignedCondition = `NOT EXISTS {
-    MATCH (cat:${parentVertexLabel})-[:${toParentEdgeType}]->(c)
+    MATCH (c)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
   }`;
   if (whereClause) {
     whereClause = whereClause + " AND " + unassignedCondition;
@@ -112,12 +112,12 @@ if (categoryId && parentVertexLabel && toParentEdgeType) {
 // Optimized query with indexed user lookup first and related vertices
 let query = "";
 if (categoryId && parentVertexLabel && toParentEdgeType) {
-  // Query with category filter - match category first, then user relationship
+  // Query with category filter - content points to category: content-[toParentEdgeType]->category
   query = `
   MATCH (u:User {uuid: $userUuid})
   MATCH (cat:${parentVertexLabel})
   WHERE elementId(cat) = $categoryId
-  MATCH (cat)-[:${toParentEdgeType}]->(c:${vertexLabel})
+  MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
   MATCH (u)-[:${relationshipType}]->(c)
   ${whereClause}
   OPTIONAL MATCH (c)-[r]->(related)

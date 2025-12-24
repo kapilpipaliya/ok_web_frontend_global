@@ -16,10 +16,14 @@ const getFetchChildren = () => args.contextData.props?.fetchChildren;
 const getParentVertexLabel = () => args.contextData.props?.parentVertexLabel;
 const getToParentEdgeType = () => args.contextData.props?.toParentEdgeType;
 
-// State
-const [children, setChildren] = args.createSignal([]);
-const [loading, setLoading] = args.createSignal(false);
-const [hasCheckedChildren, setHasCheckedChildren] = args.createSignal(false);
+// Get children and loading from props (from graph)
+const getChildren = () => {
+  return args.contextData.props?.childItems || [];
+};
+
+const getLoading = () => {
+  return args.contextData.props?.loading || false;
+};
 
 // Check if item is expanded - make it reactive by accessing the signal
 const isExpanded = () => {
@@ -38,23 +42,29 @@ const isSelected = () => {
   return item.id === selectedItem.id;
 };
 
+// Refresh children function - calls parent's fetchChildren
+const refreshChildren = async () => {
+  const item = getItem();
+  if (!item) return;
+
+  const fetchChildrenFn = getFetchChildren();
+  if (fetchChildrenFn) {
+    await fetchChildrenFn(item.id, true);
+  }
+};
+
 // Fetch children on mount if expanded
 const fetchChildrenIfNeeded = async () => {
   const item = getItem();
   if (!item) return;
 
   const expanded = isExpanded();
-  if (expanded && children().length === 0 && !hasCheckedChildren()) {
-    setLoading(true);
-    try {
-      const fetchedChildren = await getFetchChildren()(item.id);
-      setChildren(fetchedChildren || []);
-      setHasCheckedChildren(true);
-    } catch (error) {
-      console.error("Error fetching children:", error);
-      setHasCheckedChildren(true);
-    } finally {
-      setLoading(false);
+  const childrenList = getChildren();
+  
+  if (expanded && childrenList.length === 0) {
+    const fetchChildrenFn = getFetchChildren();
+    if (fetchChildrenFn) {
+      await fetchChildrenFn(item.id);
     }
   }
 };
@@ -69,8 +79,11 @@ const handleToggleExpand = async () => {
     const wasExpanded = isExpanded();
     await onToggleExpand(item.id);
     // Fetch children if expanding and we don't have them yet
-    if (!wasExpanded && (children().length === 0 || !hasCheckedChildren())) {
-      await fetchChildrenIfNeeded();
+    if (!wasExpanded) {
+      const childrenList = getChildren();
+      if (childrenList.length === 0) {
+        await fetchChildrenIfNeeded();
+      }
     }
   }
 };
@@ -91,8 +104,9 @@ const getItemName = () => {
 
   const baseName = item.P?.key || item.P?.name || item.P?.title || "No name";
 
-  // Use loaded children count; if not loaded yet, show just the name
-  const count = children().length;
+  // Use loaded children count from props
+  const childrenList = getChildren();
+  const count = childrenList.length;
   if (count > 0) {
     return `${baseName} (${count})`;
   }
@@ -108,22 +122,10 @@ const getItemIcon = () => {
 };
 
 // Check if item has children
-// Show expand button if:
-// 1. We have children loaded, OR
-// 2. We haven't checked yet (allows expand button on initial load)
+// Show expand button if we have children loaded
 const hasChildren = () => {
-  const childrenList = children();
-  // If we have children loaded, return true
-  if (childrenList.length > 0) {
-    return true;
-  }
-  // If we haven't checked yet, assume it might have children (show expand button)
-  // After checking, if no children, this will return false
-  if (!hasCheckedChildren()) {
-    return true;
-  }
-  // We've checked and found no children
-  return false;
+  const childrenList = getChildren();
+  return childrenList.length > 0;
 };
 
 // Modal state
@@ -132,6 +134,13 @@ const [isEditModalOpen, setIsEditModalOpen] = args.createSignal(false);
 
 // Get formConfig from props
 const getFormConfig = () => args.contextData.props?.formConfig;
+
+// Get onItemUpdate callback from props
+const getOnItemUpdate = () => args.contextData.props?.onItemUpdate;
+
+// Get onItemDelete callback from props
+const getOnItemDelete = () => args.contextData.props?.onItemDelete;
+
 
 // Handle opening add modal
 const handleOpenAddModal = (e) => {
@@ -160,14 +169,10 @@ const handleAddChildSave = async (newVertex) => {
   const item = getItem();
   if (!item) return;
 
-  // Clear cache for parent to force refresh
+  // Refresh children - force refresh to get latest data
   const fetchChildrenFn = getFetchChildren();
   if (fetchChildrenFn) {
-    // Refresh children - force refresh to get latest data
-    // Note: fetchChildren function signature: (parentId, forceRefresh = false)
-    const refreshedChildren = await fetchChildrenFn(item.id, true);
-    setChildren(refreshedChildren || []);
-    setHasCheckedChildren(true);
+    await fetchChildrenFn(item.id, true);
     // Expand parent if not already expanded
     const onToggleExpand = getOnToggleExpand();
     if (onToggleExpand) {
@@ -188,9 +193,121 @@ const handleEditSave = async (updatedVertex) => {
 
   handleCloseEditModal();
 
-  // Refresh the entire tree by clearing cache and re-fetching
-  // This ensures the updated item data is reflected
-  // The parent Sidebar component will handle the refresh
+  // Update the item in the tree using the parent's update function
+  const onItemUpdate = getOnItemUpdate();
+  if (onItemUpdate && updatedVertex) {
+    onItemUpdate(updatedVertex);
+  }
+
+  // The parent update should handle this via updateItemInTree function
+};
+
+// Handle delete
+const handleDelete = async (e) => {
+  e.stopPropagation();
+  const item = getItem();
+  if (!item) return;
+
+  const parentVertexLabel = getParentVertexLabel();
+  const toParentEdgeType = getToParentEdgeType();
+  const rootKeys = args.contextData.props?.rootKeys || {};
+  const rootKey = rootKeys.key || 'root';
+
+  // Prevent deletion of root item
+  if (item.P?.key === rootKey) {
+    args.showErrorToast?.("Root item cannot be deleted");
+    return;
+  }
+
+  // Confirm deletion using rbConfirm
+  const rbConfirm = args.fns?.rbConfirm;
+  if (!rbConfirm) {
+    args.showErrorToast?.("Delete confirmation not available");
+    return;
+  }
+
+  const confirmed = await rbConfirm({
+    title: "Delete Item",
+    message: `Are you sure you want to delete "${item.P?.name || item.P?.key || 'this item'}"? This action cannot be undone.`,
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
+  // Delete the vertex
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "saveSidebarVertex",
+      contextData: {
+        vertexId: item.id,
+        name: item.P?.name || "",
+        key: item.P?.key || "",
+        parentId: null,
+        parentVertexLabel: parentVertexLabel,
+        toParentEdgeType: toParentEdgeType,
+        rootKeys: rootKeys,
+        properties: item.P || {},
+        operation: "delete"
+      }
+    });
+
+    if (result?.result?.success) {
+      args.showSuccessToast?.("Item deleted successfully");
+      
+      // Get vertex from graph to collect all connected edges
+      const vertex = args.graph.vertexes[item.id];
+      const edgeIdsToDelete = [];
+      
+      if (vertex) {
+        // Collect all outgoing edge IDs
+        if (vertex.OUT) {
+          for (const edgeType in vertex.OUT) {
+            const edgeIds = vertex.OUT[edgeType] || [];
+            edgeIdsToDelete.push(...edgeIds);
+          }
+        }
+        
+        // Collect all incoming edge IDs
+        if (vertex.IN) {
+          for (const edgeType in vertex.IN) {
+            const edgeIds = vertex.IN[edgeType] || [];
+            edgeIdsToDelete.push(...edgeIds);
+          }
+        }
+      }
+      
+      // Delete all edges before calling setGraphData
+      for (const edgeId of edgeIdsToDelete) {
+        args.deleteEdge(0, edgeId, args.graph, args.setGraph);
+      }
+      
+      // Use setGraphData to handle vertex deletion from graph
+      if (result.graph) {
+        const graphData = {
+          vertexes: result.graph.vertexes || {},
+          edges: {},
+          deleted_vertexes: result.result.deleted_vertexes || [item.id],
+          deleted_edges: []
+        };
+        args.setGraphData(0, graphData, {});
+      }
+      
+      // Notify parent to remove item from tree
+      const onItemDelete = getOnItemDelete();
+      if (onItemDelete) {
+        onItemDelete(item.id);
+      }
+    } else {
+      args.showErrorToast?.(result?.result?.message || result?.error || "Failed to delete item");
+    }
+  } catch (error) {
+    console.error("Error deleting item:", error);
+    args.showErrorToast?.("Failed to delete item");
+  }
 };
 
 return {
@@ -202,12 +319,8 @@ return {
   getFetchChildren,
   isExpanded,
   isSelected,
-  children,
-  setChildren,
-  loading,
-  setLoading,
-  hasCheckedChildren,
-  setHasCheckedChildren,
+  getChildren,
+  getLoading,
   fetchChildrenIfNeeded,
   handleToggleExpand,
   handleItemClick,
@@ -224,7 +337,11 @@ return {
   handleOpenEditModal,
   handleCloseEditModal,
   handleEditSave,
-  getFormConfig
+  getFormConfig,
+  getOnItemUpdate,
+  handleDelete,
+  getOnItemDelete,
+  refreshChildren
 };
 '''
         key: SidebarTreeItem
@@ -259,14 +376,14 @@ args.createEffect(() => {
   const expandedKeys = args.contextData.props?.expandedKeys || [];
   const isExpanded = Array.isArray(expandedKeys) && expandedKeys.includes(item.id);
 
-  const children = args.fns.children();
-  const hasChecked = args.fns.hasCheckedChildren();
+  const childrenList = args.fns.getChildren();
 
   // If expanded and we haven't fetched children yet, fetch them
-  if (isExpanded && children.length === 0 && !hasChecked) {
+  if (isExpanded && childrenList.length === 0) {
     args.fns.fetchChildrenIfNeeded();
   }
 });
+
 
 return {
   as: "div",
@@ -291,10 +408,10 @@ return `._id {
   font-weight: ${args.fns.hasChildren() ? "bold" : "normal"};
   width: 100%;
   border-radius: ${args.fns.hasChildren() ? "5px" : "0 5px 5px 0"};
-  ${isHovered ? `background-color: ${args.theme.var.color.background_light_150};` : ""}
+  ${isHovered ? `background-color: ${args.theme.var.color.background_dark_150};` : ""}
   padding: 2px 0;
   transition: all 0.15s ease-in-out;
-  ${args.fns.hasChildren() ? "" : "border-left: 1px dashed ${args.theme.var.color.border}; padding-left: 10px;"}
+  ${args.fns.hasChildren() ? "" : `border-left: 1px dashed ${args.theme.var.color.border};`}
 }`;
 '''
         displayOrder: 1
@@ -503,6 +620,43 @@ return {
       }
     }
     {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  color: ${args.theme.var.color.danger || '#ef4444'};
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  &:hover {
+    opacity: 1;
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        key: tree_item_delete_button
+        props:
+          '''
+const item = args.fns.getItem();
+const rootKeys = args.contextData.props?.rootKeys || {};
+const rootKey = rootKeys.key || 'root';
+const isRoot = item?.P?.key === rootKey;
+
+return {
+  as: "icon",
+  icon: "ph:trash",
+  height: 14,
+  width: 14,
+  onClick: args.fns.handleDelete,
+  hide: isRoot
+};
+'''
+      }
+    }
+    {
       id: "11"
       L: Attr
       P: {
@@ -521,12 +675,13 @@ return `._id {
         props:
           '''
 const expanded = args.fns.isExpanded();
+const childrenList = args.fns.getChildren();
 return {
   as: "ul",
-  loop: expanded && args.fns.children().length > 0,
+  loop: expanded && childrenList.length > 0,
   contextName: "childItem",
-  data: expanded ? args.fns.children() : [],
-  hide: !expanded || args.fns.children().length === 0
+  data: expanded ? childrenList : [],
+  hide: !expanded || childrenList.length === 0
 };
 '''
       }
@@ -544,8 +699,15 @@ return {
         key: tree_item_child
         props:
           '''
+const childItem = args.contextData.childItem;
+// Get children from graph reactively using parent's getChildren function
+// Access graph reactively by calling getChildren which accesses args.graph
+const getChildrenFn = args.contextData.props?.getChildren;
+// Call getChildren to get children reactively (it accesses args.graph which is reactive)
+const children = getChildrenFn ? getChildrenFn(childItem?.id) : [];
+
 return {
-  item: args.contextData.childItem,
+  item: childItem,
   expandedKeys: args.contextData.props?.expandedKeys || [],
   selectedItem: args.contextData.props?.selectedItem,
   onToggleExpand: args.contextData.props?.onToggleExpand,
@@ -554,7 +716,12 @@ return {
   parentVertexLabel: args.contextData.props?.parentVertexLabel,
   toParentEdgeType: args.contextData.props?.toParentEdgeType,
   formConfig: args.contextData.props?.formConfig,
-  rootKeys: args.contextData.props?.rootKeys
+  rootKeys: args.contextData.props?.rootKeys,
+  onItemUpdate: args.contextData.props?.onItemUpdate,
+  onItemDelete: args.contextData.props?.onItemDelete,
+  childItems: children,
+  loading: false,
+  getChildren: getChildrenFn
 };
 '''
       }
@@ -693,6 +860,12 @@ return {
       T: Attr
       S: "8"
       E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "15"
     }
     {
       id: e13

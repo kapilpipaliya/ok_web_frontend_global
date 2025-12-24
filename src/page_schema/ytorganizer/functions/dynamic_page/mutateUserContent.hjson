@@ -124,9 +124,10 @@ try {
       };
     }
 
-    const node = result.records[0].get('c');
-    const createdContent = args.convertNodeToJson(node);
-    const createdElementId = node.elementId;
+    // Use processResult to populate graph structure
+    const vertices = args.processResult(result.records, args.context, 'c');
+    const createdContent = vertices[0];
+    const createdElementId = createdContent.id;
 
     // Handle relationships if provided
     // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
@@ -249,8 +250,9 @@ try {
       };
     }
 
-    const node = result.records[0].get('c');
-    const updatedContent = args.convertNodeToJson(node);
+    // Use processResult to populate graph structure
+    const vertices = args.processResult(result.records, args.context, 'c');
+    const updatedContent = vertices[0];
 
     // Handle relationships if provided
     // Format: { fieldKey: { relationshipType, targetLabel, targetId } }

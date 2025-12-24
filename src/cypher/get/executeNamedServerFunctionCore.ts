@@ -169,6 +169,7 @@ import {
 } from "~/lib/shopify/shopifyHelpers";
 import { getShopifyClient } from "~/lib/shopify/shopifyHelpers";
 import { runMigration } from "~/lib/schema/runMigration";
+import { processResult } from "../conversion/processResult";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -506,6 +507,7 @@ export async function executeNamedServerFunctionCore(
       getShopifyClient,
       getSessionUser,
       runMigration,
+      processResult,
     };
 
     // Execute the function

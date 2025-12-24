@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Migrates or creates default Book and AudioVideo table configuration settings. Updates existing settings if they already exist.
+        description: Migrates or creates default table configuration settings for Book, AudioVideo, Category, ShopifyProduct, and ShopifyProductCategory. Updates existing settings if they already exist.
         body:
           '''
 /**
@@ -474,6 +474,233 @@ const settingsConfigs = [
     }
   }
 };`
+  },
+  {
+    key: 'ShopifyProduct_settings_default',
+    tableVertexLabel: 'ShopifyProduct',
+    icon: '🛍️',
+    name: 'ShopifyProduct',
+    config: `return {
+  title: "Shopify Products",
+  columns: [
+    {
+      key: "title",
+      label: "Title",
+      type: "text",
+      width: "250px",
+      required: true
+    },
+    {
+      key: "handle",
+      label: "Handle",
+      type: "text",
+      width: "200px"
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "text",
+      width: "120px"
+    },
+    {
+      key: "variantsCount",
+      label: "Variants",
+      type: "number",
+      width: "100px",
+      valueAccessor: (row) => row.P?.variants?.length || 0
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      type: "date",
+      width: "150px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    },
+    {
+      key: "updatedAt",
+      label: "Updated",
+      type: "date",
+      width: "150px",
+      valueAccessor: (row) => row.P?.updatedAt || row.updatedAt
+    }
+  ],
+  rowHeight: 60,
+  showRowNumber: true,
+  showSelection: true,
+  showActions: true,
+  resizableColumns: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "title",
+            label: "Title",
+            type: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "handle",
+            label: "Handle",
+            type: "text",
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "status",
+            label: "Status",
+            type: "text",
+            maxLength: 50,
+            colSpan: 1
+          }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyProductCategory",
+    toParentEdgeType: "ProductCategory",
+    rootKeys: {},
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "key",
+              label: "Key",
+              type: "text",
+              maxLength: 100,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: 'ShopifyProductCategory_settings_default',
+    tableVertexLabel: 'ShopifyProductCategory',
+    icon: '📂',
+    name: 'ShopifyProductCategory',
+    config: `return {
+  title: "Shopify Product Categories",
+  columns: [
+    {
+      key: "name",
+      label: "Name",
+      type: "text",
+      width: "200px",
+      required: true
+    },
+    {
+      key: "key",
+      label: "Key",
+      type: "text",
+      width: "150px"
+    },
+    {
+      key: "handle",
+      label: "Handle",
+      type: "text",
+      width: "200px"
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: true,
+  showActions: true,
+  resizableColumns: true,
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "name",
+            label: "Name",
+            type: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "key",
+            label: "Key",
+            type: "text",
+            maxLength: 100,
+            colSpan: 2
+          },
+          {
+            key: "handle",
+            label: "Handle",
+            type: "text",
+            maxLength: 255,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyProductCategory",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: {},
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "key",
+              label: "Key",
+              type: "text",
+              maxLength: 100,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+};`
   }
 ];
 
@@ -541,7 +768,11 @@ const stats = {
   audioVideoSettingsCreated: 0,
   audioVideoSettingsUpdated: 0,
   categorySettingsCreated: 0,
-  categorySettingsUpdated: 0
+  categorySettingsUpdated: 0,
+  shopifyProductSettingsCreated: 0,
+  shopifyProductSettingsUpdated: 0,
+  shopifyProductCategorySettingsCreated: 0,
+  shopifyProductCategorySettingsUpdated: 0
 };
 
 for (let i = 0; i < settingsConfigs.length; i++) {
@@ -549,15 +780,21 @@ for (let i = 0; i < settingsConfigs.length; i++) {
   const result = await processSetting(setting);
 
   // Update stats based on setting type
-  if (setting.tableVertexLabel === 'book') {
+  if (setting.tableVertexLabel === 'Book') {
     stats.bookSettingsCreated += result.created;
     stats.bookSettingsUpdated += result.updated;
-  } else if (setting.tableVertexLabel === 'audioVideo') {
+  } else if (setting.tableVertexLabel === 'AudioVideo') {
     stats.audioVideoSettingsCreated += result.created;
     stats.audioVideoSettingsUpdated += result.updated;
-  } else if (setting.tableVertexLabel === 'category') {
+  } else if (setting.tableVertexLabel === 'Category') {
     stats.categorySettingsCreated += result.created;
     stats.categorySettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyProduct') {
+    stats.shopifyProductSettingsCreated += result.created;
+    stats.shopifyProductSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyProductCategory') {
+    stats.shopifyProductCategorySettingsCreated += result.created;
+    stats.shopifyProductCategorySettingsUpdated += result.updated;
   }
 }
 
@@ -569,6 +806,8 @@ console.log('==========================================');
 console.log(`Book settings - Created: ${stats.bookSettingsCreated}, Updated: ${stats.bookSettingsUpdated}`);
 console.log(`AudioVideo settings - Created: ${stats.audioVideoSettingsCreated}, Updated: ${stats.audioVideoSettingsUpdated}`);
 console.log(`Category settings - Created: ${stats.categorySettingsCreated}, Updated: ${stats.categorySettingsUpdated}`);
+console.log(`ShopifyProduct settings - Created: ${stats.shopifyProductSettingsCreated}, Updated: ${stats.shopifyProductSettingsUpdated}`);
+console.log(`ShopifyProductCategory settings - Created: ${stats.shopifyProductCategorySettingsCreated}, Updated: ${stats.shopifyProductCategorySettingsUpdated}`);
 console.log('==========================================');
 
 return {

@@ -325,6 +325,7 @@ The `serverFunction` property allows executing server-side code with database ac
   - `contextData`: Data passed from the component
   - `vertexes`: Current vertex data array
   - `graph`: Object with nodes and relationships
+  - `processResult`: Function to process query results and populate graph structure
 - Example usage:
   ```javascript
   serverFunction: `
@@ -342,6 +343,80 @@ The `serverFunction` property allows executing server-side code with database ac
   ```
 - The returned data is available to child components via `args.contextData.contextName`
 - Server functions are executed asynchronously and results are cached
+
+#### Using `args.processResult` for Graph Structure
+When querying Neo4j and returning vertices/relationships, **always use `args.processResult`** to properly populate the graph structure. This ensures vertices and edges are correctly added to `args.context.nodes` and `args.context.relationships`, which are automatically returned in the graph response.
+
+**Function Signature:**
+```javascript
+args.processResult(
+  records: Record[],           // Query result records from session.run()
+  context: EvalExpressionContext,  // args.context
+  nodeLabel: string | string[],    // Label(s) used in RETURN clause (e.g., 'v', 'child', ['child', 'parent'])
+  typeLabel?: string | string[]    // Optional: Relationship label(s) from RETURN clause (e.g., 'r', 'rel')
+)
+```
+
+**Basic Usage:**
+```javascript
+serverFunction: `
+  const query = \`
+    MATCH (v:Category)
+    RETURN v
+    ORDER BY v.name ASC
+  \`;
+  
+  const result = await args.session.run(query);
+  
+  // Use processResult to populate graph structure
+  const vertices = args.processResult(result.records, args.context, 'v');
+  
+  return {
+    success: true,
+    data: vertices,
+    message: \`Found \${vertices.length} categories\`
+  };
+\`
+```
+
+**With Relationships:**
+```javascript
+serverFunction: `
+  const query = \`
+    MATCH (child:Category)-[r:ParentCategory]->(parent:Category)
+    WHERE elementId(parent) = $parentId
+    RETURN child, parent, r
+  \`;
+  
+  const result = await args.session.run(query, { parentId });
+  
+  // Process both nodes and relationships
+  // First parameter: records
+  // Second parameter: context (args.context)
+  // Third parameter: node labels from RETURN clause
+  // Fourth parameter: relationship labels from RETURN clause
+  const vertices = args.processResult(result.records, args.context, ['child', 'parent'], 'r');
+  
+  return {
+    success: true,
+    data: vertices,
+    message: \`Found \${vertices.length} children\`
+  };
+\`
+```
+
+**Key Benefits:**
+- Automatically populates `args.context.nodes` and `args.context.relationships`
+- Updates vertex `OUT` and `IN` relationship arrays correctly
+- Graph structure is automatically included in the response via `executeNamedServerFunctionCore`
+- Ensures reactive graph updates on the client side
+- Handles both single nodes and arrays of nodes (from `collect()`)
+
+**Important Notes:**
+- Always use `processResult` instead of manually calling `args.convertNodeToJson` and adding to context
+- The graph structure (`args.context.nodes` and `args.context.relationships`) is automatically returned in the response
+- Client code can use `args.setGraphData()` to merge the returned graph into the reactive graph store
+- For deletions, return `deleted_vertexes` and `deleted_edges` arrays in the result (not in graph structure)
 
 #### Using Transactions for Atomic Operations
 When you need to perform multiple database operations that must succeed or fail together, use transactions:

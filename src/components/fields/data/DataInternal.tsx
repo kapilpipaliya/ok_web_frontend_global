@@ -18,6 +18,7 @@ export function DataInternal(props: {
   renderChildren?: boolean;
   isNoPermissionCheck?: boolean;
 }) {
+  // when contextData.props.children prop is true, it change dynamically and become a signal. so its not working.
   const context = useDataContext() || {};
   const repeaterStore = new Proxy(context, {
     get(target, key) {

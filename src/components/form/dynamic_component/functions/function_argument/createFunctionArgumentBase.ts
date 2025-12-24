@@ -53,6 +53,7 @@ import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 import { klona } from "klona";
+import { findVertexByLabelAndPks, findVertexByLabelAndUniqueId, findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -305,5 +306,10 @@ export function createFunctionArgumentBase(
 
     // setGraphData,
     klona,
+    
+    // Graph query helpers using existing functions
+    findVertexByLabelAndPks,
+    findVertexByLabelAndUniqueId,
+    findVertexIdsByLabel,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

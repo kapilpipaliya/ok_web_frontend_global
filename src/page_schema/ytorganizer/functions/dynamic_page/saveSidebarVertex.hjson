@@ -32,7 +32,10 @@ const {
   properties = {}
 } = args.contextData;
 
-if (!name || !name.trim()) {
+const { operation = "create" } = args.contextData;
+const isDelete = operation === "delete";
+const isUpdate = Boolean(vertexId) && !isDelete;
+if (!isDelete && (!name || !name.trim())) {
   return {
     success: false,
     message: "Name is required",
@@ -52,7 +55,6 @@ if (!parentVertexLabel || !toParentEdgeType) {
 const userRelationshipType = `User${parentVertexLabel}`;
 const userUuid = user.P.uuid;
 
-const isUpdate = Boolean(vertexId);
 const vertexName = name.trim();
 const vertexKey = key || vertexName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 
@@ -60,7 +62,7 @@ const vertexKey = key || vertexName.toLowerCase().replace(/\s+/g, '_').replace(/
 const rootKey = rootKeys.key || 'root';
 
 // Prevent deletion/update of root vertex
-if (isUpdate) {
+if (isUpdate || isDelete) {
   const existingCheck = await args.session.run(
     `MATCH (v:${parentVertexLabel})
      WHERE elementId(v) = $vertexId
@@ -78,6 +80,79 @@ if (isUpdate) {
       };
     }
   }
+}
+
+// For delete operation, check if vertex has children or associated content
+if (isDelete) {
+  if (!vertexId) {
+    return {
+      success: false,
+      message: "Vertex ID is required for deletion",
+      data: null
+    };
+  }
+
+  // Check if vertex has children (children point to parent: child-[toParentEdgeType]->parent)
+  const childrenCheck = await args.session.run(
+    `MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(v:${parentVertexLabel})
+     WHERE elementId(v) = $vertexId
+     RETURN count(child) as childCount`,
+    { vertexId }
+  );
+
+  const childCount = childrenCheck.records[0]?.get('childCount') || 0;
+  if (childCount > 0) {
+    return {
+      success: false,
+      message: "Cannot delete vertex with children. Please remove all children first.",
+      data: null
+    };
+  }
+
+  // Check if vertex has associated content
+  // Content items point to category: content-[toParentEdgeType]->category
+  // So we check for incoming relationships from content to this category
+  const contentCheck = await args.session.run(
+    `MATCH (content)-[r:${toParentEdgeType}]->(v:${parentVertexLabel})
+     WHERE elementId(v) = $vertexId
+     RETURN count(content) as contentCount`,
+    { vertexId }
+  );
+
+  const contentCount = contentCheck.records[0]?.get('contentCount') || 0;
+  if (contentCount > 0) {
+    return {
+      success: false,
+      message: "Cannot delete vertex with associated data. Please remove all associated items first.",
+      data: null
+    };
+  }
+
+  // Delete the vertex and its relationships from database
+  const deleteResult = await args.session.run(
+    `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+     WHERE elementId(v) = $vertexId
+     DETACH DELETE v
+     RETURN count(v) as deletedCount`,
+    { vertexId, userUuid }
+  );
+
+  const deletedCount = deleteResult.records[0]?.get('deletedCount') || 0;
+  if (deletedCount === 0) {
+    return {
+      success: false,
+      message: "Failed to delete vertex",
+      data: null
+    };
+  }
+
+  // Return success with deleted vertex ID
+  return {
+    success: true,
+    message: "Vertex deleted successfully",
+    data: { id: vertexId },
+    deleted_vertexes: [vertexId]
+  };
 }
 
 // Prevent creating vertex with root key
@@ -151,12 +226,15 @@ if (isUpdate) {
     };
   }
 
+  // Use processResult to populate graph structure
+  const updateVertices = args.processResult(updateResult.records, args.context, 'v');
   vertexNode = updateResult.records[0].get('v');
   vertexElementId = updateResult.records[0].get('elementId');
 
   // Handle parent relationship update if parentId is provided
+  // Relationship direction: child-[toParentEdgeType]->parent
   if (parentId) {
-    // Remove existing parent relationships
+    // Remove existing parent relationships (child points to parent)
     await args.session.run(
       `MATCH (v:${parentVertexLabel})-[r:${toParentEdgeType}]->()
        WHERE elementId(v) = $vertexId
@@ -164,12 +242,12 @@ if (isUpdate) {
       { vertexId: vertexElementId }
     );
 
-    // Create new parent relationship
+    // Create new parent relationship (child points to parent)
     await args.session.run(
       `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
        WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
        MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
-       CREATE (p)-[:${toParentEdgeType}]->(v)`,
+       CREATE (v)-[:${toParentEdgeType}]->(p)`,
       { vertexId: vertexElementId, parentId, userUuid }
     );
   }
@@ -194,22 +272,32 @@ if (isUpdate) {
 
   const createResult = await args.session.run(createQuery, createParams);
 
+  // Use processResult to populate graph structure
+  const createVertices = args.processResult(createResult.records, args.context, 'v');
   vertexNode = createResult.records[0].get('v');
   vertexElementId = createResult.records[0].get('elementId');
 
   // Create parent relationship if parentId is provided
+  // Relationship direction: child-[toParentEdgeType]->parent
   if (parentId) {
     await args.session.run(
       `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
        WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
        MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
-       CREATE (p)-[:${toParentEdgeType}]->(v)`,
+       CREATE (v)-[:${toParentEdgeType}]->(p)`,
       { vertexId: vertexElementId, parentId, userUuid }
     );
   }
 }
 
-const vertex = args.convertNodeToJson(vertexNode);
+// Get vertex from graph context (already populated by processResult) or convert if needed
+let vertex;
+if (args.context.nodes[vertexElementId]) {
+  vertex = args.context.nodes[vertexElementId];
+} else {
+  vertex = args.convertNodeToJson(vertexNode);
+  args.context.nodes[vertex.id] = vertex;
+}
 
 return {
   success: true,

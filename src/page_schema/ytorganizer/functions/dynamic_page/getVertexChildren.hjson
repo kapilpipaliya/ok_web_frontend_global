@@ -29,20 +29,19 @@ if (!parentVertexLabel || !toParentEdgeType) {
 }
 
 // If parentId is provided, fetch children of that parent
+// Relationship direction: child-[toParentEdgeType]->parent
 if (parentId) {
   const query = `
-    MATCH (parent:${parentVertexLabel})-[r:${toParentEdgeType}]->(child:${parentVertexLabel})
+    MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
     WHERE elementId(parent) = $parentId
-    RETURN child
+    RETURN child, parent, r
     ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
   `;
 
   const result = await args.session.run(query, { parentId });
 
-  const vertices = result.records.map(record => {
-    const node = record.get('child');
-    return args.convertNodeToJson(node);
-  });
+  // Use processResult to populate graph structure (process both child and parent vertices)
+  const vertices = args.processResult(result.records, args.context, ['child', 'parent'], 'r');
 
   return {
     success: true,
@@ -72,7 +71,7 @@ if (rootKeys) {
   const query = `
     MATCH (v:${parentVertexLabel})
     WHERE NOT EXISTS {
-      MATCH (v)<-[:${toParentEdgeType}]-(:${parentVertexLabel})
+      MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel})
     }${filterClause}
     RETURN v
     ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
@@ -80,10 +79,8 @@ if (rootKeys) {
 
   const result = await args.session.run(query, params);
 
-  const vertices = result.records.map(record => {
-    const node = record.get('v');
-    return args.convertNodeToJson(node);
-  });
+  // Use processResult to populate graph structure
+  const vertices = args.processResult(result.records, args.context, 'v');
 
   return {
     success: true,

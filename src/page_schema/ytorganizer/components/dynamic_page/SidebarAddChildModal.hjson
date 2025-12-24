@@ -183,7 +183,13 @@ return `._id {
         props:
           '''
 const mode = args.contextData.props?.mode || "add";
-const title = mode === "add" ? "Add New Child" : "Edit Item";
+const parentId = args.contextData.props?.parentId;
+let title;
+if (mode === "add") {
+  title = parentId === null || parentId === undefined ? "Add Root Item" : "Add New Child";
+} else {
+  title = "Edit Item";
+}
 
 return {
   as: "div",
