@@ -8,7 +8,7 @@ import { getSubDomain } from "~/cypher/session/getSubDomain";
 // TODO: This should not throw error, else its not captured by the API error handler and sent to the client, or either handle erroor in API Endpoints.
 export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   const url = getURL(request);
-  const subDomain = await determineSubDomain(url);
+  const subDomain = await getSubDomain(url.hostname);
   const dbSession = (await getDriver()).session({
     database: subDomain.subdomain,
   });
@@ -25,13 +25,4 @@ export function getURL(request?: APIEvent["request"]): URL {
     throw new Error("URL is missing");
   }
   return url;
-}
-
-async function determineSubDomain(
-  url: URL,
-): Promise<{ domain: null | string; subdomain: string }> {
-  const adminui = url.searchParams.get("adminui");
-  return adminui === "true"
-    ? { domain: null, subdomain: "adminui" }
-    : await getSubDomain(url.hostname);
 }

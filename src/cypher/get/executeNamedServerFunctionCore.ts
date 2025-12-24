@@ -240,6 +240,13 @@ export async function executeNamedServerFunctionCore(
   let sessionCreatedLocally = false;
   let subDomain: string | undefined;
 
+  // Function lookup session - always use fallback database for function lookup
+  let functionLookupSession: Session | undefined;
+  let functionLookupSessionCreated = false;
+
+  // Save the fallback session data in an intermediate variable for reuse
+  let fallbackSessionData: { dbSession: Session; subDomain: string } | undefined;
+
   try {
     // IMPORTANT: Session creation is inside try-catch
     // Previously this was outside, causing non-serializable Neo4j driver errors
@@ -252,6 +259,7 @@ export async function executeNamedServerFunctionCore(
       // Create new session
       // Prefer shop-specific database if session user has a shop
       const sessionUser = await getSessionUser();
+      sessionCreatedLocally = true;
 
       if (sessionUser?.P?.shop) {
         // Derive database name for this shop
@@ -259,27 +267,38 @@ export async function executeNamedServerFunctionCore(
         dbSession = (await getDriver()).session({
           database: subDomain,
         });
-        sessionCreatedLocally = true;
         context.dbSession = dbSession;
         context.subDomain = subDomain;
       } else {
         // Fallback: use standard subdomain-based session resolution
         // If getDBSessionForSubdomain() fails (e.g., Neo4j down), error is caught below
-        const sessionData = await getDBSessionForSubdomain();
-        dbSession = sessionData.dbSession;
-        subDomain = sessionData.subDomain;
-        sessionCreatedLocally = true;
+        fallbackSessionData = await getDBSessionForSubdomain();
+        dbSession = fallbackSessionData.dbSession;
+        subDomain = fallbackSessionData.subDomain;
         context.dbSession = dbSession;
         context.subDomain = subDomain;
       }
     }
+
+    // Always use fallback database session for function lookup
+    // Functions are stored in the main/admin database, not shop-specific databases
+
+    // If we already have fallbackSessionData from above, reuse it; otherwise fetch it
+    if (!fallbackSessionData) {
+      fallbackSessionData = await getDBSessionForSubdomain();
+      functionLookupSessionCreated = true;
+    }
+    functionLookupSession = fallbackSessionData.dbSession;
+    
+
     // Query to find the Function vertex with the given key
+    // Always use fallback session for function lookup
     const query = `
       MATCH (f:Function {key: $functionName})
       RETURN f
     `;
 
-    const result = await dbSession.run(query, {
+    const result = await functionLookupSession.run(query, {
       functionName: request.functionName,
     });
 
@@ -536,6 +555,10 @@ export async function executeNamedServerFunctionCore(
     if (sessionCreatedLocally && dbSession) {
       await dbSession.close(); // Release connection back to pool
       delete context.dbSession; // Remove from context to prevent reuse
+    }
+    // Close function lookup session if we created it
+    if (functionLookupSessionCreated) {
+      await functionLookupSession?.close();
     }
   }
 }
