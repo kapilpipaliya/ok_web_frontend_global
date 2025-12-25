@@ -337,6 +337,7 @@ export async function initSubdomainWorkersForSubdomain(subdomain: string) {
             },
             {
               dbSession: dbSession,
+              functionLookupSession: dbSession,
               subDomain: subdomain,
               nodes: {},
               relationships: {},

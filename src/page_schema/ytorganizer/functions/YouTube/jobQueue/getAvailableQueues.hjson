@@ -76,7 +76,7 @@ if (!args.bullmq || !args.bullmq.Queue) {
   };
 }
 
-const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
 const { Queue } = args.bullmq;
 const connection = helpers.result.data.getRedisConnection();
 

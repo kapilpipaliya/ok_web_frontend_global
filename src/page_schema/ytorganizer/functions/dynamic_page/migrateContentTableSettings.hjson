@@ -564,6 +564,8 @@ const settingsConfigs = [
     ]
   },
   uniqueKeys: [],
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
   sidebar: {
     enabled: true,
     parentVertexLabel: "ShopifyProductCategory",

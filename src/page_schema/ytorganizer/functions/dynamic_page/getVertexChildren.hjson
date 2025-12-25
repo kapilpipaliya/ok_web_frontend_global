@@ -18,7 +18,7 @@ if (!actualUser) {
 }
 
 // Extract parameters
-const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType, enableUserScoping } = args.contextData;
 
 if (!parentVertexLabel || !toParentEdgeType) {
   return {
@@ -28,21 +28,38 @@ if (!parentVertexLabel || !toParentEdgeType) {
   };
 }
 
-// Get effective user for count queries
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
-const userUuid = user.P.uuid;
+// Get effective user for count queries (only if user scoping is enabled)
+let user = null;
+let userUuid = null;
+if (enableUserScoping) {
+  user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+  userUuid = user.P.uuid;
+}
 
 // If parentId is provided, fetch children of that parent
 // Relationship direction: child-[toParentEdgeType]->parent
 if (parentId) {
-  const query = `
-    MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
-    WHERE elementId(parent) = $parentId
-    RETURN child, parent, r
-    ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
-  `;
+  // Build query with or without user scoping
+  let query;
+  if (!enableUserScoping) {
+    query = `
+      MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+      WHERE elementId(parent) = $parentId
+      RETURN child, parent, r
+      ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+    `;
+  } else {
+    const userRelationshipType = `User${parentVertexLabel}`;
+    query = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+      WHERE elementId(parent) = $parentId
+      RETURN child, parent, r
+      ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+    `;
+  }
 
-  const result = await args.session.run(query, { parentId });
+  const queryParams = !enableUserScoping ? { parentId } : { parentId, userUuid };
+  const result = await args.session.run(query, queryParams);
 
   // Use processResult to populate graph structure (process both child and parent vertices)
   // This will set up IN/OUT relationships correctly:
@@ -55,17 +72,26 @@ if (parentId) {
     for (const vertex of vertices) {
       // Count content items related to this category
       // Relationship: content-[toParentEdgeType]->category
-      // User relationship: User-[relationshipType]->content
-      const countQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
-        MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
-        WHERE elementId(cat) = $categoryId
-        RETURN count(DISTINCT content) as contentCount
-      `;
-      const countResult = await args.session.run(countQuery, { 
-        userUuid, 
-        categoryId: vertex.id 
-      });
+      // User relationship: User-[relationshipType]->content (if user scoping enabled)
+      let countQuery;
+      let countParams;
+      if (!enableUserScoping) {
+        countQuery = `
+          MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
+          WHERE elementId(cat) = $categoryId
+          RETURN count(DISTINCT content) as contentCount
+        `;
+        countParams = { categoryId: vertex.id };
+      } else {
+        countQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+          MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+          WHERE elementId(cat) = $categoryId
+          RETURN count(DISTINCT content) as contentCount
+        `;
+        countParams = { userUuid, categoryId: vertex.id };
+      }
+      const countResult = await args.session.run(countQuery, countParams);
       const contentCount = countResult.records[0]?.get('contentCount') || 0;
       
       // Update vertex in context with count
@@ -102,14 +128,29 @@ if (rootKeys) {
     ? ` AND ${filterConditions.join(' AND ')}`
     : '';
 
-  const query = `
-    MATCH (v:${parentVertexLabel})
-    WHERE NOT EXISTS {
-      MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel})
-    }${filterClause}
-    RETURN v
-    ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
-  `;
+  // Build query with or without user scoping
+  let query;
+  if (!enableUserScoping) {
+    query = `
+      MATCH (v:${parentVertexLabel})
+      WHERE NOT EXISTS {
+        MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+      }${filterClause}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+  } else {
+    const userRelationshipType = `User${parentVertexLabel}`;
+    query = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      WHERE NOT EXISTS {
+        MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+      }${filterClause}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+    params.userUuid = userUuid;
+  }
 
   const result = await args.session.run(query, params);
 
@@ -124,29 +165,51 @@ if (rootKeys) {
       const rootKey = rootKeys.key || 'root';
       
       let countQuery;
-      if (vertex.P?.key === rootKey) {
-        // Root key: count items without any category relationship
-        countQuery = `
-          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
-          WHERE NOT EXISTS {
-            MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
-          }
-          RETURN count(DISTINCT content) as contentCount
-        `;
+      let countParams;
+      if (!enableUserScoping) {
+        if (vertex.P?.key === rootKey) {
+          // Root key: count items without any category relationship
+          countQuery = `
+            MATCH (content:${tableVertexLabel})
+            WHERE NOT EXISTS {
+              MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+            }
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          countParams = {};
+        } else {
+          // Regular root item: count items related to this category
+          countQuery = `
+            MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
+            WHERE elementId(cat) = $categoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          countParams = { categoryId: vertex.id };
+        }
       } else {
-        // Regular root item: count items related to this category
-        countQuery = `
-          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
-          MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
-          WHERE elementId(cat) = $categoryId
-          RETURN count(DISTINCT content) as contentCount
-        `;
+        if (vertex.P?.key === rootKey) {
+          // Root key: count items without any category relationship
+          countQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+            WHERE NOT EXISTS {
+              MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+            }
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          countParams = { userUuid };
+        } else {
+          // Regular root item: count items related to this category
+          countQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+            MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+            WHERE elementId(cat) = $categoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          countParams = { userUuid, categoryId: vertex.id };
+        }
       }
       
-      const countResult = await args.session.run(countQuery, { 
-        userUuid, 
-        categoryId: vertex.id 
-      });
+      const countResult = await args.session.run(countQuery, countParams);
       const contentCount = countResult.records[0]?.get('contentCount') || 0;
       
       // Update vertex in context with count

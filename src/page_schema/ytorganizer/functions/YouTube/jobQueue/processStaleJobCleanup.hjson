@@ -36,7 +36,7 @@ if (args.contextData.action === 'start') {
           message,
           metadata
         }
-      });
+      }, { functionLookupSubDomain: args.subDomain });
     } catch (error) {
       // Silent failure - don't break worker if logging fails
     }

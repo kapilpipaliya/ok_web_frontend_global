@@ -31,7 +31,8 @@ const {
   rootKeys = {},
   properties = {},
   tableVertexLabel,
-  relationshipType
+  relationshipType,
+  enableUserScoping
 } = args.contextData;
 
 const { operation = "create" } = args.contextData;
@@ -53,9 +54,9 @@ if (!parentVertexLabel || !toParentEdgeType) {
   };
 }
 
-// Determine relationship type for user filtering
+// Determine relationship type for user filtering (only if user scoping is enabled)
 const userRelationshipType = `User${parentVertexLabel}`;
-const userUuid = user.P.uuid;
+const userUuid = enableUserScoping ? user.P.uuid : null;
 
 const vertexName = name.trim();
 const vertexKey = key || vertexName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
@@ -131,13 +132,26 @@ if (isDelete) {
   }
 
   // Delete the vertex and its relationships from database
-  const deleteResult = await args.session.run(
-    `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
-     WHERE elementId(v) = $vertexId
-     DETACH DELETE v
-     RETURN count(v) as deletedCount`,
-    { vertexId, userUuid }
-  );
+  let deleteQuery;
+  let deleteParams;
+  if (!enableUserScoping) {
+    deleteQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      DETACH DELETE v
+      RETURN count(v) as deletedCount
+    `;
+    deleteParams = { vertexId };
+  } else {
+    deleteQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      DETACH DELETE v
+      RETURN count(v) as deletedCount
+    `;
+    deleteParams = { vertexId, userUuid };
+  }
+  const deleteResult = await args.session.run(deleteQuery, deleteParams);
 
   const deletedCount = deleteResult.records[0]?.get('deletedCount') || 0;
   if (deletedCount === 0) {
@@ -166,19 +180,35 @@ if (!isUpdate && vertexKey === rootKey) {
   };
 }
 
-// Check for duplicate names for the same user
-const duplicateCheckQuery = `
-  MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
-  WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
-  ${isUpdate ? 'AND elementId(v) <> $vertexId' : ''}
-  RETURN v
-`;
+// Check for duplicate names for the same user (or globally if scoping disabled)
+let duplicateCheckQuery;
+let duplicateCheckParams;
+if (!enableUserScoping) {
+  duplicateCheckQuery = `
+    MATCH (v:${parentVertexLabel})
+    WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
+    ${isUpdate ? 'AND elementId(v) <> $vertexId' : ''}
+    RETURN v
+  `;
+  duplicateCheckParams = {
+    name: vertexName,
+    ...(isUpdate && { vertexId })
+  };
+} else {
+  duplicateCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+    WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
+    ${isUpdate ? 'AND elementId(v) <> $vertexId' : ''}
+    RETURN v
+  `;
+  duplicateCheckParams = {
+    userUuid,
+    name: vertexName,
+    ...(isUpdate && { vertexId })
+  };
+}
 
-const duplicateResult = await args.session.run(duplicateCheckQuery, {
-  userUuid,
-  name: vertexName,
-  ...(isUpdate && { vertexId })
-});
+const duplicateResult = await args.session.run(duplicateCheckQuery, duplicateCheckParams);
 
 if (duplicateResult.records.length > 0) {
   return {
@@ -204,19 +234,34 @@ if (isUpdate) {
     return `v.${prop} = $prop${index}`;
   }).join(', ');
 
-  const updateQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
-    WHERE elementId(v) = $vertexId
-    SET ${setClause},
-        v.updatedAt = datetime()
-    RETURN v, elementId(v) as elementId
-  `;
-
-  const updateParams = {
-    userUuid,
-    vertexId,
-    ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
-  };
+  let updateQuery;
+  let updateParams;
+  if (!enableUserScoping) {
+    updateQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      SET ${setClause},
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    updateParams = {
+      vertexId,
+      ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+    };
+  } else {
+    updateQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      SET ${setClause},
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    updateParams = {
+      userUuid,
+      vertexId,
+      ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+    };
+  }
 
   const updateResult = await args.session.run(updateQuery, updateParams);
 
@@ -245,32 +290,53 @@ if (isUpdate) {
     );
 
     // Create new parent relationship (child points to parent)
-    await args.session.run(
-      `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
-       WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
-       MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
-       CREATE (v)-[:${toParentEdgeType}]->(p)`,
-      { vertexId: vertexElementId, parentId, userUuid }
-    );
+    if (!enableUserScoping) {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId }
+      );
+    } else {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId, userUuid }
+      );
+    }
   }
 } else {
   // Create new vertex
   const propertyKeys = Object.keys(vertexProperties);
   const propertyAssignments = propertyKeys.map((key, index) => `v.${key} = $prop${index}`).join(', ');
 
-  const createQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    CREATE (u)-[:${userRelationshipType}]->(v:${parentVertexLabel})
-    SET ${propertyAssignments},
-        v.createdAt = datetime(),
-        v.updatedAt = datetime()
-    RETURN v, elementId(v) as elementId
-  `;
-
-  const createParams = {
-    userUuid,
-    ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
-  };
+  let createQuery;
+  let createParams;
+  if (!enableUserScoping) {
+    createQuery = `
+      CREATE (v:${parentVertexLabel})
+      SET ${propertyAssignments},
+          v.createdAt = datetime(),
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    createParams = Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]));
+  } else {
+    createQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (u)-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      SET ${propertyAssignments},
+          v.createdAt = datetime(),
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    createParams = {
+      userUuid,
+      ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+    };
+  }
 
   const createResult = await args.session.run(createQuery, createParams);
 
@@ -282,13 +348,22 @@ if (isUpdate) {
   // Create parent relationship if parentId is provided
   // Relationship direction: child-[toParentEdgeType]->parent
   if (parentId) {
-    await args.session.run(
-      `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
-       WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
-       MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
-       CREATE (v)-[:${toParentEdgeType}]->(p)`,
-      { vertexId: vertexElementId, parentId, userUuid }
-    );
+    if (!enableUserScoping) {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId }
+      );
+    } else {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId, userUuid }
+      );
+    }
   }
 }
 
@@ -304,31 +379,53 @@ if (args.context.nodes[vertexElementId]) {
 // Calculate and add content count if tableVertexLabel and relationshipType are provided
 if (tableVertexLabel && relationshipType) {
   const rootKey = rootKeys.key || 'root';
-  let countQuery;
   
-  if (vertex.P?.key === rootKey) {
-    // Root key: count items without any category relationship
-    countQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
-      WHERE NOT EXISTS {
-        MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
-      }
-      RETURN count(DISTINCT content) as contentCount
-    `;
+  let countQuery;
+  let countParams;
+  if (!enableUserScoping) {
+    if (vertex.P?.key === rootKey) {
+      // Root key: count items without any category relationship
+      countQuery = `
+        MATCH (content:${tableVertexLabel})
+        WHERE NOT EXISTS {
+          MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+        }
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = {};
+    } else {
+      // Regular item: count items related to this category
+      countQuery = `
+        MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
+        WHERE elementId(cat) = $categoryId
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = { categoryId: vertex.id };
+    }
   } else {
-    // Regular item: count items related to this category
-    countQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
-      MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
-      WHERE elementId(cat) = $categoryId
-      RETURN count(DISTINCT content) as contentCount
-    `;
+    if (vertex.P?.key === rootKey) {
+      // Root key: count items without any category relationship
+      countQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+        WHERE NOT EXISTS {
+          MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+        }
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = { userUuid };
+    } else {
+      // Regular item: count items related to this category
+      countQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+        MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+        WHERE elementId(cat) = $categoryId
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = { userUuid, categoryId: vertex.id };
+    }
   }
   
-  const countResult = await args.session.run(countQuery, { 
-    userUuid, 
-    categoryId: vertex.id 
-  });
+  const countResult = await args.session.run(countQuery, countParams);
   const contentCount = countResult.records[0]?.get('contentCount') || 0;
   
   // Update vertex with count

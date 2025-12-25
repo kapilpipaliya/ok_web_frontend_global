@@ -303,7 +303,8 @@ const wrappedOnSave = async (saveData) => {
         rootKeys: rootKeys,
         properties: vertex.P,
         tableVertexLabel: tableVertexLabel,
-        relationshipType: relationshipType
+        relationshipType: relationshipType,
+        enableUserScoping: args.contextData.props?.enableUserScoping
       }
     });
 

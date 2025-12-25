@@ -29,7 +29,8 @@ const {
   categoryId,
   showUnassigned,
   parentVertexLabel,
-  toParentEdgeType
+  toParentEdgeType,
+  enableUserScoping
 } = args.contextData;
 
 if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
@@ -47,7 +48,7 @@ const relationshipType = `User${vertexLabel}`;
 
 // Build WHERE clause for filters
 const whereConditions = [];
-const queryParams = { userUuid: user.P.uuid };
+const queryParams = enableUserScoping ? { userUuid: user.P.uuid } : {};
 
 // Add search filter
 if (search && search.trim()) {
@@ -111,29 +112,53 @@ if (categoryId && parentVertexLabel && toParentEdgeType) {
 
 // Optimized query with indexed user lookup first and related vertices
 let query = "";
-if (categoryId && parentVertexLabel && toParentEdgeType) {
-  // Query with category filter - content points to category: content-[toParentEdgeType]->category
-  query = `
-  MATCH (u:User {uuid: $userUuid})
-  MATCH (cat:${parentVertexLabel})
-  WHERE elementId(cat) = $categoryId
-  MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
-  MATCH (u)-[:${relationshipType}]->(c)
-  ${whereClause}
-  OPTIONAL MATCH (c)-[r]->(related)
-  ${orderByClause}
-  RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
-  `;
+if (!enableUserScoping) {
+  if (categoryId && parentVertexLabel && toParentEdgeType) {
+    // Query with category filter - content points to category: content-[toParentEdgeType]->category
+    query = `
+    MATCH (cat:${parentVertexLabel})
+    WHERE elementId(cat) = $categoryId
+    MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
+    `;
+  } else {
+    // Standard query without category filter
+    query = `
+    MATCH (c:${vertexLabel})
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
+    `;
+  }
 } else {
-  // Standard query without category filter
-  query = `
-  MATCH (u:User {uuid: $userUuid})
-  MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
-  ${whereClause}
-  OPTIONAL MATCH (c)-[r]->(related)
-  ${orderByClause}
-  RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
-  `;
+  if (categoryId && parentVertexLabel && toParentEdgeType) {
+    // Query with category filter - content points to category: content-[toParentEdgeType]->category
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (cat:${parentVertexLabel})
+    WHERE elementId(cat) = $categoryId
+    MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
+    MATCH (u)-[:${relationshipType}]->(c)
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
+    `;
+  } else {
+    // Standard query without category filter
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, collect(DISTINCT {rel: type(r), target: related}) as relationships
+    `;
+  }
 }
 
 const result = await args.session.run(query, queryParams);

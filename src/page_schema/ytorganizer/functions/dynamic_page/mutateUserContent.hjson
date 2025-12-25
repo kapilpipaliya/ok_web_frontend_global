@@ -24,7 +24,7 @@ const user = await args.getEffectiveUser(args.session, actualUser, args.contextD
 const inputData = args.contextData.data || {};
 const vertex = inputData.vertex;
 const relationships = inputData.relationships || {};
-const { tableVertexLabel, operation, elementId, uniqueKeys = [] } = args.contextData;
+const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScoping } = args.contextData;
 
 // Extract form data from vertex
 if (!vertex || !vertex.P) {
@@ -60,7 +60,7 @@ try {
     if (uniqueKeys && Array.isArray(uniqueKeys) && uniqueKeys.length > 0) {
       // Build WHERE clause for unique key validation
       const uniqueConditions = uniqueKeys.map(key => {
-        const value = data[key];
+        const value = formData[key];
         if (value === null || value === undefined || value === "") {
           return null; // Skip null/empty values in unique check
         }
@@ -69,14 +69,25 @@ try {
 
       if (uniqueConditions.length > 0) {
         // Check for existing records with same unique key values
-        const checkQuery = `
-          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
-          WHERE ${uniqueConditions.join(" AND ")}
-          RETURN c
-          LIMIT 1
-        `;
-
-        const checkParams = { userUuid: user.P.uuid };
+        let checkQuery;
+        let checkParams;
+        if (!enableUserScoping) {
+          checkQuery = `
+            MATCH (c:${vertexLabel})
+            WHERE ${uniqueConditions.join(" AND ")}
+            RETURN c
+            LIMIT 1
+          `;
+          checkParams = {};
+        } else {
+          checkQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+            WHERE ${uniqueConditions.join(" AND ")}
+            RETURN c
+            LIMIT 1
+          `;
+          checkParams = { userUuid: user.P.uuid };
+        }
         uniqueKeys.forEach(key => {
           if (formData[key] !== null && formData[key] !== undefined && formData[key] !== "") {
             checkParams[`unique_${key}`] = formData[key];
@@ -105,17 +116,28 @@ try {
     };
 
     // Create vertex and relationship in a single optimized transaction
-    const createQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      CREATE (c:${vertexLabel} $properties)
-      CREATE (u)-[:${relationshipType} {createdAt: datetime()}]->(c)
-      RETURN c
-    `;
+    let createQuery;
+    let createParams;
+    if (!enableUserScoping) {
+      createQuery = `
+        CREATE (c:${vertexLabel} $properties)
+        RETURN c
+      `;
+      createParams = { properties };
+    } else {
+      createQuery = `
+        MATCH (u:User {uuid: $userUuid})
+        CREATE (c:${vertexLabel} $properties)
+        CREATE (u)-[:${relationshipType} {createdAt: datetime()}]->(c)
+        RETURN c
+      `;
+      createParams = {
+        userUuid: user.P.uuid,
+        properties
+      };
+    }
 
-    const result = await args.session.run(createQuery, {
-      userUuid: user.P.uuid,
-      properties
-    });
+    const result = await args.session.run(createQuery, createParams);
 
     if (result.records.length === 0) {
       return {
@@ -187,14 +209,25 @@ try {
 
       if (uniqueConditions.length > 0) {
         // Check for existing records with same unique key values (excluding current record)
-        const checkQuery = `
-          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
-          WHERE elementId(c) <> $elementId AND ${uniqueConditions.join(" AND ")}
-          RETURN c
-          LIMIT 1
-        `;
-
-        const checkParams = { userUuid: user.P.uuid, elementId: updateElementId };
+        let checkQuery;
+        let checkParams;
+        if (!enableUserScoping) {
+          checkQuery = `
+            MATCH (c:${vertexLabel})
+            WHERE elementId(c) <> $elementId AND ${uniqueConditions.join(" AND ")}
+            RETURN c
+            LIMIT 1
+          `;
+          checkParams = { elementId: updateElementId };
+        } else {
+          checkQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+            WHERE elementId(c) <> $elementId AND ${uniqueConditions.join(" AND ")}
+            RETURN c
+            LIMIT 1
+          `;
+          checkParams = { userUuid: user.P.uuid, elementId: updateElementId };
+        }
         uniqueKeys.forEach(key => {
           if (formData[key] !== null && formData[key] !== undefined && formData[key] !== "") {
             checkParams[`unique_${key}`] = formData[key];
@@ -230,18 +263,34 @@ try {
     }
 
     // Update vertex with ownership verification in single query
-    const updateQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
-      WHERE elementId(c) = $elementId
-      SET c += $properties
-      RETURN c
-    `;
+    let updateQuery;
+    let updateParams;
+    if (!enableUserScoping) {
+      updateQuery = `
+        MATCH (c:${vertexLabel})
+        WHERE elementId(c) = $elementId
+        SET c += $properties
+        RETURN c
+      `;
+      updateParams = {
+        elementId: updateElementId,
+        properties: cleanProperties
+      };
+    } else {
+      updateQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel})
+        WHERE elementId(c) = $elementId
+        SET c += $properties
+        RETURN c
+      `;
+      updateParams = {
+        userUuid: user.P.uuid,
+        elementId: updateElementId,
+        properties: cleanProperties
+      };
+    }
 
-    const result = await args.session.run(updateQuery, {
-      userUuid: user.P.uuid,
-      elementId: updateElementId,
-      properties: cleanProperties
-    });
+    const result = await args.session.run(updateQuery, updateParams);
 
     if (result.records.length === 0) {
       return {
@@ -309,17 +358,30 @@ try {
     }
 
     // Verify ownership and delete in single optimized query
-    const deleteQuery = `
-      MATCH (u:User {uuid: $userUuid})-[r:${relationshipType}]->(c:${vertexLabel})
-      WHERE elementId(c) = $elementId
-      DETACH DELETE c, r
-      RETURN count(c) as deleted
-    `;
+    let deleteQuery;
+    let deleteParams;
+    if (!enableUserScoping) {
+      deleteQuery = `
+        MATCH (c:${vertexLabel})
+        WHERE elementId(c) = $elementId
+        DETACH DELETE c
+        RETURN count(c) as deleted
+      `;
+      deleteParams = { elementId: deleteElementId };
+    } else {
+      deleteQuery = `
+        MATCH (u:User {uuid: $userUuid})-[r:${relationshipType}]->(c:${vertexLabel})
+        WHERE elementId(c) = $elementId
+        DETACH DELETE c, r
+        RETURN count(c) as deleted
+      `;
+      deleteParams = {
+        userUuid: user.P.uuid,
+        elementId: deleteElementId
+      };
+    }
 
-    const result = await args.session.run(deleteQuery, {
-      userUuid: user.P.uuid,
-      elementId: deleteElementId
-    });
+    const result = await args.session.run(deleteQuery, deleteParams);
 
     const deleted = result.records[0]?.get('deleted') || 0;
 

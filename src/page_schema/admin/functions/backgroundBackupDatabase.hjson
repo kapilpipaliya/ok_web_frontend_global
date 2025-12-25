@@ -15,6 +15,7 @@ if (args.contextData.action === 'start') {
       await args.executeNamedServerFunction({
         functionName: 'logWorkerMessage',
         contextData: {
+          functionLookupSubDomain: args.subDomain,
           workerName: 'backgroundBackupDatabase',
           level,
           message,
@@ -30,7 +31,7 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Starting background database backup worker');
 
   // Initialize queue helpers and Redis connection
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: { functionLookupSubDomain: args.subDomain } });
 
   if (!helpers.result?.success) {
     await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
@@ -191,7 +192,8 @@ if (args.contextData.action === 'start') {
           const retentionResult = await args.executeNamedServerFunction({
             functionName: 'applyBackupRetentionPolicy',
             contextData: {
-              jobId: job.id
+              jobId: job.id,
+              functionLookupSubDomain: args.subDomain
             }
           });
 
@@ -218,6 +220,7 @@ if (args.contextData.action === 'start') {
             await args.executeNamedServerFunction({
               functionName: 'sendBackupAlertEmail',
               contextData: {
+                functionLookupSubDomain: args.subDomain,
                 totalDatabases,
                 successfulBackups,
                 failedBackups,
@@ -295,6 +298,7 @@ if (args.contextData.action === 'start') {
         await args.executeNamedServerFunction({
           functionName: 'sendBackupAlertEmail',
           contextData: {
+            functionLookupSubDomain: args.subDomain,
             jobFailed: true,
             error: err.message,
             jobId: job?.id

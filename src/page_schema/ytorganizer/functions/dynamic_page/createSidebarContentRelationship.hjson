@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { categoryId, contentId, relationshipType, categoryLabel, contentLabel } = args.contextData;
+const { categoryId, contentId, relationshipType, categoryLabel, contentLabel, enableUserScopingForSidebar, enableUserScopingForContent } = args.contextData;
 
 if (!categoryId || !contentId || !relationshipType || !categoryLabel || !contentLabel) {
   return {
@@ -39,22 +39,63 @@ const contentRelType = `User${contentLabel}`;;
 
 try {
   // Create relationship: ContentItem -[relationshipType]-> Category (content points to category)
-  const query = `
-    MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
-    WHERE elementId(cat) = $categoryId
-    MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
-    WHERE elementId(content) = $contentId
-    MERGE (content)-[r:${relationshipType}]->(cat)
-    ON CREATE SET r.createdAt = datetime()
-    RETURN r
-  `;
+  // Build query based on scoping settings
+  let query;
+  let queryParams;
+  if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+    // No user scoping - just create relationship
+    query = `
+      MATCH (cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { categoryId, contentId };
+  } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+    // Only content is scoped
+    query = `
+      MATCH (cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { userUuid, categoryId, contentId };
+  } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+    // Only category is scoped
+    query = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { userUuid, categoryId, contentId };
+  } else {
+    // Both scoped (default)
+    query = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { userUuid, categoryId, contentId };
+  }
 
-  const result = await args.session.run(query, {
-    userUuid,
-    categoryId,
-    contentId
-  });
+  const result = await args.session.run(query, queryParams);
 
   if (result.records.length > 0) {
     // Use processResult to populate graph structure with the relationship

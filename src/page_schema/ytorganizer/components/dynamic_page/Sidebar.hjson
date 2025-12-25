@@ -39,6 +39,8 @@ const fetchRoot = async () => {
     const tableVertexLabel = getTableVertexLabel();
     const relationshipType = getRelationshipType();
     
+    const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+    
     const result = await args.executeNamedServerFunction({
       functionName: "getVertexChildren",
       contextData: {
@@ -46,7 +48,8 @@ const fetchRoot = async () => {
         toParentEdgeType,
         rootKeys,
         tableVertexLabel,
-        relationshipType
+        relationshipType,
+        enableUserScoping
       }
     });
 
@@ -108,6 +111,8 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
     const tableVertexLabel = getTableVertexLabel();
     const relationshipType = getRelationshipType();
     
+    const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+    
     const result = await args.executeNamedServerFunction({
       functionName: "getVertexChildren",
       contextData: {
@@ -115,7 +120,8 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
         toParentEdgeType,
         parentId,
         tableVertexLabel,
-        relationshipType
+        relationshipType,
+        enableUserScoping
       }
     });
 
@@ -551,7 +557,8 @@ return {
   loading: false,
   getChildren: args.fns.getChildren,
   tableVertexLabel: args.fns.getTableVertexLabel(),
-  relationshipType: args.fns.getRelationshipType()
+  relationshipType: args.fns.getRelationshipType(),
+  enableUserScoping: args.contextData.props?.enableUserScoping
 };
 '''
       }

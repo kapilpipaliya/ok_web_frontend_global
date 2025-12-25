@@ -20,7 +20,7 @@ if (args.contextData.action === 'start') {
           message,
           metadata
         }
-      });
+      }, { functionLookupSubDomain: args.subDomain });
     } catch (error) {
       // Silent failure - don't break worker if logging fails
     }
@@ -29,7 +29,7 @@ if (args.contextData.action === 'start') {
   await logMessage('info', 'Starting background token refresh worker (runs every 6 hours)');
 
   // Initialize queue helpers and Redis connection
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} });
+  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: {} }, { functionLookupSubDomain: args.subDomain });
 
   if (!helpers.result?.success) {
     await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
@@ -159,7 +159,7 @@ if (args.contextData.action === 'start') {
             contextData: {
               userUuid: userUuid
             }
-          });
+          }, { functionLookupSubDomain: args.subDomain });
 
           if (refreshResult.result?.success) {
             tokensRefreshed++;

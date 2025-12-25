@@ -125,6 +125,7 @@ export async function runMigration(
       },
       {
         dbSession: dbSession,
+        functionLookupSession: dbSession,
         subDomain: subDomain,
         nodes: {},
         relationships: {},

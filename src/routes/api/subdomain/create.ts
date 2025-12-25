@@ -20,6 +20,7 @@ import { initSubdomainWorkersForSubdomain } from "~/server/queue/initWorkersCore
 import { importSchemas } from "~/lib/schema/importSchemas";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
 import { broadcastStartWorkers } from "~/server/cluster/clusterCommunication";
+import { runMigration } from "~/lib/schema/runMigration";
 
 // Reserved subdomain keys that cannot be used
 const RESERVED_SUBDOMAINS = new Set([
@@ -138,6 +139,17 @@ export async function POST({ request }: APIEvent) {
         error,
       );
       // Don't throw - seed function failure shouldn't block subdomain creation
+    }
+
+    // Run migrations after seed function
+    try {
+      await runMigrationForSubdomain(key, user);
+    } catch (error) {
+      console.error(
+        `[Subdomain Create] Failed to run migration for subdomain: ${key}`,
+        error,
+      );
+      // Don't throw - migration failure shouldn't block subdomain creation
     }
 
     // Start all workers for the subdomain on ALL cluster nodes
@@ -335,6 +347,7 @@ async function runSeedFunction(
       {
         dbSession: dbSession,
         subDomain: subdomainKey,
+        functionLookupSession: dbSession,
         nodes: {},
         relationships: {},
         vertexes: undefined as any,
@@ -357,6 +370,47 @@ async function runSeedFunction(
       error,
     );
     // Don't throw - seed function failure shouldn't block subdomain creation
+  } finally {
+    await dbSession.close();
+  }
+}
+
+async function runMigrationForSubdomain(
+  subdomainKey: string,
+  user: Vertex,
+): Promise<void> {
+  console.log(
+    `[Subdomain Create] Running migrations for subdomain: ${subdomainKey}...`,
+  );
+
+  const driver = await getDriver();
+  const dbSession = driver.session({ database: subdomainKey });
+
+  try {
+    const migrationResult = await runMigration(dbSession, subdomainKey, user, {
+      dryRun: false,
+    });
+
+    if (migrationResult.functionName) {
+      console.log(
+        `[Subdomain Create] Migration executed: ${migrationResult.functionName}, success: ${migrationResult.success}`,
+      );
+      if (migrationResult.error) {
+        console.error(
+          `[Subdomain Create] Migration error: ${migrationResult.error}`,
+        );
+      }
+    } else {
+      console.log(
+        `[Subdomain Create] No migration function found for subdomain: ${subdomainKey}`,
+      );
+    }
+  } catch (error) {
+    console.error(
+      `[Subdomain Create] Error running migration for subdomain: ${subdomainKey}`,
+      error,
+    );
+    // Don't throw - migration failure shouldn't block subdomain creation
   } finally {
     await dbSession.close();
   }

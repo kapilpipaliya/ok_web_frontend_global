@@ -65,12 +65,17 @@ const getGenericDataFunction = () => {
       const sidebarItem = selectedSidebarItem();
       const sidebarConfig = getSidebarConfig();
 
+      // Get config to check user scoping settings
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
       // Build filter parameters
       const filterParams = {
         tableVertexLabel,
         search: filters.search,
         filters: filters.filters,
-        sort: filters.sort
+        sort: filters.sort,
+        enableUserScoping: enableUserScopingForContent
       };
 
       // Add sidebar filtering if item is selected
@@ -144,12 +149,17 @@ const getGenericSaveFunction = () => {
         apiData = data;
       }
 
+      // Get config to check user scoping settings
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
       const result = await args.fns.executeYTOFunction("mutateUserContent", {
         tableVertexLabel,
         operation: mode === "add" ? "create" : mode === "edit" ? "update" : "delete",
         data: apiData,
         elementId: originalRow?.id,
-        uniqueKeys: uniqueKeys
+        uniqueKeys: uniqueKeys,
+        enableUserScoping: enableUserScopingForContent
       });
 
       // If adding a new item and sidebar item is selected, add relationship FROM sidebar item TO new content
@@ -163,6 +173,11 @@ const getGenericSaveFunction = () => {
 
           // Don't add relationship if root key is selected
           if (sidebarItem.P?.key !== rootKey) {
+            // Get config to check user scoping settings
+            const { config } = getCachedConfig();
+            const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+            const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
             // Create relationship: Category -[toParentEdgeType]-> ContentItem
             try {
               const newContentId = result.result.data.id;
@@ -171,7 +186,9 @@ const getGenericSaveFunction = () => {
                 contentId: newContentId,
                 relationshipType: sidebarConfig.toParentEdgeType,
                 categoryLabel: sidebarConfig.parentVertexLabel,
-                contentLabel: tableVertexLabel
+                contentLabel: tableVertexLabel,
+                enableUserScopingForSidebar: enableUserScopingForSidebar,
+                enableUserScopingForContent: enableUserScopingForContent
               });
             } catch (relError) {
               console.error("Error creating sidebar relationship:", relError);
@@ -694,6 +711,10 @@ const tableVertexLabel = args.fns.getTableVertexLabel();
 // Relationship type is "User" + tableVertexLabel (e.g., "UserBook", "UserAudioVideo")
 const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
 
+// Get config to check user scoping settings
+const { config } = args.fns.getCachedConfig();
+const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+
 return {
   parentVertexLabel: sidebarConfig?.parentVertexLabel,
   toParentEdgeType: sidebarConfig?.toParentEdgeType,
@@ -701,7 +722,8 @@ return {
   formConfig: sidebarConfig?.formConfig,
   onItemSelect: args.fns.handleSidebarItemSelect,
   tableVertexLabel: tableVertexLabel,
-  relationshipType: relationshipType
+  relationshipType: relationshipType,
+  enableUserScoping: enableUserScopingForSidebar
 };
 '''
       }

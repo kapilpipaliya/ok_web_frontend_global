@@ -257,6 +257,7 @@ export async function executeNamedServerFunctionCore(
       dbSession = context.dbSession;
       subDomain = context.subDomain;
     } else {
+      // Note: for worker functions, this will not work, so always pass the session in the context.
       // Create new session
       // Prefer shop-specific database if session user has a shop
       const sessionUser = await getSessionUser();
@@ -281,19 +282,38 @@ export async function executeNamedServerFunctionCore(
       }
     }
 
-    // Always use fallback database session for function lookup
-    // Functions are stored in the main/admin database, not shop-specific databases
-
-    // If we already have fallbackSessionData from above, reuse it; otherwise fetch it
-    if (!fallbackSessionData) {
-      fallbackSessionData = await getDBSessionForSubdomain();
-      functionLookupSessionCreated = true;
-    }
-    functionLookupSession = fallbackSessionData.dbSession;
+    // Function lookup session - use provided one if available, otherwise use fallback
+    // Functions are typically stored in the main/admin database, not shop-specific databases
+    // But for subdomain-specific functions (like seed functions), they may be in the subdomain database
     
+    if (context.functionLookupSession) {
+      // Use the provided function lookup session
+      functionLookupSession = context.functionLookupSession;
+      functionLookupSessionCreated = false; // Don't close a session we didn't create
+    } else if (context.functionLookupSubDomain) {
+      // Use the specified subdomain for function lookup
+      functionLookupSession = (await getDriver()).session({
+        database: context.functionLookupSubDomain,
+      });
+      functionLookupSessionCreated = true;
+    } else {
+      // Fallback: use fallback database session for function lookup
+      // If we already have fallbackSessionData from above, reuse it; otherwise fetch it
+      if (!fallbackSessionData) {
+        fallbackSessionData = await getDBSessionForSubdomain();
+        functionLookupSessionCreated = true;
+      }
+      functionLookupSession = fallbackSessionData.dbSession;
+    }
+    
+    // Ensure functionLookupSession is defined (should always be assigned above)
+    if (!functionLookupSession) {
+      return {
+        error: "Failed to initialize function lookup session",
+      };
+    }
 
     // Query to find the Function vertex with the given key
-    // Always use fallback session for function lookup
     const query = `
       MATCH (f:Function {key: $functionName})
       RETURN f
