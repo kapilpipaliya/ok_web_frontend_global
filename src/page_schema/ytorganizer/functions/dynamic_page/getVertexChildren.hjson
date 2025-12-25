@@ -18,7 +18,7 @@ if (!actualUser) {
 }
 
 // Extract parameters
-const { parentVertexLabel, toParentEdgeType, parentId, rootKeys } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType } = args.contextData;
 
 if (!parentVertexLabel || !toParentEdgeType) {
   return {
@@ -27,6 +27,10 @@ if (!parentVertexLabel || !toParentEdgeType) {
     data: []
   };
 }
+
+// Get effective user for count queries
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const userUuid = user.P.uuid;
 
 // If parentId is provided, fetch children of that parent
 // Relationship direction: child-[toParentEdgeType]->parent
@@ -41,7 +45,37 @@ if (parentId) {
   const result = await args.session.run(query, { parentId });
 
   // Use processResult to populate graph structure (process both child and parent vertices)
+  // This will set up IN/OUT relationships correctly:
+  // - child.OUT[toParentEdgeType] = [edge.id] (child points to parent)
+  // - parent.IN[toParentEdgeType] = [edge.id] (parent receives from children)
   const vertices = args.processResult(result.records, args.context, ['child', 'parent'], 'r');
+
+  // Add count to each vertex if tableVertexLabel and relationshipType are provided
+  if (tableVertexLabel && relationshipType) {
+    for (const vertex of vertices) {
+      // Count content items related to this category
+      // Relationship: content-[toParentEdgeType]->category
+      // User relationship: User-[relationshipType]->content
+      const countQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+        MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+        WHERE elementId(cat) = $categoryId
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      const countResult = await args.session.run(countQuery, { 
+        userUuid, 
+        categoryId: vertex.id 
+      });
+      const contentCount = countResult.records[0]?.get('contentCount') || 0;
+      
+      // Update vertex in context with count
+      if (args.context.nodes[vertex.id]) {
+        args.context.nodes[vertex.id].P.contentCount = contentCount;
+      }
+      // Also update in the returned vertex
+      vertex.P.contentCount = contentCount;
+    }
+  }
 
   return {
     success: true,
@@ -81,6 +115,48 @@ if (rootKeys) {
 
   // Use processResult to populate graph structure
   const vertices = args.processResult(result.records, args.context, 'v');
+
+  // Add count to each vertex if tableVertexLabel and relationshipType are provided
+  if (tableVertexLabel && relationshipType) {
+    for (const vertex of vertices) {
+      // For root items, count items without any category relationship or items in this root
+      const rootKeys = args.contextData.rootKeys || {};
+      const rootKey = rootKeys.key || 'root';
+      
+      let countQuery;
+      if (vertex.P?.key === rootKey) {
+        // Root key: count items without any category relationship
+        countQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+          WHERE NOT EXISTS {
+            MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+          }
+          RETURN count(DISTINCT content) as contentCount
+        `;
+      } else {
+        // Regular root item: count items related to this category
+        countQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+          MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+          WHERE elementId(cat) = $categoryId
+          RETURN count(DISTINCT content) as contentCount
+        `;
+      }
+      
+      const countResult = await args.session.run(countQuery, { 
+        userUuid, 
+        categoryId: vertex.id 
+      });
+      const contentCount = countResult.records[0]?.get('contentCount') || 0;
+      
+      // Update vertex in context with count
+      if (args.context.nodes[vertex.id]) {
+        args.context.nodes[vertex.id].P.contentCount = contentCount;
+      }
+      // Also update in the returned vertex
+      vertex.P.contentCount = contentCount;
+    }
+  }
 
   return {
     success: true,

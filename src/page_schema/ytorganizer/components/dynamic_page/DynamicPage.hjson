@@ -690,12 +690,18 @@ return {
         props:
           '''
 const sidebarConfig = args.fns.getSidebarConfig();
+const tableVertexLabel = args.fns.getTableVertexLabel();
+// Relationship type is "User" + tableVertexLabel (e.g., "UserBook", "UserAudioVideo")
+const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
+
 return {
   parentVertexLabel: sidebarConfig?.parentVertexLabel,
   toParentEdgeType: sidebarConfig?.toParentEdgeType,
   rootKeys: sidebarConfig?.rootKeys || {},
   formConfig: sidebarConfig?.formConfig,
-  onItemSelect: args.fns.handleSidebarItemSelect
+  onItemSelect: args.fns.handleSidebarItemSelect,
+  tableVertexLabel: tableVertexLabel,
+  relationshipType: relationshipType
 };
 '''
       }

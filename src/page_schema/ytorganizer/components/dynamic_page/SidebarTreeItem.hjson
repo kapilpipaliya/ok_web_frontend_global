@@ -59,9 +59,13 @@ const fetchChildrenIfNeeded = async () => {
   if (!item) return;
 
   const expanded = isExpanded();
+  if (!expanded) return;
+  
   const childrenList = getChildren();
   
-  if (expanded && childrenList.length === 0) {
+  // Always fetch children when expanded if we don't have them loaded yet
+  // This ensures nested children are fetched from the server
+  if (childrenList.length === 0) {
     const fetchChildrenFn = getFetchChildren();
     if (fetchChildrenFn) {
       await fetchChildrenFn(item.id);
@@ -78,11 +82,13 @@ const handleToggleExpand = async () => {
   if (onToggleExpand) {
     const wasExpanded = isExpanded();
     await onToggleExpand(item.id);
-    // Fetch children if expanding and we don't have them yet
+    // Always fetch children when expanding (even if we think we have them)
+    // This ensures nested children are properly fetched from the server
     if (!wasExpanded) {
-      const childrenList = getChildren();
-      if (childrenList.length === 0) {
-        await fetchChildrenIfNeeded();
+      // Fetch children from server to ensure they're in the graph
+      const fetchChildrenFn = getFetchChildren();
+      if (fetchChildrenFn) {
+        await fetchChildrenFn(item.id);
       }
     }
   }
@@ -97,18 +103,17 @@ const handleItemClick = () => {
   }
 };
 
-// Get item display name (with child count)
+// Get item display name (with content count)
 const getItemName = () => {
   const item = getItem();
   if (!item) return "";
 
   const baseName = item.P?.key || item.P?.name || item.P?.title || "No name";
 
-  // Use loaded children count from props
-  const childrenList = getChildren();
-  const count = childrenList.length;
-  if (count > 0) {
-    return `${baseName} (${count})`;
+  // Use content count from vertex P property
+  const contentCount = item.P?.contentCount ?? 0;
+  if (contentCount > 0) {
+    return `${baseName} (${contentCount})`;
   }
 
   return baseName;
@@ -122,10 +127,31 @@ const getItemIcon = () => {
 };
 
 // Check if item has children
-// Show expand button if we have children loaded
+// Show expand button if we have children loaded or if relationships indicate children exist
 const hasChildren = () => {
+  const item = getItem();
+  if (!item) return false;
+  
+  // Check if we have children in graph
   const childrenList = getChildren();
-  return childrenList.length > 0;
+  if (childrenList.length > 0) {
+    return true;
+  }
+  
+  // If no children in graph, check if the vertex has IN relationships indicating it has children
+  // Relationship direction: child-[toParentEdgeType]->parent
+  // So parent has IN relationships from children (children point to parent)
+  // When processResult processes relationships, it sets up parent.IN[toParentEdgeType]
+  const toParentEdgeType = getToParentEdgeType();
+  if (toParentEdgeType && item.IN && item.IN[toParentEdgeType] && item.IN[toParentEdgeType].length > 0) {
+    return true;
+  }
+  
+  // For nested items that haven't been fetched yet, we don't know if they have children
+  // But we should allow expansion to check - show expand button if item might have children
+  // This allows nested items to be expanded to fetch and check for children
+  // The expand button will be hidden if no children are found after fetching
+  return true;
 };
 
 // Modal state
@@ -194,12 +220,14 @@ const handleEditSave = async (updatedVertex) => {
   handleCloseEditModal();
 
   // Update the item in the tree using the parent's update function
+  // The updated vertex from server includes contentCount in P
   const onItemUpdate = getOnItemUpdate();
   if (onItemUpdate && updatedVertex) {
     onItemUpdate(updatedVertex);
   }
 
   // The parent update should handle this via updateItemInTree function
+  // The graph will be updated with the new count from the server response
 };
 
 // Handle delete
@@ -251,7 +279,9 @@ const handleDelete = async (e) => {
         toParentEdgeType: toParentEdgeType,
         rootKeys: rootKeys,
         properties: item.P || {},
-        operation: "delete"
+        operation: "delete",
+        tableVertexLabel: args.contextData.props?.tableVertexLabel,
+        relationshipType: args.contextData.props?.relationshipType
       }
     });
 
@@ -675,7 +705,10 @@ return `._id {
         props:
           '''
 const expanded = args.fns.isExpanded();
+// Get children reactively - this will update when graph changes
 const childrenList = args.fns.getChildren();
+// Only render if expanded and we have children
+// If expanded but no children yet, they might be fetching
 return {
   as: "ul",
   loop: expanded && childrenList.length > 0,
@@ -721,7 +754,9 @@ return {
   onItemDelete: args.contextData.props?.onItemDelete,
   childItems: children,
   loading: false,
-  getChildren: getChildrenFn
+  getChildren: getChildrenFn,
+  tableVertexLabel: args.contextData.props?.tableVertexLabel,
+  relationshipType: args.contextData.props?.relationshipType
 };
 '''
       }
@@ -740,6 +775,8 @@ const formConfig = args.fns.getFormConfig();
 const parentVertexLabel = args.contextData.props?.parentVertexLabel;
 const toParentEdgeType = args.contextData.props?.toParentEdgeType;
 const rootKeys = args.contextData.props?.rootKeys || {};
+const tableVertexLabel = args.contextData.props?.tableVertexLabel;
+const relationshipType = args.contextData.props?.relationshipType;
 
 return {
   isOpen: args.fns.isAddModalOpen(),
@@ -748,6 +785,8 @@ return {
   parentVertexLabel: parentVertexLabel,
   toParentEdgeType: toParentEdgeType,
   rootKeys: rootKeys,
+  tableVertexLabel: tableVertexLabel,
+  relationshipType: relationshipType,
   onSave: args.fns.handleAddChildSave,
   onClose: args.fns.handleCloseAddModal
 };
@@ -768,6 +807,8 @@ const formConfig = args.fns.getFormConfig();
 const parentVertexLabel = args.contextData.props?.parentVertexLabel;
 const toParentEdgeType = args.contextData.props?.toParentEdgeType;
 const rootKeys = args.contextData.props?.rootKeys || {};
+const tableVertexLabel = args.contextData.props?.tableVertexLabel;
+const relationshipType = args.contextData.props?.relationshipType;
 
 // For edit mode, we don't need parentId since we're just updating the vertex
 // The parent relationship should remain unchanged unless explicitly changed
@@ -779,6 +820,8 @@ return {
   parentVertexLabel: parentVertexLabel,
   toParentEdgeType: toParentEdgeType,
   rootKeys: rootKeys,
+  tableVertexLabel: tableVertexLabel,
+  relationshipType: relationshipType,
   initialVertex: item,
   mode: "edit",
   onSave: args.fns.handleEditSave,

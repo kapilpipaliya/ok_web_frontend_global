@@ -260,6 +260,8 @@ const mode = args.contextData.props?.mode || "add";
 const parentVertexLabel = args.contextData.props?.parentVertexLabel;
 const toParentEdgeType = args.contextData.props?.toParentEdgeType;
 const rootKeys = args.contextData.props?.rootKeys || {};
+const tableVertexLabel = args.contextData.props?.tableVertexLabel;
+const relationshipType = args.contextData.props?.relationshipType;
 const onSave = args.contextData.props?.onSave;
 const onClose = args.contextData.props?.onClose;
 
@@ -299,7 +301,9 @@ const wrappedOnSave = async (saveData) => {
         parentVertexLabel: parentVertexLabel,
         toParentEdgeType: toParentEdgeType,
         rootKeys: rootKeys,
-        properties: vertex.P
+        properties: vertex.P,
+        tableVertexLabel: tableVertexLabel,
+        relationshipType: relationshipType
       }
     });
 

@@ -10,6 +10,8 @@
 const getParentVertexLabel = () => args.contextData.props?.parentVertexLabel;
 const getToParentEdgeType = () => args.contextData.props?.toParentEdgeType;
 const getRootKeys = () => args.contextData.props?.rootKeys || {};
+const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getRelationshipType = () => args.contextData.props?.relationshipType;
 
 // State management - using graph for data, signals only for UI state
 const [expandedKeys, setExpandedKeys] = args.createSignal([]);
@@ -34,12 +36,17 @@ const fetchRoot = async () => {
 
   setLoading(true);
   try {
+    const tableVertexLabel = getTableVertexLabel();
+    const relationshipType = getRelationshipType();
+    
     const result = await args.executeNamedServerFunction({
       functionName: "getVertexChildren",
       contextData: {
         parentVertexLabel,
         toParentEdgeType,
-        rootKeys
+        rootKeys,
+        tableVertexLabel,
+        relationshipType
       }
     });
 
@@ -98,12 +105,17 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
   }
 
   try {
+    const tableVertexLabel = getTableVertexLabel();
+    const relationshipType = getRelationshipType();
+    
     const result = await args.executeNamedServerFunction({
       functionName: "getVertexChildren",
       contextData: {
         parentVertexLabel,
         toParentEdgeType,
-        parentId
+        parentId,
+        tableVertexLabel,
+        relationshipType
       }
     });
 
@@ -295,6 +307,8 @@ return {
   getParentVertexLabel,
   getToParentEdgeType,
   getRootKeys,
+  getTableVertexLabel,
+  getRelationshipType,
   isAddRootModalOpen,
   setIsAddRootModalOpen,
   handleOpenAddRootModal,
@@ -535,7 +549,9 @@ return {
   onItemDelete: args.fns.removeItemFromTree,
   childItems: children,
   loading: false,
-  getChildren: args.fns.getChildren
+  getChildren: args.fns.getChildren,
+  tableVertexLabel: args.fns.getTableVertexLabel(),
+  relationshipType: args.fns.getRelationshipType()
 };
 '''
       }
@@ -597,6 +613,8 @@ return {
   parentVertexLabel: args.fns.getParentVertexLabel(),
   toParentEdgeType: args.fns.getToParentEdgeType(),
   rootKeys: args.fns.getRootKeys(),
+  tableVertexLabel: args.fns.getTableVertexLabel(),
+  relationshipType: args.fns.getRelationshipType(),
   onSave: args.fns.handleAddRootSave,
   onClose: args.fns.handleCloseAddRootModal
 };
