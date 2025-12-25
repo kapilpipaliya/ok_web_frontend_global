@@ -250,9 +250,14 @@ const getGenericImportFunction = () => {
   if (!tableVertexLabel) return null;
   return async ({ data }) => {
     try {
+      // Get config to check user scoping settings
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
       const result = await args.fns.executeYTOFunction("importUserContent", {
         tableVertexLabel,
-        data
+        data,
+        enableUserScoping: enableUserScopingForContent
       });
       if (result?.error) {
         return { success: false, message: result.error };
@@ -278,11 +283,16 @@ const getGenericExportFunction = () => {
   return async ({ data, columns }) => {
     try {
       const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+      // Get config to check user scoping settings
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
       const result = await args.fns.executeYTOFunction("exportUserContent", {
         tableVertexLabel,
         format: "csv",
         data: data,
-        columns: sanitizedColumns
+        columns: sanitizedColumns,
+        enableUserScoping: enableUserScopingForContent
       });
       if (result?.error) {
         return { success: false, message: result.error };

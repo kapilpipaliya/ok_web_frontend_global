@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { tableVertexLabel, data } = args.contextData;
+const { tableVertexLabel, data, enableUserScoping } = args.contextData;
 
 if (!tableVertexLabel) {
   return {
@@ -102,19 +102,32 @@ let errorCount = 0;
 const errors = [];
 
 try {
-  const batchQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    UNWIND $items as item
-    CREATE (c:${vertexLabel})
-    SET c = item
-    CREATE (u)-[:${relationshipType} {createdAt: datetime()}]->(c)
-    RETURN count(c) as created
-  `;
+  let batchQuery;
+  let batchParams;
+  if (!enableUserScoping) {
+    batchQuery = `
+      UNWIND $items as item
+      CREATE (c:${vertexLabel})
+      SET c = item
+      RETURN count(c) as created
+    `;
+    batchParams = { items: batchItems };
+  } else {
+    batchQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      UNWIND $items as item
+      CREATE (c:${vertexLabel})
+      SET c = item
+      CREATE (u)-[:${relationshipType} {createdAt: datetime()}]->(c)
+      RETURN count(c) as created
+    `;
+    batchParams = {
+      userUuid: user.P.uuid,
+      items: batchItems
+    };
+  }
 
-  const result = await args.session.run(batchQuery, {
-    userUuid: user.P.uuid,
-    items: batchItems
-  });
+  const result = await args.session.run(batchQuery, batchParams);
 
   const createdValue = result.records[0]?.get('created');
   successCount = createdValue ? args.neo4jConvert.toNumber(createdValue) : 0;

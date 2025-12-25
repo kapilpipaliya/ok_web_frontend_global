@@ -21,7 +21,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { label, userUuid, search = "", limit = 100, relationshipType } = args.contextData;
+const { label, userUuid, search = "", limit = 100, relationshipType, enableUserScoping } = args.contextData;
 
 if (!label) {
   return {
@@ -31,24 +31,34 @@ if (!label) {
   };
 }
 
-// Use provided userUuid or current user's uuid
-const targetUserUuid = userUuid || user.P.uuid;
+// Use provided userUuid or current user's uuid (only if scoping is enabled)
+const targetUserUuid = enableUserScoping ? (userUuid || user.P.uuid) : null;
 
 // Build query
 let query;
-let params = { userUuid: targetUserUuid, limit };
+let params = { limit };
 
-if (relationshipType) {
-  // Query with specific relationship type
+if (!enableUserScoping) {
+  // No user scoping - fetch all vertices of the label
   query = `
-    MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(v:${label})
+    MATCH (v:${label})
   `;
 } else {
-  // Auto-detect relationship: User + Label (e.g., UserBook, UserAudioVideo)
-  const autoRelationship = `User${label}`;
-  query = `
-    MATCH (u:User {uuid: $userUuid})-[:${autoRelationship}]->(v:${label})
-  `;
+  // User scoping enabled - filter by user relationship
+  params.userUuid = targetUserUuid;
+  
+  if (relationshipType) {
+    // Query with specific relationship type
+    query = `
+      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(v:${label})
+    `;
+  } else {
+    // Auto-detect relationship: User + Label (e.g., UserBook, UserAudioVideo)
+    const autoRelationship = `User${label}`;
+    query = `
+      MATCH (u:User {uuid: $userUuid})-[:${autoRelationship}]->(v:${label})
+    `;
+  }
 }
 
 // Add search filter if provided

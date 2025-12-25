@@ -78,24 +78,52 @@ const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
 });
 
 try {
-  // Create a synthetic user vertex representing the shop/admin for session
-  const user = {
-    id: shop,
-    L: "User",
-    P: {
-      email: shop,
-      uuid: shop,
-      shop,
-      shopDb: subDomain,
-      shopifySession: params.session,
-      shopifyHost: params.host,
-      shopifyLocale: params.locale,
-      shopifyEmbedded: params.embedded,
-      shopifyParams: params, // Save all Shopify params for authentication in other functions
-    },
-  };
+  // Find or create user in the database
+  const user = await dbSession.executeWrite(async (tx) => {
+    // Check if user already exists by email (shop) or uuid (shop)
+    const existingUserResult = await tx.run(
+      `MATCH (u:User)
+       WHERE u.email = $shop OR u.uuid = $shop
+       RETURN u
+       LIMIT 1`,
+      { shop }
+    );
 
-  // Update HTTP session with this user
+    let userNode;
+    
+    if (existingUserResult.records.length > 0) {
+      // User exists, return the existing node (no updates needed)
+      userNode = existingUserResult.records[0].get('u');
+    } else {
+      // User doesn't exist, create it with only basic properties
+      const createResult = await tx.run(
+        `CREATE (u:User {
+          email: $shop,
+          uuid: $shop,
+          createdAt: datetime()
+        })
+        RETURN u`,
+        {
+          shop,
+        }
+      );
+      userNode = createResult.records[0].get('u');
+    }
+
+    // Convert Neo4j node to Vertex format
+    return args.convertNodeToJson(userNode);
+  });
+
+  // Add Shopify-related properties to user object for session only (not saved in DB)
+  user.P.shop = shop;
+  user.P.shopDb = subDomain;
+  user.P.shopifySession = params.session;
+  user.P.shopifyHost = params.host;
+  user.P.shopifyLocale = params.locale;
+  user.P.shopifyEmbedded = params.embedded;
+  user.P.shopifyParams = params;
+
+  // Update HTTP session with the user from database (with Shopify properties in session only)
   await args.updateSession(user);
 
   return {

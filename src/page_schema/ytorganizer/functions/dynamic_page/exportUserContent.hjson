@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { tableVertexLabel, format = "csv", data, columns } = args.contextData;
+const { tableVertexLabel, format = "csv", data, columns, enableUserScoping } = args.contextData;
 
 if (!tableVertexLabel) {
   return {
@@ -43,7 +43,8 @@ if (data && Array.isArray(data) && data.length > 0) {
       tableVertexLabel,
       search: undefined,
       filters: {},
-      sort: {}
+      sort: {},
+      enableUserScoping
     }
   });
 

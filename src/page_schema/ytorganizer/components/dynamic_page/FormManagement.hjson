@@ -208,7 +208,13 @@ const validate = () => {
 
 // Fetch select options for a field - defined in FormManagement
 const getUserVertices = async (label, options = {}) => {
-  if (!args.user) {
+  // Check if user scoping is enabled from options or field selectConfig
+  // Default to false (not scoped) to be consistent with other functions
+  const enableUserScoping = options.enableUserScoping !== undefined 
+    ? options.enableUserScoping 
+    : false;
+
+  if (enableUserScoping && !args.user) {
     return { success: false, data: [], message: "User not authenticated" };
   }
 
@@ -217,9 +223,11 @@ const getUserVertices = async (label, options = {}) => {
       functionName: "getUserVertices",
       contextData: {
         label,
-        userUuid: args.user.P.uuid,
+        userUuid: enableUserScoping ? args.user?.P?.uuid : undefined,
         search: options.search || "",
-        limit: options.limit || 100
+        limit: options.limit || 100,
+        relationshipType: options.relationshipType,
+        enableUserScoping
       }
     });
 
@@ -242,9 +250,17 @@ const fetchSelectOptions = async (field) => {
   }
 
   try {
+    // Check if field selectConfig has enableUserScoping
+    // Default to false (not scoped) to be consistent with other functions
+    const enableUserScoping = field.selectConfig.enableUserScoping !== undefined
+      ? field.selectConfig.enableUserScoping
+      : false;
+
     const result = await getUserVertices(field.selectConfig.label, {
       search: field.selectConfig.search,
-      limit: field.selectConfig.limit || 100
+      limit: field.selectConfig.limit || 100,
+      relationshipType: field.selectConfig.relationshipType,
+      enableUserScoping
     });
 
     if (result.success && result.data) {
