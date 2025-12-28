@@ -32,6 +32,9 @@ export async function getUserFromSession(
     if (!sessionUser) {
       return;
     }
+    if (sessionUser?.P?.shop) {
+      return sessionUser;
+    } 
 
     // Get user password from database
     const sessionData = await getDBSessionForSubdomain(request);

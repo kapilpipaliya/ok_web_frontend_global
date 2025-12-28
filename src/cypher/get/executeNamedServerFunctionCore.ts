@@ -259,11 +259,13 @@ export async function executeNamedServerFunctionCore(
     } else {
       // Note: for worker functions, this will not work, so always pass the session in the context.
       // Create new session
-      // Prefer shop-specific database if session user has a shop
       const sessionUser = await getSessionUser();
       sessionCreatedLocally = true;
-
-      if (sessionUser?.P?.shop) {
+      
+      // Check if we should use the session shop (if available)
+      // Only use shop database if useSessionShop isn't explicitly set to false
+      // and the user has a shop in their session
+      if (context.useSessionShop !== false && sessionUser?.P?.shop) {
         // Derive database name for this shop
         subDomain = getDatabaseNameForShop(sessionUser.P.shop);
         dbSession = (await getDriver()).session({

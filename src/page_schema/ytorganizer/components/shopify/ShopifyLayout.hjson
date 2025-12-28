@@ -110,12 +110,18 @@ return {
 
     const searchParams = ${JSON.stringify({ ...args.searchParams })};
 
-    const result = await args.executeNamedServerFunction({
-      functionName: "authShopifyAdminRequest",
-      contextData: {
-        searchParams,
-      },
-    });
+   // Using useSessionShop: false flag to ensure we use fallback database for auth
+    const result = await args.executeNamedServerFunction(
+      {
+        functionName: "authShopifyAdminRequest",
+        contextData: {
+          searchParams,
+        },
+      }, 
+      {
+        useSessionShop: false
+      }
+    );
 
     if (result?.error || result?.result?.success === false) {
       console.error("Shopify auth failed:", result?.error || result?.result?.error);

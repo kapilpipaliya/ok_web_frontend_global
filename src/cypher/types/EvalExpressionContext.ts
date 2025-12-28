@@ -4,7 +4,7 @@ import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export interface EvalExpressionContext {
-  dbSession?: Session;
+  useSessionShop?: boolean;
   subDomain?: string;
   functionLookupSession?: Session;
   functionLookupSubDomain?: string;

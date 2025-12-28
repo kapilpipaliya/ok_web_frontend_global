@@ -46,20 +46,38 @@ export async function runMigration(
     migrationSubDomain,
   } = options;
 
-  try {
-    let migrationFunctionKey: string;
+  // Define functionLookupSession at the highest scope so it's available throughout the function
+  // including in the finally block for cleanup
+  let functionLookupSession: Session | undefined;
+  let migrationFunctionKey: string;
+  let needToCloseSession = false;
 
+  try {
+    // Determine the database to use for function lookup
+    const lookupDb = migrationSubDomain || subDomain;
+    console.log(
+      `[Schema Migrate] Using subdomain for function lookup: ${lookupDb}, target: ${subDomain}`,
+    );
+
+    // If lookupDb is the same as the target subDomain, reuse dbSession.
+    // Otherwise, open a temporary session to the lookupDb.
+    if (lookupDb === subDomain) {
+      functionLookupSession = dbSession;
+    } else {
+      const driver = await getDriver();
+      functionLookupSession = driver.session({ database: lookupDb });
+      needToCloseSession = true; // Remember to close this session later
+    }
+
+    // Determine the function key to use
     if (functionName) {
       // Use provided function name
       migrationFunctionKey = functionName;
-    } else {
-      // Auto-detect migration function. We can optionally look it up in a
-      // different database than the target execution database.
-      const lookupDb = migrationSubDomain || subDomain;
       console.log(
-        `[Schema Migrate] Checking for migration function in subdomain (lookupDb: ${lookupDb}, targetDb: ${subDomain})`,
+        `[Schema Migrate] Using provided function name: ${migrationFunctionKey}`,
       );
-
+    } else {
+      // Auto-detect migration function
       const query = `
         MATCH (f:Function)
         WHERE f.key CONTAINS 'migrate' OR f.key CONTAINS 'migration'
@@ -68,37 +86,20 @@ export async function runMigration(
         LIMIT 1
       `;
 
-      // If lookupDb is the same as the target subDomain, reuse dbSession.
-      // Otherwise, open a temporary session to the lookupDb.
-      let lookupSession: Session | undefined;
-      try {
-        if (lookupDb === subDomain) {
-          lookupSession = dbSession;
-        } else {
-          const driver = await getDriver();
-          lookupSession = driver.session({ database: lookupDb });
-        }
+      const result = await functionLookupSession!.run(query);
 
-        const result = await lookupSession.run(query);
-
-        if (result.records.length === 0) {
-          return {
-            success: false,
-            error: `No migration function found for subdomain: ${lookupDb}`,
-            status: 404,
-          };
-        }
-
-        migrationFunctionKey = result.records[0].get("functionKey");
-        console.log(
-          `[Schema Migrate] Found migration function: ${migrationFunctionKey} (lookupDb: ${lookupDb}, targetDb: ${subDomain})`,
-        );
-      } finally {
-        // Only close the lookup session if we opened a separate one
-        if (lookupSession && lookupSession !== dbSession) {
-          await lookupSession.close();
-        }
+      if (result.records.length === 0) {
+        return {
+          success: false,
+          error: `No migration function found for subdomain: ${lookupDb}`,
+          status: 404,
+        };
       }
+
+      migrationFunctionKey = result.records[0].get("functionKey");
+      console.log(
+        `[Schema Migrate] Found migration function: ${migrationFunctionKey} (lookupDb: ${lookupDb}, targetDb: ${subDomain})`,
+      );
     }
 
     // Prepare context data for the migration function
@@ -125,7 +126,7 @@ export async function runMigration(
       },
       {
         dbSession: dbSession,
-        functionLookupSession: dbSession,
+        functionLookupSession: functionLookupSession,
         subDomain: subDomain,
         nodes: {},
         relationships: {},
@@ -165,5 +166,10 @@ export async function runMigration(
       error: errorMessage,
       status: 500,
     };
+  } finally {
+    // Clean up - only close the lookup session if we opened a separate one
+    if (needToCloseSession && functionLookupSession) {
+      await functionLookupSession.close();
+    }
   }
 }
