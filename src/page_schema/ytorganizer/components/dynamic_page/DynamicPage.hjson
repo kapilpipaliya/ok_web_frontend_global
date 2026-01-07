@@ -12,6 +12,7 @@ const [isSettingsModalOpen, setIsSettingsModalOpen] = args.createSignal(false);
 const [settings, setSettings] = args.createSignal(null);
 const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
 const [loading, setLoading] = args.createSignal(false);
+const [configLoading, setConfigLoading] = args.createSignal(true);
 const [selectedSidebarItem, setSelectedSidebarItem] = args.createSignal(null);
 // Store selected rows per category (keyed by category ID or 'uncategorized' or null)
 const [selectedRowsByCategory, setSelectedRowsByCategory] = args.createStore({});
@@ -649,14 +650,19 @@ const loadSettings = async () => {
 
 // Initialize settings on mount
 const initializeSettings = async () => {
-  const settingsFn = getSettingsFunction();
-  if (settingsFn) {
-    await loadSettings();
-    // Initialize memoized config after loading settings
-    updateMemoizedConfig();
-  } else {
-    // Initialize memoized config even without settings
-    updateMemoizedConfig();
+  setConfigLoading(true);
+  try {
+    const settingsFn = getSettingsFunction();
+    if (settingsFn) {
+      await loadSettings();
+      // Initialize memoized config after loading settings
+      updateMemoizedConfig();
+    } else {
+      // Initialize memoized config even without settings
+      updateMemoizedConfig();
+    }
+  } finally {
+    setConfigLoading(false);
   }
 };
 
@@ -835,6 +841,8 @@ return {
   setSettings,
   loading,
   setLoading,
+  configLoading,
+  setConfigLoading,
   loadSettings,
   initializeSettings,
   handleOpenSettings,
@@ -862,7 +870,13 @@ return {
 
 '''
         key: DynamicPage
-        props: ""
+        props:
+          '''
+return {
+  onMount: async () => {
+    await args.fns.initializeSettings();
+  }
+}'''
       }
     }
     {
@@ -938,10 +952,7 @@ return {
   selectedSidebarItem: args.fns.selectedSidebarItem(),
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows,
-  onMount: async () => {
-    await args.fns.initializeSettings();
-  }
+  clearSelectedRows: args.fns.clearSelectedRows
 }'''
       }
     }
@@ -955,9 +966,10 @@ return {
         props:
           '''
 const hasSidebar = args.fns.hasSidebar();
+const configLoading = args.fns.configLoading();
 return {
   as: "div",
-  hide: hasSidebar
+  hide: hasSidebar || configLoading
 };
 '''
       }
@@ -975,11 +987,55 @@ return {
 return {
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows,
-  onMount: async () => {
-    await args.fns.initializeSettings();
-  }
+  clearSelectedRows: args.fns.clearSelectedRows
 }'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+  z-index: 1000;
+}`;
+'''
+        displayOrder: 0
+        componentName: Html
+        key: config_loading_overlay
+        props:
+          '''
+const configLoading = args.fns.configLoading();
+return {
+  as: "div",
+  hide: !configLoading
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "large",
+  color: "primary"
+};
+'''
       }
     }
   ]
@@ -1013,6 +1069,18 @@ return {
       T: Attr
       S: "5"
       E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
     }
   ]
 }
