@@ -89,6 +89,7 @@ try {
     };
   } else {
     // Create relationships for all content items to the category
+    // Before creating, remove any existing relationships for these items
     // Process each content item individually to handle errors gracefully
     for (const contentId of contentIds) {
       try {
@@ -98,6 +99,8 @@ try {
             WHERE elementId(cat) = $categoryId
             MATCH (content:${contentLabel})
             WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
@@ -111,6 +114,8 @@ try {
             MATCH (u:User {uuid: $userUuid})
             MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
             WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
@@ -124,6 +129,8 @@ try {
             WHERE elementId(cat) = $categoryId
             MATCH (content:${contentLabel})
             WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
@@ -137,6 +144,8 @@ try {
             WHERE elementId(cat) = $categoryId
             MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
             WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()

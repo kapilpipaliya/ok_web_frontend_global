@@ -277,6 +277,28 @@ const handleDrop = async (e) => {
     // Determine category ID - if 'uncategorized' or root key, use null
     const categoryId = (item.P?.key === rootKey || item.P?.key === 'uncategorized') ? null : item.id;
     
+    // Prevent dropping into the same selected category
+    const selectedSidebarItemFn = args.fns?.selectedSidebarItem;
+    const currentSelected = typeof selectedSidebarItemFn === "function" ? selectedSidebarItemFn() : null;
+    if (currentSelected) {
+      const currentRootKey = currentSelected.P?.key;
+      const isCurrentRootOrUncategorized =
+        currentRootKey === rootKey || currentRootKey === "uncategorized";
+      const isTargetRootOrUncategorized =
+        item.P?.key === rootKey || item.P?.key === "uncategorized";
+      
+      // Same regular category
+      const isSameCategory = currentSelected.id && item.id && currentSelected.id === item.id;
+      
+      // Both represent the "uncategorized" bucket
+      const isSameUncategorized = isCurrentRootOrUncategorized && isTargetRootOrUncategorized;
+      
+      if (isSameCategory || isSameUncategorized) {
+        args.showWarningToast?.("Items are already in this category");
+        return;
+      }
+    }
+    
     // Get sidebar config
     const sidebarConfig = {
       parentVertexLabel: parentVertexLabel,
