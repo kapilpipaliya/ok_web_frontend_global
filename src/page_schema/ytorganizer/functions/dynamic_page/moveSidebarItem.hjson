@@ -1,0 +1,234 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Moves a sidebar category item to a different parent category. Validates that the move is valid (not to itself, not to its own descendant, not moving root).
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { 
+  categoryId, 
+  newParentId, 
+  parentVertexLabel, 
+  toParentEdgeType, 
+  rootKeys = {},
+  enableUserScoping
+} = args.contextData;
+
+if (!categoryId) {
+  return {
+    success: false,
+    message: "categoryId is required"
+  };
+}
+
+if (!parentVertexLabel || !toParentEdgeType) {
+  return {
+    success: false,
+    message: "parentVertexLabel and toParentEdgeType are required"
+  };
+}
+
+const rootKey = rootKeys.key;
+const userRelationshipType = `User${parentVertexLabel}`;
+const userUuid = enableUserScoping ? user.P.uuid : null;
+
+// Initialize deleted edges tracking in context if not exists
+if (!args.context.deletedEdges) {
+  args.context.deletedEdges = [];
+}
+
+try {
+  // Validate: Cannot move root vertex
+  const rootCheck = await args.session.run(
+    `MATCH (v:${parentVertexLabel})
+     WHERE elementId(v) = $categoryId
+     RETURN v.key as key`,
+    { categoryId }
+  );
+
+  if (rootCheck.records.length > 0) {
+    const existingKey = rootCheck.records[0].get('key');
+    if (existingKey === rootKey) {
+      return {
+        success: false,
+        message: "Root vertex cannot be moved"
+      };
+    }
+  }
+
+  // Validate: Cannot move to itself
+  if (categoryId === newParentId) {
+    return {
+      success: false,
+      message: "Cannot move a category to itself"
+    };
+  }
+
+  // Validate: Cannot move to its own descendant
+  // Relationship direction: child-[toParentEdgeType]->parent
+  // To check if newParentId is a descendant of categoryId, we need to find a path
+  // from newParentId (or any of its descendants) back to categoryId
+  // This means: newParentId-[toParentEdgeType]->...->categoryId
+  // Or: any descendant of categoryId-[toParentEdgeType]*->categoryId, and newParentId is in that chain
+  // Actually, simpler: check if there's a path from newParentId to categoryId following toParentEdgeType
+  // If newParentId can reach categoryId, then newParentId is a descendant of categoryId
+  let descendantCheckQuery;
+  let descendantCheckParams;
+  
+  if (!enableUserScoping) {
+    // Check if there's a path from newParentId to categoryId (newParentId is descendant of categoryId)
+    // Or check if categoryId has newParentId as a descendant by finding all descendants of categoryId
+    descendantCheckQuery = `
+      MATCH (category:${parentVertexLabel})
+      WHERE elementId(category) = $categoryId
+      MATCH (target:${parentVertexLabel})
+      WHERE elementId(target) = $newParentId
+      MATCH path = (target)-[r:${toParentEdgeType}*]->(category)
+      RETURN count(path) as pathCount
+    `;
+    descendantCheckParams = { categoryId, newParentId };
+  } else {
+    descendantCheckQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(category:${parentVertexLabel})
+      WHERE elementId(category) = $categoryId
+      MATCH (u)-[:${userRelationshipType}]->(target:${parentVertexLabel})
+      WHERE elementId(target) = $newParentId
+      MATCH path = (target)-[r:${toParentEdgeType}*]->(category)
+      RETURN count(path) as pathCount
+    `;
+    descendantCheckParams = { userUuid, categoryId, newParentId };
+  }
+
+  const descendantCheckResult = await args.session.run(descendantCheckQuery, descendantCheckParams);
+  const pathCount = descendantCheckResult.records[0]?.get('pathCount') || 0;
+  
+  if (pathCount > 0) {
+    return {
+      success: false,
+      message: "Cannot move a category to its own descendant"
+    };
+  }
+
+  // Get old parent edge ID before deleting
+  let getOldEdgeQuery;
+  let getOldEdgeParams;
+  
+  if (!enableUserScoping) {
+    getOldEdgeQuery = `
+      MATCH (category:${parentVertexLabel})-[oldRel:${toParentEdgeType}]->(:${parentVertexLabel})
+      WHERE elementId(category) = $categoryId
+      RETURN collect(elementId(oldRel)) as oldEdgeIds
+    `;
+    getOldEdgeParams = { categoryId };
+  } else {
+    getOldEdgeQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(category:${parentVertexLabel})-[oldRel:${toParentEdgeType}]->(:${parentVertexLabel})
+      WHERE elementId(category) = $categoryId
+      RETURN collect(elementId(oldRel)) as oldEdgeIds
+    `;
+    getOldEdgeParams = { userUuid, categoryId };
+  }
+
+  const getOldEdgeResult = await args.session.run(getOldEdgeQuery, getOldEdgeParams);
+  const oldEdgeIds = getOldEdgeResult.records[0]?.get('oldEdgeIds') || [];
+  const validOldEdgeIds = Array.isArray(oldEdgeIds) ? oldEdgeIds.filter(id => id !== null) : [];
+
+  // Delete old parent relationship if it exists
+  if (validOldEdgeIds.length > 0) {
+    const deleteOldEdgeQuery = `
+      UNWIND $edgeIds as edgeId
+      MATCH ()-[r:${toParentEdgeType}]->()
+      WHERE elementId(r) = edgeId
+      DELETE r
+      RETURN count(r) as deletedCount
+    `;
+    await args.session.run(deleteOldEdgeQuery, { edgeIds: validOldEdgeIds });
+    
+    // Track deleted edges
+    args.context.deletedEdges.push(...validOldEdgeIds);
+  }
+
+  // Create new parent relationship
+  // If newParentId is null or 'root', don't create a relationship (make it a root item)
+  let createNewEdgeQuery;
+  let createNewEdgeParams;
+  
+  if (newParentId && newParentId !== 'root' && newParentId !== 'uncategorized') {
+    if (!enableUserScoping) {
+      createNewEdgeQuery = `
+        MATCH (category:${parentVertexLabel})
+        WHERE elementId(category) = $categoryId
+        MATCH (newParent:${parentVertexLabel})
+        WHERE elementId(newParent) = $newParentId
+        MERGE (category)-[r:${toParentEdgeType}]->(newParent)
+        ON CREATE SET r.createdAt = datetime()
+        ON MATCH SET r.updatedAt = datetime()
+        RETURN r, category, newParent
+      `;
+      createNewEdgeParams = { categoryId, newParentId };
+    } else {
+      createNewEdgeQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(category:${parentVertexLabel})
+        WHERE elementId(category) = $categoryId
+        MATCH (u)-[:${userRelationshipType}]->(newParent:${parentVertexLabel})
+        WHERE elementId(newParent) = $newParentId
+        MERGE (category)-[r:${toParentEdgeType}]->(newParent)
+        ON CREATE SET r.createdAt = datetime()
+        ON MATCH SET r.updatedAt = datetime()
+        RETURN r, category, newParent
+      `;
+      createNewEdgeParams = { userUuid, categoryId, newParentId };
+    }
+
+    const createResult = await args.session.run(createNewEdgeQuery, createNewEdgeParams);
+    
+    if (createResult.records.length === 0) {
+      return {
+        success: false,
+        message: "Failed to create new parent relationship. Category or new parent not found or not accessible."
+      };
+    }
+
+    // Use processResult to populate graph structure
+    args.processResult(createResult.records, args.context, [], 'r');
+  }
+
+  // Return success
+  return {
+    success: true,
+    message: "Category moved successfully",
+    data: {
+      categoryId,
+      newParentId: newParentId || null
+    }
+  };
+} catch (error) {
+  console.error("Error moving sidebar item:", error);
+  return {
+    success: false,
+    message: error.message || "Failed to move category"
+  };
+}
+'''
+        key: moveSidebarItem
+      }
+    }
+  ]
+  edges: []
+}
+

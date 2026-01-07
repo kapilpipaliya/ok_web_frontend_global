@@ -170,6 +170,7 @@ const getOnItemDelete = () => args.contextData.props?.onItemDelete;
 // Get fetchRoot function from props
 const getFetchRoot = () => args.contextData.props?.fetchRoot;
 
+
 // Helper function to refresh category count
 const refreshCategoryCount = async (categoryItem, rootKey) => {
   if (!categoryItem) return;
@@ -272,11 +273,186 @@ const handleEditSave = async (updatedVertex) => {
 
 // Drag and drop handlers
 const [isDragOver, setIsDragOver] = args.createSignal(false);
+const [isDragging, setIsDragging] = args.createSignal(false);
+const [isValidDrop, setIsValidDrop] = args.createSignal(true);
+const [draggedCategoryId, setDraggedCategoryId] = args.createSignal(null);
+
+// Helper function to check if a category is a descendant of another
+// Relationship direction: child-[toParentEdgeType]->parent
+// To check if targetId is a descendant of categoryId, we traverse from targetId to categoryId
+const isDescendantOf = (targetId, categoryId) => {
+  if (!targetId || !categoryId || targetId === categoryId) {
+    return false;
+  }
+  
+  const toParentEdgeType = getToParentEdgeType();
+  if (!toParentEdgeType) return false;
+  
+  try {
+    // Get target vertex from graph
+    const targetVertex = args.graph?.vertexes?.[targetId];
+    if (!targetVertex) return false;
+    
+    // Traverse up the parent chain to see if we reach categoryId
+    // Use evalExpression to follow the toParentEdgeType relationship backwards
+    // Since child-[toParentEdgeType]->parent, we use ->toParentEdgeType to go from child to parent
+    const parent = args.evalExpression(
+      `->${toParentEdgeType}`,
+      { graph: args.graph, setGraph: args.setGraph, vertexes: [targetVertex] }
+    );
+    
+    if (!parent || parent.length === 0) {
+      // No parent, so not a descendant
+      return false;
+    }
+    
+    const parentId = parent[0]?.id;
+    if (!parentId) return false;
+    
+    // If parent is the category we're checking against, target is a direct child
+    if (parentId === categoryId) {
+      return true;
+    }
+    
+    // Recursively check if parent is a descendant
+    return isDescendantOf(parentId, categoryId);
+  } catch (error) {
+    console.error("Error checking descendant:", error);
+    return false;
+  }
+};
+
+// Validate if a drop target is valid for the dragged category
+const validateDropTarget = (categoryId, targetId) => {
+  if (!categoryId || !targetId) {
+    return { valid: false, reason: "Missing category or target ID" };
+  }
+  
+  // Check 1: Cannot drop on itself
+  if (categoryId === targetId) {
+    return { valid: false, reason: "Cannot move a category to itself" };
+  }
+  
+  const rootKeys = args.contextData.props?.rootKeys || {};
+  const rootKey = rootKeys.key;
+  
+  // Get the dragged item
+  const draggedItem = args.graph?.vertexes?.[categoryId];
+  if (!draggedItem) {
+    return { valid: false, reason: "Dragged category not found" };
+  }
+  
+  // Check 2: Cannot drag root items
+  if (draggedItem.P?.key === rootKey || draggedItem.P?.key === 'uncategorized' || draggedItem.id === 'uncategorized') {
+    return { valid: false, reason: "Root items cannot be moved" };
+  }
+  
+  // Check 3: Cannot drop on a descendant
+  if (isDescendantOf(targetId, categoryId)) {
+    return { valid: false, reason: "Cannot move a category to its own descendant" };
+  }
+  
+  return { valid: true };
+};
+
+// Handle drag start for sidebar items
+const handleDragStartSidebar = (e) => {
+  const item = getItem();
+  if (!item) {
+    e.preventDefault();
+    return;
+  }
+  
+  const rootKeys = args.contextData.props?.rootKeys || {};
+  const rootKey = rootKeys.key;
+  
+  // Prevent dragging root items
+  if (item.P?.key === rootKey || item.P?.key === 'uncategorized') {
+    e.preventDefault();
+    return;
+  }
+  
+  setIsDragging(true);
+  setDraggedCategoryId(item.id);
+  setIsValidDrop(true); // Reset validation state
+  
+  // Store sidebar item data
+  e.dataTransfer.setData('application/json', JSON.stringify({
+    type: 'sidebar-item',
+    categoryId: item.id,
+    categoryName: item.P?.name || item.P?.key || 'Category'
+  }));
+  e.dataTransfer.effectAllowed = 'move';
+  
+  // Create custom drag image
+  const dragImage = document.createElement('div');
+  dragImage.style.cssText = `
+    padding: 8px 12px;
+    background: ${args.theme?.var?.color?.primary || '#3b82f6'};
+    color: ${args.theme?.var?.color?.primary_text || '#ffffff'};
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    pointer-events: none;
+    position: absolute;
+    top: -1000px;
+    white-space: nowrap;
+  `;
+  dragImage.textContent = item.P?.name || item.P?.key || 'Category';
+  document.body.appendChild(dragImage);
+  e.dataTransfer.setDragImage(dragImage, 0, 0);
+  setTimeout(() => document.body.removeChild(dragImage), 0);
+};
+
+const handleDragEnd = () => {
+  setIsDragging(false);
+  setIsDragOver(false);
+  setIsValidDrop(true);
+  setDraggedCategoryId(null);
+};
 
 const handleDragOver = (e) => {
   e.preventDefault();
   e.stopPropagation();
-  e.dataTransfer.dropEffect = 'move';
+  
+  // Check if this is a sidebar item drag
+  const dataStr = e.dataTransfer.getData('application/json');
+  let draggedCategoryId = null;
+  
+  try {
+    if (dataStr) {
+      const data = JSON.parse(dataStr);
+      if (data.type === 'sidebar-item' && data.categoryId) {
+        draggedCategoryId = data.categoryId;
+      }
+    }
+  } catch (error) {
+    // Not a JSON drag, might be table items - allow default behavior
+  }
+  
+  // If dragging a sidebar item, validate the drop target
+  if (draggedCategoryId) {
+    const item = getItem();
+    if (item) {
+      const validation = validateDropTarget(draggedCategoryId, item.id);
+      setIsValidDrop(validation.valid);
+      
+      if (validation.valid) {
+        e.dataTransfer.dropEffect = 'move';
+      } else {
+        e.dataTransfer.dropEffect = 'none';
+      }
+    } else {
+      setIsValidDrop(false);
+      e.dataTransfer.dropEffect = 'none';
+    }
+  } else {
+    // Table items or other drags - allow move
+    e.dataTransfer.dropEffect = 'move';
+    setIsValidDrop(true);
+  }
+  
   setIsDragOver(true);
 };
 
@@ -284,6 +460,55 @@ const handleDragLeave = (e) => {
   e.preventDefault();
   e.stopPropagation();
   setIsDragOver(false);
+};
+
+// Handle moving sidebar item to new parent
+const handleMoveSidebarItem = async (categoryId, newParentId) => {
+  const parentVertexLabel = getParentVertexLabel();
+  const toParentEdgeType = getToParentEdgeType();
+  const rootKeys = args.contextData.props?.rootKeys || {};
+  const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+  
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "moveSidebarItem",
+      contextData: {
+        categoryId,
+        newParentId,
+        parentVertexLabel,
+        toParentEdgeType,
+        rootKeys,
+        enableUserScoping
+      }
+    });
+
+    if (result?.result?.success) {
+      // Process graph data if available
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+      
+      // Refresh children for both old and new parents
+      const fetchChildrenFn = getFetchChildren();
+      if (fetchChildrenFn) {
+        // Refresh root items to update the tree structure
+        const fetchRootFn = getFetchRoot();
+        if (fetchRootFn) {
+          await fetchRootFn();
+        }
+      }
+      
+      args.showSuccessToast?.(result.result.message || "Category moved successfully");
+      return true;
+    } else {
+      args.showErrorToast?.(result?.result?.message || "Failed to move category");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error moving sidebar item:", error);
+    args.showErrorToast?.("Failed to move category");
+    return false;
+  }
 };
 
 const handleDrop = async (e) => {
@@ -296,6 +521,32 @@ const handleDrop = async (e) => {
     if (!dataStr) return;
     
     const data = JSON.parse(dataStr);
+    
+    // Handle sidebar item drops
+    if (data.type === 'sidebar-item' && data.categoryId) {
+      const item = getItem();
+      if (!item) return;
+      
+      // Re-validate before proceeding (defense in depth)
+      const validation = validateDropTarget(data.categoryId, item.id);
+      if (!validation.valid) {
+        args.showWarningToast?.(validation.reason || "Cannot drop here");
+        return;
+      }
+      
+      const rootKeys = args.contextData.props?.rootKeys || {};
+      const rootKey = rootKeys.key;
+      
+      // Determine new parent ID
+      // If target is root or uncategorized, set newParentId to null (make it a root item)
+      const newParentId = (item.P?.key === rootKey || item.P?.key === 'uncategorized') ? null : item.id;
+      
+      // Move the sidebar item
+      await handleMoveSidebarItem(data.categoryId, newParentId);
+      return;
+    }
+    
+    // Handle table item drops (existing functionality)
     if (data.type !== 'table-items' || !data.itemIds || !Array.isArray(data.itemIds)) {
       return;
     }
@@ -567,6 +818,9 @@ return {
   handleItemClick,
   getItemName,
   getItemIcon,
+  isDragging,
+  handleDragStartSidebar,
+  handleDragEnd,
   hasChildren,
   isAddModalOpen,
   setIsAddModalOpen,
@@ -585,9 +839,16 @@ return {
   refreshChildren,
   isDragOver,
   setIsDragOver,
+  isDragging,
+  isValidDrop,
+  isDescendantOf,
+  validateDropTarget,
   handleDragOver,
   handleDragLeave,
-  handleDrop
+  handleDrop,
+  handleDragStartSidebar,
+  handleDragEnd,
+  handleMoveSidebarItem
 };
 '''
         key: SidebarTreeItem
@@ -600,7 +861,6 @@ return {
       P: {
         css:
           '''
-const isHovered = args.fns.isSelected();
 return `._id {
   display: flex;
   flex-direction: column;
@@ -647,9 +907,28 @@ return {
           '''
 const isHovered = args.fns.isSelected();
 const isDragOver = args.fns.isDragOver();
+const isValidDrop = args.fns.isValidDrop?.() ?? true;
+const isDragging = args.fns.isDragging?.() || false;
+const item = args.fns.getItem();
+const rootKeys = args.contextData.props?.rootKeys || {};
+const rootKey = rootKeys.key;
+const isRoot = item?.P?.key === rootKey || item?.P?.key === 'uncategorized';
+
+// Determine drag over styling based on validation
+let dragOverStyle = "";
+if (isDragOver) {
+  if (isValidDrop) {
+    // Valid drop: green border and subtle green background
+    dragOverStyle = `background-color: ${args.theme.var.color.success || '#10b981'}20; border: 2px dashed ${args.theme.var.color.success || '#10b981'};`;
+  } else {
+    // Invalid drop: red border and red background with opacity
+    dragOverStyle = `background-color: ${args.theme.var.color.danger || '#ef4444'}20; border: 2px dashed ${args.theme.var.color.danger || '#ef4444'}; cursor: not-allowed;`;
+  }
+}
+
 return `._id {
   align-items: center;
-  cursor: pointer;
+  cursor: ${isRoot ? 'default' : isDragging ? 'grabbing' : isDragOver && !isValidDrop ? 'not-allowed' : 'grab'};
   display: flex;
   gap: 0.375rem;
   font-size: 14px;
@@ -657,7 +936,8 @@ return `._id {
   width: 100%;
   border-radius: ${args.fns.hasChildren() ? "5px" : "0 5px 5px 0"};
   ${isHovered ? `background-color: ${args.theme.var.color.background_dark_150};` : ""}
-  ${isDragOver ? `background-color: ${args.theme.var.color.primary_light_200}; border: 2px dashed ${args.theme.var.color.primary};` : ""}
+  ${dragOverStyle}
+  ${isDragging ? `opacity: 0.5;` : ""}
   padding: 2px 0;
   transition: all 0.15s ease-in-out;
   ${args.fns.hasChildren() ? "" : `border-left: 1px dashed ${args.theme.var.color.border};`}
@@ -668,12 +948,24 @@ return `._id {
         key: tree_item_content
         props:
           '''
+const item = args.fns.getItem();
+const rootKeys = args.contextData.props?.rootKeys || {};
+const rootKey = rootKeys.key;
+const isRoot = item?.P?.key === rootKey || item?.P?.key === 'uncategorized';
+const isDragging = args.fns.isDragging?.() || false;
+const isDragOver = args.fns.isDragOver?.() || false;
+const isValidDrop = args.fns.isValidDrop?.() ?? true;
+
 return {
   as: "div",
   onClick: args.fns.handleItemClick,
   onDragOver: args.fns.handleDragOver,
   onDragLeave: args.fns.handleDragLeave,
-  onDrop: args.fns.handleDrop
+  onDrop: args.fns.handleDrop,
+  draggable: !isRoot,
+  onDragStart: !isRoot ? args.fns.handleDragStartSidebar : undefined,
+  onDragEnd: args.fns.handleDragEnd,
+  style: isDragging ? { opacity: 0.5 } : {}
 };
 '''
       }

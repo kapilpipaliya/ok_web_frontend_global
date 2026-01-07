@@ -290,6 +290,176 @@ const removeItemFromTree = (itemId) => {
   }
 };
 
+// Helper function to get all visible items in tree order (for navigation)
+const getAllVisibleItems = () => {
+  const rootItems = getRoot();
+  const expandedKeysList = expandedKeys();
+  const toParentEdgeType = getToParentEdgeType();
+  
+  const result = [];
+  
+  const traverse = (items) => {
+    for (const item of items) {
+      if (!item) continue;
+      result.push(item);
+      
+      // If item is expanded, add its children recursively
+      if (Array.isArray(expandedKeysList) && expandedKeysList.includes(item.id)) {
+        // Use getChildren function to get children
+        const children = getChildren(item.id) || [];
+        
+        // Recursively traverse children
+        if (children.length > 0) {
+          traverse(children);
+        }
+      }
+    }
+  };
+  
+  traverse(rootItems);
+  return result;
+};
+
+// Helper function to get parent category
+const getParentCategory = (itemId) => {
+  if (!itemId) return null;
+  const toParentEdgeType = getToParentEdgeType();
+  if (!toParentEdgeType) return null;
+  
+  const item = args.graph?.vertexes?.[itemId];
+  if (!item) return null;
+  
+  // Relationship: child-[toParentEdgeType]->parent
+  // Use ->toParentEdgeType to get parent
+  const parent = args.evalExpression(
+    `->${toParentEdgeType}`,
+    { graph: args.graph, setGraph: args.setGraph, vertexes: [item] }
+  );
+  
+  return parent && parent.length > 0 ? parent[0] : null;
+};
+
+// Helper function to get first child
+const getFirstChild = (itemId) => {
+  if (!itemId) return null;
+  const children = getChildren(itemId) || [];
+  return children.length > 0 ? children[0] : null;
+};
+
+// Navigate to adjacent category (for selection, not moving)
+const navigateToCategory = async (direction) => {
+  const currentSelected = selectedItem();
+  if (!currentSelected) return;
+  
+  const allItems = getAllVisibleItems();
+  const currentIndex = allItems.findIndex(i => i.id === currentSelected.id);
+  
+  if (currentIndex === -1) return;
+  
+  let targetItem = null;
+  const expandedKeysList = expandedKeys();
+  
+  switch (direction) {
+    case 'up':
+      // Select previous item
+      if (currentIndex > 0) {
+        targetItem = allItems[currentIndex - 1];
+      }
+      break;
+      
+    case 'down':
+      // Select next item
+      if (currentIndex < allItems.length - 1) {
+        targetItem = allItems[currentIndex + 1];
+      }
+      break;
+      
+    case 'left':
+      // Collapse if expanded, or select parent
+      const isExpanded = Array.isArray(expandedKeysList) && expandedKeysList.includes(currentSelected.id);
+      if (isExpanded) {
+        await toggleExpand(currentSelected.id);
+      } else {
+        // Select parent
+        const parent = getParentCategory(currentSelected.id);
+        if (parent) {
+          targetItem = parent;
+        }
+      }
+      break;
+      
+    case 'right':
+      // Expand if collapsed, or select first child
+      const isExpanded2 = Array.isArray(expandedKeysList) && expandedKeysList.includes(currentSelected.id);
+      if (!isExpanded2) {
+        await toggleExpand(currentSelected.id);
+      } else {
+        // Select first child
+        const firstChild = getFirstChild(currentSelected.id);
+        if (firstChild) {
+          targetItem = firstChild;
+        }
+      }
+      break;
+  }
+  
+  // Select the target item if found
+  if (targetItem) {
+    handleItemSelect(targetItem);
+  }
+};
+
+// Keyboard event handler for sidebar
+const handleSidebarKeyDown = async (e) => {
+  // Only handle if sidebar has focus and no modal is open
+  const currentSelected = selectedItem();
+  if (!currentSelected) return;
+  
+  // Handle keyboard shortcuts for navigation/selection
+  switch (e.key) {
+    case 'ArrowUp':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('up');
+      break;
+      
+    case 'ArrowDown':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('down');
+      break;
+      
+    case 'ArrowLeft':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('left');
+      break;
+      
+    case 'ArrowRight':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('right');
+      break;
+      
+    case 'Enter':
+      // Select/activate the current item (same as clicking)
+      e.preventDefault();
+      e.stopPropagation();
+      // handleItemSelect is already called, but we can trigger any additional action if needed
+      break;
+      
+    case 'Escape':
+      // Cancel any ongoing operation (if needed)
+      e.preventDefault();
+      e.stopPropagation();
+      break;
+      
+    default:
+      // Let other keys pass through
+      return;
+  }
+};
+
 // Initialize on mount
 const initialize = async () => {
   await fetchRoot();
@@ -324,7 +494,10 @@ return {
   removeItemFromTree,
   getChildren,
   getLoadingState,
-  getOnMoveItemsToCategory: () => args.contextData.props?.onMoveItemsToCategory
+  getOnMoveItemsToCategory: () => args.contextData.props?.onMoveItemsToCategory,
+  getAllVisibleItems,
+  navigateToCategory,
+  handleSidebarKeyDown
 };
 '''
         key: Sidebar
@@ -351,9 +524,11 @@ return `._id {
           '''
 return {
   as: "div",
+  tabIndex: 0,
   onMount: () => {
     args.fns.initialize();
-  }
+  },
+  onKeyDown: args.fns.handleSidebarKeyDown
 };
 '''
       }
@@ -561,7 +736,8 @@ return {
   relationshipType: args.fns.getRelationshipType(),
   enableUserScoping: args.contextData.props?.enableUserScoping,
   onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory(),
-  fetchRoot: args.fns.fetchRoot
+  fetchRoot: args.fns.fetchRoot,
+  getRoot: args.fns.getRoot
 };
 '''
       }
