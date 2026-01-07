@@ -510,10 +510,11 @@ return {
       P: {
         css:
           '''
+const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 300;
 return `._id {
   display: grid;
   gap: 4px;
-  grid-template-columns: repeat(2, 20% calc(80% - 4px));
+  grid-template-columns: ${sidebarWidth}px 2px 1fr;
   height: 100%;
 }`;
 '''
@@ -546,6 +547,7 @@ return `._id {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  height: 100%;
 }`;
 '''
         displayOrder: 1
@@ -743,23 +745,64 @@ return {
       }
     }
     {
-      id: "6"
+      id: "13"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  width: 2px;
+  height: 100%;
+  cursor: col-resize;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  
+  &:hover {
+    background-color: ${args.theme.var.color.primary}40;
+  }
+}`;
+'''
         displayOrder: 2
-        componentName: Slot
-        slot: main
-        key: sidebar_main_content
+        componentName: Html
+        key: sidebar_resize_handle
         props:
           '''
-return {
+const setSidebarWidth = args.contextData.props?.setSidebarWidth;
+const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 300;
 
+return {
+  as: "div",
+  onMouseDown: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!setSidebarWidth) return;
+    
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+    
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidth = Math.max(200, Math.min(800, startWidth + deltaX)); // Min 200px, Max 800px
+      setSidebarWidth(newWidth);
+    };
+    
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }
 };
 '''
       }
     }
     {
-      id: "7"
+      id: "6"
       L: Attr
       P: {
         css:
@@ -767,15 +810,32 @@ return {
 return `._id {
   overflow-y: auto;
   padding: 8px;
+  height: 100%;
 }`;
 '''
-        displayOrder: 1
+        displayOrder: 3
         componentName: Html
         key: sidebar_main_wrapper
         props:
           '''
 return {
   as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: main
+        key: sidebar_main_content
+        props:
+          '''
+return {
+
 };
 '''
       }
@@ -825,7 +885,19 @@ return {
       id: e3
       T: Attr
       S: "2"
+      E: "13"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
       E: "6"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "6"
+      E: "14"
     }
     {
       id: e4
@@ -868,12 +940,6 @@ return {
       T: Attr
       S: "4"
       E: "5"
-    }
-    {
-      id: e11
-      T: Attr
-      S: "6"
-      E: "7"
     }
   ]
 }
