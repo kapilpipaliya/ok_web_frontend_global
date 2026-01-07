@@ -230,6 +230,103 @@ const handleEditSave = async (updatedVertex) => {
   // The graph will be updated with the new count from the server response
 };
 
+// Drag and drop handlers
+const [isDragOver, setIsDragOver] = args.createSignal(false);
+
+const handleDragOver = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  e.dataTransfer.dropEffect = 'move';
+  setIsDragOver(true);
+};
+
+const handleDragLeave = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setIsDragOver(false);
+};
+
+const handleDrop = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setIsDragOver(false);
+  
+  try {
+    const dataStr = e.dataTransfer.getData('application/json');
+    if (!dataStr) return;
+    
+    const data = JSON.parse(dataStr);
+    if (data.type !== 'table-items' || !data.itemIds || !Array.isArray(data.itemIds)) {
+      return;
+    }
+    
+    const item = getItem();
+    if (!item) return;
+    
+    const onMoveItemsToCategory = args.contextData.props?.onMoveItemsToCategory;
+    if (!onMoveItemsToCategory) {
+      args.showErrorToast?.("Move function not available");
+      return;
+    }
+    
+    const parentVertexLabel = getParentVertexLabel();
+    const toParentEdgeType = getToParentEdgeType();
+    const rootKeys = args.contextData.props?.rootKeys || {};
+    const rootKey = rootKeys.key || 'root';
+    
+    // Determine category ID - if 'uncategorized' or root key, use null
+    const categoryId = (item.P?.key === rootKey || item.P?.key === 'uncategorized') ? null : item.id;
+    
+    // Get sidebar config
+    const sidebarConfig = {
+      parentVertexLabel: parentVertexLabel,
+      toParentEdgeType: toParentEdgeType,
+      rootKeys: rootKeys
+    };
+    
+    // Call move function from parent
+    const result = await onMoveItemsToCategory(data.itemIds, categoryId, sidebarConfig);
+    
+    if (result?.success) {
+      args.showSuccessToast?.(result.message || `Moved ${data.itemIds.length} item${data.itemIds.length !== 1 ? 's' : ''} successfully`);
+      
+      // Refresh children to update counts
+      const fetchChildrenFn = getFetchChildren();
+      if (fetchChildrenFn) {
+        await fetchChildrenFn(item.id, true);
+      }
+      
+      // Refresh parent's children if this is a child item
+      const parentItem = args.evalExpression?.(`<-${toParentEdgeType}`, {
+        graph: args.graph,
+        setGraph: args.setGraph,
+        vertexes: [item]
+      })?.[0];
+      
+      if (parentItem) {
+        const parentFetchChildrenFn = getFetchChildren();
+        if (parentFetchChildrenFn) {
+          await parentFetchChildrenFn(parentItem.id, true);
+        }
+      }
+      
+      // Trigger table refresh by calling parent's refresh if available
+      if (args.contextData.props?.onItemSelect) {
+        // Re-select current item to trigger table refresh
+        const onItemSelect = getOnItemSelect();
+        if (onItemSelect) {
+          onItemSelect(item);
+        }
+      }
+    } else {
+      args.showErrorToast?.(result?.message || "Failed to move items");
+    }
+  } catch (error) {
+    console.error("Error handling drop:", error);
+    args.showErrorToast?.("Failed to move items");
+  }
+};
+
 // Handle delete
 const handleDelete = async (e) => {
   e.stopPropagation();
@@ -372,7 +469,12 @@ return {
   getOnItemUpdate,
   handleDelete,
   getOnItemDelete,
-  refreshChildren
+  refreshChildren,
+  isDragOver,
+  setIsDragOver,
+  handleDragOver,
+  handleDragLeave,
+  handleDrop
 };
 '''
         key: SidebarTreeItem
@@ -430,6 +532,7 @@ return {
         css:
           '''
 const isHovered = args.fns.isSelected();
+const isDragOver = args.fns.isDragOver();
 return `._id {
   align-items: center;
   cursor: pointer;
@@ -440,6 +543,7 @@ return `._id {
   width: 100%;
   border-radius: ${args.fns.hasChildren() ? "5px" : "0 5px 5px 0"};
   ${isHovered ? `background-color: ${args.theme.var.color.background_dark_150};` : ""}
+  ${isDragOver ? `background-color: ${args.theme.var.color.primary_light_200}; border: 2px dashed ${args.theme.var.color.primary};` : ""}
   padding: 2px 0;
   transition: all 0.15s ease-in-out;
   ${args.fns.hasChildren() ? "" : `border-left: 1px dashed ${args.theme.var.color.border};`}
@@ -452,7 +556,10 @@ return `._id {
           '''
 return {
   as: "div",
-  onClick: args.fns.handleItemClick
+  onClick: args.fns.handleItemClick,
+  onDragOver: args.fns.handleDragOver,
+  onDragLeave: args.fns.handleDragLeave,
+  onDrop: args.fns.handleDrop
 };
 '''
       }
@@ -757,7 +864,8 @@ return {
   loading: false,
   getChildren: getChildrenFn,
   tableVertexLabel: args.contextData.props?.tableVertexLabel,
-  relationshipType: args.contextData.props?.relationshipType
+  relationshipType: args.contextData.props?.relationshipType,
+  onMoveItemsToCategory: args.contextData.props?.onMoveItemsToCategory
 };
 '''
       }

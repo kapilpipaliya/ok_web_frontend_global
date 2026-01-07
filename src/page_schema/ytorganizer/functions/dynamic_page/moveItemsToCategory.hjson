@@ -1,0 +1,192 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Moves multiple content items to a category by creating relationships. If categoryId is null or 'uncategorized', removes relationships instead.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { 
+  contentIds, 
+  categoryId, 
+  relationshipType, 
+  categoryLabel, 
+  contentLabel, 
+  enableUserScopingForSidebar, 
+  enableUserScopingForContent 
+} = args.contextData;
+
+if (!contentIds || !Array.isArray(contentIds) || contentIds.length === 0) {
+  return {
+    success: false,
+    message: "contentIds array is required and must not be empty"
+  };
+}
+
+if (!relationshipType || !categoryLabel || !contentLabel) {
+  return {
+    success: false,
+    message: "relationshipType, categoryLabel, and contentLabel are required"
+  };
+}
+
+const userUuid = user.P.uuid;
+const userCategoryRelType = `User${categoryLabel}`;
+const contentRelType = `User${contentLabel}`;
+
+// If categoryId is null, undefined, or 'uncategorized', remove relationships
+const isUncategorized = !categoryId || categoryId === 'uncategorized';
+
+try {
+  let query;
+  let queryParams;
+  let successCount = 0;
+  let errorCount = 0;
+  const errors = [];
+
+  if (isUncategorized) {
+    // Remove relationships for all content items
+    if (!enableUserScopingForContent) {
+      query = `
+        MATCH (content:${contentLabel})-[r:${relationshipType}]->(:${categoryLabel})
+        WHERE elementId(content) IN $contentIds
+        DELETE r
+        RETURN count(r) as deletedCount
+      `;
+      queryParams = { contentIds };
+    } else {
+      query = `
+        MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(:${categoryLabel})
+        WHERE elementId(content) IN $contentIds
+        DELETE r
+        RETURN count(r) as deletedCount
+      `;
+      queryParams = { userUuid, contentIds };
+    }
+
+    const result = await args.session.run(query, queryParams);
+    const deletedCount = result.records[0]?.get('deletedCount') || 0;
+    successCount = deletedCount;
+    
+    return {
+      success: true,
+      message: `Removed ${successCount} relationship${successCount !== 1 ? 's' : ''} successfully`,
+      data: { movedCount: successCount }
+    };
+  } else {
+    // Create relationships for all content items to the category
+    // Process each content item individually to handle errors gracefully
+    for (const contentId of contentIds) {
+      try {
+        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+          query = `
+            MATCH (cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { categoryId, contentId };
+        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+          query = `
+            MATCH (cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (u:User {uuid: $userUuid})
+            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { userUuid, categoryId, contentId };
+        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+          query = `
+            MATCH (u:User {uuid: $userUuid})
+            MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { userUuid, categoryId, contentId };
+        } else {
+          query = `
+            MATCH (u:User {uuid: $userUuid})
+            MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { userUuid, categoryId, contentId };
+        }
+
+        const result = await args.session.run(query, queryParams);
+        
+        if (result.records.length > 0) {
+          // Use processResult to populate graph structure
+          args.processResult(result.records, args.context, [], 'r');
+          successCount++;
+        } else {
+          errorCount++;
+          errors.push(`Content item ${contentId} not found or not accessible`);
+        }
+      } catch (error) {
+        errorCount++;
+        errors.push(`Error moving content ${contentId}: ${error.message}`);
+      }
+    }
+
+    if (successCount > 0) {
+      return {
+        success: true,
+        message: `Moved ${successCount} item${successCount !== 1 ? 's' : ''} successfully${errorCount > 0 ? ` (${errorCount} failed)` : ''}`,
+        data: { movedCount: successCount, errorCount, errors: errorCount > 0 ? errors : undefined }
+      };
+    } else {
+      return {
+        success: false,
+        message: `Failed to move items: ${errors.join('; ')}`,
+        data: { movedCount: 0, errorCount, errors }
+      };
+    }
+  }
+} catch (error) {
+  console.error("Error moving items to category:", error);
+  return {
+    success: false,
+    message: error.message || "Failed to move items to category"
+  };
+}
+'''
+        key: moveItemsToCategory
+      }
+    }
+  ]
+  edges: []
+}
+

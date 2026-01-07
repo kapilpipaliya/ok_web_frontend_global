@@ -640,6 +640,40 @@ const handleSidebarItemSelect = (item) => {
   // The table component should react to sidebar selection changes
 };
 
+// Handle moving items to category
+const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel || !sidebarConfig) {
+    return { success: false, message: "Missing configuration" };
+  }
+  
+  const { config } = getCachedConfig();
+  const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+  const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+  
+  const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
+  
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "moveItemsToCategory",
+      contextData: {
+        contentIds: contentIds,
+        categoryId: categoryId,
+        relationshipType: sidebarConfig.toParentEdgeType,
+        categoryLabel: sidebarConfig.parentVertexLabel,
+        contentLabel: tableVertexLabel,
+        enableUserScopingForSidebar: enableUserScopingForSidebar,
+        enableUserScopingForContent: enableUserScopingForContent
+      }
+    });
+    
+    return result?.result || { success: false, message: result?.error || "Failed to move items" };
+  } catch (error) {
+    console.error("Error moving items:", error);
+    return { success: false, message: error.message || "Failed to move items" };
+  }
+};
+
 // Exported API
 return {
   prop,
@@ -676,7 +710,8 @@ return {
   hasSidebar,
   selectedSidebarItem,
   setSelectedSidebarItem,
-  handleSidebarItemSelect
+  handleSidebarItemSelect,
+  handleMoveItemsToCategory
 }
 
 '''
@@ -733,7 +768,8 @@ return {
   onItemSelect: args.fns.handleSidebarItemSelect,
   tableVertexLabel: tableVertexLabel,
   relationshipType: relationshipType,
-  enableUserScoping: enableUserScopingForSidebar
+  enableUserScoping: enableUserScopingForSidebar,
+  onMoveItemsToCategory: args.fns.handleMoveItemsToCategory
 };
 '''
       }

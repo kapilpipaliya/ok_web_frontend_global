@@ -599,6 +599,72 @@ args.createEffect(() => {
   }
 });
 
+// Drag and drop functionality
+const handleDragStart = (e) => {
+  const selected = selectedRows();
+  if (selected.size === 0) {
+    e.preventDefault();
+    return;
+  }
+  
+  const filtered = filteredData();
+  const selectedItems = Array.from(selected)
+    .map(index => filtered[index])
+    .filter(item => item !== undefined);
+  
+  if (selectedItems.length === 0) {
+    e.preventDefault();
+    return;
+  }
+  
+  // Store selected item IDs in dataTransfer
+  const itemIds = selectedItems.map(item => item.id);
+  e.dataTransfer.setData('application/json', JSON.stringify({
+    type: 'table-items',
+    itemIds: itemIds,
+    count: selectedItems.length
+  }));
+  e.dataTransfer.effectAllowed = 'move';
+  
+  // Create custom drag image with count
+  const dragImage = document.createElement('div');
+  const theme = args.theme || {};
+  const primaryColor = theme.var?.color?.primary || '#3b82f6';
+  const primaryTextColor = theme.var?.color?.primary_text || '#ffffff';
+  
+  dragImage.style.cssText = `
+    padding: 8px 12px;
+    background: ${primaryColor};
+    color: ${primaryTextColor};
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    pointer-events: none;
+    position: absolute;
+    top: -1000px;
+    white-space: nowrap;
+  `;
+  dragImage.textContent = `Move ${selectedItems.length} item${selectedItems.length !== 1 ? 's' : ''}`;
+  document.body.appendChild(dragImage);
+  e.dataTransfer.setDragImage(dragImage, 0, 0);
+  
+  // Clean up drag image after a short delay
+  setTimeout(() => {
+    if (document.body.contains(dragImage)) {
+      document.body.removeChild(dragImage);
+    }
+  }, 0);
+};
+
+const getSelectedItems = () => {
+  const selected = selectedRows();
+  const filtered = filteredData();
+  return Array.from(selected)
+    .map(index => filtered[index])
+    .filter(item => item !== undefined);
+};
+
 return {
   getColumns,
   getRowHeight,
@@ -661,7 +727,9 @@ return {
   getGridTemplateColumns,
   renderCellContent,
   handleSave,
-  handleDelete
+  handleDelete,
+  handleDragStart,
+  getSelectedItems
 };
 '''
         key: Table
@@ -1804,8 +1872,14 @@ const rowIndex = virtualItem.index;
 
 const showSelection = args.fns.getShowSelection();
 
+const selected = args.fns.selectedRows();
+const hasSelection = selected.size > 0;
+
 return {
   as: "div",
+  draggable: hasSelection,
+  onDragStart: hasSelection ? args.fns.handleDragStart : undefined,
+  style: hasSelection ? "cursor: move;" : undefined
 };
 '''
       }

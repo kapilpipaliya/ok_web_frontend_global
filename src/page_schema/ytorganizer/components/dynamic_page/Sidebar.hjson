@@ -323,7 +323,8 @@ return {
   updateItemInTree,
   removeItemFromTree,
   getChildren,
-  getLoadingState
+  getLoadingState,
+  getOnMoveItemsToCategory: () => args.contextData.props?.onMoveItemsToCategory
 };
 '''
         key: Sidebar
@@ -558,7 +559,8 @@ return {
   getChildren: args.fns.getChildren,
   tableVertexLabel: args.fns.getTableVertexLabel(),
   relationshipType: args.fns.getRelationshipType(),
-  enableUserScoping: args.contextData.props?.enableUserScoping
+  enableUserScoping: args.contextData.props?.enableUserScoping,
+  onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory()
 };
 '''
       }
