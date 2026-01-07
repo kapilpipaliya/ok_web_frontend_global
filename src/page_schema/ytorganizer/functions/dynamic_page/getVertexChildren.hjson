@@ -157,6 +157,56 @@ if (rootKeys) {
   // Use processResult to populate graph structure
   const vertices = args.processResult(result.records, args.context, 'v');
 
+  // Create 'uncategorized' item as first item (only if tableVertexLabel and relationshipType are provided)
+  let uncategorizedVertex = null;
+  if (tableVertexLabel && relationshipType) {
+    // Count items without any category relationship
+    let uncategorizedCountQuery;
+    let uncategorizedCountParams;
+    if (!enableUserScoping) {
+      uncategorizedCountQuery = `
+        MATCH (content:${tableVertexLabel})
+        WHERE NOT EXISTS {
+          MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+        }
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      uncategorizedCountParams = {};
+    } else {
+      uncategorizedCountQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+        WHERE NOT EXISTS {
+          MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+        }
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      uncategorizedCountParams = { userUuid };
+    }
+    
+    const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+    const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
+    
+    // Create virtual 'uncategorized' vertex
+    const uncategorizedId = 'uncategorized';
+    uncategorizedVertex = {
+      id: uncategorizedId,
+      L: [parentVertexLabel],
+      P: {
+        key: 'uncategorized',
+        name: 'Uncategorized',
+        contentCount: uncategorizedCount
+      },
+      IN: {},
+      OUT: {}
+    };
+    
+    // Add to context graph
+    if (!args.context.nodes) {
+      args.context.nodes = {};
+    }
+    args.context.nodes[uncategorizedId] = uncategorizedVertex;
+  }
+
   // Add count to each vertex if tableVertexLabel and relationshipType are provided
   if (tableVertexLabel && relationshipType) {
     for (const vertex of vertices) {
@@ -221,10 +271,15 @@ if (rootKeys) {
     }
   }
 
+  // Prepend 'uncategorized' item as first item if it exists
+  const finalVertices = uncategorizedVertex 
+    ? [uncategorizedVertex, ...vertices]
+    : vertices;
+
   return {
     success: true,
-    data: vertices,
-    message: `Found ${vertices.length} root vertices`
+    data: finalVertices,
+    message: `Found ${finalVertices.length} root vertices`
   };
 }
 

@@ -75,7 +75,7 @@ if (filters && typeof filters === "object") {
   }
 }
 
-const whereClause = whereConditions.length > 0 
+let whereClause = whereConditions.length > 0 
   ? "WHERE " + whereConditions.join(" AND ")
   : "";
 

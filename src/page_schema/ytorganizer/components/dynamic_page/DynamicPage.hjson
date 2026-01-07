@@ -83,8 +83,8 @@ const getGenericDataFunction = () => {
         const rootKeys = sidebarConfig.rootKeys || {};
         const rootKey = rootKeys.key || 'root';
 
-        // If root key is selected, show items without any category relationship
-        if (sidebarItem.P?.key === rootKey) {
+        // If root key or 'uncategorized' is selected, show items without any category relationship
+        if (sidebarItem.P?.key === rootKey || sidebarItem.P?.key === 'uncategorized') {
           filterParams.showUnassigned = true;
           filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
           filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
@@ -171,8 +171,8 @@ const getGenericSaveFunction = () => {
           const rootKeys = sidebarConfig.rootKeys || {};
           const rootKey = rootKeys.key || 'root';
 
-          // Don't add relationship if root key is selected
-          if (sidebarItem.P?.key !== rootKey) {
+          // Don't add relationship if root key or 'uncategorized' is selected
+          if (sidebarItem.P?.key !== rootKey && sidebarItem.P?.key !== 'uncategorized') {
             // Get config to check user scoping settings
             const { config } = getCachedConfig();
             const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
