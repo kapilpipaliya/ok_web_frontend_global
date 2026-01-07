@@ -560,7 +560,8 @@ return {
   tableVertexLabel: args.fns.getTableVertexLabel(),
   relationshipType: args.fns.getRelationshipType(),
   enableUserScoping: args.contextData.props?.enableUserScoping,
-  onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory()
+  onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory(),
+  fetchRoot: args.fns.fetchRoot
 };
 '''
       }

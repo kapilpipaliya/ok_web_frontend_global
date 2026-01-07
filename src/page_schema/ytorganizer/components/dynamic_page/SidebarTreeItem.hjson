@@ -167,6 +167,46 @@ const getOnItemUpdate = () => args.contextData.props?.onItemUpdate;
 // Get onItemDelete callback from props
 const getOnItemDelete = () => args.contextData.props?.onItemDelete;
 
+// Get fetchRoot function from props
+const getFetchRoot = () => args.contextData.props?.fetchRoot;
+
+// Helper function to refresh category count
+const refreshCategoryCount = async (categoryItem, rootKey) => {
+  if (!categoryItem) return;
+  
+  const fetchChildrenFn = getFetchChildren();
+  const fetchRootFn = getFetchRoot();
+  
+  // Check if category is uncategorized
+  const isUncategorized = 
+    categoryItem.P?.key === rootKey || 
+    categoryItem.P?.key === 'uncategorized' || 
+    categoryItem.id === 'uncategorized';
+  
+  if (isUncategorized) {
+    // Refresh root items to update uncategorized count
+    if (fetchRootFn) {
+      await fetchRootFn();
+    }
+  } else if (categoryItem.id && fetchChildrenFn) {
+    // Refresh the specific category
+    await fetchChildrenFn(categoryItem.id, true);
+    
+    // Also refresh parent's children if this is a child item (to update parent's count)
+    const toParentEdgeType = getToParentEdgeType();
+    if (toParentEdgeType) {
+      const parentItem = args.evalExpression?.(`<-${toParentEdgeType}`, {
+        graph: args.graph,
+        setGraph: args.setGraph,
+        vertexes: [categoryItem]
+      })?.[0];
+      
+      if (parentItem && parentItem.id && fetchChildrenFn) {
+        await fetchChildrenFn(parentItem.id, true);
+      }
+    }
+  }
+};
 
 // Handle opening add modal
 const handleOpenAddModal = (e) => {
@@ -312,24 +352,26 @@ const handleDrop = async (e) => {
     if (result?.success) {
       args.showSuccessToast?.(result.message || `Moved ${data.itemIds.length} item${data.itemIds.length !== 1 ? 's' : ''} successfully`);
       
-      // Refresh children to update counts
-      const fetchChildrenFn = getFetchChildren();
-      if (fetchChildrenFn) {
-        await fetchChildrenFn(item.id, true);
+      // Determine source category (where items were moved FROM)
+      const sourceCategory = currentSelected;
+      const isSourceUncategorized = sourceCategory && (
+        sourceCategory.P?.key === rootKey || 
+        sourceCategory.P?.key === 'uncategorized' ||
+        sourceCategory.id === 'uncategorized'
+      );
+      
+      // Determine target category (where items were moved TO)
+      const isTargetUncategorized = item.P?.key === rootKey || item.P?.key === 'uncategorized' || item.id === 'uncategorized';
+      
+      // Refresh source category (where items were moved FROM)
+      if (sourceCategory) {
+        await refreshCategoryCount(sourceCategory, rootKey);
       }
       
-      // Refresh parent's children if this is a child item
-      const parentItem = args.evalExpression?.(`<-${toParentEdgeType}`, {
-        graph: args.graph,
-        setGraph: args.setGraph,
-        vertexes: [item]
-      })?.[0];
-      
-      if (parentItem) {
-        const parentFetchChildrenFn = getFetchChildren();
-        if (parentFetchChildrenFn) {
-          await parentFetchChildrenFn(parentItem.id, true);
-        }
+      // Refresh target category (where items were moved TO)
+      // If both are uncategorized, we already refreshed root items for source, so skip target to avoid double refresh
+      if (!(isSourceUncategorized && isTargetUncategorized)) {
+        await refreshCategoryCount(item, rootKey);
       }
       
       // Trigger table refresh by calling parent's refresh if available
@@ -523,9 +565,10 @@ return `._id {
           '''
 // Watch for expansion changes and fetch children when expanded
 // Access expandedKeys prop directly to make it reactive
-args.createEffect(() => {
+/*args.createEffect(() => {
   const item = args.fns.getItem();
   if (!item) return;
+  if (item.id === "uncategorized") return;
 
   // Access expandedKeys prop to make effect reactive to prop changes
   const expandedKeys = args.contextData.props?.expandedKeys || [];
@@ -537,7 +580,7 @@ args.createEffect(() => {
   if (isExpanded && childrenList.length === 0) {
     args.fns.fetchChildrenIfNeeded();
   }
-});
+});*/
 
 
 return {
@@ -887,7 +930,8 @@ return {
   getChildren: getChildrenFn,
   tableVertexLabel: args.contextData.props?.tableVertexLabel,
   relationshipType: args.contextData.props?.relationshipType,
-  onMoveItemsToCategory: args.contextData.props?.onMoveItemsToCategory
+  onMoveItemsToCategory: args.contextData.props?.onMoveItemsToCategory,
+  fetchRoot: args.contextData.props?.fetchRoot
 };
 '''
       }

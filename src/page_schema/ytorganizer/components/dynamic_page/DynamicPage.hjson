@@ -666,7 +666,14 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
         enableUserScopingForContent: enableUserScopingForContent
       }
     });
-    
+
+    // Process graph data if available
+    if (result?.result?.success && result.result.data) {
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+    }
+
     return result?.result || { success: false, message: result?.error || "Failed to move items" };
   } catch (error) {
     console.error("Error moving items:", error);

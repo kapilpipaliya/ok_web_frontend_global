@@ -540,6 +540,8 @@ export async function executeNamedServerFunctionCore(
       graph: {
         edges: context.relationships!,
         vertexes: context.nodes!,
+        deleted_edges: context.deletedEdges || [],
+        deleted_vertexes: context.deletedVertexes || [],
       },
     };
   } catch (error: any) {

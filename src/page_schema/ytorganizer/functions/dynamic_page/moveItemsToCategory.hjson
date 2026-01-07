@@ -48,6 +48,11 @@ const userUuid = user.P.uuid;
 const userCategoryRelType = `User${categoryLabel}`;
 const contentRelType = `User${contentLabel}`;
 
+// Initialize deleted edges tracking in context if not exists
+if (!args.context.deletedEdges) {
+  args.context.deletedEdges = [];
+}
+
 // If categoryId is null, undefined, or 'uncategorized', remove relationships
 const isUncategorized = !categoryId || categoryId === 'uncategorized';
 
@@ -57,30 +62,63 @@ try {
   let successCount = 0;
   let errorCount = 0;
   const errors = [];
+  const deletedEdgeIds = [];
 
   if (isUncategorized) {
     // Remove relationships for all content items
+    // First, get the edge IDs before deleting them
+    let getEdgeIdsQuery;
     if (!enableUserScopingForContent) {
-      query = `
+      getEdgeIdsQuery = `
         MATCH (content:${contentLabel})-[r:${relationshipType}]->(:${categoryLabel})
         WHERE elementId(content) IN $contentIds
-        DELETE r
-        RETURN count(r) as deletedCount
+        RETURN collect(elementId(r)) as edgeIds
       `;
       queryParams = { contentIds };
     } else {
-      query = `
+      getEdgeIdsQuery = `
         MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(:${categoryLabel})
         WHERE elementId(content) IN $contentIds
-        DELETE r
-        RETURN count(r) as deletedCount
+        RETURN collect(elementId(r)) as edgeIds
       `;
       queryParams = { userUuid, contentIds };
     }
 
-    const result = await args.session.run(query, queryParams);
-    const deletedCount = result.records[0]?.get('deletedCount') || 0;
-    successCount = deletedCount;
+    const getEdgeIdsResult = await args.session.run(getEdgeIdsQuery, queryParams);
+    const edgeIds = getEdgeIdsResult.records[0]?.get('edgeIds') || [];
+    const validEdgeIds = Array.isArray(edgeIds) ? edgeIds.filter(id => id !== null) : [];
+    
+    // Now delete the edges
+    if (validEdgeIds.length > 0) {
+      if (!enableUserScopingForContent) {
+        query = `
+          UNWIND $edgeIds as edgeId
+          MATCH ()-[r:${relationshipType}]->()
+          WHERE elementId(r) = edgeId
+          DELETE r
+          RETURN count(r) as deletedCount
+        `;
+        queryParams = { edgeIds: validEdgeIds };
+      } else {
+        query = `
+          UNWIND $edgeIds as edgeId
+          MATCH ()-[r:${relationshipType}]->()
+          WHERE elementId(r) = edgeId
+          DELETE r
+          RETURN count(r) as deletedCount
+        `;
+        queryParams = { edgeIds: validEdgeIds };
+      }
+
+      const deleteResult = await args.session.run(query, queryParams);
+      successCount = deleteResult.records[0]?.get('deletedCount') || 0;
+    }
+    
+    // Track deleted edge IDs
+    if (validEdgeIds.length > 0) {
+      deletedEdgeIds.push(...validEdgeIds);
+      args.context.deletedEdges.push(...validEdgeIds);
+    }
     
     return {
       success: true,
@@ -93,14 +131,69 @@ try {
     // Process each content item individually to handle errors gracefully
     for (const contentId of contentIds) {
       try {
+        // First, get old edge IDs before deleting
+        let getOldEdgeIdsQuery;
+        let getOldEdgeIdsParams;
+        
+        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+          getOldEdgeIdsQuery = `
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { contentId };
+        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+          getOldEdgeIdsQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { userUuid, contentId };
+        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+          getOldEdgeIdsQuery = `
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { contentId };
+        } else {
+          getOldEdgeIdsQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { userUuid, contentId };
+        }
+
+        const getOldEdgeIdsResult = await args.session.run(getOldEdgeIdsQuery, getOldEdgeIdsParams);
+        const oldRelIds = getOldEdgeIdsResult.records[0]?.get('oldRelIds') || [];
+        const validOldRelIds = Array.isArray(oldRelIds) ? oldRelIds.filter(id => id !== null) : [];
+        
+        // Delete old edges if any exist
+        if (validOldRelIds.length > 0) {
+          const deleteOldEdgesQuery = `
+            UNWIND $edgeIds as edgeId
+            MATCH ()-[r:${relationshipType}]->()
+            WHERE elementId(r) = edgeId
+            DELETE r
+            RETURN count(r) as deletedCount
+          `;
+          await args.session.run(deleteOldEdgesQuery, { edgeIds: validOldRelIds });
+          deletedEdgeIds.push(...validOldRelIds);
+          args.context.deletedEdges.push(...validOldRelIds);
+        }
+        
+        // Now create the new relationship
         if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
           query = `
             MATCH (cat:${categoryLabel})
             WHERE elementId(cat) = $categoryId
             MATCH (content:${contentLabel})
             WHERE elementId(content) = $contentId
-            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
-            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
@@ -114,8 +207,6 @@ try {
             MATCH (u:User {uuid: $userUuid})
             MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
             WHERE elementId(content) = $contentId
-            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
-            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
@@ -129,8 +220,6 @@ try {
             WHERE elementId(cat) = $categoryId
             MATCH (content:${contentLabel})
             WHERE elementId(content) = $contentId
-            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
-            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
@@ -144,8 +233,6 @@ try {
             WHERE elementId(cat) = $categoryId
             MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
             WHERE elementId(content) = $contentId
-            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
-            DELETE oldRel
             MERGE (content)-[r:${relationshipType}]->(cat)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
