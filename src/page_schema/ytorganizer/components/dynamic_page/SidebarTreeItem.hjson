@@ -312,7 +312,7 @@ const handleDrop = async (e) => {
     const parentVertexLabel = getParentVertexLabel();
     const toParentEdgeType = getToParentEdgeType();
     const rootKeys = args.contextData.props?.rootKeys || {};
-    const rootKey = rootKeys.key || 'root';
+    const rootKey = rootKeys.key;
     
     // Determine category ID - if 'uncategorized' or root key, use null
     const categoryId = (item.P?.key === rootKey || item.P?.key === 'uncategorized') ? null : item.id;
@@ -359,27 +359,43 @@ const handleDrop = async (e) => {
         sourceCategory.P?.key === 'uncategorized' ||
         sourceCategory.id === 'uncategorized'
       );
-      
-      // Determine target category (where items were moved TO)
       const isTargetUncategorized = item.P?.key === rootKey || item.P?.key === 'uncategorized' || item.id === 'uncategorized';
       
-      // Refresh source category (where items were moved FROM)
-      if (sourceCategory) {
-        await refreshCategoryCount(sourceCategory, rootKey);
+      // Update content counts using mergeVertexProperties
+      const updatedCounts = result.data?.updatedCounts;
+      
+      if (updatedCounts) {
+        
+        // Update target category count (if not uncategorized)
+        if (updatedCounts.targetCategoryId && !isTargetUncategorized && item.id === updatedCounts.targetCategoryId) {
+          args.mergeVertexProperties(0, item.id, args.graph, args.setGraph, {
+            contentCount: updatedCounts.targetCount
+          });
+        }
+        
+        // Update source category count (if not uncategorized)
+        if (updatedCounts.sourceCategoryId && !isSourceUncategorized && currentSelected && currentSelected.id === updatedCounts.sourceCategoryId) {
+          args.mergeVertexProperties(0, currentSelected.id, args.graph, args.setGraph, {
+            contentCount: updatedCounts.sourceCount
+          });
+        }
+        
+        // For uncategorized, we need to refresh root items to update the uncategorized count
+        // This is because uncategorized is a virtual vertex that's part of root items
+        if (isSourceUncategorized || isTargetUncategorized) {
+          const fetchRootFn = getFetchRoot();
+          if (fetchRootFn) {
+            await fetchRootFn();
+          }
+        }
       }
       
-      // Refresh target category (where items were moved TO)
-      // If both are uncategorized, we already refreshed root items for source, so skip target to avoid double refresh
-      if (!(isSourceUncategorized && isTargetUncategorized)) {
-        await refreshCategoryCount(item, rootKey);
-      }
-      
-      // Trigger table refresh by calling parent's refresh if available
-      if (args.contextData.props?.onItemSelect) {
-        // Re-select current item to trigger table refresh
+      // Refresh table data for currently selected sidebar item
+      if (sourceCategory && args.contextData.props?.onItemSelect) {
         const onItemSelect = getOnItemSelect();
         if (onItemSelect) {
-          onItemSelect(item);
+          // Re-select the current item to trigger table refresh
+          onItemSelect({...sourceCategory});
         }
       }
     } else {
@@ -400,7 +416,7 @@ const handleDelete = async (e) => {
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
   const rootKeys = args.contextData.props?.rootKeys || {};
-  const rootKey = rootKeys.key || 'root';
+  const rootKey = rootKeys.key;
 
   // Prevent deletion of root item
   if (item.P?.key === rootKey) {
@@ -845,7 +861,7 @@ return `._id {
           '''
 const item = args.fns.getItem();
 const rootKeys = args.contextData.props?.rootKeys || {};
-const rootKey = rootKeys.key || 'root';
+const rootKey = rootKeys.key;
 const isRoot = item?.P?.key === rootKey;
 
 return {

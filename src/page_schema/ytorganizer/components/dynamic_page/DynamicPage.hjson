@@ -81,7 +81,7 @@ const getGenericDataFunction = () => {
       // Add sidebar filtering if item is selected
       if (sidebarItem && sidebarConfig) {
         const rootKeys = sidebarConfig.rootKeys || {};
-        const rootKey = rootKeys.key || 'root';
+        const rootKey = rootKeys.key;
 
         // If root key or 'uncategorized' is selected, show items without any category relationship
         if (sidebarItem.P?.key === rootKey || sidebarItem.P?.key === 'uncategorized') {
@@ -169,7 +169,7 @@ const getGenericSaveFunction = () => {
 
         if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
           const rootKeys = sidebarConfig.rootKeys || {};
-          const rootKey = rootKeys.key || 'root';
+          const rootKey = rootKeys.key;
 
           // Don't add relationship if root key or 'uncategorized' is selected
           if (sidebarItem.P?.key !== rootKey && sidebarItem.P?.key !== 'uncategorized') {
@@ -654,6 +654,10 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
   
   try {
+    // Get source category ID from selected sidebar item
+    const currentSelected = selectedSidebarItem()
+    const sourceCategoryId = currentSelected?.id && currentSelected.P?.key !== 'uncategorized' ? currentSelected.id : null;
+    
     const result = await args.executeNamedServerFunction({
       functionName: "moveItemsToCategory",
       contextData: {
@@ -663,7 +667,8 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
         categoryLabel: sidebarConfig.parentVertexLabel,
         contentLabel: tableVertexLabel,
         enableUserScopingForSidebar: enableUserScopingForSidebar,
-        enableUserScopingForContent: enableUserScopingForContent
+        enableUserScopingForContent: enableUserScopingForContent,
+        sourceCategoryId: sourceCategoryId
       }
     });
 

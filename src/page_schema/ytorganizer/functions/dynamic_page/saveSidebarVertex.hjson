@@ -62,7 +62,7 @@ const vertexName = name.trim();
 const vertexKey = key || vertexName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 
 // Get root key from config
-const rootKey = rootKeys.key || 'root';
+const rootKey = rootKeys.key;
 
 // Prevent deletion/update of root vertex
 if (isUpdate || isDelete) {
@@ -378,7 +378,7 @@ if (args.context.nodes[vertexElementId]) {
 
 // Calculate and add content count if tableVertexLabel and relationshipType are provided
 if (tableVertexLabel && relationshipType) {
-  const rootKey = rootKeys.key || 'root';
+  const rootKey = rootKeys.key;
   
   let countQuery;
   let countParams;

@@ -212,7 +212,7 @@ if (rootKeys) {
     for (const vertex of vertices) {
       // For root items, count items without any category relationship or items in this root
       const rootKeys = args.contextData.rootKeys || {};
-      const rootKey = rootKeys.key || 'root';
+      const rootKey = rootKeys.key;
       
       let countQuery;
       let countParams;
