@@ -16,7 +16,7 @@ const getRelationshipType = () => args.contextData.props?.relationshipType;
 // State management - using graph for data, signals only for UI state
 const [expandedKeys, setExpandedKeys] = args.createSignal([]);
 const [selectedItem, setSelectedItem] = args.createSignal(null);
-const [loading, setLoading] = args.createSignal(false);
+const [sidebarLoading, setSidebarLoading] = args.createSignal(false);
 const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
 const [rootVertices, setRootVertices] = args.createSignal([]);
 
@@ -34,7 +34,7 @@ const fetchRoot = async () => {
     return;
   }
 
-  setLoading(true);
+  setSidebarLoading(true);
   try {
     const tableVertexLabel = getTableVertexLabel();
     const relationshipType = getRelationshipType();
@@ -78,7 +78,7 @@ const fetchRoot = async () => {
     console.error("Error fetching root:", error);
     args.showErrorToast?.("Failed to load sidebar data");
   } finally {
-    setLoading(false);
+    setSidebarLoading(false);
   }
 };
 
@@ -473,8 +473,8 @@ return {
   setExpandedKeys,
   selectedItem,
   setSelectedItem,
-  loading,
-  setLoading,
+  sidebarLoading,
+  setSidebarLoading,
   fetchRoot,
   fetchChildren,
   toggleExpand,

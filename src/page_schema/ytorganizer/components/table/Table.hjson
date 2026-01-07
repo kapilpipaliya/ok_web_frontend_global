@@ -1845,10 +1845,55 @@ return `._id {
         componentName: VirtualList
         props:
           '''
+const isLoading = args.fns.loading();
 return {
   items: args.fns.filteredData(),
   itemHeight: args.fns.getRowHeight(),
-  containerClass: "table-body-list"
+  containerClass: "table-body-list",
+  hide: isLoading
+};
+'''
+      }
+    }
+    {
+      id: "40a"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+}
+`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.loading();
+return {
+  as: "div",
+  hide: !isLoading
+};
+'''
+      }
+    }
+    {
+      id: "40b"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
 };
 '''
       }
@@ -3149,6 +3194,18 @@ return {
       T: Attr
       S: "40"
       E: "41"
+    }
+    {
+      id: e66a
+      T: Attr
+      S: "22"
+      E: "40a"
+    }
+    {
+      id: e66b
+      T: Attr
+      S: "40a"
+      E: "40b"
     }
     {
       id: e67

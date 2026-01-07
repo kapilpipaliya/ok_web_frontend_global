@@ -814,8 +814,6 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
     setLoading(false);
   }
 };
-<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
-read_lints
 
 // Exported API
 return {
