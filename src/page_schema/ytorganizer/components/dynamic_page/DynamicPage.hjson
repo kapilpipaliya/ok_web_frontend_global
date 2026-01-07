@@ -699,7 +699,14 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   try {
     // Get source category ID from selected sidebar item
     const currentSelected = selectedSidebarItem()
-    const sourceCategoryId = currentSelected?.id && currentSelected.P?.key !== 'uncategorized' ? currentSelected.id : null;
+    let sourceCategoryId = null;
+    if (currentSelected?.id) {
+      if (currentSelected.P?.key === 'uncategorized' || currentSelected.id === 'uncategorized') {
+        sourceCategoryId = 'uncategorized';
+      } else {
+        sourceCategoryId = currentSelected.id;
+      }
+    }
     
     const result = await args.executeNamedServerFunction({
       functionName: "moveItemsToCategory",

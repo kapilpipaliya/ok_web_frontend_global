@@ -365,7 +365,6 @@ const handleDrop = async (e) => {
       const updatedCounts = result.data?.updatedCounts;
       
       if (updatedCounts) {
-        
         // Update target category count (if not uncategorized)
         if (updatedCounts.targetCategoryId && !isTargetUncategorized && item.id === updatedCounts.targetCategoryId) {
           args.mergeVertexProperties(0, item.id, args.graph, args.setGraph, {
@@ -380,13 +379,47 @@ const handleDrop = async (e) => {
           });
         }
         
-        // For uncategorized, we need to refresh root items to update the uncategorized count
-        // This is because uncategorized is a virtual vertex that's part of root items
-        if (isSourceUncategorized || isTargetUncategorized) {
-          const fetchRootFn = getFetchRoot();
-          if (fetchRootFn) {
-            await fetchRootFn();
+        // For uncategorized target, update the uncategorized vertex directly if it exists
+        if (isTargetUncategorized && updatedCounts.targetCategoryId === 'uncategorized' && updatedCounts.targetCount !== undefined) {
+          // Try to find and update the uncategorized vertex in the graph
+          const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+          if (uncategorizedVertex) {
+            args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+              contentCount: updatedCounts.targetCount
+            });
+          } else {
+            // If uncategorized vertex doesn't exist in graph, refresh root items
+            const fetchRootFn = getFetchRoot();
+            if (fetchRootFn) {
+              await fetchRootFn();
+            }
           }
+        }
+        
+        // For uncategorized source, update the uncategorized vertex directly if it exists
+        if (isSourceUncategorized && updatedCounts.sourceCategoryId === 'uncategorized' && updatedCounts.sourceCount !== undefined) {
+          // Try to find and update the uncategorized vertex in the graph
+          const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+          if (uncategorizedVertex) {
+            args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+              contentCount: updatedCounts.sourceCount
+            });
+          } else {
+            // If uncategorized vertex doesn't exist in graph, refresh root items
+            const fetchRootFn = getFetchRoot();
+            if (fetchRootFn) {
+              await fetchRootFn();
+            }
+          }
+        }
+      }
+      
+      // Always refresh root items if moving to/from uncategorized (as fallback)
+      // This ensures the uncategorized count is updated even if updatedCounts is missing
+      if (isSourceUncategorized || isTargetUncategorized) {
+        const fetchRootFn = getFetchRoot();
+        if (fetchRootFn) {
+          await fetchRootFn();
         }
       }
       

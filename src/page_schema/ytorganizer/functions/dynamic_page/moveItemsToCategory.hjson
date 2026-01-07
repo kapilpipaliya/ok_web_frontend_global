@@ -121,10 +121,89 @@ try {
       args.context.deletedEdges.push(...validEdgeIds);
     }
     
+    // Calculate updated content counts for uncategorized and source category
+    const updatedCounts = {};
+    
+    if (successCount > 0) {
+      // Calculate uncategorized count (items without any category relationship)
+      let uncategorizedCountQuery;
+      let uncategorizedCountParams;
+      if (!enableUserScopingForContent) {
+        uncategorizedCountQuery = `
+          MATCH (content:${contentLabel})
+          WHERE NOT EXISTS {
+            MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+          }
+          RETURN count(DISTINCT content) as contentCount
+        `;
+        uncategorizedCountParams = {};
+      } else {
+        uncategorizedCountQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+          WHERE NOT EXISTS {
+            MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+          }
+          RETURN count(DISTINCT content) as contentCount
+        `;
+        uncategorizedCountParams = { userUuid };
+      }
+      
+      const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+      const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
+      updatedCounts.targetCount = uncategorizedCount;
+      updatedCounts.targetCategoryId = 'uncategorized';
+      
+      // Calculate source category count if provided and not uncategorized
+      if (sourceCategoryId && sourceCategoryId !== 'uncategorized') {
+        let sourceCountQuery;
+        let sourceCountParams;
+        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+          sourceCountQuery = `
+            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { sourceCategoryId };
+        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+          sourceCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+            MATCH (content)-[:${relationshipType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { userUuid, sourceCategoryId };
+        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+          sourceCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat)
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { userUuid, sourceCategoryId };
+        } else {
+          sourceCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(cat)
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { userUuid, sourceCategoryId };
+        }
+        
+        const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
+        updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
+        updatedCounts.sourceCategoryId = sourceCategoryId;
+      } else if (sourceCategoryId === 'uncategorized') {
+        // Source is uncategorized, so use the same uncategorized count
+        updatedCounts.sourceCount = uncategorizedCount;
+        updatedCounts.sourceCategoryId = 'uncategorized';
+      }
+    }
+    
     return {
       success: true,
       message: `Removed ${successCount} relationship${successCount !== 1 ? 's' : ''} successfully`,
-      data: { movedCount: successCount }
+      data: { movedCount: successCount, updatedCounts: Object.keys(updatedCounts).length > 0 ? updatedCounts : undefined }
     };
   } else {
     // Create relationships for all content items to the category
@@ -306,44 +385,74 @@ try {
       
       // Calculate source category count if provided
       if (sourceCategoryId) {
-        let sourceCountQuery;
-        let sourceCountParams;
-        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
-          sourceCountQuery = `
-            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat:${categoryLabel})
-            WHERE elementId(cat) = $sourceCategoryId
-            RETURN count(DISTINCT content) as contentCount
-          `;
-          sourceCountParams = { sourceCategoryId };
-        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
-          sourceCountQuery = `
-            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
-            MATCH (content)-[:${relationshipType}]->(cat:${categoryLabel})
-            WHERE elementId(cat) = $sourceCategoryId
-            RETURN count(DISTINCT content) as contentCount
-          `;
-          sourceCountParams = { userUuid, sourceCategoryId };
-        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
-          sourceCountQuery = `
-            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
-            WHERE elementId(cat) = $sourceCategoryId
-            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat)
-            RETURN count(DISTINCT content) as contentCount
-          `;
-          sourceCountParams = { userUuid, sourceCategoryId };
+        if (sourceCategoryId === 'uncategorized') {
+          // Source is uncategorized, count items without any category relationship
+          let uncategorizedCountQuery;
+          let uncategorizedCountParams;
+          if (!enableUserScopingForContent) {
+            uncategorizedCountQuery = `
+              MATCH (content:${contentLabel})
+              WHERE NOT EXISTS {
+                MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+              }
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            uncategorizedCountParams = {};
+          } else {
+            uncategorizedCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+              WHERE NOT EXISTS {
+                MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+              }
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            uncategorizedCountParams = { userUuid };
+          }
+          
+          const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+          updatedCounts.sourceCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
+          updatedCounts.sourceCategoryId = 'uncategorized';
         } else {
-          sourceCountQuery = `
-            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
-            WHERE elementId(cat) = $sourceCategoryId
-            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(cat)
-            RETURN count(DISTINCT content) as contentCount
-          `;
-          sourceCountParams = { userUuid, sourceCategoryId };
+          // Source is a regular category
+          let sourceCountQuery;
+          let sourceCountParams;
+          if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+            sourceCountQuery = `
+              MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { sourceCategoryId };
+          } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+            sourceCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+              MATCH (content)-[:${relationshipType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { userUuid, sourceCategoryId };
+          } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+            sourceCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat)
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { userUuid, sourceCategoryId };
+          } else {
+            sourceCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              MATCH (u)-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(cat)
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { userUuid, sourceCategoryId };
+          }
+          
+          const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
+          updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
+          updatedCounts.sourceCategoryId = sourceCategoryId;
         }
-        
-        const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
-        updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
-        updatedCounts.sourceCategoryId = sourceCategoryId;
       }
       
       return {
