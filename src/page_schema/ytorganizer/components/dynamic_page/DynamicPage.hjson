@@ -122,6 +122,54 @@ const getGenericDataFunction = () => {
     }
   };
 };
+
+// Helper function to get sidebar config (needed by updateSidebarCategoryCount)
+// This is a simplified version that will be replaced by the full getSidebarConfig later
+const getSidebarConfigForCount = () => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config?.sidebar;
+  }
+  return args.contextData.props?.sidebar || config?.sidebar;
+};
+
+// Update sidebar category count after adding/deleting items
+// Note: This uses getSidebarConfigForCount which will be replaced by getSidebarConfig
+// when it's defined later. This ensures the function is available when getGenericSaveFunction is called.
+const updateSidebarCategoryCount = (categoryId, increment = 1) => {
+  if (!categoryId) return;
+  
+  const sidebarConfig = getSidebarConfigForCount();
+  if (!sidebarConfig) return;
+  
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+  
+  // Check if it's uncategorized
+  if (categoryId === 'uncategorized' || categoryId === rootKey) {
+    // For uncategorized, update the uncategorized vertex directly if it exists
+    const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+    if (uncategorizedVertex) {
+      const currentCount = uncategorizedVertex.P?.contentCount ?? 0;
+      const newCount = Math.max(0, currentCount + increment);
+      args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+        contentCount: newCount
+      });
+    }
+    return;
+  }
+  
+  // For regular categories, update the count directly
+  const categoryVertex = args.graph?.vertexes?.[categoryId];
+  if (categoryVertex) {
+    const currentCount = categoryVertex.P?.contentCount ?? 0;
+    const newCount = Math.max(0, currentCount + increment);
+    args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+      contentCount: newCount
+    });
+  }
+};
+
 const getGenericSaveFunction = () => {
   const tableVertexLabel = getTableVertexLabel();
   if (!tableVertexLabel) return null;
@@ -194,10 +242,36 @@ const getGenericSaveFunction = () => {
                 enableUserScopingForSidebar: enableUserScopingForSidebar,
                 enableUserScopingForContent: enableUserScopingForContent
               });
+              
+              // Update category count - increment by 1
+              updateSidebarCategoryCount(sidebarItem.id, 1);
             } catch (relError) {
               console.error("Error creating sidebar relationship:", relError);
               // Don't fail the whole operation if relationship creation fails
             }
+          } else {
+            // For uncategorized items, update the uncategorized vertex directly if it exists
+            updateSidebarCategoryCount('uncategorized', 1);
+          }
+        }
+      }
+      
+      // If deleting an item, decrement the category count
+      if (mode === "delete" && result?.result?.success && originalRow) {
+        const sidebarItem = selectedSidebarItem();
+        const sidebarConfig = getSidebarConfig();
+        
+        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
+          const rootKeys = sidebarConfig.rootKeys || {};
+          const rootKey = rootKeys.key;
+          
+          // Use the currently selected sidebar item to determine which category to decrement
+          if (sidebarItem.P?.key === rootKey || sidebarItem.P?.key === 'uncategorized') {
+            // If uncategorized is selected, decrement uncategorized count
+            updateSidebarCategoryCount('uncategorized', -1);
+          } else if (sidebarItem.id) {
+            // Decrement the selected category's count
+            updateSidebarCategoryCount(sidebarItem.id, -1);
           }
         }
       }
@@ -699,6 +773,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
   
   try {
+    setLoading(true);
     // Get source category ID from selected sidebar item
     const currentSelected = selectedSidebarItem()
     let sourceCategoryId = null;
@@ -735,8 +810,12 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   } catch (error) {
     console.error("Error moving items:", error);
     return { success: false, message: error.message || "Failed to move items" };
+  } finally {
+    setLoading(false);
   }
 };
+<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
+read_lints
 
 // Exported API
 return {
@@ -840,7 +919,8 @@ return {
   enableUserScoping: enableUserScopingForSidebar,
   onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
   sidebarWidth: args.fns.sidebarWidth,
-  setSidebarWidth: args.fns.setSidebarWidth
+  setSidebarWidth: args.fns.setSidebarWidth,
+  fetchRoot: args.fns.fetchRoot
 };
 '''
       }
