@@ -32,7 +32,31 @@ const [filteredData, setFilteredData] = args.createSignal([]);
 const [searchTerm, setSearchTerm] = args.createSignal("");
 const [columnFilters, setColumnFilters] = args.createStore({});
 const [sortConfig, setSortConfig] = args.createStore({ column: null, direction: null });
-const [selectedRows, setSelectedRows] = args.createSignal(new Set());
+// Get selected rows functions from props (always provided by parent)
+const getSelectedRows = () => {
+  const propFn = args.contextData.props?.getSelectedRows;
+  if (!propFn) {
+    console.warn("getSelectedRows not provided to Table component");
+    return new Set();
+  }
+  return propFn();
+};
+const setSelectedRows = (newSelected) => {
+  const propFn = args.contextData.props?.setSelectedRows;
+  if (!propFn) {
+    console.warn("setSelectedRows not provided to Table component");
+    return;
+  }
+  propFn(newSelected);
+};
+const clearSelectedRows = () => {
+  const propFn = args.contextData.props?.clearSelectedRows;
+  if (!propFn) {
+    console.warn("clearSelectedRows not provided to Table component");
+    return;
+  }
+  propFn();
+};
 const [isModalOpen, setIsModalOpen] = args.createSignal(false);
 const [modalMode, setModalMode] = args.createSignal("add"); // "add" or "edit"
 const [editingRow, setEditingRow] = args.createSignal(null);
@@ -354,24 +378,26 @@ const handleSearch = () => {
   });
 };
 
-// Handle row selection
-const toggleRowSelection = (rowIndex) => {
-  const newSelected = new Set(selectedRows());
-  if (newSelected.has(rowIndex)) {
-    newSelected.delete(rowIndex);
+// Handle row selection (using vertex IDs)
+const toggleRowSelection = (vertexId) => {
+  const currentSelected = getSelectedRows();
+  const newSelected = new Set(currentSelected);
+  if (newSelected.has(vertexId)) {
+    newSelected.delete(vertexId);
   } else {
-    newSelected.add(rowIndex);
+    newSelected.add(vertexId);
   }
   setSelectedRows(newSelected);
 };
 
 const selectAllRows = () => {
-  const allIndices = new Set(filteredData().map((_, i) => i));
-  setSelectedRows(allIndices);
+  const filtered = filteredData();
+  const allVertexIds = new Set(filtered.map(row => row.id).filter(id => id !== undefined && id !== null));
+  setSelectedRows(allVertexIds);
 };
 
 const clearSelection = () => {
-  setSelectedRows(new Set());
+  clearSelectedRows();
 };
 
 // Handle add/edit
@@ -601,24 +627,23 @@ args.createEffect(() => {
 
 // Drag and drop functionality
 const handleDragStart = (e) => {
-  const selected = selectedRows();
+  const selected = getSelectedRows();
   if (selected.size === 0) {
     e.preventDefault();
     return;
   }
   
-  const filtered = filteredData();
-  const selectedItems = Array.from(selected)
-    .map(index => filtered[index])
-    .filter(item => item !== undefined);
+  // Selected rows now contain vertex IDs directly
+  const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
   
-  if (selectedItems.length === 0) {
+  if (itemIds.length === 0) {
     e.preventDefault();
     return;
   }
   
-  // Store selected item IDs in dataTransfer
-  const itemIds = selectedItems.map(item => item.id);
+  // Get selected items for count display
+  const filtered = filteredData();
+  const selectedItems = filtered.filter(row => itemIds.includes(row.id));
   e.dataTransfer.setData('application/json', JSON.stringify({
     type: 'table-items',
     itemIds: itemIds,
@@ -658,11 +683,10 @@ const handleDragStart = (e) => {
 };
 
 const getSelectedItems = () => {
-  const selected = selectedRows();
+  const selected = getSelectedRows();
   const filtered = filteredData();
-  return Array.from(selected)
-    .map(index => filtered[index])
-    .filter(item => item !== undefined);
+  const selectedIds = Array.from(selected);
+  return filtered.filter(row => selectedIds.includes(row.id));
 };
 
 return {
@@ -700,8 +724,9 @@ return {
   setColumnFilters,
   sortConfig,
   setSortConfig,
-  selectedRows,
+  getSelectedRows,
   setSelectedRows,
+  clearSelectedRows,
   isModalOpen,
   setIsModalOpen,
   modalMode,
@@ -1230,9 +1255,10 @@ return {
         props:
           '''
 const showSelection = args.fns.getShowSelection();
-const selected = args.fns.selectedRows();
+const selected = args.fns.getSelectedRows();
 const filtered = args.fns.filteredData();
-const allSelected = selected.size === filtered.length && filtered.length > 0;
+// Check if all rows are selected by comparing vertex IDs
+const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
 
 return {
   as: "input",
@@ -1837,8 +1863,9 @@ return {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const selectedRows = args.fns.selectedRows();
-const isSelected = selectedRows.has(rowIndex);
+const rowData = args.fns.filteredData()[rowIndex];
+const selectedRows = args.fns.getSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return [
 `._id {
@@ -1872,7 +1899,7 @@ const rowIndex = virtualItem.index;
 
 const showSelection = args.fns.getShowSelection();
 
-const selected = args.fns.selectedRows();
+const selected = args.fns.getSelectedRows();
 const hasSelection = selected.size > 0;
 
 return {
@@ -1894,8 +1921,9 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const selectedRows = args.fns.selectedRows();
-const isSelected = selectedRows.has(rowIndex);
+const rowData = args.fns.filteredData()[rowIndex];
+const selectedRows = args.fns.getSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return `._id {
   padding: ${args.theme.var.spacing.md};
@@ -1912,8 +1940,9 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const selectedRows = args.fns.selectedRows();
-const isSelected = selectedRows.has(rowIndex);
+const rowData = args.fns.filteredData()[rowIndex];
+const selectedRows = args.fns.getSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return {
   as: "div",
@@ -1934,8 +1963,9 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const selectedRows = args.fns.selectedRows();
-const isSelected = selectedRows.has(rowIndex);
+const rowData = args.fns.filteredData()[rowIndex];
+const selectedRows = args.fns.getSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return {
   as: "input",
@@ -1943,7 +1973,9 @@ return {
   checked: isSelected,
   onChange: (e) => {
     e.stopPropagation();
-    args.fns.toggleRowSelection(rowIndex);
+    if (rowData?.id) {
+      args.fns.toggleRowSelection(rowData.id);
+    }
   },
   onClick: (e) => {
     e.stopPropagation();

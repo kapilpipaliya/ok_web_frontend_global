@@ -13,6 +13,8 @@ const [settings, setSettings] = args.createSignal(null);
 const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
 const [loading, setLoading] = args.createSignal(false);
 const [selectedSidebarItem, setSelectedSidebarItem] = args.createSignal(null);
+// Store selected rows per category (keyed by category ID or 'uncategorized' or null)
+const [selectedRowsByCategory, setSelectedRowsByCategory] = args.createStore({});
 
 // Basic context/prop accessors
 const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
@@ -633,6 +635,47 @@ const hasSidebar = () => {
   return sidebarConfig && (sidebarConfig.enabled !== false);
 };
 
+// Get category key for selected rows storage
+const getCategoryKey = (item) => {
+  const sidebarConfig = getSidebarConfig();
+  if (!item) {
+    // No sidebar or no item selected - use 'no-sidebar' key
+    return sidebarConfig ? null : 'no-sidebar';
+  }
+  if (!sidebarConfig) {
+    return 'no-sidebar';
+  }
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+  
+  // Use 'uncategorized' for uncategorized items, otherwise use item ID
+  if (item.P?.key === rootKey || item.P?.key === 'uncategorized' || item.id === 'uncategorized') {
+    return 'uncategorized';
+  }
+  return item.id || 'no-sidebar';
+};
+
+// Get selected rows for current category
+const getSelectedRows = () => {
+  const item = selectedSidebarItem();
+  const categoryKey = getCategoryKey(item);
+  if (categoryKey === null) return new Set();
+  return selectedRowsByCategory[categoryKey] || new Set();
+};
+
+// Set selected rows for current category
+const setSelectedRows = (newSelected) => {
+  const item = selectedSidebarItem();
+  const categoryKey = getCategoryKey(item);
+  if (categoryKey === null) return;
+  setSelectedRowsByCategory(categoryKey, newSelected);
+};
+
+// Clear selected rows for current category
+const clearSelectedRows = () => {
+  setSelectedRows(new Set());
+};
+
 // Handle sidebar item selection
 const handleSidebarItemSelect = (item) => {
   setSelectedSidebarItem(item);
@@ -723,7 +766,10 @@ return {
   selectedSidebarItem,
   setSelectedSidebarItem,
   handleSidebarItemSelect,
-  handleMoveItemsToCategory
+  handleMoveItemsToCategory,
+  getSelectedRows,
+  setSelectedRows,
+  clearSelectedRows
 }
 
 '''
@@ -799,6 +845,9 @@ return {
           '''
 return {
   selectedSidebarItem: args.fns.selectedSidebarItem(),
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
   onMount: async () => {
     await args.fns.initializeSettings();
   }
@@ -833,9 +882,11 @@ return {
         props:
           '''
 return {
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
   onMount: async () => {
     await args.fns.initializeSettings();
-
   }
 }'''
       }
