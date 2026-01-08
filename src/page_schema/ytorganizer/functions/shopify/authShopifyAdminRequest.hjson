@@ -62,12 +62,6 @@ const request = {
   // Add any other fields needed by authenticate.admin if necessary
 };
 
-// Authenticate the request using Shopify's admin authentication
-// This verifies the OAuth session and ensures the user has proper permissions
-// If authentication fails, the user will be redirected to login
-await shopify.authenticate.admin(request);
-
-
 // Ensure dedicated database for this shop and run migration
 const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
   dryRun: false,
@@ -76,6 +70,11 @@ const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
   },
   migrationSubDomain: "ytorganizer"
 });
+
+// Authenticate the request using Shopify's admin authentication
+// This verifies the OAuth session and ensures the user has proper permissions
+// If authentication fails, the user will be redirected to login
+await shopify.authenticate.admin(request);
 
 try {
   // Find or create user in the database

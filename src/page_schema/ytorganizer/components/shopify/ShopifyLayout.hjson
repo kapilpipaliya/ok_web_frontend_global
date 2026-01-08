@@ -108,7 +108,7 @@ return {
     // This server function runs on the server and authenticates the Shopify admin app
     // It calls the named server function "authShopifyAdminRequest"
 
-    const searchParams = ${JSON.stringify({ ...args.searchParams })};
+    const searchParams = ${JSON.stringify({ ...args.untrack(() => args.searchParams) })};
 
    // Using useSessionShop: false flag to ensure we use fallback database for auth
     const result = await args.executeNamedServerFunction(

@@ -648,3 +648,9 @@ do not complete tasks:
 here only display menu items below Youtube,
 the Home and YouTube title menu should display above the YouTube Ownership select field
 getUserContent is called before getUserContentSetting is called 
+
+
+how multi-tenent is working:
+1. when authShopifyAdminRequest function is executed from layout we pass useSessionShop: false to use subdomain db.
+2. update getUserFromSession function, when sessionUser?.P?.shop then return user from session only.
+3. executeNamedServerFunctionCore also use appropriate db when sessionUser?.P?.shop is available.
