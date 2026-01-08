@@ -765,16 +765,44 @@ const setTomSelectValue = (value) => {
   if (!tomSelectInstance) return;
 
   try {
-    if (value === null || value === '' || value === undefined) {
-      // Clear the select field if value is empty
-      tomSelectInstance.clear(true); // true = silent (don't trigger change event)
-    } else {
-      // Ensure the value exists in the options before setting it
-      const optionExists = tomSelectInstance.options[value];
-      if (optionExists) {
-        tomSelectInstance.setValue(value, true); // true = silent (don't trigger change event)
+    const multiple = tomSelectInstance.settings.maxItems !== 1;
+    
+    // Handle multiple mode (arrays)
+    if (multiple) {
+      // For multiple mode, value should be an array
+      const valueArray = Array.isArray(value) ? value : (value ? [value] : []);
+      
+      // If empty array, clear all selections
+      if (valueArray.length === 0) {
+        tomSelectInstance.clear(true); // true = silent (don't trigger change event)
       } else {
-        console.warn(`TomSelect: Value "${value}" not found in options`, tomSelectInstance.options);
+        // Set multiple values - TomSelect.setValue accepts array for multiple mode
+        // Filter out values that don't exist in options
+        const validValues = valueArray.filter(v => {
+          if (v === null || v === undefined || v === '') return false;
+          return tomSelectInstance.options[v] !== undefined;
+        });
+        
+        if (validValues.length > 0) {
+          tomSelectInstance.setValue(validValues, true); // true = silent (don't trigger change event)
+        } else {
+          // If no valid values, clear
+          tomSelectInstance.clear(true);
+        }
+      }
+    } else {
+      // Single mode
+      if (value === null || value === '' || value === undefined) {
+        // Clear the select field if value is empty
+        tomSelectInstance.clear(true); // true = silent (don't trigger change event)
+      } else {
+        // Ensure the value exists in the options before setting it
+        const optionExists = tomSelectInstance.options[value];
+        if (optionExists) {
+          tomSelectInstance.setValue(value, true); // true = silent (don't trigger change event)
+        } else {
+          console.warn(`TomSelect: Value "${value}" not found in options`, tomSelectInstance.options);
+        }
       }
     }
   } catch (err) {

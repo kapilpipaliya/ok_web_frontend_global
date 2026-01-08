@@ -236,6 +236,57 @@ const applyLocalFilters = () => {
   setFilteredData(filtered);
 };
 
+// Update category contentCount based on fetched data length when local filters are enabled
+const updateCategoryCountFromFetchedData = (fetchedData) => {
+  // Get selected sidebar item - try both function and prop
+  const selectedSidebarItemFn = args.fns.selectedSidebarItem || args.contextData.props?.selectedSidebarItem;
+  const selectedItem = typeof selectedSidebarItemFn === 'function' ? selectedSidebarItemFn() : selectedSidebarItemFn;
+  if (!selectedItem) return;
+  
+  const config = args.fns.evaluateConfig?.() || {};
+  const sidebarConfig = config?.sidebar;
+  if (!sidebarConfig) return;
+  
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+  
+  // Determine category ID
+  const isUncategorized = selectedItem.P?.key === rootKey || selectedItem.P?.key === 'uncategorized' || selectedItem.id === 'uncategorized';
+  const categoryId = isUncategorized ? 'uncategorized' : selectedItem.id;
+  
+  if (!categoryId) return;
+  
+  // Get current count from graph
+  let currentCount = 0;
+  if (isUncategorized) {
+    const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+    currentCount = uncategorizedVertex?.P?.contentCount ?? 0;
+  } else {
+    const categoryVertex = args.graph?.vertexes?.[categoryId];
+    currentCount = categoryVertex?.P?.contentCount ?? 0;
+  }
+  
+  // Update count if different - use fetched data length (before filtering)
+  const fetchedLength = fetchedData?.length ?? 0;
+  if (currentCount !== fetchedLength) {
+    if (isUncategorized) {
+      const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+      if (uncategorizedVertex) {
+        args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+          contentCount: fetchedLength
+        });
+      }
+    } else {
+      const categoryVertex = args.graph?.vertexes?.[categoryId];
+      if (categoryVertex) {
+        args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+          contentCount: fetchedLength
+        });
+      }
+    }
+  }
+};
+
 const debouncedSetSearchTerm = args.debounce(value => {
   setSearchTerm(value);
   
@@ -403,14 +454,58 @@ const getUniqueColumnValues = (column) => {
   return Array.from(uniqueValues).sort();
 };
 
+// Common function to create select filter component props
+const getSelectFilterProps = (columnKey, filterValue, options) => {
+  // Normalize filterValue to array for multiple select
+  // Ensure values match option values exactly
+  // If "_All_VALUES_" is present, don't include it in the display value
+  let normalizedValue = Array.isArray(filterValue) 
+    ? filterValue.filter(v => v !== null && v !== undefined && v !== "" && v !== "_All_VALUES_")
+    : (filterValue && filterValue !== "_All_VALUES_" ? [filterValue] : []);
+  
+  // If filter is cleared (undefined), pass empty array to clear TomSelect
+  // TomSelect needs empty array for multiple mode to show as cleared
+  const displayValue = filterValue === undefined ? [] : normalizedValue;
+  
+  // Check if filter is currently empty
+  const isFilterEmpty = filterValue === undefined || 
+    (Array.isArray(filterValue) && filterValue.length === 0) ||
+    filterValue === null || filterValue === "";
+
+  return {
+    componentName: "TomSelect",
+    value: displayValue,
+    onChange: (newValue) => {
+      // If "All" is selected
+      if (Array.isArray(newValue) && newValue.includes("_All_VALUES_")) {
+        // clear all filters
+        handleColumnFilterChange(columnKey, ["_All_VALUES_"]);
+      } else {
+        handleColumnFilterChange(columnKey, newValue);
+      }
+    },
+    options: options,
+    placeholder: "Filter...",
+    search: options.length > 10, // Enable search if many options
+    multiple: true
+  };
+};
+
 // Handle column filter change
 const handleColumnFilterChange = (columnKey, value) => {
   // Handle array values (multiple select)
   let filterValue;
+  setColumnFilters(columnKey, value);
+  debugger
   if (Array.isArray(value)) {
-    // Remove "_All_VALUES_" if present and filter out empty values
-    const filtered = value.filter(v => v !== "_All_VALUES_" && v !== "" && v !== null && v !== undefined);
-    filterValue = filtered.length === 0 ? undefined : filtered;
+    // If "_All_VALUES_" is selected, clear all filters for this column
+    if (value.includes("_All_VALUES_")) {
+      filterValue = undefined;
+    } else {
+      // Remove "_All_VALUES_" if present and filter out empty values
+      const filtered = value.filter(v => v !== "_All_VALUES_" && v !== "" && v !== null && v !== undefined);
+      filterValue = filtered.length === 0 ? undefined : filtered;
+    }
   } else {
     // Single value - clear if "All" or empty
     filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
@@ -419,8 +514,6 @@ const handleColumnFilterChange = (columnKey, value) => {
   if (filterValue === undefined) {
     // Remove the filter key from columnFilters
     setColumnFilters(columnKey, undefined);
-  } else {
-    setColumnFilters(columnKey, filterValue);
   }
 
   // Check if local filters are enabled
@@ -451,6 +544,12 @@ const handleSearch = () => {
     enableLocalSort ? undefined : sortConfig, 
     data => {
       setData(data);
+      
+      // Update category count with fetched data length if local filters are enabled
+      if (enableLocalFilters) {
+        updateCategoryCountFromFetchedData(data);
+      }
+      
       // Always apply local filters if enabled, or if server didn't filter
       if (enableLocalFilters || enableLocalSort) {
         applyLocalFilters();
@@ -838,7 +937,8 @@ return {
   handleSave,
   handleDelete,
   handleDragStart,
-  getSelectedItems
+  getSelectedItems,
+  getSelectFilterProps
 };
 '''
         key: Table
@@ -1865,21 +1965,11 @@ if (column.key === "__rowNumber" || column.type === "rowNumber") {
 
 // Render appropriate filter component based on column type
 if (column.type === "select" && column.options) {
-  // Normalize filterValue to array for multiple select
-  // Ensure values match option values exactly
-  const normalizedValue = Array.isArray(filterValue) 
-    ? filterValue.filter(v => v !== null && v !== undefined && v !== "")
-    : (filterValue ? [filterValue] : []);
-  
-  return {
-    componentName: "TomSelect",
-    value: normalizedValue,
-    onChange: (newValue) => args.fns.handleColumnFilterChange(column.key, newValue),
-    options: [{ value: "_All_VALUES_", label: "All" }, ...column.options],
-    placeholder: "Filter...",
-    search: false,
-    multiple: true
-  };
+  return args.fns.getSelectFilterProps(
+    column.key,
+    filterValue,
+    [{ value: "_All_VALUES_", label: "All" }, ...column.options]
+  );
 }
 
 if (column.type === "checkbox") {
@@ -1911,21 +2001,11 @@ if (filterType === "select") {
   const uniqueValues = args.fns.getUniqueColumnValues(column);
   const options = [{ value: "_All_VALUES_", label: "All" }, ...uniqueValues.map(val => ({ value: val, label: val }))];
   
-  // Normalize filterValue to array for multiple select
-  // Ensure values match option values exactly and filter out invalid values
-  const normalizedValue = Array.isArray(filterValue) 
-    ? filterValue.filter(v => v !== null && v !== undefined && v !== "" && v !== "_All_VALUES_")
-    : (filterValue && filterValue !== "_All_VALUES_" ? [filterValue] : []);
-
-  return {
-    componentName: "TomSelect",
-    value: normalizedValue,
-    onChange: (newValue) => args.fns.handleColumnFilterChange(column.key, newValue),
-    options: options,
-    placeholder: "Filter...",
-    search: true,
-    multiple: true
-  };
+  return args.fns.getSelectFilterProps(
+    column.key,
+    filterValue,
+    options
+  );
 }
 
 // Default: text input (applies filter immediately on change)
