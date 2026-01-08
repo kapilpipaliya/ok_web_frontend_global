@@ -71,6 +71,12 @@ const fetchRoot = async () => {
       for (const rootItem of rootItems) {
         await fetchChildren(rootItem.id);
       }
+      
+      // Select the first root item if no item is currently selected
+      if (rootItems.length > 0 && !selectedItem()) {
+        const firstRootItem = rootItems[0];
+        handleItemSelect(firstRootItem);
+      }
     } else {
       args.showErrorToast?.(result?.result?.message || result?.error || "Failed to load root vertices");
     }
@@ -543,7 +549,6 @@ return {
 return `._id {
   overflow-y: auto;
   padding: 8px;
-  border-right: 1px solid ${args.theme.var.color.border};
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -755,6 +760,8 @@ return `._id {
   height: 100%;
   cursor: col-resize;
   background-color: transparent;
+  border-left: 1px solid ${args.theme.var.color.border};
+  border-right: 1px solid ${args.theme.var.color.border};
   transition: background-color 0.2s;
   flex-shrink: 0;
   position: relative;

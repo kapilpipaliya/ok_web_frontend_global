@@ -620,7 +620,7 @@ const selectedSidebarItem = args.fns.selectedSidebarItem;
 args.createEffect(() => {
   const item = selectedSidebarItem?.();
   // When sidebar selection changes, refresh table data
-  if (item !== undefined) {
+  if (item) {
     handleSearch();
   }
 });
@@ -761,7 +761,11 @@ return {
         props:
           '''return {
   onMount: () => {
-    args.fns.handleSearch();
+    // If sidebar is configured, don't fetch on mount
+    const hasSidebar = args.fns.hasSidebar?.();
+    if (!hasSidebar) {
+      args.fns.handleSearch();
+    }
   }
 }'''
       }
