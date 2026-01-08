@@ -76,6 +76,11 @@ const initializeFromQueryParams = () => {
     try {
       const filters = JSON.parse(searchParams.filters);
       setColumnFilters(filters);
+      // Apply filters after restoring from URL
+      // Use setTimeout to ensure store update is complete
+      setTimeout(() => {
+        applyLocalFilters();
+      }, 0);
     } catch (e) {
       console.error("Error parsing filters from query:", e);
     }
@@ -163,12 +168,35 @@ const applyLocalFilters = () => {
         }
         const cellValue = getCellValue(row, col);
         if (col.type === "text") {
-          if (!String(cellValue || "").toLowerCase().includes(String(filterValue).toLowerCase())) {
-            return false;
+          // Support both single value and array (for multiple select filters)
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0) {
+              return true; // No filter applied
+            }
+            // Check if cell value matches any of the selected filter values
+            const cellValueStr = String(cellValue || "").toLowerCase();
+            const matches = filterValue.some(fv => 
+              cellValueStr.includes(String(fv).toLowerCase())
+            );
+            if (!matches) {
+              return false;
+            }
+          } else {
+            // Single value filter
+            if (!String(cellValue || "").toLowerCase().includes(String(filterValue).toLowerCase())) {
+              return false;
+            }
           }
         } else if (col.type === "select") {
-          if (cellValue !== filterValue) {
-            return false;
+          // Support both single value and array (multiple select)
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0 || !filterValue.includes(cellValue)) {
+              return false;
+            }
+          } else {
+            if (cellValue !== filterValue) {
+              return false;
+            }
           }
         } else if (col.type === "checkbox") {
           if (cellValue !== filterValue) {
@@ -210,7 +238,18 @@ const applyLocalFilters = () => {
 
 const debouncedSetSearchTerm = args.debounce(value => {
   setSearchTerm(value);
-  applyLocalFilters();
+  
+  // Check if local filters are enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  
+  if (enableLocalFilters) {
+    // Apply local filters only
+    applyLocalFilters();
+  } else {
+    // Server-side search - trigger search
+    handleSearch();
+  }
   updateQueryParams();
 }, 500);
 
@@ -335,7 +374,17 @@ const handleSort = (column) => {
     setSortConfig({ column: column.key, direction: "asc" });
   }
 
-  applyLocalFilters();
+  // Check if local sort is enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalSort = config?.enableLocalSort === true;
+  
+  if (enableLocalSort) {
+    // Apply local sort only
+    applyLocalFilters();
+  } else {
+    // Server-side sort - trigger search
+    handleSearch();
+  }
   updateQueryParams();
 };
 
@@ -356,26 +405,61 @@ const getUniqueColumnValues = (column) => {
 
 // Handle column filter change
 const handleColumnFilterChange = (columnKey, value) => {
-  // Clear filter if value is "All" or empty
-  const filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
+  // Handle array values (multiple select)
+  let filterValue;
+  if (Array.isArray(value)) {
+    // Remove "_All_VALUES_" if present and filter out empty values
+    const filtered = value.filter(v => v !== "_All_VALUES_" && v !== "" && v !== null && v !== undefined);
+    filterValue = filtered.length === 0 ? undefined : filtered;
+  } else {
+    // Single value - clear if "All" or empty
+    filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
+  }
 
   if (filterValue === undefined) {
     // Remove the filter key from columnFilters
     setColumnFilters(columnKey, undefined);
   } else {
-    setColumnFilters(columnKey, filterValue );
+    setColumnFilters(columnKey, filterValue);
   }
 
-  applyLocalFilters();
+  // Check if local filters are enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  
+  if (enableLocalFilters) {
+    // Apply local filters only
+    applyLocalFilters();
+  } else {
+    // Server-side filters - trigger search
+    handleSearch();
+  }
   updateQueryParams();
 };
 
 // Handle search
 const handleSearch = () => {
-  args.fns.fetchData(searchTerm(), columnFilters, sortConfig, data => {
-    setData(data);
-    applyLocalFilters();
-  });
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  const enableLocalSort = config?.enableLocalSort === true;
+  
+  // If local filters/sort are enabled, fetch all data and apply locally
+  // Otherwise, pass filters/sort to server
+  args.fns.fetchData(
+    enableLocalFilters ? undefined : searchTerm(), 
+    enableLocalFilters ? undefined : columnFilters, 
+    enableLocalSort ? undefined : sortConfig, 
+    data => {
+      setData(data);
+      // Always apply local filters if enabled, or if server didn't filter
+      if (enableLocalFilters || enableLocalSort) {
+        applyLocalFilters();
+      } else {
+        // Server already filtered, just set filtered data to match data
+        setFilteredData(data);
+      }
+    }
+  );
 };
 
 // Handle row selection (using vertex IDs)
@@ -1750,7 +1834,8 @@ return {
           '''
 const column = args.contextData.column;
 const columnFilters = args.fns.columnFilters;
-const filterValue = columnFilters[column.key] || "";
+// Preserve array values from URL - don't default to empty string for select filters
+const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (column.type === "select" || column.filterType === "select" ? [] : "");
 
 return `._id {
   width: 100%;
@@ -1762,7 +1847,16 @@ return `._id {
           '''
 const column = args.contextData.column;
 const columnFilters = args.fns.columnFilters;
-const filterValue = columnFilters[column.key] || "";
+// Access store reactively - ensure we get the current value
+const getFilterValue = () => {
+  const value = columnFilters[column.key];
+  if (value !== undefined) {
+    return value;
+  }
+  // Default to empty array for select filters, empty string for others
+  return (column.type === "select" || column.filterType === "select") ? [] : "";
+};
+const filterValue = getFilterValue();
 
 // Skip filter for rowNumber
 if (column.key === "__rowNumber" || column.type === "rowNumber") {
@@ -1771,13 +1865,20 @@ if (column.key === "__rowNumber" || column.type === "rowNumber") {
 
 // Render appropriate filter component based on column type
 if (column.type === "select" && column.options) {
+  // Normalize filterValue to array for multiple select
+  // Ensure values match option values exactly
+  const normalizedValue = Array.isArray(filterValue) 
+    ? filterValue.filter(v => v !== null && v !== undefined && v !== "")
+    : (filterValue ? [filterValue] : []);
+  
   return {
     componentName: "TomSelect",
-    value: filterValue || "",
+    value: normalizedValue,
     onChange: (newValue) => args.fns.handleColumnFilterChange(column.key, newValue),
     options: [{ value: "_All_VALUES_", label: "All" }, ...column.options],
     placeholder: "Filter...",
-    search: false
+    search: false,
+    multiple: true
   };
 }
 
@@ -1809,14 +1910,21 @@ const filterType = column.filterType || (column.type === "text" || !column.type 
 if (filterType === "select") {
   const uniqueValues = args.fns.getUniqueColumnValues(column);
   const options = [{ value: "_All_VALUES_", label: "All" }, ...uniqueValues.map(val => ({ value: val, label: val }))];
+  
+  // Normalize filterValue to array for multiple select
+  // Ensure values match option values exactly and filter out invalid values
+  const normalizedValue = Array.isArray(filterValue) 
+    ? filterValue.filter(v => v !== null && v !== undefined && v !== "" && v !== "_All_VALUES_")
+    : (filterValue && filterValue !== "_All_VALUES_" ? [filterValue] : []);
 
   return {
     componentName: "TomSelect",
-    value: filterValue || "",
+    value: normalizedValue,
     onChange: (newValue) => args.fns.handleColumnFilterChange(column.key, newValue),
     options: options,
     placeholder: "Filter...",
-    search: true
+    search: true,
+    multiple: true
   };
 }
 

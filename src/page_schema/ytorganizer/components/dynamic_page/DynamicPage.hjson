@@ -74,12 +74,17 @@ const getGenericDataFunction = () => {
       const { config } = getCachedConfig();
       const enableUserScopingForContent = config?.enableUserScopingForContent === true;
 
+      // Get config to check if local filters/sort are enabled
+      const enableLocalFilters = config?.enableLocalFilters === true;
+      const enableLocalSort = config?.enableLocalSort === true;
+
       // Build filter parameters
+      // Skip filters/sort if local filtering/sorting is enabled
       const filterParams = {
         tableVertexLabel,
-        search: filters.search,
-        filters: filters.filters,
-        sort: filters.sort,
+        search: enableLocalFilters ? undefined : filters.search,
+        filters: enableLocalFilters ? undefined : filters.filters,
+        sort: enableLocalSort ? undefined : filters.sort,
         enableUserScoping: enableUserScopingForContent
       };
 
@@ -519,6 +524,8 @@ const evaluateConfig = () => {
     hooks: args.contextData.props?.hooks,
     enableUserScopingForSidebar: args.contextData.props?.enableUserScopingForSidebar,
     enableUserScopingForContent: args.contextData.props?.enableUserScopingForContent,
+    enableLocalFilters: args.contextData.props?.enableLocalFilters,
+    enableLocalSort: args.contextData.props?.enableLocalSort,
     sidebar: args.contextData.props?.sidebar
   };
   setEvaluatedConfig(config);

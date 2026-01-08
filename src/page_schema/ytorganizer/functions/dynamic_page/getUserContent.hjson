@@ -70,8 +70,14 @@ if (filters && typeof filters === "object") {
   for (const [key, value] of Object.entries(filters)) {
     if (value !== undefined && value !== null && value !== "") {
       const paramKey = `filter_${key}`;
-      whereConditions.push(`c.${key} = $${paramKey}`);
-      queryParams[paramKey] = value;
+      // Support both single values and arrays (for multiple select filters)
+      if (Array.isArray(value) && value.length > 0) {
+        whereConditions.push(`c.${key} IN $${paramKey}`);
+        queryParams[paramKey] = value;
+      } else if (!Array.isArray(value)) {
+        whereConditions.push(`c.${key} = $${paramKey}`);
+        queryParams[paramKey] = value;
+      }
     }
   }
 }

@@ -566,6 +566,8 @@ const settingsConfigs = [
   uniqueKeys: [],
   enableUserScopingForSidebar: false,
   enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
   hooks: {
     // Hooks for fetching data - syncs Shopify products when fetching uncategorized
     beforeFetchData: "shopifyProductBeforeFetchData",
