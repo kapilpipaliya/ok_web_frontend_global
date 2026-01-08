@@ -567,9 +567,9 @@ const settingsConfigs = [
   enableUserScopingForSidebar: false,
   enableUserScopingForContent: false,
   hooks: {
-    // Hooks for fetching data
+    // Hooks for fetching data - syncs Shopify products when fetching uncategorized
     beforeFetchData: "shopifyProductBeforeFetchData",
-    afterFetchData: ["shopifyProductAfterFetchData", "shopifyProductLogFetch"],
+    /*afterFetchData: ["shopifyProductAfterFetchData", "shopifyProductLogFetch"],
     // Hooks for saving items (add/edit/delete)
     beforeSave: "shopifyProductBeforeSave",
     afterSave: "shopifyProductAfterSave",
@@ -593,6 +593,7 @@ const settingsConfigs = [
     afterGetUserVertices: "shopifyProductAfterGetUserVertices",
     beforeGetVertexChildren: "shopifyProductBeforeGetVertexChildren",
     afterGetVertexChildren: ["shopifyProductAfterGetVertexChildren", "shopifyProductLogGetChildren"]
+    */
   },
   sidebar: {
     enabled: true,

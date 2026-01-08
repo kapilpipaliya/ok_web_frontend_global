@@ -175,11 +175,11 @@ if (!enableUserScoping) {
   }
 }
 
-const result = await args.session.run(query, queryParams);
+const queryResult = await args.session.run(query, queryParams);
 
 // Convert to vertex format with relationships
 const itemsMap = new Map();
-result.records.forEach(record => {
+for (const record of queryResult.records) {
   const node = record.get('c');
   const vertex = args.convertNodeToJson(node);
   const elementId = node.elementId;
@@ -192,7 +192,7 @@ result.records.forEach(record => {
 
   // Add relationships
   const relationships = record.get('relationships') || [];
-  relationships.forEach(relData => {
+  for (const relData of relationships) {
     if (relData.rel && relData.target) {
       const targetVertex = args.convertNodeToJson(relData.target);
       if (!itemsMap.get(elementId).OUT[relData.rel]) {
@@ -205,8 +205,8 @@ result.records.forEach(record => {
         itemsMap.set(relData.target.elementId, targetVertex);
       }
     }
-  });
-});
+  }
+}
 
 const items = Array.from(itemsMap.values()).filter(v => v.L.includes(vertexLabel));
 

@@ -1,0 +1,370 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Syncs Shopify products with database when fetching uncategorized products. Fetches all products from Shopify and creates/updates/deletes ShopifyProduct vertices accordingly.
+        body:
+          '''
+// Only sync when fetching for 'uncategorized' category (showUnassigned = true or categoryId === 'uncategorized')
+// and tableVertexLabel is 'ShopifyProduct'
+const { tableVertexLabel, showUnassigned, categoryId } = args.contextData;
+
+if (tableVertexLabel !== 'ShopifyProduct' || (!showUnassigned && categoryId !== 'uncategorized')) {
+  // Not fetching uncategorized Shopify products, skip sync
+  return;
+}
+
+console.log('🔄 Syncing Shopify products with database...');
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductBeforeFetchData: getSessionUser failed", e);
+  return; // Can't sync without shop info
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductBeforeFetchData: Shop domain is missing, skipping sync");
+  return;
+}
+
+// Get Shopify params from session
+const shopifyParams = sessionUser?.P?.shopifyParams || {};
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const origin = args.request ? new URL(args.request.url).origin : "https://ysaar.com";
+  const url = new URL(`${origin}/shopify`);
+  for (const [key, value] of Object.entries(shopifyParams)) {
+    if (typeof value !== "undefined" && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  }
+
+  const request = {
+    query: shopifyParams,
+    url: url.toString(),
+    headers: {
+      get(name) {
+        if (shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined") {
+          return shopifyParams.headers[name];
+        }
+        return undefined;
+      },
+      has(name) {
+        return shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined";
+      }
+    },
+  };
+
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyProductBeforeFetchData: Shopify authentication failed", authError);
+  return; // Can't sync without authentication
+}
+
+// Fetch all products from Shopify using pagination
+const commonProductFields = `
+  id
+  title
+  descriptionHtml
+  vendor
+  productType
+  createdAt
+  updatedAt
+  publishedAt
+  status
+  tags
+  handle
+  variants(first: 20) {
+    edges {
+      node {
+        title
+        price
+        compareAtPrice
+        sku
+        inventoryQuantity
+        taxable
+        barcode
+        inventoryPolicy
+        id
+        taxCode
+        updatedAt
+      }
+    }
+  }
+  media(first: 20) {
+    edges {
+      node {
+        alt
+        id
+        mediaContentType
+        mediaErrors {
+          code
+          details
+          message
+        }
+        mediaWarnings {
+          code
+          message
+        }
+        preview {
+          status
+          image {
+            altText
+            height
+            id
+            metafields (first:10) {
+              nodes {
+                key
+                value
+              }
+            }
+            url
+            width
+          }
+        }
+        status
+      }
+    }
+  }
+  options {
+    name
+    position
+    values
+  }
+  metafields(first: 20) {
+    edges {
+      node {
+        key
+        value
+        type
+        namespace
+      }
+    }
+  }
+  category {
+    id
+    level
+    name
+    parentId
+    isRoot
+    isArchived
+    isLeaf
+    fullName
+  }
+  collections (first:20) {
+    nodes {
+      title
+      id
+    }
+  }
+  mediaCount {
+    count
+    precision
+  }
+  onlineStoreUrl
+  totalInventory
+  tracksInventory
+`;
+
+let allShopifyProducts = [];
+let hasNextPage = true;
+let cursor = null;
+
+console.log('📦 Fetching all products from Shopify...');
+
+while (hasNextPage) {
+  // Construct pagination parameters
+  const paginationParams = cursor ? `first: 250, after: "${cursor}"` : `first: 250`;
+  
+  const productsQuery = `
+    query {
+      products(${paginationParams}) {
+        edges {
+          node {
+            ${commonProductFields}
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await admin.graphql(productsQuery);
+    
+    // Handle Response object - extract JSON if it's a Response
+    let apiResponse;
+    if (response instanceof Response) {
+      apiResponse = await response.json();
+    } else {
+      apiResponse = response;
+    }
+
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error("Shopify Admin GraphQL errors:", apiResponse.errors);
+      break; // Stop pagination on error
+    }
+
+    const pageProducts = apiResponse.data.products.edges.map((edge) => {
+      const node = edge.node;
+      return {
+        ...node,
+        variants: node.variants?.edges?.map((v) => v.node) || [],
+        media: node.media?.edges?.map((m) => m.node) || [],
+        metafields: node.metafields?.edges?.map((m) => m.node) || [],
+        collections: node.collections?.nodes || []
+      };
+    });
+
+    allShopifyProducts = [...allShopifyProducts, ...pageProducts];
+    
+    // Update pagination variables
+    hasNextPage = apiResponse.data.products.pageInfo.hasNextPage;
+    if (hasNextPage && apiResponse.data.products.edges.length > 0) {
+      cursor = apiResponse.data.products.edges[apiResponse.data.products.edges.length - 1].cursor;
+    }
+    
+    console.log(`📦 Retrieved ${allShopifyProducts.length} products so far...`);
+    
+    // Small delay to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 500));
+  } catch (error) {
+    console.error("Error fetching products from Shopify:", error);
+    break; // Stop pagination on error
+  }
+}
+
+console.log(`✅ Found ${allShopifyProducts.length} products in Shopify`);
+
+// Get all existing ShopifyProduct vertices from database
+const existingProductsResult = await args.session.run(
+  `MATCH (p:ShopifyProduct)
+   RETURN elementId(p) as elementId, p.id as id`,
+  {}
+);
+
+const existingProducts = new Map();
+for (const record of existingProductsResult.records) {
+  const elementId = record.get('elementId');
+  const id = record.get('id');
+  if (id) {
+    existingProducts.set(id, elementId);
+  }
+}
+
+console.log(`📊 Found ${existingProducts.size} existing products in database`);
+
+// Extract Shopify product IDs from fetched products
+const shopifyProductIds = new Set(allShopifyProducts.map(p => p.id));
+
+// Find products to delete (exist in DB but not in Shopify)
+const productsToDelete = [];
+for (const [id, dbId] of existingProducts) {
+  if (!shopifyProductIds.has(id)) {
+    productsToDelete.push(dbId);
+  }
+}
+
+// Delete products that no longer exist in Shopify
+if (productsToDelete.length > 0) {
+  console.log(`🗑️  Deleting ${productsToDelete.length} products that no longer exist in Shopify...`);
+  await args.session.run(
+    `MATCH (p:ShopifyProduct)
+     WHERE elementId(p) IN $ids
+     DETACH DELETE p`,
+    { ids: productsToDelete }
+  );
+  console.log(`✅ Deleted ${productsToDelete.length} products`);
+}
+
+// Create or update products
+let createdCount = 0;
+let updatedCount = 0;
+
+for (const shopifyProduct of allShopifyProducts) {
+  const id = shopifyProduct.id;
+  const existingDbId = existingProducts.get(id);
+
+  // Prepare product properties
+  const productProperties = {
+    id: id,
+    title: shopifyProduct.title || '',
+    handle: shopifyProduct.handle || '',
+    descriptionHtml: shopifyProduct.descriptionHtml || '',
+    vendor: shopifyProduct.vendor || '',
+    productType: shopifyProduct.productType || '',
+    status: shopifyProduct.status || '',
+    tags: shopifyProduct.tags || [],
+    createdAt: shopifyProduct.createdAt || new Date().toISOString(),
+    updatedAt: shopifyProduct.updatedAt || new Date().toISOString(),
+    publishedAt: shopifyProduct.publishedAt || null,
+    onlineStoreUrl: shopifyProduct.onlineStoreUrl || null,
+    totalInventory: shopifyProduct.totalInventory || 0,
+    tracksInventory: shopifyProduct.tracksInventory || false,
+    variantsCount: shopifyProduct.variants?.length || 0,
+    // Store complex objects as JSON strings
+    variants: JSON.stringify(shopifyProduct.variants || []),
+    media: JSON.stringify(shopifyProduct.media || []),
+    metafields: JSON.stringify(shopifyProduct.metafields || []),
+    collections: JSON.stringify(shopifyProduct.collections || []),
+    options: JSON.stringify(shopifyProduct.options || []),
+    category: shopifyProduct.category ? JSON.stringify(shopifyProduct.category) : null
+  };
+
+  if (existingDbId) {
+    // Update existing product
+    const propertyKeys = Object.keys(productProperties);
+    const propertyAssignments = propertyKeys.map((key, index) => `p.${key} = $prop${index}`).join(', ');
+
+    await args.session.run(
+      `MATCH (p:ShopifyProduct)
+       WHERE elementId(p) = $id
+       SET ${propertyAssignments},
+           p.updatedAt = datetime()`,
+      {
+        id: existingDbId,
+        ...Object.fromEntries(Object.entries(productProperties).map(([key, value], index) => [`prop${index}`, value]))
+      }
+    );
+    updatedCount++;
+  } else {
+    // Create new product
+    const propertyKeys = Object.keys(productProperties);
+    const propertyAssignments = propertyKeys.map((key, index) => `p.${key} = $prop${index}`).join(', ');
+
+    await args.session.run(
+      `CREATE (p:ShopifyProduct)
+       SET ${propertyAssignments},
+           p.createdAt = datetime(),
+           p.updatedAt = datetime()`,
+      Object.fromEntries(Object.entries(productProperties).map(([key, value], index) => [`prop${index}`, value]))
+    );
+    createdCount++;
+  }
+}
+
+console.log(`✅ Sync complete: Created ${createdCount}, Updated ${updatedCount}, Deleted ${productsToDelete.length}`);
+'''
+        key: shopifyProductBeforeFetchData
+      }
+    }
+  ]
+  edges: []
+}
+
