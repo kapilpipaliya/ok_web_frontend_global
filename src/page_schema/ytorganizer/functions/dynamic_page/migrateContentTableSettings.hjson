@@ -566,6 +566,34 @@ const settingsConfigs = [
   uniqueKeys: [],
   enableUserScopingForSidebar: false,
   enableUserScopingForContent: false,
+  hooks: {
+    // Hooks for fetching data
+    beforeFetchData: "shopifyProductBeforeFetchData",
+    afterFetchData: ["shopifyProductAfterFetchData", "shopifyProductLogFetch"],
+    // Hooks for saving items (add/edit/delete)
+    beforeSave: "shopifyProductBeforeSave",
+    afterSave: "shopifyProductAfterSave",
+    // Hooks for category operations
+    beforeAddCategory: "shopifyProductBeforeAddCategory",
+    afterAddCategory: "shopifyProductAfterAddCategory",
+    beforeMoveCategory: "shopifyProductBeforeMoveCategory",
+    afterMoveCategory: "shopifyProductAfterMoveCategory",
+    // Hooks for moving items to category
+    beforeMoveItemsToCategory: "shopifyProductBeforeMoveItemsToCategory",
+    afterMoveItemsToCategory: "shopifyProductAfterMoveItemsToCategory",
+    // Hooks for import/export operations
+    beforeImport: "shopifyProductBeforeImport",
+    afterImport: ["shopifyProductAfterImport", "shopifyProductLogImport"],
+    beforeExport: "shopifyProductBeforeExport",
+    afterExport: "shopifyProductAfterExport",
+    // Hooks for relationship and vertex operations
+    beforeCreateRelationship: "shopifyProductBeforeCreateRelationship",
+    afterCreateRelationship: "shopifyProductAfterCreateRelationship",
+    beforeGetUserVertices: "shopifyProductBeforeGetUserVertices",
+    afterGetUserVertices: "shopifyProductAfterGetUserVertices",
+    beforeGetVertexChildren: "shopifyProductBeforeGetVertexChildren",
+    afterGetVertexChildren: ["shopifyProductAfterGetVertexChildren", "shopifyProductLogGetChildren"]
+  },
   sidebar: {
     enabled: true,
     parentVertexLabel: "ShopifyProductCategory",

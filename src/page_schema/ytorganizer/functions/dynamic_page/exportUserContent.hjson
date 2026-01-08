@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { tableVertexLabel, format = "csv", data, columns, enableUserScoping } = args.contextData;
+const { tableVertexLabel, format = "csv", data, columns, enableUserScoping, hooks } = args.contextData;
 
 if (!tableVertexLabel) {
   return {
@@ -64,6 +64,15 @@ if (items.length === 0) {
     message: "No data to export"
   };
 }
+
+// Execute beforeExport hooks
+await args.executeHooks(hooks?.beforeExport, {
+  tableVertexLabel,
+  format,
+  itemsCount: items.length,
+  columns,
+  enableUserScoping
+});
 
 // Export to CSV
 if (format === "csv") {
@@ -132,12 +141,24 @@ if (format === "csv") {
     csv += values.join(",") + "\\n";
   });
 
-  return {
+  const csvResult = {
     success: true,
     data: csv,
     contentType: "text/csv",
     filename: `${tableVertexLabel}_export_${new Date().toISOString().split("T")[0]}.csv`
   };
+
+  // Execute afterExport hooks
+  await args.executeHooks(hooks?.afterExport, {
+    tableVertexLabel,
+    format,
+    itemsCount: items.length,
+    columns,
+    enableUserScoping,
+    result: csvResult
+  });
+
+  return csvResult;
 }
 
 // Export to JSON
@@ -151,18 +172,42 @@ if (format === "json") {
     return cleanItem;
   });
 
-  return {
+  const jsonResult = {
     success: true,
     data: JSON.stringify(jsonData, null, 2),
     contentType: "application/json",
     filename: `${tableVertexLabel}_export_${new Date().toISOString().split("T")[0]}.json`
   };
+
+  // Execute afterExport hooks
+  await args.executeHooks(hooks?.afterExport, {
+    tableVertexLabel,
+    format,
+    itemsCount: items.length,
+    columns,
+    enableUserScoping,
+    result: jsonResult
+  });
+
+  return jsonResult;
 }
 
-return {
+const unsupportedResult = {
   success: false,
   message: `Unsupported format: ${format}`
 };
+
+// Execute afterExport hooks even on failure
+await args.executeHooks(hooks?.afterExport, {
+  tableVertexLabel,
+  format,
+  itemsCount: items.length,
+  columns,
+  enableUserScoping,
+  result: unsupportedResult
+});
+
+return unsupportedResult;
 '''
         key: exportUserContent
       }

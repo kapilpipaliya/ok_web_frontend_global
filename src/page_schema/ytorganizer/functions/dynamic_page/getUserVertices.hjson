@@ -21,7 +21,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { label, userUuid, search = "", limit = 100, relationshipType, enableUserScoping } = args.contextData;
+const { label, userUuid, search = "", limit = 100, relationshipType, enableUserScoping, hooks } = args.contextData;
 
 if (!label) {
   return {
@@ -33,6 +33,16 @@ if (!label) {
 
 // Use provided userUuid or current user's uuid (only if scoping is enabled)
 const targetUserUuid = enableUserScoping ? (userUuid || user.P.uuid) : null;
+
+// Execute beforeGetUserVertices hooks
+await args.executeHooks(hooks?.beforeGetUserVertices, {
+  label,
+  userUuid: targetUserUuid,
+  search,
+  limit,
+  relationshipType,
+  enableUserScoping
+});
 
 // Build query
 let query;
@@ -83,11 +93,24 @@ const result = await args.session.run(query, params);
 // Use processResult to populate graph structure
 const vertices = args.processResult(result.records, args.context, 'v');
 
-return {
+const resultData = {
   success: true,
   data: vertices,
   message: `Found ${vertices.length} ${label} vertices`
 };
+
+// Execute afterGetUserVertices hooks
+await args.executeHooks(hooks?.afterGetUserVertices, {
+  label,
+  userUuid: targetUserUuid,
+  search,
+  limit,
+  relationshipType,
+  enableUserScoping,
+  result: resultData
+});
+
+return resultData;
 '''
         key: getUserVertices
       }

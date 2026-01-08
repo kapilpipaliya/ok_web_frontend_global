@@ -49,7 +49,8 @@ const fetchRoot = async () => {
         rootKeys,
         tableVertexLabel,
         relationshipType,
-        enableUserScoping
+        enableUserScoping,
+        hooks: args.contextData.props?.hooks
       }
     });
 
@@ -127,7 +128,8 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
         parentId,
         tableVertexLabel,
         relationshipType,
-        enableUserScoping
+        enableUserScoping,
+        hooks: args.contextData.props?.hooks
       }
     });
 
@@ -503,7 +505,8 @@ return {
   getOnMoveItemsToCategory: () => args.contextData.props?.onMoveItemsToCategory,
   getAllVisibleItems,
   navigateToCategory,
-  handleSidebarKeyDown
+  handleSidebarKeyDown,
+  getHooks: () => args.contextData.props?.hooks
 };
 '''
         key: Sidebar
@@ -744,7 +747,8 @@ return {
   enableUserScoping: args.contextData.props?.enableUserScoping,
   onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory(),
   fetchRoot: args.fns.fetchRoot,
-  getRoot: args.fns.getRoot
+  getRoot: args.fns.getRoot,
+  hooks: args.fns.getHooks()
 };
 '''
       }
@@ -869,7 +873,8 @@ return {
   tableVertexLabel: args.fns.getTableVertexLabel(),
   relationshipType: args.fns.getRelationshipType(),
   onSave: args.fns.handleAddRootSave,
-  onClose: args.fns.handleCloseAddRootModal
+  onClose: args.fns.handleCloseAddRootModal,
+  hooks: args.fns.getHooks()
 };
 '''
       }

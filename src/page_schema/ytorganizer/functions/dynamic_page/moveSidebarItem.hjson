@@ -26,7 +26,8 @@ const {
   parentVertexLabel, 
   toParentEdgeType, 
   rootKeys = {},
-  enableUserScoping
+  enableUserScoping,
+  hooks
 } = args.contextData;
 
 if (!categoryId) {
@@ -51,6 +52,16 @@ const userUuid = enableUserScoping ? user.P.uuid : null;
 if (!args.context.deletedEdges) {
   args.context.deletedEdges = [];
 }
+
+// Execute beforeMoveCategory hooks
+await args.executeHooks(hooks?.beforeMoveCategory, {
+  categoryId,
+  newParentId,
+  parentVertexLabel,
+  toParentEdgeType,
+  rootKeys,
+  enableUserScoping
+});
 
 try {
   // Validate: Cannot move root vertex
@@ -208,8 +219,7 @@ try {
     args.processResult(createResult.records, args.context, [], 'r');
   }
 
-  // Return success
-  return {
+  const result = {
     success: true,
     message: "Category moved successfully",
     data: {
@@ -217,6 +227,19 @@ try {
       newParentId: newParentId || null
     }
   };
+  
+  // Execute afterMoveCategory hooks
+  await args.executeHooks(hooks?.afterMoveCategory, {
+    categoryId,
+    newParentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    enableUserScoping,
+    result: result
+  });
+  
+  return result;
 } catch (error) {
   console.error("Error moving sidebar item:", error);
   return {

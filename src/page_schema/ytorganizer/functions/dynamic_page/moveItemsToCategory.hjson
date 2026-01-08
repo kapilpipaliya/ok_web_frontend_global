@@ -28,7 +28,8 @@ const {
   contentLabel, 
   enableUserScopingForSidebar, 
   enableUserScopingForContent,
-  sourceCategoryId 
+  sourceCategoryId,
+  hooks
 } = args.contextData;
 
 if (!contentIds || !Array.isArray(contentIds) || contentIds.length === 0) {
@@ -56,6 +57,18 @@ if (!args.context.deletedEdges) {
 
 // If categoryId is null, undefined, or 'uncategorized', remove relationships
 const isUncategorized = !categoryId || categoryId === 'uncategorized';
+
+// Execute beforeMoveItemsToCategory hooks
+await args.executeHooks(hooks?.beforeMoveItemsToCategory, {
+  contentIds,
+  categoryId,
+  relationshipType,
+  categoryLabel,
+  contentLabel,
+  enableUserScopingForSidebar,
+  enableUserScopingForContent,
+  sourceCategoryId
+});
 
 try {
   let query;
@@ -200,11 +213,26 @@ try {
       }
     }
     
-    return {
+    const uncategorizedResult = {
       success: true,
       message: `Removed ${successCount} relationship${successCount !== 1 ? 's' : ''} successfully`,
       data: { movedCount: successCount, updatedCounts: Object.keys(updatedCounts).length > 0 ? updatedCounts : undefined }
     };
+    
+    // Execute afterMoveItemsToCategory hooks
+    await args.executeHooks(hooks?.afterMoveItemsToCategory, {
+      contentIds,
+      categoryId,
+      relationshipType,
+      categoryLabel,
+      contentLabel,
+      enableUserScopingForSidebar,
+      enableUserScopingForContent,
+      sourceCategoryId,
+      result: uncategorizedResult
+    });
+    
+    return uncategorizedResult;
   } else {
     // Create relationships for all content items to the category
     // Before creating, remove any existing relationships for these items
@@ -455,7 +483,7 @@ try {
         }
       }
       
-      return {
+      const moveResult = {
         success: true,
         message: `Moved ${successCount} item${successCount !== 1 ? 's' : ''} successfully${errorCount > 0 ? ` (${errorCount} failed)` : ''}`,
         data: { 
@@ -465,12 +493,42 @@ try {
           updatedCounts
         }
       };
+      
+      // Execute afterMoveItemsToCategory hooks
+      await executeHooks(hooks?.afterMoveItemsToCategory, {
+        contentIds,
+        categoryId,
+        relationshipType,
+        categoryLabel,
+        contentLabel,
+        enableUserScopingForSidebar,
+        enableUserScopingForContent,
+        sourceCategoryId,
+        result: moveResult
+      });
+      
+      return moveResult;
     } else {
-      return {
+      const failResult = {
         success: false,
         message: `Failed to move items: ${errors.join('; ')}`,
         data: { movedCount: 0, errorCount, errors }
       };
+      
+      // Execute afterMoveItemsToCategory hooks even on failure
+      await executeHooks(hooks?.afterMoveItemsToCategory, {
+        contentIds,
+        categoryId,
+        relationshipType,
+        categoryLabel,
+        contentLabel,
+        enableUserScopingForSidebar,
+        enableUserScopingForContent,
+        sourceCategoryId,
+        result: failResult
+      });
+      
+      return failResult;
     }
   }
 } catch (error) {

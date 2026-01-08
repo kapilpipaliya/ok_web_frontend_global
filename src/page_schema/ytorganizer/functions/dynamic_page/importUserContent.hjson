@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { tableVertexLabel, data, enableUserScoping } = args.contextData;
+const { tableVertexLabel, data, enableUserScoping, hooks } = args.contextData;
 
 if (!tableVertexLabel) {
   return {
@@ -86,6 +86,14 @@ if (items.length === 0) {
   };
 }
 
+// Execute beforeImport hooks
+await args.executeHooks(hooks?.beforeImport, {
+  tableVertexLabel,
+  data: dataTrimmed,
+  itemsCount: items.length,
+  enableUserScoping
+});
+
 // Prepare batch insert data
 const batchItems = items.map(item => {
   const { id, elementId, ...cleanItem } = item;
@@ -136,7 +144,7 @@ try {
   errors.push(`Batch import failed: ${error.message}`);
 }
 
-return {
+const result = {
   success: true,
   message: `Imported ${successCount} ${tableVertexLabel}s${errorCount > 0 ? `, ${errorCount} failed` : ""}`,
   data: {
@@ -145,6 +153,17 @@ return {
     errors: errors.length > 0 ? errors : undefined
   }
 };
+
+// Execute afterImport hooks
+await args.executeHooks(hooks?.afterImport, {
+  tableVertexLabel,
+  data: dataTrimmed,
+  itemsCount: items.length,
+  enableUserScoping,
+  result: result
+});
+
+return result;
 '''
         key: importUserContent
       }

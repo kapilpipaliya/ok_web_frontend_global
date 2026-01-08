@@ -468,18 +468,22 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
   const toParentEdgeType = getToParentEdgeType();
   const rootKeys = args.contextData.props?.rootKeys || {};
   const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+  const hooks = args.contextData.props?.hooks;
+  
+  const moveContextData = {
+    categoryId,
+    newParentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    enableUserScoping,
+    hooks: hooks
+  };
   
   try {
     const result = await args.executeNamedServerFunction({
       functionName: "moveSidebarItem",
-      contextData: {
-        categoryId,
-        newParentId,
-        parentVertexLabel,
-        toParentEdgeType,
-        rootKeys,
-        enableUserScoping
-      }
+      contextData: moveContextData
     });
 
     if (result?.result?.success) {
@@ -1304,7 +1308,8 @@ return {
   tableVertexLabel: tableVertexLabel,
   relationshipType: relationshipType,
   onSave: args.fns.handleAddChildSave,
-  onClose: args.fns.handleCloseAddModal
+  onClose: args.fns.handleCloseAddModal,
+  hooks: args.contextData.props?.hooks
 };
 '''
       }
@@ -1331,6 +1336,7 @@ const relationshipType = args.contextData.props?.relationshipType;
 return {
   isOpen: args.fns.isEditModalOpen(),
   formConfig: formConfig,
+  hooks: args.contextData.props?.hooks,
   vertexId: item?.id,
   parentId: null, // Don't change parent on edit
   parentVertexLabel: parentVertexLabel,

@@ -18,7 +18,7 @@ if (!actualUser) {
 }
 
 // Extract parameters
-const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType, enableUserScoping } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, parentId, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks } = args.contextData;
 
 if (!parentVertexLabel || !toParentEdgeType) {
   return {
@@ -35,6 +35,17 @@ if (enableUserScoping) {
   user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
   userUuid = user.P.uuid;
 }
+
+// Execute beforeGetVertexChildren hooks
+await args.executeHooks(hooks?.beforeGetVertexChildren, {
+  parentVertexLabel,
+  toParentEdgeType,
+  parentId,
+  rootKeys,
+  tableVertexLabel,
+  relationshipType,
+  enableUserScoping
+});
 
 // If parentId is provided, fetch children of that parent
 // Relationship direction: child-[toParentEdgeType]->parent
@@ -103,11 +114,25 @@ if (parentId) {
     }
   }
 
-  return {
+  const resultData = {
     success: true,
     data: vertices,
     message: `Found ${vertices.length} children`
   };
+
+  // Execute afterGetVertexChildren hooks
+  await args.executeHooks(hooks?.afterGetVertexChildren, {
+    parentVertexLabel,
+    toParentEdgeType,
+    parentId,
+    rootKeys,
+    tableVertexLabel,
+    relationshipType,
+    enableUserScoping,
+    result: resultData
+  });
+
+  return resultData;
 }
 
 // If rootKeys is provided, fetch root vertices
@@ -276,19 +301,47 @@ if (rootKeys) {
     ? [uncategorizedVertex, ...vertices]
     : vertices;
 
-  return {
+  const resultData = {
     success: true,
     data: finalVertices,
     message: `Found ${finalVertices.length} root vertices`
   };
+
+  // Execute afterGetVertexChildren hooks
+  await args.executeHooks(hooks?.afterGetVertexChildren, {
+    parentVertexLabel,
+    toParentEdgeType,
+    parentId: null,
+    rootKeys,
+    tableVertexLabel,
+    relationshipType,
+    enableUserScoping,
+    result: resultData
+  });
+
+  return resultData;
 }
 
 // Default: return empty array
-return {
+const defaultResult = {
   success: true,
   data: [],
   message: "No parentId or rootKeys provided"
 };
+
+// Execute afterGetVertexChildren hooks even for default case
+await args.executeHooks(hooks?.afterGetVertexChildren, {
+  parentVertexLabel,
+  toParentEdgeType,
+  parentId: null,
+  rootKeys: null,
+  tableVertexLabel,
+  relationshipType,
+  enableUserScoping,
+  result: defaultResult
+});
+
+return defaultResult;
 '''
         key: getVertexChildren
       }

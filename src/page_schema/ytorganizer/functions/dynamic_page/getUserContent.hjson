@@ -30,7 +30,8 @@ const {
   showUnassigned,
   parentVertexLabel,
   toParentEdgeType,
-  enableUserScoping
+  enableUserScoping,
+  hooks
 } = args.contextData;
 
 if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
@@ -109,6 +110,19 @@ if (categoryId && parentVertexLabel && toParentEdgeType) {
     whereClause = "WHERE " + unassignedCondition;
   }
 }
+
+// Execute beforeFetchData hooks
+await args.executeHooks(hooks?.beforeFetchData, {
+  tableVertexLabel,
+  search,
+  filters,
+  sort,
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType,
+  enableUserScoping
+});
 
 // Optimized query with indexed user lookup first and related vertices
 let query = "";
@@ -196,12 +210,28 @@ result.records.forEach(record => {
 
 const items = Array.from(itemsMap.values()).filter(v => v.L.includes(vertexLabel));
 
-return {
+const result = {
   success: true,
   data: items,
   relatedVertices: Array.from(itemsMap.values()).filter(v => !v.L.includes(vertexLabel)),
   message: `Found ${items.length} ${tableVertexLabel} item${items.length !== 1 ? 's' : ''}`
 };
+
+// Execute afterFetchData hooks
+await args.executeHooks(hooks?.afterFetchData, {
+  tableVertexLabel,
+  search,
+  filters,
+  sort,
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType,
+  enableUserScoping,
+  result: result
+});
+
+return result;
 '''
         key: getUserContent
       }

@@ -371,6 +371,30 @@ export async function executeNamedServerFunctionCore(
       }
     };
 
+    // Helper function to execute hooks (string or string[])
+    // Must be defined after contextAwareExecuteNamedServerFunction
+    const executeHooks = async (hooks: string | string[] | undefined, hookContextData: any = {}) => {
+      if (!hooks) return;
+      
+      // Normalize to array
+      const hookArray = Array.isArray(hooks) ? hooks : [hooks];
+      
+      // Execute each hook sequentially
+      for (const hookName of hookArray) {
+        if (!hookName || typeof hookName !== 'string') continue;
+        
+        try {
+          await contextAwareExecuteNamedServerFunction({
+            functionName: hookName,
+            contextData: hookContextData
+          });
+        } catch (error) {
+          console.error(`Error executing hook '${hookName}':`, error);
+          // Don't throw - hooks should not break the main operation
+        }
+      }
+    };
+
     // Prepare the args object that will be available in the function
     const args = {
       session: dbSession,
@@ -383,6 +407,7 @@ export async function executeNamedServerFunctionCore(
       contextData: request.contextData || {},
       vertexes: context.vertexes || [],
       executeNamedServerFunction: contextAwareExecuteNamedServerFunction,
+      executeHooks: executeHooks,
       getUserFromSession,
       convertNodeToJson,
       neo4jDriver,

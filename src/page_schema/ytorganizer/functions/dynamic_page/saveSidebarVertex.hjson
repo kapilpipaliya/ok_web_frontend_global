@@ -32,7 +32,8 @@ const {
   properties = {},
   tableVertexLabel,
   relationshipType,
-  enableUserScoping
+  enableUserScoping,
+  hooks
 } = args.contextData;
 
 const { operation = "create" } = args.contextData;
@@ -308,6 +309,19 @@ if (isUpdate) {
     }
   }
 } else {
+  // Execute beforeAddCategory hooks (only for create, not update)
+  await args.executeHooks(hooks?.beforeAddCategory, {
+    vertexId: null,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId
+  });
+  
   // Create new vertex
   const propertyKeys = Object.keys(vertexProperties);
   const propertyAssignments = propertyKeys.map((key, index) => `v.${key} = $prop${index}`).join(', ');
@@ -435,11 +449,29 @@ if (tableVertexLabel && relationshipType) {
   }
 }
 
-return {
+const result = {
   success: true,
   message: isUpdate ? "Vertex updated successfully" : "Vertex created successfully",
   data: vertex
 };
+
+// Execute afterAddCategory hooks (only for create, not update)
+if (!isUpdate) {
+  await args.executeHooks(hooks?.afterAddCategory, {
+    vertexId: vertexElementId,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId,
+    result: result
+  });
+}
+
+return result;
 '''
         key: saveSidebarVertex
       }

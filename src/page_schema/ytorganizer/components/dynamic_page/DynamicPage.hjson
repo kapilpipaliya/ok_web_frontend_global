@@ -70,7 +70,7 @@ const getGenericDataFunction = () => {
       const sidebarItem = selectedSidebarItem();
       const sidebarConfig = getSidebarConfig();
 
-      // Get config to check user scoping settings
+      // Get config to check user scoping settings and hooks
       const { config } = getCachedConfig();
       const enableUserScopingForContent = config?.enableUserScopingForContent === true;
 
@@ -101,7 +101,11 @@ const getGenericDataFunction = () => {
         }
       }
 
+      // Pass hooks to server function - hooks will be executed server-side
+      filterParams.hooks = config?.hooks;
+
       const result = await args.fns.executeYTOFunction("getUserContent", filterParams);
+
       if (result?.error) {
         args.showErrorToast?.(result.error);
         return { data: [] };
@@ -202,7 +206,7 @@ const getGenericSaveFunction = () => {
         apiData = data;
       }
 
-      // Get config to check user scoping settings
+      // Get config to check user scoping settings and hooks
       const { config } = getCachedConfig();
       const enableUserScopingForContent = config?.enableUserScopingForContent === true;
 
@@ -212,7 +216,8 @@ const getGenericSaveFunction = () => {
         data: apiData,
         elementId: originalRow?.id,
         uniqueKeys: uniqueKeys,
-        enableUserScoping: enableUserScopingForContent
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks
       });
 
       // If adding a new item and sidebar item is selected, add relationship FROM sidebar item TO new content
@@ -241,7 +246,8 @@ const getGenericSaveFunction = () => {
                 categoryLabel: sidebarConfig.parentVertexLabel,
                 contentLabel: tableVertexLabel,
                 enableUserScopingForSidebar: enableUserScopingForSidebar,
-                enableUserScopingForContent: enableUserScopingForContent
+                enableUserScopingForContent: enableUserScopingForContent,
+                hooks: config?.hooks
               });
               
               // Update category count - increment by 1
@@ -329,14 +335,15 @@ const getGenericImportFunction = () => {
   if (!tableVertexLabel) return null;
   return async ({ data }) => {
     try {
-      // Get config to check user scoping settings
+      // Get config to check user scoping settings and hooks
       const { config } = getCachedConfig();
       const enableUserScopingForContent = config?.enableUserScopingForContent === true;
 
       const result = await args.fns.executeYTOFunction("importUserContent", {
         tableVertexLabel,
         data,
-        enableUserScoping: enableUserScopingForContent
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks
       });
       if (result?.error) {
         return { success: false, message: result.error };
@@ -362,7 +369,7 @@ const getGenericExportFunction = () => {
   return async ({ data, columns }) => {
     try {
       const sanitizedColumns = JSON.parse(JSON.stringify(columns));
-      // Get config to check user scoping settings
+      // Get config to check user scoping settings and hooks
       const { config } = getCachedConfig();
       const enableUserScopingForContent = config?.enableUserScopingForContent === true;
 
@@ -371,7 +378,8 @@ const getGenericExportFunction = () => {
         format: "csv",
         data: data,
         columns: sanitizedColumns,
-        enableUserScoping: enableUserScopingForContent
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks
       });
       if (result?.error) {
         return { success: false, message: result.error };
@@ -481,13 +489,8 @@ const evaluateConfig = () => {
       const configFunction = new Function(currentSettings);
       const evaluated = configFunction();
       if (evaluated && typeof evaluated === 'object') {
-        config = {
-          columns: evaluated.columns,
-          formConfig: evaluated.formConfig,
-          uniqueKeys: evaluated.uniqueKeys || []
-        };
-        setEvaluatedConfig(config);
-        return config;
+        setEvaluatedConfig(evaluated);
+        return evaluated;
       }
     } catch (error) {
       console.error("Error evaluating settings function body:", error);
@@ -500,13 +503,8 @@ const evaluateConfig = () => {
     try {
       const evaluated = configFn();
       if (evaluated && typeof evaluated === 'object') {
-        config = {
-          columns: evaluated.columns,
-          formConfig: evaluated.formConfig,
-          uniqueKeys: evaluated.uniqueKeys || []
-        };
-        setEvaluatedConfig(config);
-        return config;
+        setEvaluatedConfig(evaluated);
+        return evaluated;
       }
     } catch (error) {
       console.error("Error evaluating config function:", error);
@@ -517,7 +515,11 @@ const evaluateConfig = () => {
   config = {
     columns: args.contextData.props?.columns || [],
     formConfig: args.contextData.props?.formConfig,
-    uniqueKeys: []
+    uniqueKeys: [],
+    hooks: args.contextData.props?.hooks,
+    enableUserScopingForSidebar: args.contextData.props?.enableUserScopingForSidebar,
+    enableUserScopingForContent: args.contextData.props?.enableUserScopingForContent,
+    sidebar: args.contextData.props?.sidebar
   };
   setEvaluatedConfig(config);
   return config;
@@ -791,18 +793,21 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       }
     }
     
+    const contextData = {
+      contentIds: contentIds,
+      categoryId: categoryId,
+      relationshipType: sidebarConfig.toParentEdgeType,
+      categoryLabel: sidebarConfig.parentVertexLabel,
+      contentLabel: tableVertexLabel,
+      enableUserScopingForSidebar: enableUserScopingForSidebar,
+      enableUserScopingForContent: enableUserScopingForContent,
+      sourceCategoryId: sourceCategoryId,
+      hooks: config?.hooks
+    };
+
     const result = await args.executeNamedServerFunction({
       functionName: "moveItemsToCategory",
-      contextData: {
-        contentIds: contentIds,
-        categoryId: categoryId,
-        relationshipType: sidebarConfig.toParentEdgeType,
-        categoryLabel: sidebarConfig.parentVertexLabel,
-        contentLabel: tableVertexLabel,
-        enableUserScopingForSidebar: enableUserScopingForSidebar,
-        enableUserScopingForContent: enableUserScopingForContent,
-        sourceCategoryId: sourceCategoryId
-      }
+      contextData: contextData
     });
 
     // Process graph data if available
@@ -916,7 +921,7 @@ const tableVertexLabel = args.fns.getTableVertexLabel();
 // Relationship type is "User" + tableVertexLabel (e.g., "UserBook", "UserAudioVideo")
 const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
 
-// Get config to check user scoping settings
+// Get config to check user scoping settings and hooks
 const { config } = args.fns.getCachedConfig();
 const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
 
@@ -932,7 +937,8 @@ return {
   onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
   sidebarWidth: args.fns.sidebarWidth,
   setSidebarWidth: args.fns.setSidebarWidth,
-  fetchRoot: args.fns.fetchRoot
+  fetchRoot: args.fns.fetchRoot,
+  hooks: config?.hooks
 };
 '''
       }

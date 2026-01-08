@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { categoryId, contentId, relationshipType, categoryLabel, contentLabel, enableUserScopingForSidebar, enableUserScopingForContent } = args.contextData;
+const { categoryId, contentId, relationshipType, categoryLabel, contentLabel, enableUserScopingForSidebar, enableUserScopingForContent, hooks } = args.contextData;
 
 if (!categoryId || !contentId || !relationshipType || !categoryLabel || !contentLabel) {
   return {
@@ -36,6 +36,17 @@ const userUuid = user.P.uuid;
 // For content: User -[UserBook/UserAudioVideo]-> Content
 const userCategoryRelType = `User${categoryLabel}`;
 const contentRelType = `User${contentLabel}`;;
+
+// Execute beforeCreateRelationship hooks
+await args.executeHooks(hooks?.beforeCreateRelationship, {
+  categoryId,
+  contentId,
+  relationshipType,
+  categoryLabel,
+  contentLabel,
+  enableUserScopingForSidebar,
+  enableUserScopingForContent
+});
 
 try {
   // Create relationship: ContentItem -[relationshipType]-> Category (content points to category)
@@ -97,25 +108,54 @@ try {
 
   const result = await args.session.run(query, queryParams);
 
+  let resultData;
   if (result.records.length > 0) {
     // Use processResult to populate graph structure with the relationship
     args.processResult(result.records, args.context, [], 'r');
-    return {
+    resultData = {
       success: true,
       message: "Relationship created successfully"
     };
   } else {
-    return {
+    resultData = {
       success: false,
       message: "Failed to create relationship. Category or content not found or not accessible."
     };
   }
+
+  // Execute afterCreateRelationship hooks
+  await args.executeHooks(hooks?.afterCreateRelationship, {
+    categoryId,
+    contentId,
+    relationshipType,
+    categoryLabel,
+    contentLabel,
+    enableUserScopingForSidebar,
+    enableUserScopingForContent,
+    result: resultData
+  });
+
+  return resultData;
 } catch (error) {
   console.error("Error creating sidebar content relationship:", error);
-  return {
+  const errorResult = {
     success: false,
     message: error.message || "Failed to create relationship"
   };
+
+  // Execute afterCreateRelationship hooks even on error
+  await args.executeHooks(hooks?.afterCreateRelationship, {
+    categoryId,
+    contentId,
+    relationshipType,
+    categoryLabel,
+    contentLabel,
+    enableUserScopingForSidebar,
+    enableUserScopingForContent,
+    result: errorResult
+  });
+
+  return errorResult;
 }
 '''
         key: createSidebarContentRelationship
