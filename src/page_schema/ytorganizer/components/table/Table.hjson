@@ -495,8 +495,7 @@ const getSelectFilterProps = (columnKey, filterValue, options) => {
 const handleColumnFilterChange = (columnKey, value) => {
   // Handle array values (multiple select)
   let filterValue;
-  setColumnFilters(columnKey, value);
-  debugger
+  setColumnFilters(columnKey, value ? JSON.parse(JSON.stringify(value)) : value);
   if (Array.isArray(value)) {
     // If "_All_VALUES_" is selected, clear all filters for this column
     if (value.includes("_All_VALUES_")) {
