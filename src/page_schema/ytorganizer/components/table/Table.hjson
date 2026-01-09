@@ -1007,11 +1007,10 @@ return {
         css:
           '''
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.xs};
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.md};
-  max-width: 1024px;
 }`;
 '''
         displayOrder: 2

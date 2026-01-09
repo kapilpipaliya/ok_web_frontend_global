@@ -602,6 +602,7 @@ const settingsConfigs = [
     parentVertexLabel: "ShopifyProductCategory",
     toParentEdgeType: "ProductCategory",
     rootKeys: {},
+    label: "Category",
     formConfig: {
       gridColumns: 1,
       groups: [
@@ -705,6 +706,7 @@ const settingsConfigs = [
     parentVertexLabel: "ShopifyProductCategory",
     toParentEdgeType: "ParentCategory",
     rootKeys: {},
+    label: "Category",
     formConfig: {
       gridColumns: 1,
       groups: [

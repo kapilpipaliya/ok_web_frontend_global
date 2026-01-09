@@ -184,11 +184,13 @@ return `._id {
           '''
 const mode = args.contextData.props?.mode || "add";
 const parentId = args.contextData.props?.parentId;
+const label = args.contextData.props?.label || "Item";
+
 let title;
 if (mode === "add") {
-  title = parentId === null || parentId === undefined ? "Add Root Item" : "Add New Child";
+  title = parentId === null || parentId === undefined ? `Add Root ${label}` : `Add New Child ${label}`;
 } else {
-  title = "Edit Item";
+  title = `Edit ${label}`;
 }
 
 return {
@@ -252,14 +254,15 @@ return `._id {
         componentName: FormManagement
         props:
           '''
-const formConfig = args.contextData.props?.formConfig;
+const sidebarConfig = args.contextData.props?.sidebarConfig || {};
+const formConfig = sidebarConfig?.formConfig;
 const parentId = args.contextData.props?.parentId;
 const vertexId = args.contextData.props?.vertexId;
 const initialVertex = args.contextData.props?.initialVertex;
 const mode = args.contextData.props?.mode || "add";
-const parentVertexLabel = args.contextData.props?.parentVertexLabel;
-const toParentEdgeType = args.contextData.props?.toParentEdgeType;
-const rootKeys = args.contextData.props?.rootKeys || {};
+const parentVertexLabel = sidebarConfig?.parentVertexLabel;
+const toParentEdgeType = sidebarConfig?.toParentEdgeType;
+const rootKeys = sidebarConfig?.rootKeys || {};
 const tableVertexLabel = args.contextData.props?.tableVertexLabel;
 const relationshipType = args.contextData.props?.relationshipType;
 const onSave = args.contextData.props?.onSave;

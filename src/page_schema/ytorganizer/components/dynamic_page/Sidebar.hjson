@@ -6,10 +6,12 @@
       P: {
         fns:
           '''
-// Get props from context
-const getParentVertexLabel = () => args.contextData.props?.parentVertexLabel;
-const getToParentEdgeType = () => args.contextData.props?.toParentEdgeType;
-const getRootKeys = () => args.contextData.props?.rootKeys || {};
+const getParentVertexLabel = () => args.fns.getSidebarConfig()?.parentVertexLabel;
+const getToParentEdgeType = () => args.fns.getSidebarConfig()?.toParentEdgeType;
+const getRootKeys = () => args.fns.getSidebarConfig()?.rootKeys || {};
+const getFormConfig = () => args.fns.getSidebarConfig()?.formConfig;
+const getSidebarLabel = () => args.fns.getSidebarConfig()?.label || args.fns.getSidebarConfig()?.parentVertexLabel;
+
 const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
 const getRelationshipType = () => args.contextData.props?.relationshipType;
 
@@ -493,6 +495,7 @@ return {
   getRootKeys,
   getTableVertexLabel,
   getRelationshipType,
+  getSidebarLabel,
   isAddRootModalOpen,
   setIsAddRootModalOpen,
   handleOpenAddRootModal,
@@ -682,7 +685,7 @@ return `._id {
           '''
 return {
   as: "span",
-  text: "Add Root Item"
+  text: `Add Root ${args.fns.getSidebarLabel()}`
 };
 '''
       }
@@ -725,6 +728,7 @@ return {
 const item = args.contextData.sidebarItem;
 // Get children from graph (reactive)
 const children = args.fns.getChildren(item?.id);
+const sidebarConfig = args.fns.getSidebarConfig();
 
 return {
   item: item,
@@ -733,10 +737,7 @@ return {
   onToggleExpand: args.fns.toggleExpand,
   onItemSelect: args.fns.handleItemSelect,
   fetchChildren: args.fns.fetchChildren,
-  parentVertexLabel: args.fns.getParentVertexLabel(),
-  toParentEdgeType: args.fns.getToParentEdgeType(),
-  formConfig: args.contextData.props?.formConfig,
-  rootKeys: args.fns.getRootKeys(),
+  sidebarConfig: sidebarConfig,
   onItemUpdate: args.fns.updateItemInTree,
   onItemDelete: args.fns.removeItemFromTree,
   childItems: children,
@@ -748,7 +749,8 @@ return {
   onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory(),
   fetchRoot: args.fns.fetchRoot,
   getRoot: args.fns.getRoot,
-  hooks: args.fns.getHooks()
+  hooks: args.fns.getHooks(),
+  label: args.fns.getSidebarLabel()
 };
 '''
       }
@@ -860,21 +862,21 @@ return {
         key: sidebar_add_root_modal
         props:
           '''
+const sidebarConfig = args.fns.getSidebarConfig();
+
 return {
   isOpen: args.fns.isAddRootModalOpen(),
-  formConfig: args.contextData.props?.formConfig,
+  sidebarConfig: sidebarConfig,
   parentId: null,
   vertexId: null,
   initialVertex: null,
   mode: "add",
-  parentVertexLabel: args.fns.getParentVertexLabel(),
-  toParentEdgeType: args.fns.getToParentEdgeType(),
-  rootKeys: args.fns.getRootKeys(),
   tableVertexLabel: args.fns.getTableVertexLabel(),
   relationshipType: args.fns.getRelationshipType(),
   onSave: args.fns.handleAddRootSave,
   onClose: args.fns.handleCloseAddRootModal,
-  hooks: args.fns.getHooks()
+  hooks: args.fns.getHooks(),
+  label: args.fns.getSidebarLabel()
 };
 '''
       }

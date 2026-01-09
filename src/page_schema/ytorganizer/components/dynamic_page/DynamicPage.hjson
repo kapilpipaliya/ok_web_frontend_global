@@ -923,7 +923,6 @@ return {
         key: sidebar_component
         props:
           '''
-const sidebarConfig = args.fns.getSidebarConfig();
 const tableVertexLabel = args.fns.getTableVertexLabel();
 // Relationship type is "User" + tableVertexLabel (e.g., "UserBook", "UserAudioVideo")
 const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
@@ -933,10 +932,6 @@ const { config } = args.fns.getCachedConfig();
 const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
 
 return {
-  parentVertexLabel: sidebarConfig?.parentVertexLabel,
-  toParentEdgeType: sidebarConfig?.toParentEdgeType,
-  rootKeys: sidebarConfig?.rootKeys || {},
-  formConfig: sidebarConfig?.formConfig,
   onItemSelect: args.fns.handleSidebarItemSelect,
   tableVertexLabel: tableVertexLabel,
   relationshipType: relationshipType,

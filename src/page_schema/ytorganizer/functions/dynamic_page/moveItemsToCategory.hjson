@@ -495,7 +495,7 @@ try {
       };
       
       // Execute afterMoveItemsToCategory hooks
-      await executeHooks(hooks?.afterMoveItemsToCategory, {
+      await args.executeHooks(hooks?.afterMoveItemsToCategory, {
         contentIds,
         categoryId,
         relationshipType,
@@ -516,7 +516,7 @@ try {
       };
       
       // Execute afterMoveItemsToCategory hooks even on failure
-      await executeHooks(hooks?.afterMoveItemsToCategory, {
+      await args.executeHooks(hooks?.afterMoveItemsToCategory, {
         contentIds,
         categoryId,
         relationshipType,

@@ -13,8 +13,8 @@ const getSelectedItem = () => args.contextData.props?.selectedItem;
 const getOnToggleExpand = () => args.contextData.props?.onToggleExpand;
 const getOnItemSelect = () => args.contextData.props?.onItemSelect;
 const getFetchChildren = () => args.contextData.props?.fetchChildren;
-const getParentVertexLabel = () => args.contextData.props?.parentVertexLabel;
-const getToParentEdgeType = () => args.contextData.props?.toParentEdgeType;
+const getParentVertexLabel = () => args.contextData.props?.sidebarConfig?.parentVertexLabel;
+const getToParentEdgeType = () => args.contextData.props?.sidebarConfig?.toParentEdgeType;
 
 // Get children and loading from props (from graph)
 const getChildren = () => {
@@ -159,7 +159,7 @@ const [isAddModalOpen, setIsAddModalOpen] = args.createSignal(false);
 const [isEditModalOpen, setIsEditModalOpen] = args.createSignal(false);
 
 // Get formConfig from props
-const getFormConfig = () => args.contextData.props?.formConfig;
+const getFormConfig = () => args.contextData.props?.sidebarConfig?.formConfig;
 
 // Get onItemUpdate callback from props
 const getOnItemUpdate = () => args.contextData.props?.onItemUpdate;
@@ -333,7 +333,7 @@ const validateDropTarget = (categoryId, targetId) => {
     return { valid: false, reason: "Cannot move a category to itself" };
   }
   
-  const rootKeys = args.contextData.props?.rootKeys || {};
+  const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
   const rootKey = rootKeys.key;
   
   // Get the dragged item
@@ -363,7 +363,7 @@ const handleDragStartSidebar = (e) => {
     return;
   }
   
-  const rootKeys = args.contextData.props?.rootKeys || {};
+  const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
   const rootKey = rootKeys.key;
   
   // Prevent dragging root items
@@ -466,7 +466,7 @@ const handleDragLeave = (e) => {
 const handleMoveSidebarItem = async (categoryId, newParentId) => {
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
-  const rootKeys = args.contextData.props?.rootKeys || {};
+  const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
   const enableUserScoping = args.contextData.props?.enableUserScoping === true;
   const hooks = args.contextData.props?.hooks;
   
@@ -538,7 +538,7 @@ const handleDrop = async (e) => {
         return;
       }
       
-      const rootKeys = args.contextData.props?.rootKeys || {};
+      const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
       const rootKey = rootKeys.key;
       
       // Determine new parent ID
@@ -566,7 +566,7 @@ const handleDrop = async (e) => {
     
     const parentVertexLabel = getParentVertexLabel();
     const toParentEdgeType = getToParentEdgeType();
-    const rootKeys = args.contextData.props?.rootKeys || {};
+    const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
     const rootKey = rootKeys.key;
     
     // Determine category ID - if 'uncategorized' or root key, use null
@@ -703,7 +703,7 @@ const handleDelete = async (e) => {
 
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
-  const rootKeys = args.contextData.props?.rootKeys || {};
+  const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
   const rootKey = rootKeys.key;
 
   // Prevent deletion of root item
@@ -914,7 +914,7 @@ const isDragOver = args.fns.isDragOver();
 const isValidDrop = args.fns.isValidDrop?.() ?? true;
 const isDragging = args.fns.isDragging?.() || false;
 const item = args.fns.getItem();
-const rootKeys = args.contextData.props?.rootKeys || {};
+const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
 const rootKey = rootKeys.key;
 const isRoot = item?.P?.key === rootKey || item?.P?.key === 'uncategorized';
 
@@ -953,7 +953,7 @@ return `._id {
         props:
           '''
 const item = args.fns.getItem();
-const rootKeys = args.contextData.props?.rootKeys || {};
+const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
 const rootKey = rootKeys.key;
 const isRoot = item?.P?.key === rootKey || item?.P?.key === 'uncategorized';
 const isDragging = args.fns.isDragging?.() || false;
@@ -1189,7 +1189,7 @@ return `._id {
         props:
           '''
 const item = args.fns.getItem();
-const rootKeys = args.contextData.props?.rootKeys || {};
+const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
 const rootKey = rootKeys.key;
 const isRoot = item?.P?.key === rootKey;
 
@@ -1264,10 +1264,7 @@ return {
   onToggleExpand: args.contextData.props?.onToggleExpand,
   onItemSelect: args.contextData.props?.onItemSelect,
   fetchChildren: args.contextData.props?.fetchChildren,
-  parentVertexLabel: args.contextData.props?.parentVertexLabel,
-  toParentEdgeType: args.contextData.props?.toParentEdgeType,
-  formConfig: args.contextData.props?.formConfig,
-  rootKeys: args.contextData.props?.rootKeys,
+  sidebarConfig: args.contextData.props?.sidebarConfig,
   onItemUpdate: args.contextData.props?.onItemUpdate,
   onItemDelete: args.contextData.props?.onItemDelete,
   childItems: children,
@@ -1276,7 +1273,9 @@ return {
   tableVertexLabel: args.contextData.props?.tableVertexLabel,
   relationshipType: args.contextData.props?.relationshipType,
   onMoveItemsToCategory: args.contextData.props?.onMoveItemsToCategory,
-  fetchRoot: args.contextData.props?.fetchRoot
+  fetchRoot: args.contextData.props?.fetchRoot,
+  hooks: args.contextData.props?.hooks,
+  label: args.contextData.props?.label
 };
 '''
       }
@@ -1291,25 +1290,20 @@ return {
         props:
           '''
 const item = args.fns.getItem();
-const formConfig = args.fns.getFormConfig();
-const parentVertexLabel = args.contextData.props?.parentVertexLabel;
-const toParentEdgeType = args.contextData.props?.toParentEdgeType;
-const rootKeys = args.contextData.props?.rootKeys || {};
+const sidebarConfig = args.contextData.props?.sidebarConfig;
 const tableVertexLabel = args.contextData.props?.tableVertexLabel;
 const relationshipType = args.contextData.props?.relationshipType;
 
 return {
   isOpen: args.fns.isAddModalOpen(),
-  formConfig: formConfig,
+  sidebarConfig: sidebarConfig,
   parentId: item?.id,
-  parentVertexLabel: parentVertexLabel,
-  toParentEdgeType: toParentEdgeType,
-  rootKeys: rootKeys,
   tableVertexLabel: tableVertexLabel,
   relationshipType: relationshipType,
   onSave: args.fns.handleAddChildSave,
   onClose: args.fns.handleCloseAddModal,
-  hooks: args.contextData.props?.hooks
+  hooks: args.contextData.props?.hooks,
+  label: args.contextData.props?.label
 };
 '''
       }
@@ -1324,10 +1318,7 @@ return {
         props:
           '''
 const item = args.fns.getItem();
-const formConfig = args.fns.getFormConfig();
-const parentVertexLabel = args.contextData.props?.parentVertexLabel;
-const toParentEdgeType = args.contextData.props?.toParentEdgeType;
-const rootKeys = args.contextData.props?.rootKeys || {};
+const sidebarConfig = args.contextData.props?.sidebarConfig;
 const tableVertexLabel = args.contextData.props?.tableVertexLabel;
 const relationshipType = args.contextData.props?.relationshipType;
 
@@ -1335,13 +1326,11 @@ const relationshipType = args.contextData.props?.relationshipType;
 // The parent relationship should remain unchanged unless explicitly changed
 return {
   isOpen: args.fns.isEditModalOpen(),
-  formConfig: formConfig,
+  sidebarConfig: sidebarConfig,
+  label: args.contextData.props?.label,
   hooks: args.contextData.props?.hooks,
   vertexId: item?.id,
   parentId: null, // Don't change parent on edit
-  parentVertexLabel: parentVertexLabel,
-  toParentEdgeType: toParentEdgeType,
-  rootKeys: rootKeys,
   tableVertexLabel: tableVertexLabel,
   relationshipType: relationshipType,
   initialVertex: item,

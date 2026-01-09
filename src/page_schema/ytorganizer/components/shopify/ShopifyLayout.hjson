@@ -151,20 +151,6 @@ return {
       }
     }
     {
-      id: "8"
-      L: Attr
-      P: {
-        as: div
-        displayOrder: 1
-        componentName: Html
-        key: unique_6
-        props:
-          '''return {
-  text: "Sample"
-}'''
-      }
-    }
-    {
       id: "9"
       L: Attr
       P: {
@@ -240,12 +226,6 @@ return {
       T: Attr
       S: "5"
       E: "10"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "7"
-      E: "8"
     }
   ]
 }
