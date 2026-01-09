@@ -1,0 +1,218 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Updates Shopify product tags when a product is added to a category. Adds the category name as a tag.
+        body:
+          '''
+// Only process if contentLabel is 'ShopifyProduct'
+const { contentLabel, contentId, categoryId, categoryLabel } = args.contextData;
+
+if (contentLabel !== 'ShopifyProduct') {
+  // Not Shopify products, skip tag update
+  return;
+}
+
+// Skip if adding to uncategorized (no category tag to add)
+if (!categoryId || categoryId === 'uncategorized') {
+  return;
+}
+
+console.log(`🏷️  Adding category tag to Shopify product...`);
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductAfterCreateRelationship: getSessionUser failed", e);
+  return; // Can't update without shop info
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductAfterCreateRelationship: Shop domain is missing, skipping tag update");
+  return;
+}
+
+// Get Shopify params from session
+const shopifyParams = sessionUser?.P?.shopifyParams || {};
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const origin = args.request ? new URL(args.request.url).origin : "https://ysaar.com";
+  const url = new URL(`${origin}/shopify`);
+  for (const [key, value] of Object.entries(shopifyParams)) {
+    if (typeof value !== "undefined" && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  }
+
+  const request = {
+    query: shopifyParams,
+    url: url.toString(),
+    headers: {
+      get(name) {
+        if (shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined") {
+          return shopifyParams.headers[name];
+        }
+        return undefined;
+      },
+      has(name) {
+        return shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined";
+      }
+    },
+  };
+
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyProductAfterCreateRelationship: Shopify authentication failed", authError);
+  return; // Can't update without authentication
+}
+
+// Get the category name for the tag
+let categoryName = null;
+if (categoryId && categoryId !== 'uncategorized') {
+  const categoryResult = await args.session.run(
+    `MATCH (cat:${categoryLabel})
+     WHERE elementId(cat) = $categoryId
+     RETURN cat.name as name`,
+    { categoryId }
+  );
+  
+  if (categoryResult.records.length > 0) {
+    const category = categoryResult.records[0];
+    categoryName = category.get('name') || null;
+  }
+}
+
+if (!categoryName) {
+  console.warn("shopifyProductAfterCreateRelationship: Could not find category name, skipping tag update");
+  return;
+}
+
+// Get Shopify product ID for the content item
+const productResult = await args.session.run(
+  `MATCH (p:ShopifyProduct)
+   WHERE elementId(p) = $contentId
+   RETURN p.id as shopifyId`,
+  { contentId }
+);
+
+if (productResult.records.length === 0) {
+  console.warn("shopifyProductAfterCreateRelationship: Shopify product not found");
+  return;
+}
+
+const shopifyId = productResult.records[0].get('shopifyId');
+if (!shopifyId) {
+  console.warn("shopifyProductAfterCreateRelationship: Shopify product ID not found");
+  return;
+}
+
+try {
+  // Fetch current product data to get existing tags
+  const getProductQuery = `
+    query {
+      product(id: "${shopifyId}") {
+        id
+        tags
+      }
+    }
+  `;
+  
+  const getProductResponse = await admin.graphql(getProductQuery);
+  
+  // Handle Response object - extract JSON if it's a Response
+  let getProductApiResponse;
+  if (getProductResponse instanceof Response) {
+    getProductApiResponse = await getProductResponse.json();
+  } else {
+    getProductApiResponse = getProductResponse;
+  }
+
+  if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) {
+    console.error(`Error fetching product ${shopifyId}:`, getProductApiResponse.errors);
+    return;
+  }
+
+  const currentProduct = getProductApiResponse.data?.product;
+  if (!currentProduct) {
+    console.warn(`Product ${shopifyId} not found in Shopify`);
+    return;
+  }
+
+  // Get current tags
+  const currentTags = currentProduct.tags || [];
+  
+  // Add category tag if not already present
+  let updatedTags = [...currentTags];
+  if (!updatedTags.includes(categoryName)) {
+    updatedTags.push(categoryName);
+  }
+
+  // Update product tags using productSet mutation
+  const updateProductMutation = `
+    mutation productSet($input: ProductSetInput!) {
+      productSet(synchronous: true, input: $input) {
+        product {
+          id
+          title
+          tags
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    input: {
+      id: shopifyId,
+      tags: updatedTags
+    }
+  };
+
+  const updateResponse = await admin.graphql(updateProductMutation, { variables });
+  
+  // Handle Response object - extract JSON if it's a Response
+  let updateApiResponse;
+  if (updateResponse instanceof Response) {
+    updateApiResponse = await updateResponse.json();
+  } else {
+    updateApiResponse = updateResponse;
+  }
+
+  if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
+    console.error(`Shopify GraphQL errors for product ${shopifyId}:`, updateApiResponse.errors);
+    return;
+  }
+
+  const userErrors = updateApiResponse.data?.productSet?.userErrors || [];
+  if (userErrors.length > 0) {
+    console.error(`User errors updating product ${shopifyId}:`, userErrors);
+    return;
+  }
+
+  console.log(`✅ Added category tag "${categoryName}" to product ${shopifyId}`);
+} catch (error) {
+  console.error(`Error updating product ${shopifyId}:`, error);
+}
+'''
+        key: shopifyProductAfterCreateRelationship
+      }
+    }
+  ]
+  edges: []
+}
+

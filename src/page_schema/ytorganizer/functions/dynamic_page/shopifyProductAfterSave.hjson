@@ -1,0 +1,228 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Creates a product in Shopify when a new ShopifyProduct is added to the database.
+        body:
+          '''
+// Only process if tableVertexLabel is 'ShopifyProduct' and operation is 'create'
+const { tableVertexLabel, operation, elementId, data, result } = args.contextData;
+
+if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'create') {
+  // Not creating a Shopify product, skip
+  return;
+}
+
+// Skip if product already has a Shopify ID (already exists in Shopify)
+const vertex = data?.vertex;
+const formData = vertex?.P || {};
+if (formData.id) {
+  // Product already has a Shopify ID, skip creation
+  console.log("shopifyProductAfterSave: Product already has Shopify ID, skipping creation");
+  return;
+}
+
+console.log(`🛍️  Creating product in Shopify...`);
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductAfterSave: getSessionUser failed", e);
+  return; // Can't create without shop info
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductAfterSave: Shop domain is missing, skipping product creation");
+  return;
+}
+
+// Get Shopify params from session
+const shopifyParams = sessionUser?.P?.shopifyParams || {};
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const origin = args.request ? new URL(args.request.url).origin : "https://ysaar.com";
+  const url = new URL(`${origin}/shopify`);
+  for (const [key, value] of Object.entries(shopifyParams)) {
+    if (typeof value !== "undefined" && value !== null) {
+      url.searchParams.append(key, String(value));
+    }
+  }
+
+  const request = {
+    query: shopifyParams,
+    url: url.toString(),
+    headers: {
+      get(name) {
+        if (shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined") {
+          return shopifyParams.headers[name];
+        }
+        return undefined;
+      },
+      has(name) {
+        return shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined";
+      }
+    },
+  };
+
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyProductAfterSave: Shopify authentication failed", authError);
+  return; // Can't create without authentication
+}
+
+// Prepare product data for Shopify
+// Extract data from formData
+const title = formData.title || formData.name || 'Untitled Product';
+const handle = formData.handle || title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+const descriptionHtml = formData.descriptionHtml || formData.description || '';
+const vendor = formData.vendor || '';
+const productType = formData.productType || '';
+const status = formData.status || 'DRAFT';
+const tags = formData.tags || [];
+
+// Prepare variants - if no variants provided, create a default one
+let variants = [];
+if (formData.variants) {
+  try {
+    variants = typeof formData.variants === 'string' ? JSON.parse(formData.variants) : formData.variants;
+  } catch (e) {
+    console.warn("shopifyProductAfterSave: Failed to parse variants, using default", e);
+  }
+}
+
+// If no variants, create a default variant
+if (!variants || variants.length === 0) {
+  variants = [{
+    title: 'Default Title',
+    price: formData.price || '0.00',
+    sku: formData.sku || '',
+    inventoryQuantity: formData.inventoryQuantity || 0,
+    inventoryPolicy: formData.inventoryPolicy || 'DENY',
+    taxable: formData.taxable !== undefined ? formData.taxable : true
+  }];
+}
+
+// Create product in Shopify using productSet mutation
+const createProductMutation = `
+  mutation productSet($input: ProductSetInput!) {
+    productSet(synchronous: true, input: $input) {
+      product {
+        id
+        title
+        handle
+        status
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const productInput = {
+  product: {
+    title: title,
+    // handle: handle,
+    descriptionHtml: descriptionHtml,
+    vendor: vendor,
+    productType: productType,
+    status: status,
+    tags: tags,
+    variants: variants.map(v => ({
+      title: v.title || 'Default Title',
+      price: v.price || '0.00',
+      sku: v.sku || '',
+      inventoryQuantity: v.inventoryQuantity || 0,
+      inventoryPolicy: v.inventoryPolicy || 'DENY',
+      taxable: v.taxable !== undefined ? v.taxable : true,
+      compareAtPrice: v.compareAtPrice || null
+    }))
+  }
+};
+
+const variables = {
+  input: productInput
+};
+
+try {
+  const response = await admin.graphql(createProductMutation, { variables });
+  
+  // Handle Response object - extract JSON if it's a Response
+  let apiResponse;
+  if (response instanceof Response) {
+    apiResponse = await response.json();
+  } else {
+    apiResponse = response;
+  }
+
+  if (apiResponse.errors && apiResponse.errors.length > 0) {
+    console.error("shopifyProductAfterSave: Shopify GraphQL errors:", apiResponse.errors);
+    return;
+  }
+
+  const userErrors = apiResponse.data?.productSet?.userErrors || [];
+  if (userErrors.length > 0) {
+    console.error("shopifyProductAfterSave: User errors creating product:", userErrors);
+    return;
+  }
+
+  const createdProduct = apiResponse.data?.productSet?.product;
+  if (!createdProduct) {
+    console.warn("shopifyProductAfterSave: Product creation succeeded but no product returned");
+    return;
+  }
+
+  // Extract Shopify product ID (format: gid://shopify/Product/123456)
+  const shopifyProductId = createdProduct.id;
+  const shopifyHandle = createdProduct.handle;
+  
+  // Update the database product with the Shopify ID and handle
+  if (elementId && shopifyProductId) {
+    await args.session.run(
+      `MATCH (p:ShopifyProduct)
+       WHERE elementId(p) = $elementId
+       SET p.id = $shopifyId,
+           p.handle = $handle,
+           p.updatedAt = datetime()`,
+      {
+        elementId: elementId,
+        shopifyId: shopifyProductId,
+        handle: shopifyHandle
+      }
+    );
+    
+    // Update the result vertex P object with Shopify ID and handle
+    if (result && result.data && result.data.P) {
+      result.data.P.id = shopifyProductId;
+      result.data.P.handle = shopifyHandle;
+    }
+    
+    console.log(`✅ Created product in Shopify: ${shopifyProductId} (${createdProduct.title})`);
+    console.log(`✅ Updated database product ${elementId} with Shopify ID: ${shopifyProductId} and handle: ${shopifyHandle}`);
+  } else {
+    console.warn("shopifyProductAfterSave: Missing elementId or shopifyProductId, cannot update database");
+  }
+} catch (error) {
+  console.error("shopifyProductAfterSave: Error creating product in Shopify:", error);
+}
+'''
+        key: shopifyProductAfterSave
+      }
+    }
+  ]
+  edges: []
+}
+

@@ -108,7 +108,7 @@ const getItemName = () => {
   const item = getItem();
   if (!item) return "";
 
-  const baseName = item.P?.key || item.P?.name || item.P?.title || "No name";
+  const baseName = item.P?.name || item.P?.title || item.P?.key || "No name";
 
   // Use content count from vertex P property
   const contentCount = item.P?.contentCount ?? 0;

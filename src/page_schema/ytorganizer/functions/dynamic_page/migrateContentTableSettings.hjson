@@ -544,20 +544,6 @@ const settingsConfigs = [
             required: true,
             maxLength: 255,
             colSpan: 2
-          },
-          {
-            key: "handle",
-            label: "Handle",
-            type: "text",
-            maxLength: 255,
-            colSpan: 2
-          },
-          {
-            key: "status",
-            label: "Status",
-            type: "text",
-            maxLength: 50,
-            colSpan: 1
           }
         ]
       }
@@ -571,31 +557,33 @@ const settingsConfigs = [
   hooks: {
     // Hooks for fetching data - syncs Shopify products when fetching uncategorized
     beforeFetchData: "shopifyProductBeforeFetchData",
-    /*afterFetchData: ["shopifyProductAfterFetchData", "shopifyProductLogFetch"],
+    // afterFetchData: ["shopifyProductAfterFetchData", "shopifyProductLogFetch"],
     // Hooks for saving items (add/edit/delete)
-    beforeSave: "shopifyProductBeforeSave",
+    // beforeSave: "shopifyProductBeforeSave",
+    // Hooks for saving - creates product in Shopify when new product is added
     afterSave: "shopifyProductAfterSave",
     // Hooks for category operations
-    beforeAddCategory: "shopifyProductBeforeAddCategory",
-    afterAddCategory: "shopifyProductAfterAddCategory",
-    beforeMoveCategory: "shopifyProductBeforeMoveCategory",
-    afterMoveCategory: "shopifyProductAfterMoveCategory",
+    // beforeAddCategory: "shopifyProductBeforeAddCategory",
+    // afterAddCategory: "shopifyProductAfterAddCategory",
+    // beforeMoveCategory: "shopifyProductBeforeMoveCategory",
+    // afterMoveCategory: "shopifyProductAfterMoveCategory",
     // Hooks for moving items to category
-    beforeMoveItemsToCategory: "shopifyProductBeforeMoveItemsToCategory",
+    // beforeMoveItemsToCategory: "shopifyProductBeforeMoveItemsToCategory",
+    // Hooks for moving items to category - updates Shopify product tags
     afterMoveItemsToCategory: "shopifyProductAfterMoveItemsToCategory",
     // Hooks for import/export operations
-    beforeImport: "shopifyProductBeforeImport",
-    afterImport: ["shopifyProductAfterImport", "shopifyProductLogImport"],
-    beforeExport: "shopifyProductBeforeExport",
-    afterExport: "shopifyProductAfterExport",
+    // beforeImport: "shopifyProductBeforeImport",
+    // afterImport: ["shopifyProductAfterImport", "shopifyProductLogImport"],
+    // beforeExport: "shopifyProductBeforeExport",
+    // afterExport: "shopifyProductAfterExport",
     // Hooks for relationship and vertex operations
-    beforeCreateRelationship: "shopifyProductBeforeCreateRelationship",
+    // beforeCreateRelationship: "shopifyProductBeforeCreateRelationship",
+    // Hooks for creating relationship - adds category tag to Shopify product
     afterCreateRelationship: "shopifyProductAfterCreateRelationship",
-    beforeGetUserVertices: "shopifyProductBeforeGetUserVertices",
-    afterGetUserVertices: "shopifyProductAfterGetUserVertices",
-    beforeGetVertexChildren: "shopifyProductBeforeGetVertexChildren",
-    afterGetVertexChildren: ["shopifyProductAfterGetVertexChildren", "shopifyProductLogGetChildren"]
-    */
+    // beforeGetUserVertices: "shopifyProductBeforeGetUserVertices",
+    // afterGetUserVertices: "shopifyProductAfterGetUserVertices",
+    // beforeGetVertexChildren: "shopifyProductBeforeGetVertexChildren",
+    // afterGetVertexChildren: ["shopifyProductAfterGetVertexChildren", "shopifyProductLogGetChildren"]
   },
   sidebar: {
     enabled: true,
@@ -617,13 +605,6 @@ const settingsConfigs = [
               type: "text",
               required: true,
               maxLength: 255,
-              colSpan: 2
-            },
-            {
-              key: "key",
-              label: "Key",
-              type: "text",
-              maxLength: 100,
               colSpan: 2
             }
           ]
@@ -721,13 +702,6 @@ const settingsConfigs = [
               type: "text",
               required: true,
               maxLength: 255,
-              colSpan: 2
-            },
-            {
-              key: "key",
-              label: "Key",
-              type: "text",
-              maxLength: 100,
               colSpan: 2
             }
           ]
