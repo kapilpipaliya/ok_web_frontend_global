@@ -1099,8 +1099,12 @@ return `._id {
         key: tree_item_actions
         props:
           '''
+const item = args.fns.getItem();
+const isUncategorized = item?.P?.key === 'uncategorized' || item?.id === 'uncategorized';
+
 return {
-  as: "div"
+  as: "div",
+  hide: isUncategorized
 };
 '''
       }
