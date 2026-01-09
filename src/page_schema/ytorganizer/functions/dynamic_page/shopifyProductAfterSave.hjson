@@ -105,19 +105,19 @@ if (formData.variants) {
 // If no variants, create a default variant
 if (!variants || variants.length === 0) {
   variants = [{
-    title: 'Default Title',
+    // title: 'Default Title',
     price: formData.price || '0.00',
     sku: formData.sku || '',
-    inventoryQuantity: formData.inventoryQuantity || 0,
+    // inventoryQuantity: formData.inventoryQuantity || 0,
     inventoryPolicy: formData.inventoryPolicy || 'DENY',
     taxable: formData.taxable !== undefined ? formData.taxable : true
   }];
 }
 
-// Create product in Shopify using productSet mutation
+// Create product in Shopify using productCreate mutation
 const createProductMutation = `
-  mutation productSet($input: ProductSetInput!) {
-    productSet(synchronous: true, input: $input) {
+  mutation productCreate($input: ProductInput!) {
+    productCreate(input: $input) {
       product {
         id
         title
@@ -133,24 +133,22 @@ const createProductMutation = `
 `;
 
 const productInput = {
-  product: {
-    title: title,
-    // handle: handle,
-    descriptionHtml: descriptionHtml,
-    vendor: vendor,
-    productType: productType,
-    status: status,
-    tags: tags,
-    variants: variants.map(v => ({
-      title: v.title || 'Default Title',
-      price: v.price || '0.00',
-      sku: v.sku || '',
-      inventoryQuantity: v.inventoryQuantity || 0,
-      inventoryPolicy: v.inventoryPolicy || 'DENY',
-      taxable: v.taxable !== undefined ? v.taxable : true,
-      compareAtPrice: v.compareAtPrice || null
-    }))
-  }
+  title: title,
+  // handle: handle,
+  descriptionHtml: descriptionHtml,
+  vendor: vendor,
+  productType: productType,
+  status: status,
+  tags: tags,
+  // variants: variants.map(v => ({
+  //   title: v.title || 'Default Title',
+  //   price: v.price || '0.00',
+  //   sku: v.sku || '',
+  //   inventoryQuantity: v.inventoryQuantity || 0,
+  //   inventoryPolicy: v.inventoryPolicy || 'DENY',
+  //   taxable: v.taxable !== undefined ? v.taxable : true,
+  //   compareAtPrice: v.compareAtPrice || null
+  // }))
 };
 
 const variables = {
@@ -173,13 +171,13 @@ try {
     return;
   }
 
-  const userErrors = apiResponse.data?.productSet?.userErrors || [];
+  const userErrors = apiResponse.data?.productCreate?.userErrors || [];
   if (userErrors.length > 0) {
     console.error("shopifyProductAfterSave: User errors creating product:", userErrors);
     return;
   }
 
-  const createdProduct = apiResponse.data?.productSet?.product;
+  const createdProduct = apiResponse.data?.productCreate?.product;
   if (!createdProduct) {
     console.warn("shopifyProductAfterSave: Product creation succeeded but no product returned");
     return;
