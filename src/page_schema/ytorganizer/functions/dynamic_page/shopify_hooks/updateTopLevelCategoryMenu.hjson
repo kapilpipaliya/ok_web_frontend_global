@@ -1,0 +1,171 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Finds the top-level parent category for a given category and updates or creates its Shopify menu. If the category is no longer top-level, deletes its menu.
+        body:
+          '''
+// Extract parameters
+const { categoryElementId, shop, shopifyParams } = args.contextData;
+
+if (!categoryElementId || !shop) {
+  return {
+    success: false,
+    error: "categoryElementId and shop are required"
+  };
+}
+
+try {
+  // Find the top-level parent category
+  const topLevelResult = await args.session.run(
+    `MATCH (category:ShopifyProductCategory)
+     WHERE elementId(category) = $categoryElementId
+     OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory)
+     WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
+     WITH topLevel, category
+     ORDER BY length(path) DESC
+     LIMIT 1
+     RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
+            COALESCE(topLevel.name, category.name) as topLevelName,
+            COALESCE(topLevel.menuId, category.menuId) as menuId,
+            COALESCE(topLevel.id, category.id) as shopifyId`,
+    { categoryElementId }
+  );
+
+  if (topLevelResult.records.length === 0) {
+    return {
+      success: false,
+      error: "Could not find category"
+    };
+  }
+
+  const topLevel = topLevelResult.records[0];
+  const topLevelId = topLevel.get('topLevelId');
+  const topLevelName = topLevel.get('topLevelName');
+  const topLevelMenuId = topLevel.get('menuId');
+  const topLevelShopifyId = topLevel.get('shopifyId');
+
+  if (!topLevelShopifyId) {
+    return {
+      success: false,
+      error: "Top-level category does not have Shopify ID"
+    };
+  }
+
+  // Check if this is actually a top-level category (no parent)
+  const isTopLevelCheck = await args.session.run(
+    `MATCH (category:ShopifyProductCategory)
+     WHERE elementId(category) = $topLevelId
+     RETURN NOT EXISTS((category)-[:ProductCategory]->()) as isTopLevel`,
+    { topLevelId }
+  );
+
+  const isTopLevel = isTopLevelCheck.records[0]?.get('isTopLevel') || false;
+
+  if (!isTopLevel) {
+    // This category is no longer top-level, delete its menu if it exists
+    if (topLevelMenuId) {
+      console.log(`📋 Category "${topLevelName}" is no longer top-level, deleting its menu...`);
+      const deleteResult = await args.executeNamedServerFunction({
+        functionName: "deleteShopifyMenu",
+        contextData: {
+          menuId: topLevelMenuId,
+          categoryElementId: topLevelId,
+          shop: shop,
+          shopifyParams: shopifyParams || {}
+        }
+      });
+      if (deleteResult.result?.success) {
+        return {
+          success: true,
+          action: "deleted",
+          message: `Deleted menu for category "${topLevelName}" that is no longer top-level`,
+          topLevelId: topLevelId
+        };
+      } else {
+        return {
+          success: false,
+          error: "Failed to delete menu",
+          details: deleteResult.result?.error
+        };
+      }
+    }
+    return {
+      success: true,
+      action: "skipped",
+      message: "Category is no longer top-level and has no menu to delete",
+      topLevelId: topLevelId
+    };
+  }
+
+  // Update or create menu for top-level category (even if it has no children)
+  if (topLevelMenuId) {
+    console.log(`Updating menu for top-level category: ${topLevelName}`);
+    const updateResult = await args.executeNamedServerFunction({
+      functionName: "updateShopifyMenuForCategory",
+      contextData: {
+        categoryElementId: topLevelId,
+        categoryName: topLevelName,
+        menuId: topLevelMenuId,
+        shop: shop,
+        shopifyParams: shopifyParams || {}
+      }
+    });
+    if (updateResult.result?.success) {
+      return {
+        success: true,
+        action: "updated",
+        message: `Updated menu for top-level category "${topLevelName}"`,
+        topLevelId: topLevelId
+      };
+    } else {
+      return {
+        success: false,
+        error: "Failed to update menu",
+        details: updateResult.result?.error
+      };
+    }
+  } else {
+    // Create menu for top-level category
+    console.log(`Creating menu for top-level category: ${topLevelName}`);
+    const createResult = await args.executeNamedServerFunction({
+      functionName: "createShopifyMenuForCategory",
+      contextData: {
+        categoryElementId: topLevelId,
+        categoryName: topLevelName,
+        shop: shop,
+        shopifyParams: shopifyParams || {}
+      }
+    });
+    if (createResult.result?.success) {
+      return {
+        success: true,
+        action: "created",
+        message: `Created menu for top-level category "${topLevelName}"`,
+        topLevelId: topLevelId
+      };
+    } else {
+      return {
+        success: false,
+        error: "Failed to create menu",
+        details: createResult.result?.error
+      };
+    }
+  }
+} catch (error) {
+  console.error("updateTopLevelCategoryMenu: Error:", error);
+  return {
+    success: false,
+    error: error.message || "Error updating top-level category menu"
+  };
+}
+'''
+        key: updateTopLevelCategoryMenu
+      }
+    }
+  ]
+  edges: []
+}
+

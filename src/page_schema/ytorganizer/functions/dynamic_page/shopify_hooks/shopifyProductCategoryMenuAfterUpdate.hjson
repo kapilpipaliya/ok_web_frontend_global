@@ -37,89 +37,20 @@ if (!shop) {
 const shopifyParams = sessionUser?.P?.shopifyParams || {};
 
 try {
-  // Find the top-level parent category (root category with no parent)
-  const topLevelResult = await args.session.run(
-    `MATCH (category:ShopifyProductCategory)
-     WHERE elementId(category) = $vertexId
-     OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory)
-     WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
-     WITH topLevel, category
-     ORDER BY length(path) DESC
-     LIMIT 1
-     RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
-            COALESCE(topLevel.name, category.name) as topLevelName,
-            COALESCE(topLevel.menuId, category.menuId) as menuId,
-            COALESCE(topLevel.id, category.id) as shopifyId`,
-    { vertexId }
-  );
-
-  if (topLevelResult.records.length === 0) {
-    console.warn("shopifyProductCategoryMenuAfterUpdate: Could not find top-level category");
-    return;
-  }
-
-  const topLevel = topLevelResult.records[0];
-  const topLevelId = topLevel.get('topLevelId');
-  const topLevelName = topLevel.get('topLevelName');
-  const topLevelMenuId = topLevel.get('menuId');
-  const topLevelShopifyId = topLevel.get('shopifyId');
-
-  if (!topLevelShopifyId) {
-    console.warn("shopifyProductCategoryMenuAfterUpdate: Top-level category does not have Shopify ID");
-    return;
-  }
-
-  // Check if top-level category has children
-  const childrenCheck = await args.session.run(
-    `MATCH (parent:ShopifyProductCategory)
-     WHERE elementId(parent) = $topLevelId
-     MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
-     WHERE child.id IS NOT NULL
-     RETURN count(child) as childCount`,
-    { topLevelId }
-  );
-
-  const childCount = childrenCheck.records[0]?.get('childCount') || 0;
-
-  // Update menu for top-level category (even if it has no children)
-  if (topLevelMenuId) {
-    console.log(`Updating menu for top-level category: ${topLevelName}`);
-    const updateResult = await args.executeNamedServerFunction({
-      functionName: "updateShopifyMenuForCategory",
-      contextData: {
-        categoryElementId: topLevelId,
-        categoryName: topLevelName,
-        menuId: topLevelMenuId,
-        shop: shop,
-        shopifyParams: shopifyParams
-      }
-    });
-    
-    if (!updateResult.result?.success) {
-      console.error("shopifyProductCategoryMenuAfterUpdate: Failed to update menu:", updateResult.result?.error);
-      return;
+  // Use common function to update top-level category menu
+  const menuResult = await args.executeNamedServerFunction({
+    functionName: "updateTopLevelCategoryMenu",
+    contextData: {
+      categoryElementId: vertexId,
+      shop: shop,
+      shopifyParams: shopifyParams
     }
-    
-    console.log(`✅ Updated menu for top-level category "${topLevelName}"`);
+  });
+
+  if (menuResult.result?.success) {
+    console.log(`✅ ${menuResult.result.message}`);
   } else {
-    // Create new menu for top-level category
-    console.log(`Creating menu for top-level category: ${topLevelName}`);
-    const createResult = await args.executeNamedServerFunction({
-      functionName: "createShopifyMenuForCategory",
-      contextData: {
-        categoryElementId: topLevelId,
-        categoryName: topLevelName,
-        shop: shop,
-        shopifyParams: shopifyParams
-      }
-    });
-    
-    if (!createResult.result?.success) {
-      console.error("shopifyProductCategoryMenuAfterUpdate: Failed to create menu:", createResult.result?.error);
-      return;
-    }
-    
-    console.log(`✅ Created menu for top-level category "${topLevelName}"`);
+    console.error("shopifyProductCategoryMenuAfterUpdate: Failed to update menu:", menuResult.result?.error);
   }
 } catch (error) {
   console.error("shopifyProductCategoryMenuAfterUpdate: Error updating menu in Shopify:", error);

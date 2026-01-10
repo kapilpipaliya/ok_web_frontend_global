@@ -98,72 +98,20 @@ try {
 
   // Update menus for all affected top-level categories
   for (const affectedCategoryId of affectedCategoryIds) {
-    // Find the top-level parent category
-    const topLevelResult = await args.session.run(
-      `MATCH (category:ShopifyProductCategory)
-       WHERE elementId(category) = $affectedCategoryId
-       OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory)
-       WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
-       WITH topLevel, category
-       ORDER BY length(path) DESC
-       LIMIT 1
-       RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
-              COALESCE(topLevel.name, category.name) as topLevelName,
-              COALESCE(topLevel.menuId, category.menuId) as menuId,
-              COALESCE(topLevel.id, category.id) as shopifyId`,
-      { affectedCategoryId }
-    );
-
-    if (topLevelResult.records.length === 0) continue;
-
-    const topLevel = topLevelResult.records[0];
-    const topLevelId = topLevel.get('topLevelId');
-    const topLevelName = topLevel.get('topLevelName');
-    const topLevelMenuId = topLevel.get('menuId');
-    const topLevelShopifyId = topLevel.get('shopifyId');
-
-    if (!topLevelShopifyId) continue;
-
-    // Verify this is actually a top-level category
-    const isTopLevelCheck = await args.session.run(
-      `MATCH (category:ShopifyProductCategory)
-       WHERE elementId(category) = $topLevelId
-       RETURN NOT EXISTS((category)-[:ProductCategory]->()) as isTopLevel`,
-      { topLevelId }
-    );
-
-    const isTopLevel = isTopLevelCheck.records[0]?.get('isTopLevel') || false;
-    if (!isTopLevel) continue;
-
-    // Check if this top-level category has children
-    const childrenCheck = await args.session.run(
-      `MATCH (parent:ShopifyProductCategory)
-       WHERE elementId(parent) = $topLevelId
-       MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
-       WHERE child.id IS NOT NULL
-       RETURN count(child) as childCount`,
-      { topLevelId }
-    );
-
-    const childCount = childrenCheck.records[0]?.get('childCount') || 0;
-
-    // Update menu for top-level category (even if it has no children)
-    if (topLevelMenuId) {
-      // Top-level category still has children, update its menu
-      console.log(`📋 Updating menu for top-level category "${topLevelName}"...`);
-      const updateResult = await args.executeNamedServerFunction({
-        functionName: "updateShopifyMenuForCategory",
-        contextData: {
-          categoryElementId: topLevelId,
-          categoryName: topLevelName,
-          menuId: topLevelMenuId,
-          shop: shop,
-          shopifyParams: shopifyParams
-        }
-      });
-      if (updateResult.result?.success) {
-        console.log(`✅ Updated menu for top-level category "${topLevelName}"`);
+    // Use common function to update top-level category menu
+    const menuResult = await args.executeNamedServerFunction({
+      functionName: "updateTopLevelCategoryMenu",
+      contextData: {
+        categoryElementId: affectedCategoryId,
+        shop: shop,
+        shopifyParams: shopifyParams
       }
+    });
+
+    if (menuResult.result?.success) {
+      console.log(`✅ ${menuResult.result.message}`);
+    } else if (menuResult.result?.action !== 'skipped') {
+      console.warn("shopifyProductCategoryMenuAfterDelete: Failed to update menu:", menuResult.result?.error);
     }
   }
 } catch (error) {
