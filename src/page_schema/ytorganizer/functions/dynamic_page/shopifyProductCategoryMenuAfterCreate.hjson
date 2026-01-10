@@ -1,0 +1,124 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Creates a Shopify menu for a top-level parent category when a category is created. The menu contains all children categories as menu items linking to collections.
+        body:
+          '''
+// Only process if parentVertexLabel is 'ShopifyProductCategory'
+const { parentVertexLabel, vertexId, name, parentId, result } = args.contextData;
+
+if (parentVertexLabel !== 'ShopifyProductCategory') {
+  // Not a ShopifyProductCategory, skip
+  return;
+}
+
+console.log(`📋 Creating Shopify menu for top-level category...`);
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductCategoryMenuAfterCreate: getSessionUser failed", e);
+  return;
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductCategoryMenuAfterCreate: Shop domain is missing, skipping menu creation");
+  return;
+}
+
+// Get Shopify params from session
+const shopifyParams = sessionUser?.P?.shopifyParams || {};
+
+try {
+  // Find the top-level parent category (root category with no parent)
+  const topLevelResult = await args.session.run(
+    `MATCH (category:ShopifyProductCategory)
+     WHERE elementId(category) = $vertexId
+     OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory)
+     WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
+     WITH topLevel, category
+     ORDER BY length(path) DESC
+     LIMIT 1
+     RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
+            COALESCE(topLevel.name, category.name) as topLevelName,
+            COALESCE(topLevel.menuId, null) as menuId,
+            COALESCE(topLevel.id, category.id) as shopifyId`,
+    { vertexId }
+  );
+
+  if (topLevelResult.records.length === 0) {
+    console.warn("shopifyProductCategoryMenuAfterCreate: Could not find top-level category");
+    return;
+  }
+
+  const topLevel = topLevelResult.records[0];
+  const topLevelId = topLevel.get('topLevelId');
+  const topLevelName = topLevel.get('topLevelName');
+  const topLevelMenuId = topLevel.get('menuId');
+  const topLevelShopifyId = topLevel.get('shopifyId');
+
+  if (!topLevelShopifyId) {
+    console.warn("shopifyProductCategoryMenuAfterCreate: Top-level category does not have Shopify ID");
+    return;
+  }
+
+  // Check if top-level category has children
+  const childrenCheck = await args.session.run(
+    `MATCH (parent:ShopifyProductCategory)
+     WHERE elementId(parent) = $topLevelId
+     MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
+     WHERE child.id IS NOT NULL
+     RETURN count(child) as childCount`,
+    { topLevelId }
+  );
+
+  const childCount = childrenCheck.records[0]?.get('childCount') || 0;
+
+  // Create or update menu for top-level category (even if it has no children)
+  if (!topLevelMenuId) {
+    console.log(`Creating menu for top-level category: ${topLevelName}`);
+    const createResult = await args.executeNamedServerFunction({
+      functionName: "createShopifyMenuForCategory",
+      contextData: {
+        categoryElementId: topLevelId,
+        categoryName: topLevelName,
+        shop: shop,
+        shopifyParams: shopifyParams
+      }
+    });
+    if (createResult.result?.success) {
+      console.log(`✅ Created menu for top-level category "${topLevelName}"`);
+    }
+  } else {
+    console.log(`Updating menu for top-level category: ${topLevelName}`);
+    const updateResult = await args.executeNamedServerFunction({
+      functionName: "updateShopifyMenuForCategory",
+      contextData: {
+        categoryElementId: topLevelId,
+        categoryName: topLevelName,
+        menuId: topLevelMenuId,
+        shop: shop,
+        shopifyParams: shopifyParams
+      }
+    });
+    if (updateResult.result?.success) {
+      console.log(`✅ Updated menu for top-level category "${topLevelName}"`);
+    }
+  }
+} catch (error) {
+  console.error("shopifyProductCategoryMenuAfterCreate: Error creating menu in Shopify:", error);
+}
+'''
+        key: shopifyProductCategoryMenuAfterCreate
+      }
+    }
+  ]
+  edges: []
+}

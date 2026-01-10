@@ -1,0 +1,178 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Updates or deletes a Shopify menu for a top-level parent category when a category is deleted. If the deleted category is top-level, delete its menu. Otherwise, update the top-level parent's menu based on the edges passed from saveSidebarVertex.
+        body:
+          '''
+// Only process if parentVertexLabel is 'ShopifyProductCategory' and operation is 'delete'
+const { parentVertexLabel, vertexId, operation, result, outgoingEdges, incomingEdges } = args.contextData;
+
+if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') {
+  // Not deleting a ShopifyProductCategory, skip
+  return;
+}
+
+console.log(`📋 Updating Shopify menu for top-level category after deletion...`);
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductCategoryMenuAfterDelete: getSessionUser failed", e);
+  return;
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductCategoryMenuAfterDelete: Shop domain is missing, skipping menu update");
+  return;
+}
+
+// Get Shopify params from session
+const shopifyParams = sessionUser?.P?.shopifyParams || {};
+
+try {
+  // Get the deleted category data
+  const deletedData = result?.data;
+  const categoryData = deletedData?.P || {};
+  const deletedMenuId = categoryData.menuId;
+  const deletedName = categoryData.name;
+
+  // Check if the deleted category was a top-level category (has no parent)
+  // Since the category is already deleted, we check if it had a menu (top-level categories have menus)
+  if (deletedMenuId) {
+    // This was a top-level category, delete its menu
+    console.log(`📋 Deleted category was top-level, deleting its menu...`);
+    const deleteResult = await args.executeNamedServerFunction({
+      functionName: "deleteShopifyMenu",
+      contextData: {
+        menuId: deletedMenuId,
+        categoryElementId: vertexId,
+        shop: shop,
+        shopifyParams: shopifyParams
+      }
+    });
+    
+    if (deleteResult.result?.success) {
+      console.log(`✅ Deleted menu for top-level category "${deletedName}"`);
+    } else {
+      console.error("shopifyProductCategoryMenuAfterDelete: Failed to delete menu:", deleteResult.result?.error);
+    }
+    return;
+  }
+
+  // The deleted category was not top-level, find affected top-level categories from edges
+  // Edges contain information about relationships: {type, from, to, edgeId, targetLabel/sourceLabel}
+  // We need to find the parent category from the edges and then find its top-level ancestor
+  
+  const affectedCategoryIds = new Set();
+  
+  // Process outgoing edges to find parent categories (deleted category -> parent)
+  if (outgoingEdges && Array.isArray(outgoingEdges)) {
+    for (const edge of outgoingEdges) {
+      if (edge && edge.type === 'ProductCategory' && edge.targetLabel === 'ShopifyProductCategory') {
+        // This edge was from the deleted category to a parent
+        if (edge.from === vertexId && edge.to) {
+          affectedCategoryIds.add(edge.to);
+        }
+      }
+    }
+  }
+  
+  // Process incoming edges to find child categories (child -> deleted category)
+  if (incomingEdges && Array.isArray(incomingEdges)) {
+    for (const edge of incomingEdges) {
+      if (edge && edge.type === 'ProductCategory' && edge.sourceLabel === 'ShopifyProductCategory') {
+        // This edge was from a child to the deleted category
+        if (edge.to === vertexId && edge.from) {
+          affectedCategoryIds.add(edge.from);
+        }
+      }
+    }
+  }
+
+  // Update menus for all affected top-level categories
+  for (const affectedCategoryId of affectedCategoryIds) {
+    // Find the top-level parent category
+    const topLevelResult = await args.session.run(
+      `MATCH (category:ShopifyProductCategory)
+       WHERE elementId(category) = $affectedCategoryId
+       OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory)
+       WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
+       WITH topLevel, category
+       ORDER BY length(path) DESC
+       LIMIT 1
+       RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
+              COALESCE(topLevel.name, category.name) as topLevelName,
+              COALESCE(topLevel.menuId, null) as menuId,
+              COALESCE(topLevel.id, category.id) as shopifyId`,
+      { affectedCategoryId }
+    );
+
+    if (topLevelResult.records.length === 0) continue;
+
+    const topLevel = topLevelResult.records[0];
+    const topLevelId = topLevel.get('topLevelId');
+    const topLevelName = topLevel.get('topLevelName');
+    const topLevelMenuId = topLevel.get('menuId');
+    const topLevelShopifyId = topLevel.get('shopifyId');
+
+    if (!topLevelShopifyId) continue;
+
+    // Verify this is actually a top-level category
+    const isTopLevelCheck = await args.session.run(
+      `MATCH (category:ShopifyProductCategory)
+       WHERE elementId(category) = $topLevelId
+       RETURN NOT EXISTS((category)-[:ProductCategory]->()) as isTopLevel`,
+      { topLevelId }
+    );
+
+    const isTopLevel = isTopLevelCheck.records[0]?.get('isTopLevel') || false;
+    if (!isTopLevel) continue;
+
+    // Check if this top-level category has children
+    const childrenCheck = await args.session.run(
+      `MATCH (parent:ShopifyProductCategory)
+       WHERE elementId(parent) = $topLevelId
+       MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
+       WHERE child.id IS NOT NULL
+       RETURN count(child) as childCount`,
+      { topLevelId }
+    );
+
+    const childCount = childrenCheck.records[0]?.get('childCount') || 0;
+
+    // Update menu for top-level category (even if it has no children)
+    if (topLevelMenuId) {
+      // Top-level category still has children, update its menu
+      console.log(`📋 Updating menu for top-level category "${topLevelName}"...`);
+      const updateResult = await args.executeNamedServerFunction({
+        functionName: "updateShopifyMenuForCategory",
+        contextData: {
+          categoryElementId: topLevelId,
+          categoryName: topLevelName,
+          menuId: topLevelMenuId,
+          shop: shop,
+          shopifyParams: shopifyParams
+        }
+      });
+      if (updateResult.result?.success) {
+        console.log(`✅ Updated menu for top-level category "${topLevelName}"`);
+      }
+    }
+  }
+} catch (error) {
+  console.error("shopifyProductCategoryMenuAfterDelete: Error updating menu in Shopify:", error);
+}
+'''
+        key: shopifyProductCategoryMenuAfterDelete
+      }
+    }
+  ]
+  edges: []
+}

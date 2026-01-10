@@ -132,21 +132,41 @@ if (isDelete) {
     };
   }
 
-  // Get the vertex data before deletion for hooks (if needed)
-  // We need to fetch it before deletion to get properties like Shopify ID
+  // Get the vertex data and all edges before deletion for hooks (if needed)
+  // We need to fetch it before deletion to get properties like Shopify ID and all relationships
   let deletedVertexData = null;
+  let outgoingEdges = [];
+  let incomingEdges = [];
   try {
     const fetchQuery = !enableUserScoping
-      ? `MATCH (v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`
-      : `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`;
+      ? `MATCH (v:${parentVertexLabel}) 
+         WHERE elementId(v) = $vertexId 
+         OPTIONAL MATCH (v)-[r]->(target)
+         OPTIONAL MATCH (source)-[r2]->(v)
+         RETURN v, 
+                collect(DISTINCT {type: type(r), from: elementId(v), to: elementId(target), edgeId: elementId(r), targetLabel: labels(target)[0]}) as outgoingEdges,
+                collect(DISTINCT {type: type(r2), from: elementId(source), to: elementId(v), edgeId: elementId(r2), sourceLabel: labels(source)[0]}) as incomingEdges`
+      : `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel}) 
+         WHERE elementId(v) = $vertexId 
+         OPTIONAL MATCH (v)-[r]->(target)
+         OPTIONAL MATCH (source)-[r2]->(v)
+         RETURN v, 
+                collect(DISTINCT {type: type(r), from: elementId(v), to: elementId(target), edgeId: elementId(r), targetLabel: labels(target)[0]}) as outgoingEdges,
+                collect(DISTINCT {type: type(r2), from: elementId(source), to: elementId(v), edgeId: elementId(r2), sourceLabel: labels(source)[0]}) as incomingEdges`;
     const fetchParams = enableUserScoping ? { vertexId, userUuid } : { vertexId };
     const fetchResult = await args.session.run(fetchQuery, fetchParams);
     if (fetchResult.records.length > 0) {
       const vertexNode = fetchResult.records[0].get('v');
       deletedVertexData = args.convertNodeToJson(vertexNode);
+      
+      // Filter out null edges and collect separately
+      const outgoingEdgesRaw = fetchResult.records[0].get('outgoingEdges') || [];
+      const incomingEdgesRaw = fetchResult.records[0].get('incomingEdges') || [];
+      outgoingEdges = outgoingEdgesRaw.filter(e => e && e.edgeId && e.to);
+      incomingEdges = incomingEdgesRaw.filter(e => e && e.edgeId && e.from);
     }
   } catch (e) {
-    console.warn("Failed to fetch vertex data before deletion for hooks:", e);
+    console.warn("Failed to fetch vertex data and edges before deletion for hooks:", e);
   }
 
   // Execute beforeDelete hooks
@@ -160,7 +180,9 @@ if (isDelete) {
     rootKeys,
     properties: deletedVertexData?.P || {},
     isRoot: !parentId,
-    operation: "delete"
+    operation: "delete",
+    outgoingEdges: outgoingEdges,
+    incomingEdges: incomingEdges
   });
 
   // Delete the vertex and its relationships from database
@@ -213,7 +235,9 @@ if (isDelete) {
     properties: deletedVertexData?.P || {},
     isRoot: !parentId,
     operation: "delete",
-    result: result
+    result: result,
+    outgoingEdges: outgoingEdges,
+    incomingEdges: incomingEdges
   });
 
   // Return success with deleted vertex ID

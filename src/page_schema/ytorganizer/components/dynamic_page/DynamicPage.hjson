@@ -940,7 +940,7 @@ return {
   sidebarWidth: args.fns.sidebarWidth,
   setSidebarWidth: args.fns.setSidebarWidth,
   fetchRoot: args.fns.fetchRoot,
-  hooks: config?.hooks
+  hooks: config?.sidebar?.hooks
 };
 '''
       }

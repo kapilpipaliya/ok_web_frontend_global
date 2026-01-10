@@ -1,0 +1,72 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Builds nested menu items recursively for a parent category, including all levels of children.
+        body:
+          '''
+// Extract parameters
+const { parentElementId } = args.contextData;
+
+if (!parentElementId) {
+  return {
+    success: false,
+    error: "parentElementId is required"
+  };
+}
+
+// Get direct children for this parent category
+const childrenResult = await args.session.run(
+  `MATCH (parent:ShopifyProductCategory)
+   WHERE elementId(parent) = $parentElementId
+   MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
+   WHERE child.id IS NOT NULL
+   RETURN elementId(child) as elementId, child.name as name, child.id as shopifyId, child.handle as shopifyHandle
+   ORDER BY child.name`,
+  { parentElementId }
+);
+
+const menuItems = [];
+
+for (const record of childrenResult.records) {
+  const shopifyId = record.get('shopifyId');
+  const childName = record.get('name');
+  const childElementId = record.get('elementId');
+  
+  if (!shopifyId) {
+    console.warn(`Child category ${childName} does not have a Shopify ID, skipping`);
+    continue;
+  }
+  
+  // Recursively get nested children for this child
+  const nestedResult = await args.executeNamedServerFunction({
+    functionName: "buildNestedMenuItems",
+    contextData: {
+      parentElementId: childElementId
+    }
+  });
+  
+  const nestedItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
+  
+  menuItems.push({
+    title: childName,
+    type: "COLLECTION",
+    resourceId: shopifyId,
+    items: nestedItems
+  });
+}
+
+return {
+  success: true,
+  menuItems: menuItems
+};
+'''
+        key: buildNestedMenuItems
+      }
+    }
+  ]
+  edges: []
+}
+

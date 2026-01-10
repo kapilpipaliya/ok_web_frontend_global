@@ -135,22 +135,25 @@ try {
     };
   }
 
-  // Get old parent edge ID before deleting
+  // Get old parent edge ID and parent ID before deleting
   let getOldEdgeQuery;
   let getOldEdgeParams;
+  let oldParentId = null;
   
   if (!enableUserScoping) {
     getOldEdgeQuery = `
-      MATCH (category:${parentVertexLabel})-[oldRel:${toParentEdgeType}]->(:${parentVertexLabel})
+      MATCH (category:${parentVertexLabel})-[oldRel:${toParentEdgeType}]->(oldParent:${parentVertexLabel})
       WHERE elementId(category) = $categoryId
-      RETURN collect(elementId(oldRel)) as oldEdgeIds
+      RETURN collect(elementId(oldRel)) as oldEdgeIds,
+             collect(elementId(oldParent)) as oldParentIds
     `;
     getOldEdgeParams = { categoryId };
   } else {
     getOldEdgeQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(category:${parentVertexLabel})-[oldRel:${toParentEdgeType}]->(:${parentVertexLabel})
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(category:${parentVertexLabel})-[oldRel:${toParentEdgeType}]->(oldParent:${parentVertexLabel})
       WHERE elementId(category) = $categoryId
-      RETURN collect(elementId(oldRel)) as oldEdgeIds
+      RETURN collect(elementId(oldRel)) as oldEdgeIds,
+             collect(elementId(oldParent)) as oldParentIds
     `;
     getOldEdgeParams = { userUuid, categoryId };
   }
@@ -158,6 +161,10 @@ try {
   const getOldEdgeResult = await args.session.run(getOldEdgeQuery, getOldEdgeParams);
   const oldEdgeIds = getOldEdgeResult.records[0]?.get('oldEdgeIds') || [];
   const validOldEdgeIds = Array.isArray(oldEdgeIds) ? oldEdgeIds.filter(id => id !== null) : [];
+  const oldParentIds = getOldEdgeResult.records[0]?.get('oldParentIds') || [];
+  if (oldParentIds && oldParentIds.length > 0 && oldParentIds[0]) {
+    oldParentId = oldParentIds[0];
+  }
 
   // Delete old parent relationship if it exists
   if (validOldEdgeIds.length > 0) {
@@ -232,6 +239,7 @@ try {
   await args.executeHooks(hooks?.afterMoveCategory, {
     categoryId,
     newParentId,
+    oldParentId,
     parentVertexLabel,
     toParentEdgeType,
     rootKeys,

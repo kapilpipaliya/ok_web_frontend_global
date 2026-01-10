@@ -621,11 +621,13 @@ const settingsConfigs = [
     },
     hooks: {
       // Hooks for creating category - creates collection in Shopify
-      afterCreate: "shopifyProductCategoryAfterCreate",
+      afterCreate: ["shopifyProductCategoryAfterCreate", "shopifyProductCategoryMenuAfterCreate"],
       // Hooks for updating category - updates collection in Shopify
-      afterUpdate: "shopifyProductCategoryAfterUpdate",
+      afterUpdate: ["shopifyProductCategoryAfterUpdate", "shopifyProductCategoryMenuAfterUpdate"],
       // Hooks for deleting category - deletes collection in Shopify
-      afterDelete: "shopifyProductCategoryAfterDelete"
+      afterDelete: ["shopifyProductCategoryAfterDelete", "shopifyProductCategoryMenuAfterDelete"],
+      // Hooks for moving category - updates menus when category is moved
+      afterMoveCategory: "shopifyProductCategoryMenuAfterMoveCategory"
     }
   }
 };`
@@ -726,11 +728,13 @@ const settingsConfigs = [
     },
     hooks: {
       // Hooks for creating category - creates collection in Shopify
-      afterCreate: "shopifyProductCategoryAfterCreate",
+      afterCreate: ["shopifyProductCategoryAfterCreate", "shopifyProductCategoryMenuAfterCreate"],
       // Hooks for updating category - updates collection in Shopify
-      afterUpdate: "shopifyProductCategoryAfterUpdate",
+      afterUpdate: ["shopifyProductCategoryAfterUpdate", "shopifyProductCategoryMenuAfterUpdate"],
       // Hooks for deleting category - deletes collection in Shopify
-      afterDelete: "shopifyProductCategoryAfterDelete"
+      afterDelete: ["shopifyProductCategoryAfterDelete", "shopifyProductCategoryMenuAfterDelete"],
+      // Hooks for moving category - updates menus when category is moved
+      afterMoveCategory: "shopifyProductCategoryMenuAfterMoveCategory"
     }
   }
 };`

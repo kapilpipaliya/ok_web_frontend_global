@@ -1,0 +1,115 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Deletes a Shopify menu and removes menu info from the category.
+        body:
+          '''
+// Extract parameters
+const { menuId, categoryElementId, shop, shopifyParams } = args.contextData;
+
+if (!menuId || !shop) {
+  return {
+    success: false,
+    error: "menuId and shop are required"
+  };
+}
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("deleteShopifyMenu: Shopify authentication failed", authError);
+  return {
+    success: false,
+    error: "Shopify authentication failed"
+  };
+}
+
+if (!admin) {
+  return {
+    success: false,
+    error: "Shopify admin client not available"
+  };
+}
+
+try {
+  const deleteMenuMutation = `
+    mutation menuDelete($id: ID!) {
+      menuDelete(id: $id) {
+        deletedMenuId
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const deleteResponse = await admin.graphql(deleteMenuMutation, { 
+    variables: { id: menuId }
+  });
+  
+  let deleteApiResponse;
+  if (deleteResponse instanceof Response) {
+    deleteApiResponse = await deleteResponse.json();
+  } else {
+    deleteApiResponse = deleteResponse;
+  }
+
+  if (deleteApiResponse.errors && deleteApiResponse.errors.length > 0) {
+    console.error("Error deleting menu:", deleteApiResponse.errors);
+    return {
+      success: false,
+      error: "Error deleting menu",
+      details: deleteApiResponse.errors
+    };
+  }
+
+  const userErrors = deleteApiResponse.data?.menuDelete?.userErrors || [];
+  if (userErrors.length > 0) {
+    console.error("User errors deleting menu:", userErrors);
+    return {
+      success: false,
+      error: "User errors deleting menu",
+      details: userErrors
+    };
+  }
+
+  // Remove menu info from category if categoryElementId is provided
+  if (categoryElementId) {
+    await args.session.run(
+      `MATCH (c:ShopifyProductCategory)
+       WHERE elementId(c) = $elementId
+       REMOVE c.menuId, c.menuHandle`,
+      { elementId: categoryElementId }
+    );
+  }
+
+  const deletedMenuId = deleteApiResponse.data?.menuDelete?.deletedMenuId;
+  return {
+    success: true,
+    deletedMenuId: deletedMenuId
+  };
+} catch (error) {
+  console.error("deleteShopifyMenu: Error deleting menu:", error);
+  return {
+    success: false,
+    error: error.message || "Error deleting menu"
+  };
+}
+'''
+        key: deleteShopifyMenu
+      }
+    }
+  ]
+  edges: []
+}
+

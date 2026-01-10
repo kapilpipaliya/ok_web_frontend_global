@@ -745,11 +745,12 @@ const handleDelete = async (e) => {
         rootKeys: rootKeys,
         properties: item.P || {},
         operation: "delete",
-          tableVertexLabel: args.contextData.props?.tableVertexLabel,
-          relationshipType: args.contextData.props?.relationshipType,
-          enableUserScoping: args.contextData.props?.enableUserScoping
-        }
-      });
+        tableVertexLabel: args.contextData.props?.tableVertexLabel,
+        relationshipType: args.contextData.props?.relationshipType,
+        enableUserScoping: args.contextData.props?.enableUserScoping,
+        hooks: args.contextData.props?.hooks
+      }
+    });
 
     if (result?.result?.success) {
       args.showSuccessToast?.("Item deleted successfully");

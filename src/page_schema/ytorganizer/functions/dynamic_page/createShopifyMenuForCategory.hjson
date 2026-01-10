@@ -1,0 +1,163 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Creates a Shopify menu for a parent category with all nested children.
+        body:
+          '''
+// Extract parameters
+const { categoryElementId, categoryName, shop, shopifyParams } = args.contextData;
+
+if (!categoryElementId || !categoryName || !shop) {
+  return {
+    success: false,
+    error: "categoryElementId, categoryName, and shop are required"
+  };
+}
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("createShopifyMenuForCategory: Shopify authentication failed", authError);
+  return {
+    success: false,
+    error: "Shopify authentication failed"
+  };
+}
+
+if (!admin) {
+  return {
+    success: false,
+    error: "Shopify admin client not available"
+  };
+}
+
+try {
+  const menuTitle = categoryName;
+  const menuHandle = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+  // Build nested menu structure with all levels of children
+  const nestedResult = await args.executeNamedServerFunction({
+    functionName: "buildNestedMenuItems",
+    contextData: {
+      parentElementId: categoryElementId
+    }
+  });
+  
+  const menuItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
+  
+  if (menuItems.length === 0) {
+    return {
+      success: false,
+      error: "No children with Shopify IDs found"
+    };
+  }
+
+  // Create menu
+  const createMenuMutation = `
+    mutation menuCreate($title: String!, $handle: String!, $items: [MenuItemCreateInput!]!) {
+      menuCreate(title: $title, handle: $handle, items: $items) {
+        menu {
+          id
+          handle
+          title
+          items {
+            id
+            title
+            type
+            resourceId
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const createResponse = await admin.graphql(createMenuMutation, {
+    variables: { 
+      title: menuTitle,
+      handle: menuHandle,
+      items: menuItems
+    }
+  });
+  
+  let createApiResponse;
+  if (createResponse instanceof Response) {
+    createApiResponse = await createResponse.json();
+  } else {
+    createApiResponse = createResponse;
+  }
+
+  if (createApiResponse.errors && createApiResponse.errors.length > 0) {
+    console.error("Shopify GraphQL errors:", createApiResponse.errors);
+    return {
+      success: false,
+      error: "Shopify GraphQL errors",
+      details: createApiResponse.errors
+    };
+  }
+
+  const userErrors = createApiResponse.data?.menuCreate?.userErrors || [];
+  if (userErrors.length > 0) {
+    console.error("User errors creating menu:", userErrors);
+    return {
+      success: false,
+      error: "User errors creating menu",
+      details: userErrors
+    };
+  }
+
+  const newMenu = createApiResponse.data?.menuCreate?.menu;
+  if (!newMenu) {
+    return {
+      success: false,
+      error: "Menu creation succeeded but no menu returned"
+    };
+  }
+
+  // Update parent category with menu info
+  await args.session.run(
+    `MATCH (c:ShopifyProductCategory)
+     WHERE elementId(c) = $elementId
+     SET c.menuId = $menuId,
+         c.menuHandle = $menuHandle,
+         c.updatedAt = datetime()`,
+    {
+      elementId: categoryElementId,
+      menuId: newMenu.id,
+      menuHandle: newMenu.handle
+    }
+  );
+
+  return {
+    success: true,
+    menu: newMenu,
+    menuId: newMenu.id,
+    menuHandle: newMenu.handle
+  };
+} catch (error) {
+  console.error("createShopifyMenuForCategory: Error creating menu:", error);
+  return {
+    success: false,
+    error: error.message || "Error creating menu"
+  };
+}
+'''
+        key: createShopifyMenuForCategory
+      }
+    }
+  ]
+  edges: []
+}
+
