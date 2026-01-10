@@ -109,7 +109,7 @@ try {
        LIMIT 1
        RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
               COALESCE(topLevel.name, category.name) as topLevelName,
-              COALESCE(topLevel.menuId, null) as menuId,
+              COALESCE(topLevel.menuId, category.menuId) as menuId,
               COALESCE(topLevel.id, category.id) as shopifyId`,
       { affectedCategoryId }
     );

@@ -41,7 +41,6 @@ const shopifyCollectionId = categoryData.id;
 
 // Get the old category name from beforeUpdate hook context (if available)
 // The oldData is passed from saveSidebarVertex beforeUpdate hook
-const oldData = args.contextData.oldData;
 const oldCategoryName = oldData?.P?.name || null;
 const newCategoryName = name; // New category name from the update
 
@@ -192,7 +191,7 @@ try {
 }
 
 // Helper function to update product tags when category name changes
-async function updateProductTagsForCategoryNameChange(categoryId, oldCategoryName, newCategoryName) {
+async function updateProductTagsForCategoryNameChange(categoryId, oldCategoryName, newCategoryName, adminInstance) {
   if (!categoryId || !newCategoryName) {
     return;
   }

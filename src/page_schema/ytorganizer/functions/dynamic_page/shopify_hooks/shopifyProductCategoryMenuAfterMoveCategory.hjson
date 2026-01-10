@@ -50,7 +50,7 @@ try {
        LIMIT 1
        RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
               COALESCE(topLevel.name, category.name) as topLevelName,
-              COALESCE(topLevel.menuId, null) as menuId,
+              COALESCE(topLevel.menuId, category.menuId) as menuId,
               COALESCE(topLevel.id, category.id) as shopifyId`,
       { categoryElementId }
     );
@@ -139,6 +139,44 @@ try {
   if (oldParentId && oldParentId !== 'root' && oldParentId !== 'uncategorized') {
     console.log(`Updating menu for old parent's top-level category...`);
     await updateTopLevelMenu(oldParentId);
+  } else if (!oldParentId || oldParentId === 'root' || oldParentId === 'uncategorized') {
+    // If oldParentId is not present, the moved item was itself a root item
+    // Since the parent relationship is already changed in moveSidebarItem, 
+    // we need to check if the moved category had a menu and delete it
+    // (it's no longer a root item, so its menu should be deleted)
+    const movedCategoryResult = await args.session.run(
+      `MATCH (category:ShopifyProductCategory)
+       WHERE elementId(category) = $categoryId
+       RETURN category.menuId as menuId, category.name as name, category.id as shopifyId`,
+      { categoryId }
+    );
+    
+    if (movedCategoryResult.records.length > 0) {
+      const record = movedCategoryResult.records[0];
+      const menuId = record.get('menuId');
+      const categoryName = record.get('name');
+      const shopifyId = record.get('shopifyId');
+      
+      // If the moved category had a menu and was a root item (oldParentId is null),
+      // delete its menu since it's no longer a root item after the move
+      if (menuId && shopifyId) {
+        // The category is no longer top-level (parent relationship already changed),
+        // so delete its menu
+        console.log(`📋 Category "${categoryName}" was a root item and is no longer top-level after move, deleting its menu...`);
+        const deleteResult = await args.executeNamedServerFunction({
+          functionName: "deleteShopifyMenu",
+          contextData: {
+            menuId: menuId,
+            categoryElementId: categoryId,
+            shop: shop,
+            shopifyParams: shopifyParams
+          }
+        });
+        if (deleteResult.result?.success) {
+          console.log(`✅ Deleted menu for root category "${categoryName}" that is no longer top-level`);
+        }
+      }
+    }
   }
 
   // Update menu for the "to" top-level parent (new parent's top-level)

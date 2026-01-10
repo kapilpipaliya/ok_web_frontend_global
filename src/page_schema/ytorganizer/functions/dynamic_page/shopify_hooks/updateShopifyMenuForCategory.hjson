@@ -102,6 +102,41 @@ try {
 
   const userErrors = updateApiResponse.data?.menuUpdate?.userErrors || [];
   if (userErrors.length > 0) {
+    // Check if the error is "Menu does not exist"
+    const menuNotFoundError = userErrors.find(
+      error => error.message && error.message.toLowerCase().includes('menu does not exist')
+    );
+
+    if (menuNotFoundError) {
+      console.log("Menu does not exist, creating new menu instead...");
+      // Create menu instead of updating
+      const createResult = await args.executeNamedServerFunction({
+        functionName: "createShopifyMenuForCategory",
+        contextData: {
+          categoryElementId: categoryElementId,
+          categoryName: categoryName,
+          shop: shop,
+          shopifyParams: shopifyParams
+        }
+      });
+
+      if (createResult.result?.success) {
+        return {
+          success: true,
+          menu: createResult.result.menu,
+          menuId: createResult.result.menuId,
+          menuHandle: createResult.result.menuHandle
+        };
+      } else {
+        return {
+          success: false,
+          error: "Failed to create menu after update failed",
+          details: createResult.result?.error || createResult.result
+        };
+      }
+    }
+
+    // Other errors - return them
     console.error("User errors updating menu:", userErrors);
     return {
       success: false,

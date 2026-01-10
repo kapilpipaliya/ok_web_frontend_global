@@ -293,6 +293,7 @@ if (duplicateResult.records.length > 0) {
 
 let vertexNode;
 let vertexElementId;
+let oldVertexData = null; // Declare outside if block so it's accessible in afterUpdate hook
 
 // Merge properties with name and key
 const vertexProperties = {
@@ -303,7 +304,6 @@ const vertexProperties = {
 
 if (isUpdate) {
   // Get the old vertex data before update for hooks
-  let oldVertexData = null;
   try {
     const fetchQuery = !enableUserScoping
       ? `MATCH (v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`
