@@ -8,14 +8,29 @@
         body:
           '''
 // Extract parameters
-const { shop, shopifyParams, menuTitle = "Categories", menuHandle = "categories" } = args.contextData;
+const { menuTitle = "Categories", menuHandle = "categories" } = args.contextData;
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("createAllCategoriesMenu: getSessionUser failed", e);
+  return;
+}
+
+const shop = sessionUser?.P?.shop;
 
 if (!shop) {
+  console.warn("createAllCategoriesMenu: Shop domain is missing, skipping menu creation");
   return {
     success: false,
     error: "shop is required"
   };
 }
+
+// Get Shopify params from session
+const shopifyParams = sessionUser?.P?.shopifyParams || {};
 
 // Get Shopify API object
 const shopify = args.getShopifyClient();
@@ -208,9 +223,9 @@ try {
         // Update the stored menu ID in Setting (in case it changed)
         await args.session.run(
           `MERGE (s:Setting {key: $key})
+           ON CREATE SET s.createdAt = datetime()
            SET s.value = $menuId,
-               s.updatedAt = datetime()
-           ON CREATE SET s.createdAt = datetime()`,
+               s.updatedAt = datetime()`,
           { key: settingKey, menuId: updatedMenu.id }
         );
 
@@ -304,9 +319,9 @@ try {
     // Store the menu ID in Setting for future use
     await args.session.run(
       `MERGE (s:Setting {key: $key})
+       ON CREATE SET s.createdAt = datetime()
        SET s.value = $menuId,
-           s.updatedAt = datetime()
-       ON CREATE SET s.createdAt = datetime()`,
+           s.updatedAt = datetime()`,
       { key: settingKey, menuId: newMenu.id }
     );
 
