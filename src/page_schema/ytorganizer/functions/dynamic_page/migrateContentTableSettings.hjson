@@ -558,10 +558,18 @@ const settingsConfigs = [
     // Hooks for fetching data - syncs Shopify products when fetching uncategorized
     beforeFetchData: "shopifyProductBeforeFetchData",
     // afterFetchData: ["shopifyProductAfterFetchData", "shopifyProductLogFetch"],
-    // Hooks for saving items (add/edit/delete)
-    // beforeSave: "shopifyProductBeforeSave",
-    // Hooks for saving - creates product in Shopify when new product is added
-    afterSave: "shopifyProductAfterSave",
+    // Hooks for creating items
+    // beforeCreate: "shopifyProductBeforeCreate",
+    // Hooks for creating - creates product in Shopify when new product is added
+    afterCreate: "shopifyProductAfterCreate",
+    // Hooks for updating items
+    // beforeUpdate: "shopifyProductBeforeUpdate",
+    // Hooks for updating - updates product in Shopify when product is updated
+    afterUpdate: "shopifyProductAfterUpdate",
+    // Hooks for deleting items
+    // beforeDelete: "shopifyProductBeforeDelete",
+    // Hooks for deleting - deletes product from Shopify when product is deleted
+    afterDelete: "shopifyProductAfterDelete",
     // Hooks for category operations
     // beforeAddCategory: "shopifyProductBeforeAddCategory",
     // afterAddCategory: "shopifyProductAfterAddCategory",
@@ -610,6 +618,14 @@ const settingsConfigs = [
           ]
         }
       ]
+    },
+    hooks: {
+      // Hooks for creating category - creates collection in Shopify
+      afterCreate: "shopifyProductCategoryAfterCreate",
+      // Hooks for updating category - updates collection in Shopify
+      afterUpdate: "shopifyProductCategoryAfterUpdate",
+      // Hooks for deleting category - deletes collection in Shopify
+      afterDelete: "shopifyProductCategoryAfterDelete"
     }
   }
 };`
@@ -707,6 +723,14 @@ const settingsConfigs = [
           ]
         }
       ]
+    },
+    hooks: {
+      // Hooks for creating category - creates collection in Shopify
+      afterCreate: "shopifyProductCategoryAfterCreate",
+      // Hooks for updating category - updates collection in Shopify
+      afterUpdate: "shopifyProductCategoryAfterUpdate",
+      // Hooks for deleting category - deletes collection in Shopify
+      afterDelete: "shopifyProductCategoryAfterDelete"
     }
   }
 };`

@@ -54,15 +54,35 @@ const vertexLabel = tableVertexLabel;
 // Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
 const relationshipType = `User${vertexLabel}`;
 
-// Execute beforeSave hooks
-await args.executeHooks(hooks?.beforeSave, {
-  tableVertexLabel,
-  operation,
-  elementId,
-  data: inputData,
-  uniqueKeys,
-  enableUserScoping
-});
+// Execute before hooks based on operation
+if (operation === "create") {
+  await args.executeHooks(hooks?.beforeCreate, {
+    tableVertexLabel,
+    operation,
+    elementId,
+    data: inputData,
+    uniqueKeys,
+    enableUserScoping
+  });
+} else if (operation === "update") {
+  await args.executeHooks(hooks?.beforeUpdate, {
+    tableVertexLabel,
+    operation,
+    elementId,
+    data: inputData,
+    uniqueKeys,
+    enableUserScoping
+  });
+} else if (operation === "delete") {
+  await args.executeHooks(hooks?.beforeDelete, {
+    tableVertexLabel,
+    operation,
+    elementId,
+    data: inputData,
+    uniqueKeys,
+    enableUserScoping
+  });
+}
 
 try {
   if (operation === "create") {
@@ -196,8 +216,8 @@ try {
       message: `${vertexLabel} created successfully`
     };
     
-    // Execute afterSave hooks
-    await args.executeHooks(hooks?.afterSave, {
+    // Execute afterCreate hooks
+    await args.executeHooks(hooks?.afterCreate, {
       tableVertexLabel,
       operation,
       elementId: createdElementId,
@@ -370,8 +390,8 @@ try {
       message: `${vertexLabel} updated successfully`
     };
     
-    // Execute afterSave hooks
-    await args.executeHooks(hooks?.afterSave, {
+    // Execute afterUpdate hooks
+    await args.executeHooks(hooks?.afterUpdate, {
       tableVertexLabel,
       operation,
       elementId: updateElementId,
@@ -391,6 +411,23 @@ try {
         success: false,
         message: "elementId is required for delete operation"
       };
+    }
+
+    // Get the vertex data before deletion for hooks (if needed)
+    // We need to fetch it before deletion to get properties like Shopify ID
+    let deletedVertexData = null;
+    try {
+      const fetchQuery = !enableUserScoping
+        ? `MATCH (c:${vertexLabel}) WHERE elementId(c) = $elementId RETURN c`
+        : `MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(c:${vertexLabel}) WHERE elementId(c) = $elementId RETURN c`;
+      const fetchParams = enableUserScoping ? { elementId: deleteElementId, userUuid: user.P.uuid } : { elementId: deleteElementId };
+      const fetchResult = await args.session.run(fetchQuery, fetchParams);
+      if (fetchResult.records.length > 0) {
+        const vertexNode = fetchResult.records[0].get('c');
+        deletedVertexData = args.convertNodeToJson(vertexNode);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch vertex data before deletion for hooks:", e);
     }
 
     // Verify ownership and delete in single optimized query
@@ -430,11 +467,12 @@ try {
 
     const deleteResult = {
       success: true,
-      message: `${vertexLabel} deleted successfully`
+      message: `${vertexLabel} deleted successfully`,
+      data: deletedVertexData ? { P: deletedVertexData.P } : null
     };
     
-    // Execute afterSave hooks
-    await args.executeHooks(hooks?.afterSave, {
+    // Execute afterDelete hooks
+    await args.executeHooks(hooks?.afterDelete, {
       tableVertexLabel,
       operation,
       elementId: deleteElementId,

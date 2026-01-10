@@ -1,0 +1,120 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Deletes a product in Shopify when a ShopifyProduct is deleted from the database.
+        body:
+          '''
+// Only process if tableVertexLabel is 'ShopifyProduct' and operation is 'delete'
+const { tableVertexLabel, operation, elementId, result } = args.contextData;
+
+if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'delete') {
+  // Not deleting a ShopifyProduct, skip
+  return;
+}
+
+// Get the product data from result to check if it has a Shopify ID
+const deletedData = result?.data;
+const productData = deletedData?.P || {};
+const shopifyProductId = productData.id;
+
+if (!shopifyProductId) {
+  // Product doesn't have a Shopify ID, skip deletion
+  console.log("shopifyProductAfterDelete: Product doesn't have Shopify ID, skipping product deletion");
+  return;
+}
+
+console.log(`🛍️  Deleting product in Shopify: ${shopifyProductId}...`);
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductAfterDelete: getSessionUser failed", e);
+  return; // Can't delete without shop info
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductAfterDelete: Shop domain is missing, skipping product deletion");
+  return;
+}
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyProductAfterDelete: Shopify authentication failed", authError);
+  return; // Can't delete without authentication
+}
+
+if (!admin) {
+  console.warn("shopifyProductAfterDelete: Shopify admin client not available");
+  return;
+}
+
+try {
+  // Delete product in Shopify using productDelete mutation
+  const deleteProductMutation = `
+    mutation productDelete($id: ID!) {
+      productDelete(input: { id: $id }) {
+        deletedProductId
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    id: shopifyProductId
+  };
+
+  const response = await admin.graphql(deleteProductMutation, { variables });
+  
+  // Handle Response object - extract JSON if it's a Response
+  let apiResponse;
+  if (response instanceof Response) {
+    apiResponse = await response.json();
+  } else {
+    apiResponse = response;
+  }
+
+  if (apiResponse.errors && apiResponse.errors.length > 0) {
+    console.error("shopifyProductAfterDelete: Shopify GraphQL errors:", apiResponse.errors);
+    return;
+  }
+
+  const userErrors = apiResponse.data?.productDelete?.userErrors || [];
+  if (userErrors.length > 0) {
+    console.error("shopifyProductAfterDelete: User errors deleting product:", userErrors);
+    return;
+  }
+
+  const deletedProductId = apiResponse.data?.productDelete?.deletedProductId;
+  if (deletedProductId) {
+    console.log(`✅ Deleted product in Shopify: ${deletedProductId}`);
+  } else {
+    console.warn("shopifyProductAfterDelete: Product deletion succeeded but no deleted ID returned");
+  }
+} catch (error) {
+  console.error("shopifyProductAfterDelete: Error deleting product in Shopify:", error);
+}
+'''
+        key: shopifyProductAfterDelete
+      }
+    }
+  ]
+  edges: []
+}
+

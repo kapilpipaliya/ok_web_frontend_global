@@ -132,6 +132,37 @@ if (isDelete) {
     };
   }
 
+  // Get the vertex data before deletion for hooks (if needed)
+  // We need to fetch it before deletion to get properties like Shopify ID
+  let deletedVertexData = null;
+  try {
+    const fetchQuery = !enableUserScoping
+      ? `MATCH (v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`
+      : `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`;
+    const fetchParams = enableUserScoping ? { vertexId, userUuid } : { vertexId };
+    const fetchResult = await args.session.run(fetchQuery, fetchParams);
+    if (fetchResult.records.length > 0) {
+      const vertexNode = fetchResult.records[0].get('v');
+      deletedVertexData = args.convertNodeToJson(vertexNode);
+    }
+  } catch (e) {
+    console.warn("Failed to fetch vertex data before deletion for hooks:", e);
+  }
+
+  // Execute beforeDelete hooks
+  await args.executeHooks(hooks?.beforeDelete, {
+    vertexId: vertexId,
+    name: deletedVertexData?.P?.name || name,
+    key: deletedVertexData?.P?.key,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: deletedVertexData?.P || {},
+    isRoot: !parentId,
+    operation: "delete"
+  });
+
   // Delete the vertex and its relationships from database
   let deleteQuery;
   let deleteParams;
@@ -163,13 +194,30 @@ if (isDelete) {
     };
   }
 
-  // Return success with deleted vertex ID
-  return {
+  const result = {
     success: true,
     message: "Vertex deleted successfully",
-    data: { id: vertexId },
+    data: { id: vertexId, ...(deletedVertexData ? { P: deletedVertexData.P } : {}) },
     deleted_vertexes: [vertexId]
   };
+
+  // Execute afterDelete hooks
+  await args.executeHooks(hooks?.afterDelete, {
+    vertexId: vertexId,
+    name: deletedVertexData?.P?.name || name,
+    key: deletedVertexData?.P?.key,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: deletedVertexData?.P || {},
+    isRoot: !parentId,
+    operation: "delete",
+    result: result
+  });
+
+  // Return success with deleted vertex ID
+  return result;
 }
 
 // Prevent creating vertex with root key
@@ -230,6 +278,37 @@ const vertexProperties = {
 };
 
 if (isUpdate) {
+  // Get the old vertex data before update for hooks
+  let oldVertexData = null;
+  try {
+    const fetchQuery = !enableUserScoping
+      ? `MATCH (v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`
+      : `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`;
+    const fetchParams = enableUserScoping ? { vertexId, userUuid } : { vertexId };
+    const fetchResult = await args.session.run(fetchQuery, fetchParams);
+    if (fetchResult.records.length > 0) {
+      const vertexNode = fetchResult.records[0].get('v');
+      oldVertexData = args.convertNodeToJson(vertexNode);
+    }
+  } catch (e) {
+    console.warn("Failed to fetch vertex data before update for hooks:", e);
+  }
+
+  // Execute beforeUpdate hooks
+  await args.executeHooks(hooks?.beforeUpdate, {
+    vertexId: vertexId,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId,
+    operation: "update",
+    oldData: oldVertexData
+  });
+
   // Update existing vertex
   const setClause = Object.keys(vertexProperties).map((prop, index) => {
     return `v.${prop} = $prop${index}`;
@@ -309,8 +388,8 @@ if (isUpdate) {
     }
   }
 } else {
-  // Execute beforeAddCategory hooks (only for create, not update)
-  await args.executeHooks(hooks?.beforeAddCategory, {
+  // Execute beforeCreate hooks (only for create, not update)
+  await args.executeHooks(hooks?.beforeCreate, {
     vertexId: null,
     name: vertexName,
     key: vertexKey,
@@ -455,9 +534,9 @@ const result = {
   data: vertex
 };
 
-// Execute afterAddCategory hooks (only for create, not update)
+// Execute afterCreate hooks (only for create, not update)
 if (!isUpdate) {
-  await args.executeHooks(hooks?.afterAddCategory, {
+  await args.executeHooks(hooks?.afterCreate, {
     vertexId: vertexElementId,
     name: vertexName,
     key: vertexKey,
@@ -468,6 +547,24 @@ if (!isUpdate) {
     properties: vertexProperties,
     isRoot: !parentId,
     result: result
+  });
+}
+
+// Execute afterUpdate hooks (for updates)
+if (isUpdate) {
+  await args.executeHooks(hooks?.afterUpdate, {
+    vertexId: vertexElementId,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId,
+    operation: "update",
+    result: result,
+    oldData: oldVertexData
   });
 }
 

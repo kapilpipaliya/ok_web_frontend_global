@@ -362,6 +362,7 @@ console.log(`✅ Found ${allShopifyProducts.length} products in Shopify`);
 // For specific category, use the products we already fetched
 // For uncategorized, fetch all products from database
 const existingProducts = new Map();
+const productsWithoutId = []; // Track products without Shopify ID
 
 if (isUncategorized) {
   // For uncategorized, fetch all products from database
@@ -376,9 +377,15 @@ if (isUncategorized) {
     const id = record.get('id');
     if (id) {
       existingProducts.set(id, elementId);
+    } else {
+      // Product exists in DB but doesn't have a Shopify ID
+      productsWithoutId.push(elementId);
     }
   }
   console.log(`📊 Found ${existingProducts.size} existing products in database`);
+  if (productsWithoutId.length > 0) {
+    console.log(`⚠️  Found ${productsWithoutId.length} products without Shopify ID (will be deleted)`);
+  }
 } else if (existingCategoryProducts.length > 0) {
   // For specific category, use the products we already fetched
   for (const product of existingCategoryProducts) {
@@ -386,9 +393,15 @@ if (isUncategorized) {
     const elementId = product.id; // This is the database elementId
     if (shopifyId && elementId) {
       existingProducts.set(shopifyId, elementId);
+    } else if (elementId) {
+      // Product exists in category but doesn't have a Shopify ID
+      productsWithoutId.push(elementId);
     }
   }
   console.log(`📊 Found ${existingProducts.size} existing products in category`);
+  if (productsWithoutId.length > 0) {
+    console.log(`⚠️  Found ${productsWithoutId.length} products without Shopify ID in category (will be deleted)`);
+  }
 }
 
 // For specific category, we already have only category products in existingProducts
@@ -407,9 +420,20 @@ for (const [id, dbId] of productsToConsiderForDeletion) {
   }
 }
 
-// Delete products that no longer exist in Shopify
+// Also add products without Shopify ID to deletion list
+productsToDelete.push(...productsWithoutId);
+
+// Delete products that no longer exist in Shopify or don't have a Shopify ID
 if (productsToDelete.length > 0) {
-  console.log(`🗑️  Deleting ${productsToDelete.length} products that no longer exist in Shopify...`);
+  const deletedCount = productsToDelete.length - productsWithoutId.length;
+  const deletedWithoutIdCount = productsWithoutId.length;
+  console.log(`🗑️  Deleting ${productsToDelete.length} products:`);
+  if (deletedCount > 0) {
+    console.log(`   - ${deletedCount} products that no longer exist in Shopify`);
+  }
+  if (deletedWithoutIdCount > 0) {
+    console.log(`   - ${deletedWithoutIdCount} products without Shopify ID`);
+  }
   await args.session.run(
     `MATCH (p:ShopifyProduct)
      WHERE elementId(p) IN $ids

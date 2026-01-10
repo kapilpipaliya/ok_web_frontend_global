@@ -1,0 +1,353 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Updates a collection in Shopify when a ShopifyProductCategory is modified in the database.
+        body:
+          '''
+// Only process if parentVertexLabel is 'ShopifyProductCategory' and operation is 'update'
+const { parentVertexLabel, name, vertexId, operation, result, oldData } = args.contextData;
+
+if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') {
+  // Not updating a ShopifyProductCategory, skip
+  return;
+}
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductCategoryAfterUpdate: getSessionUser failed", e);
+  return; // Can't update without shop info
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductCategoryAfterUpdate: Shop domain is missing, skipping collection update");
+  return;
+}
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Get the category to check if it has a Shopify ID
+const vertex = result?.data;
+const categoryData = vertex?.P || {};
+const shopifyCollectionId = categoryData.id;
+
+// Get the old category name from beforeUpdate hook context (if available)
+// The oldData is passed from saveSidebarVertex beforeUpdate hook
+const oldData = args.contextData.oldData;
+const oldCategoryName = oldData?.P?.name || null;
+const newCategoryName = name; // New category name from the update
+
+// Only update tags if name actually changed
+const nameChanged = oldCategoryName && oldCategoryName !== newCategoryName;
+
+if (!shopifyCollectionId) {
+  // Category doesn't have a Shopify ID, skip collection update but still update product tags
+  console.log("shopifyProductCategoryAfterUpdate: Category doesn't have Shopify ID, skipping collection update");
+  
+  // Still update product tags even if collection doesn't exist
+  // Need to authenticate first
+  let adminForTags;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    adminForTags = authResult.admin;
+  } catch (authError) {
+    console.error("shopifyProductCategoryAfterUpdate: Shopify authentication failed for tag update", authError);
+    return;
+  }
+  
+  if (nameChanged && newCategoryName && adminForTags) {
+    await updateProductTagsForCategoryNameChange(vertexId, oldCategoryName, newCategoryName, adminForTags);
+  }
+  return;
+}
+
+console.log(`🛍️  Updating collection in Shopify for category: ${name}...`);
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyProductCategoryAfterUpdate: Shopify authentication failed", authError);
+  return; // Can't update without authentication
+}
+
+if (!admin) {
+  console.warn("shopifyProductCategoryAfterUpdate: Shopify admin client not available");
+  return;
+}
+
+try {
+  // Update collection in Shopify using collectionUpdate mutation
+  const updateCollectionMutation = `
+    mutation collectionUpdate($input: CollectionInput!) {
+      collectionUpdate(input: $input) {
+        collection {
+          id
+          handle
+          title
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    input: {
+      id: shopifyCollectionId,
+      title: name,
+      descriptionHtml: `<p>Products for ${name}</p>`,
+      seo: {
+        title: name,
+        description: `Products for ${name}`
+      },
+      // Update tag rule to match the new category name
+      ruleSet: {
+        rules: [
+          {
+            column: "TAG",
+            relation: "EQUALS",
+            condition: name
+          }
+        ],
+        appliedDisjunctively: false
+      }
+    }
+  };
+
+  const response = await admin.graphql(updateCollectionMutation, { variables });
+  
+  // Handle Response object - extract JSON if it's a Response
+  let apiResponse;
+  if (response instanceof Response) {
+    apiResponse = await response.json();
+  } else {
+    apiResponse = response;
+  }
+
+  if (apiResponse.errors && apiResponse.errors.length > 0) {
+    console.error("shopifyProductCategoryAfterUpdate: Shopify GraphQL errors:", apiResponse.errors);
+    return;
+  }
+
+  const userErrors = apiResponse.data?.collectionUpdate?.userErrors || [];
+  if (userErrors.length > 0) {
+    console.error("shopifyProductCategoryAfterUpdate: User errors updating collection:", userErrors);
+    return;
+  }
+
+  const updatedCollection = apiResponse.data?.collectionUpdate?.collection;
+  if (!updatedCollection) {
+    console.warn("shopifyProductCategoryAfterUpdate: Collection update succeeded but no collection returned");
+    return;
+  }
+
+  // Extract Shopify collection handle (ID should remain the same)
+  const shopifyHandle = updatedCollection.handle;
+  
+  // Update the database category with the updated handle
+  if (vertexId && shopifyHandle) {
+    await args.session.run(
+      `MATCH (c:ShopifyProductCategory)
+       WHERE elementId(c) = $elementId
+       SET c.handle = $handle,
+           c.updatedAt = datetime()`,
+      {
+        elementId: vertexId,
+        handle: shopifyHandle
+      }
+    );
+    
+    // Update the result vertex P object with updated handle
+    if (result && result.data && result.data.P) {
+      result.data.P.handle = shopifyHandle;
+    }
+    
+    console.log(`✅ Updated collection in Shopify: ${shopifyCollectionId} (${updatedCollection.title})`);
+    console.log(`✅ Updated database category ${vertexId} with handle: ${shopifyHandle}`);
+  } else {
+    console.warn("shopifyProductCategoryAfterUpdate: Missing vertexId or shopifyHandle, cannot update database");
+  }
+
+  // Update product tags if category name changed
+  if (nameChanged && newCategoryName && admin) {
+    await updateProductTagsForCategoryNameChange(vertexId, oldCategoryName, newCategoryName, admin);
+  } else if (!nameChanged) {
+    console.log("shopifyProductCategoryAfterUpdate: Category name unchanged, skipping product tag update");
+  }
+} catch (error) {
+  console.error("shopifyProductCategoryAfterUpdate: Error updating collection in Shopify:", error);
+}
+
+// Helper function to update product tags when category name changes
+async function updateProductTagsForCategoryNameChange(categoryId, oldCategoryName, newCategoryName) {
+  if (!categoryId || !newCategoryName) {
+    return;
+  }
+
+  console.log(`🏷️  Updating product tags for category name change: "${oldCategoryName}" → "${newCategoryName}"...`);
+
+  // Get all products in this category
+  const productsResult = await args.session.run(
+    `MATCH (p:ShopifyProduct)-[:ProductCategory]->(cat:ShopifyProductCategory)
+     WHERE elementId(cat) = $categoryId
+     RETURN elementId(p) as elementId, p.id as shopifyId`,
+    { categoryId }
+  );
+
+  const productsToUpdate = [];
+  for (const record of productsResult.records) {
+    const elementId = record.get('elementId');
+    const shopifyId = record.get('shopifyId');
+    if (shopifyId) {
+      productsToUpdate.push({ elementId, shopifyId });
+    }
+  }
+
+  if (productsToUpdate.length === 0) {
+    console.log("shopifyProductCategoryAfterUpdate: No products found in category to update tags");
+    return;
+  }
+
+  console.log(`🏷️  Updating tags for ${productsToUpdate.length} product(s)...`);
+
+  // Update each product's tags
+  let successCount = 0;
+  let errorCount = 0;
+
+  for (const product of productsToUpdate) {
+    try {
+      // Fetch current product data to get existing tags
+      const getProductQuery = `
+        query {
+          product(id: "${product.shopifyId}") {
+            id
+            tags
+          }
+        }
+      `;
+      
+      const getProductResponse = await adminInstance.graphql(getProductQuery);
+      
+      // Handle Response object - extract JSON if it's a Response
+      let getProductApiResponse;
+      if (getProductResponse instanceof Response) {
+        getProductApiResponse = await getProductResponse.json();
+      } else {
+        getProductApiResponse = getProductResponse;
+      }
+
+      if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) {
+        console.error(`Error fetching product ${product.shopifyId}:`, getProductApiResponse.errors);
+        errorCount++;
+        continue;
+      }
+
+      const currentProduct = getProductApiResponse.data?.product;
+      if (!currentProduct) {
+        console.warn(`Product ${product.shopifyId} not found in Shopify`);
+        errorCount++;
+        continue;
+      }
+
+      // Get current tags
+      const currentTags = currentProduct.tags || [];
+      
+      // Remove old category tag if it exists
+      let updatedTags = [...currentTags];
+      if (oldCategoryName && updatedTags.includes(oldCategoryName)) {
+        updatedTags = updatedTags.filter(tag => tag !== oldCategoryName);
+      }
+      
+      // Add new category tag if not already present
+      if (newCategoryName && !updatedTags.includes(newCategoryName)) {
+        updatedTags.push(newCategoryName);
+      }
+
+      // Only update if tags actually changed
+      if (JSON.stringify(currentTags.sort()) === JSON.stringify(updatedTags.sort())) {
+        console.log(`Product ${product.shopifyId} tags already up to date`);
+        successCount++;
+        continue;
+      }
+
+      // Update product tags using productSet mutation
+      const updateProductMutation = `
+        mutation productSet($input: ProductSetInput!) {
+          productSet(synchronous: true, input: $input) {
+            product {
+              id
+              title
+              tags
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `;
+
+      const variables = {
+        input: {
+          id: product.shopifyId,
+          tags: updatedTags
+        }
+      };
+
+      const updateResponse = await adminInstance.graphql(updateProductMutation, { variables });
+      
+      // Handle Response object - extract JSON if it's a Response
+      let updateApiResponse;
+      if (updateResponse instanceof Response) {
+        updateApiResponse = await updateResponse.json();
+      } else {
+        updateApiResponse = updateResponse;
+      }
+
+      if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
+        console.error(`Shopify GraphQL errors for product ${product.shopifyId}:`, updateApiResponse.errors);
+        errorCount++;
+        continue;
+      }
+
+      const userErrors = updateApiResponse.data?.productSet?.userErrors || [];
+      if (userErrors.length > 0) {
+        console.error(`User errors updating product ${product.shopifyId}:`, userErrors);
+        errorCount++;
+        continue;
+      }
+
+      successCount++;
+      console.log(`✅ Updated tags for product ${product.shopifyId}: ${updatedTags.join(', ')}`);
+      
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
+    } catch (error) {
+      console.error(`Error updating product ${product.shopifyId}:`, error);
+      errorCount++;
+    }
+  }
+
+  console.log(`✅ Tag update complete: ${successCount} succeeded, ${errorCount} failed`);
+}
+'''
+        key: shopifyProductCategoryAfterUpdate
+      }
+    }
+  ]
+  edges: []
+}
+

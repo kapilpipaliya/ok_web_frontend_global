@@ -20,7 +20,7 @@ const vertex = data?.vertex;
 const formData = vertex?.P || {};
 if (formData.id) {
   // Product already has a Shopify ID, skip creation
-  console.log("shopifyProductAfterSave: Product already has Shopify ID, skipping creation");
+  console.log("shopifyProductAfterCreate: Product already has Shopify ID, skipping creation");
   return;
 }
 
@@ -31,14 +31,14 @@ let sessionUser;
 try {
   sessionUser = await args.getSessionUser();
 } catch (e) {
-  console.warn("shopifyProductAfterSave: getSessionUser failed", e);
+  console.warn("shopifyProductAfterCreate: getSessionUser failed", e);
   return; // Can't create without shop info
 }
 
 const shop = sessionUser?.P?.shop;
 
 if (!shop) {
-  console.warn("shopifyProductAfterSave: Shop domain is missing, skipping product creation");
+  console.warn("shopifyProductAfterCreate: Shop domain is missing, skipping product creation");
   return;
 }
 
@@ -78,7 +78,7 @@ try {
   const authResult = await shopify.unauthenticated.admin(shop);
   admin = authResult.admin;
 } catch (authError) {
-  console.error("shopifyProductAfterSave: Shopify authentication failed", authError);
+  console.error("shopifyProductAfterCreate: Shopify authentication failed", authError);
   return; // Can't create without authentication
 }
 
@@ -98,7 +98,7 @@ if (formData.variants) {
   try {
     variants = typeof formData.variants === 'string' ? JSON.parse(formData.variants) : formData.variants;
   } catch (e) {
-    console.warn("shopifyProductAfterSave: Failed to parse variants, using default", e);
+    console.warn("shopifyProductAfterCreate: Failed to parse variants, using default", e);
   }
 }
 
@@ -167,19 +167,19 @@ try {
   }
 
   if (apiResponse.errors && apiResponse.errors.length > 0) {
-    console.error("shopifyProductAfterSave: Shopify GraphQL errors:", apiResponse.errors);
+    console.error("shopifyProductAfterCreate: Shopify GraphQL errors:", apiResponse.errors);
     return;
   }
 
   const userErrors = apiResponse.data?.productCreate?.userErrors || [];
   if (userErrors.length > 0) {
-    console.error("shopifyProductAfterSave: User errors creating product:", userErrors);
+    console.error("shopifyProductAfterCreate: User errors creating product:", userErrors);
     return;
   }
 
   const createdProduct = apiResponse.data?.productCreate?.product;
   if (!createdProduct) {
-    console.warn("shopifyProductAfterSave: Product creation succeeded but no product returned");
+    console.warn("shopifyProductAfterCreate: Product creation succeeded but no product returned");
     return;
   }
 
@@ -211,13 +211,13 @@ try {
     console.log(`✅ Created product in Shopify: ${shopifyProductId} (${createdProduct.title})`);
     console.log(`✅ Updated database product ${elementId} with Shopify ID: ${shopifyProductId} and handle: ${shopifyHandle}`);
   } else {
-    console.warn("shopifyProductAfterSave: Missing elementId or shopifyProductId, cannot update database");
+    console.warn("shopifyProductAfterCreate: Missing elementId or shopifyProductId, cannot update database");
   }
 } catch (error) {
-  console.error("shopifyProductAfterSave: Error creating product in Shopify:", error);
+  console.error("shopifyProductAfterCreate: Error creating product in Shopify:", error);
 }
 '''
-        key: shopifyProductAfterSave
+        key: shopifyProductAfterCreate
       }
     }
   ]

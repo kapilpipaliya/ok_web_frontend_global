@@ -1,0 +1,120 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Deletes a collection in Shopify when a ShopifyProductCategory is deleted from the database.
+        body:
+          '''
+// Only process if parentVertexLabel is 'ShopifyProductCategory' and operation is 'delete'
+const { parentVertexLabel, vertexId, operation, result } = args.contextData;
+
+if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') {
+  // Not deleting a ShopifyProductCategory, skip
+  return;
+}
+
+// Get the category data from result to check if it has a Shopify ID
+const deletedData = result?.data;
+const categoryData = deletedData?.P || {};
+const shopifyCollectionId = categoryData.id;
+
+if (!shopifyCollectionId) {
+  // Category doesn't have a Shopify ID, skip deletion
+  console.log("shopifyProductCategoryAfterDelete: Category doesn't have Shopify ID, skipping collection deletion");
+  return;
+}
+
+console.log(`🛍️  Deleting collection in Shopify: ${shopifyCollectionId}...`);
+
+// Get current authenticated user from session to get shop info
+let sessionUser;
+try {
+  sessionUser = await args.getSessionUser();
+} catch (e) {
+  console.warn("shopifyProductCategoryAfterDelete: getSessionUser failed", e);
+  return; // Can't delete without shop info
+}
+
+const shop = sessionUser?.P?.shop;
+
+if (!shop) {
+  console.warn("shopifyProductCategoryAfterDelete: Shop domain is missing, skipping collection deletion");
+  return;
+}
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyProductCategoryAfterDelete: Shopify authentication failed", authError);
+  return; // Can't delete without authentication
+}
+
+if (!admin) {
+  console.warn("shopifyProductCategoryAfterDelete: Shopify admin client not available");
+  return;
+}
+
+try {
+  // Delete collection in Shopify using collectionDelete mutation
+  const deleteCollectionMutation = `
+    mutation collectionDelete($id: ID!) {
+      collectionDelete(input: { id: $id }) {
+        deletedCollectionId
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    id: shopifyCollectionId
+  };
+
+  const response = await admin.graphql(deleteCollectionMutation, { variables });
+  
+  // Handle Response object - extract JSON if it's a Response
+  let apiResponse;
+  if (response instanceof Response) {
+    apiResponse = await response.json();
+  } else {
+    apiResponse = response;
+  }
+
+  if (apiResponse.errors && apiResponse.errors.length > 0) {
+    console.error("shopifyProductCategoryAfterDelete: Shopify GraphQL errors:", apiResponse.errors);
+    return;
+  }
+
+  const userErrors = apiResponse.data?.collectionDelete?.userErrors || [];
+  if (userErrors.length > 0) {
+    console.error("shopifyProductCategoryAfterDelete: User errors deleting collection:", userErrors);
+    return;
+  }
+
+  const deletedCollectionId = apiResponse.data?.collectionDelete?.deletedCollectionId;
+  if (deletedCollectionId) {
+    console.log(`✅ Deleted collection in Shopify: ${deletedCollectionId}`);
+  } else {
+    console.warn("shopifyProductCategoryAfterDelete: Collection deletion succeeded but no deleted ID returned");
+  }
+} catch (error) {
+  console.error("shopifyProductCategoryAfterDelete: Error deleting collection in Shopify:", error);
+}
+'''
+        key: shopifyProductCategoryAfterDelete
+      }
+    }
+  ]
+  edges: []
+}
+
