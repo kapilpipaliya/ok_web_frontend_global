@@ -55,7 +55,7 @@ try {
 
   // Update menu
   const updateMenuMutation = `
-    mutation menuUpdate($id: ID!, $title: String, $items: [MenuItemCreateInput!]) {
+    mutation menuUpdate($id: ID!, $title: String!, $items: [MenuItemUpdateInput!]!) {
       menuUpdate(id: $id, title: $title, items: $items) {
         menu {
           id

@@ -99,18 +99,6 @@ try {
       return null;
     }
 
-    // Check if top-level category has children
-    const childrenCheck = await args.session.run(
-      `MATCH (parent:ShopifyProductCategory)
-       WHERE elementId(parent) = $topLevelId
-       MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
-       WHERE child.id IS NOT NULL
-       RETURN count(child) as childCount`,
-      { topLevelId }
-    );
-
-    const childCount = childrenCheck.records[0]?.get('childCount') || 0;
-
     // Update or create menu for top-level category (even if it has no children)
     if (topLevelMenuId) {
       console.log(`Updating menu for top-level category: ${topLevelName}`);

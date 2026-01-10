@@ -54,12 +54,12 @@ try {
   
   const menuItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
   
-  if (menuItems.length === 0) {
+  /*if (menuItems.length === 0) {
     return {
       success: false,
       error: "No children with Shopify IDs found"
     };
-  }
+  }*/
 
   // Create menu
   const createMenuMutation = `
