@@ -1,0 +1,336 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Creates or updates a Shopify menu containing all top-level parent categories and their nested children. This is a master menu that shows the complete category hierarchy.
+        body:
+          '''
+// Extract parameters
+const { shop, shopifyParams, menuTitle = "Categories", menuHandle = "categories" } = args.contextData;
+
+if (!shop) {
+  return {
+    success: false,
+    error: "shop is required"
+  };
+}
+
+// Get Shopify API object
+const shopify = args.getShopifyClient();
+
+// Authenticate the request using Shopify's admin authentication
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("createAllCategoriesMenu: Shopify authentication failed", authError);
+  return {
+    success: false,
+    error: "Shopify authentication failed"
+  };
+}
+
+if (!admin) {
+  return {
+    success: false,
+    error: "Shopify admin client not available"
+  };
+}
+
+try {
+  // Get all top-level categories (categories with no parent)
+  const topLevelResult = await args.session.run(
+    `MATCH (topLevel:ShopifyProductCategory)
+     WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
+     AND topLevel.id IS NOT NULL
+     RETURN elementId(topLevel) as elementId,
+            topLevel.name as name,
+            topLevel.id as shopifyId,
+            topLevel.handle as handle
+     ORDER BY topLevel.name`,
+    {}
+  );
+
+  if (topLevelResult.records.length === 0) {
+    console.log("createAllCategoriesMenu: No top-level categories found");
+    return {
+      success: true,
+      action: "skipped",
+      message: "No top-level categories found"
+    };
+  }
+
+  // Build menu items for all top-level categories
+  const menuItems = [];
+
+  for (const record of topLevelResult.records) {
+    const topLevelElementId = record.get('elementId');
+    const topLevelName = record.get('name');
+    const topLevelShopifyId = record.get('shopifyId');
+    const topLevelHandle = record.get('handle');
+
+    if (!topLevelShopifyId) {
+      continue;
+    }
+
+    // Get nested children for this top-level category
+    const nestedResult = await args.executeNamedServerFunction({
+      functionName: "buildNestedMenuItems",
+      contextData: {
+        parentElementId: topLevelElementId
+      }
+    });
+
+    const nestedItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
+
+    // Create menu item for this top-level category
+    menuItems.push({
+      title: topLevelName,
+      type: "COLLECTION",
+      resourceId: topLevelShopifyId,
+      items: nestedItems
+    });
+  }
+
+  if (menuItems.length === 0) {
+    return {
+      success: false,
+      error: "No categories with Shopify IDs found"
+    };
+  }
+
+  // Get stored menu ID from Setting
+  const settingKey = "allCategoriesMenuId";
+  const settingResult = await args.session.run(
+    `MATCH (s:Setting {key: $key}) RETURN s.value as menuId`,
+    { key: settingKey }
+  );
+
+  let storedMenuId = null;
+  if (settingResult.records.length > 0) {
+    storedMenuId = settingResult.records[0].get('menuId');
+  }
+
+  // Try to fetch menu by ID if we have a stored ID
+  if (storedMenuId) {
+    const getMenuQuery = `
+      query menu($id: ID!) {
+        menu(id: $id) {
+          id
+          handle
+          title
+        }
+      }
+    `;
+
+    try {
+      const getMenuResponse = await admin.graphql(getMenuQuery, {
+        variables: { id: storedMenuId }
+      });
+
+      let getMenuApiResponse;
+      if (getMenuResponse instanceof Response) {
+        getMenuApiResponse = await getMenuResponse.json();
+      } else {
+        getMenuApiResponse = getMenuResponse;
+      }
+
+      // Check if menu exists and there are no errors
+      if (getMenuApiResponse.data?.menu && (!getMenuApiResponse.errors || getMenuApiResponse.errors.length === 0)) {
+        // Menu exists, update it
+        const updateMenuMutation = `
+          mutation menuUpdate($id: ID!, $title: String!, $items: [MenuItemUpdateInput!]!) {
+            menuUpdate(id: $id, title: $title, items: $items) {
+              menu {
+                id
+                handle
+                title
+                items {
+                  id
+                  title
+                  type
+                  resourceId
+                }
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `;
+
+        const updateResponse = await admin.graphql(updateMenuMutation, {
+          variables: {
+            id: storedMenuId,
+            title: menuTitle,
+            items: menuItems
+          }
+        });
+
+        let updateApiResponse;
+        if (updateResponse instanceof Response) {
+          updateApiResponse = await updateResponse.json();
+        } else {
+          updateApiResponse = updateResponse;
+        }
+
+        if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
+          console.error("Shopify GraphQL errors:", updateApiResponse.errors);
+          return {
+            success: false,
+            error: "Shopify GraphQL errors",
+            details: updateApiResponse.errors
+          };
+        }
+
+        const userErrors = updateApiResponse.data?.menuUpdate?.userErrors || [];
+        if (userErrors.length > 0) {
+          console.error("User errors updating menu:", userErrors);
+          return {
+            success: false,
+            error: "User errors updating menu",
+            details: userErrors
+          };
+        }
+
+        const updatedMenu = updateApiResponse.data?.menuUpdate?.menu;
+        if (!updatedMenu) {
+          return {
+            success: false,
+            error: "Menu update succeeded but no menu returned"
+          };
+        }
+
+        // Update the stored menu ID in Setting (in case it changed)
+        await args.session.run(
+          `MERGE (s:Setting {key: $key})
+           SET s.value = $menuId,
+               s.updatedAt = datetime()
+           ON CREATE SET s.createdAt = datetime()`,
+          { key: settingKey, menuId: updatedMenu.id }
+        );
+
+        return {
+          success: true,
+          action: "updated",
+          menu: updatedMenu,
+          menuId: updatedMenu.id,
+          menuHandle: updatedMenu.handle,
+          message: `Updated all categories menu "${menuTitle}"`
+        };
+      } else {
+        // Menu was deleted from Shopify (data.menu is null or errors occurred)
+        console.log("createAllCategoriesMenu: Menu was deleted from Shopify, will create new menu");
+        storedMenuId = null;
+      }
+    } catch (error) {
+      // Menu not found or error fetching, will create new one below
+      console.log("createAllCategoriesMenu: Menu not found by ID or error occurred, will create new menu:", error.message);
+      storedMenuId = null;
+    }
+  }
+
+  // Menu doesn't exist or we don't have a stored ID, create new menu
+  if (!storedMenuId) {
+    // Create new menu
+    const createMenuMutation = `
+      mutation menuCreate($title: String!, $handle: String!, $items: [MenuItemCreateInput!]!) {
+        menuCreate(title: $title, handle: $handle, items: $items) {
+          menu {
+            id
+            handle
+            title
+            items {
+              id
+              title
+              type
+              resourceId
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const createResponse = await admin.graphql(createMenuMutation, {
+      variables: {
+        title: menuTitle,
+        handle: menuHandle,
+        items: menuItems
+      }
+    });
+
+    let createApiResponse;
+    if (createResponse instanceof Response) {
+      createApiResponse = await createResponse.json();
+    } else {
+      createApiResponse = createResponse;
+    }
+
+    if (createApiResponse.errors && createApiResponse.errors.length > 0) {
+      console.error("Shopify GraphQL errors:", createApiResponse.errors);
+      return {
+        success: false,
+        error: "Shopify GraphQL errors",
+        details: createApiResponse.errors
+      };
+    }
+
+    const userErrors = createApiResponse.data?.menuCreate?.userErrors || [];
+    if (userErrors.length > 0) {
+      console.error("User errors creating menu:", userErrors);
+      return {
+        success: false,
+        error: "User errors creating menu",
+        details: userErrors
+      };
+    }
+
+    const newMenu = createApiResponse.data?.menuCreate?.menu;
+    if (!newMenu) {
+      return {
+        success: false,
+        error: "Menu creation succeeded but no menu returned"
+      };
+    }
+
+    // Store the menu ID in Setting for future use
+    await args.session.run(
+      `MERGE (s:Setting {key: $key})
+       SET s.value = $menuId,
+           s.updatedAt = datetime()
+       ON CREATE SET s.createdAt = datetime()`,
+      { key: settingKey, menuId: newMenu.id }
+    );
+
+    return {
+      success: true,
+      action: "created",
+      menu: newMenu,
+      menuId: newMenu.id,
+      menuHandle: newMenu.handle,
+      message: `Created all categories menu "${menuTitle}"`
+    };
+  }
+} catch (error) {
+  console.error("createAllCategoriesMenu: Error:", error);
+  return {
+    success: false,
+    error: error.message || "Error creating all categories menu"
+  };
+}
+'''
+        key: createAllCategoriesMenu
+      }
+    }
+  ]
+  edges: []
+}
+

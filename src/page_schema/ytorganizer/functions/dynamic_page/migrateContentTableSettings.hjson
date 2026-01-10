@@ -621,13 +621,13 @@ const settingsConfigs = [
     },
     hooks: {
       // Hooks for creating category - creates collection in Shopify
-      afterCreate: ["shopifyProductCategoryAfterCreate", "shopifyProductCategoryMenuAfterCreate"],
+      afterCreate: ["shopifyProductCategoryAfterCreate", "shopifyProductCategoryMenuAfterCreate", "createAllCategoriesMenu"],
       // Hooks for updating category - updates collection in Shopify
-      afterUpdate: ["shopifyProductCategoryAfterUpdate", "shopifyProductCategoryMenuAfterUpdate"],
+      afterUpdate: ["shopifyProductCategoryAfterUpdate", "shopifyProductCategoryMenuAfterUpdate", "createAllCategoriesMenu"],
       // Hooks for deleting category - deletes collection in Shopify
-      afterDelete: ["shopifyProductCategoryAfterDelete", "shopifyProductCategoryMenuAfterDelete"],
+      afterDelete: ["shopifyProductCategoryAfterDelete", "shopifyProductCategoryMenuAfterDelete", "createAllCategoriesMenu"],
       // Hooks for moving category - updates menus when category is moved
-      afterMoveCategory: "shopifyProductCategoryMenuAfterMoveCategory"
+      afterMoveCategory: ["shopifyProductCategoryMenuAfterMoveCategory", "createAllCategoriesMenu"]
     }
   }
 };`
@@ -728,13 +728,13 @@ const settingsConfigs = [
     },
     hooks: {
       // Hooks for creating category - creates collection in Shopify
-      afterCreate: ["shopifyProductCategoryAfterCreate", "shopifyProductCategoryMenuAfterCreate"],
+      afterCreate: ["shopifyProductCategoryAfterCreate", "shopifyProductCategoryMenuAfterCreate", "createAllCategoriesMenu"],
       // Hooks for updating category - updates collection in Shopify
-      afterUpdate: ["shopifyProductCategoryAfterUpdate", "shopifyProductCategoryMenuAfterUpdate"],
+      afterUpdate: ["shopifyProductCategoryAfterUpdate", "shopifyProductCategoryMenuAfterUpdate", "createAllCategoriesMenu"],
       // Hooks for deleting category - deletes collection in Shopify
-      afterDelete: ["shopifyProductCategoryAfterDelete", "shopifyProductCategoryMenuAfterDelete"],
+      afterDelete: ["shopifyProductCategoryAfterDelete", "shopifyProductCategoryMenuAfterDelete", "createAllCategoriesMenu"],
       // Hooks for moving category - updates menus when category is moved
-      afterMoveCategory: "shopifyProductCategoryMenuAfterMoveCategory"
+      afterMoveCategory: ["shopifyProductCategoryMenuAfterMoveCategory", "createAllCategoriesMenu"]
     }
   }
 };`
