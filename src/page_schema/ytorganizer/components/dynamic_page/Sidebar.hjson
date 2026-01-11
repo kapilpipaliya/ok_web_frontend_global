@@ -159,6 +159,38 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
   return [];
 };
 
+// Helper function to get sortable name from item
+const getItemSortName = (item) => {
+  if (!item) return "";
+  return item.P?.name || item.P?.title || item.P?.key || "";
+};
+
+// Helper function to check if item is Uncategorized
+const isUncategorized = (item) => {
+  if (!item) return false;
+  return item.P?.key === 'uncategorized' || item.id === 'uncategorized' || 
+         item.P?.name?.toLowerCase() === 'uncategorized' || 
+         item.P?.title?.toLowerCase() === 'uncategorized';
+};
+
+// Common function to sort items (Uncategorized first, then alphabetically)
+const sortItems = (items) => {
+  if (!items || !Array.isArray(items)) return items;
+  return [...items].sort((a, b) => {
+    const isAUncategorized = isUncategorized(a);
+    const isBUncategorized = isUncategorized(b);
+    
+    // Uncategorized items come first
+    if (isAUncategorized && !isBUncategorized) return -1;
+    if (!isAUncategorized && isBUncategorized) return 1;
+    
+    // Both are uncategorized or both are not - sort alphabetically
+    const nameA = getItemSortName(a);
+    const nameB = getItemSortName(b);
+    return nameA.localeCompare(nameB);
+  });
+};
+
 // Get children for a specific parent using evalExpression (reactive)
 const getChildren = (parentId) => {
   if (!parentId) return [];
@@ -176,7 +208,7 @@ const getChildren = (parentId) => {
     { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
   ) || [];
   
-  return children;
+  return sortItems(children);
 };
 
 // Get loading state - not needed with graph, but kept for compatibility
@@ -191,9 +223,11 @@ const getRoot = () => {
   // Access graph reactively
   const graph = args.graph;
   // Map IDs to vertices from graph and filter out blank results
-  return rootIds
+  const rootItems = rootIds
     .map(id => graph.vertexes[id])
     .filter(v => v !== undefined && v !== null);
+  
+  return sortItems(rootItems);
 };
 
 // Toggle expand/collapse
@@ -554,11 +588,14 @@ return {
           '''
 return `._id {
   overflow-y: auto;
+  scrollbar-width: thin;
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   height: 100%;
+  min-height: 0;
+  max-height: 100vh;
 }`;
 '''
         displayOrder: 1

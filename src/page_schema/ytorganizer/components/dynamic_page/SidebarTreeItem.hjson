@@ -16,9 +16,21 @@ const getFetchChildren = () => args.contextData.props?.fetchChildren;
 const getParentVertexLabel = () => args.contextData.props?.sidebarConfig?.parentVertexLabel;
 const getToParentEdgeType = () => args.contextData.props?.sidebarConfig?.toParentEdgeType;
 
+// Helper function to get sortable name from item
+const getItemSortName = (item) => {
+  if (!item) return "";
+  return item.P?.name || item.P?.title || item.P?.key || "";
+};
+
 // Get children and loading from props (from graph)
 const getChildren = () => {
-  return args.contextData.props?.childItems || [];
+  const children = args.contextData.props?.childItems || [];
+  // Sort children by name alphabetically
+  return children.sort((a, b) => {
+    const nameA = getItemSortName(a);
+    const nameB = getItemSortName(b);
+    return nameA.localeCompare(nameB);
+  });
 };
 
 const getLoading = () => {
@@ -122,8 +134,21 @@ const getItemName = () => {
 // Get item icon
 const getItemIcon = () => {
   const item = getItem();
-  if (!item) return "ph:circle";
-  return item.P?.icon || "ph:circle";
+  if (!item) return null;
+  
+  // First check if item has explicit icon
+  if (item.P?.icon) {
+    return item.P.icon;
+  }
+  
+  // Then check for default icon in sidebarConfig
+  const sidebarConfig = args.contextData.props?.sidebarConfig;
+  if (sidebarConfig?.defaultIcon) {
+    return sidebarConfig.defaultIcon;
+  }
+  
+  // No icon configured
+  return null;
 };
 
 // Check if item has children
@@ -946,6 +971,15 @@ return `._id {
   padding: 2px 0;
   transition: all 0.15s ease-in-out;
   ${args.fns.hasChildren() ? "" : `border-left: 1px dashed ${args.theme.var.color.border};`}
+  
+  &:hover {
+    background-color: ${args.theme.var.color.background_dark_150};
+  }
+  
+  &:hover .tree-item-actions {
+    opacity: 1;
+    visibility: visible;
+  }
 }`;
 '''
         displayOrder: 1
@@ -1045,7 +1079,8 @@ return {
   as: "icon",
   icon: args.fns.getItemIcon(),
   height: 16,
-  width: 16
+  width: 16,
+  hide: args.fns.getItemIcon() === null
 };
 '''
       }
@@ -1085,8 +1120,9 @@ return `._id {
   margin-left: 4px;
   cursor: pointer;
   color: ${args.theme.var.color.primary};
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
   display: flex;
   gap: 4px;
   align-items: center;
@@ -1105,7 +1141,8 @@ const isUncategorized = item?.P?.key === 'uncategorized' || item?.id === 'uncate
 
 return {
   as: "div",
-  hide: isUncategorized
+  hide: isUncategorized,
+  class: "tree-item-actions"
 };
 '''
       }
