@@ -542,6 +542,10 @@ const updateMemoizedConfig = () => {
 const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
   const dataFn = getDataFunction();
   if (!dataFn) return;
+  
+  // Capture the category item at the time of fetch
+  const categoryItemForFetch = selectedSidebarItem();
+  
   setLoading(true);
   try {
     const result = await dataFn({
@@ -550,7 +554,8 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
       sort: sortConfig
     });
     if (result?.data) {
-      callback(result.data);
+      // Pass both data and the category item that was used for fetching
+      callback(result.data, categoryItemForFetch);
     }
   } catch (error) {
     console.error("Error fetching table data:", error);

@@ -19,6 +19,7 @@ const getRelationshipType = () => args.contextData.props?.relationshipType;
 const [expandedKeys, setExpandedKeys] = args.createSignal([]);
 const [selectedItem, setSelectedItem] = args.createSignal(null);
 const [sidebarLoading, setSidebarLoading] = args.createSignal(false);
+const [operationLoading, setOperationLoading] = args.createSignal(false);
 const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
 const [rootVertices, setRootVertices] = args.createSignal([]);
 
@@ -543,7 +544,9 @@ return {
   getAllVisibleItems,
   navigateToCategory,
   handleSidebarKeyDown,
-  getHooks: () => args.contextData.props?.hooks
+  getHooks: () => args.contextData.props?.hooks,
+  operationLoading,
+  setOperationLoading
 };
 '''
         key: Sidebar
@@ -562,6 +565,7 @@ return `._id {
   gap: 4px;
   grid-template-columns: ${sidebarWidth}px 2px 1fr;
   height: 100%;
+  position: relative;
 }`;
 '''
         displayOrder: 1
@@ -596,6 +600,7 @@ return `._id {
   height: 100%;
   min-height: 0;
   max-height: 100vh;
+  position: relative;
 }`;
 '''
         displayOrder: 1
@@ -739,7 +744,7 @@ return `._id {
   margin: 0;
 }`;
 '''
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         key: sidebar_tree_list
         props:
@@ -787,7 +792,9 @@ return {
   fetchRoot: args.fns.fetchRoot,
   getRoot: args.fns.getRoot,
   hooks: args.fns.getHooks(),
-  label: args.fns.getSidebarLabel()
+  label: args.fns.getSidebarLabel(),
+  operationLoading: args.fns.operationLoading,
+  setOperationLoading: args.fns.setOperationLoading
 };
 '''
       }
@@ -918,6 +925,55 @@ return {
 '''
       }
     }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(0.2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        key: sidebar_loading_overlay
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.operationLoading()
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        key: sidebar_loading_spinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
   ]
   edges: [
     {
@@ -991,6 +1047,18 @@ return {
       T: Attr
       S: "4"
       E: "5"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "3"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "15"
+      E: "16"
     }
   ]
 }

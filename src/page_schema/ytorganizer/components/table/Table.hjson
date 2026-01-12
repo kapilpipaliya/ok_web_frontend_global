@@ -237,11 +237,10 @@ const applyLocalFilters = () => {
 };
 
 // Update category contentCount based on fetched data length when local filters are enabled
-const updateCategoryCountFromFetchedData = (fetchedData) => {
-  // Get selected sidebar item - try both function and prop
-  const selectedSidebarItemFn = args.fns.selectedSidebarItem || args.contextData.props?.selectedSidebarItem;
-  const selectedItem = typeof selectedSidebarItemFn === 'function' ? selectedSidebarItemFn() : selectedSidebarItemFn;
-  if (!selectedItem) return;
+const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
+  // Use the category item passed from fetchData, not the currently selected item
+  // This ensures we update the count for the category that was actually fetched
+  if (!categoryItem) return;
   
   const config = args.fns.evaluateConfig?.() || {};
   const sidebarConfig = config?.sidebar;
@@ -250,9 +249,9 @@ const updateCategoryCountFromFetchedData = (fetchedData) => {
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
   
-  // Determine category ID
-  const isUncategorized = selectedItem.P?.key === rootKey || selectedItem.P?.key === 'uncategorized' || selectedItem.id === 'uncategorized';
-  const categoryId = isUncategorized ? 'uncategorized' : selectedItem.id;
+  // Determine category ID from the category item that was used for fetching
+  const isUncategorized = categoryItem.P?.key === rootKey || categoryItem.P?.key === 'uncategorized' || categoryItem.id === 'uncategorized';
+  const categoryId = isUncategorized ? 'uncategorized' : categoryItem.id;
   
   if (!categoryId) return;
   
@@ -541,12 +540,13 @@ const handleSearch = () => {
     enableLocalFilters ? undefined : searchTerm(), 
     enableLocalFilters ? undefined : columnFilters, 
     enableLocalSort ? undefined : sortConfig, 
-    data => {
+    (data, categoryItem) => {
       setData(data);
       
       // Update category count with fetched data length if local filters are enabled
+      // Pass the categoryItem that was used for fetching, not the currently selected item
       if (enableLocalFilters) {
-        updateCategoryCountFromFetchedData(data);
+        updateCategoryCountFromFetchedData(data, categoryItem);
       }
       
       // Always apply local filters if enabled, or if server didn't filter
@@ -943,7 +943,8 @@ return {
         key: Table
         props:
           '''return {
-  onMount: () => {
+  onMount: async () => {
+    args.fns.initializeFromQueryParams();
     // If sidebar is configured, don't fetch on mount
     const hasSidebar = args.fns.hasSidebar?.();
     if (!hasSidebar) {
@@ -954,24 +955,6 @@ return {
       }
     }
     {
-      id: "2"
-      L: Attr
-      P: {
-        displayOrder: 1
-        fns: ""
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-  onMount: async () => {
-    args.fns.initializeFromQueryParams();
-  }
-};
-'''
-      }
-    }
-    {
       id: "3"
       L: Attr
       P: {
@@ -979,6 +962,9 @@ return {
           '''
 return `._id {
   background: ${args.theme.var.color.background};
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 16px);
 }`;
 '''
         displayOrder: 1
@@ -1349,19 +1335,13 @@ return {
 const isResizing = args.fns.isResizing();
 
 return [`._id {
-  height: calc(100vh - 200px);
-}
-
-@media (max-width: 768px) {
-  ._id {
-    height: calc(100vh - 72px - 32px);
-  }
-}`,`._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
   grid-template-rows: auto auto 1fr;
 
   user-select: ${isResizing ? "none" : "auto"};
+  /* prevents flexbox from forcing the item to exceed its container. */
+  min-height: 0;
 }`];
 '''
         displayOrder: 4
@@ -2990,12 +2970,6 @@ return {
   ]
   edges: [
     {
-      id: e1
-      T: Attr
-      S: "1"
-      E: "2"
-    }
-    {
       id: e2
       T: ComponentVariant
       S: "1"
@@ -3130,25 +3104,25 @@ return {
     {
       id: e24
       T: Attr
-      S: "2"
+      S: "1"
       E: "3"
     }
     {
       id: e25
       T: Attr
-      S: "2"
+      S: "1"
       E: "51"
     }
     {
       id: e26
       T: Attr
-      S: "2"
+      S: "1"
       E: "52"
     }
     {
       id: e27
       T: Attr
-      S: "2"
+      S: "1"
       E: "63"
     }
     {

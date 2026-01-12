@@ -570,11 +570,6 @@ const settingsConfigs = [
     // beforeDelete: "shopifyProductBeforeDelete",
     // Hooks for deleting - deletes product from Shopify when product is deleted
     afterDelete: "shopifyProductAfterDelete",
-    // Hooks for category operations
-    // beforeAddCategory: "shopifyProductBeforeAddCategory",
-    // afterAddCategory: "shopifyProductAfterAddCategory",
-    // beforeMoveCategory: "shopifyProductBeforeMoveCategory",
-    // afterMoveCategory: "shopifyProductAfterMoveCategory",
     // Hooks for moving items to category
     // beforeMoveItemsToCategory: "shopifyProductBeforeMoveItemsToCategory",
     // Hooks for moving items to category - updates Shopify product tags

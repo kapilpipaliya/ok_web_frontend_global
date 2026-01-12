@@ -195,7 +195,6 @@ const getOnItemDelete = () => args.contextData.props?.onItemDelete;
 // Get fetchRoot function from props
 const getFetchRoot = () => args.contextData.props?.fetchRoot;
 
-
 // Helper function to refresh category count
 const refreshCategoryCount = async (categoryItem, rootKey) => {
   if (!categoryItem) return;
@@ -261,21 +260,27 @@ const handleAddChildSave = async (newVertex) => {
   const item = getItem();
   if (!item) return;
 
-  // Refresh children - force refresh to get latest data
-  const fetchChildrenFn = getFetchChildren();
-  if (fetchChildrenFn) {
-    await fetchChildrenFn(item.id, true);
-    // Expand parent if not already expanded
-    const onToggleExpand = getOnToggleExpand();
-    if (onToggleExpand) {
-      const expanded = getExpandedKeys();
-      if (!expanded.includes(item.id)) {
-        await onToggleExpand(item.id);
+  try {
+    args.fns.setOperationLoading?.(true);
+
+    // Refresh children - force refresh to get latest data
+    const fetchChildrenFn = getFetchChildren();
+    if (fetchChildrenFn) {
+      await fetchChildrenFn(item.id, true);
+      // Expand parent if not already expanded
+      const onToggleExpand = getOnToggleExpand();
+      if (onToggleExpand) {
+        const expanded = getExpandedKeys();
+        if (!expanded.includes(item.id)) {
+          await onToggleExpand(item.id);
+        }
       }
     }
-  }
 
-  handleCloseAddModal();
+    handleCloseAddModal();
+  } finally {
+    args.fns.setOperationLoading?.(false);
+  }
 };
 
 // Handle save callback - refresh after editing
@@ -506,6 +511,8 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
   };
   
   try {
+    args.fns.setOperationLoading?.(true);
+    
     const result = await args.executeNamedServerFunction({
       functionName: "moveSidebarItem",
       contextData: moveContextData
@@ -537,6 +544,8 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
     console.error("Error moving sidebar item:", error);
     args.showErrorToast?.("Failed to move category");
     return false;
+  } finally {
+    args.fns.setOperationLoading?.(false);
   }
 };
 
@@ -570,7 +579,7 @@ const handleDrop = async (e) => {
       // If target is root or uncategorized, set newParentId to null (make it a root item)
       const newParentId = (item.P?.key === rootKey || item.P?.key === 'uncategorized') ? null : item.id;
       
-      // Move the sidebar item
+      // Move the sidebar item (loading is handled inside handleMoveSidebarItem)
       await handleMoveSidebarItem(data.categoryId, newParentId);
       return;
     }
@@ -579,6 +588,8 @@ const handleDrop = async (e) => {
     if (data.type !== 'table-items' || !data.itemIds || !Array.isArray(data.itemIds)) {
       return;
     }
+    
+    args.fns.setOperationLoading?.(true);
     
     const item = getItem();
     if (!item) return;
@@ -717,6 +728,8 @@ const handleDrop = async (e) => {
   } catch (error) {
     console.error("Error handling drop:", error);
     args.showErrorToast?.("Failed to move items");
+  } finally {
+    args.fns.setOperationLoading?.(false);
   }
 };
 
@@ -758,6 +771,8 @@ const handleDelete = async (e) => {
 
   // Delete the vertex
   try {
+    args.fns.setOperationLoading?.(true);
+    
     const result = await args.executeNamedServerFunction({
       functionName: "saveSidebarVertex",
       contextData: {
@@ -829,6 +844,8 @@ const handleDelete = async (e) => {
   } catch (error) {
     console.error("Error deleting item:", error);
     args.showErrorToast?.("Failed to delete item");
+  } finally {
+    args.fns.setOperationLoading?.(false);
   }
 };
 
