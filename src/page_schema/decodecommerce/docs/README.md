@@ -8,22 +8,22 @@ DecodeCommerce is a professional website for a custom eCommerce solution provide
 ```
 decodecommerce/
 ├── components/           # Reusable components
-│   ├── DecodeCommerceNavigationHeader.hjson
-│   ├── DecodeCommerceHeroSection.hjson
-│   ├── DecodeCommerceFeatureGrid.hjson
-│   ├── DecodeCommerceROICalculator.hjson
-│   ├── DecodeCommerceProcessTimeline.hjson
-│   ├── DecodeCommercePricingSection.hjson
-│   ├── DecodeCommerceTestimonialSlider.hjson
-│   ├── DecodeCommerceFAQAccordion.hjson
-│   ├── DecodeCommerceCTASection.hjson
-│   └── DecodeCommerceFooter.hjson
+│   ├── NavigationHeader.hjson
+│   ├── HeroSection.hjson
+│   ├── FeatureGrid.hjson
+│   ├── ROICalculator.hjson
+│   ├── ProcessTimeline.hjson
+│   ├── PricingSection.hjson
+│   ├── TestimonialSlider.hjson
+│   ├── FAQAccordion.hjson
+│   ├── CTASection.hjson
+│   └── Footer.hjson
 ├── pages/               # Page templates
-│   ├── DecodeCommerceHome.hjson
-│   ├── DecodeCommerceFeatures.hjson
-│   ├── DecodeCommercePricing.hjson
-│   ├── DecodeCommerceAbout.hjson
-│   └── DecodeCommerceContact.hjson
+│   ├── Home.hjson
+│   ├── Features.hjson
+│   ├── Pricing.hjson
+│   ├── About.hjson
+│   └── Contact.hjson
 └── docs/               # Documentation
     ├── README.md
     └── COMPONENT_REVIEW.md
@@ -31,7 +31,7 @@ decodecommerce/
 
 ## Components
 
-### DecodeCommerceNavigationHeader
+### NavigationHeader
 - **Purpose**: Main navigation bar with theme toggle
 - **Features**:
   - Sticky navigation
@@ -40,7 +40,7 @@ decodecommerce/
   - Theme toggle button (light/dark mode)
   - Mobile responsive
 
-### DecodeCommerceHeroSection
+### HeroSection
 - **Purpose**: Landing hero section with main value proposition
 - **Features**:
   - Animated background gradient
@@ -49,7 +49,7 @@ decodecommerce/
   - Statistics display (ROI metrics)
   - Floating preview card
 
-### DecodeCommerceFeatureGrid
+### FeatureGrid
 - **Purpose**: Display key features in a grid layout
 - **Features**:
   - 6 main features with carbon icons
@@ -57,7 +57,7 @@ decodecommerce/
   - Responsive grid layout
   - Feature cards with descriptions
 
-### DecodeCommerceROICalculator
+### ROICalculator
 - **Purpose**: Interactive calculator showing potential savings
 - **Features**:
   - Revenue slider input
@@ -66,7 +66,7 @@ decodecommerce/
   - Visual result display
   - Engaging user interaction
 
-### DecodeCommerceProcessTimeline
+### ProcessTimeline
 - **Purpose**: Show the development process timeline
 - **Features**:
   - 4-step process visualization
@@ -75,7 +75,7 @@ decodecommerce/
   - Icon-based steps
   - Duration information
 
-### DecodeCommercePricingSection
+### PricingSection
 - **Purpose**: Display pricing plans
 - **Features**:
   - 3 pricing tiers (Starter, Professional, Enterprise)
@@ -84,7 +84,7 @@ decodecommerce/
   - CTA buttons per plan
   - Responsive card layout
 
-### DecodeCommerceTestimonialSlider
+### TestimonialSlider
 - **Purpose**: Customer testimonials display
 - **Features**:
   - Horizontal scroll layout
@@ -93,7 +93,7 @@ decodecommerce/
   - Auto-scrolling capability
   - Quote styling
 
-### DecodeCommerceFAQAccordion
+### FAQAccordion
 - **Purpose**: Frequently asked questions
 - **Features**:
   - Expandable/collapsible items
@@ -101,7 +101,7 @@ decodecommerce/
   - Single open item at a time
   - Icon rotation on expand
 
-### DecodeCommerceCTASection
+### CTASection
 - **Purpose**: Final call-to-action section
 - **Features**:
   - Strong headline
@@ -110,7 +110,7 @@ decodecommerce/
   - Background gradient
   - Prominent CTA button
 
-### DecodeCommerceFooter
+### Footer
 - **Purpose**: Site footer with links and info
 - **Features**:
   - Company description
@@ -183,28 +183,28 @@ decodecommerce/
 
 ## Pages Created
 
-### DecodeCommerceHome
+### Home
 The main landing page that combines all components to create a comprehensive overview of DecodeCommerce services.
 
-### DecodeCommerceFeatures
+### Features
 Detailed features page showcasing advanced capabilities with alternating layouts for better visual appeal.
 
-### DecodeCommercePricing
+### Pricing
 Comprehensive pricing page with plan comparison table and FAQ section.
 
-### DecodeCommerceAbout
+### About
 Company story page with values, mission, and success metrics.
 
-### DecodeCommerceContact
+### Contact
 Contact page with form submission and multiple contact methods.
 
 ## Fixed Issues
 
-1. **Component Naming**: All components now have DecodeCommerce prefix
+1. **Component Naming**: All components use simplified names without prefix
 2. **ROI Calculator**: Fixed undefined savings error by properly connecting data context
 3. **Pricing Grid**: Fixed to display 3 columns on large screens with proper breakpoints
 4. **FAQ Accordion**: Fixed issue where all items expanded together by adding proper indexing
-5. **HomePage**: Renamed to DecodeCommerceHome with updated component references
+5. **HomePage**: Renamed to Home with updated component references
 
 ## Future Enhancements
 

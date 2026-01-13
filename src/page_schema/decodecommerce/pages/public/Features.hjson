@@ -4,10 +4,10 @@
       id: "page",
       L: "Page",
       P: {
-        key: "DecodeCommercePricing",
+        key: "Features",
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
-        url: "/pricing"
+        url: "/features"
       }
     },
     {
@@ -35,7 +35,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "DecodeCommerceNavigationHeader"
+        componentName: "NavigationHeader"
       }
     },
     {
@@ -108,7 +108,7 @@ return `._id {
         props: '''
 return {
   as: "h1",
-  text: "Simple, Transparent Pricing"
+  text: "Powerful Features for Modern eCommerce"
 };
 ''',
         css: '''
@@ -134,14 +134,14 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "No hidden fees. No surprises. Just honest pricing for your eCommerce success."
+  text: "Everything you need to build, manage, and scale your NetSuite-powered eCommerce platform"
 };
 ''',
         css: '''
 return `._id {
   font-size: 1.25rem;
   color: ${args.theme.var.color.text_dark_300};
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
   
   @media (max-width: 768px) {
@@ -156,7 +156,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "DecodeCommercePricingSection"
+        componentName: "FeatureGrid"
       }
     },
     {
@@ -215,7 +215,7 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "Compare Plans"
+  text: "Advanced Capabilities"
 };
 ''',
         css: '''
@@ -246,7 +246,15 @@ return {
 ''',
         css: '''
 return `._id {
-  overflow-x: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }`;
 '''
       }
@@ -257,24 +265,57 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
+        contextName: "advancedFeatures",
+        loop: true,
         props: '''
 return {
-  as: "table"
+  data: [
+    {
+      title: "Real-time Inventory Sync",
+      description: "Keep your inventory perfectly synchronized between NetSuite and your eCommerce platform. No more overselling or stock discrepancies.",
+      icon: "carbon:data-1",
+      features: [
+        "Automatic stock level updates",
+        "Multi-warehouse support",
+        "Low stock alerts",
+        "Batch inventory management"
+      ]
+    },
+    {
+      title: "Order Management System",
+      description: "Streamline your order processing from placement to fulfillment with our integrated order management system.",
+      icon: "carbon:delivery-truck",
+      features: [
+        "Automated order routing",
+        "Status tracking",
+        "Returns management",
+        "Customer notifications"
+      ]
+    },
+    {
+      title: "Customer Portal",
+      description: "Give your customers a self-service portal to manage their accounts, view orders, and track shipments.",
+      icon: "carbon:user-multiple",
+      features: [
+        "Order history",
+        "Reorder functionality",
+        "Account management",
+        "Support tickets"
+      ]
+    },
+    {
+      title: "Analytics & Reporting",
+      description: "Get deep insights into your business performance with our comprehensive analytics suite.",
+      icon: "carbon:analytics",
+      features: [
+        "Sales dashboards",
+        "Customer insights",
+        "Performance metrics",
+        "Custom reports"
+      ]
+    }
+  ]
 };
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  border-collapse: collapse;
-  background: ${args.theme.var.color.background};
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 5px 20px ${args.theme.var.color.text_light_900};
-  
-  @media (max-width: 768px) {
-    min-width: 600px;
-  }
-}`;
 '''
       }
     },
@@ -285,13 +326,30 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
 return {
-  as: "thead"
+  as: "div"
 };
 ''',
         css: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
 return `._id {
-  background: ${args.theme.var.color.background_dark_100};
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: ${isEven ? '1fr 1fr' : '1fr 1fr'};
+  gap: 3rem;
+  align-items: center;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-column: span 1;
+    grid-template-columns: 1fr;
+    margin-bottom: 3rem;
+  }
 }`;
 '''
       }
@@ -303,9 +361,24 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
 return {
-  as: "tr"
+  as: "div"
 };
+''',
+        css: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
+return `._id {
+  ${!isEven ? 'order: 2;' : ''}
+  
+  @media (max-width: 768px) {
+    order: 1;
+  }
+}`;
 '''
       }
     },
@@ -316,18 +389,17 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const feature = args.contextData.advancedFeatures;
 return {
-  as: "th",
-  text: "Features"
+  as: "div"
 };
 ''',
         css: '''
 return `._id {
-  padding: 1.5rem;
-  text-align: left;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.background_dark_200};
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }`;
 '''
       }
@@ -336,14 +408,21 @@ return `._id {
       id: "17",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
-        contextName: "planHeaders",
-        loop: true,
         props: '''
+const feature = args.contextData.advancedFeatures;
 return {
-  data: ["Starter", "Professional", "Enterprise"]
+  as: "icon",
+  icon: feature.icon,
+  width: 48,
+  height: 48
 };
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
 '''
       }
     },
@@ -351,22 +430,21 @@ return {
       id: "18",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
-const plan = args.contextData.planHeaders;
+const feature = args.contextData.advancedFeatures;
 return {
-  as: "th",
-  text: plan
+  as: "h3",
+  text: feature.title
 };
 ''',
         css: '''
 return `._id {
-  padding: 1.5rem;
-  text-align: center;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 700;
   color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.background_dark_200};
+  margin: 0;
 }`;
 '''
       }
@@ -378,9 +456,18 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const feature = args.contextData.advancedFeatures;
 return {
-  as: "tbody"
+  as: "p",
+  text: feature.description
 };
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_dark_300};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
 '''
       }
     },
@@ -388,75 +475,19 @@ return {
       id: "20",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 3,
         componentName: "Html",
-        contextName: "features",
-        loop: true,
         props: '''
 return {
-  data: [
-    {
-      feature: "NetSuite Integration",
-      starter: "Basic",
-      professional: "Advanced",
-      enterprise: "Full Suite"
-    },
-    {
-      feature: "Product Catalog Size",
-      starter: "Up to 1,000",
-      professional: "Unlimited",
-      enterprise: "Unlimited"
-    },
-    {
-      feature: "Monthly Orders",
-      starter: "Up to 500",
-      professional: "Up to 5,000",
-      enterprise: "Unlimited"
-    },
-    {
-      feature: "Support",
-      starter: "Email",
-      professional: "Priority",
-      enterprise: "Dedicated Manager"
-    },
-    {
-      feature: "Delivery Time",
-      starter: "2 months",
-      professional: "1.5 months",
-      enterprise: "Fast-track"
-    },
-    {
-      feature: "Custom Features",
-      starter: "—",
-      professional: "✓",
-      enterprise: "✓"
-    },
-    {
-      feature: "API Access",
-      starter: "Limited",
-      professional: "Full",
-      enterprise: "Full + Custom"
-    },
-    {
-      feature: "Analytics",
-      starter: "Basic",
-      professional: "Advanced",
-      enterprise: "Custom Dashboards"
-    },
-    {
-      feature: "Multi-store",
-      starter: "—",
-      professional: "Up to 3",
-      enterprise: "Unlimited"
-    },
-    {
-      feature: "SLA",
-      starter: "—",
-      professional: "99.9%",
-      enterprise: "99.99%"
-    }
-  ]
+  as: "ul"
 };
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}`;
 '''
       }
     },
@@ -466,23 +497,13 @@ return {
       P: {
         displayOrder: 1,
         componentName: "Html",
+        contextName: "featureList",
+        loop: true,
         props: '''
-const feature = args.contextData.features;
-const index = feature.index;
+const feature = args.contextData.advancedFeatures;
 return {
-  as: "tr"
+  data: feature.features
 };
-''',
-        css: '''
-const feature = args.contextData.features;
-const index = feature.index;
-return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_dark_100};
-  
-  &:hover {
-    background: ${args.theme.var.color.background_dark_50};
-  }
-}`;
 '''
       }
     },
@@ -493,16 +514,17 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const item = args.contextData.featureList;
 return {
-  as: "td",
-  text: feature.feature
+  as: "li"
 };
 ''',
         css: '''
 return `._id {
-  padding: 1rem 1.5rem;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
   color: ${args.theme.var.color.text};
 }`;
 '''
@@ -512,20 +534,20 @@ return `._id {
       id: "23",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
 return {
-  as: "td",
-  text: feature.starter
+  as: "icon",
+  icon: "carbon:checkmark",
+  width: 16,
+  height: 16
 };
 ''',
         css: '''
 return `._id {
-  padding: 1rem 1.5rem;
-  text-align: center;
-  color: ${args.theme.var.color.text_dark_300};
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
 }`;
 '''
       }
@@ -534,24 +556,14 @@ return `._id {
       id: "24",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const item = args.contextData.featureList;
 return {
-  as: "td",
-  text: feature.professional
+  as: "span",
+  text: item
 };
-''',
-        css: '''
-const feature = args.contextData.features;
-const hasCheck = feature.professional === "✓";
-return `._id {
-  padding: 1rem 1.5rem;
-  text-align: center;
-  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
-  font-weight: ${hasCheck ? '600' : '400'};
-}`;
 '''
       }
     },
@@ -559,23 +571,30 @@ return `._id {
       id: "25",
       L: "Attr",
       P: {
-        displayOrder: 4,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
-const feature = args.contextData.features;
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
 return {
-  as: "td",
-  text: feature.enterprise
+  as: "div"
 };
 ''',
         css: '''
-const feature = args.contextData.features;
-const hasCheck = feature.enterprise === "✓";
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
 return `._id {
-  padding: 1rem 1.5rem;
-  text-align: center;
-  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
-  font-weight: ${hasCheck ? '600' : '400'};
+  ${isEven ? 'order: 2;' : ''}
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 10px 40px ${args.theme.var.color.text_light_900};
+  
+  @media (max-width: 768px) {
+    order: 2;
+  }
 }`;
 '''
       }
@@ -584,16 +603,32 @@ return `._id {
       id: "26",
       L: "Attr",
       P: {
-        displayOrder: 4,
-        componentName: "DecodeCommerceFAQAccordion"
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+return {
+  as: "icon",
+  icon: feature.icon,
+  width: 200,
+  height: 200
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: auto;
+  color: ${args.theme.var.color.primary_light_800};
+}`;
+'''
       }
     },
     {
       id: "27",
       L: "Attr",
       P: {
-        displayOrder: 5,
-        componentName: "DecodeCommerceCTASection"
+        displayOrder: 4,
+        componentName: "CTASection"
       }
     },
     {
@@ -601,7 +636,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "DecodeCommerceFooter"
+        componentName: "Footer"
       }
     }
   ],
@@ -622,16 +657,16 @@ return `._id {
     { id: "e13", T: "Attr", S: "13", E: "14" },
     { id: "e14", T: "Attr", S: "14", E: "15" },
     { id: "e15", T: "Attr", S: "15", E: "16" },
-    { id: "e16", T: "Attr", S: "15", E: "17" },
-    { id: "e17", T: "Attr", S: "17", E: "18" },
-    { id: "e18", T: "Attr", S: "13", E: "19" },
-    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "16", E: "18" },
+    { id: "e18", T: "Attr", S: "15", E: "19" },
+    { id: "e19", T: "Attr", S: "15", E: "20" },
     { id: "e20", T: "Attr", S: "20", E: "21" },
     { id: "e21", T: "Attr", S: "21", E: "22" },
-    { id: "e22", T: "Attr", S: "21", E: "23" },
-    { id: "e23", T: "Attr", S: "21", E: "24" },
-    { id: "e24", T: "Attr", S: "21", E: "25" },
-    { id: "e25", T: "Attr", S: "3", E: "26" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "22", E: "24" },
+    { id: "e24", T: "Attr", S: "14", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
     { id: "e26", T: "Attr", S: "3", E: "27" },
     { id: "e27", T: "Attr", S: "1", E: "28" }
   ]

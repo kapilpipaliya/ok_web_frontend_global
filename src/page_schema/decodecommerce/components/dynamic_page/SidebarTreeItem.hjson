@@ -966,10 +966,10 @@ let dragOverStyle = "";
 if (isDragOver) {
   if (isValidDrop) {
     // Valid drop: green border and subtle green background
-    dragOverStyle = `background-color: ${args.theme.var.color.success || '#10b981'}20; border: 2px dashed ${args.theme.var.color.success || '#10b981'};`;
+    dragOverStyle = `background-color: ${args.theme.var.color.success_light_200}; border: 2px dashed ${args.theme.var.color.success_light_200};`;
   } else {
     // Invalid drop: red border and red background with opacity
-    dragOverStyle = `background-color: ${args.theme.var.color.danger || '#ef4444'}20; border: 2px dashed ${args.theme.var.color.danger || '#ef4444'}; cursor: not-allowed;`;
+    dragOverStyle = `background-color: ${args.theme.var.color.error_light_200}; border: 2px dashed ${args.theme.var.color.error_light_200}; cursor: not-allowed;`;
   }
 }
 
@@ -1234,7 +1234,7 @@ return {
           '''
 return `._id {
   cursor: pointer;
-  color: ${args.theme.var.color.danger || '#ef4444'};
+  color: ${args.theme.var.color.error};
   opacity: 0.7;
   transition: opacity 0.2s ease;
   &:hover {

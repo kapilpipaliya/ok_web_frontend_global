@@ -4,7 +4,7 @@
       id: "page",
       L: "Page",
       P: {
-        key: "DecodeCommerceHome",
+        key: "Home",
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/"
@@ -35,7 +35,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "DecodeCommerceNavigationHeader"
+        componentName: "NavigationHeader"
       }
     },
     {
@@ -56,7 +56,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "DecodeCommerceHeroSection"
+        componentName: "HeroSection"
       }
     },
     {
@@ -64,7 +64,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "DecodeCommerceFeatureGrid"
+        componentName: "FeatureGrid"
       }
     },
     {
@@ -72,7 +72,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "DecodeCommerceROICalculator"
+        componentName: "ROICalculator"
       }
     },
     {
@@ -80,7 +80,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 4,
-        componentName: "DecodeCommerceProcessTimeline"
+        componentName: "ProcessTimeline"
       }
     },
     {
@@ -88,7 +88,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 5,
-        componentName: "DecodeCommercePricingSection"
+        componentName: "PricingSection"
       }
     },
     {
@@ -96,7 +96,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 6,
-        componentName: "DecodeCommerceTestimonialSlider"
+        componentName: "TestimonialSlider"
       }
     },
     {
@@ -104,7 +104,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 7,
-        componentName: "DecodeCommerceFAQAccordion"
+        componentName: "FAQAccordion"
       }
     },
     {
@@ -112,7 +112,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 8,
-        componentName: "DecodeCommerceCTASection"
+        componentName: "CTASection"
       }
     },
     {
@@ -120,7 +120,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "DecodeCommerceFooter"
+        componentName: "Footer"
       }
     }
   ],

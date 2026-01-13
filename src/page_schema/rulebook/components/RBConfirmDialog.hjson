@@ -144,7 +144,7 @@ return `._id {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: ${args.theme.var.zIndex.modal};
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;

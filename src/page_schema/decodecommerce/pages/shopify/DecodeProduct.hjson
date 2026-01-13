@@ -5,9 +5,9 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: ShopifyApp
-        url: /shopify
-        key: ShopifyApp
+        title: DecodeProduct
+        url: /decodeProduct
+        key: DecodeProduct
         props:
           '''return {
   isNoPermissionCheck: true

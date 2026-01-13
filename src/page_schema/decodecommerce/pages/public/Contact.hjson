@@ -4,7 +4,7 @@
       id: "page",
       L: "Page",
       P: {
-        key: "DecodeCommerceContact",
+        key: "Contact",
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/contact"
@@ -35,7 +35,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "DecodeCommerceNavigationHeader"
+        componentName: "NavigationHeader"
       }
     },
     {
@@ -901,7 +901,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "DecodeCommerceFooter"
+        componentName: "Footer"
       }
     }
   ],

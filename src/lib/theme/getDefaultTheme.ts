@@ -42,7 +42,46 @@ export function getDefaultTheme() {
         "light": "${(DEFAULT_THEME.color.muted as ModeSpecificColor).light}",
         "dark": "${(DEFAULT_THEME.color.muted as ModeSpecificColor).dark}"
       }
-    }
+    },
+    // Custom spacing for mobile-first design
+    spacing: {
+      xs: "0.25rem",
+      sm: "0.5rem",
+      md: "1rem",
+      lg: "1.5rem",
+      xl: "2rem",
+      xxl: "3rem"
+    },
+    // Border radius for modern look
+    borderRadius: {
+      sm: "0.375rem",
+      md: "0.5rem",
+      lg: "0.75rem",
+      xl: "1rem",
+      full: "9999px"
+    },
+    // Animation timing
+    animation: {
+      fast: "150ms",
+      normal: "300ms",
+      slow: "500ms"
+    },
+    // Touch-friendly sizing
+    touch: {
+      minTarget: "44px",
+      button: "48px",
+      input: "52px"
+    },
+    // Typography scale
+    fontSize: {
+      xs: "0.75rem",
+      sm: "0.875rem",
+      md: "1rem",
+      lg: "1.125rem",
+      xl: "1.25rem",
+      xxl: "1.5rem",
+      title: "2rem"
+    },
   }
 }`;
 }
