@@ -523,6 +523,41 @@ const settingsConfigs = [
   },
   columns: [
     {
+      key: "preview",
+      label: "Preview",
+      type: "imagePreview",
+      width: "100px",
+      sortable: false,
+      valueAccessor: (row) => {
+        // Try to parse media JSON string first
+        const mediaStr = row.P?.media || row.media;
+        if (mediaStr && typeof mediaStr === 'string') {
+          try {
+            const mediaArray = JSON.parse(mediaStr);
+            if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+              // Get first image from media array
+              const firstMedia = mediaArray[0];
+              if (firstMedia?.preview?.image?.url) {
+                return firstMedia.preview.image.url;
+              }
+              if (firstMedia?.preview?.image?.src) {
+                return firstMedia.preview.image.src;
+              }
+            }
+          } catch (e) {
+            console.warn("Failed to parse media JSON:", e);
+          }
+        }
+        // Fallback: Try to get the first image from Shopify product images array
+        const images = row.P?.images || row.images;
+        if (images && Array.isArray(images) && images.length > 0) {
+          return images[0].src || images[0].url || images[0];
+        }
+        // Fallback to featuredImage if available
+        return row.P?.featuredImage || row.featuredImage || row.P?.image?.src || row.image?.src || null;
+      }
+    },
+    {
       key: "title",
       label: "Title",
       type: "text",
@@ -563,7 +598,7 @@ const settingsConfigs = [
       valueAccessor: (row) => row.P?.updatedAt || row.updatedAt
     }
   ],
-  rowHeight: 60,
+  rowHeight: 80,
   showRowNumber: true,
   showSelection: true,
   showActions: true,
