@@ -183,7 +183,10 @@ return `._id {
         props:
           '''
 const mode = args.contextData.props?.mode || "add";
-const title = mode === "add" ? "Add New Item" : "Edit Item";
+const label = args.contextData.props?.label;
+const title = mode === "add" 
+  ? (label ? `Add New ${label}` : "Add New Item")
+  : (label ? `Edit ${label}` : "Edit Item");
 
 return {
   as: "div",
@@ -347,6 +350,14 @@ return {
         key: mode
       }
     }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: label
+      }
+    }
   ]
   edges: [
     {
@@ -396,6 +407,12 @@ return {
       T: ComponentVariant
       S: "1"
       E: "14"
+    }
+    {
+      id: e8a
+      T: ComponentVariant
+      S: "1"
+      E: "15"
     }
     {
       id: e9

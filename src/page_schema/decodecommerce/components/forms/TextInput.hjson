@@ -26,7 +26,7 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.sm};
   background: ${args.theme.var.color.background};
   transition: all ${args.theme.var.animation.fast} ease;
-  min-height: ${args.theme.var.touch.input};
+  // min-height: ${args.theme.var.touch.input};
 
   &:focus-within {
     border-color: ${args.theme.var.color.primary};
@@ -102,11 +102,12 @@ return `._id {
   font-size: ${args.theme.var.fontSize.md};
   background: transparent;
   color: ${args.theme.var.color.text};
-  line-height: 1.5;
+  // line-height: 1.5;
 
   &::placeholder {
     color: ${args.theme.var.color.muted};
     opacity: 1;
+    font-size: ${args.theme.var.fontSize.sm};
   }
 
   &:disabled {

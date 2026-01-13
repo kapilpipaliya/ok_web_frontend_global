@@ -25,6 +25,21 @@ const getShowEditButton = () => args.fns.prop('showEditButton') ?? true;
 const getShowSelection = () => args.fns.prop('showSelection');
 const getShowActions = () => args.fns.prop('showActions');
 const getResizableColumns = () => args.fns.prop('resizableColumns') ?? true;
+const getHideExportButtons = () => args.fns.prop('hideExportButtons') ?? false;
+const getHideImportButtons = () => args.fns.prop('hideImportButtons') ?? false;
+const getHideSettingsButton = () => args.fns.prop('hideSettingsButton') ?? false;
+const getIcon = () => args.fns.prop('icon');
+const getLabel = () => args.fns.prop('label');
+const getAddButtonLabel = () => {
+  const label = getLabel();
+  return label ? `Add new ${label}` : "Add New Item";
+};
+const getOnEdit = () => args.fns.prop('onEdit');
+const getOnAfterAdd = () => args.fns.prop('onAfterAdd');
+const getOnAfterEdit = () => args.fns.prop('onAfterEdit');
+const getOnAdd = () => args.fns.prop('onAdd');
+const getOnDelete = () => args.fns.prop('onDelete');
+const getOnAfterDelete = () => args.fns.prop('onAfterDelete');
 
 const [data, setData] = args.createSignal([]);
 const [filteredData, setFilteredData] = args.createSignal([]);
@@ -583,14 +598,44 @@ const clearSelection = () => {
 };
 
 // Handle add/edit
-const handleAdd = () => {
+const handleAdd = async () => {
+  const onAdd = getOnAdd();
+  
+  // If onAdd function is provided, call it instead of opening modal
+  if (onAdd && typeof onAdd === 'function') {
+    try {
+      await onAdd();
+      return;
+    } catch (error) {
+      console.error("Error in onAdd function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute add action");
+      return;
+    }
+  }
+  
+  // Default behavior: open add modal
   setModalMode("add");
   setEditingRow(null);
   setFormData(null);
   setIsModalOpen(true);
 };
 
-const handleEdit = (row) => {
+const handleEdit = async (row) => {
+  const onEdit = getOnEdit();
+  
+  // If onEdit function is provided, call it instead of opening modal
+  if (onEdit && typeof onEdit === 'function') {
+    try {
+      await onEdit(row);
+      return;
+    } catch (error) {
+      console.error("Error in onEdit function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute edit action");
+      return;
+    }
+  }
+  
+  // Default behavior: open edit modal
   setModalMode("edit");
   setEditingRow(row);
   // Set form data directly from row vertex
@@ -622,11 +667,33 @@ const handleSave = async (formDataToSave) => {
       // Optimistic update
       if (modalMode() === "add") {
         setData([...data(), result.data]);
+        
+        // Check if onAfterAdd function is provided
+        const onAfterAdd = getOnAfterAdd();
+        if (onAfterAdd && typeof onAfterAdd === 'function') {
+          try {
+            await onAfterAdd(result);
+          } catch (error) {
+            console.error("Error in onAfterAdd function:", error);
+            args.showErrorToast?.(error?.message || "Failed to execute after add action");
+          }
+        }
       } else {
         const updated = data().map(row => 
           row.id === editingRow()?.id ? result.data : row
         );
         setData(updated);
+        
+        // Check if onAfterEdit function is provided
+        const onAfterEdit = getOnAfterEdit();
+        if (onAfterEdit && typeof onAfterEdit === 'function') {
+          try {
+            await onAfterEdit(result);
+          } catch (error) {
+            console.error("Error in onAfterEdit function:", error);
+            args.showErrorToast?.(error?.message || "Failed to execute after edit action");
+          }
+        }
       }
       applyLocalFilters();
     } else {
@@ -644,6 +711,21 @@ const handleSave = async (formDataToSave) => {
 
 // Handle delete
 const handleDelete = async (row) => {
+  const onDelete = getOnDelete();
+  
+  // If onDelete function is provided, call it instead of default delete
+  if (onDelete && typeof onDelete === 'function') {
+    try {
+      await onDelete(row);
+      return;
+    } catch (error) {
+      console.error("Error in onDelete function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute delete action");
+      return;
+    }
+  }
+  
+  // Default behavior: use formConfig saveFunction
   const formConfig = args.fns.getFormConfig();
   if (!formConfig?.saveFunction) {
     args.showErrorToast?.("Delete function not configured");
@@ -689,6 +771,17 @@ const handleDelete = async (row) => {
       const updated = data().filter(item => item.id !== row.id);
       setData(updated);
       applyLocalFilters(updated);
+      
+      // Check if onAfterDelete function is provided
+      const onAfterDelete = getOnAfterDelete();
+      if (onAfterDelete && typeof onAfterDelete === 'function') {
+        try {
+          await onAfterDelete(result, row);
+        } catch (error) {
+          console.error("Error in onAfterDelete function:", error);
+          args.showErrorToast?.(error?.message || "Failed to execute after delete action");
+        }
+      }
     } else {
       const errorMsg = result?.message || result?.error || "Failed to delete";
       args.showErrorToast?.(errorMsg);
@@ -886,6 +979,18 @@ return {
   getShowSelection,
   getShowActions,
   getResizableColumns,
+  getHideExportButtons,
+  getHideImportButtons,
+  getHideSettingsButton,
+  getIcon,
+  getLabel,
+  getAddButtonLabel,
+  getOnEdit,
+  getOnAfterAdd,
+  getOnAfterEdit,
+  getOnAdd,
+  getOnDelete,
+  getOnAfterDelete,
   getColumnWidth,
   createResizeHandler,
   columnWidths,
@@ -1040,6 +1145,9 @@ return {
         css:
           '''
 return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
   font-size: ${args.theme.var.fontSize.xl};
   font-weight: 600;
   color: ${args.theme.var.color.text};
@@ -1050,10 +1158,53 @@ return `._id {
         props:
           '''
 const title = args.fns.getTitle();
+const displayTitle = title;
 return {
   as: "div",
-  text: title,
-  hide: !title
+  hide: !displayTitle
+};
+'''
+      }
+    }
+    {
+      id: "7a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const icon = args.fns.getIcon();
+return {
+  as: "icon",
+  icon: icon,
+  width: 24,
+  height: 24,
+  hide: !icon
+};
+'''
+      }
+    }
+    {
+      id: "7b"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const title = args.fns.getTitle();
+const displayTitle = title;
+return {
+  as: "span",
+  text: displayTitle,
+  hide: !displayTitle
 };
 '''
       }
@@ -1086,6 +1237,38 @@ return {
       L: Attr
       P: {
         slotName: customActions
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        slotName: additionalFilters
         displayOrder: 1
         componentName: Slot
       }
@@ -1127,7 +1310,8 @@ return {
 return {
   variant: "primary",
   onClick: args.fns.handleAdd,
-  text: "Add"
+  text: "Add",
+  leftIcon: "carbon:add"
 };
 '''
       }
@@ -1144,35 +1328,18 @@ return `._id {
   gap: ${args.theme.var.spacing.sm};
 }`;
 '''
-        displayOrder: 2
+        displayOrder: 6
         componentName: Html
         props:
           '''
 const hasImport = !!args.fns.getImportFunction();
 const hasExport = !!args.fns.getExportFunction();
+const hideImportButtons = args.fns.getHideImportButtons();
+const hideExportButtons = args.fns.getHideExportButtons();
 
 return {
   as: "div",
-  hide: !hasImport && !hasExport
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "secondary",
-  onClick: args.fns.handleExport,
-  text: "Export All",
-  leftIcon: "carbon:download",
-  disabled: args.fns.loading(),
-  hide: !args.fns.getExportFunction()
+  hide: (!hasImport && !hasExport) || (hideImportButtons && hideExportButtons)
 };
 '''
       }
@@ -1181,7 +1348,7 @@ return {
       id: "14"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: Button
         props:
           '''
@@ -1191,7 +1358,26 @@ return {
   text: "Import",
   leftIcon: "carbon:upload",
   disabled: args.fns.loading(),
-  hide: !args.fns.getImportFunction()
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons()
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleExport,
+  text: "Export All",
+  leftIcon: "carbon:download",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons()
 };
 '''
       }
@@ -1200,7 +1386,7 @@ return {
       id: "15"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 3
         componentName: Button
         props:
           '''
@@ -1210,41 +1396,9 @@ return {
   text: "Export Filtered",
   leftIcon: "carbon:filter",
   disabled: args.fns.loading(),
-  hide: !args.fns.getExportFunction()
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons()
 };
 '''
-      }
-    }
-    {
-      id: "16"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: ${args.theme.var.spacing.sm};
-  flex-wrap: wrap;
-}`;
-'''
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
-      }
-    }
-    {
-      id: "17"
-      L: Attr
-      P: {
-        slotName: additionalFilters
-        displayOrder: 1
-        componentName: Slot
       }
     }
     {
@@ -1261,7 +1415,7 @@ return `._id {
   min-width: 200px;
 }`;
 '''
-        displayOrder: 2
+        displayOrder: 4
         componentName: Html
         props:
           '''
@@ -1302,6 +1456,8 @@ return {
   variant: "primary",
   onClick: args.fns.handleSearch,
   text: "Search",
+  leftIcon: "carbon:search",
+  hide: true,
   disabled: args.fns.loading()
 };
 '''
@@ -1311,7 +1467,7 @@ return {
       id: "21"
       L: Attr
       P: {
-        displayOrder: 3
+        displayOrder: 5
         componentName: Button
         props:
           '''
@@ -1321,7 +1477,7 @@ return {
   text: "Settings",
   leftIcon: "carbon:settings",
   disabled: args.fns.loading(),
-  hide: !args.fns.getSettingsFunction()
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton()
 };
 '''
       }
@@ -1511,11 +1667,41 @@ return `._id {
   color: ${args.theme.var.color.text};
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: default;
+  user-select: none;
   position: relative;
 }`;
 '''
         displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "27a"
+      L: Attr
+      P: {
+        css:
+          '''
+const sortConfig = args.fns.sortConfig;
+const column = { key: "__actions", label: "Actions" };
+
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+        displayOrder: 1
         componentName: Html
         props:
           '''
@@ -2447,7 +2633,8 @@ return {
   mode: args.fns.modalMode(),
   formConfig: args.fns.getFormConfig(),
   initialVertex: args.fns.formData,
-  onSave: args.fns.handleSave
+  onSave: args.fns.handleSave,
+  label: args.fns.getLabel()
 };
 '''
       }
@@ -3168,6 +3355,18 @@ return {
       E: "7"
     }
     {
+      id: e34a
+      T: Attr
+      S: "7"
+      E: "7a"
+    }
+    {
+      id: e34b
+      T: Attr
+      S: "7"
+      E: "7b"
+    }
+    {
       id: e35
       T: Attr
       S: "6"
@@ -3178,18 +3377,6 @@ return {
       T: Attr
       S: "8"
       E: "9"
-    }
-    {
-      id: e37
-      T: Attr
-      S: "8"
-      E: "10"
-    }
-    {
-      id: e38
-      T: Attr
-      S: "8"
-      E: "12"
     }
     {
       id: e39
@@ -3220,6 +3407,18 @@ return {
       T: Attr
       S: "16"
       E: "17"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "16"
+      E: "10"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "16"
+      E: "12"
     }
     {
       id: e44
@@ -3276,6 +3475,18 @@ return {
       E: "27"
     }
     {
+      id: e52a
+      T: Attr
+      S: "27"
+      E: "27a"
+    }
+    {
+      id: e52b
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
       id: e53
       T: Attr
       S: "23"
@@ -3292,12 +3503,6 @@ return {
       T: Attr
       S: "24"
       E: "26"
-    }
-    {
-      id: e56
-      T: Attr
-      S: "27"
-      E: "28"
     }
     {
       id: e57

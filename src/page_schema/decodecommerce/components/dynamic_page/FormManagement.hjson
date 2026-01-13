@@ -17,6 +17,7 @@ return `._id {
   width: 100%;
   display: flex;
   flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
   height: 100%;
 }`;
 '''
@@ -436,22 +437,6 @@ return {
   onMount: () => {
     args.fns.initializeForm();
   }
-};
-'''
-      }
-    }
-    {
-      id: "3"
-      L: Attr
-      P: {
-        displayOrder: 1
-        fns: ""
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div",
-
 };
 '''
       }
@@ -1031,12 +1016,6 @@ return {
       E: "22"
     }
     {
-      id: e8
-      T: Attr
-      S: "2"
-      E: "3"
-    }
-    {
       id: e9
       T: Attr
       S: "2"
@@ -1045,7 +1024,7 @@ return {
     {
       id: e10
       T: Attr
-      S: "3"
+      S: "2"
       E: "4"
     }
     {

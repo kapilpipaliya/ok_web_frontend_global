@@ -72,7 +72,7 @@ export function Content(props: ContentProps) {
           componentName={null}
           hide={null}
           {...props.mergedClasses()}
-          {...props.permissions()}
+          // {...props.permissions()}
           component={props.component()}
           text={props.processedText()}
           // disabled={props.disabled || undefined}
