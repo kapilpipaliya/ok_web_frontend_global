@@ -11,7 +11,6 @@ export async function getSubDomain(host: string) {
     return { domain, subdomain: "admin" };
   }
 
-  const effectiveDomain = domain || hostname;
   const effectiveSubdomain = subdomain;
 
   // Handle nip.io domains (e.g., subdomain.192.168.1.1.nip.io)
@@ -24,11 +23,12 @@ export async function getSubDomain(host: string) {
   if (effectiveSubdomain === "admin") {
     return { domain, subdomain: ADMIN_DB_NAME };
   }
-  if (effectiveDomain === process.env.DOMAIN) {
+  if (domain === process.env.DOMAIN || hostname === process.env.DOMAIN) {
     return { domain, subdomain: effectiveSubdomain || "www" };
   }
 
   // Otherwise look up the domain in SubDomain vertex
+  // First try hostname, then domain if hostname not found
   const driver = await getDriver();
   const dbSession = driver.session({ database: ADMIN_DB_NAME });
 
@@ -37,16 +37,27 @@ export async function getSubDomain(host: string) {
       MATCH (s:SubDomain {domain: $domain})
       RETURN s.key as subdomain
     `;
-    const result = await dbSession.run(query, { domain: effectiveDomain });
-
-    if (result.records.length > 0) {
-      return { domain, subdomain: result.records[0].get("subdomain") };
+    
+    // First, try to find hostname in database
+    if (hostname) {
+      const result = await dbSession.run(query, { domain: hostname });
+      if (result.records.length > 0) {
+        return { domain, subdomain: result.records[0].get("subdomain") };
+      }
     }
 
-    console.error("Domain not found in SubDomain vertices:", effectiveDomain);
-    throw new Error(`Domain not found: ${effectiveDomain}`);
+    // If hostname not found and domain exists and is different, try domain
+    if (domain && domain !== hostname) {
+      const result = await dbSession.run(query, { domain });
+      if (result.records.length > 0) {
+        return { domain, subdomain: result.records[0].get("subdomain") };
+      }
+    }
+
+    console.error("Domain not found in SubDomain vertices:", hostname || domain);
+    throw new Error(`Domain not found: ${hostname || domain}`);
   } catch (error) {
-    console.error("Error looking up domain:", error, effectiveDomain);
+    console.error("Error looking up domain:", error, hostname || domain);
     throw error;
   } finally {
     await dbSession.close();
