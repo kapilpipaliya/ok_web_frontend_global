@@ -103,9 +103,39 @@ return `._id {
       P: {
         displayOrder: 2,
         componentName: "Html",
+        fns: '''
+const [openDropdown, setOpenDropdown] = args.createSignal(null);
+return {
+  openDropdown,
+  setOpenDropdown,
+  toggleDropdown: (itemId) => {
+    const current = openDropdown();
+    setOpenDropdown(current === itemId ? null : itemId);
+  },
+  isDropdownOpen: (itemId) => {
+    return openDropdown() === itemId;
+  },
+  closeDropdown: () => {
+    setOpenDropdown(null);
+  }
+};
+''',
         props: '''
 return {
-  as: "div"
+  as: "div",
+  onMount: () => {
+    const handleClickOutside = (event) => {
+      const target = event.target;
+      const navContainer = args.ref();
+      if (navContainer && !navContainer.contains(target)) {
+        args.fns.closeDropdown();
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }
 };
 ''',
         css: '''
@@ -117,6 +147,14 @@ return `._id {
   @media (max-width: 768px) {
     gap: 1rem;
   }
+  
+  > * {
+    position: relative;
+    
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
 }`;
 '''
       }
@@ -127,18 +165,44 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
-        contextName: "navItems",
+        contextName: "navItem",
         loop: true,
         props: '''
 return {
   data: [
     { href: "/", text: "Home" },
     { href: "/features", text: "Features" },
+    { href: "#", text: "Product", submenu: [
+      { href: "/product/decode-product", text: "Decode Product" }
+    ] },
     { href: "/pricing", text: "Pricing" },
     { href: "/about", text: "About" },
     { href: "/contact", text: "Contact" }
   ]
 };
+'''
+      }
+    },
+    {
+      id: "6a",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+const itemId = item.href || item.text;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const item = args.contextData.navItem;
+const itemId = item.href || item.text;
+const isOpen = args.fns.isDropdownOpen(itemId);
+return `._id {
+  position: relative;
+}`;
 '''
       }
     },
@@ -149,25 +213,66 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const item = args.contextData.navItems;
+const item = args.contextData.navItem;
 const currentPath = args.location.pathname;
-const isActive = item.href === currentPath || (item.href === "/" && currentPath === "/");
+const isActive =
+  item.href === currentPath ||
+  (item.href === "/" && currentPath === "/") ||
+  (item.submenu && item.submenu.some((sub) => sub.href === currentPath));
 return {
-  as: "a",
-  href: item.href,
-  text: item.text
+  as: "div",
+  style: "display: flex; align-items: center; gap: 0.5rem;"
 };
 ''',
         css: '''
-const item = args.contextData.navItems;
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "7a",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
 const currentPath = args.location.pathname;
-const isActive = item.href === currentPath || (item.href === "/" && currentPath === "/");
+const isActive =
+  item.href === currentPath ||
+  (item.href === "/" && currentPath === "/") ||
+  (item.submenu && item.submenu.some((sub) => sub.href === currentPath));
+const itemId = item.href || item.text;
+return {
+  as: "a",
+  href: item.href,
+  text: item.text,
+  onClick: (e) => {
+    if (item.submenu && item.submenu.length > 0) {
+      e.preventDefault();
+      args.fns.toggleDropdown(itemId);
+    }
+  }
+};
+''',
+        css: '''
+const item = args.contextData.navItem;
+const currentPath = args.location.pathname;
+const isActive =
+  item.href === currentPath ||
+  (item.href === "/" && currentPath === "/") ||
+  (item.submenu && item.submenu.some((sub) => sub.href === currentPath));
 return `._id {
   color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
   text-decoration: none;
   font-weight: ${isActive ? '600' : '500'};
   transition: all 0.2s ease;
   position: relative;
+  padding: 0.25rem 0;
   
   ${isActive ? `
     &::after {
@@ -185,10 +290,129 @@ return `._id {
   &:hover {
     color: ${args.theme.var.color.primary};
   }
-  
-  @media (max-width: 768px) {
-    display: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "7b",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+const itemId = item.href || item.text;
+const isOpen = args.fns.isDropdownOpen(itemId);
+return {
+  as: "icon",
+  icon: "carbon:chevron-down",
+  width: 16,
+  height: 16,
+  hide: !item.submenu || item.submenu.length === 0,
+  onClick: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    args.fns.toggleDropdown(itemId);
   }
+};
+''',
+        css: '''
+const item = args.contextData.navItem;
+const itemId = item.href || item.text;
+const isOpen = args.fns.isDropdownOpen(itemId);
+return `._id {
+  color: ${args.theme.var.color.text};
+  transition: transform 0.2s ease;
+  transform: ${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  cursor: pointer;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+const itemId = item.href || item.text;
+const isOpen = args.fns.isDropdownOpen(itemId);
+return {
+  as: "div",
+  hide: !item.submenu || item.submenu.length === 0 || !isOpen
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: ${args.theme.var.color.background};
+  box-shadow: 0 4px 12px ${args.theme.var.color.text_light_900};
+  min-width: 220px;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0;
+  z-index: 1000;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "submenuItem",
+        loop: true,
+        props: '''
+const item = args.contextData.navItem;
+return {
+  data: item.submenu || []
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submenuItem = args.contextData.submenuItem;
+return {
+  as: "a",
+  href: submenuItem.href,
+  text: submenuItem.text
+};
+''',
+        css: '''
+const submenuItem = args.contextData.submenuItem;
+const currentPath = args.location.pathname;
+const isActive = currentPath === submenuItem.href;
+return `._id {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  transition: all 0.15s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+    color: ${args.theme.var.color.primary};
+  }
+  
+  ${isActive ? `
+    font-weight: 600;
+  ` : ''}
 }`;
 '''
       }
@@ -257,8 +481,14 @@ return `._id {
     { id: "e3", T: "Attr", S: "3", E: "4" },
     { id: "e4", T: "Attr", S: "3", E: "5" },
     { id: "e5", T: "Attr", S: "5", E: "6" },
-    { id: "e6", T: "Attr", S: "6", E: "7" },
-    { id: "e7", T: "Attr", S: "5", E: "8" },
-    { id: "e8", T: "Attr", S: "8", E: "9" }
+    { id: "e6", T: "Attr", S: "6", E: "6a" },
+    { id: "e7", T: "Attr", S: "6a", E: "7" },
+    { id: "e8", T: "Attr", S: "7", E: "7a" },
+    { id: "e9", T: "Attr", S: "7", E: "7b" },
+    { id: "e10", T: "Attr", S: "6a", E: "10" },
+    { id: "e11", T: "Attr", S: "10", E: "11" },
+    { id: "e12", T: "Attr", S: "11", E: "12" },
+    { id: "e13", T: "Attr", S: "5", E: "8" },
+    { id: "e14", T: "Attr", S: "8", E: "9" }
   ]
 }

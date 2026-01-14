@@ -160,23 +160,6 @@ return {
         key: unique_9
       }
     }
-    {
-      id: "10"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: FeedbackModal
-        key: unique_12
-        props:
-          '''
-return {
-  isOpen: args.fns.isFeedbackModalOpen,
-  onClose: args.fns.closeFeedbackModal,
-  onSubmit: args.fns.submitFeedback
-};
-'''
-      }
-    }
   ]
   edges: [
     {
@@ -220,12 +203,6 @@ return {
       T: Attr
       S: "5"
       E: "9"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "5"
-      E: "10"
     }
   ]
 }
