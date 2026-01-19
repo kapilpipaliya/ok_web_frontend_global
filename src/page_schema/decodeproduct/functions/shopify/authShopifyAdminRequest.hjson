@@ -68,7 +68,7 @@ const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
   contextData: {
     searchParams: params,
   },
-  migrationSubDomain: "ytorganizer"
+  migrationSubDomain: "decodeproduct"
 });
 
 // Authenticate the request using Shopify's admin authentication

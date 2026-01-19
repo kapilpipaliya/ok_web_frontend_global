@@ -3,6 +3,12 @@ import { parseHjsonPreservingMultiline } from "~/lib/hjson/parseHjsonPreservingM
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Edge } from "~/lib/graph/type/edge";
 
+// Node.js modules are marked as external in build config
+// They will only be available on the server side
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 export interface WebsiteSchemas {
   components?: Record<string, ExportedSchema>;
   pages?: Record<string, ExportedSchema>;
@@ -145,6 +151,7 @@ export function getWebsiteNameForSubdomain(
   subdomain: string,
   domain?: string,
 ): string | null {
+  "use server";
   // For localhost in dev, load all websites
   if (subdomain === "admin") {
     return null; // Load all
@@ -157,8 +164,68 @@ export function getWebsiteNameForSubdomain(
 // Cache for website schemas to avoid reloading
 const websiteSchemaCache = new Map<string, WebsiteSchemas>();
 
+// Get the base directory for page_schema files
+function getSchemaBaseDir(): string {
+  const schemaPath = path.join(process.cwd(), "src", "page_schema");
+  
+  if (!fs.existsSync(schemaPath)) {
+    throw new Error(
+      `Could not find page_schema directory at: ${schemaPath}. Current working directory: ${process.cwd()}`,
+    );
+  }
+  
+  return schemaPath;
+}
+
+// Load all .hjson files from filesystem recursively
+function loadFromFilesystem(): Record<string, string> {
+  const schemaBaseDir = getSchemaBaseDir();
+  const result: Record<string, string> = {};
+  let fileCount = 0;
+
+  function readDir(dir: string, relativePath: string = ""): void {
+    try {
+      if (!fs.existsSync(dir)) {
+        console.warn(`Directory does not exist: ${dir}`);
+        return;
+      }
+
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        const relPath = relativePath
+          ? path.join(relativePath, entry.name)
+          : entry.name;
+
+        if (entry.isDirectory()) {
+          // Recursively read subdirectories
+          readDir(fullPath, relPath);
+        } else if (entry.isFile() && entry.name.endsWith(".hjson")) {
+          try {
+            const content = fs.readFileSync(fullPath, "utf-8");
+            // Convert path to format expected by parseModulePath: "./website/schemaType/.../file.hjson"
+            // Use forward slashes for consistency
+            const normalizedPath = `./${relPath.replace(/\\/g, "/")}`;
+            result[normalizedPath] = content;
+            fileCount++;
+          } catch (error) {
+            console.error(`Failed to read file ${fullPath}:`, error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to read directory ${dir}:`, error);
+    }
+  }
+
+  readDir(schemaBaseDir);
+  return result;
+}
+
 // Get specific website schemas synchronously with caching
 export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
+  "use server";
   // Check cache first
   if (websiteSchemaCache.has(websiteName)) {
     return websiteSchemaCache.get(websiteName)!;
@@ -171,18 +238,13 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
     functions: {},
   };
 
-  // We have to use the general pattern, but we'll filter efficiently
-  // Use explicit default import for better compatibility
+  // Load all .hjson files from filesystem
   // Pattern matches: ./website/schemaType/**/*.hjson (any depth of nesting)
-  const allModules = import.meta.glob("./*//**/*.hjson", {
-    eager: true,
-    query: "?raw",
-    import: "default",
-  }) as Record<string, string>;
+  const allModules = loadFromFilesystem();
 
   // Process only modules for this specific website
-  for (const [path, content] of Object.entries(allModules)) {
-    const parsedPath = parseModulePath(path);
+  for (const [filePath, content] of Object.entries(allModules)) {
+    const parsedPath = parseModulePath(filePath);
     if (!parsedPath || parsedPath.websiteName !== websiteName) continue;
 
     processSchemaFile(schemas, parsedPath, content);
@@ -199,6 +261,7 @@ export function getSchemasForSubdomain(
   subdomain: string,
   domain?: string,
 ): AllWebsiteSchemas | WebsiteSchemas {
+  "use server";
   const websiteName = getWebsiteNameForSubdomain(subdomain, domain);
 
   if (websiteName === null) {
@@ -211,19 +274,15 @@ export function getSchemasForSubdomain(
 
 // Load all website schemas synchronously (used when we need all schemas)
 function loadAllWebsiteSchemasSync(): AllWebsiteSchemas {
+  "use server";
   const schemas: AllWebsiteSchemas = {};
 
-  // Import all hjson files synchronously
-  // Use explicit default import for better compatibility
+  // Load all hjson files from filesystem
   // Pattern matches: ./website/schemaType/**/*.hjson (any depth of nesting)
-  const eagerModules = import.meta.glob("./*//**/*.hjson", {
-    eager: true,
-    query: "?raw",
-    import: "default",
-  }) as Record<string, string>;
+  const allModules = loadFromFilesystem();
 
-  for (const [path, content] of Object.entries(eagerModules)) {
-    const parsedPath = parseModulePath(path);
+  for (const [filePath, content] of Object.entries(allModules)) {
+    const parsedPath = parseModulePath(filePath);
     if (!parsedPath) continue;
 
     processSchemaFile(schemas, parsedPath, content);

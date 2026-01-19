@@ -1,5 +1,3 @@
-"use server";
-
 import fs from "node:fs";
 import zlib from "node:zlib";
 import { promisify } from "node:util";
@@ -19,6 +17,7 @@ const gunzip = promisify(zlib.gunzip);
  * Get all subdomains (database names)
  */
 export async function getAllSubdomains() {
+  "use server";
   try {
     const driver = await getDriver();
     const session = driver.session({ database: "system" });
@@ -56,6 +55,7 @@ export async function getAllSubdomains() {
  * List all cloud backups
  */
 export async function listBackups() {
+  "use server";
   try {
     const result = await listCloudBackups();
     return result;
@@ -81,6 +81,7 @@ export async function deleteBackup(
   databaseName?: string,
   key?: string,
 ) {
+  "use server";
   try {
     const result = await deleteCloudBackup({ filename, databaseName, key });
     return result;
@@ -100,6 +101,7 @@ export async function downloadBackup(
   databaseName?: string,
   localPath?: string,
 ) {
+  "use server";
   try {
     const downloadPath = localPath || `/tmp/${filename}`;
     const result = await downloadBackupFromCloud({
@@ -120,6 +122,7 @@ export async function downloadBackup(
  * Create a new database backup
  */
 export async function createBackup(databaseName: string) {
+  "use server";
   try {
     const result = await createDatabaseBackup({
       databaseName: databaseName,
@@ -143,6 +146,7 @@ export async function restoreBackup(
   targetDatabaseName?: string,
   confirmed?: boolean,
 ) {
+  "use server";
   try {
     const result = await restoreFromBackup({
       filename,
@@ -163,6 +167,7 @@ export async function restoreBackup(
  * Save a note for a backup
  */
 export async function saveBackupNote(backupKey: string, note: string) {
+  "use server";
   try {
     const driver = await getDriver();
     const session = driver.session({ database: "admin" });
@@ -216,6 +221,7 @@ export async function saveBackupNote(backupKey: string, note: string) {
  * Get all backup notes
  */
 export async function getBackupNotes() {
+  "use server";
   try {
     const driver = await getDriver();
     const session = driver.session({ database: "admin" });
@@ -256,6 +262,7 @@ export async function compareBackups(
   filename2: string,
   databaseName2: string,
 ) {
+  "use server";
   try {
     // Download both backups
     const tmpPath1 = `/tmp/compare_${Date.now()}_1_${filename1}`;
@@ -356,6 +363,7 @@ export async function compareBackups(
  * Preview backup contents
  */
 export async function previewBackup(filename: string, databaseName: string) {
+  "use server";
   try {
     // Download backup
     const tmpPath = `/tmp/preview_${Date.now()}_${filename}`;
@@ -446,6 +454,7 @@ export async function uploadAndRestoreBackup(
   shouldRestore = false,
   confirmed = false,
 ) {
+  "use server";
   try {
     console.log(`[Upload] Processing file: ${tmpPath}`);
 
