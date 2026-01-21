@@ -12,10 +12,14 @@ export function getHttpsSession() {
     cookie: {
       maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
       httpOnly: true, // Prevents JavaScript access to the cookie (security best practice)
-      secure: true, // process.env.NODE_ENV === "production",
+      secure: true, // Required for SameSite=None
       //sameSite: "lax" as const, // Provides CSRF protection while allowing navigation
-      sameSite: "None" as const, // to work with Google Chrome
+      sameSite: "none" as const, // Required for cross-site cookies (iframes, embedded apps)
       path: "/", // Makes the cookie available across your entire site
+      // Note: Safari blocks third-party cookies in iframes by default
+      // Even with SameSite=None and Secure, Safari's ITP may block cookies
+      // Client-side: Use Storage Access API (document.requestStorageAccess()) after user interaction
+      // See: https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/
     },
   };
   return useSession(config);

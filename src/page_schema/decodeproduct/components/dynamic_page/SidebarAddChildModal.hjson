@@ -312,6 +312,12 @@ const wrappedOnSave = async (saveData) => {
       }
     });
 
+    // Check for errors and show toast
+    const errorMessage = args.fns.extractError?.(result, true, "Failed to create vertex");
+    if (errorMessage) {
+      return;
+    }
+
     if (result?.result?.success) {
       args.showSuccessToast?.(result.result.message || "Vertex created successfully");
       // Cleanup transaction after successful save
@@ -324,8 +330,6 @@ const wrappedOnSave = async (saveData) => {
       if (onClose) {
         onClose();
       }
-    } else {
-      args.showErrorToast?.(result?.result?.message || result?.error || "Failed to create vertex");
     }
   } catch (error) {
     console.error("Error saving vertex:", error);

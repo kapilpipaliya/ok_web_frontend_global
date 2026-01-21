@@ -654,3 +654,13 @@ how multi-tenent is working:
 1. when authShopifyAdminRequest function is executed from layout we pass useSessionShop: false to use subdomain db.
 2. update getUserFromSession function, when sessionUser?.P?.shop then return user from session only.
 3. executeNamedServerFunctionCore also use appropriate db when sessionUser?.P?.shop is available.
+
+
+
+
+launch:
+https://shopify.dev/docs/apps/launch/app-store-review/app-quality-checks
+
+
+About session tokens
+https://shopify.dev/docs/apps/build/authentication-authorization/session-tokens

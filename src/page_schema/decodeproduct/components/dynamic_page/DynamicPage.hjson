@@ -43,6 +43,40 @@ const prop = (p) => {
   return args.contextData.props[p];
 };
 
+// Common function to extract error message from response
+// Returns error message string or null if no error
+// Optionally shows toast notification if showToast is true
+const extractError = (result, showToast = false, defaultMessage = null) => {
+  if (!result) return defaultMessage;
+  
+  // Check top-level error
+  if (result.error) {
+    if (showToast) {
+      args.showErrorToast?.(result.error);
+    }
+    return result.error;
+  }
+  
+  // Check result-level error
+  if (result.result?.error) {
+    if (showToast) {
+      args.showErrorToast?.(result.result.error);
+    }
+    return result.result.error;
+  }
+  
+  // Check success: false with message
+  if (result.result && result.result.success === false) {
+    const errorMessage = result.result.message || result.result.error || defaultMessage;
+    if (errorMessage && showToast) {
+      args.showErrorToast?.(errorMessage);
+    }
+    return errorMessage;
+  }
+  
+  return null;
+};
+
 // Functions invoked by "get*" which must be defined before their usages
 const getGenericSettingsFunction = () => {
   const tableVertexLabel = getTableVertexLabel();
@@ -53,11 +87,20 @@ const getGenericSettingsFunction = () => {
         tableVertexLabel,
         key: `${tableVertexLabel}_settings`
       });
+      
+      // Check for errors and show toast
+      const errorMessage = extractError(result, true, "Failed to load settings");
+      if (errorMessage) {
+        return { success: false, data: { setting: null } };
+      }
+      
+      // Return successful result
       if (result?.result?.success && result.result.data?.setting) {
         return result.result;
       }
     } catch (error) {
       console.error("Error loading settings:", error);
+      args.showErrorToast?.(error?.message || "Failed to load settings");
     }
     return { success: false, data: { setting: null } };
   };
@@ -111,19 +154,17 @@ const getGenericDataFunction = () => {
 
       const result = await args.fns.executeYTOFunction("getUserContent", filterParams);
 
-      if (result?.error) {
-        args.showErrorToast?.(result.error);
+      // Check for errors and show toast
+      const errorMessage = extractError(result, true, "Failed to load data");
+      if (errorMessage) {
         return { data: [] };
       }
-      if (result?.result) {
-        if (result.result.error) {
-          args.showErrorToast?.(result.result.error);
-          return { data: [] };
-        }
-        if (result.result.success && result.result.data) {
-          return { data: Array.isArray(result.result.data) ? result.result.data : [] };
-        }
+      
+      // Return successful result
+      if (result?.result?.success && result.result.data) {
+        return { data: Array.isArray(result.result.data) ? result.result.data : [] };
       }
+      
       return { data: [] };
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -288,18 +329,17 @@ const getGenericSaveFunction = () => {
         }
       }
 
-      if (result?.error) {
-        return { success: false, message: result.error };
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to save");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
       }
-      if (result?.result) {
-        if (result.result.error) {
-          return { success: false, message: result.result.error };
-        }
-        if (result.result.success) {
-          return { success: true, data: result.result.data };
-        }
-        return { success: false, message: result.result.message || "Failed to save" };
+      
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, data: result.result.data };
       }
+      
       return { success: false, message: "Failed to save" };
     } catch (error) {
       console.error("Error saving:", error);
@@ -317,17 +357,18 @@ const getGenericSaveSettingsFunction = () => {
         key: `${tableVertexLabel}_settings`,
         config: configText
       });
-      if (result?.error) {
-        return { success: false, message: result.error };
+      
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to save settings");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
       }
-      if (result?.result) {
-        if (result.result.error) {
-          return { success: false, message: result.result.error };
-        }
-        if (result.result.success) {
-          return { success: true, message: result.result.message || "Settings saved successfully" };
-        }
+      
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, message: result.result.message || "Settings saved successfully" };
       }
+      
       return { success: false, message: "Failed to save settings" };
     } catch (error) {
       console.error("Error saving settings:", error);
@@ -350,17 +391,18 @@ const getGenericImportFunction = () => {
         enableUserScoping: enableUserScopingForContent,
         hooks: config?.hooks
       });
-      if (result?.error) {
-        return { success: false, message: result.error };
+      
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to import data");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
       }
-      if (result?.result) {
-        if (result.result.error) {
-          return { success: false, message: result.result.error };
-        }
-        if (result.result.success) {
-          return { success: true, message: result.result.message };
-        }
+      
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, message: result.result.message };
       }
+      
       return { success: false, message: "Failed to import data" };
     } catch (error) {
       console.error("Error importing data:", error);
@@ -386,22 +428,23 @@ const getGenericExportFunction = () => {
         enableUserScoping: enableUserScopingForContent,
         hooks: config?.hooks
       });
-      if (result?.error) {
-        return { success: false, message: result.error };
+      
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to export data");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
       }
-      if (result?.result) {
-        if (result.result.error) {
-          return { success: false, message: result.result.error };
-        }
-        if (result.result.success) {
-          return {
-            success: true,
-            data: result.result.data,
-            tableVertexLabel: result.result.tableVertexLabel,
-            filename: result.result.filename
-          };
-        }
+      
+      // Return successful result
+      if (result?.result?.success) {
+        return {
+          success: true,
+          data: result.result.data,
+          tableVertexLabel: result.result.tableVertexLabel,
+          filename: result.result.filename
+        };
       }
+      
       return { success: false, message: "Failed to export data" };
     } catch (error) {
       console.error("Error exporting data:", error);
@@ -645,6 +688,15 @@ const loadSettings = async () => {
   if (!settingsFn) return null;
   try {
     const result = await settingsFn();
+    
+    // Handle error cases (result from settingsFn is already processed, check success flag)
+    if (result && result.success === false) {
+      if (result.message) {
+        args.showErrorToast?.(result.message);
+      }
+      return null;
+    }
+    
     if (result?.success && result?.data?.setting) {
       const settingData = result.data.setting.P || {};
       // Get the raw config text (function body) - don't evaluate it
@@ -658,6 +710,7 @@ const loadSettings = async () => {
     }
   } catch (error) {
     console.error("Error loading settings:", error);
+    args.showErrorToast?.(error?.message || "Failed to load settings");
   }
   return null;
 };
@@ -822,6 +875,12 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       contextData: contextData
     });
 
+    // Check for errors and show toast
+    const errorMessage = extractError(result, true, "Failed to move items");
+    if (errorMessage) {
+      return { success: false, message: errorMessage };
+    }
+
     // Process graph data if available
     if (result?.result?.success && result.result.data) {
       if (result.graph && result.graph.vertexes) {
@@ -829,10 +888,12 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       }
     }
 
-    return result?.result || { success: false, message: result?.error || "Failed to move items" };
+    return result?.result || { success: false, message: "Failed to move items" };
   } catch (error) {
     console.error("Error moving items:", error);
-    return { success: false, message: error.message || "Failed to move items" };
+    const errorMessage = error.message || "Failed to move items";
+    args.showErrorToast?.(errorMessage);
+    return { success: false, message: errorMessage };
   } finally {
     setLoading(false);
   }
@@ -882,7 +943,8 @@ return {
   setSelectedRows,
   clearSelectedRows,
   sidebarWidth,
-  setSidebarWidth
+  setSidebarWidth,
+  extractError
 }
 
 '''

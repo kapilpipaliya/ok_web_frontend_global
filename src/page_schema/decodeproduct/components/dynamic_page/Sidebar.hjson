@@ -57,6 +57,13 @@ const fetchRoot = async () => {
       }
     });
 
+    // Check for errors and show toast
+    const errorMessage = args.fns.extractError?.(result, true, "Failed to load root vertices");
+    if (errorMessage) {
+      // Error already shown via extractError
+      return;
+    }
+
     if (result?.result?.success && result.result.data) {
       const rootItems = result.result.data;
       
@@ -81,8 +88,6 @@ const fetchRoot = async () => {
         const firstRootItem = rootItems[0];
         handleItemSelect(firstRootItem);
       }
-    } else {
-      args.showErrorToast?.(result?.result?.message || result?.error || "Failed to load root vertices");
     }
   } catch (error) {
     console.error("Error fetching root:", error);

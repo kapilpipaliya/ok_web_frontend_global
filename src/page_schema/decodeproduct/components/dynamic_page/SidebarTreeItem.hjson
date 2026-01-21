@@ -518,6 +518,12 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
       contextData: moveContextData
     });
 
+    // Check for errors and show toast
+    const errorMessage = args.fns.extractError?.(result, true, "Failed to move category");
+    if (errorMessage) {
+      return false;
+    }
+
     if (result?.result?.success) {
       // Process graph data if available
       if (result.graph && result.graph.vertexes) {
@@ -536,10 +542,9 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
       
       args.showSuccessToast?.(result.result.message || "Category moved successfully");
       return true;
-    } else {
-      args.showErrorToast?.(result?.result?.message || "Failed to move category");
-      return false;
     }
+    
+    return false;
   } catch (error) {
     console.error("Error moving sidebar item:", error);
     args.showErrorToast?.("Failed to move category");
@@ -723,7 +728,12 @@ const handleDrop = async (e) => {
         }
       }
     } else {
-      args.showErrorToast?.(result?.message || "Failed to move items");
+      // Check for errors and show toast (result is from onMoveItemsToCategory, not executeNamedServerFunction)
+      if (result && result.success === false) {
+        args.showErrorToast?.(result.message || "Failed to move items");
+      } else {
+        args.showErrorToast?.("Failed to move items");
+      }
     }
   } catch (error) {
     console.error("Error handling drop:", error);
@@ -839,7 +849,12 @@ const handleDelete = async (e) => {
         onItemDelete(item.id);
       }
     } else {
-      args.showErrorToast?.(result?.result?.message || result?.error || "Failed to delete item");
+      // Check for errors and show toast
+      const errorMessage = args.fns.extractError?.(result, true, "Failed to delete item");
+      if (!errorMessage) {
+        // If extractError didn't find an error but success is false, show default message
+        args.showErrorToast?.("Failed to delete item");
+      }
     }
   } catch (error) {
     console.error("Error deleting item:", error);
