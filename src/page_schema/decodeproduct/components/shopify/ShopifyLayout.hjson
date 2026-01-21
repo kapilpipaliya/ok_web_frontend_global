@@ -200,6 +200,49 @@ return {
       }
     }
     {
+      id: "8_nav"
+      L: Attr
+      P: {
+        displayOrder: 2.5
+        componentName: Html
+        key: unique_nav
+        props:
+          '''return {
+  as: "s-app-nav"
+}'''
+      }
+    }
+    {
+      id: "8_nav_link_1"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_nav_link_1
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app",
+  text: "Home"
+}'''
+      }
+    }
+    {
+      id: "8_nav_link_2"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: unique_nav_link_2
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app/additional",
+  text: "Additional page"
+}'''
+      }
+    }
+    {
       id: "9"
       L: Attr
       P: {
@@ -252,6 +295,24 @@ return {
       T: Attr
       S: "5"
       E: "7_loader"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "8_nav"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8_nav"
+      E: "8_nav_link_1"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8_nav"
+      E: "8_nav_link_2"
     }
     {
       id: e7
