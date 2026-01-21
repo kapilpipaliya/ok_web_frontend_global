@@ -13,11 +13,96 @@
     }
   });
 };
+
+// Create signals for loading state and auth data
+const [isLoading, setIsLoading] = args.createSignal(true);
+const [authData, setAuthData] = args.createSignal(null);
+const [authError, setAuthError] = args.createSignal(null);
+
+// Function to fetch auth data
+const fetchAuthData = async () => {
+  try {
+    setIsLoading(true);
+    setAuthError(null);
+
+    const searchParams = args.untrack(() => ({...args.searchParams}));
+
+    // Call the named server function "authShopifyAdminRequest"
+    const result = await args.executeNamedServerFunction(
+      {
+        functionName: "authShopifyAdminRequest",
+        contextData: {
+          searchParams,
+        },
+      }, 
+      {
+        useSessionShop: false
+      }
+    );
+
+    if (result?.error || result?.result?.success === false) {
+      console.error("Shopify auth failed:", result?.error || result?.result?.error);
+      const errorMessage = result?.error || result?.result?.error || "Shopify auth failed";
+      setAuthError(errorMessage);
+      setAuthData({
+        data: null,
+        error: errorMessage,
+        needsOAuth: result?.result?.needsOAuth || false,
+        redirectUrl: result?.result?.redirectUrl,
+      });
+      return;
+    }
+
+    const authResult = {
+      data: result?.result,
+      needsOAuth: result?.result?.needsOAuth || false,
+      redirectUrl: result?.result?.redirectUrl,
+    };
+
+    setAuthData(authResult);
+
+    // Check if OAuth redirect is needed
+    if (authResult?.needsOAuth && authResult?.redirectUrl) {
+      // Redirect to OAuth begin endpoint
+      window.location.href = authResult.redirectUrl;
+    }
+  } catch (err) {
+    console.error("Error fetching Shopify auth data:", err);
+    const errorMessage = err?.message || "Failed to authenticate with Shopify";
+    setAuthError(errorMessage);
+    setAuthData({
+      data: null,
+      error: errorMessage,
+      needsOAuth: false,
+      redirectUrl: null,
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Fetch auth data on mount
+const onMount = () => {
+  fetchAuthData();
+};
+
 return {
-  executeYTOFunction
+  executeYTOFunction,
+  isLoading,
+  setIsLoading,
+  authData,
+  setAuthData,
+  authError,
+  setAuthError,
+  fetchAuthData,
+  onMount
 }'''
         title: ShopifyLayout
         key: ShopifyLayout
+        props:
+          '''return {
+  onMount: args.fns.onMount
+}'''
       }
     }
     {
@@ -90,64 +175,28 @@ return {
       }
     }
     {
-      id: "7"
+      id: "7_loader"
       L: Attr
       P: {
-        contextName: auth
-        as: div
         displayOrder: 2
-        fns:
-          '''return {
-
-}'''
-        componentName: Html
-        key: unique_4
+        componentName: LoadingSpinner
+        key: unique_4_loader
         props:
-          '''return {
-  serverFunction: `
-    // This server function runs on the server and authenticates the Shopify admin app
-    // It calls the named server function "authShopifyAdminRequest"
+          '''const isLoading = args.fns.isLoading?.();
 
-    const searchParams = ${JSON.stringify(args.untrack(() => ({...args.searchParams})))};
-
-   // Using useSessionShop: false flag to ensure we use fallback database for auth
-    const result = await args.executeNamedServerFunction(
-      {
-        functionName: "authShopifyAdminRequest",
-        contextData: {
-          searchParams,
-        },
-      }, 
-      {
-        useSessionShop: false
-      }
-    );
-
-    if (result?.error || result?.result?.success === false) {
-      console.error("Shopify auth failed:", result?.error || result?.result?.error);
-      return {
-        data: null,
-        error: result?.error || result?.result?.error || "Shopify auth failed",
-        needsOAuth: result?.result?.needsOAuth || false,
-        redirectUrl: result?.result?.redirectUrl,
-      };
-    }
-
-    return {
-      data: result?.result,
-      needsOAuth: result?.result?.needsOAuth || false,
-      redirectUrl: result?.result?.redirectUrl,
-    };
-  `,
-  onMount: () => {
-    // Check if OAuth redirect is needed after server function completes
-    const authData = args.contextData?.auth;
-    if (authData?.needsOAuth && authData?.redirectUrl) {
-      // Redirect to OAuth begin endpoint
-      window.location.href = authData.redirectUrl;
-    }
-  }
+return {
+  size: "medium",
+  color: "primary",
+  text: "Authenticating with Shopify...",
+  hide: !isLoading
 }'''
+        css:
+          '''return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}`;'''
       }
     }
     {
@@ -158,6 +207,12 @@ return {
         componentName: Slot
         slot: 1children
         key: unique_9
+        props:
+          '''const isLoading = args.fns.isLoading?.();
+
+return {
+  hide: isLoading
+}'''
       }
     }
   ]
@@ -196,7 +251,7 @@ return {
       id: e6
       T: Attr
       S: "5"
-      E: "7"
+      E: "7_loader"
     }
     {
       id: e7
