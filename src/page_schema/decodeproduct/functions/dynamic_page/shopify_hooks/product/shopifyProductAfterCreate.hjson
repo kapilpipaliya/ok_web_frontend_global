@@ -26,60 +26,30 @@ if (formData.id) {
 
 console.log(`🛍️  Creating product in Shopify...`);
 
-// Get current authenticated user from session to get shop info
-let sessionUser;
-try {
-  sessionUser = await args.getSessionUser();
-} catch (e) {
-  console.warn("shopifyProductAfterCreate: getSessionUser failed", e);
-  return; // Can't create without shop info
-}
-
-const shop = sessionUser?.P?.shop;
-
-if (!shop) {
-  console.warn("shopifyProductAfterCreate: Shop domain is missing, skipping product creation");
-  return;
-}
-
-// Get Shopify params from session
-const shopifyParams = sessionUser?.P?.shopifyParams || {};
-
 // Get Shopify API object
 const shopify = args.getShopifyClient();
 
 // Authenticate the request using Shopify's admin authentication
 let admin;
+let shop;
 try {
-  const origin = args.request ? new URL(args.request.url).origin : "https://ysaar.com";
-  const url = new URL(`${origin}/shopify`);
-  for (const [key, value] of Object.entries(shopifyParams)) {
-    if (typeof value !== "undefined" && value !== null) {
-      url.searchParams.append(key, String(value));
-    }
+  const event = args.getRequestEvent();
+  if (!event) {
+    throw new Error("No request context available");
   }
+  const request = event.request;
 
-  const request = {
-    query: shopifyParams,
-    url: url.toString(),
-    headers: {
-      get(name) {
-        if (shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined") {
-          return shopifyParams.headers[name];
-        }
-        return undefined;
-      },
-      has(name) {
-        return shopifyParams.headers && typeof shopifyParams.headers[name] !== "undefined";
-      }
-    },
-  };
-
-  const authResult = await shopify.unauthenticated.admin(shop);
-  admin = authResult.admin;
+  const result = await shopify.authenticate.admin(request);
+  shop = result.session.shop;
+  admin = result.admin;
 } catch (authError) {
   console.error("shopifyProductAfterCreate: Shopify authentication failed", authError);
   return; // Can't create without authentication
+}
+
+if (!shop) {
+  console.warn("shopifyProductAfterCreate: Shop domain is missing, skipping product creation");
+  return;
 }
 
 // Prepare product data for Shopify

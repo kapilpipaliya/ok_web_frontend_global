@@ -8,12 +8,12 @@
         body:
           '''
 // Extract parameters
-const { categoryElementId, shop, shopifyParams } = args.contextData;
+const { categoryElementId } = args.contextData;
 
-if (!categoryElementId || !shop) {
+if (!categoryElementId) {
   return {
     success: false,
-    error: "categoryElementId and shop are required"
+    error: "categoryElementId is required"
   };
 }
 
@@ -72,9 +72,7 @@ try {
         functionName: "deleteShopifyMenu",
         contextData: {
           menuId: topLevelMenuId,
-          categoryElementId: topLevelId,
-          shop: shop,
-          shopifyParams: shopifyParams || {}
+          categoryElementId: topLevelId
         }
       });
       if (deleteResult.result?.success) {
@@ -108,9 +106,7 @@ try {
       contextData: {
         categoryElementId: topLevelId,
         categoryName: topLevelName,
-        menuId: topLevelMenuId,
-        shop: shop,
-        shopifyParams: shopifyParams || {}
+        menuId: topLevelMenuId
       }
     });
     if (updateResult.result?.success) {
@@ -134,9 +130,7 @@ try {
       functionName: "createShopifyMenuForCategory",
       contextData: {
         categoryElementId: topLevelId,
-        categoryName: topLevelName,
-        shop: shop,
-        shopifyParams: shopifyParams || {}
+        categoryName: topLevelName
       }
     });
     if (createResult.result?.success) {

@@ -664,3 +664,6 @@ https://shopify.dev/docs/apps/launch/app-store-review/app-quality-checks
 
 About session tokens
 https://shopify.dev/docs/apps/build/authentication-authorization/session-tokens
+
+Make shopify page same like markets page.
+

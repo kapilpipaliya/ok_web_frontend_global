@@ -15,22 +15,6 @@ if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') {
   return;
 }
 
-// Get current authenticated user from session to get shop info
-let sessionUser;
-try {
-  sessionUser = await args.getSessionUser();
-} catch (e) {
-  console.warn("shopifyProductCategoryAfterUpdate: getSessionUser failed", e);
-  return; // Can't update without shop info
-}
-
-const shop = sessionUser?.P?.shop;
-
-if (!shop) {
-  console.warn("shopifyProductCategoryAfterUpdate: Shop domain is missing, skipping collection update");
-  return;
-}
-
 // Get Shopify API object
 const shopify = args.getShopifyClient();
 
@@ -54,9 +38,17 @@ if (!shopifyCollectionId) {
   // Still update product tags even if collection doesn't exist
   // Need to authenticate first
   let adminForTags;
+  let shopForTags;
   try {
-    const authResult = await shopify.unauthenticated.admin(shop);
-    adminForTags = authResult.admin;
+    const event = args.getRequestEvent();
+    if (!event) {
+      throw new Error("No request context available");
+    }
+    const request = event.request;
+
+    const result = await shopify.authenticate.admin(request);
+    shopForTags = result.session.shop;
+    adminForTags = result.admin;
   } catch (authError) {
     console.error("shopifyProductCategoryAfterUpdate: Shopify authentication failed for tag update", authError);
     return;
@@ -72,12 +64,25 @@ console.log(`🛍️  Updating collection in Shopify for category: ${name}...`);
 
 // Authenticate the request using Shopify's admin authentication
 let admin;
+let shop;
 try {
-  const authResult = await shopify.unauthenticated.admin(shop);
-  admin = authResult.admin;
+  const event = args.getRequestEvent();
+  if (!event) {
+    throw new Error("No request context available");
+  }
+  const request = event.request;
+
+  const result = await shopify.authenticate.admin(request);
+  shop = result.session.shop;
+  admin = result.admin;
 } catch (authError) {
   console.error("shopifyProductCategoryAfterUpdate: Shopify authentication failed", authError);
   return; // Can't update without authentication
+}
+
+if (!shop) {
+  console.warn("shopifyProductCategoryAfterUpdate: Shop domain is missing, skipping collection update");
+  return;
 }
 
 if (!admin) {

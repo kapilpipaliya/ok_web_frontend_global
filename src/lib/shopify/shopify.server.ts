@@ -35,6 +35,7 @@ import { getNeo4jSessionStore } from "./neo4jSessionStore";
 
 /**
  * Shopify App Configuration
+ * https://shopify.dev/docs/api/shopify-app-react-router/latest/entrypoints/shopifyapp
  *
  * Creates and configures the main Shopify app instance.
  * This configuration object defines how the app authenticates, stores sessions,
@@ -60,7 +61,7 @@ const shopify = shopifyApp({
   // Split from comma-separated string in environment variable
   // Common scopes: read_products, write_products, read_orders, etc.
   // See: https://shopify.dev/docs/api/usage/access-scopes
-  scopes: ["read_products", "write_products"], // process.env.SCOPES?.split(","),
+  scopes: ["read_products", "write_content", "write_metaobjects", "write_online_store_navigation", "write_products"], // process.env.SCOPES?.split(","),
 
   // App URL: The public URL where your app is hosted
   // Used for OAuth redirects and webhook URLs

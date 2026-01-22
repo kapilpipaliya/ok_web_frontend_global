@@ -1,4 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
+import { getRequestEvent } from "solid-js/web";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -7,9 +8,84 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { getDriver } from "~/cypher/core/driver";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getAdminUser } from "~/cypher/permissions/utils/getAdminUser";
+import { getShopifyClient, ensureShopDatabaseAndMigrate, getDBSessionForShop } from "~/lib/shopify/shopifyHelpers";
+import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function getSessionUser(): Promise<undefined | Vertex> {
   try {
+    // Check if hostname is decodeproduct.decodecommerce.com
+    const event = getRequestEvent();
+    if (event) {
+      try {
+        const urlObj = new URL(event.request.url);
+        if (urlObj.hostname === "decodeproduct.decodecommerce.com") {
+          // Authenticate with Shopify to get shop
+          const shopify = getShopifyClient();
+          const result = await shopify.authenticate.admin(event.request);
+          const shop = result.session.shop;
+          
+          if (shop) {
+            // Get database session for this shop (assumes database already exists)
+            const { dbSession, subDomain } = await getDBSessionForShop(shop);
+            
+            try {
+              // Find or create user in the database
+              const user = await dbSession.executeWrite(async (tx) => {
+                // Check if user already exists by email (shop) or uuid (shop)
+                const existingUserResult = await tx.run(
+                  `MATCH (u:User)
+                   WHERE u.email = $shop OR u.uuid = $shop
+                   RETURN u
+                   LIMIT 1`,
+                  { shop }
+                );
+
+                let userNode;
+                
+                if (existingUserResult.records.length > 0) {
+                  // User exists, return the existing node (no updates needed)
+                  userNode = existingUserResult.records[0].get('u');
+                } else {
+                  // User doesn't exist, create it with only basic properties
+                  const createResult = await tx.run(
+                    `CREATE (u:User {
+                      email: $shop,
+                      uuid: $shop,
+                      createdAt: datetime()
+                    })
+                    RETURN u`,
+                    {
+                      shop,
+                    }
+                  );
+                  userNode = createResult.records[0].get('u');
+                }
+
+                // Convert Neo4j node to Vertex format
+                return convertNodeToJson(userNode);
+              });
+
+              // Add Shopify-related properties to user object for session only (not saved in DB)
+              user.P.shop = shop;
+              user.P.shopDb = subDomain;
+
+              // Update HTTP session with the user from database (with Shopify properties in session only)
+              // await updateSession(user);
+              
+              return user;
+            } finally {
+              // Close the database session
+              await dbSession.close();
+            }
+          }
+        }
+      } catch (err) {
+        // If Shopify authentication fails, fall through to regular session check
+        console.error("Error in Shopify authentication for getSessionUser:", err);
+      }
+    }
+    
+    // Regular session check for other hostnames
     const httpSession = await getHttpsSession();
     const sessionUser = httpSession?.data?.user;
     if (!sessionUser) return;

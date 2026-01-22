@@ -17,25 +17,6 @@ if (parentVertexLabel !== 'ShopifyProductCategory') {
 
 console.log(`📋 Updating menus for top-level categories after category move...`);
 
-// Get current authenticated user from session to get shop info
-let sessionUser;
-try {
-  sessionUser = await args.getSessionUser();
-} catch (e) {
-  console.warn("shopifyProductCategoryMenuAfterMoveCategory: getSessionUser failed", e);
-  return;
-}
-
-const shop = sessionUser?.P?.shop;
-
-if (!shop) {
-  console.warn("shopifyProductCategoryMenuAfterMoveCategory: Shop domain is missing, skipping menu update");
-  return;
-}
-
-// Get Shopify params from session
-const shopifyParams = sessionUser?.P?.shopifyParams || {};
-
 try {
   // Update menu for the "from" top-level parent (old parent's top-level)
   if (oldParentId && oldParentId !== 'root' && oldParentId !== 'uncategorized') {
@@ -43,9 +24,7 @@ try {
     const oldParentResult = await args.executeNamedServerFunction({
       functionName: "updateTopLevelCategoryMenu",
       contextData: {
-        categoryElementId: oldParentId,
-        shop: shop,
-        shopifyParams: shopifyParams
+        categoryElementId: oldParentId
       }
     });
     if (oldParentResult.result?.success) {
@@ -79,9 +58,7 @@ try {
           functionName: "deleteShopifyMenu",
           contextData: {
             menuId: menuId,
-            categoryElementId: categoryId,
-            shop: shop,
-            shopifyParams: shopifyParams
+            categoryElementId: categoryId
           }
         });
         if (deleteResult.result?.success) {
@@ -102,9 +79,7 @@ try {
   const movedCategoryResult = await args.executeNamedServerFunction({
     functionName: "updateTopLevelCategoryMenu",
     contextData: {
-      categoryElementId: categoryId,
-      shop: shop,
-      shopifyParams: shopifyParams
+      categoryElementId: categoryId
     }
   });
   if (movedCategoryResult.result?.success) {

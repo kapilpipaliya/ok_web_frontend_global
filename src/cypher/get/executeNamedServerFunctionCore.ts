@@ -1,3 +1,4 @@
+import { getRequestEvent } from "solid-js/web";
 import type { EvalExpressionContext } from "~/cypher/types/EvalExpressionContext";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Edge } from "~/lib/graph/type/edge";
@@ -259,15 +260,36 @@ export async function executeNamedServerFunctionCore(
     } else {
       // Note: for worker functions, this will not work, so always pass the session in the context.
       // Create new session
-      const sessionUser = await getSessionUser();
       sessionCreatedLocally = true;
       
-      // Check if we should use the session shop (if available)
+      // Extract shop from request URL instead of session
+      let shopFromRequest: string | undefined;
+      const event = getRequestEvent();
+      if (event) {
+        const request = event.request;
+        try {
+          const urlObj = new URL(request.url);
+          if (urlObj.hostname === "decodeproduct.decodecommerce.com") {
+            // For decodeproduct.decodecommerce.com, get shop from Shopify authentication
+            try {
+              const shopify = getShopifyClient();
+              const result = await shopify.authenticate.admin(request);
+              shopFromRequest = result.session.shop;
+            } catch (authError) {
+              console.error(authError);
+            }
+          }
+        } catch (err) {
+          // ignore invalid URLs
+        }
+      }
+      
+      // Check if we should use the shop from request (if available)
       // Only use shop database if useSessionShop isn't explicitly set to false
-      // and the user has a shop in their session
-      if (context.useSessionShop !== false && sessionUser?.P?.shop) {
+      // and we have a shop from the request
+      if (context.useSessionShop !== false && shopFromRequest) {
         // Derive database name for this shop
-        subDomain = getDatabaseNameForShop(sessionUser.P.shop);
+        subDomain = getDatabaseNameForShop(shopFromRequest);
         dbSession = (await getDriver()).session({
           database: subDomain,
         });
@@ -555,6 +577,7 @@ export async function executeNamedServerFunctionCore(
       getSessionUser,
       runMigration,
       processResult,
+      getRequestEvent,
     };
 
     // Execute the function

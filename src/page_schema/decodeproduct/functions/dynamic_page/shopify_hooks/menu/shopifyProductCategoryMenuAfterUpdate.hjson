@@ -17,33 +17,12 @@ if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') {
 
 console.log(`📋 Updating Shopify menu for top-level category...`);
 
-// Get current authenticated user from session to get shop info
-let sessionUser;
-try {
-  sessionUser = await args.getSessionUser();
-} catch (e) {
-  console.warn("shopifyProductCategoryMenuAfterUpdate: getSessionUser failed", e);
-  return;
-}
-
-const shop = sessionUser?.P?.shop;
-
-if (!shop) {
-  console.warn("shopifyProductCategoryMenuAfterUpdate: Shop domain is missing, skipping menu update");
-  return;
-}
-
-// Get Shopify params from session
-const shopifyParams = sessionUser?.P?.shopifyParams || {};
-
 try {
   // Use common function to update top-level category menu
   const menuResult = await args.executeNamedServerFunction({
     functionName: "updateTopLevelCategoryMenu",
     contextData: {
-      categoryElementId: vertexId,
-      shop: shop,
-      shopifyParams: shopifyParams
+      categoryElementId: vertexId
     }
   });
 

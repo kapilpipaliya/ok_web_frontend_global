@@ -32,35 +32,11 @@ if (!valid || !shop) {
 
 const shopify = args.getShopifyClient();
 
-// Since we don't have a request object, create it from available data.
-// Construct a URL using "https://ysaar.com/shopify" and the query params from Shopify.
-const url = new URL("https://ysaar.com/shopify");
-for (const [key, value] of Object.entries(params)) {
-  if (typeof value !== "undefined") {
-    url.searchParams.append(key, value);
-  }
+const event = args.getRequestEvent();
+if (!event) {
+  throw new Error("No request context available");
 }
-
-// Create a minimal request-like object with query (params), url, and headers
-// Shopify's authenticate.admin expects a headers-like object with a .get(name) method (Map-like)
-const request = {
-  query: params,
-  url: url.toString(),
-  headers: {
-    get(name) {
-      // If params.headers exists and name exists in it, return, otherwise undefined
-      if (params.headers && typeof params.headers[name] !== "undefined") {
-        return params.headers[name];
-      }
-      return undefined;
-    },
-    // Optionally, support .has as well if needed by Shopify SDK
-    has(name) {
-      return params.headers && typeof params.headers[name] !== "undefined";
-    }
-  },
-  // Add any other fields needed by authenticate.admin if necessary
-};
+const request = event.request;
 
 // Ensure dedicated database for this shop and run migration
 const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
@@ -76,65 +52,15 @@ const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
 // If authentication fails, the user will be redirected to login
 await shopify.authenticate.admin(request);
 
-try {
-  // Find or create user in the database
-  const user = await dbSession.executeWrite(async (tx) => {
-    // Check if user already exists by email (shop) or uuid (shop)
-    const existingUserResult = await tx.run(
-      `MATCH (u:User)
-       WHERE u.email = $shop OR u.uuid = $shop
-       RETURN u
-       LIMIT 1`,
-      { shop }
-    );
+// Close the dedicated session we created for this shop
+await dbSession.close();
 
-    let userNode;
-    
-    if (existingUserResult.records.length > 0) {
-      // User exists, return the existing node (no updates needed)
-      userNode = existingUserResult.records[0].get('u');
-    } else {
-      // User doesn't exist, create it with only basic properties
-      const createResult = await tx.run(
-        `CREATE (u:User {
-          email: $shop,
-          uuid: $shop,
-          createdAt: datetime()
-        })
-        RETURN u`,
-        {
-          shop,
-        }
-      );
-      userNode = createResult.records[0].get('u');
-    }
-
-    // Convert Neo4j node to Vertex format
-    return args.convertNodeToJson(userNode);
-  });
-
-  // Add Shopify-related properties to user object for session only (not saved in DB)
-  user.P.shop = shop;
-  user.P.shopDb = subDomain;
-  user.P.shopifySession = params.session;
-  user.P.shopifyHost = params.host;
-  user.P.shopifyLocale = params.locale;
-  user.P.shopifyEmbedded = params.embedded;
-  user.P.shopifyParams = params;
-
-  // Update HTTP session with the user from database (with Shopify properties in session only)
-  await args.updateSession(user);
-
-  return {
-    success: true,
-    shop,
-    subDomain,
-    message: "Shopify admin app request authenticated",
-  };
-} finally {
-  // Close the dedicated session we created for this shop
-  await dbSession.close();
-}
+return {
+  success: true,
+  shop,
+  subDomain,
+  message: "Shopify admin app request authenticated",
+};
 '''
         key: authShopifyAdminRequest
       }

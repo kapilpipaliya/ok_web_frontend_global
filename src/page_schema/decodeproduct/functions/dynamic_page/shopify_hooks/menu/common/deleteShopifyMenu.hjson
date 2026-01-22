@@ -8,12 +8,12 @@
         body:
           '''
 // Extract parameters
-const { menuId, categoryElementId, shop, shopifyParams } = args.contextData;
+const { menuId, categoryElementId } = args.contextData;
 
-if (!menuId || !shop) {
+if (!menuId) {
   return {
     success: false,
-    error: "menuId and shop are required"
+    error: "menuId is required"
   };
 }
 
@@ -22,14 +22,29 @@ const shopify = args.getShopifyClient();
 
 // Authenticate the request using Shopify's admin authentication
 let admin;
+let shop;
 try {
-  const authResult = await shopify.unauthenticated.admin(shop);
-  admin = authResult.admin;
+  const event = args.getRequestEvent();
+  if (!event) {
+    throw new Error("No request context available");
+  }
+  const request = event.request;
+
+  const result = await shopify.authenticate.admin(request);
+  shop = result.session.shop;
+  admin = result.admin;
 } catch (authError) {
   console.error("deleteShopifyMenu: Shopify authentication failed", authError);
   return {
     success: false,
     error: "Shopify authentication failed"
+  };
+}
+
+if (!shop) {
+  return {
+    success: false,
+    error: "shop is required"
   };
 }
 

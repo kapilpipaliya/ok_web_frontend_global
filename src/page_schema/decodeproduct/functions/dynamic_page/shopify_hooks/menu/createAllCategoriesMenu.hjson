@@ -10,41 +10,35 @@
 // Extract parameters
 const { menuTitle = "Categories", menuHandle = "categories" } = args.contextData;
 
-// Get current authenticated user from session to get shop info
-let sessionUser;
-try {
-  sessionUser = await args.getSessionUser();
-} catch (e) {
-  console.warn("createAllCategoriesMenu: getSessionUser failed", e);
-  return;
-}
+// Get Shopify API object
+const shopify = args.getShopifyClient();
 
-const shop = sessionUser?.P?.shop;
+// Authenticate the request using Shopify's admin authentication
+let admin;
+let shop;
+try {
+  const event = args.getRequestEvent();
+  if (!event) {
+    throw new Error("No request context available");
+  }
+  const request = event.request;
+
+  const result = await shopify.authenticate.admin(request);
+  shop = result.session.shop;
+  admin = result.admin;
+} catch (authError) {
+  console.error("createAllCategoriesMenu: Shopify authentication failed", authError);
+  return {
+    success: false,
+    error: "Shopify authentication failed"
+  };
+}
 
 if (!shop) {
   console.warn("createAllCategoriesMenu: Shop domain is missing, skipping menu creation");
   return {
     success: false,
     error: "shop is required"
-  };
-}
-
-// Get Shopify params from session
-const shopifyParams = sessionUser?.P?.shopifyParams || {};
-
-// Get Shopify API object
-const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
-try {
-  const authResult = await shopify.unauthenticated.admin(shop);
-  admin = authResult.admin;
-} catch (authError) {
-  console.error("createAllCategoriesMenu: Shopify authentication failed", authError);
-  return {
-    success: false,
-    error: "Shopify authentication failed"
   };
 }
 

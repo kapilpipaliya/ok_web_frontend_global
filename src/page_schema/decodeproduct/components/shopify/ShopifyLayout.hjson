@@ -81,9 +81,24 @@ const fetchAuthData = async () => {
   }
 };
 
-// Fetch auth data on mount
+// Handle Shopify navigate event
+// when route is loaded outside the Shopify admin, then the user will be redirected to the Shopify admin
+const handleNavigate = (event) => {
+  const href = event.target?.getAttribute('href');
+  if (href) {
+    args.navigate(href);
+  }
+};
+
+// Fetch auth data and register event listener on mount
 const onMount = () => {
   fetchAuthData();
+  document.addEventListener('shopify:navigate', handleNavigate);
+};
+
+// Unregister event listener on cleanup
+const onCleanup = () => {
+  document.removeEventListener('shopify:navigate', handleNavigate);
 };
 
 return {
@@ -95,13 +110,16 @@ return {
   authError,
   setAuthError,
   fetchAuthData,
-  onMount
+  handleNavigate,
+  onMount,
+  onCleanup
 }'''
         title: ShopifyLayout
         key: ShopifyLayout
         props:
           '''return {
-  onMount: args.fns.onMount
+  onMount: args.fns.onMount,
+  onCleanup: args.fns.onCleanup
 }'''
       }
     }
@@ -112,7 +130,6 @@ return {
         as: meta
         displayOrder: 1
         componentName: Html
-        key: unique_1
         props:
           '''return {
   name: "shopify-api-key",
@@ -127,7 +144,6 @@ return {
         as: script
         displayOrder: 2
         componentName: Html
-        key: unique_2
         props:
           '''return {
   src: "https://cdn.shopify.com/shopifycloud/app-bridge.js"
@@ -141,7 +157,6 @@ return {
         as: script
         displayOrder: 3
         componentName: Html
-        key: unique_3
         props:
           '''return {
   src: "https://cdn.shopify.com/shopifycloud/polaris.js"
@@ -154,7 +169,6 @@ return {
       P: {
         displayOrder: 6
         componentName: ConfirmProvider
-        key: unique_7
       }
     }
     {
@@ -163,7 +177,6 @@ return {
       P: {
         displayOrder: 1
         componentName: Html
-        key: unique_8
         props:
           '''
 return {
@@ -180,7 +193,6 @@ return {
       P: {
         displayOrder: 2
         componentName: LoadingSpinner
-        key: unique_4_loader
         props:
           '''const isLoading = args.fns.isLoading?.();
 
@@ -205,7 +217,6 @@ return {
       P: {
         displayOrder: 2.5
         componentName: Html
-        key: unique_nav
         props:
           '''return {
   as: "s-app-nav"
@@ -218,7 +229,6 @@ return {
       P: {
         displayOrder: 1
         componentName: Html
-        key: unique_nav_link_1
         props:
           '''return {
   as: "s-link",
@@ -233,7 +243,6 @@ return {
       P: {
         displayOrder: 2
         componentName: Html
-        key: unique_nav_link_2
         props:
           '''return {
   as: "s-link",
@@ -249,7 +258,6 @@ return {
         displayOrder: 3
         componentName: Slot
         slot: 1children
-        key: unique_9
         props:
           '''const isLoading = args.fns.isLoading?.();
 
