@@ -6,7 +6,7 @@
       P: {
         fns: return { enabled: () => true }
         title: DragDropTest
-        url: /app
+        url: /app/test
         key: DragDropTest
         props:
           '''return {
@@ -37,6 +37,8 @@ const [sourceItems, setSourceItems] = args.createSignal([...initialSourceItems])
 const [droppedItems, setDroppedItems] = args.createSignal([]);
 const [draggedItemId, setDraggedItemId] = args.createSignal(null);
 const [isDragOver, setIsDragOver] = args.createSignal(false);
+const draggableCleanups = new Map();
+const dropTargetCleanup = { current: null };
 
 // Get source items
 const getSourceItems = () => {
@@ -48,81 +50,100 @@ const getDroppedItems = () => {
   return droppedItems();
 };
 
-// Handle drag start
-const handleDragStart = (e) => {
-  const itemId = parseInt(e.currentTarget.getAttribute('data-item-id'));
-  if (!itemId) return;
+// Initialize draggable for an element
+const initDraggable = (element, itemId) => {
+  if (!element) return;
   
-  setDraggedItemId(itemId);
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('application/json', JSON.stringify({ type: 'item', id: itemId }));
-  
-  // Visual feedback
-  e.currentTarget.style.opacity = '0.5';
-};
-
-// Handle drag end
-const handleDragEnd = (e) => {
-  setDraggedItemId(null);
-  e.currentTarget.style.opacity = '1';
-};
-
-// Handle drag over
-const handleDragOver = (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  e.dataTransfer.dropEffect = 'move';
-  setIsDragOver(true);
-};
-
-// Handle drag leave
-const handleDragLeave = (e) => {
-  // Only set drag over to false if we're leaving the drop zone itself
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = e.clientX;
-  const y = e.clientY;
-  
-  if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-    setIsDragOver(false);
+  // Clean up existing draggable if any
+  const existingCleanup = draggableCleanups.get(itemId);
+  if (existingCleanup) {
+    existingCleanup();
   }
-};
-
-// Handle drop
-const handleDrop = (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  setIsDragOver(false);
   
-  try {
-    const dataStr = e.dataTransfer.getData('application/json');
-    if (!dataStr) return;
-    
-    const data = JSON.parse(dataStr);
-    
-    if (data.type === 'item' && data.id) {
-      const itemId = data.id;
-      const sourceItemsList = sourceItems();
-      const droppedItemsList = droppedItems();
-      
-      // Find the item in source items
-      const itemIndex = sourceItemsList.findIndex(item => item.id === itemId);
-      if (itemIndex === -1) return;
-      
-      const item = sourceItemsList[itemIndex];
-      
-      // Remove from source and add to dropped
-      const newSourceItems = sourceItemsList.filter(item => item.id !== itemId);
-      const newDroppedItems = [...droppedItemsList, item];
-      
-      setSourceItems(newSourceItems);
-      setDroppedItems(newDroppedItems);
-      
-      args.showSuccessToast?.(`${item.name} dropped successfully!`);
+  const cleanup = args.draggable({
+    element,
+    getInitialData: () => ({
+      type: 'item',
+      id: itemId
+    }),
+    onDragStart: (event) => {
+      setDraggedItemId(itemId);
+      if (element) {
+        element.style.opacity = '0.5';
+      }
+    },
+    onDrop: (event) => {
+      setDraggedItemId(null);
+      if (element) {
+        element.style.opacity = '1';
+      }
     }
-  } catch (error) {
-    console.error('Error handling drop:', error);
-    args.showErrorToast?.('Failed to drop item');
+  });
+  
+  draggableCleanups.set(itemId, cleanup);
+  return cleanup;
+};
+
+// Initialize drop target
+const initDropTarget = (element) => {
+  if (!element) return;
+  
+  // Clean up existing drop target if any
+  if (dropTargetCleanup.current) {
+    dropTargetCleanup.current();
   }
+
+  const cleanup = args.dropTargetForElements({
+    element,
+    getData: () => ({}),
+    canDrop: (args) => {
+      const source = args.source;
+      const data = source.data;
+      return data && data.type === 'item';
+    },
+    onDragEnter: () => {
+      setIsDragOver(true);
+    },
+    onDrag: () => {
+      setIsDragOver(true);
+    },
+    onDragLeave: () => {
+      setIsDragOver(false);
+    },
+    onDrop: (event) => {
+      setIsDragOver(false);
+      
+      const source = event.source;
+      const data = source.data;
+      
+      if (data && data.type === 'item' && data.id) {
+        const itemId = data.id;
+        const sourceItemsList = sourceItems();
+        const droppedItemsList = droppedItems();
+        
+        // Find the item in source items
+        const itemIndex = sourceItemsList.findIndex(item => item.id === itemId);
+        if (itemIndex === -1) return;
+        
+        const item = sourceItemsList[itemIndex];
+        
+        // Remove from source and add to dropped
+        const newSourceItems = sourceItemsList.filter(item => item.id !== itemId);
+        const newDroppedItems = [...droppedItemsList, item];
+        
+        setSourceItems(newSourceItems);
+        setDroppedItems(newDroppedItems);
+        
+        args.showSuccessToast?.(`${item.name} dropped successfully!`);
+      }
+    },
+    onDropTargetChange: (event) => {
+      setIsDragOver(event.isActive);
+    }
+  });
+  
+  dropTargetCleanup.current = cleanup;
+  return cleanup;
 };
 
 // Reset items
@@ -152,11 +173,8 @@ const getStatsText = () => {
 return {
   getSourceItems,
   getDroppedItems,
-  handleDragStart,
-  handleDragEnd,
-  handleDragOver,
-  handleDragLeave,
-  handleDrop,
+  initDraggable,
+  initDropTarget,
   resetItems,
   getDraggableStyle,
   getStatsText,
@@ -344,11 +362,13 @@ return {
         props:
           '''return {
   as: "div",
-  draggable: true,
   "data-item-id": args.contextData.sourceItem.id,
-  onDragStart: args.fns.handleDragStart,
-  onDragEnd: args.fns.handleDragEnd,
-  style: args.fns.getDraggableStyle(args.contextData.sourceItem.id)
+  style: args.fns.getDraggableStyle(args.contextData.sourceItem.id),
+  ref: (el) => {
+    if (el) {
+      args.fns.initDraggable(el, args.contextData.sourceItem.id);
+    }
+  }
 }'''
         css:
           '''return `._id {
@@ -438,9 +458,11 @@ return {
         props:
           '''return {
   as: "div",
-  onDragOver: args.fns.handleDragOver,
-  onDragLeave: args.fns.handleDragLeave,
-  onDrop: args.fns.handleDrop
+  ref: (el) => {
+    if (el) {
+      args.fns.initDropTarget(el);
+    }
+  }
 }'''
         css:
           '''return `._id {

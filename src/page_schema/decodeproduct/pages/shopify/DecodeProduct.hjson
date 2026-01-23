@@ -6,7 +6,7 @@
       P: {
         fns: return { enabled: () => true }
         title: DecodeProduct
-        url: /app2
+        url: /app
         key: DecodeProduct
         props:
           '''return {

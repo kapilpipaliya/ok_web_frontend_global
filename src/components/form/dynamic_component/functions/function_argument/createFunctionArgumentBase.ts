@@ -54,6 +54,36 @@ import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 import { klona } from "klona";
 import { findVertexByLabelAndPks, findVertexByLabelAndUniqueId, findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
+// Following Untitled-1 (11-21, 12-13): also import `combine`, `GroupDropIndicator`, `liveRegion`, `type Instruction`, and `triggerPostMoveFlash` non-directly (no direct imports).
+// Only import drag-and-drop modules and related utilities on the client, using dynamic import assignment.
+
+let draggable, dropTargetForElements, monitorForElements, dropTargetForExternal, monitorForExternal;
+let combine, GroupDropIndicator, liveRegion, triggerPostMoveFlash;
+
+if (typeof window !== "undefined") {
+  // Only import drag-and-drop modules and related drag+drop utilities on the client
+  import("@atlaskit/pragmatic-drag-and-drop/element/adapter").then(mod => {
+    draggable = mod.draggable;
+    dropTargetForElements = mod.dropTargetForElements;
+    monitorForElements = mod.monitorForElements;
+  });
+  import("@atlaskit/pragmatic-drag-and-drop/external/adapter").then(mod => {
+    dropTargetForExternal = mod.dropTargetForExternal;
+    monitorForExternal = mod.monitorForExternal;
+  });
+  import("@atlaskit/pragmatic-drag-and-drop/combine").then(mod => {
+    combine = mod.combine;
+  });
+  import("@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/group").then(mod => {
+    GroupDropIndicator = mod.GroupDropIndicator;
+  });
+  import("@atlaskit/pragmatic-drag-and-drop-live-region").then(mod => {
+    liveRegion = mod;
+  });
+  import("@atlaskit/pragmatic-drag-and-drop-flourish/trigger-post-move-flash").then(mod => {
+    triggerPostMoveFlash = mod.triggerPostMoveFlash;
+  });
+}
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -311,5 +341,15 @@ export function createFunctionArgumentBase(
     findVertexByLabelAndPks,
     findVertexByLabelAndUniqueId,
     findVertexIdsByLabel,
+    
+    // Pragmatic drag and drop - direct access to library functions
+    draggable,
+    dropTargetForElements,
+    monitorForElements,
+    dropTargetForExternal,
+    monitorForExternal,
+
+    combine, GroupDropIndicator, liveRegion, triggerPostMoveFlash
+
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }
