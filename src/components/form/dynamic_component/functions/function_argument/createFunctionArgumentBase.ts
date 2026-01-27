@@ -57,31 +57,37 @@ import { findVertexByLabelAndPks, findVertexByLabelAndUniqueId, findVertexIdsByL
 // Following Untitled-1 (11-21, 12-13): also import `combine`, `GroupDropIndicator`, `liveRegion`, `type Instruction`, and `triggerPostMoveFlash` non-directly (no direct imports).
 // Only import drag-and-drop modules and related utilities on the client, using dynamic import assignment.
 
-let draggable, dropTargetForElements, monitorForElements, dropTargetForExternal, monitorForExternal;
-let combine, GroupDropIndicator, liveRegion, triggerPostMoveFlash;
+let draggable: any,
+  dropTargetForElements: any,
+  monitorForElements: any,
+  dropTargetForExternal: any,
+  monitorForExternal: any;
+let setCustomNativeDragPreview: any;
+let pointerOutsideOfPreview: any;
+let centerUnderPointer: any;
+let preserveOffsetOnSource: any;
+let combine: any, GroupDropIndicator: any, liveRegion: any, triggerPostMoveFlash: any;
+let attachInstruction: any, extractInstruction: any, DropIndicator: any;
 
 if (typeof window !== "undefined") {
   // Only import drag-and-drop modules and related drag+drop utilities on the client
-  import("@atlaskit/pragmatic-drag-and-drop/element/adapter").then(mod => {
+  import("./pragmaticElementAdapter").then(mod => {
     draggable = mod.draggable;
     dropTargetForElements = mod.dropTargetForElements;
     monitorForElements = mod.monitorForElements;
-  });
-  import("@atlaskit/pragmatic-drag-and-drop/external/adapter").then(mod => {
+    setCustomNativeDragPreview = mod.setCustomNativeDragPreview;
+    pointerOutsideOfPreview = mod.pointerOutsideOfPreview;
+    centerUnderPointer = mod.centerUnderPointer;
+    preserveOffsetOnSource = mod.preserveOffsetOnSource;
     dropTargetForExternal = mod.dropTargetForExternal;
     monitorForExternal = mod.monitorForExternal;
-  });
-  import("@atlaskit/pragmatic-drag-and-drop/combine").then(mod => {
     combine = mod.combine;
-  });
-  import("@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/group").then(mod => {
     GroupDropIndicator = mod.GroupDropIndicator;
-  });
-  import("@atlaskit/pragmatic-drag-and-drop-live-region").then(mod => {
-    liveRegion = mod;
-  });
-  import("@atlaskit/pragmatic-drag-and-drop-flourish/trigger-post-move-flash").then(mod => {
+    DropIndicator = mod.DropIndicator;
+    liveRegion = mod.liveRegion;
     triggerPostMoveFlash = mod.triggerPostMoveFlash;
+    attachInstruction = mod.attachInstruction;
+    extractInstruction = mod.extractInstruction;
   });
 }
 
@@ -348,8 +354,17 @@ export function createFunctionArgumentBase(
     monitorForElements,
     dropTargetForExternal,
     monitorForExternal,
-
-    combine, GroupDropIndicator, liveRegion, triggerPostMoveFlash
+    setCustomNativeDragPreview,
+    pointerOutsideOfPreview,
+    centerUnderPointer,
+    preserveOffsetOnSource,
+    combine,
+    GroupDropIndicator,
+    DropIndicator,
+    liveRegion,
+    triggerPostMoveFlash,
+    attachInstruction,
+    extractInstruction
 
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

@@ -900,61 +900,141 @@ args.createEffect(() => {
   }
 });
 
-// Drag and drop functionality
-const handleDragStart = (e) => {
+// Drag and drop functionality using @atlaskit/pragmatic-drag-and-drop
+const tableDraggableCleanups = new Map();
+const tableDraggableElements = new Map(); // Store elements by rowId
+
+// Helper to check if a row can be dragged
+const canDragRow = (rowId) => {
+  if (!rowId) return false;
   const selected = getSelectedRows();
-  if (selected.size === 0) {
-    e.preventDefault();
-    return;
-  }
+  if (!selected.has(rowId)) return false;
   
-  // Selected rows now contain vertex IDs directly
-  const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
-  
-  if (itemIds.length === 0) {
-    e.preventDefault();
-    return;
-  }
-  
-  // Get selected items for count display
   const filtered = filteredData();
-  const selectedItems = filtered.filter(row => itemIds.includes(row.id));
-  e.dataTransfer.setData('application/json', JSON.stringify({
-    type: 'table-items',
-    itemIds: itemIds,
-    count: selectedItems.length
-  }));
-  e.dataTransfer.effectAllowed = 'move';
+  const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
+  return filtered.some(row => itemIds.includes(row.id));
+};
+
+// Initialize draggable for table row - always initialize, validation in onDragStart
+const initTableDraggable = (element, rowId) => {
+  if (!element || !args.draggable) return;
   
-  // Create custom drag image with count
-  const dragImage = document.createElement('div');
-  const theme = args.theme || {};
-  const primaryColor = theme.var?.color?.primary || '#3b82f6';
-  const primaryTextColor = theme.var?.color?.primary_text || '#ffffff';
+  // Clean up existing draggable for this element if any
+  const existingCleanup = tableDraggableCleanups.get(element);
+  if (existingCleanup) {
+    existingCleanup();
+  }
   
-  dragImage.style.cssText = `
-    padding: 8px 12px;
-    background: ${primaryColor};
-    color: ${primaryTextColor};
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    pointer-events: none;
-    position: absolute;
-    top: -1000px;
-    white-space: nowrap;
-  `;
-  dragImage.textContent = `Move ${selectedItems.length} item${selectedItems.length !== 1 ? 's' : ''}`;
-  document.body.appendChild(dragImage);
-  e.dataTransfer.setDragImage(dragImage, 0, 0);
-  
-  // Clean up drag image after a short delay
-  setTimeout(() => {
-    if (document.body.contains(dragImage)) {
-      document.body.removeChild(dragImage);
+  const cleanup = args.draggable({
+    element,
+    getInitialData: () => {
+      if (!canDragRow(rowId)) {
+        return { type: 'table-items', itemIds: [], count: 0 };
+      }
+      
+      const selected = getSelectedRows();
+      const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
+      const filtered = filteredData();
+      const selectedItems = filtered.filter(row => itemIds.includes(row.id));
+      
+      return {
+        type: 'table-items',
+        itemIds,
+        count: selectedItems.length
+      };
+    },
+    onGenerateDragPreview: ({ nativeSetDragImage }) => {
+      // Provide a stable custom preview (pragmatic disables default preview in some setups)
+      if (!args.setCustomNativeDragPreview || !nativeSetDragImage) return;
+      if (!canDragRow(rowId)) return;
+
+      const selected = getSelectedRows();
+      const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
+      const filtered = filteredData();
+      const selectedItems = filtered.filter(row => itemIds.includes(row.id));
+      const count = selectedItems.length;
+
+      if (!count) return;
+
+      return args.setCustomNativeDragPreview({
+        nativeSetDragImage,
+        getOffset: args.pointerOutsideOfPreview
+          ? args.pointerOutsideOfPreview({ x: "8px", y: "8px" })
+          : undefined,
+        render: ({ container }) => {
+          container.style.boxSizing = "border-box";
+          container.style.display = "flex";
+          container.style.alignItems = "center";
+          container.style.gap = "10px";
+          container.style.padding = "10px 12px";
+          container.style.borderRadius = "10px";
+          container.style.border = `1px solid ${args.theme?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
+          container.style.background = `${args.theme?.var?.color?.background_light_200 ?? "#fff"}`;
+          container.style.color = `${args.theme?.var?.color?.text ?? "#111"}`;
+          container.style.boxShadow = "0 10px 28px rgba(0,0,0,0.18)";
+          container.style.pointerEvents = "none";
+          container.style.fontSize = "14px";
+          container.style.fontWeight = "600";
+          container.style.maxWidth = "320px";
+
+          const badge = document.createElement("div");
+          badge.style.flex = "0 0 auto";
+          badge.style.padding = "2px 8px";
+          badge.style.borderRadius = "9999px";
+          badge.style.background = `${args.theme?.var?.color?.primary ?? "#4f46e5"}`;
+          badge.style.color = `${args.theme?.var?.color?.primary_text ?? "#fff"}`;
+          badge.style.fontSize = "12px";
+          badge.style.fontWeight = "700";
+          badge.textContent = String(count);
+
+          const text = document.createElement("div");
+          text.style.minWidth = "0";
+          text.style.whiteSpace = "nowrap";
+          text.style.overflow = "hidden";
+          text.style.textOverflow = "ellipsis";
+          text.textContent = count === 1 ? "Move 1 item" : `Move ${count} items`;
+
+          container.appendChild(badge);
+          container.appendChild(text);
+        }
+      });
+    },
+    onDragStart: () => {
+      if (!canDragRow(rowId)) return;
+      if (element) element.style.opacity = '0.5';
+    },
+    onDrop: () => {
+      if (element) element.style.opacity = '1';
     }
-  }, 0);
+  });
+  
+  tableDraggableCleanups.set(element, cleanup);
+  if (rowId) {
+    tableDraggableElements.set(rowId, element);
+  }
+  return cleanup;
+};
+
+// Cleanup table draggable for a specific element
+const cleanupTableDraggable = (element) => {
+  if (element) {
+    const cleanup = tableDraggableCleanups.get(element);
+    if (cleanup) {
+      cleanup();
+      tableDraggableCleanups.delete(element);
+    }
+    // Remove from elements map
+    tableDraggableElements.forEach((el, rowId) => {
+      if (el === element) {
+        tableDraggableElements.delete(rowId);
+      }
+    });
+  } else {
+    // Cleanup all draggables
+    tableDraggableCleanups.forEach((cleanup) => cleanup());
+    tableDraggableCleanups.clear();
+    tableDraggableElements.clear();
+  }
 };
 
 const getSelectedItems = () => {
@@ -1040,7 +1120,8 @@ return {
   renderCellContent,
   handleSave,
   handleDelete,
-  handleDragStart,
+  initTableDraggable,
+  cleanupTableDraggable,
   getSelectedItems,
   getSelectFilterProps
 };
@@ -2297,6 +2378,7 @@ return [
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
+const rowData = args.fns.filteredData()[rowIndex];
 
 const showSelection = args.fns.getShowSelection();
 
@@ -2305,8 +2387,17 @@ const hasSelection = selected.size > 0;
 
 return {
   as: "div",
-  draggable: hasSelection,
-  onDragStart: hasSelection ? args.fns.handleDragStart : undefined,
+  ref: (el) => {
+    if (el && args.fns.initTableDraggable && rowData?.id) {
+      args.fns.initTableDraggable(el, rowData.id);
+    }
+  },
+  onCleanup: () => {
+    // Cleanup draggable on unmount using args.ref() to get element
+    if (args.fns.cleanupTableDraggable && args.ref) {
+      args.fns.cleanupTableDraggable(args.ref());
+    }
+  },
   style: hasSelection ? "cursor: move;" : undefined
 };
 '''

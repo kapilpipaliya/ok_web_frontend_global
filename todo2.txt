@@ -667,3 +667,9 @@ https://shopify.dev/docs/apps/build/authentication-authorization/session-tokens
 
 Make shopify page same like markets page.
 
+Supported browsers for accessing Shopify:
+https://help.shopify.com/en/manual/shopify-admin/supported-browsers
+
+
+tree example:
+https://atlassian.design/components/pragmatic-drag-and-drop/examples
