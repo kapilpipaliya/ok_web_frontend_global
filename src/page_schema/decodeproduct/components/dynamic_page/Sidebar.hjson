@@ -45,7 +45,7 @@ const fetchRoot = async () => {
     const enableUserScoping = args.contextData.props?.enableUserScoping === true;
     
     const result = await args.executeNamedServerFunction({
-      functionName: "getVertexChildren",
+      functionName: "getSidebarTreeRoots",
       contextData: {
         parentVertexLabel,
         toParentEdgeType,
@@ -60,34 +60,25 @@ const fetchRoot = async () => {
     // Check for errors and show toast
     const errorMessage = args.fns.extractError?.(result, true, "Failed to load root vertices");
     if (errorMessage) {
-      // Error already shown via extractError
       return;
     }
 
     if (result?.result?.success && result.result.data) {
       const rootItems = result.result.data;
       
-      // Store root items in graph
       if (result.graph && result.graph.vertexes) {
         args.setGraphData(0, result.graph, {});
       }
       
-      // Store root items IDs in signal
       setRootVertices(rootItems.map(v => v.id));
       
-      // Auto-expand root items
-      const rootIds = rootItems.map(v => v.id);
-      setExpandedKeys(rootIds);
-      // Fetch children for all root items
-      for (const rootItem of rootItems) {
-        await fetchChildren(rootItem.id);
-      }
+      // Lazy expand: do not expand or fetch children on load (1 API call total)
+      setExpandedKeys([]);
       
       // Restore selection from URL (vertex id) so reload activates same category
       const initialCategoryId = args.contextData.props?.initialCategoryId;
       if (initialCategoryId && args.graph?.vertexes?.[initialCategoryId]) {
         const vertex = args.graph.vertexes[initialCategoryId];
-        // Expand parent chain so the restored category is visible
         let parent = getParentCategory(initialCategoryId);
         while (parent && parent.id) {
           setExpandedKeys(keys => keys.includes(parent.id) ? keys : [...keys, parent.id]);
@@ -95,7 +86,6 @@ const fetchRoot = async () => {
         }
         handleItemSelect(vertex);
       } else if (rootItems.length > 0 && !selectedItem()) {
-        // Fallback: select the first root item if no item is currently selected
         const firstRootItem = rootItems[0];
         handleItemSelect(firstRootItem);
       }
