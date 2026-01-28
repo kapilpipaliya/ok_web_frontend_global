@@ -17,7 +17,7 @@ if (!actualUser) {
   };
 }
 
-const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks } = args.contextData;
+const { parentVertexLabel, toParentEdgeType, rootKeys, tableVertexLabel, relationshipType, enableUserScoping, hooks, loadFullTree } = args.contextData;
 
 if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
   return {
@@ -26,6 +26,7 @@ if (!parentVertexLabel || !toParentEdgeType || !rootKeys) {
     data: []
   };
 }
+const fetchFullTree = loadFullTree === true;
 
 let user = null;
 let userUuid = null;
@@ -44,63 +45,127 @@ await args.executeHooks(hooks?.beforeGetVertexChildren, {
   enableUserScoping
 });
 
-// 1) Fetch root vertices (same as getVertexChildren)
-const filterConditions = [];
-const params = {};
-let paramIndex = 0;
-for (const [key, value] of Object.entries(rootKeys)) {
-  paramIndex++;
-  const paramName = `filter${paramIndex}`;
-  filterConditions.push(`v.${key} = $${paramName}`);
-  params[paramName] = value;
-}
-const filterClause = filterConditions.length > 0 ? ` AND ${filterConditions.join(' AND ')}` : '';
+let rootVertices;
 
-let rootQuery;
-if (!enableUserScoping) {
-  rootQuery = `
-    MATCH (v:${parentVertexLabel})
-    WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }${filterClause}
-    RETURN v
-    ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
-  `;
-} else {
-  const userRel = `User${parentVertexLabel}`;
-  rootQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(v:${parentVertexLabel})
-    WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }${filterClause}
-    RETURN v
-    ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
-  `;
-  params.userUuid = userUuid;
-}
-const rootResult = await args.session.run(rootQuery, params);
-const rootVertices = args.processResult(rootResult.records, args.context, 'v');
-const rootIds = rootVertices.map(v => v.id).filter(Boolean);
-
-// 2) Fetch all direct children of roots in one query
-if (rootIds.length > 0) {
-  let childrenQuery;
+if (fetchFullTree) {
+  // Full tree: fetch all vertices and all edges in two queries
+  if (!args.context.nodes) args.context.nodes = {};
+  let allVerticesQuery;
+  const allVerticesParams = {};
   if (!enableUserScoping) {
-    childrenQuery = `
+    allVerticesQuery = `
+      MATCH (v:${parentVertexLabel})
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+  } else {
+    const userRel = `User${parentVertexLabel}`;
+    allVerticesQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(v:${parentVertexLabel})
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+    allVerticesParams.userUuid = userUuid;
+  }
+  const allVerticesResult = await args.session.run(allVerticesQuery, allVerticesParams);
+  args.processResult(allVerticesResult.records, args.context, 'v');
+
+  let allEdgesQuery;
+  const allEdgesParams = {};
+  if (!enableUserScoping) {
+    allEdgesQuery = `
       MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
-      WHERE elementId(parent) IN $rootIds
       RETURN child, parent, r
       ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
     `;
   } else {
     const userRel = `User${parentVertexLabel}`;
-    childrenQuery = `
+    allEdgesQuery = `
       MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
-      WHERE elementId(parent) IN $rootIds
       RETURN child, parent, r
       ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
     `;
+    allEdgesParams.userUuid = userUuid;
   }
-  const childrenParams = { rootIds };
-  if (enableUserScoping) childrenParams.userUuid = userUuid;
-  const childrenResult = await args.session.run(childrenQuery, childrenParams);
-  args.processResult(childrenResult.records, args.context, ['child', 'parent'], 'r');
+  const allEdgesResult = await args.session.run(allEdgesQuery, allEdgesParams);
+  args.processResult(allEdgesResult.records, args.context, ['child', 'parent'], 'r');
+
+  // Roots = vertices with no incoming toParentEdgeType
+  const nodes = args.context.nodes;
+  rootVertices = Object.keys(nodes)
+    .filter(id => {
+      const node = nodes[id];
+      const outEdges = node?.OUT?.[toParentEdgeType];
+      return !outEdges || outEdges.length === 0;
+    })
+    .map(id => nodes[id])
+    .filter(Boolean)
+    .sort((a, b) => {
+      const orderA = a.P?.displayOrder ?? 0;
+      const orderB = b.P?.displayOrder ?? 0;
+      if (orderA !== orderB) return orderA - orderB;
+      const keyA = a.P?.key ?? '';
+      const keyB = b.P?.key ?? '';
+      return String(keyA).localeCompare(String(keyB));
+    });
+} else {
+  // One level: roots + direct children only
+  const filterConditions = [];
+  const params = {};
+  let paramIndex = 0;
+  for (const [key, value] of Object.entries(rootKeys)) {
+    paramIndex++;
+    const paramName = `filter${paramIndex}`;
+    filterConditions.push(`v.${key} = $${paramName}`);
+    params[paramName] = value;
+  }
+  const filterClause = filterConditions.length > 0 ? ` AND ${filterConditions.join(' AND ')}` : '';
+
+  let rootQuery;
+  if (!enableUserScoping) {
+    rootQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }${filterClause}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+  } else {
+    const userRel = `User${parentVertexLabel}`;
+    rootQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(v:${parentVertexLabel})
+      WHERE NOT EXISTS { MATCH (v)-[:${toParentEdgeType}]->(:${parentVertexLabel}) }${filterClause}
+      RETURN v
+      ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
+    `;
+    params.userUuid = userUuid;
+  }
+  const rootResult = await args.session.run(rootQuery, params);
+  rootVertices = args.processResult(rootResult.records, args.context, 'v');
+  const rootIds = rootVertices.map(v => v.id).filter(Boolean);
+
+  if (rootIds.length > 0) {
+    let childrenQuery;
+    if (!enableUserScoping) {
+      childrenQuery = `
+        MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+        WHERE elementId(parent) IN $rootIds
+        RETURN child, parent, r
+        ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+      `;
+    } else {
+      const userRel = `User${parentVertexLabel}`;
+      childrenQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+        WHERE elementId(parent) IN $rootIds
+        RETURN child, parent, r
+        ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
+      `;
+    }
+    const childrenParams = { rootIds };
+    if (enableUserScoping) childrenParams.userUuid = userUuid;
+    const childrenResult = await args.session.run(childrenQuery, childrenParams);
+    args.processResult(childrenResult.records, args.context, ['child', 'parent'], 'r');
+  }
 }
 
 // 3) Uncategorized vertex and its count

@@ -668,6 +668,7 @@ const settingsConfigs = [
     toParentEdgeType: "ProductCategory",
     rootKeys: {},
     label: "Category",
+    loadFullTree: true,
     formConfig: {
       gridColumns: 1,
       groups: [

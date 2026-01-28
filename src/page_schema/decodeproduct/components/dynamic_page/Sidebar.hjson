@@ -44,17 +44,19 @@ const fetchRoot = async () => {
     
     const enableUserScoping = args.contextData.props?.enableUserScoping === true;
     
+    const sidebarContextData = {
+      parentVertexLabel,
+      toParentEdgeType,
+      rootKeys,
+      tableVertexLabel,
+      relationshipType,
+      enableUserScoping,
+      loadFullTree: args.fns.getSidebarConfig()?.loadFullTree === true,
+      hooks: args.contextData.props?.hooks
+    };
     const result = await args.executeNamedServerFunction({
       functionName: "getSidebarTreeRoots",
-      contextData: {
-        parentVertexLabel,
-        toParentEdgeType,
-        rootKeys,
-        tableVertexLabel,
-        relationshipType,
-        enableUserScoping,
-        hooks: args.contextData.props?.hooks
-      }
+      contextData: sidebarContextData
     });
 
     // Check for errors and show toast
