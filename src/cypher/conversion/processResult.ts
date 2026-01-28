@@ -36,7 +36,11 @@ export function processResult(
               vertices.push(vertex);
             }
             if (nodes) {
-              nodes[vertex.id] = vertex;
+              // Don't overwrite existing vertex: preserves IN/OUT from previous updateNodeRelations
+              // (e.g. getSidebarTreeRoots loadFullTree: same vertex can be parent in one edge and child in another)
+              if (!nodes[vertex.id]) {
+                nodes[vertex.id] = vertex;
+              }
             }
           }
         }

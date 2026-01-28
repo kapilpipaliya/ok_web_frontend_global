@@ -21,14 +21,14 @@ const [selectedItem, setSelectedItem] = args.createSignal(null);
 const [sidebarLoading, setSidebarLoading] = args.createSignal(false);
 const [operationLoading, setOperationLoading] = args.createSignal(false);
 const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
-const [rootVertices, setRootVertices] = args.createSignal([]);
 
 // Graph namespace for sidebar data
 const SIDEBAR_NAMESPACE = "sidebar";
 const getSidebarNamespace = (key) => `${SIDEBAR_NAMESPACE}_${key}`;
 
 // Fetch root vertices and store in graph
-const fetchRoot = async () => {
+// options.preserveExpanded: when true, do not reset expandedKeys (e.g. after adding a category)
+const fetchRoot = async (options) => {
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
   const rootKeys = getRootKeys();
@@ -72,10 +72,9 @@ const fetchRoot = async () => {
         args.setGraphData(0, result.graph, {});
       }
       
-      setRootVertices(rootItems.map(v => v.id));
-      
-      // Lazy expand: do not expand or fetch children on load (1 API call total)
-      setExpandedKeys([]);
+      if (!options?.preserveExpanded) {
+        setExpandedKeys([]);
+      }
       
       // Restore selection from URL (vertex id) so reload activates same category
       const initialCategoryId = args.contextData.props?.initialCategoryId;
@@ -225,17 +224,18 @@ const getLoadingState = (parentId) => {
   return false; // Graph updates are synchronous
 };
 
-// Get root items from signal mapped to graph vertices (reactive)
+// Get root items computed from graph (GraphData: vertexes VertexMap, optional vertexLabelIdMap).
+// Roots = vertices with parentVertexLabel and no incoming toParentEdgeType + uncategorized.
 const getRoot = () => {
-  // Get root vertex IDs from signal
-  const rootIds = rootVertices();
-  // Access graph reactively
+  const toParentEdgeType = getToParentEdgeType();
+  const parentVertexLabel = getParentVertexLabel();
   const graph = args.graph;
-  // Map IDs to vertices from graph and filter out blank results
-  const rootItems = rootIds
-    .map(id => graph.vertexes[id])
-    .filter(v => v !== undefined && v !== null);
-  
+  const vertexes = graph?.vertexes;
+  if (!vertexes || !toParentEdgeType) return sortItems([]);
+  const labelIds = graph.vertexLabelIdMap?.[parentVertexLabel];
+  const candidateIds = Array.isArray(labelIds) ? labelIds : Object.keys(vertexes).filter(id => vertexes[id]?.L?.includes(parentVertexLabel));
+  const rootIds = candidateIds.filter(id => vertexes[id] != null && (id === 'uncategorized' || !(vertexes[id].OUT?.[toParentEdgeType]?.length)));
+  const rootItems = rootIds.map(id => vertexes[id]).filter(v => v != null);
   return sortItems(rootItems);
 };
 
@@ -272,16 +272,9 @@ const handleCloseAddRootModal = () => {
   setIsAddRootModalOpen(false);
 };
 
-// Handle saving root item
+// Handle saving root item (preserve expanded state so tree does not collapse)
 const handleAddRootSave = async (savedVertex) => {
-  // Add to root vertices signal (store only ID)
-  const currentRootIds = rootVertices();
-  if (!currentRootIds.includes(savedVertex.id)) {
-    setRootVertices([...currentRootIds, savedVertex.id]);
-  }
-  
-  // Refresh root items from server to ensure graph is updated
-  await fetchRoot();
+  await fetchRoot({ preserveExpanded: true });
   setIsAddRootModalOpen(false);
 };
 
@@ -319,14 +312,8 @@ const removeItemFromTree = (itemId) => {
     }
   }
 
-  // Remove vertex from graph
+  // Remove vertex from graph (getRoot() is computed from graph so roots update automatically)
   args.deleteVertex(0, itemId, args.graph, args.setGraph);
-
-  // Remove from root vertices signal if it's a root item (signal stores IDs)
-  const currentRootIds = rootVertices();
-  if (currentRootIds.includes(itemId)) {
-    setRootVertices(currentRootIds.filter(id => id !== itemId));
-  }
 
   // Select parent item if it exists, otherwise clear selection
   const currentSelected = selectedItem();
@@ -520,8 +507,6 @@ const initialize = async () => {
 
 return {
   getRoot,
-  rootVertices,
-  setRootVertices,
   expandedKeys,
   setExpandedKeys,
   selectedItem,
@@ -730,7 +715,8 @@ return {
   hooks: args.fns.getHooks(),
   label: args.fns.getSidebarLabel(),
   operationLoading: args.fns.operationLoading,
-  setOperationLoading: args.fns.setOperationLoading
+  setOperationLoading: args.fns.setOperationLoading,
+  setExpandedKeys: args.fns.setExpandedKeys
 };
 '''
       }

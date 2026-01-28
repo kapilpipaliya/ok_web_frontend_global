@@ -624,21 +624,15 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
     }
 
     if (result?.result?.success) {
-      // Process graph data if available
-      if (result.graph && result.graph.vertexes) {
+      // Apply graph update from move (edge change); getRoot() is computed from graph so roots update automatically
+      if (result.graph && (result.graph.vertexes || result.graph.edges)) {
         args.setGraphData(0, result.graph, {});
       }
-      
-      // Refresh children for both old and new parents
-      const fetchChildrenFn = getFetchChildren();
-      if (fetchChildrenFn) {
-        // Refresh root items to update the tree structure
-        const fetchRootFn = getFetchRoot();
-        if (fetchRootFn) {
-          await fetchRootFn();
-        }
+      // Preserve expanded state: keep moved item and new parent expanded after move
+      const setExpandedKeysFn = args.contextData.props?.setExpandedKeys;
+      if (setExpandedKeysFn) {
+        setExpandedKeysFn(keys => [...new Set([...(Array.isArray(keys) ? keys : []), categoryId, newParentId].filter(Boolean))]);
       }
-      
       args.showSuccessToast?.(result.result.message || "Category moved successfully");
       return true;
     }
@@ -1387,8 +1381,10 @@ return {
   relationshipType: args.contextData.props?.relationshipType,
   onMoveItemsToCategory: args.contextData.props?.onMoveItemsToCategory,
   fetchRoot: args.contextData.props?.fetchRoot,
+  getRoot: args.contextData.props?.getRoot,
   hooks: args.contextData.props?.hooks,
-  label: args.contextData.props?.label
+  label: args.contextData.props?.label,
+  setExpandedKeys: args.contextData.props?.setExpandedKeys
 };
 '''
       }
