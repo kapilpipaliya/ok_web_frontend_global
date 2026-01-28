@@ -828,8 +828,11 @@ const clearSelectedRows = () => {
 // Handle sidebar item selection
 const handleSidebarItemSelect = (item) => {
   setSelectedSidebarItem(item);
-  // Trigger table refresh by calling fetchData if available
-  // The table component should react to sidebar selection changes
+  // Persist selected category in URL so reload restores the same category (vertex id only)
+  if (item?.id != null && args.setSearchParams) {
+    const current = args.searchParams || {};
+    args.setSearchParams({ ...current, sidebarCategory: item.id }, { replace: true });
+  }
 };
 
 // Handle moving items to category
@@ -1007,7 +1010,8 @@ return {
   sidebarWidth: args.fns.sidebarWidth,
   setSidebarWidth: args.fns.setSidebarWidth,
   fetchRoot: args.fns.fetchRoot,
-  hooks: config?.sidebar?.hooks
+  hooks: config?.sidebar?.hooks,
+  initialCategoryId: args.searchParams?.sidebarCategory
 };
 '''
       }
