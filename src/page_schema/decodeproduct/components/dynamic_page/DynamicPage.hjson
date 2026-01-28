@@ -847,15 +847,15 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   
   try {
     setLoading(true);
-    // Get source category ID from selected sidebar item
-    const currentSelected = selectedSidebarItem()
-    let sourceCategoryId = null;
-    if (currentSelected?.id) {
-      if (currentSelected.P?.key === 'uncategorized' || currentSelected.id === 'uncategorized') {
-        sourceCategoryId = 'uncategorized';
-      } else {
-        sourceCategoryId = currentSelected.id;
-      }
+    // Get source category ID from selected sidebar item (vertex id only; backend passes "uncategorized" for root)
+    const currentSelected = selectedSidebarItem();
+    const sourceCategoryId = currentSelected?.id ?? null;
+
+    // Guard: don't allow moving into the same active category (compare by id; null means uncategorized)
+    const normalizeCategoryId = (id) => (id === null || id === undefined ? 'uncategorized' : id);
+    if (normalizeCategoryId(sourceCategoryId) === normalizeCategoryId(categoryId)) {
+      args.showWarningToast?.("Items are already in this category");
+      return { success: false, message: "Items are already in this category" };
     }
     
     const contextData = {
