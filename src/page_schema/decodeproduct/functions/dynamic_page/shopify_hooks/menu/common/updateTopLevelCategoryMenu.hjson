@@ -72,9 +72,10 @@ try {
         functionName: "deleteShopifyMenu",
         contextData: {
           menuId: topLevelMenuId,
-          categoryElementId: topLevelId
+          categoryElementId: topLevelId,
+          shop: args.contextData?.shop
         }
-      });
+      }, { functionLookupSubDomain: 'decodeproduct' });
       if (deleteResult.result?.success) {
         return {
           success: true,
@@ -106,9 +107,10 @@ try {
       contextData: {
         categoryElementId: topLevelId,
         categoryName: topLevelName,
-        menuId: topLevelMenuId
+        menuId: topLevelMenuId,
+        shop: args.contextData?.shop
       }
-    });
+    }, { functionLookupSubDomain: 'decodeproduct' });
     if (updateResult.result?.success) {
       return {
         success: true,
@@ -130,9 +132,10 @@ try {
       functionName: "createShopifyMenuForCategory",
       contextData: {
         categoryElementId: topLevelId,
-        categoryName: topLevelName
+        categoryName: topLevelName,
+        shop: args.contextData?.shop
       }
-    });
+    }, { functionLookupSubDomain: 'decodeproduct' });
     if (createResult.result?.success) {
       return {
         success: true,

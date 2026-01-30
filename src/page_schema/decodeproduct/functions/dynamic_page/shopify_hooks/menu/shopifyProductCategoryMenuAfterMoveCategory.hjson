@@ -4,91 +4,51 @@
       id: "1"
       L: Function
       P: {
-        description: Updates Shopify menus for top-level parent categories when a category is moved. Updates both the "from" and "to" top-level parent menus. Creates menu if new parent becomes top-level, removes menu if existing parent becomes a child.
+        description: Enqueues background job to update Shopify menus when a category is moved.
         body:
           '''
-// Only process if parentVertexLabel is 'ShopifyProductCategory'
 const { parentVertexLabel, categoryId, newParentId, oldParentId, toParentEdgeType } = args.contextData;
 
-if (parentVertexLabel !== 'ShopifyProductCategory') {
-  // Not a ShopifyProductCategory, skip
+if (parentVertexLabel !== 'ShopifyProductCategory') return;
+
+const shopify = args.getShopifyClient();
+let shop;
+try {
+  const event = args.getRequestEvent();
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
+} catch (authError) {
+  console.error("shopifyProductCategoryMenuAfterMoveCategory: Shopify authentication failed", authError);
   return;
 }
-
-console.log(`📋 Updating menus for top-level categories after category move...`);
+if (!shop) return;
 
 try {
-  // Update menu for the "from" top-level parent (old parent's top-level)
-  if (oldParentId && oldParentId !== 'root' && oldParentId !== 'uncategorized') {
-    console.log(`Updating menu for old parent's top-level category...`);
-    const oldParentResult = await args.executeNamedServerFunction({
-      functionName: "updateTopLevelCategoryMenu",
-      contextData: {
-        categoryElementId: oldParentId
-      }
-    });
-    if (oldParentResult.result?.success) {
-      console.log(`✅ ${oldParentResult.result.message}`);
-    }
-  } else if (!oldParentId || oldParentId === 'root' || oldParentId === 'uncategorized') {
-    // If oldParentId is not present, the moved item was itself a root item
-    // Since the parent relationship is already changed in moveSidebarItem, 
-    // we need to check if the moved category had a menu and delete it
-    // (it's no longer a root item, so its menu should be deleted)
-    const movedCategoryResult = await args.session.run(
-      `MATCH (category:ShopifyProductCategory)
-       WHERE elementId(category) = $categoryId
-       RETURN category.menuId as menuId, category.name as name, category.id as shopifyId`,
-      { categoryId }
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (categoryId) {
+    await args.session.run(
+      `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId: categoryId, status: 'queued' }
     );
-    
-    if (movedCategoryResult.records.length > 0) {
-      const record = movedCategoryResult.records[0];
-      const menuId = record.get('menuId');
-      const categoryName = record.get('name');
-      const shopifyId = record.get('shopifyId');
-      
-      // If the moved category had a menu and was a root item (oldParentId is null),
-      // delete its menu since it's no longer a root item after the move
-      if (menuId && shopifyId) {
-        // The category is no longer top-level (parent relationship already changed),
-        // so delete its menu
-        console.log(`📋 Category "${categoryName}" was a root item and is no longer top-level after move, deleting its menu...`);
-        const deleteResult = await args.executeNamedServerFunction({
-          functionName: "deleteShopifyMenu",
-          contextData: {
-            menuId: menuId,
-            categoryElementId: categoryId
-          }
-        });
-        if (deleteResult.result?.success) {
-          console.log(`✅ Deleted menu for root category "${categoryName}" that is no longer top-level`);
-        }
-      }
-    }
   }
-
-  // Update menu for the "to" top-level parent (new parent's top-level)
-  /*if (newParentId && newParentId !== 'root' && newParentId !== 'uncategorized') {
-    console.log(`Updating menu for new parent's top-level category...`);
-    await updateTopLevelMenu(newParentId);
-  }*/
-
-  // Update menu for the moved category itself (in case it becomes top-level or its top-level changes)
-  console.log(`Updating menu for moved category's top-level...`);
-  const movedCategoryResult = await args.executeNamedServerFunction({
-    functionName: "updateTopLevelCategoryMenu",
-    contextData: {
-      categoryElementId: categoryId
-    }
+  const queueName = 'processShopifyProductCategoryMenuAfterMoveCategory';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    parentVertexLabel,
+    categoryId,
+    newParentId,
+    oldParentId,
+    toParentEdgeType
   });
-  if (movedCategoryResult.result?.success) {
-    console.log(`✅ ${movedCategoryResult.result.message}`);
-  }
-
-  console.log(`✅ Menu updates complete after category move`);
+  await queue.close();
 } catch (error) {
-  console.error("shopifyProductCategoryMenuAfterMoveCategory: Error updating menus:", error);
+  console.error("shopifyProductCategoryMenuAfterMoveCategory: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductCategoryMenuAfterMoveCategory

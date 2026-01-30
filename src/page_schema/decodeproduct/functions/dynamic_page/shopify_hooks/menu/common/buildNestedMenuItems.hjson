@@ -46,7 +46,7 @@ for (const record of childrenResult.records) {
     contextData: {
       parentElementId: childElementId
     }
-  });
+  }, { functionLookupSubDomain: 'decodeproduct' });
   
   const nestedItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
   

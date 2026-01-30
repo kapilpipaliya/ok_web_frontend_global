@@ -4,157 +4,55 @@
       id: "1"
       L: Function
       P: {
-        description: Updates a product in Shopify when a ShopifyProduct is updated in the database.
+        description: Enqueues background job to update a product in Shopify when a ShopifyProduct is updated.
         body:
           '''
-// Only process if tableVertexLabel is 'ShopifyProduct' and operation is 'update'
 const { tableVertexLabel, operation, elementId, data, result } = args.contextData;
 
-if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'update') {
-  // Not updating a ShopifyProduct, skip
-  return;
-}
+if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'update') return;
 
-// Get the product to check if it has a Shopify ID
 const vertex = data?.vertex;
 const formData = vertex?.P || {};
-const shopifyProductId = formData.id;
+if (!formData.id) return;
 
-if (!shopifyProductId) {
-  // Product doesn't have a Shopify ID, skip update
-  console.log("shopifyProductAfterUpdate: Product doesn't have Shopify ID, skipping product update");
-  return;
-}
-
-console.log(`🛍️  Updating product in Shopify: ${shopifyProductId}...`);
-
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
 let shop;
 try {
   const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
 } catch (authError) {
   console.error("shopifyProductAfterUpdate: Shopify authentication failed", authError);
-  return; // Can't update without authentication
-}
-
-if (!shop) {
-  console.warn("shopifyProductAfterUpdate: Shop domain is missing, skipping product update");
   return;
 }
-
-if (!admin) {
-  console.warn("shopifyProductAfterUpdate: Shopify admin client not available");
-  return;
-}
+if (!shop) return;
 
 try {
-  // Update product in Shopify using productUpdate mutation
-  const updateProductMutation = `
-    mutation productUpdate($input: ProductInput!) {
-      productUpdate(input: $input) {
-        product {
-          id
-          title
-          handle
-          status
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
-
-  // Prepare product data for Shopify
-  const title = formData.title || formData.name || 'Untitled Product';
-  const descriptionHtml = formData.descriptionHtml || formData.description || '';
-  const vendor = formData.vendor || '';
-  const productType = formData.productType || '';
-  const status = formData.status || 'DRAFT';
-  const tags = formData.tags || [];
-
-  const productInput = {
-    id: shopifyProductId,
-    title: title,
-    descriptionHtml: descriptionHtml,
-    vendor: vendor,
-    productType: productType,
-    status: status,
-    tags: tags
-  };
-
-  const variables = {
-    input: productInput
-  };
-
-  const response = await admin.graphql(updateProductMutation, { variables });
-  
-  // Handle Response object - extract JSON if it's a Response
-  let apiResponse;
-  if (response instanceof Response) {
-    apiResponse = await response.json();
-  } else {
-    apiResponse = response;
-  }
-
-  if (apiResponse.errors && apiResponse.errors.length > 0) {
-    console.error("shopifyProductAfterUpdate: Shopify GraphQL errors:", apiResponse.errors);
-    return;
-  }
-
-  const userErrors = apiResponse.data?.productUpdate?.userErrors || [];
-  if (userErrors.length > 0) {
-    console.error("shopifyProductAfterUpdate: User errors updating product:", userErrors);
-    return;
-  }
-
-  const updatedProduct = apiResponse.data?.productUpdate?.product;
-  if (!updatedProduct) {
-    console.warn("shopifyProductAfterUpdate: Product update succeeded but no product returned");
-    return;
-  }
-
-  // Extract Shopify product handle (ID should remain the same)
-  const shopifyHandle = updatedProduct.handle;
-  
-  // Update the database product with the updated handle
-  if (elementId && shopifyHandle) {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (elementId) {
     await args.session.run(
-      `MATCH (p:ShopifyProduct)
-       WHERE elementId(p) = $elementId
-       SET p.handle = $handle,
-           p.updatedAt = datetime()`,
-      {
-        elementId: elementId,
-        handle: shopifyHandle
-      }
+      `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId, status: 'queued' }
     );
-    
-    // Update the result vertex P object with updated handle
-    if (result && result.data && result.data.P) {
-      result.data.P.handle = shopifyHandle;
-    }
-    
-    console.log(`✅ Updated product in Shopify: ${shopifyProductId} (${updatedProduct.title})`);
-    console.log(`✅ Updated database product ${elementId} with handle: ${shopifyHandle}`);
-  } else {
-    console.warn("shopifyProductAfterUpdate: Missing elementId or shopifyHandle, cannot update database");
   }
+  const queueName = 'processShopifyProductAfterUpdate';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    tableVertexLabel,
+    operation,
+    elementId,
+    data,
+    result
+  });
+  await queue.close();
 } catch (error) {
-  console.error("shopifyProductAfterUpdate: Error updating product in Shopify:", error);
+  console.error("shopifyProductAfterUpdate: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductAfterUpdate
@@ -163,4 +61,3 @@ try {
   ]
   edges: []
 }
-

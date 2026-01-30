@@ -4,35 +4,51 @@
       id: "1"
       L: Function
       P: {
-        description: Creates a Shopify menu for a top-level parent category when a category is created. The menu contains all children categories as menu items linking to collections.
+        description: Enqueues background job to create Shopify menu for top-level category when a category is created.
         body:
           '''
-// Only process if parentVertexLabel is 'ShopifyProductCategory'
 const { parentVertexLabel, vertexId, name, parentId, result } = args.contextData;
 
-if (parentVertexLabel !== 'ShopifyProductCategory') {
-  // Not a ShopifyProductCategory, skip
+if (parentVertexLabel !== 'ShopifyProductCategory') return;
+
+const shopify = args.getShopifyClient();
+let shop;
+try {
+  const event = args.getRequestEvent();
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
+} catch (authError) {
+  console.error("shopifyProductCategoryMenuAfterCreate: Shopify authentication failed", authError);
   return;
 }
-
-console.log(`📋 Creating Shopify menu for top-level category...`);
+if (!shop) return;
 
 try {
-  // Use common function to update top-level category menu
-  const menuResult = await args.executeNamedServerFunction({
-    functionName: "updateTopLevelCategoryMenu",
-    contextData: {
-      categoryElementId: vertexId
-    }
-  });
-
-  if (menuResult.result?.success) {
-    console.log(`✅ ${menuResult.result.message}`);
-  } else {
-    console.warn("shopifyProductCategoryMenuAfterCreate: Failed to update menu:", menuResult.result?.error);
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (vertexId) {
+    await args.session.run(
+      `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId: vertexId, status: 'queued' }
+    );
   }
+  const queueName = 'processShopifyProductCategoryMenuAfterCreate';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    parentVertexLabel,
+    vertexId,
+    name,
+    parentId,
+    result
+  });
+  await queue.close();
 } catch (error) {
-  console.error("shopifyProductCategoryMenuAfterCreate: Error creating menu in Shopify:", error);
+  console.error("shopifyProductCategoryMenuAfterCreate: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductCategoryMenuAfterCreate

@@ -1,0 +1,131 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: updates Shopify product tags when products are moved to a category (remove old tag, add new).
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyProductAfterMoveItemsToCategory';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { contentLabel, contentIds, categoryId, categoryLabel, relationshipType, sourceCategoryId, shop } = jobData;
+  if (contentLabel !== 'ShopifyProduct') return;
+
+  const isUncategorized = !categoryId || categoryId === 'uncategorized';
+
+  const shopify = args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyProductAfterMoveItemsToCategory: unauthenticated.admin failed", authError);
+    return;
+  }
+  if (!admin) return;
+
+  let newCategoryName = null;
+  if (!isUncategorized) {
+    const categoryResult = await dbSession.run(
+      `MATCH (cat:${categoryLabel}) WHERE elementId(cat) = $categoryId RETURN cat.name as name`,
+      { categoryId }
+    );
+    if (categoryResult.records.length > 0) newCategoryName = categoryResult.records[0].get('name') || null;
+    if (!newCategoryName) return;
+  }
+
+  let oldCategoryName = null;
+  if (sourceCategoryId && sourceCategoryId !== 'uncategorized') {
+    const oldCategoryResult = await dbSession.run(
+      `MATCH (cat:${categoryLabel}) WHERE elementId(cat) = $sourceCategoryId RETURN cat.name as name`,
+      { sourceCategoryId }
+    );
+    if (oldCategoryResult.records.length > 0) oldCategoryName = oldCategoryResult.records[0].get('name') || null;
+  }
+
+  if (isUncategorized && !oldCategoryName) return;
+  if (!isUncategorized && !newCategoryName) return;
+
+  const productsResult = await dbSession.run(
+    `MATCH (p:ShopifyProduct) WHERE elementId(p) IN $contentIds RETURN elementId(p) as elementId, p.id as shopifyId`,
+    { contentIds }
+  );
+  const productsToUpdate = [];
+  for (const record of productsResult.records) {
+    const shopifyId = record.get('shopifyId');
+    if (shopifyId) productsToUpdate.push({ elementId: record.get('elementId'), shopifyId });
+  }
+  if (productsToUpdate.length === 0) return;
+
+  for (const product of productsToUpdate) {
+    try {
+      const getProductResponse = await admin.graphql(`query { product(id: "${product.shopifyId}") { id tags } }`);
+      let getProductApiResponse = getProductResponse instanceof Response ? await getProductResponse.json() : getProductResponse;
+      if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) continue;
+      const currentProduct = getProductApiResponse.data?.product;
+      if (!currentProduct) continue;
+      const currentTags = currentProduct.tags || [];
+      let updatedTags = [...currentTags];
+      if (oldCategoryName) updatedTags = updatedTags.filter(tag => tag !== oldCategoryName);
+      if (!isUncategorized && newCategoryName && !updatedTags.includes(newCategoryName)) updatedTags.push(newCategoryName);
+      await admin.graphql(
+        `mutation productSet($input: ProductSetInput!) { productSet(synchronous: true, input: $input) { product { id tags } userErrors { field message } } }`,
+        { variables: { input: { id: product.shopifyId, tags: updatedTags } } }
+      );
+      await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId: product.elementId });
+      await new Promise(r => setTimeout(r, 200));
+    } catch (error) {
+      console.error("processShopifyProductAfterMoveItemsToCategory: Error for product", product.shopifyId, error);
+      await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.updatedAt = datetime()`, { elementId: product.elementId });
+    }
+  }
+  console.log(`✅ Tag update complete for ${productsToUpdate.length} product(s)`);
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  const runWithSession = helpers.result.data.runWithSession;
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterMoveItemsToCategory: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyProductAfterMoveItemsToCategory: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyProductAfterMoveItemsToCategory: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+  await doJob(args, args.contextData, dbSession);
+});
+'''
+        key: processShopifyProductAfterMoveItemsToCategory
+      }
+    }
+  ]
+  edges: []
+}

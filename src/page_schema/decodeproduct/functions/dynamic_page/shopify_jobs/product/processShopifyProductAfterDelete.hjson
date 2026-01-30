@@ -1,0 +1,107 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: deletes a product in Shopify when a ShopifyProduct is deleted.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyProductAfterDelete';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { tableVertexLabel, operation, elementId, result, shop } = jobData;
+  if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'delete') return;
+
+  const deletedData = result?.data;
+  const productData = deletedData?.P || {};
+  const shopifyProductId = productData.id;
+
+  if (!shopifyProductId) {
+    console.log("processShopifyProductAfterDelete: Product doesn't have Shopify ID, skipping");
+    return;
+  }
+
+  const shopify = args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyProductAfterDelete: unauthenticated.admin failed", authError);
+    return;
+  }
+  if (!admin) return;
+
+  try {
+    const deleteProductMutation = `
+      mutation productDelete($id: ID!) {
+        productDelete(input: { id: $id }) {
+          deletedProductId
+          userErrors { field message }
+        }
+      }
+    `;
+    const response = await admin.graphql(deleteProductMutation, { variables: { id: shopifyProductId } });
+    let apiResponse = response instanceof Response ? await response.json() : response;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error("processShopifyProductAfterDelete: GraphQL errors:", apiResponse.errors);
+      return;
+    }
+    const userErrors = apiResponse.data?.productDelete?.userErrors || [];
+    if (userErrors.length > 0) {
+      console.error("processShopifyProductAfterDelete: User errors:", userErrors);
+      return;
+    }
+    const deletedProductId = apiResponse.data?.productDelete?.deletedProductId;
+    if (deletedProductId) console.log(`✅ Deleted product in Shopify: ${deletedProductId}`);
+  } catch (error) {
+    console.error("processShopifyProductAfterDelete: Error", error);
+  }
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  const runWithSession = helpers.result.data.runWithSession;
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterDelete: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyProductAfterDelete: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyProductAfterDelete: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+  await doJob(args, args.contextData, dbSession);
+});
+'''
+        key: processShopifyProductAfterDelete
+      }
+    }
+  ]
+  edges: []
+}

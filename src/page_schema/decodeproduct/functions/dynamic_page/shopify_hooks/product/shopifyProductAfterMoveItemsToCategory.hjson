@@ -4,233 +4,55 @@
       id: "1"
       L: Function
       P: {
-        description: Updates Shopify product tags when products are moved to a category. Removes old category tag and adds new category tag.
+        description: Enqueues background job to update Shopify product tags when products are moved to a category.
         body:
           '''
-// Only process if contentLabel is 'ShopifyProduct'
 const { contentLabel, contentIds, categoryId, categoryLabel, relationshipType, sourceCategoryId } = args.contextData;
 
-if (contentLabel !== 'ShopifyProduct') {
-  // Not Shopify products, skip tag update
-  return;
-}
+if (contentLabel !== 'ShopifyProduct') return;
 
-const isUncategorized = !categoryId || categoryId === 'uncategorized';
-
-console.log(`🏷️  Updating Shopify product tags for ${contentIds.length} product(s)...`);
-
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
 let shop;
 try {
   const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
 } catch (authError) {
   console.error("shopifyProductAfterMoveItemsToCategory: Shopify authentication failed", authError);
-  return; // Can't update without authentication
-}
-
-if (!shop) {
-  console.warn("shopifyProductAfterMoveItemsToCategory: Shop domain is missing, skipping tag update");
   return;
 }
+if (!shop) return;
 
-// Get the new category name for the tag (only if not uncategorized)
-let newCategoryName = null;
-if (!isUncategorized) {
-  const categoryResult = await args.session.run(
-    `MATCH (cat:${categoryLabel})
-     WHERE elementId(cat) = $categoryId
-     RETURN cat.name as name`,
-    { categoryId }
+try {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
   );
-  
-  if (categoryResult.records.length > 0) {
-    const category = categoryResult.records[0];
-    newCategoryName = category.get('name') || null;
+  if (!helpers.result?.success) return;
+  if (contentIds && Array.isArray(contentIds)) {
+    for (const elementId of contentIds) {
+      await args.session.run(
+        `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+        { elementId, status: 'queued' }
+      );
+    }
   }
-  
-  if (!newCategoryName) {
-    console.warn("shopifyProductAfterMoveItemsToCategory: Could not find category name, skipping tag update");
-    return;
-  }
+  const queueName = 'processShopifyProductAfterMoveItemsToCategory';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    contentLabel,
+    contentIds,
+    categoryId,
+    categoryLabel,
+    relationshipType,
+    sourceCategoryId
+  });
+  await queue.close();
+} catch (error) {
+  console.error("shopifyProductAfterMoveItemsToCategory: Failed to enqueue job", error);
 }
-
-// Get the old category name for tag removal (if moving from one category)
-// This is needed both when moving to another category and when moving to uncategorized
-let oldCategoryName = null;
-if (sourceCategoryId && sourceCategoryId !== 'uncategorized') {
-  const oldCategoryResult = await args.session.run(
-    `MATCH (cat:${categoryLabel})
-     WHERE elementId(cat) = $sourceCategoryId
-     RETURN cat.name as name`,
-    { sourceCategoryId }
-  );
-  
-  if (oldCategoryResult.records.length > 0) {
-    const oldCategory = oldCategoryResult.records[0];
-    oldCategoryName = oldCategory.get('name') || null;
-  }
-}
-
-// If moving to uncategorized, we need at least the old category name to remove the tag
-// If moving to a category, we need the new category name
-if (isUncategorized && !oldCategoryName) {
-  console.log("shopifyProductAfterMoveItemsToCategory: Moving to uncategorized but no source category found, skipping tag update");
-  return;
-}
-
-if (!isUncategorized && !newCategoryName) {
-  console.warn("shopifyProductAfterMoveItemsToCategory: Could not find category name, skipping tag update");
-  return;
-}
-
-// Get Shopify product IDs for the content items
-const productsResult = await args.session.run(
-  `MATCH (p:ShopifyProduct)
-   WHERE elementId(p) IN $contentIds
-   RETURN elementId(p) as elementId, p.id as shopifyId`,
-  { contentIds }
-);
-
-const productsToUpdate = [];
-for (const record of productsResult.records) {
-  const elementId = record.get('elementId');
-  const shopifyId = record.get('shopifyId');
-  if (shopifyId) {
-    productsToUpdate.push({ elementId, shopifyId });
-  }
-}
-
-if (productsToUpdate.length === 0) {
-  console.warn("shopifyProductAfterMoveItemsToCategory: No Shopify products found to update");
-  return;
-}
-
-console.log(`🏷️  Updating tags for ${productsToUpdate.length} product(s)...`);
-
-// Update each product's tags
-let successCount = 0;
-let errorCount = 0;
-
-for (const product of productsToUpdate) {
-  try {
-    // Fetch current product data to get existing tags
-    const getProductQuery = `
-      query {
-        product(id: "${product.shopifyId}") {
-          id
-          tags
-        }
-      }
-    `;
-    
-    const getProductResponse = await admin.graphql(getProductQuery);
-    
-    // Handle Response object - extract JSON if it's a Response
-    let getProductApiResponse;
-    if (getProductResponse instanceof Response) {
-      getProductApiResponse = await getProductResponse.json();
-    } else {
-      getProductApiResponse = getProductResponse;
-    }
-
-    if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) {
-      console.error(`Error fetching product ${product.shopifyId}:`, getProductApiResponse.errors);
-      errorCount++;
-      continue;
-    }
-
-    const currentProduct = getProductApiResponse.data?.product;
-    if (!currentProduct) {
-      console.warn(`Product ${product.shopifyId} not found in Shopify`);
-      errorCount++;
-      continue;
-    }
-
-    // Get current tags
-    const currentTags = currentProduct.tags || [];
-    
-    // Remove old category tag if moving from one category to another
-    let updatedTags = [...currentTags];
-    if (oldCategoryName) {
-      updatedTags = updatedTags.filter(tag => tag !== oldCategoryName);
-    }
-    
-    // Add new category tag if not already present (only if not moving to uncategorized)
-    if (!isUncategorized && newCategoryName && !updatedTags.includes(newCategoryName)) {
-      updatedTags.push(newCategoryName);
-    }
-
-    // Update product tags using productSet mutation
-    const updateProductMutation = `
-      mutation productSet($input: ProductSetInput!) {
-        productSet(synchronous: true, input: $input) {
-          product {
-            id
-            title
-            tags
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `;
-
-    const variables = {
-      input: {
-        id: product.shopifyId,
-        tags: updatedTags
-      }
-    };
-
-    const updateResponse = await admin.graphql(updateProductMutation, { variables });
-    
-    // Handle Response object - extract JSON if it's a Response
-    let updateApiResponse;
-    if (updateResponse instanceof Response) {
-      updateApiResponse = await updateResponse.json();
-    } else {
-      updateApiResponse = updateResponse;
-    }
-
-    if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
-      console.error(`Shopify GraphQL errors for product ${product.shopifyId}:`, updateApiResponse.errors);
-      errorCount++;
-      continue;
-    }
-
-    const userErrors = updateApiResponse.data?.productSet?.userErrors || [];
-    if (userErrors.length > 0) {
-      console.error(`User errors updating product ${product.shopifyId}:`, userErrors);
-      errorCount++;
-      continue;
-    }
-
-    successCount++;
-    console.log(`✅ Updated tags for product ${product.shopifyId}: ${updatedTags.join(', ')}`);
-    
-    // Small delay to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 200));
-  } catch (error) {
-    console.error(`Error updating product ${product.shopifyId}:`, error);
-    errorCount++;
-  }
-}
-
-console.log(`✅ Tag update complete: ${successCount} succeeded, ${errorCount} failed`);
 '''
         key: shopifyProductAfterMoveItemsToCategory
       }
@@ -238,4 +60,3 @@ console.log(`✅ Tag update complete: ${successCount} succeeded, ${errorCount} f
   ]
   edges: []
 }
-

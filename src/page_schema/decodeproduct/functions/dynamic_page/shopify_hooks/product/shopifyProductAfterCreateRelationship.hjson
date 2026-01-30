@@ -4,179 +4,51 @@
       id: "1"
       L: Function
       P: {
-        description: Updates Shopify product tags when a product is added to a category. Adds the category name as a tag.
+        description: Enqueues background job to add category tag to Shopify product when product is added to a category.
         body:
           '''
-// Only process if contentLabel is 'ShopifyProduct'
 const { contentLabel, contentId, categoryId, categoryLabel } = args.contextData;
 
-if (contentLabel !== 'ShopifyProduct') {
-  // Not Shopify products, skip tag update
-  return;
-}
+if (contentLabel !== 'ShopifyProduct') return;
+if (!categoryId || categoryId === 'uncategorized') return;
 
-// Skip if adding to uncategorized (no category tag to add)
-if (!categoryId || categoryId === 'uncategorized') {
-  return;
-}
-
-console.log(`🏷️  Adding category tag to Shopify product...`);
-
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
 let shop;
 try {
   const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
 } catch (authError) {
   console.error("shopifyProductAfterCreateRelationship: Shopify authentication failed", authError);
-  return; // Can't update without authentication
-}
-
-if (!shop) {
-  console.warn("shopifyProductAfterCreateRelationship: Shop domain is missing, skipping tag update");
   return;
 }
-
-// Get the category name for the tag
-let categoryName = null;
-if (categoryId && categoryId !== 'uncategorized') {
-  const categoryResult = await args.session.run(
-    `MATCH (cat:${categoryLabel})
-     WHERE elementId(cat) = $categoryId
-     RETURN cat.name as name`,
-    { categoryId }
-  );
-  
-  if (categoryResult.records.length > 0) {
-    const category = categoryResult.records[0];
-    categoryName = category.get('name') || null;
-  }
-}
-
-if (!categoryName) {
-  console.warn("shopifyProductAfterCreateRelationship: Could not find category name, skipping tag update");
-  return;
-}
-
-// Get Shopify product ID for the content item
-const productResult = await args.session.run(
-  `MATCH (p:ShopifyProduct)
-   WHERE elementId(p) = $contentId
-   RETURN p.id as shopifyId`,
-  { contentId }
-);
-
-if (productResult.records.length === 0) {
-  console.warn("shopifyProductAfterCreateRelationship: Shopify product not found");
-  return;
-}
-
-const shopifyId = productResult.records[0].get('shopifyId');
-if (!shopifyId) {
-  console.warn("shopifyProductAfterCreateRelationship: Shopify product ID not found");
-  return;
-}
+if (!shop) return;
 
 try {
-  // Fetch current product data to get existing tags
-  const getProductQuery = `
-    query {
-      product(id: "${shopifyId}") {
-        id
-        tags
-      }
-    }
-  `;
-  
-  const getProductResponse = await admin.graphql(getProductQuery);
-  
-  // Handle Response object - extract JSON if it's a Response
-  let getProductApiResponse;
-  if (getProductResponse instanceof Response) {
-    getProductApiResponse = await getProductResponse.json();
-  } else {
-    getProductApiResponse = getProductResponse;
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (contentId) {
+    await args.session.run(
+      `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId: contentId, status: 'queued' }
+    );
   }
-
-  if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) {
-    console.error(`Error fetching product ${shopifyId}:`, getProductApiResponse.errors);
-    return;
-  }
-
-  const currentProduct = getProductApiResponse.data?.product;
-  if (!currentProduct) {
-    console.warn(`Product ${shopifyId} not found in Shopify`);
-    return;
-  }
-
-  // Get current tags
-  const currentTags = currentProduct.tags || [];
-  
-  // Add category tag if not already present
-  let updatedTags = [...currentTags];
-  if (!updatedTags.includes(categoryName)) {
-    updatedTags.push(categoryName);
-  }
-
-  // Update product tags using productSet mutation
-  const updateProductMutation = `
-    mutation productSet($input: ProductSetInput!) {
-      productSet(synchronous: true, input: $input) {
-        product {
-          id
-          title
-          tags
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
-
-  const variables = {
-    input: {
-      id: shopifyId,
-      tags: updatedTags
-    }
-  };
-
-  const updateResponse = await admin.graphql(updateProductMutation, { variables });
-  
-  // Handle Response object - extract JSON if it's a Response
-  let updateApiResponse;
-  if (updateResponse instanceof Response) {
-    updateApiResponse = await updateResponse.json();
-  } else {
-    updateApiResponse = updateResponse;
-  }
-
-  if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
-    console.error(`Shopify GraphQL errors for product ${shopifyId}:`, updateApiResponse.errors);
-    return;
-  }
-
-  const userErrors = updateApiResponse.data?.productSet?.userErrors || [];
-  if (userErrors.length > 0) {
-    console.error(`User errors updating product ${shopifyId}:`, userErrors);
-    return;
-  }
-
-  console.log(`✅ Added category tag "${categoryName}" to product ${shopifyId}`);
+  const queueName = 'processShopifyProductAfterCreateRelationship';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    contentLabel,
+    contentId,
+    categoryId,
+    categoryLabel
+  });
+  await queue.close();
 } catch (error) {
-  console.error(`Error updating product ${shopifyId}:`, error);
+  console.error("shopifyProductAfterCreateRelationship: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductAfterCreateRelationship
@@ -185,4 +57,3 @@ try {
   ]
   edges: []
 }
-

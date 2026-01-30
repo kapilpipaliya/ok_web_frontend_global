@@ -4,158 +4,56 @@
       id: "1"
       L: Function
       P: {
-        description: Creates a collection in Shopify when a new ShopifyProductCategory is added to the database.
+        description: Enqueues background job to create a collection in Shopify when a new ShopifyProductCategory is added.
         body:
           '''
-// Only process if parentVertexLabel is 'ShopifyProductCategory'
 const { parentVertexLabel, name, vertexId, result } = args.contextData;
 
-if (parentVertexLabel !== 'ShopifyProductCategory') {
-  // Not a ShopifyProductCategory, skip
-  return;
-}
+if (parentVertexLabel !== 'ShopifyProductCategory') return;
 
-// Skip if category already has a Shopify ID (already exists in Shopify)
 const vertex = result?.data;
 const categoryData = vertex?.P || {};
-if (categoryData.id) {
-  // Category already has a Shopify ID, skip creation
-  console.log("shopifyProductCategoryAfterCreate: Category already has Shopify ID, skipping collection creation");
-  return;
-}
+// Category already has a Shopify ID, skip creation
 
-console.log(`🛍️  Creating collection in Shopify for category: ${name}...`);
+if (categoryData.id) return;
 
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
 let shop;
 try {
   const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
 } catch (authError) {
   console.error("shopifyProductCategoryAfterCreate: Shopify authentication failed", authError);
-  return; // Can't create without authentication
-}
-
-if (!shop) {
-  console.warn("shopifyProductCategoryAfterCreate: Shop domain is missing, skipping collection creation");
   return;
 }
-
-if (!admin) {
-  console.warn("shopifyProductCategoryAfterCreate: Shopify admin client not available");
-  return;
-}
+if (!shop) return;
 
 try {
-  // Create collection in Shopify using collectionCreate mutation
-  const createCollectionMutation = `
-    mutation collectionCreate($input: CollectionInput!) {
-      collectionCreate(input: $input) {
-        collection {
-          id
-          handle
-          title
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
-
-  const variables = {
-    input: {
-      title: name,
-      descriptionHtml: `<p>Products for ${name}</p>`,
-      seo: {
-        title: name,
-        description: `Products for ${name}`
-      },
-      // Add tag equal to the category name
-      ruleSet: {
-        rules: [
-          {
-            column: "TAG",
-            relation: "EQUALS",
-            condition: name
-          }
-        ],
-        appliedDisjunctively: false
-      }
-    }
-  };
-
-  const response = await admin.graphql(createCollectionMutation, { variables });
-  
-  // Handle Response object - extract JSON if it's a Response
-  let apiResponse;
-  if (response instanceof Response) {
-    apiResponse = await response.json();
-  } else {
-    apiResponse = response;
-  }
-
-  if (apiResponse.errors && apiResponse.errors.length > 0) {
-    console.error("shopifyProductCategoryAfterCreate: Shopify GraphQL errors:", apiResponse.errors);
-    return;
-  }
-
-  const userErrors = apiResponse.data?.collectionCreate?.userErrors || [];
-  if (userErrors.length > 0) {
-    console.error("shopifyProductCategoryAfterCreate: User errors creating collection:", userErrors);
-    return;
-  }
-
-  const createdCollection = apiResponse.data?.collectionCreate?.collection;
-  if (!createdCollection) {
-    console.warn("shopifyProductCategoryAfterCreate: Collection creation succeeded but no collection returned");
-    return;
-  }
-
-  // Extract Shopify collection ID (format: gid://shopify/Collection/123456)
-  const shopifyCollectionId = createdCollection.id;
-  const shopifyHandle = createdCollection.handle;
-  
-  // Update the database category with the Shopify ID and handle
-  if (vertexId && shopifyCollectionId) {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (vertexId) {
     await args.session.run(
-      `MATCH (c:ShopifyProductCategory)
-       WHERE elementId(c) = $elementId
-       SET c.id = $shopifyId,
-           c.handle = $handle,
-           c.updatedAt = datetime()`,
-      {
-        elementId: vertexId,
-        shopifyId: shopifyCollectionId,
-        handle: shopifyHandle
-      }
+      `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId: vertexId, status: 'queued' }
     );
-    
-    // Update the result vertex P object with Shopify ID and handle
-    if (result && result.data && result.data.P) {
-      result.data.P.id = shopifyCollectionId;
-      result.data.P.handle = shopifyHandle;
-    }
-    
-    console.log(`✅ Created collection in Shopify: ${shopifyCollectionId} (${createdCollection.title})`);
-    console.log(`✅ Updated database category ${vertexId} with Shopify ID: ${shopifyCollectionId} and handle: ${shopifyHandle}`);
-  } else {
-    console.warn("shopifyProductCategoryAfterCreate: Missing vertexId or shopifyCollectionId, cannot update database");
   }
+  const queueName = 'processShopifyProductCategoryAfterCreate';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    parentVertexLabel,
+    name,
+    vertexId,
+    result
+  });
+  await queue.close();
 } catch (error) {
-  console.error("shopifyProductCategoryAfterCreate: Error creating collection in Shopify:", error);
+  console.error("shopifyProductCategoryAfterCreate: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductCategoryAfterCreate
@@ -164,4 +62,3 @@ try {
   ]
   edges: []
 }
-

@@ -1,0 +1,92 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: updates a product in Shopify when a ShopifyProduct is updated.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyProductAfterUpdate';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { tableVertexLabel, operation, elementId, data: vertexPayload, result, shop } = jobData;
+  if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'update') return;
+  const vertex = vertexPayload?.vertex;
+  const formData = vertex?.P || {};
+  const shopifyProductId = formData.id;
+  if (!shopifyProductId) { console.log("processShopifyProductAfterUpdate: Product doesn't have Shopify ID, skipping"); return; }
+  const shopify = args.getShopifyClient();
+  let admin;
+  try { const authResult = await shopify.unauthenticated.admin(shop); admin = authResult.admin; } catch (authError) { console.error("processShopifyProductAfterUpdate: unauthenticated.admin failed", authError); return; }
+  if (!admin) return;
+  const title = formData.title || formData.name || 'Untitled Product';
+  const descriptionHtml = formData.descriptionHtml || formData.description || '';
+  const vendor = formData.vendor || '';
+  const productType = formData.productType || '';
+  const status = formData.status || 'DRAFT';
+  const tags = formData.tags || [];
+  const updateProductMutation = `mutation productUpdate($input: ProductInput!) { productUpdate(input: $input) { product { id title handle status } userErrors { field message } } }`;
+  const productInput = { id: shopifyProductId, title, descriptionHtml, vendor, productType, status, tags };
+  const variables = { input: productInput };
+  try {
+    const response = await admin.graphql(updateProductMutation, { variables });
+    let apiResponse = response instanceof Response ? await response.json() : response;
+    if (apiResponse.errors && apiResponse.errors.length > 0) return;
+    const userErrors = apiResponse.data?.productUpdate?.userErrors || [];
+    if (userErrors.length > 0) return;
+    const updatedProduct = apiResponse.data?.productUpdate?.product;
+    if (!updatedProduct) return;
+    const shopifyHandle = updatedProduct.handle;
+    if (elementId && shopifyHandle) {
+      await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.handle = $handle, p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId, handle: shopifyHandle });
+      if (result?.data?.P) result.data.P.handle = shopifyHandle;
+      console.log(`✅ Updated product in Shopify: ${shopifyProductId}`);
+    }
+  } catch (error) { console.error("processShopifyProductAfterUpdate: Error", error); if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.updatedAt = datetime()`, { elementId }); }
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await helpers.result.data.runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterUpdate: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyProductAfterUpdate: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyProductAfterUpdate: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+  await doJob(args, args.contextData, dbSession);
+});
+'''
+        key: processShopifyProductAfterUpdate
+      }
+    }
+  ]
+  edges: []
+}

@@ -195,20 +195,22 @@ export async function startWorkerForSubdomainCore(
       database: subDomain,
     });
 
-    try {
-      // Handle database-defined subdomain workers
-      const workerResult = await executeNamedServerFunction(
-        {
-          functionName: workerKey,
-          contextData: {
-            action: "start",
+      try {
+        // Handle database-defined subdomain workers
+        // Look up the function in the target subdomain's DB (where worker functions are defined)
+        const workerResult = await executeNamedServerFunction(
+          {
+            functionName: workerKey,
+            contextData: {
+              action: "start",
+            },
           },
-        },
-        {
-          dbSession: subdomainDbSession,
-          subDomain: subDomain,
-        },
-      );
+          {
+            dbSession: subdomainDbSession,
+            subDomain: subDomain,
+            functionLookupSession: subdomainDbSession,
+          },
+        );
 
       if (workerResult.error) {
         console.error(
@@ -564,6 +566,7 @@ export async function startWorkerForSubdomain(
       });
 
       try {
+        // Look up the function in the target subdomain's DB (where worker functions are defined)
         const workerResult = await executeNamedServerFunction(
           {
             functionName: workerKey,
@@ -574,6 +577,7 @@ export async function startWorkerForSubdomain(
           {
             dbSession: targetDbSession,
             subDomain: targetSubdomain,
+            functionLookupSession: targetDbSession,
           },
         );
 

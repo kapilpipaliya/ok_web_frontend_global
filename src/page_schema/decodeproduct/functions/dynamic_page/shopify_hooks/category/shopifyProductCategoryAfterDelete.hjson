@@ -4,108 +4,54 @@
       id: "1"
       L: Function
       P: {
-        description: Deletes a collection in Shopify when a ShopifyProductCategory is deleted from the database.
+        description: Enqueues background job to delete a collection in Shopify when a ShopifyProductCategory is deleted.
         body:
           '''
-// Only process if parentVertexLabel is 'ShopifyProductCategory' and operation is 'delete'
 const { parentVertexLabel, vertexId, operation, result } = args.contextData;
 
-if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') {
-  // Not deleting a ShopifyProductCategory, skip
-  return;
-}
+if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') return;
 
-// Get the category data from result to check if it has a Shopify ID
 const deletedData = result?.data;
 const categoryData = deletedData?.P || {};
-const shopifyCollectionId = categoryData.id;
+if (!categoryData.id) return;
 
-if (!shopifyCollectionId) {
-  // Category doesn't have a Shopify ID, skip deletion
-  console.log("shopifyProductCategoryAfterDelete: Category doesn't have Shopify ID, skipping collection deletion");
-  return;
-}
-
-console.log(`🛍️  Deleting collection in Shopify: ${shopifyCollectionId}...`);
-
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
 let shop;
 try {
   const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
 } catch (authError) {
   console.error("shopifyProductCategoryAfterDelete: Shopify authentication failed", authError);
-  return; // Can't delete without authentication
-}
-
-if (!shop) {
-  console.warn("shopifyProductCategoryAfterDelete: Shop domain is missing, skipping collection deletion");
   return;
 }
-
-if (!admin) {
-  console.warn("shopifyProductCategoryAfterDelete: Shopify admin client not available");
-  return;
-}
+if (!shop) return;
 
 try {
-  // Delete collection in Shopify using collectionDelete mutation
-  const deleteCollectionMutation = `
-    mutation collectionDelete($id: ID!) {
-      collectionDelete(input: { id: $id }) {
-        deletedCollectionId
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
-
-  const variables = {
-    id: shopifyCollectionId
-  };
-
-  const response = await admin.graphql(deleteCollectionMutation, { variables });
-  
-  // Handle Response object - extract JSON if it's a Response
-  let apiResponse;
-  if (response instanceof Response) {
-    apiResponse = await response.json();
-  } else {
-    apiResponse = response;
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (vertexId) {
+    await args.session.run(
+      `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId: vertexId, status: 'queued' }
+    );
   }
-
-  if (apiResponse.errors && apiResponse.errors.length > 0) {
-    console.error("shopifyProductCategoryAfterDelete: Shopify GraphQL errors:", apiResponse.errors);
-    return;
-  }
-
-  const userErrors = apiResponse.data?.collectionDelete?.userErrors || [];
-  if (userErrors.length > 0) {
-    console.error("shopifyProductCategoryAfterDelete: User errors deleting collection:", userErrors);
-    return;
-  }
-
-  const deletedCollectionId = apiResponse.data?.collectionDelete?.deletedCollectionId;
-  if (deletedCollectionId) {
-    console.log(`✅ Deleted collection in Shopify: ${deletedCollectionId}`);
-  } else {
-    console.warn("shopifyProductCategoryAfterDelete: Collection deletion succeeded but no deleted ID returned");
-  }
+  const queueName = 'processShopifyProductCategoryAfterDelete';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    parentVertexLabel,
+    vertexId,
+    operation,
+    result
+  });
+  await queue.close();
 } catch (error) {
-  console.error("shopifyProductCategoryAfterDelete: Error deleting collection in Shopify:", error);
+  console.error("shopifyProductCategoryAfterDelete: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductCategoryAfterDelete
@@ -114,4 +60,3 @@ try {
   ]
   edges: []
 }
-

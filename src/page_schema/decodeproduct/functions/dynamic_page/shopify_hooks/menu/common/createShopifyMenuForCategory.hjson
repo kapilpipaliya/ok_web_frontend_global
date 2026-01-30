@@ -17,42 +17,32 @@ if (!categoryElementId || !categoryName) {
   };
 }
 
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
 let admin;
 let shop;
-try {
-  const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
+const event = args.getRequestEvent();
+if (event) {
+  try {
+    const request = event.request;
+    const result = await shopify.authenticate.admin(request);
+    shop = result.session.shop;
+    admin = result.admin;
+  } catch (authError) {
+    console.error("createShopifyMenuForCategory: Shopify authentication failed", authError);
+    return { success: false, error: "Shopify authentication failed" };
   }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
-} catch (authError) {
-  console.error("createShopifyMenuForCategory: Shopify authentication failed", authError);
-  return {
-    success: false,
-    error: "Shopify authentication failed"
-  };
+} else if (args.contextData.shop) {
+  try {
+    const authResult = await shopify.unauthenticated.admin(args.contextData.shop);
+    admin = authResult.admin;
+    shop = authResult.session?.shop || args.contextData.shop;
+  } catch (authError) {
+    console.error("createShopifyMenuForCategory: Shopify unauthenticated.admin failed", authError);
+    return { success: false, error: "Shopify authentication failed" };
+  }
 }
-
-if (!shop) {
-  return {
-    success: false,
-    error: "shop is required"
-  };
-}
-
-if (!admin) {
-  return {
-    success: false,
-    error: "Shopify admin client not available"
-  };
+if (!shop || !admin) {
+  return { success: false, error: "shop and admin are required (request context or contextData.shop)" };
 }
 
 try {
@@ -65,7 +55,7 @@ try {
     contextData: {
       parentElementId: categoryElementId
     }
-  });
+  }, { functionLookupSubDomain: 'decodeproduct' });
   
   const menuItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
   

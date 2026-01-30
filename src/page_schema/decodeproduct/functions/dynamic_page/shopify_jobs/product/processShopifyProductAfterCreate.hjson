@@ -1,0 +1,131 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: creates a product in Shopify when a new ShopifyProduct is added.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyProductAfterCreate';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { tableVertexLabel, operation, elementId, data: vertexPayload, result, shop } = jobData;
+  if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'create') return;
+
+  const vertex = vertexPayload?.vertex;
+  const formData = vertex?.P || {};
+  if (formData.id) {
+    console.log("processShopifyProductAfterCreate: Product already has Shopify ID, skipping");
+    if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId });
+    return;
+  }
+
+  const shopify = args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyProductAfterCreate: unauthenticated.admin failed", authError);
+    return;
+  }
+  if (!admin) return;
+
+  const title = formData.title || formData.name || 'Untitled Product';
+  const descriptionHtml = formData.descriptionHtml || formData.description || '';
+  const vendor = formData.vendor || '';
+  const productType = formData.productType || '';
+  const status = formData.status || 'DRAFT';
+  const tags = formData.tags || [];
+
+  const createProductMutation = `
+    mutation productCreate($input: ProductInput!) {
+      productCreate(input: $input) {
+        product { id title handle status }
+        userErrors { field message }
+      }
+    }
+  `;
+  const productInput = { title, descriptionHtml, vendor, productType, status, tags };
+  const variables = { input: productInput };
+
+  try {
+    const response = await admin.graphql(createProductMutation, { variables });
+    let apiResponse = response instanceof Response ? await response.json() : response;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error("processShopifyProductAfterCreate: GraphQL errors:", apiResponse.errors);
+      return;
+    }
+    const userErrors = apiResponse.data?.productCreate?.userErrors || [];
+    if (userErrors.length > 0) {
+      console.error("processShopifyProductAfterCreate: User errors:", userErrors);
+      return;
+    }
+    const createdProduct = apiResponse.data?.productCreate?.product;
+    if (!createdProduct) return;
+    const shopifyProductId = createdProduct.id;
+    const shopifyHandle = createdProduct.handle;
+    if (elementId && shopifyProductId) {
+      await dbSession.run(
+        `MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId
+         SET p.id = $shopifyId, p.handle = $handle, p.syncStatus = 'complete', p.updatedAt = datetime()`,
+        { elementId, shopifyId: shopifyProductId, handle: shopifyHandle }
+      );
+      if (result?.data?.P) {
+        result.data.P.id = shopifyProductId;
+        result.data.P.handle = shopifyHandle;
+      }
+      console.log(`✅ Created product in Shopify: ${shopifyProductId} (${createdProduct.title})`);
+    }
+  } catch (error) {
+    console.error("processShopifyProductAfterCreate: Error", error);
+    if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.updatedAt = datetime()`, { elementId });
+  }
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  const runWithSession = helpers.result.data.runWithSession;
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterCreate: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyProductAfterCreate: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyProductAfterCreate: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+  await doJob(args, args.contextData, dbSession);
+});
+'''
+        key: processShopifyProductAfterCreate
+      }
+    }
+  ]
+  edges: []
+}

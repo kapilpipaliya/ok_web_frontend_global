@@ -4,187 +4,55 @@
       id: "1"
       L: Function
       P: {
-        description: Creates a product in Shopify when a new ShopifyProduct is added to the database.
+        description: Enqueues background job to create a product in Shopify when a new ShopifyProduct is added.
         body:
           '''
-// Only process if tableVertexLabel is 'ShopifyProduct' and operation is 'create'
 const { tableVertexLabel, operation, elementId, data, result } = args.contextData;
 
-if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'create') {
-  // Not creating a Shopify product, skip
-  return;
-}
+if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'create') return;
 
-// Skip if product already has a Shopify ID (already exists in Shopify)
 const vertex = data?.vertex;
 const formData = vertex?.P || {};
-if (formData.id) {
-  // Product already has a Shopify ID, skip creation
-  console.log("shopifyProductAfterCreate: Product already has Shopify ID, skipping creation");
-  return;
-}
+if (formData.id) return;
 
-console.log(`🛍️  Creating product in Shopify...`);
-
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
 let shop;
 try {
   const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
 } catch (authError) {
   console.error("shopifyProductAfterCreate: Shopify authentication failed", authError);
-  return; // Can't create without authentication
-}
-
-if (!shop) {
-  console.warn("shopifyProductAfterCreate: Shop domain is missing, skipping product creation");
   return;
 }
-
-// Prepare product data for Shopify
-// Extract data from formData
-const title = formData.title || formData.name || 'Untitled Product';
-const handle = formData.handle || title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-const descriptionHtml = formData.descriptionHtml || formData.description || '';
-const vendor = formData.vendor || '';
-const productType = formData.productType || '';
-const status = formData.status || 'DRAFT';
-const tags = formData.tags || [];
-
-// Prepare variants - if no variants provided, create a default one
-let variants = [];
-if (formData.variants) {
-  try {
-    variants = typeof formData.variants === 'string' ? JSON.parse(formData.variants) : formData.variants;
-  } catch (e) {
-    console.warn("shopifyProductAfterCreate: Failed to parse variants, using default", e);
-  }
-}
-
-// If no variants, create a default variant
-if (!variants || variants.length === 0) {
-  variants = [{
-    // title: 'Default Title',
-    price: formData.price || '0.00',
-    sku: formData.sku || '',
-    // inventoryQuantity: formData.inventoryQuantity || 0,
-    inventoryPolicy: formData.inventoryPolicy || 'DENY',
-    taxable: formData.taxable !== undefined ? formData.taxable : true
-  }];
-}
-
-// Create product in Shopify using productCreate mutation
-const createProductMutation = `
-  mutation productCreate($input: ProductInput!) {
-    productCreate(input: $input) {
-      product {
-        id
-        title
-        handle
-        status
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-`;
-
-const productInput = {
-  title: title,
-  // handle: handle,
-  descriptionHtml: descriptionHtml,
-  vendor: vendor,
-  productType: productType,
-  status: status,
-  tags: tags,
-  // variants: variants.map(v => ({
-  //   title: v.title || 'Default Title',
-  //   price: v.price || '0.00',
-  //   sku: v.sku || '',
-  //   inventoryQuantity: v.inventoryQuantity || 0,
-  //   inventoryPolicy: v.inventoryPolicy || 'DENY',
-  //   taxable: v.taxable !== undefined ? v.taxable : true,
-  //   compareAtPrice: v.compareAtPrice || null
-  // }))
-};
-
-const variables = {
-  input: productInput
-};
+if (!shop) return;
 
 try {
-  const response = await admin.graphql(createProductMutation, { variables });
-  
-  // Handle Response object - extract JSON if it's a Response
-  let apiResponse;
-  if (response instanceof Response) {
-    apiResponse = await response.json();
-  } else {
-    apiResponse = response;
-  }
-
-  if (apiResponse.errors && apiResponse.errors.length > 0) {
-    console.error("shopifyProductAfterCreate: Shopify GraphQL errors:", apiResponse.errors);
-    return;
-  }
-
-  const userErrors = apiResponse.data?.productCreate?.userErrors || [];
-  if (userErrors.length > 0) {
-    console.error("shopifyProductAfterCreate: User errors creating product:", userErrors);
-    return;
-  }
-
-  const createdProduct = apiResponse.data?.productCreate?.product;
-  if (!createdProduct) {
-    console.warn("shopifyProductAfterCreate: Product creation succeeded but no product returned");
-    return;
-  }
-
-  // Extract Shopify product ID (format: gid://shopify/Product/123456)
-  const shopifyProductId = createdProduct.id;
-  const shopifyHandle = createdProduct.handle;
-  
-  // Update the database product with the Shopify ID and handle
-  if (elementId && shopifyProductId) {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (elementId) {
     await args.session.run(
-      `MATCH (p:ShopifyProduct)
-       WHERE elementId(p) = $elementId
-       SET p.id = $shopifyId,
-           p.handle = $handle,
-           p.updatedAt = datetime()`,
-      {
-        elementId: elementId,
-        shopifyId: shopifyProductId,
-        handle: shopifyHandle
-      }
+      `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId, status: 'queued' }
     );
-    
-    // Update the result vertex P object with Shopify ID and handle
-    if (result && result.data && result.data.P) {
-      result.data.P.id = shopifyProductId;
-      result.data.P.handle = shopifyHandle;
-    }
-    
-    console.log(`✅ Created product in Shopify: ${shopifyProductId} (${createdProduct.title})`);
-    console.log(`✅ Updated database product ${elementId} with Shopify ID: ${shopifyProductId} and handle: ${shopifyHandle}`);
-  } else {
-    console.warn("shopifyProductAfterCreate: Missing elementId or shopifyProductId, cannot update database");
   }
+  const queueName = 'processShopifyProductAfterCreate';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    tableVertexLabel,
+    operation,
+    elementId,
+    data,
+    result
+  });
+  await queue.close();
 } catch (error) {
-  console.error("shopifyProductAfterCreate: Error creating product in Shopify:", error);
+  console.error("shopifyProductAfterCreate: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductAfterCreate
@@ -193,4 +61,3 @@ try {
   ]
   edges: []
 }
-

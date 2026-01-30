@@ -38,29 +38,45 @@ if (!event) {
 }
 const request = event.request;
 
-// Ensure dedicated database for this shop and run migration
-const { dbSession, subDomain } = await args.ensureShopDatabaseAndMigrate(shop, {
-  dryRun: false,
-  contextData: {
-    searchParams: params,
-  },
-  migrationSubDomain: "decodeproduct"
-});
+let dbSession;
+try {
+  // Ensure dedicated database for this shop and run migration
+  const result = await args.ensureShopDatabaseAndMigrate(shop, {
+    dryRun: false,
+    contextData: {
+      searchParams: params,
+    },
+    migrationSubDomain: "decodeproduct"
+  });
+  dbSession = result.dbSession;
+  const { subDomain } = result;
 
-// Authenticate the request using Shopify's admin authentication
-// This verifies the OAuth session and ensures the user has proper permissions
-// If authentication fails, the user will be redirected to login
-await shopify.authenticate.admin(request);
+  // Authenticate the request using Shopify's admin authentication
+  // This verifies the OAuth session and ensures the user has proper permissions
+  // If authentication fails, the user will be redirected to login
+  await shopify.authenticate.admin(request);
 
-// Close the dedicated session we created for this shop
-await dbSession.close();
-
-return {
-  success: true,
-  shop,
-  subDomain,
-  message: "Shopify admin app request authenticated",
-};
+  return {
+    success: true,
+    shop,
+    subDomain,
+    message: "Shopify admin app request authenticated",
+  };
+} catch (errorOrResponse) {
+  if (errorOrResponse instanceof Response) {
+    const ev = args.getRequestEvent();
+    if (ev?.responseHeaders) {
+      errorOrResponse.headers.forEach((value, key) => {
+        ev.responseHeaders.set(key, value);
+      });
+    }
+  }
+  throw errorOrResponse;
+} finally {
+  if (dbSession) {
+    await dbSession.close();
+  }
+}
 '''
         key: authShopifyAdminRequest
       }

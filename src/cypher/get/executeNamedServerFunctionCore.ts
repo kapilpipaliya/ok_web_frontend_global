@@ -404,16 +404,11 @@ export async function executeNamedServerFunctionCore(
       // Execute each hook sequentially
       for (const hookName of hookArray) {
         if (!hookName || typeof hookName !== 'string') continue;
-        
-        try {
-          await contextAwareExecuteNamedServerFunction({
-            functionName: hookName,
-            contextData: hookContextData
-          });
-        } catch (error) {
-          console.error(`Error executing hook '${hookName}':`, error);
-          // Don't throw - hooks should not break the main operation
-        }
+
+        await contextAwareExecuteNamedServerFunction({
+          functionName: hookName,
+          contextData: hookContextData
+        });
       }
     };
 

@@ -36,7 +36,7 @@ if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
         // Don't pass hooks to avoid recursion
         hooks: null
       }
-    });
+    }, { functionLookupSubDomain: 'decodeproduct' });
     
     if (fetchResult?.result?.success && fetchResult.result.data) {
       existingCategoryProducts = fetchResult.result.data;

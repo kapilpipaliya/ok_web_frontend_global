@@ -1,0 +1,108 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: deletes a collection in Shopify when a ShopifyProductCategory is deleted.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyProductCategoryAfterDelete';
+
+const doJob = async (args, data, dbSession) => {
+  const { parentVertexLabel, vertexId, operation, result, shop } = data;
+  if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') return;
+
+  const deletedData = result?.data;
+  const categoryData = deletedData?.P || {};
+  const shopifyCollectionId = categoryData.id;
+
+  if (!shopifyCollectionId) {
+    console.log("processShopifyProductCategoryAfterDelete: Category doesn't have Shopify ID, skipping");
+    return;
+  }
+
+  const shopify = args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyProductCategoryAfterDelete: Shopify unauthenticated.admin failed", authError);
+    return;
+  }
+  if (!admin) return;
+
+  try {
+    const deleteCollectionMutation = `
+      mutation collectionDelete($id: ID!) {
+        collectionDelete(input: { id: $id }) {
+          deletedCollectionId
+          userErrors { field message }
+        }
+      }
+    `;
+    const response = await admin.graphql(deleteCollectionMutation, { variables: { id: shopifyCollectionId } });
+    let apiResponse = response instanceof Response ? await response.json() : response;
+
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error("processShopifyProductCategoryAfterDelete: GraphQL errors:", apiResponse.errors);
+      return;
+    }
+    const userErrors = apiResponse.data?.collectionDelete?.userErrors || [];
+    if (userErrors.length > 0) {
+      console.error("processShopifyProductCategoryAfterDelete: User errors:", userErrors);
+      return;
+    }
+    const deletedCollectionId = apiResponse.data?.collectionDelete?.deletedCollectionId;
+    if (deletedCollectionId) console.log(`✅ Deleted collection in Shopify: ${deletedCollectionId}`);
+  } catch (error) {
+    console.error("processShopifyProductCategoryAfterDelete: Error", error);
+  }
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  const runWithSession = helpers.result.data.runWithSession;
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryAfterDelete: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyProductCategoryAfterDelete: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyProductCategoryAfterDelete: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+  await doJob(args, args.contextData, dbSession);
+});
+'''
+        key: processShopifyProductCategoryAfterDelete
+      }
+    }
+  ]
+  edges: []
+}

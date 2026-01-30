@@ -4,108 +4,54 @@
       id: "1"
       L: Function
       P: {
-        description: Deletes a product in Shopify when a ShopifyProduct is deleted from the database.
+        description: Enqueues background job to delete a product in Shopify when a ShopifyProduct is deleted.
         body:
           '''
-// Only process if tableVertexLabel is 'ShopifyProduct' and operation is 'delete'
 const { tableVertexLabel, operation, elementId, result } = args.contextData;
 
-if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'delete') {
-  // Not deleting a ShopifyProduct, skip
-  return;
-}
+if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'delete') return;
 
-// Get the product data from result to check if it has a Shopify ID
 const deletedData = result?.data;
 const productData = deletedData?.P || {};
-const shopifyProductId = productData.id;
+if (!productData.id) return;
 
-if (!shopifyProductId) {
-  // Product doesn't have a Shopify ID, skip deletion
-  console.log("shopifyProductAfterDelete: Product doesn't have Shopify ID, skipping product deletion");
-  return;
-}
-
-console.log(`🛍️  Deleting product in Shopify: ${shopifyProductId}...`);
-
-// Get Shopify API object
 const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
 let shop;
 try {
   const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
+  if (!event) throw new Error("No request context available");
+  const authResult = await shopify.authenticate.admin(event.request);
+  shop = authResult.session.shop;
 } catch (authError) {
   console.error("shopifyProductAfterDelete: Shopify authentication failed", authError);
-  return; // Can't delete without authentication
-}
-
-if (!shop) {
-  console.warn("shopifyProductAfterDelete: Shop domain is missing, skipping product deletion");
   return;
 }
-
-if (!admin) {
-  console.warn("shopifyProductAfterDelete: Shopify admin client not available");
-  return;
-}
+if (!shop) return;
 
 try {
-  // Delete product in Shopify using productDelete mutation
-  const deleteProductMutation = `
-    mutation productDelete($id: ID!) {
-      productDelete(input: { id: $id }) {
-        deletedProductId
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
-
-  const variables = {
-    id: shopifyProductId
-  };
-
-  const response = await admin.graphql(deleteProductMutation, { variables });
-  
-  // Handle Response object - extract JSON if it's a Response
-  let apiResponse;
-  if (response instanceof Response) {
-    apiResponse = await response.json();
-  } else {
-    apiResponse = response;
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodeproduct' }
+  );
+  if (!helpers.result?.success) return;
+  if (elementId) {
+    await args.session.run(
+      `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
+      { elementId, status: 'queued' }
+    );
   }
-
-  if (apiResponse.errors && apiResponse.errors.length > 0) {
-    console.error("shopifyProductAfterDelete: Shopify GraphQL errors:", apiResponse.errors);
-    return;
-  }
-
-  const userErrors = apiResponse.data?.productDelete?.userErrors || [];
-  if (userErrors.length > 0) {
-    console.error("shopifyProductAfterDelete: User errors deleting product:", userErrors);
-    return;
-  }
-
-  const deletedProductId = apiResponse.data?.productDelete?.deletedProductId;
-  if (deletedProductId) {
-    console.log(`✅ Deleted product in Shopify: ${deletedProductId}`);
-  } else {
-    console.warn("shopifyProductAfterDelete: Product deletion succeeded but no deleted ID returned");
-  }
+  const queueName = 'processShopifyProductAfterDelete';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    tableVertexLabel,
+    operation,
+    elementId,
+    result
+  });
+  await queue.close();
 } catch (error) {
-  console.error("shopifyProductAfterDelete: Error deleting product in Shopify:", error);
+  console.error("shopifyProductAfterDelete: Failed to enqueue job", error);
 }
 '''
         key: shopifyProductAfterDelete
@@ -114,4 +60,3 @@ try {
   ]
   edges: []
 }
-

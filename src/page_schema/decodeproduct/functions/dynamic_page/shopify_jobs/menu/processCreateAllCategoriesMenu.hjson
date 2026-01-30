@@ -1,0 +1,173 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: creates or updates the master Shopify menu containing all top-level categories and nested children.
+        body:
+          '''
+const QUEUE_NAME = 'processCreateAllCategoriesMenu';
+
+const doJob = async (args, jobData, dbSession, subDomain, h) => {
+  const { menuTitle = "Categories", menuHandle = "categories", shop } = jobData;
+  const shopify = args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processCreateAllCategoriesMenu: unauthenticated.admin failed", authError);
+    return { success: false, error: "Shopify authentication failed" };
+  }
+  if (!shop || !admin) return { success: false, error: "shop and admin are required" };
+  try {
+    const topLevelResult = await dbSession.run(
+      `MATCH (topLevel:ShopifyProductCategory)
+       WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
+       AND topLevel.id IS NOT NULL
+       RETURN elementId(topLevel) as elementId,
+              topLevel.name as name,
+              topLevel.id as shopifyId,
+              topLevel.handle as handle
+       ORDER BY topLevel.name`,
+      {}
+    );
+    if (topLevelResult.records.length === 0) {
+      console.log("processCreateAllCategoriesMenu: No top-level categories found");
+      return { success: true, action: "skipped", message: "No top-level categories found" };
+    }
+    const menuItems = [];
+    for (const record of topLevelResult.records) {
+      const topLevelElementId = record.get('elementId');
+      const topLevelName = record.get('name');
+      const topLevelShopifyId = record.get('shopifyId');
+      const topLevelHandle = record.get('handle');
+      if (!topLevelShopifyId) continue;
+      const nestedResult = await h.buildNestedMenuItems(dbSession, topLevelElementId);
+      const nestedItems = nestedResult?.success ? (nestedResult.menuItems || []) : [];
+      menuItems.push({ title: topLevelName, type: "COLLECTION", resourceId: topLevelShopifyId, items: nestedItems });
+    }
+    if (menuItems.length === 0) return { success: false, error: "No categories with Shopify IDs found" };
+    const settingKey = "allCategoriesMenuId";
+    const settingResult = await dbSession.run(
+      `MATCH (s:Setting {key: $key}) RETURN s.value as menuId`,
+      { key: settingKey }
+    );
+    let storedMenuId = settingResult.records.length > 0 ? settingResult.records[0].get('menuId') : null;
+    if (storedMenuId) {
+      try {
+        const getMenuResponse = await admin.graphql(
+          `query menu($id: ID!) { menu(id: $id) { id handle title } }`,
+          { variables: { id: storedMenuId } }
+        );
+        let getMenuApiResponse = getMenuResponse instanceof Response ? await getMenuResponse.json() : getMenuResponse;
+        if (getMenuApiResponse.data?.menu && (!getMenuApiResponse.errors || getMenuApiResponse.errors.length === 0)) {
+          const updateResponse = await admin.graphql(
+            `mutation menuUpdate($id: ID!, $title: String!, $items: [MenuItemUpdateInput!]!) {
+              menuUpdate(id: $id, title: $title, items: $items) {
+                menu { id handle title items { id title type resourceId } }
+                userErrors { field message }
+              }
+            }`,
+            { variables: { id: storedMenuId, title: menuTitle, items: menuItems } }
+          );
+          let updateApiResponse = updateResponse instanceof Response ? await updateResponse.json() : updateResponse;
+          if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
+            console.error("processCreateAllCategoriesMenu: GraphQL errors:", updateApiResponse.errors);
+            return { success: false, error: "Shopify GraphQL errors", details: updateApiResponse.errors };
+          }
+          const userErrors = updateApiResponse.data?.menuUpdate?.userErrors || [];
+          if (userErrors.length > 0) return { success: false, error: "User errors updating menu", details: userErrors };
+          const updatedMenu = updateApiResponse.data?.menuUpdate?.menu;
+          if (!updatedMenu) return { success: false, error: "Menu update succeeded but no menu returned" };
+          await dbSession.run(
+            `MERGE (s:Setting {key: $key}) ON CREATE SET s.createdAt = datetime()
+             SET s.value = $menuId, s.updatedAt = datetime()`,
+            { key: settingKey, menuId: updatedMenu.id }
+          );
+          return { success: true, action: "updated", menu: updatedMenu, menuId: updatedMenu.id, menuHandle: updatedMenu.handle, message: `Updated all categories menu "${menuTitle}"` };
+        }
+      } catch (e) {
+        console.log("processCreateAllCategoriesMenu: Menu not found, creating new:", e.message);
+      }
+      storedMenuId = null;
+    }
+    if (!storedMenuId) {
+      const createResponse = await admin.graphql(
+        `mutation menuCreate($title: String!, $handle: String!, $items: [MenuItemCreateInput!]!) {
+          menuCreate(title: $title, handle: $handle, items: $items) {
+            menu { id handle title items { id title type resourceId } }
+            userErrors { field message }
+          }
+        }`,
+        { variables: { title: menuTitle, handle: menuHandle, items: menuItems } }
+      );
+      let createApiResponse = createResponse instanceof Response ? await createResponse.json() : createResponse;
+      if (createApiResponse.errors && createApiResponse.errors.length > 0) {
+        return { success: false, error: "Shopify GraphQL errors", details: createApiResponse.errors };
+      }
+      const userErrors = createApiResponse.data?.menuCreate?.userErrors || [];
+      if (userErrors.length > 0) return { success: false, error: "User errors creating menu", details: userErrors };
+      const newMenu = createApiResponse.data?.menuCreate?.menu;
+      if (!newMenu) return { success: false, error: "Menu creation succeeded but no menu returned" };
+      await dbSession.run(
+        `MERGE (s:Setting {key: $key}) ON CREATE SET s.createdAt = datetime()
+         SET s.value = $menuId, s.updatedAt = datetime()`,
+        { key: settingKey, menuId: newMenu.id }
+      );
+      return { success: true, action: "created", menu: newMenu, menuId: newMenu.id, menuHandle: newMenu.handle, message: `Created all categories menu "${menuTitle}"` };
+    }
+  } catch (error) {
+    console.error("processCreateAllCategoriesMenu: Error", error);
+    return { success: false, error: error.message || "Error creating all categories menu" };
+  }
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  const runWithSession = helpers.result.data.runWithSession;
+  const h = helpers.result.data;
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession, subDomain) => {
+        await doJob(args, job.data, dbSession, subDomain, h);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processCreateAllCategoriesMenu: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processCreateAllCategoriesMenu: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processCreateAllCategoriesMenu: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+const h = helpers.result.data;
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession, subDomain) => {
+  await doJob(args, args.contextData, dbSession, subDomain, h);
+});
+'''
+        key: processCreateAllCategoriesMenu
+      }
+    }
+  ]
+  edges: []
+}

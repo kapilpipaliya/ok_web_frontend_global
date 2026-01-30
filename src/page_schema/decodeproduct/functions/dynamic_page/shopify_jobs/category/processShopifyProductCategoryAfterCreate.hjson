@@ -1,0 +1,137 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: creates a collection in Shopify when a new ShopifyProductCategory is added.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyProductCategoryAfterCreate';
+
+const doJob = async (args, data, dbSession) => {
+  const { parentVertexLabel, name, vertexId, result, shop } = data;
+  if (parentVertexLabel !== 'ShopifyProductCategory') return;
+
+  const vertex = result?.data;
+  const categoryData = vertex?.P || {};
+  if (categoryData.id) {
+    console.log("processShopifyProductCategoryAfterCreate: Category already has Shopify ID, skipping");
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementId: vertexId });
+    return;
+  }
+
+  const shopify = args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyProductCategoryAfterCreate: Shopify unauthenticated.admin failed", authError);
+    return;
+  }
+  if (!admin) return;
+
+  try {
+    const createCollectionMutation = `
+      mutation collectionCreate($input: CollectionInput!) {
+        collectionCreate(input: $input) {
+          collection { id handle title }
+          userErrors { field message }
+        }
+      }
+    `;
+    const variables = {
+      input: {
+        title: name,
+        descriptionHtml: `<p>Products for ${name}</p>`,
+        seo: { title: name, description: `Products for ${name}` },
+        ruleSet: {
+          rules: [{ column: "TAG", relation: "EQUALS", condition: name }],
+          appliedDisjunctively: false
+        }
+      }
+    };
+
+    const response = await admin.graphql(createCollectionMutation, { variables });
+    let apiResponse = response instanceof Response ? await response.json() : response;
+
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error("processShopifyProductCategoryAfterCreate: GraphQL errors:", apiResponse.errors);
+      return;
+    }
+    const userErrors = apiResponse.data?.collectionCreate?.userErrors || [];
+    if (userErrors.length > 0) {
+      console.error("processShopifyProductCategoryAfterCreate: User errors:", userErrors);
+      return;
+    }
+
+    const createdCollection = apiResponse.data?.collectionCreate?.collection;
+    if (!createdCollection) return;
+
+    const shopifyCollectionId = createdCollection.id;
+    const shopifyHandle = createdCollection.handle;
+
+    if (vertexId && shopifyCollectionId) {
+      await dbSession.run(
+        `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId
+         SET c.id = $shopifyId, c.handle = $handle, c.syncStatus = 'complete', c.updatedAt = datetime()`,
+        { elementId: vertexId, shopifyId: shopifyCollectionId, handle: shopifyHandle }
+      );
+      if (result?.data?.P) {
+        result.data.P.id = shopifyCollectionId;
+        result.data.P.handle = shopifyHandle;
+      }
+      console.log(`✅ Created collection in Shopify: ${shopifyCollectionId} (${createdCollection.title})`);
+    }
+  } catch (error) {
+    console.error("processShopifyProductCategoryAfterCreate: Error", error);
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.updatedAt = datetime()`, { elementId: vertexId });
+  }
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  const runWithSession = helpers.result.data.runWithSession;
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryAfterCreate: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyProductCategoryAfterCreate: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyProductCategoryAfterCreate: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+  await doJob(args, args.contextData, dbSession);
+});
+'''
+        key: processShopifyProductCategoryAfterCreate
+      }
+    }
+  ]
+  edges: []
+}

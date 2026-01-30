@@ -1,0 +1,112 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: adds category name as tag to Shopify product when product is added to a category.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyProductAfterCreateRelationship';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { contentLabel, contentId, categoryId, categoryLabel, shop } = jobData;
+  if (contentLabel !== 'ShopifyProduct') return;
+  if (!categoryId || categoryId === 'uncategorized') return;
+
+  const shopify = args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyProductAfterCreateRelationship: unauthenticated.admin failed", authError);
+    return;
+  }
+  if (!admin) return;
+
+  let categoryName = null;
+  const categoryResult = await dbSession.run(
+    `MATCH (cat:${categoryLabel}) WHERE elementId(cat) = $categoryId RETURN cat.name as name`,
+    { categoryId }
+  );
+  if (categoryResult.records.length > 0) categoryName = categoryResult.records[0].get('name') || null;
+  if (!categoryName) {
+    console.warn("processShopifyProductAfterCreateRelationship: Could not find category name");
+    return;
+  }
+
+  const productResult = await dbSession.run(
+    `MATCH (p:ShopifyProduct) WHERE elementId(p) = $contentId RETURN p.id as shopifyId`,
+    { contentId }
+  );
+  if (productResult.records.length === 0) return;
+  const shopifyId = productResult.records[0].get('shopifyId');
+  if (!shopifyId) return;
+
+  try {
+    const getProductResponse = await admin.graphql(`query { product(id: "${shopifyId}") { id tags } }`);
+    let getProductApiResponse = getProductResponse instanceof Response ? await getProductResponse.json() : getProductResponse;
+    if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) return;
+    const currentProduct = getProductApiResponse.data?.product;
+    if (!currentProduct) return;
+    const currentTags = currentProduct.tags || [];
+    let updatedTags = [...currentTags];
+    if (!updatedTags.includes(categoryName)) updatedTags.push(categoryName);
+    await admin.graphql(
+      `mutation productSet($input: ProductSetInput!) { productSet(synchronous: true, input: $input) { product { id tags } userErrors { field message } } }`,
+      { variables: { input: { id: shopifyId, tags: updatedTags } } }
+    );
+    if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId: contentId });
+    console.log(`✅ Added category tag "${categoryName}" to product ${shopifyId}`);
+  } catch (error) {
+    console.error("processShopifyProductAfterCreateRelationship: Error", error);
+    if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.updatedAt = datetime()`, { elementId: contentId });
+  }
+};
+
+if (args.contextData?.action === 'start') {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
+  if (!helpers.result?.success) {
+    console.error('Shopify queue helpers init failed', helpers.result?.error);
+    throw new Error('Shopify queue helpers initialization failed');
+  }
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  const runWithSession = helpers.result.data.runWithSession;
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterCreateRelationship: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyProductAfterCreateRelationship: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyProductAfterCreateRelationship: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
+await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+  await doJob(args, args.contextData, dbSession);
+});
+'''
+        key: processShopifyProductAfterCreateRelationship
+      }
+    }
+  ]
+  edges: []
+}
