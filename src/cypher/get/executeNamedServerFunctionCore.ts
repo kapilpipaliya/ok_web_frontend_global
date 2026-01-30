@@ -1,3 +1,4 @@
+import { debounce } from "@solid-primitives/scheduled";
 import { getRequestEvent } from "solid-js/web";
 import type { EvalExpressionContext } from "~/cypher/types/EvalExpressionContext";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -572,6 +573,7 @@ export async function executeNamedServerFunctionCore(
       getSessionUser,
       runMigration,
       processResult,
+      debounce,
       getRequestEvent,
     };
 

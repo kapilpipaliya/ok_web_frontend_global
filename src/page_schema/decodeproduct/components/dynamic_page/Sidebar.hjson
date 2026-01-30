@@ -21,6 +21,13 @@ const [selectedItem, setSelectedItem] = args.createSignal(null);
 const [sidebarLoading, setSidebarLoading] = args.createSignal(false);
 const [operationLoading, setOperationLoading] = args.createSignal(false);
 const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
+const [searchQuery, setSearchQuery] = args.createSignal("");
+const [debouncedSearchQuery, setDebouncedSearchQuery] = args.createSignal("");
+const debouncedSetSearch = args.debounce((value) => setDebouncedSearchQuery(value), 200);
+const onSearchChange = (value) => {
+  setSearchQuery(value);
+  debouncedSetSearch(value);
+};
 
 // Graph namespace for sidebar data
 const SIDEBAR_NAMESPACE = "sidebar";
@@ -237,6 +244,39 @@ const getRoot = () => {
   const rootIds = candidateIds.filter(id => vertexes[id] != null && (id === 'uncategorized' || !(vertexes[id].OUT?.[toParentEdgeType]?.length)));
   const rootItems = rootIds.map(id => vertexes[id]).filter(v => v != null);
   return sortItems(rootItems);
+};
+
+// Search: filter tree item by query (local, no server)
+const filterTreeVertex = (item, query) => {
+  if (!item || !query || typeof query !== 'string') return { match: true, matchedChildren: false };
+  const q = query.trim().toLowerCase();
+  if (!q) return { match: true, matchedChildren: false };
+  const searchable = String(item.P?.name ?? item.P?.title ?? item.P?.key ?? '').toLowerCase();
+  if (searchable.includes(q)) return { match: true, matchedChildren: false };
+  const children = getChildren(item.id) || [];
+  const hasMatchingChild = children.some((child) => {
+    const r = filterTreeVertex(child, q);
+    return r.match || r.matchedChildren;
+  });
+  return { match: false, matchedChildren: hasMatchingChild };
+};
+
+// Search: whether to expand item (expand when search active and item matches or has matching children)
+const shouldExpandVertexForSearch = (item) => {
+  const q = debouncedSearchQuery()?.trim?.() || '';
+  if (!q) return (expandedKeys() || []).includes(item?.id);
+  const r = filterTreeVertex(item, q);
+  return r.match || r.matchedChildren;
+};
+
+// Search: roots to show (filter when search active)
+const getFilteredRoot = () => {
+  const q = debouncedSearchQuery()?.trim?.() || '';
+  if (!q) return getRoot();
+  return getRoot().filter((r) => {
+    const x = filterTreeVertex(r, q);
+    return x.match || x.matchedChildren;
+  });
 };
 
 // Toggle expand/collapse
@@ -539,7 +579,14 @@ return {
   handleSidebarKeyDown,
   getHooks: () => args.contextData.props?.hooks,
   operationLoading,
-  setOperationLoading
+  setOperationLoading,
+  searchQuery,
+  setSearchQuery,
+  debouncedSearchQuery,
+  onSearchChange,
+  getFilteredRoot,
+  filterTreeVertex,
+  shouldExpandVertexForSearch
 };
 '''
         key: Sidebar
@@ -608,6 +655,51 @@ return {
       }
     }
     {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 100%;
+  line-height: 28px;
+  border: 1px solid ${args.theme.var.color.border};
+  background-color: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 14px;
+  height: 36px;
+  padding: 0 0.75rem 0 2rem;
+  border-radius: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0.5rem center;
+  background-size: 1.25rem;
+}
+._id:focus {
+  outline: none;
+  border-color: ${args.theme.var.color.primary};
+}
+._id::placeholder {
+  color: ${args.theme.var.color.text_light_400};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_search_bar
+        props:
+          '''
+return {
+  as: "input",
+  type: "search",
+  placeholder: "Search...",
+  value: args.fns.searchQuery(),
+  onInput: (e) => args.fns.onSearchChange(e.target.value)
+};
+'''
+      }
+    }
+    {
       id: "8"
       L: Attr
       P: {
@@ -621,7 +713,7 @@ return `._id {
   margin-bottom: 8px;
 }`;
 '''
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         key: sidebar_add_root_button_container
         props:
@@ -665,7 +757,7 @@ return `._id {
   margin: 0;
 }`;
 '''
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         key: sidebar_tree_list
         props:
@@ -674,7 +766,7 @@ return {
   as: "ul",
   loop: true,
   contextName: "sidebarItem",
-  data: args.fns.getRoot()
+  data: args.fns.getFilteredRoot()
 };
 '''
       }
@@ -716,7 +808,10 @@ return {
   label: args.fns.getSidebarLabel(),
   operationLoading: args.fns.operationLoading,
   setOperationLoading: args.fns.setOperationLoading,
-  setExpandedKeys: args.fns.setExpandedKeys
+  setExpandedKeys: args.fns.setExpandedKeys,
+  searchActive: !!(args.fns.debouncedSearchQuery?.()?.trim?.()),
+  filterTree: (item) => args.fns.filterTreeVertex?.(item, args.fns.debouncedSearchQuery()?.trim?.() || ''),
+  shouldExpandForSearch: (item) => args.fns.shouldExpandVertexForSearch?.(item)
 };
 '''
       }
@@ -939,6 +1034,12 @@ return {
       T: Attr
       S: "3"
       E: "4"
+    }
+    {
+      id: e_search
+      T: Attr
+      S: "3"
+      E: "7"
     }
     {
       id: e6

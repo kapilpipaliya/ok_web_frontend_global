@@ -37,11 +37,44 @@ const getLoading = () => {
   return args.contextData.props?.loading || false;
 };
 
-// Check if item is expanded - make it reactive by accessing the signal
+// Search: getters from props
+const getSearchActive = () => args.contextData.props?.searchActive ?? false;
+const getFilterTree = () => args.contextData.props?.filterTree;
+const getShouldExpandForSearch = () => args.contextData.props?.shouldExpandForSearch;
+
+// Search: show item when no search or when item/children match
+const shouldShowItem = () => {
+  if (!getSearchActive() || !getFilterTree()) return true;
+  const item = getItem();
+  if (!item) return true;
+  const r = getFilterTree()(item);
+  return r && (r.match || r.matchedChildren);
+};
+
+// Search: direct match for highlight (node's text matches)
+const isDirectMatch = () => {
+  if (!getSearchActive() || !getFilterTree()) return false;
+  const item = getItem();
+  if (!item) return false;
+  return getFilterTree()(item).match;
+};
+
+// Search: ancestor of a match (parent path to a matched node)
+const isAncestorOfMatch = () => {
+  if (!getSearchActive() || !getFilterTree()) return false;
+  const item = getItem();
+  if (!item) return false;
+  const r = getFilterTree()(item);
+  return r && r.matchedChildren && !r.match;
+};
+
+// Check if item is expanded - when search active use shouldExpandForSearch, else use expandedKeys
 const isExpanded = () => {
   const item = getItem();
   if (!item) return false;
-  // Access expandedKeys as a signal to make it reactive
+  if (getSearchActive() && getShouldExpandForSearch()) {
+    return getShouldExpandForSearch()(item);
+  }
   const expandedKeys = getExpandedKeys();
   return Array.isArray(expandedKeys) && expandedKeys.includes(item.id);
 };
@@ -912,6 +945,9 @@ return {
   getItemName,
   getItemIcon,
   hasChildren,
+  shouldShowItem,
+  isDirectMatch,
+  isAncestorOfMatch,
   isAddModalOpen,
   setIsAddModalOpen,
   handleOpenAddModal,
@@ -984,6 +1020,7 @@ return `._id {
 return {
   as: "div",
   class: args.contextData.props.class,
+  hide: !args.fns.shouldShowItem(),
 };
 '''
       }
@@ -995,6 +1032,8 @@ return {
         css:
           '''
 const isHovered = args.fns.isSelected();
+const isDirectMatch = args.fns.isDirectMatch();
+const isAncestorOfMatch = args.fns.isAncestorOfMatch?.() ?? false;
 const isDragOver = args.fns.isDragOver();
 const isValidDrop = args.fns.isValidDrop?.() ?? true;
 const isDragging = args.fns.isDragging?.() || false;
@@ -1015,6 +1054,20 @@ if (isDragOver) {
   }
 }
 
+// Compute background color variable based on state
+let backgroundColor = "";
+if (dragOverStyle.includes('background-color')) {
+  // The dragOverStyle already sets background color, so don't override
+  // No action needed since dragOverStyle will apply its background 
+} else if (isHovered) {
+  backgroundColor = args.theme.var.color.background_dark_150;
+} else if (isDirectMatch) {
+  backgroundColor = args.theme.var.color.primary_light_500;
+//} else if (!isDirectMatch && isAncestorOfMatch) {
+//  backgroundColor = args.theme.var.color.primary_light_600;
+} 
+
+// Compose the style string
 return `._id {
   align-items: center;
   cursor: ${isRoot ? 'default' : isDragging ? 'grabbing' : isDragOver && !isValidDrop ? 'not-allowed' : 'grab'};
@@ -1024,7 +1077,8 @@ return `._id {
   font-weight: ${args.fns.hasChildren() ? "bold" : "normal"};
   width: 100%;
   border-radius: ${args.fns.hasChildren() ? "5px" : "0 5px 5px 0"};
-  ${isHovered ? `background-color: ${args.theme.var.color.background_dark_150};` : ""}
+  ${backgroundColor ? `background-color: ${backgroundColor};
+  ${isDirectMatch ? " font-weight: bold;" : ""}` : ""}
   ${dragOverStyle}
   ${isDragging ? `opacity: 0.5;` : ""}
   padding: 2px 0;
@@ -1384,7 +1438,10 @@ return {
   getRoot: args.contextData.props?.getRoot,
   hooks: args.contextData.props?.hooks,
   label: args.contextData.props?.label,
-  setExpandedKeys: args.contextData.props?.setExpandedKeys
+  setExpandedKeys: args.contextData.props?.setExpandedKeys,
+  searchActive: args.contextData.props?.searchActive,
+  filterTree: args.contextData.props?.filterTree,
+  shouldExpandForSearch: args.contextData.props?.shouldExpandForSearch
 };
 '''
       }
