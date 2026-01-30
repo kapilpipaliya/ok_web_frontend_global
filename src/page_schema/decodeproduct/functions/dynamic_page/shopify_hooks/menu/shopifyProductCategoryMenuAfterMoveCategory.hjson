@@ -36,7 +36,7 @@ try {
       { elementId: categoryId, status: 'queued' }
     );
   }
-  const queueName = 'processShopifyProductCategoryMenuAfterMoveCategory';
+  const queueName = 'processShopifyProductCategoryAfterMoveCategory';
   const queue = helpers.result.data.createShopifyQueue(args, queueName);
   await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,

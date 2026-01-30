@@ -33,8 +33,11 @@ const {
   tableVertexLabel,
   relationshipType,
   enableUserScoping,
-  hooks
+  hooks,
+  label: sidebarLabel
 } = args.contextData;
+
+const itemLabel = sidebarLabel && typeof sidebarLabel === 'string' ? sidebarLabel : 'item';
 
 const { operation = "create" } = args.contextData;
 const isDelete = operation === "delete";
@@ -108,7 +111,7 @@ if (isDelete) {
   if (childCount > 0) {
     return {
       success: false,
-      message: "Cannot delete vertex with children. Please remove all children first.",
+      message: `Cannot delete ${itemLabel} with children. Please remove all children first.`,
       data: null
     };
   }
@@ -127,7 +130,7 @@ if (isDelete) {
   if (contentCount > 0) {
     return {
       success: false,
-      message: "Cannot delete vertex with associated data. Please remove all associated items first.",
+      message: `Cannot delete ${itemLabel} with associated data. Please remove all associated items first.`,
       data: null
     };
   }

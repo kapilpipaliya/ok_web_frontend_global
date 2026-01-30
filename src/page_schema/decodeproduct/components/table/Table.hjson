@@ -826,7 +826,8 @@ const handleDelete = async (row) => {
     });
 
     if (result?.success) {
-      args.showSuccessToast?.("Item deleted successfully");
+      const label = getLabel();
+      args.showSuccessToast?.(label ? `${label} deleted successfully` : "Item deleted successfully");
       // Remove from data
       const updated = data().filter(item => item.id !== row.id);
       setData(updated);
@@ -2754,9 +2755,11 @@ if (column.type === "actions" && args.fns.getShowEditButton() && args.fns.getFor
 }
 
 // Default text rendering
+const cellTitle = column.key === 'syncStatus' && rowData?.P?.syncError ? rowData.P.syncError : undefined;
 return {
   as: "div",
-  text: typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : ""
+  text: typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : "",
+  title: cellTitle
 };
 '''
       }

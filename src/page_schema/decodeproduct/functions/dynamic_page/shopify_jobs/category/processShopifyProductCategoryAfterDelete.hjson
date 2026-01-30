@@ -9,8 +9,19 @@
           '''
 const QUEUE_NAME = 'processShopifyProductCategoryAfterDelete';
 
-const doJob = async (args, data, dbSession) => {
-  const { parentVertexLabel, vertexId, operation, result, shop } = data;
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) {
+  console.error('Shopify queue helpers init failed', helpers.result?.error);
+  throw new Error('Shopify queue helpers initialization failed');
+}
+const h = helpers.result.data;
+const runWithSession = h.runWithSession;
+
+const doJob = async (args, jobData, dbSession) => {
+  const { parentVertexLabel, vertexId, operation, result, shop } = jobData;
   if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') return;
 
   const deletedData = result?.data;
@@ -56,24 +67,40 @@ const doJob = async (args, data, dbSession) => {
     }
     const deletedCollectionId = apiResponse.data?.collectionDelete?.deletedCollectionId;
     if (deletedCollectionId) console.log(`✅ Deleted collection in Shopify: ${deletedCollectionId}`);
+    if (h && shop) {
+      try {
+        const qMenu = h.createShopifyQueue(args, 'processShopifyProductCategoryMenuAfterDelete');
+        await h.addShopifyJob(qMenu, 'processShopifyProductCategoryMenuAfterDelete', {
+          shop,
+          parentVertexLabel: 'ShopifyProductCategory',
+          vertexId,
+          operation: 'delete',
+          result,
+          outgoingEdges: jobData.outgoingEdges ?? [],
+          incomingEdges: jobData.incomingEdges ?? []
+        });
+        await qMenu.close();
+      } catch (e) {
+        console.error('processShopifyProductCategoryMenuAfterDelete enqueue:', e);
+      }
+      try {
+        const q = h.createShopifyQueue(args, 'processCreateAllCategoriesMenu');
+        await h.addShopifyJob(q, 'processCreateAllCategoriesMenu', { shop, menuTitle: 'Categories', menuHandle: 'categories' });
+        await q.close();
+      } catch (e) {
+        console.error('createAllCategoriesMenu enqueue:', e);
+      }
+    }
   } catch (error) {
     console.error("processShopifyProductCategoryAfterDelete: Error", error);
+    // Vertex already deleted from graph so syncError cannot be set
   }
 };
 
 if (args.contextData?.action === 'start') {
-  const helpers = await args.executeNamedServerFunction(
-    { functionName: 'shopifyQueueHelpers', contextData: {} },
-    { functionLookupSubDomain: args.subDomain }
-  );
-  if (!helpers.result?.success) {
-    console.error('Shopify queue helpers init failed', helpers.result?.error);
-    throw new Error('Shopify queue helpers initialization failed');
-  }
   const { Worker } = args.bullmq;
-  const connection = helpers.result.data.getRedisConnection();
+  const connection = h.getRedisConnection();
   if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
-  const runWithSession = helpers.result.data.runWithSession;
   let workerInstance;
   try {
     workerInstance = new Worker(QUEUE_NAME, async (job) => {
@@ -91,12 +118,7 @@ if (args.contextData?.action === 'start') {
   }
 }
 
-const helpers = await args.executeNamedServerFunction(
-  { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
-);
-if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
-await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+await runWithSession(args, args.contextData.shop, async (dbSession) => {
   await doJob(args, args.contextData, dbSession);
 });
 '''

@@ -19,28 +19,31 @@ const doJob = async (args, jobData, dbSession, subDomain, h) => {
       if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementId: vertexId });
     } else {
       console.error("processShopifyProductCategoryMenuAfterUpdate: Failed to update menu:", menuResult?.error);
-      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.updatedAt = datetime()`, { elementId: vertexId });
+      const errMsg = (menuResult?.error && (typeof menuResult.error === 'string' ? menuResult.error : menuResult.error?.message || String(menuResult.error))) || 'Menu update failed';
+      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg.substring(0, 2000) });
     }
   } catch (error) {
     console.error("processShopifyProductCategoryMenuAfterUpdate: Error", error);
-    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.updatedAt = datetime()`, { elementId: vertexId });
+    const errMsg = error?.message || String(error);
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg.substring(0, 2000) });
   }
 };
 
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) {
+  console.error('Shopify queue helpers init failed', helpers.result?.error);
+  throw new Error('Shopify queue helpers initialization failed');
+}
+const h = helpers.result.data;
+const runWithSession = h.runWithSession;
+
 if (args.contextData?.action === 'start') {
-  const helpers = await args.executeNamedServerFunction(
-    { functionName: 'shopifyQueueHelpers', contextData: {} },
-    { functionLookupSubDomain: args.subDomain }
-  );
-  if (!helpers.result?.success) {
-    console.error('Shopify queue helpers init failed', helpers.result?.error);
-    throw new Error('Shopify queue helpers initialization failed');
-  }
   const { Worker } = args.bullmq;
-  const connection = helpers.result.data.getRedisConnection();
+  const connection = h.getRedisConnection();
   if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
-  const runWithSession = helpers.result.data.runWithSession;
-  const h = helpers.result.data;
   let workerInstance;
   try {
     workerInstance = new Worker(QUEUE_NAME, async (job) => {
@@ -58,13 +61,7 @@ if (args.contextData?.action === 'start') {
   }
 }
 
-const helpers = await args.executeNamedServerFunction(
-  { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
-);
-if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
-const h = helpers.result.data;
-await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession, subDomain) => {
+await runWithSession(args, args.contextData.shop, async (dbSession, subDomain) => {
   await doJob(args, args.contextData, dbSession, subDomain, h);
 });
 '''

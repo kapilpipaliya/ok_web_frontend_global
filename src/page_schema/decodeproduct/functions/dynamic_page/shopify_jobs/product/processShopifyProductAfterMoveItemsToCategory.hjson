@@ -78,25 +78,27 @@ const doJob = async (args, jobData, dbSession) => {
       await new Promise(r => setTimeout(r, 200));
     } catch (error) {
       console.error("processShopifyProductAfterMoveItemsToCategory: Error for product", product.shopifyId, error);
-      await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.updatedAt = datetime()`, { elementId: product.elementId });
+      const errMsg = error?.message || String(error);
+      await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: product.elementId, syncError: errMsg.substring(0, 2000) });
     }
   }
   console.log(`✅ Tag update complete for ${productsToUpdate.length} product(s)`);
 };
 
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) {
+  console.error('Shopify queue helpers init failed', helpers.result?.error);
+  throw new Error('Shopify queue helpers initialization failed');
+}
+const runWithSession = helpers.result.data.runWithSession;
+
 if (args.contextData?.action === 'start') {
-  const helpers = await args.executeNamedServerFunction(
-    { functionName: 'shopifyQueueHelpers', contextData: {} },
-    { functionLookupSubDomain: args.subDomain }
-  );
-  if (!helpers.result?.success) {
-    console.error('Shopify queue helpers init failed', helpers.result?.error);
-    throw new Error('Shopify queue helpers initialization failed');
-  }
   const { Worker } = args.bullmq;
   const connection = helpers.result.data.getRedisConnection();
   if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
-  const runWithSession = helpers.result.data.runWithSession;
   let workerInstance;
   try {
     workerInstance = new Worker(QUEUE_NAME, async (job) => {
@@ -114,12 +116,7 @@ if (args.contextData?.action === 'start') {
   }
 }
 
-const helpers = await args.executeNamedServerFunction(
-  { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: args.subDomain }
-);
-if (!helpers.result?.success) throw new Error('Shopify queue helpers initialization failed');
-await helpers.result.data.runWithSession(args, args.contextData.shop, async (dbSession) => {
+await runWithSession(args, args.contextData.shop, async (dbSession) => {
   await doJob(args, args.contextData, dbSession);
 });
 '''
