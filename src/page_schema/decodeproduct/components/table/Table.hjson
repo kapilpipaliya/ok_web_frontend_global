@@ -80,6 +80,7 @@ const [isImportModalOpen, setIsImportModalOpen] = args.createSignal(false);
 const [importData, setImportData] = args.createSignal("");
 const [columnWidths, setColumnWidths] = args.createStore({});
 const [isResizing, setIsResizing] = args.createSignal(false);
+const pollRef = { id: null };
 
 // Initialize from query parameters
 const initializeFromQueryParams = () => {
@@ -543,6 +544,52 @@ const handleColumnFilterChange = (columnKey, value) => {
   updateQueryParams();
 };
 
+// Background poll: fetch only queued row ids and merge updates (no full reload, no loader)
+const pollQueuedRows = async () => {
+  const config = args.fns.evaluateConfig?.() || {};
+  const intervalMs = config?.refetchIntervalWhenQueued;
+  const currentData = data();
+  const queuedIds = (Array.isArray(currentData) ? currentData : [])
+    .filter(r => (r.P?.syncStatus) === 'queued')
+    .map(r => r.id)
+    .filter(id => id !== undefined && id !== null);
+  if (queuedIds.length === 0 || !intervalMs) return;
+  const refresh = args.fns.refreshQueuedRows;
+  if (!refresh || typeof refresh !== 'function') return;
+  try {
+    const result = await refresh(queuedIds);
+    const updated = result?.data;
+    if (Array.isArray(updated) && updated.length > 0) {
+      const updatedMap = new Map(updated.map(row => [row.id, row]));
+      const newData = currentData.map(row => updatedMap.get(row.id) || row);
+      setData(newData);
+      applyLocalFilters();
+      const stillQueued = newData.some(r => (r.P?.syncStatus) === 'queued');
+      if (stillQueued && pollRef.id === null) {
+        pollRef.id = setTimeout(() => {
+          pollRef.id = null;
+          pollQueuedRows();
+        }, intervalMs);
+      }
+    } else {
+      if (pollRef.id === null) {
+        pollRef.id = setTimeout(() => {
+          pollRef.id = null;
+          pollQueuedRows();
+        }, intervalMs);
+      }
+    }
+  } catch (e) {
+    console.error("pollQueuedRows:", e);
+    if (pollRef.id === null) {
+      pollRef.id = setTimeout(() => {
+        pollRef.id = null;
+        pollQueuedRows();
+      }, intervalMs);
+    }
+  }
+};
+
 // Handle search
 const handleSearch = () => {
   const config = args.fns.evaluateConfig?.() || {};
@@ -570,6 +617,19 @@ const handleSearch = () => {
       } else {
         // Server already filtered, just set filtered data to match data
         setFilteredData(data);
+      }
+      
+      // Poll when any row has syncStatus === 'queued': background refresh only queued ids, merge result (no loader)
+      if (pollRef.id) {
+        clearTimeout(pollRef.id);
+        pollRef.id = null;
+      }
+      const intervalMs = config?.refetchIntervalWhenQueued;
+      if (intervalMs && Array.isArray(data) && data.some(r => (r.P?.syncStatus) === 'queued')) {
+        pollRef.id = setTimeout(() => {
+          pollRef.id = null;
+          pollQueuedRows();
+        }, intervalMs);
       }
     }
   );

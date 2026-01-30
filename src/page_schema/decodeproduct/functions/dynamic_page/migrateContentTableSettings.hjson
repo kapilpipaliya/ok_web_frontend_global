@@ -577,6 +577,13 @@ const settingsConfigs = [
       width: "120px"
     },
     {
+      key: "syncStatus",
+      label: "Sync",
+      type: "text",
+      width: "100px",
+      valueAccessor: (row) => row.P?.syncStatus
+    },
+    {
       key: "variantsCount",
       label: "Variants",
       type: "number",
@@ -628,6 +635,7 @@ const settingsConfigs = [
   enableUserScopingForContent: false,
   enableLocalFilters: true,
   enableLocalSort: true,
+  refetchIntervalWhenQueued: 5000,
   hooks: {
     // Hooks for fetching data - syncs Shopify products when fetching uncategorized
     beforeFetchData: "shopifyProductBeforeFetchData",

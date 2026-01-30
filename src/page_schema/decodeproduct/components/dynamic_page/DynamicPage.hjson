@@ -166,12 +166,23 @@ const getGenericDataFunction = () => {
       }
       
       return { data: [] };
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      args.showErrorToast?.("Failed to load data");
-      return { data: [] };
-    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    args.showErrorToast?.("Failed to load data");
+    return { data: [] };
+  }
   };
+};
+
+// Background refresh: fetch only rows that are no longer queued (no loader, no full reload)
+const refreshQueuedRows = async (elementIds) => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel || !Array.isArray(elementIds) || elementIds.length === 0) return { success: true, data: [] };
+  try {
+    const result = await args.fns.executeYTOFunction("getUserContent", { tableVertexLabel, elementIds, onlyNotQueued: true });
+    if (result?.result?.success && result.result.data) return { success: true, data: result.result.data };
+  } catch (e) { console.error("refreshQueuedRows:", e); }
+  return { success: true, data: [] };
 };
 
 // Helper function to get sidebar config (needed by updateSidebarCategoryCount)
@@ -929,6 +940,7 @@ return {
   handleOpenSettings,
   handleSaveSettings,
   getGenericDataFunction,
+  refreshQueuedRows,
   getGenericSaveFunction,
   getGenericImportFunction,
   getGenericExportFunction,
