@@ -11,17 +11,7 @@ const { parentVertexLabel, vertexId, operation, result, outgoingEdges, incomingE
 
 if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') return;
 
-const shopify = args.getShopifyClient();
-let shop;
-try {
-  const event = args.getRequestEvent();
-  if (!event) throw new Error("No request context available");
-  const authResult = await shopify.authenticate.admin(event.request);
-  shop = authResult.session.shop;
-} catch (authError) {
-  console.error("shopifyProductCategoryMenuAfterDelete: Shopify authentication failed", authError);
-  return;
-}
+const shop = args.contextData.shop;
 if (!shop) return;
 
 try {
@@ -36,7 +26,7 @@ try {
       { elementId: vertexId, status: 'queued' }
     );
   }
-  const queueName = 'processShopifyProductCategoryMenuAfterDelete';
+  const queueName = 'processShopifyMenuAfterDelete';
   const queue = helpers.result.data.createShopifyQueue(args, queueName);
   await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
@@ -49,10 +39,10 @@ try {
   });
   await queue.close();
 } catch (error) {
-  console.error("shopifyProductCategoryMenuAfterDelete: Failed to enqueue job", error);
+  console.error("shopifyMenuAfterDelete: Failed to enqueue job", error);
 }
 '''
-        key: shopifyProductCategoryMenuAfterDelete
+        key: shopifyMenuAfterDelete
       }
     }
   ]

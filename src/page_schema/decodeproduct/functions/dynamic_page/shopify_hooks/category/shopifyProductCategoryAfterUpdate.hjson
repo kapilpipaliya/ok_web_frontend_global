@@ -7,21 +7,8 @@
         description: Enqueues background job to update a collection in Shopify when a ShopifyProductCategory is modified.
         body:
           '''
-const { parentVertexLabel, name, vertexId, operation, result, oldData } = args.contextData;
-
+const { parentVertexLabel, name, vertexId, operation, result, oldData, shop } = args.contextData;
 if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') return;
-
-const shopify = args.getShopifyClient();
-let shop;
-try {
-  const event = args.getRequestEvent();
-  if (!event) throw new Error("No request context available");
-  const authResult = await shopify.authenticate.admin(event.request);
-  shop = authResult.session.shop;
-} catch (authError) {
-  console.error("shopifyProductCategoryAfterUpdate: Shopify authentication failed", authError);
-  return;
-}
 if (!shop) return;
 
 try {
@@ -48,6 +35,8 @@ try {
     oldData
   });
   await queue.close();
+  const r = args.contextData?.result;
+  if (r?.data?.P && typeof r.data.P === 'object') r.data.P.syncStatus = 'queued';
 } catch (error) {
   console.error("shopifyProductCategoryAfterUpdate: Failed to enqueue job", error);
 }

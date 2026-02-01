@@ -43,58 +43,7 @@ const doJob = async (args, jobData, dbSession) => {
   const nameChanged = oldCategoryName && oldCategoryName !== newCategoryName;
 
   if (!shopifyCollectionId) {
-    if (nameChanged && newCategoryName) {
-      const updateProductTagsForCategoryNameChange = async (categoryId, oldName, newName, adminInstance) => {
-        if (!categoryId || !newName) return;
-        const productsResult = await dbSession.run(
-          `MATCH (p:ShopifyProduct)-[:ProductCategory]->(cat:ShopifyProductCategory)
-           WHERE elementId(cat) = $categoryId
-           RETURN elementId(p) as elementId, p.id as shopifyId`,
-          { categoryId }
-        );
-        const productsToUpdate = [];
-        for (const record of productsResult.records) {
-          const shopifyId = record.get('shopifyId');
-          if (shopifyId) productsToUpdate.push({ shopifyId });
-        }
-        for (const product of productsToUpdate) {
-          try {
-            const getProductResponse = await adminInstance.graphql(`query { product(id: "${product.shopifyId}") { id tags } }`);
-            let getProductApiResponse = getProductResponse instanceof Response ? await getProductResponse.json() : getProductResponse;
-            const currentProduct = getProductApiResponse.data?.product;
-            if (!currentProduct) continue;
-            const currentTags = currentProduct.tags || [];
-            let updatedTags = [...currentTags];
-            if (oldName && updatedTags.includes(oldName)) updatedTags = updatedTags.filter(tag => tag !== oldName);
-            if (newName && !updatedTags.includes(newName)) updatedTags.push(newName);
-            if (JSON.stringify(currentTags.sort()) === JSON.stringify(updatedTags.sort())) continue;
-            await adminInstance.graphql(
-              `mutation productSet($input: ProductSetInput!) { productSet(synchronous: true, input: $input) { product { id tags } userErrors { field message } } }`,
-              { variables: { input: { id: product.shopifyId, tags: updatedTags } } }
-            );
-            await new Promise(r => setTimeout(r, 200));
-          } catch (e) { console.error("Tag update error", product.shopifyId, e); }
-        }
-      };
-      await updateProductTagsForCategoryNameChange(vertexId, oldCategoryName, newCategoryName, admin);
-    }
-    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementId: vertexId });
-    if (h && shop) {
-      try {
-        const qMenu = h.createShopifyQueue(args, 'processShopifyProductCategoryMenuAfterUpdate');
-        await h.addShopifyJob(qMenu, 'processShopifyProductCategoryMenuAfterUpdate', { shop, parentVertexLabel: 'ShopifyProductCategory', vertexId, name, operation: 'update', result });
-        await qMenu.close();
-      } catch (e) {
-        console.error('processShopifyProductCategoryMenuAfterUpdate enqueue:', e);
-      }
-      try {
-        const q = h.createShopifyQueue(args, 'processCreateAllCategoriesMenu');
-        await h.addShopifyJob(q, 'processCreateAllCategoriesMenu', { shop, menuTitle: 'Categories', menuHandle: 'categories' });
-        await q.close();
-      } catch (e) {
-        console.error('createAllCategoriesMenu enqueue:', e);
-      }
-    }
+    console.warn("processShopifyProductCategoryAfterUpdate: No Shopify collection ID for category vertexId=", vertexId, ", skipping");
     return;
   }
 
@@ -126,7 +75,7 @@ const doJob = async (args, jobData, dbSession) => {
     const shopifyHandle = updatedCollection.handle;
     if (vertexId && shopifyHandle) {
       await dbSession.run(
-        `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.handle = $handle, c.syncStatus = 'complete', c.updatedAt = datetime()`,
+        `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.handle = $handle, c.updatedAt = datetime()`,
         { elementId: vertexId, handle: shopifyHandle }
       );
       if (result?.data?.P) result.data.P.handle = shopifyHandle;
@@ -163,11 +112,11 @@ const doJob = async (args, jobData, dbSession) => {
       await updateProductTagsForCategoryNameChange(vertexId, oldCategoryName, newCategoryName, admin);
       if (h && shop) {
         try {
-          const qMenu = h.createShopifyQueue(args, 'processShopifyProductCategoryMenuAfterUpdate');
-          await h.addShopifyJob(qMenu, 'processShopifyProductCategoryMenuAfterUpdate', { shop, parentVertexLabel: 'ShopifyProductCategory', vertexId, name, operation: 'update', result });
+          const qMenu = h.createShopifyQueue(args, 'processShopifyMenuAfterUpdate');
+          await h.addShopifyJob(qMenu, 'processShopifyMenuAfterUpdate', { shop, parentVertexLabel: 'ShopifyProductCategory', vertexId, name, operation: 'update', result });
           await qMenu.close();
         } catch (e) {
-          console.error('processShopifyProductCategoryMenuAfterUpdate enqueue:', e);
+          console.error('processShopifyMenuAfterUpdate enqueue:', e);
         }
         try {
           const q = h.createShopifyQueue(args, 'processCreateAllCategoriesMenu');
@@ -195,7 +144,7 @@ if (args.contextData?.action === 'start') {
       await runWithSession(args, job.data.shop, async (dbSession) => {
         await doJob(args, job.data, dbSession);
       });
-    }, { connection, concurrency: 2 });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryAfterUpdate: Job failed', job?.id, err?.message));
     workerInstance.on('error', (err) => console.error('processShopifyProductCategoryAfterUpdate: Worker error', err?.message));
     return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
@@ -205,10 +154,6 @@ if (args.contextData?.action === 'start') {
     throw error;
   }
 }
-
-await runWithSession(args, args.contextData.shop, async (dbSession) => {
-  await doJob(args, args.contextData, dbSession);
-});
 '''
         key: processShopifyProductCategoryAfterUpdate
       }

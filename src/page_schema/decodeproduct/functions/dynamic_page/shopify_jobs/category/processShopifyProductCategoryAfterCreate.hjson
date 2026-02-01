@@ -28,7 +28,7 @@ const doJob = async (args, jobData, dbSession) => {
   const categoryData = vertex?.P || {};
   if (categoryData.id) {
     console.log("processShopifyProductCategoryAfterCreate: Category already has Shopify ID, skipping");
-    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementId: vertexId });
+    // if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.updatedAt = datetime()`, { elementId: vertexId });
     return;
   }
 
@@ -86,7 +86,7 @@ const doJob = async (args, jobData, dbSession) => {
     if (vertexId && shopifyCollectionId) {
       await dbSession.run(
         `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId
-         SET c.id = $shopifyId, c.handle = $handle, c.syncStatus = 'complete', c.updatedAt = datetime()`,
+         SET c.id = $shopifyId, c.handle = $handle, c.updatedAt = datetime()`,
         { elementId: vertexId, shopifyId: shopifyCollectionId, handle: shopifyHandle }
       );
       if (result?.data?.P) {
@@ -96,8 +96,8 @@ const doJob = async (args, jobData, dbSession) => {
       console.log(`✅ Created collection in Shopify: ${shopifyCollectionId} (${createdCollection.title})`);
       if (h && shop) {
         try {
-          const qMenu = h.createShopifyQueue(args, 'processShopifyProductCategoryMenuAfterCreate');
-          await h.addShopifyJob(qMenu, 'processShopifyProductCategoryMenuAfterCreate', {
+          const qMenu = h.createShopifyQueue(args, 'processShopifyMenuAfterCreate');
+          await h.addShopifyJob(qMenu, 'processShopifyMenuAfterCreate', {
             shop,
             parentVertexLabel: 'ShopifyProductCategory',
             vertexId,
@@ -107,7 +107,7 @@ const doJob = async (args, jobData, dbSession) => {
           });
           await qMenu.close();
         } catch (e) {
-          console.error('processShopifyProductCategoryMenuAfterCreate enqueue:', e);
+          console.error('processShopifyMenuAfterCreate enqueue:', e);
         }
         try {
           const q = h.createShopifyQueue(args, 'processCreateAllCategoriesMenu');
@@ -135,7 +135,7 @@ if (args.contextData?.action === 'start') {
       await runWithSession(args, job.data.shop, async (dbSession) => {
         await doJob(args, job.data, dbSession);
       });
-    }, { connection, concurrency: 2 });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryAfterCreate: Job failed', job?.id, err?.message));
     workerInstance.on('error', (err) => console.error('processShopifyProductCategoryAfterCreate: Worker error', err?.message));
     return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
@@ -145,10 +145,6 @@ if (args.contextData?.action === 'start') {
     throw error;
   }
 }
-
-await runWithSession(args, args.contextData.shop, async (dbSession) => {
-  await doJob(args, args.contextData, dbSession);
-});
 '''
         key: processShopifyProductCategoryAfterCreate
       }

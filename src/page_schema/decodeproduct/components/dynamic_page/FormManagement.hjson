@@ -87,11 +87,11 @@ const initializeForm = () => {
     const existingVertex = args.graph.vertexes[initialVertex.id];
 
     if (existingVertex) {
-      // Use existing vertex ID
-      setFormVertexId(initialVertex.id);
-      // Generate new txnId for edit operations
+      // Clone vertex before editing so edits don't mutate the original until save
       const txnId = args.generateNewTxnId(args.graph, args.setGraph);
       setFormTxnId(txnId);
+      const clonedVertex = args.cloneVertexWithEdges(txnId, existingVertex, {}, args.graph, args.setGraph);
+      setFormVertexId(clonedVertex.id);
     } else {
       // Vertex doesn't exist in graph, create new vertex with initialVertex properties
       const txnId = args.generateNewTxnId(args.graph, args.setGraph);
@@ -356,6 +356,13 @@ const handleSave = async () => {
       vertex: vertex,
       relationships: relationshipData
     });
+
+    // Clean up after successful save: revert form transaction and reset txn id
+    const txnId = formTxnId();
+    if (txnId && txnId > 0) {
+      args.revertTransaction(txnId);
+      setFormTxnId(0);
+    }
   } catch (error) {
     console.error("Error saving:", error);
     args.showErrorToast?.("Failed to save");

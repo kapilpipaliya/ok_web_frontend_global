@@ -190,6 +190,9 @@ const getSyncStatus = () => {
   return item?.P?.syncStatus ?? null;
 };
 
+// True when item is queued (sync in progress) - no operations allowed
+const isQueued = () => getSyncStatus() === 'queued';
+
 // Check if item has children
 // Show expand button if we have children loaded or if relationships indicate children exist
 const hasChildren = () => {
@@ -272,6 +275,10 @@ const refreshCategoryCount = async (categoryItem) => {
 // Handle opening add modal
 const handleOpenAddModal = (e) => {
   e.stopPropagation();
+  if (isQueued()) {
+    args.showWarningToast?.("Cannot add: item is syncing");
+    return;
+  }
   setIsAddModalOpen(true);
 };
 
@@ -283,6 +290,10 @@ const handleCloseAddModal = () => {
 // Handle opening edit modal
 const handleOpenEditModal = (e) => {
   e.stopPropagation();
+  if (isQueued()) {
+    args.showWarningToast?.("Cannot edit: item is syncing");
+    return;
+  }
   setIsEditModalOpen(true);
 };
 
@@ -299,11 +310,11 @@ const handleAddChildSave = async (newVertex) => {
   try {
     args.fns.setOperationLoading?.(true);
 
-    // Refresh children - force refresh to get latest data
+    // Refresh children - force refresh to get latest data (includes new vertex and starts queued poll)
     const fetchChildrenFn = getFetchChildren();
     if (fetchChildrenFn) {
       await fetchChildrenFn(item.id, true);
-      // Expand parent if not already expanded
+      // Expand parent if not already expanded so the new row is visible
       const onToggleExpand = getOnToggleExpand();
       if (onToggleExpand) {
         const expanded = getExpandedKeys();
@@ -311,6 +322,12 @@ const handleAddChildSave = async (newVertex) => {
           await onToggleExpand(item.id);
         }
       }
+    }
+
+    // If new vertex is queued, ensure poll runs (fetchChildren already starts it; this covers edge cases)
+    const startPoll = args.contextData.props?.startSidebarQueuedPollIfNeeded;
+    if (newVertex?.P?.syncStatus === 'queued' && startPoll) {
+      startPoll();
     }
 
     handleCloseAddModal();
@@ -323,8 +340,6 @@ const handleAddChildSave = async (newVertex) => {
 const handleEditSave = async (updatedVertex) => {
   const item = getItem();
   if (!item) return;
-
-  handleCloseEditModal();
 
   // Update the item in the tree using the parent's update function
   // The updated vertex from server includes contentCount in P
@@ -433,6 +448,7 @@ const initDraggable = (element) => {
   
   const cleanup = args.draggable({
     element,
+    canDrag: () => !isQueued(),
     getInitialData: () => ({
       type: 'sidebar-item',
       categoryId: item.id,
@@ -531,6 +547,8 @@ const initDropTarget = (element) => {
     element,
     getData: () => ({}),
     canDrop: (args) => {
+      // Note: Don't return false for isQueued here - we need drop target to stay active
+      // so onDrag fires and we can show red highlight; onDrop will reject the drop
       const source = args.source;
       const data = source.data;
       
@@ -557,6 +575,13 @@ const initDropTarget = (element) => {
       const source = event.source;
       const data = source.data;
       
+      // Cannot drop onto a queued (syncing) item
+      if (isQueued()) {
+        setIsValidDrop(false);
+        setIsDragOver(true);
+        return;
+      }
+      
       // Validate drop target for sidebar items
       if (data && data.type === 'sidebar-item' && data.categoryId) {
         const validation = validateDropTarget(data.categoryId, item.id);
@@ -577,6 +602,12 @@ const initDropTarget = (element) => {
     },
     onDrop: async (event) => {
       setIsDragOver(false);
+      
+      // Cannot drop onto a queued (syncing) item
+      if (isQueued()) {
+        args.showWarningToast?.("Cannot drop here: item is syncing");
+        return;
+      }
       
       const source = event.source;
       const data = source.data;
@@ -819,6 +850,10 @@ const handleDelete = async (e) => {
   e.stopPropagation();
   const item = getItem();
   if (!item) return;
+  if (isQueued()) {
+    args.showWarningToast?.("Cannot delete: item is syncing");
+    return;
+  }
 
   const parentVertexLabel = getParentVertexLabel();
   const toParentEdgeType = getToParentEdgeType();
@@ -953,6 +988,7 @@ return {
   getItemName,
   getItemIcon,
   getSyncStatus,
+  isQueued,
   hasChildren,
   shouldShowItem,
   isDirectMatch,
@@ -1050,6 +1086,7 @@ const item = args.fns.getItem();
 const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
 const rootKey = rootKeys.key;
 const isRoot = item?.P?.key === rootKey || item?.P?.key === 'uncategorized';
+const isQueued = args.fns.isQueued?.() ?? false;
 
 // Determine drag over styling based on validation
 let dragOverStyle = "";
@@ -1079,7 +1116,7 @@ if (dragOverStyle.includes('background-color')) {
 // Compose the style string
 return `._id {
   align-items: center;
-  cursor: ${isRoot ? 'default' : isDragging ? 'grabbing' : isDragOver && !isValidDrop ? 'not-allowed' : 'grab'};
+  cursor: ${isRoot || isQueued ? 'default' : isDragging ? 'grabbing' : isDragOver && !isValidDrop ? 'not-allowed' : 'grab'};
   display: flex;
   gap: 0.375rem;
   font-size: 14px;
@@ -1128,10 +1165,16 @@ return {
         args.fns.initDropTarget(el);
       }
     } else {
-      // Cleanup on unmount
+      // Cleanup on unmount (ref called with null)
       if (args.fns.cleanupDragAndDrop) {
         args.fns.cleanupDragAndDrop();
       }
+    }
+  },
+  onCleanup: () => {
+    // Ensure drag-and-drop listeners are removed on unmount (backup if ref(null) not called)
+    if (args.fns.cleanupDragAndDrop) {
+      args.fns.cleanupDragAndDrop();
     }
   },
   style: isDragging ? { opacity: 0.5 } : {}
@@ -1302,10 +1345,11 @@ return `._id {
           '''
 const item = args.fns.getItem();
 const isUncategorized = item?.id === 'uncategorized';
+const isQueued = args.fns.isQueued?.() ?? false;
 
 return {
   as: "div",
-  hide: isUncategorized,
+  hide: isUncategorized || isQueued,
   class: "tree-item-actions"
 };
 '''
@@ -1479,6 +1523,7 @@ return {
   onMoveItemsToCategory: args.contextData.props?.onMoveItemsToCategory,
   fetchRoot: args.contextData.props?.fetchRoot,
   getRoot: args.contextData.props?.getRoot,
+  startSidebarQueuedPollIfNeeded: args.contextData.props?.startSidebarQueuedPollIfNeeded,
   hooks: args.contextData.props?.hooks,
   label: args.contextData.props?.label,
   setExpandedKeys: args.contextData.props?.setExpandedKeys,

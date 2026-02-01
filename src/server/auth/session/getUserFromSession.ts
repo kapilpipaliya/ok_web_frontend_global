@@ -12,9 +12,9 @@ import { getShopifyClient, ensureShopDatabaseAndMigrate, getDBSessionForShop } f
 import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function getSessionUser(): Promise<undefined | Vertex> {
+  // Check if hostname is decodeproduct.decodecommerce.com
+  const event = getRequestEvent();
   try {
-    // Check if hostname is decodeproduct.decodecommerce.com
-    const event = getRequestEvent();
     if (event) {
       try {
         const urlObj = new URL(event.request.url);
@@ -79,9 +79,16 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
             }
           }
         }
-      } catch (err) {
+      } catch (errorOrResponse) {
+        if (errorOrResponse instanceof Response) {
+          if (event && event.response) {
+            errorOrResponse.headers.forEach((value, key) => {
+              event.response.headers.set(key, value);
+            });
+          }
+        }
         // If Shopify authentication fails, fall through to regular session check
-        console.error("Error in Shopify authentication for getSessionUser:", err);
+        console.error("Error in Shopify authentication for getSessionUser:", errorOrResponse);
       }
     }
     

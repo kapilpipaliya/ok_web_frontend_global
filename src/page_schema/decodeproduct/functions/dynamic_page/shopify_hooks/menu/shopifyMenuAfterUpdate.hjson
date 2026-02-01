@@ -11,17 +11,7 @@ const { parentVertexLabel, vertexId, name, operation, result } = args.contextDat
 
 if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') return;
 
-const shopify = args.getShopifyClient();
-let shop;
-try {
-  const event = args.getRequestEvent();
-  if (!event) throw new Error("No request context available");
-  const authResult = await shopify.authenticate.admin(event.request);
-  shop = authResult.session.shop;
-} catch (authError) {
-  console.error("shopifyProductCategoryMenuAfterUpdate: Shopify authentication failed", authError);
-  return;
-}
+const shop = args.contextData.shop;
 if (!shop) return;
 
 try {
@@ -36,7 +26,7 @@ try {
       { elementId: vertexId, status: 'queued' }
     );
   }
-  const queueName = 'processShopifyProductCategoryMenuAfterUpdate';
+  const queueName = 'processShopifyMenuAfterUpdate';
   const queue = helpers.result.data.createShopifyQueue(args, queueName);
   await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
@@ -47,11 +37,13 @@ try {
     result
   });
   await queue.close();
+  const r = args.contextData?.result;
+  if (r?.data?.P && typeof r.data.P === 'object') r.data.P.syncStatus = 'queued';
 } catch (error) {
-  console.error("shopifyProductCategoryMenuAfterUpdate: Failed to enqueue job", error);
+  console.error("shopifyMenuAfterUpdate: Failed to enqueue job", error);
 }
 '''
-        key: shopifyProductCategoryMenuAfterUpdate
+        key: shopifyMenuAfterUpdate
       }
     }
   ]

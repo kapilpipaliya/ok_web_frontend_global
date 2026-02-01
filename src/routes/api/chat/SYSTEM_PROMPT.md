@@ -241,6 +241,13 @@ export interface FunctionArgumentBaseType {
           setGraph: SetStoreFunction<GraphInterface>,
           data: Record<string, unknown>,
   ) => void;
+  cloneVertexWithEdges: (
+          txnId: number,
+          vertex: Vertex,
+          extraProperties: Record<string, unknown>,
+          graph: GraphInterface,
+          setGraph: SetStoreFunction<GraphInterface>,
+  ) => Vertex;
   // Theme toggle functions
   toggleTheme: () => void;
   setColorMode: (mode: "light" | "dark" | "system") => void;

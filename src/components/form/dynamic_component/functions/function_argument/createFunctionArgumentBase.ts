@@ -53,6 +53,7 @@ import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 import { klona } from "klona";
+import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { findVertexByLabelAndPks, findVertexByLabelAndUniqueId, findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
 // Following Untitled-1 (11-21, 12-13): also import `combine`, `GroupDropIndicator`, `liveRegion`, `type Instruction`, and `triggerPostMoveFlash` non-directly (no direct imports).
 // Only import drag-and-drop modules and related utilities on the client, using dynamic import assignment.
@@ -339,6 +340,7 @@ export function createFunctionArgumentBase(
     addNewEdge,
     deleteEdge,
     newEdge,
+    cloneVertexWithEdges,
 
     // setGraphData,
     klona,

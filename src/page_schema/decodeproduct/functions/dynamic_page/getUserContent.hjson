@@ -207,6 +207,8 @@ if (!enableUserScoping) {
 const queryResult = await args.session.run(query, queryParams);
 
 // Use processResult to populate graph structure (nodes + relationships)
+if (!args.context.nodes) args.context.nodes = {};
+if (!args.context.relationships) args.context.relationships = {};
 args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
 const nodes = args.context.nodes || {};
 const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));

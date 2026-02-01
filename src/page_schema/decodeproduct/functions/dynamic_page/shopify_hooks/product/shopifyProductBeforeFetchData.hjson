@@ -56,31 +56,22 @@ if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
 
 console.log('🔄 Syncing Shopify products with database...');
 
-// Get Shopify API object
-const shopify = args.getShopifyClient();
-
-// Authenticate the request using Shopify's admin authentication
-let admin;
-let shop;
-try {
-  const event = args.getRequestEvent();
-  if (!event) {
-    throw new Error("No request context available");
-  }
-  const request = event.request;
-
-  const result = await shopify.authenticate.admin(request);
-  shop = result.session.shop;
-  admin = result.admin;
-} catch (authError) {
-  console.error("shopifyProductBeforeFetchData: Shopify authentication failed", authError);
-  return; // Can't sync without authentication
-}
-
+const shop = args.contextData.shop;
 if (!shop) {
   console.warn("shopifyProductBeforeFetchData: Shop domain is missing, skipping sync");
   return;
 }
+
+const shopify = args.getShopifyClient();
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyProductBeforeFetchData: Shopify unauthenticated.admin failed", authError);
+  return; // Can't sync without authentication
+}
+if (!admin) return;
 
 // Fetch all products from Shopify using pagination
 const commonProductFields = `

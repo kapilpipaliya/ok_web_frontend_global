@@ -4,26 +4,26 @@
       id: "1"
       L: Function
       P: {
-        description: Background job: updates Shopify menu for top-level category when a category is updated.
+        description: Background job: creates Shopify menu for top-level category when a category is created.
         body:
           '''
-const QUEUE_NAME = 'processShopifyProductCategoryMenuAfterUpdate';
+const QUEUE_NAME = 'processShopifyMenuAfterCreate';
 
 const doJob = async (args, jobData, dbSession, subDomain, h) => {
-  const { parentVertexLabel, vertexId, name, operation, result, shop } = jobData;
-  if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') return;
+  const { parentVertexLabel, vertexId, name, parentId, result, shop } = jobData;
+  if (parentVertexLabel !== 'ShopifyProductCategory') return;
   try {
     const menuResult = await h.updateTopLevelCategoryMenuLogic(args, dbSession, { categoryElementId: vertexId, shop });
     if (menuResult?.success) {
       console.log(`✅ ${menuResult.message}`);
       if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementId: vertexId });
     } else {
-      console.error("processShopifyProductCategoryMenuAfterUpdate: Failed to update menu:", menuResult?.error);
+      console.warn("processShopifyMenuAfterCreate: Failed to update menu:", menuResult?.error);
       const errMsg = (menuResult?.error && (typeof menuResult.error === 'string' ? menuResult.error : menuResult.error?.message || String(menuResult.error))) || 'Menu update failed';
       if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg.substring(0, 2000) });
     }
   } catch (error) {
-    console.error("processShopifyProductCategoryMenuAfterUpdate: Error", error);
+    console.error("processShopifyMenuAfterCreate: Error", error);
     const errMsg = error?.message || String(error);
     if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg.substring(0, 2000) });
   }
@@ -50,22 +50,19 @@ if (args.contextData?.action === 'start') {
       await runWithSession(args, job.data.shop, async (dbSession, subDomain) => {
         await doJob(args, job.data, dbSession, subDomain, h);
       });
-    }, { connection, concurrency: 2 });
-    workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryMenuAfterUpdate: Job failed', job?.id, err?.message));
-    workerInstance.on('error', (err) => console.error('processShopifyProductCategoryMenuAfterUpdate: Worker error', err?.message));
+    }, { connection, concurrency: 2, lockDuration: 120000 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyMenuAfterCreate: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyMenuAfterCreate: Worker error', err?.message));
     return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
   } catch (error) {
-    console.error('processShopifyProductCategoryMenuAfterUpdate: Failed to create worker', error);
+    console.error('processShopifyMenuAfterCreate: Failed to create worker', error);
     if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
     throw error;
   }
 }
 
-await runWithSession(args, args.contextData.shop, async (dbSession, subDomain) => {
-  await doJob(args, args.contextData, dbSession, subDomain, h);
-});
 '''
-        key: processShopifyProductCategoryMenuAfterUpdate
+        key: processShopifyMenuAfterCreate
       }
     }
   ]

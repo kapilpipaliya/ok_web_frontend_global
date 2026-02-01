@@ -9,20 +9,8 @@
           '''
 const { menuTitle = "Categories", menuHandle = "categories" } = args.contextData;
 
-const shopify = args.getShopifyClient();
-let shop;
-try {
-  const event = args.getRequestEvent();
-  if (!event) throw new Error("No request context available");
-  const authResult = await shopify.authenticate.admin(event.request);
-  shop = authResult.session.shop;
-} catch (authError) {
-  console.error("createAllCategoriesMenu: Shopify authentication failed", authError);
-  return { success: false, error: "Shopify authentication failed" };
-}
-if (!shop) {
-  return { success: false, error: "shop is required" };
-}
+const shop = args.contextData.shop;
+if (!shop) return { success: false, error: "shop is required" };
 
 try {
   const helpers = await args.executeNamedServerFunction(

@@ -19,23 +19,11 @@ if (!categoryElementId || !categoryName) {
 
 const shopify = args.getShopifyClient();
 let admin;
-let shop;
-const event = args.getRequestEvent();
-if (event) {
+const shop = args.contextData.shop;
+if (shop) {
   try {
-    const request = event.request;
-    const result = await shopify.authenticate.admin(request);
-    shop = result.session.shop;
-    admin = result.admin;
-  } catch (authError) {
-    console.error("createShopifyMenuForCategory: Shopify authentication failed", authError);
-    return { success: false, error: "Shopify authentication failed" };
-  }
-} else if (args.contextData.shop) {
-  try {
-    const authResult = await shopify.unauthenticated.admin(args.contextData.shop);
+    const authResult = await shopify.unauthenticated.admin(shop);
     admin = authResult.admin;
-    shop = authResult.session?.shop || args.contextData.shop;
   } catch (authError) {
     console.error("createShopifyMenuForCategory: Shopify unauthenticated.admin failed", authError);
     return { success: false, error: "Shopify authentication failed" };

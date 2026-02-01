@@ -86,7 +86,7 @@ if (args.contextData?.action === 'start') {
       await runWithSession(args, job.data.shop, async (dbSession) => {
         await doJob(args, job.data, dbSession);
       });
-    }, { connection, concurrency: 2 });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processShopifyProductAfterCreateRelationship: Job failed', job?.id, err?.message));
     workerInstance.on('error', (err) => console.error('processShopifyProductAfterCreateRelationship: Worker error', err?.message));
     return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
@@ -96,10 +96,6 @@ if (args.contextData?.action === 'start') {
     throw error;
   }
 }
-
-await runWithSession(args, args.contextData.shop, async (dbSession) => {
-  await doJob(args, args.contextData, dbSession);
-});
 '''
         key: processShopifyProductAfterCreateRelationship
       }

@@ -65,9 +65,9 @@ try {
 } catch (errorOrResponse) {
   if (errorOrResponse instanceof Response) {
     const ev = args.getRequestEvent();
-    if (ev?.responseHeaders) {
+    if (ev && ev.response) {
       errorOrResponse.headers.forEach((value, key) => {
-        ev.responseHeaders.set(key, value);
+        ev.response.headers.set(key, value);
       });
     }
   }

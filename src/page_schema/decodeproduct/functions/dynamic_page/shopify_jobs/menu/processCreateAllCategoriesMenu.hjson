@@ -145,7 +145,7 @@ if (args.contextData?.action === 'start') {
       await runWithSession(args, job.data.shop, async (dbSession, subDomain) => {
         await doJob(args, job.data, dbSession, subDomain, h);
       });
-    }, { connection, concurrency: 2 });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
     workerInstance.on('failed', (job, err) => console.error('processCreateAllCategoriesMenu: Job failed', job?.id, err?.message));
     workerInstance.on('error', (err) => console.error('processCreateAllCategoriesMenu: Worker error', err?.message));
     return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
@@ -155,10 +155,6 @@ if (args.contextData?.action === 'start') {
     throw error;
   }
 }
-
-await runWithSession(args, args.contextData.shop, async (dbSession, subDomain) => {
-  await doJob(args, args.contextData, dbSession, subDomain, h);
-});
 '''
         key: processCreateAllCategoriesMenu
       }

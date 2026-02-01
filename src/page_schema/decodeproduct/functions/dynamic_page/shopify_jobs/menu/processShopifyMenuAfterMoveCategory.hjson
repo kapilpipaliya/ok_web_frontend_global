@@ -7,7 +7,7 @@
         description: Background job: updates Shopify menus when a category is moved (from/to top-level).
         body:
           '''
-const QUEUE_NAME = 'processShopifyProductCategoryAfterMoveCategory';
+const QUEUE_NAME = 'processShopifyMenuAfterMoveCategory';
 
 const helpers = await args.executeNamedServerFunction(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
@@ -63,7 +63,7 @@ const doJob = async (args, jobData, dbSession, subDomain) => {
     }
     console.log(`✅ Menu updates complete after category move`);
   } catch (error) {
-    console.error("processShopifyProductCategoryAfterMoveCategory: Error", error);
+    console.error("processShopifyMenuAfterMoveCategory: Error", error);
     const errMsg = error?.message || String(error);
     if (categoryId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: categoryId, syncError: errMsg.substring(0, 2000) });
   }
@@ -79,22 +79,18 @@ if (args.contextData?.action === 'start') {
       await runWithSession(args, job.data.shop, async (dbSession, subDomain) => {
         await doJob(args, job.data, dbSession, subDomain);
       });
-    }, { connection, concurrency: 2 });
-    workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryAfterMoveCategory: Job failed', job?.id, err?.message));
-    workerInstance.on('error', (err) => console.error('processShopifyProductCategoryAfterMoveCategory: Worker error', err?.message));
+    }, { connection, concurrency: 2, lockDuration: 120000 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyMenuAfterMoveCategory: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyMenuAfterMoveCategory: Worker error', err?.message));
     return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
   } catch (error) {
-    console.error('processShopifyProductCategoryAfterMoveCategory: Failed to create worker', error);
+    console.error('processShopifyMenuAfterMoveCategory: Failed to create worker', error);
     if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
     throw error;
   }
 }
-
-await runWithSession(args, args.contextData.shop, async (dbSession, subDomain) => {
-  await doJob(args, args.contextData, dbSession, subDomain);
-});
 '''
-        key: processShopifyProductCategoryAfterMoveCategory
+        key: processShopifyMenuAfterMoveCategory
       }
     }
   ]

@@ -29,6 +29,7 @@ const onSearchChange = (value) => {
   debouncedSetSearch(value);
 };
 const sidebarPollRef = { id: null };
+const sidebarPollCancelledRef = { current: false };
 
 // Graph namespace for sidebar data
 const SIDEBAR_NAMESPACE = "sidebar";
@@ -350,6 +351,11 @@ const updateItemInTree = (updatedVertex) => {
   if (currentSelected && currentSelected.id === updatedVertex.id) {
     setSelectedItem(updatedVertex);
   }
+
+  // If the saved vertex is queued (sync in progress), start polling so we fetch updated status when ready
+  if (updatedVertex.P?.syncStatus === 'queued') {
+    startSidebarQueuedPollIfNeeded();
+  }
 };
 
 // Background refresh: fetch only sidebar vertices that are no longer queued and merge into graph
@@ -380,8 +386,13 @@ const pollQueuedSidebar = async () => {
   const queuedIds = getQueuedSidebarVertexIds();
   if (queuedIds.length === 0) return;
   await refreshQueuedSidebarItems(queuedIds);
+  if (sidebarPollCancelledRef.current) return;
   const stillQueued = getQueuedSidebarVertexIds();
-  if (stillQueued.length > 0 && sidebarPollRef.id === null) {
+  if (stillQueued.length > 0) {
+    if (sidebarPollRef.id) {
+      clearTimeout(sidebarPollRef.id);
+      sidebarPollRef.id = null;
+    }
     sidebarPollRef.id = setTimeout(() => {
       sidebarPollRef.id = null;
       pollQueuedSidebar();
@@ -390,17 +401,23 @@ const pollQueuedSidebar = async () => {
 };
 
 const startSidebarQueuedPollIfNeeded = () => {
+  if (sidebarPollCancelledRef.current) return;
   if (sidebarPollRef.id) {
     clearTimeout(sidebarPollRef.id);
     sidebarPollRef.id = null;
   }
-  const intervalMs = args.fns.getSidebarConfig?.()?.refetchIntervalWhenQueued ?? 5000;
   const queuedIds = getQueuedSidebarVertexIds();
-  if (intervalMs && queuedIds.length > 0) {
-    sidebarPollRef.id = setTimeout(() => {
-      sidebarPollRef.id = null;
-      pollQueuedSidebar();
-    }, intervalMs);
+  if (queuedIds.length === 0) return;
+  // Run first poll immediately so sync status updates sooner; pollQueuedSidebar schedules the next run at intervalMs
+  pollQueuedSidebar();
+};
+
+// Clear poll timeout and mark as cancelled so in-flight poll does not reschedule (prevents leak on unmount)
+const cleanupSidebarPoll = () => {
+  sidebarPollCancelledRef.current = true;
+  if (sidebarPollRef.id) {
+    clearTimeout(sidebarPollRef.id);
+    sidebarPollRef.id = null;
   }
 };
 
@@ -654,7 +671,9 @@ return {
   onSearchChange,
   getFilteredRoot,
   filterTreeVertex,
-  shouldExpandVertexForSearch
+  shouldExpandVertexForSearch,
+  startSidebarQueuedPollIfNeeded,
+  cleanupSidebarPoll
 };
 '''
         key: Sidebar
@@ -686,6 +705,9 @@ return {
   tabIndex: 0,
   onMount: () => {
     args.fns.initialize();
+  },
+  onCleanup: () => {
+    args.fns.cleanupSidebarPoll?.();
   },
   onKeyDown: args.fns.handleSidebarKeyDown
 };
@@ -872,6 +894,7 @@ return {
   onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory(),
   fetchRoot: args.fns.fetchRoot,
   getRoot: args.fns.getRoot,
+  startSidebarQueuedPollIfNeeded: args.fns.startSidebarQueuedPollIfNeeded,
   hooks: args.fns.getHooks(),
   label: args.fns.getSidebarLabel(),
   operationLoading: args.fns.operationLoading,

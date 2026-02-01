@@ -7,7 +7,7 @@
         description: Background job: deletes or updates Shopify menus when a category is deleted.
         body:
           '''
-const QUEUE_NAME = 'processShopifyProductCategoryMenuAfterDelete';
+const QUEUE_NAME = 'processShopifyMenuAfterDelete';
 
 const doJob = async (args, jobData, dbSession, subDomain, h) => {
   const { parentVertexLabel, vertexId, operation, result, outgoingEdges, incomingEdges, shop } = jobData;
@@ -20,7 +20,7 @@ const doJob = async (args, jobData, dbSession, subDomain, h) => {
     if (deletedMenuId) {
       const deleteResult = await h.deleteShopifyMenuLogic(args, dbSession, { menuId: deletedMenuId, categoryElementId: vertexId, shop });
       if (deleteResult?.success) console.log(`✅ Deleted menu for top-level category "${deletedName}"`);
-      else console.error("processShopifyProductCategoryMenuAfterDelete: Failed to delete menu:", deleteResult?.error);
+      else console.error("processShopifyMenuAfterDelete: Failed to delete menu:", deleteResult?.error);
       return;
     }
     const affectedCategoryIds = new Set();
@@ -40,13 +40,13 @@ const doJob = async (args, jobData, dbSession, subDomain, h) => {
         console.log(`✅ ${menuResult.message}`);
         await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementId: affectedCategoryId });
       } else if (menuResult?.action !== 'skipped') {
-        console.warn("processShopifyProductCategoryMenuAfterDelete: Failed to update menu:", menuResult?.error);
+        console.warn("processShopifyMenuAfterDelete: Failed to update menu:", menuResult?.error);
         const errMsg = (menuResult?.error && (typeof menuResult.error === 'string' ? menuResult.error : menuResult.error?.message || String(menuResult.error))) || 'Menu update failed';
         await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: affectedCategoryId, syncError: errMsg.substring(0, 2000) });
       }
     }
   } catch (error) {
-    console.error("processShopifyProductCategoryMenuAfterDelete: Error", error);
+    console.error("processShopifyMenuAfterDelete: Error", error);
     const errMsg = error?.message || String(error);
     if (vertexId) { try { await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg.substring(0, 2000) }); } catch (e) {} }
   }
@@ -73,22 +73,19 @@ if (args.contextData?.action === 'start') {
       await runWithSession(args, job.data.shop, async (dbSession, subDomain) => {
         await doJob(args, job.data, dbSession, subDomain, h);
       });
-    }, { connection, concurrency: 2 });
-    workerInstance.on('failed', (job, err) => console.error('processShopifyProductCategoryMenuAfterDelete: Job failed', job?.id, err?.message));
-    workerInstance.on('error', (err) => console.error('processShopifyProductCategoryMenuAfterDelete: Worker error', err?.message));
+    }, { connection, concurrency: 2, lockDuration: 120000 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyMenuAfterDelete: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyMenuAfterDelete: Worker error', err?.message));
     return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
   } catch (error) {
-    console.error('processShopifyProductCategoryMenuAfterDelete: Failed to create worker', error);
+    console.error('processShopifyMenuAfterDelete: Failed to create worker', error);
     if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
     throw error;
   }
 }
 
-await runWithSession(args, args.contextData.shop, async (dbSession, subDomain) => {
-  await doJob(args, args.contextData, dbSession, subDomain, h);
-});
 '''
-        key: processShopifyProductCategoryMenuAfterDelete
+        key: processShopifyMenuAfterDelete
       }
     }
   ]

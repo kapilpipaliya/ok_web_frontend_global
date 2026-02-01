@@ -172,6 +172,7 @@ import {
 import { getShopifyClient } from "~/lib/shopify/shopifyHelpers";
 import { runMigration } from "~/lib/schema/runMigration";
 import { processResult } from "../conversion/processResult";
+import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -243,6 +244,9 @@ export async function executeNamedServerFunctionCore(
   let sessionCreatedLocally = false;
   let subDomain: string | undefined;
 
+  // Resolved shop for contextData (from request or from Shopify auth)
+  let shopForContext: string | undefined = request.contextData?.shop;
+
   // Function lookup session - always use fallback database for function lookup
   let functionLookupSession: Session | undefined;
   let functionLookupSessionCreated = false;
@@ -274,8 +278,10 @@ export async function executeNamedServerFunctionCore(
             // For decodeproduct.decodecommerce.com, get shop from Shopify authentication
             try {
               const shopify = getShopifyClient();
+              // TODO: use unauthenticated.admin(shop) instead of authenticate.admin(request)
               const result = await shopify.authenticate.admin(request);
               shopFromRequest = result.session.shop;
+              if (shopFromRequest) shopForContext = shopForContext ?? shopFromRequest;
             } catch (authError) {
               console.error(authError);
             }
@@ -367,6 +373,15 @@ export async function executeNamedServerFunctionCore(
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
     const serverFunction = new AsyncFunction("args", functionBody);
 
+
+    // Parent context (e.g. shop) to merge into hook contextData so hooks receive it without callers passing it explicitly
+    const parentContextDataForHooks = {
+      ...(request.contextData || {}),
+      ...(shopForContext != null && request.contextData?.shop === undefined
+        ? { shop: shopForContext }
+        : {}),
+    };
+
     // Create a context-aware executeNamedServerFunction that preserves session/subdomain
     const contextAwareExecuteNamedServerFunction = async (
       req: NamedServerFunctionRequest,
@@ -387,6 +402,8 @@ export async function executeNamedServerFunctionCore(
           vertexes: {} as unknown as any, // context.vertexes,
         };
 
+        req.contextData =  { ...parentContextDataForHooks, ...(req.contextData || {}) };
+
         return await executeNamedServerFunctionCore(req, executionContext);
       } finally {
         // Always close the session we created
@@ -402,13 +419,13 @@ export async function executeNamedServerFunctionCore(
       // Normalize to array
       const hookArray = Array.isArray(hooks) ? hooks : [hooks];
       
-      // Execute each hook sequentially
+      // Execute each hook sequentially; merge parent context (e.g. shop) so hooks receive it
       for (const hookName of hookArray) {
         if (!hookName || typeof hookName !== 'string') continue;
 
         await contextAwareExecuteNamedServerFunction({
           functionName: hookName,
-          contextData: hookContextData
+          contextData: hookContextData,
         });
       }
     };
@@ -422,7 +439,12 @@ export async function executeNamedServerFunctionCore(
         });
       },
       context: context,
-      contextData: request.contextData || {},
+      contextData: {
+        ...(request.contextData || {}),
+        ...(shopForContext != null && request.contextData?.shop === undefined
+          ? { shop: shopForContext }
+          : {}),
+      },
       vertexes: context.vertexes || [],
       executeNamedServerFunction: contextAwareExecuteNamedServerFunction,
       executeHooks: executeHooks,
@@ -575,6 +597,7 @@ export async function executeNamedServerFunctionCore(
       processResult,
       debounce,
       getRequestEvent,
+      cloneVertexWithEdges,
     };
 
     // Execute the function

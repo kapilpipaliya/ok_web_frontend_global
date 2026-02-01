@@ -686,7 +686,7 @@ const handleEdit = async (row) => {
   // If onEdit function is provided, call it instead of opening modal
   if (onEdit && typeof onEdit === 'function') {
     try {
-      await onEdit(row);
+      await onEdit(row, args);
       return;
     } catch (error) {
       console.error("Error in onEdit function:", error);
@@ -732,7 +732,7 @@ const handleSave = async (formDataToSave) => {
         const onAfterAdd = getOnAfterAdd();
         if (onAfterAdd && typeof onAfterAdd === 'function') {
           try {
-            await onAfterAdd(result);
+            await onAfterAdd(result, args);
           } catch (error) {
             console.error("Error in onAfterAdd function:", error);
             args.showErrorToast?.(error?.message || "Failed to execute after add action");
@@ -748,7 +748,7 @@ const handleSave = async (formDataToSave) => {
         const onAfterEdit = getOnAfterEdit();
         if (onAfterEdit && typeof onAfterEdit === 'function') {
           try {
-            await onAfterEdit(result);
+            await onAfterEdit(result, args);
           } catch (error) {
             console.error("Error in onAfterEdit function:", error);
             args.showErrorToast?.(error?.message || "Failed to execute after edit action");
@@ -837,7 +837,7 @@ const handleDelete = async (row) => {
       const onAfterDelete = getOnAfterDelete();
       if (onAfterDelete && typeof onAfterDelete === 'function') {
         try {
-          await onAfterDelete(result, row);
+          await onAfterDelete(result, row, args);
         } catch (error) {
           console.error("Error in onAfterDelete function:", error);
           args.showErrorToast?.(error?.message || "Failed to execute after delete action");
@@ -965,6 +965,12 @@ args.createEffect(() => {
 const tableDraggableCleanups = new Map();
 const tableDraggableElements = new Map(); // Store elements by rowId
 
+// Read current rowId from element's data attribute (row re-renders update it when sidebar/data changes)
+const getRowIdFromElement = (element) => {
+  const id = element?.getAttribute?.('data-row-id');
+  return id != null && id !== '' ? id : undefined;
+};
+
 // Helper to check if a row can be dragged
 const canDragRow = (rowId) => {
   if (!rowId) return false;
@@ -976,8 +982,8 @@ const canDragRow = (rowId) => {
   return filtered.some(row => itemIds.includes(row.id));
 };
 
-// Initialize draggable for table row - always initialize, validation in onDragStart
-const initTableDraggable = (element, rowId) => {
+// Initialize draggable for table row - rowId read from element data-row-id
+const initTableDraggable = (element) => {
   if (!element || !args.draggable) return;
   
   // Clean up existing draggable for this element if any
@@ -989,7 +995,8 @@ const initTableDraggable = (element, rowId) => {
   const cleanup = args.draggable({
     element,
     getInitialData: () => {
-      if (!canDragRow(rowId)) {
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) {
         return { type: 'table-items', itemIds: [], count: 0 };
       }
       
@@ -1007,7 +1014,8 @@ const initTableDraggable = (element, rowId) => {
     onGenerateDragPreview: ({ nativeSetDragImage }) => {
       // Provide a stable custom preview (pragmatic disables default preview in some setups)
       if (!args.setCustomNativeDragPreview || !nativeSetDragImage) return;
-      if (!canDragRow(rowId)) return;
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) return;
 
       const selected = getSelectedRows();
       const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
@@ -1061,18 +1069,18 @@ const initTableDraggable = (element, rowId) => {
       });
     },
     onDragStart: () => {
-      if (!canDragRow(rowId)) return;
-      if (element) element.style.opacity = '0.5';
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) return;
+      if (element) element.style.opacity = "0.5";
     },
     onDrop: () => {
-      if (element) element.style.opacity = '1';
+      if (element) element.style.opacity = "1";
     }
   });
   
   tableDraggableCleanups.set(element, cleanup);
-  if (rowId) {
-    tableDraggableElements.set(rowId, element);
-  }
+  const rowId = getRowIdFromElement(element);
+  if (rowId) tableDraggableElements.set(rowId, element);
   return cleanup;
 };
 
@@ -2448,9 +2456,10 @@ const hasSelection = selected.size > 0;
 
 return {
   as: "div",
+  "data-row-id": rowData?.id ?? undefined,
   ref: (el) => {
-    if (el && args.fns.initTableDraggable && rowData?.id) {
-      args.fns.initTableDraggable(el, rowData.id);
+    if (el && args.fns.initTableDraggable) {
+      args.fns.initTableDraggable(el);
     }
   },
   onCleanup: () => {
@@ -2598,7 +2607,100 @@ return {
   },
   ariaLabel: "Edit",
   title: "Edit",
-  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton()
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || (() => {
+    const editLink = args.fns.prop('editLink');
+    if (!editLink) return false;
+    const hasHref = editLink?.getHref?.(rowData);
+    const hasOnClick = typeof (editLink?.getOnClick ?? editLink?.onClick) === "function";
+    return !!(hasHref || hasOnClick);
+  })()
+};
+'''
+      }
+    }
+    {
+      id: "45a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.filteredData()[virtualItem.index];
+const editLink = args.fns.prop('editLink');
+const getHrefFn = editLink?.getHref;
+const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
+const defaultStyle = "color: " + (args.theme?.var?.color?.primary ?? "inherit") + "; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;";
+const styleVal = editLink?.style;
+const editLinkStyle = typeof styleVal === "function" ? styleVal(rowData) : (styleVal ?? defaultStyle);
+const onClickFn = editLink?.getOnClick ?? editLink?.onClick;
+const hasCustomOnClick = typeof onClickFn === "function";
+const editLinkIcon = editLink?.icon;
+const showIconLink = !!editLinkIcon;
+
+return {
+  as: "a",
+  href: editHref ?? "#",
+  target: editLink?.target ?? "_top",
+  rel: editLink?.rel ?? "noopener noreferrer",
+  text: editLink?.label ?? "Edit",
+  onClick: (e) => {
+    e.stopPropagation();
+    if (hasCustomOnClick) {
+      e.preventDefault();
+      onClickFn(rowData, e);
+    } else if (!editHref) {
+      e.preventDefault();
+    }
+  },
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || (!editHref && !hasCustomOnClick) || showIconLink,
+  style: editLinkStyle
+};
+'''
+      }
+    }
+    {
+      id: "45b"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: IconButton
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.filteredData()[virtualItem.index];
+const editLink = args.fns.prop('editLink');
+const getHrefFn = editLink?.getHref;
+const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
+const onClickFn = editLink?.getOnClick ?? editLink?.onClick;
+const hasCustomOnClick = typeof onClickFn === "function";
+const editLinkIcon = editLink?.icon;
+
+return {
+  icon: editLinkIcon,
+  href: editHref ?? "#",
+  target: editLink?.target ?? "_top",
+  size: "sm",
+  variant: "ghost",
+  title: editLink?.label ?? "Edit",
+  ariaLabel: editLink?.label ?? "Edit",
+  onClick: (e) => {
+    e.stopPropagation();
+    if (hasCustomOnClick) {
+      e.preventDefault();
+      onClickFn(rowData, e);
+    } else if (!editHref) {
+      e.preventDefault();
+    }
+  },
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || !editLinkIcon || (!editHref && !hasCustomOnClick)
 };
 '''
       }
@@ -3759,6 +3861,18 @@ return {
       T: Attr
       S: "44"
       E: "45"
+    }
+    {
+      id: e71a
+      T: Attr
+      S: "44"
+      E: "45a"
+    }
+    {
+      id: e71b
+      T: Attr
+      S: "44"
+      E: "45b"
     }
     {
       id: e72
