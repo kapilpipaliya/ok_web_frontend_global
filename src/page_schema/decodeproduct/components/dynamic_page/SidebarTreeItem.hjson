@@ -686,10 +686,10 @@ const handleTableItemsDrop = async (itemIds) => {
               contentCount: updatedCounts.targetCount
             });
           } else {
-            // If uncategorized vertex doesn't exist in graph, refresh root items
+            // If uncategorized vertex doesn't exist in graph, refresh root items (preserve expanded state)
             const fetchRootFn = getFetchRoot();
             if (fetchRootFn) {
-              await fetchRootFn();
+              await fetchRootFn({ preserveExpanded: true });
             }
           }
         }
@@ -703,21 +703,36 @@ const handleTableItemsDrop = async (itemIds) => {
               contentCount: updatedCounts.sourceCount
             });
           } else {
-            // If uncategorized vertex doesn't exist in graph, refresh root items
+            // If uncategorized vertex doesn't exist in graph, refresh root items (preserve expanded state)
             const fetchRootFn = getFetchRoot();
             if (fetchRootFn) {
-              await fetchRootFn();
+              await fetchRootFn({ preserveExpanded: true });
             }
           }
         }
       }
       
-      // Always refresh root items if moving to/from uncategorized (as fallback)
-      // This ensures the uncategorized count is updated even if updatedCounts is missing
+      // Always refresh root items if moving to/from uncategorized (as fallback); preserve expanded state so tree does not collapse
       if (isSourceUncategorized || isTargetUncategorized) {
         const fetchRootFn = getFetchRoot();
         if (fetchRootFn) {
-          await fetchRootFn();
+          await fetchRootFn({ preserveExpanded: true });
+        }
+      }
+      
+      // Keep drop target and its ancestors expanded so the parent item does not collapse
+      const setExpandedKeysFn = args.contextData.props?.setExpandedKeys;
+      if (setExpandedKeysFn && item?.id) {
+        const toParentEdgeType = getToParentEdgeType();
+        const ancestorIds = [];
+        let current = item;
+        while (current?.id) {
+          ancestorIds.push(current.id);
+          const parent = args.evalExpression?.(`->${toParentEdgeType}`, { graph: args.graph, setGraph: args.setGraph, vertexes: [current] })?.[0];
+          current = parent || null;
+        }
+        if (ancestorIds.length > 0) {
+          setExpandedKeysFn(keys => [...new Set([...(Array.isArray(keys) ? keys : []), ...ancestorIds])]);
         }
       }
       
