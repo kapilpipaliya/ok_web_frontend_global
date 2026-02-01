@@ -13,7 +13,7 @@ if (contentLabel !== 'ShopifyProduct') return;
 if (!categoryId || categoryId === 'uncategorized') return;
 
 const shop = args.contextData.shop;
-if (!shop) return;
+if (!shop) { console.log('shopifyProductAfterCreateRelationship: shop not available in contextData'); return; }
 
 try {
   const helpers = await args.executeNamedServerFunction(

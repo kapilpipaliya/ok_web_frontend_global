@@ -221,13 +221,6 @@ const hasChildren = () => {
   return true;
 };
 
-// Modal state
-const [isAddModalOpen, setIsAddModalOpen] = args.createSignal(false);
-const [isEditModalOpen, setIsEditModalOpen] = args.createSignal(false);
-
-// Get formConfig from props
-const getFormConfig = () => args.contextData.props?.sidebarConfig?.formConfig;
-
 // Get onItemUpdate callback from props
 const getOnItemUpdate = () => args.contextData.props?.onItemUpdate;
 
@@ -237,119 +230,23 @@ const getOnItemDelete = () => args.contextData.props?.onItemDelete;
 // Get fetchRoot function from props
 const getFetchRoot = () => args.contextData.props?.fetchRoot;
 
-// Helper function to refresh category count
-const refreshCategoryCount = async (categoryItem) => {
-  if (!categoryItem) return;
-  
-  const fetchChildrenFn = getFetchChildren();
-  const fetchRootFn = getFetchRoot();
-  
-  // Backend passes id as "uncategorized" for root
-  const isUncategorized = categoryItem.id === 'uncategorized';
-  
-  if (isUncategorized) {
-    // Refresh root items to update uncategorized count
-    if (fetchRootFn) {
-      await fetchRootFn();
-    }
-  } else if (categoryItem.id && fetchChildrenFn) {
-    // Refresh the specific category
-    await fetchChildrenFn(categoryItem.id, true);
-    
-    // Also refresh parent's children if this is a child item (to update parent's count)
-    const toParentEdgeType = getToParentEdgeType();
-    if (toParentEdgeType) {
-      const parentItem = args.evalExpression?.(`<-${toParentEdgeType}`, {
-        graph: args.graph,
-        setGraph: args.setGraph,
-        vertexes: [categoryItem]
-      })?.[0];
-      
-      if (parentItem && parentItem.id && fetchChildrenFn) {
-        await fetchChildrenFn(parentItem.id, true);
-      }
-    }
-  }
-};
-
-// Handle opening add modal
+// Open add/edit modals (handled by parent Sidebar - single modal for one item at a time)
 const handleOpenAddModal = (e) => {
   e.stopPropagation();
-  if (isQueued()) {
-    args.showWarningToast?.("Cannot add: item is syncing");
-    return;
+  const item = getItem();
+  const onOpenAddModal = args.contextData.props?.onOpenAddModal;
+  if (item && onOpenAddModal) {
+    onOpenAddModal(item);
   }
-  setIsAddModalOpen(true);
 };
 
-// Handle closing add modal
-const handleCloseAddModal = () => {
-  setIsAddModalOpen(false);
-};
-
-// Handle opening edit modal
 const handleOpenEditModal = (e) => {
   e.stopPropagation();
-  if (isQueued()) {
-    args.showWarningToast?.("Cannot edit: item is syncing");
-    return;
-  }
-  setIsEditModalOpen(true);
-};
-
-// Handle closing edit modal
-const handleCloseEditModal = () => {
-  setIsEditModalOpen(false);
-};
-
-// Handle save callback - refresh children after adding
-const handleAddChildSave = async (newVertex) => {
   const item = getItem();
-  if (!item) return;
-
-  try {
-    args.fns.setOperationLoading?.(true);
-
-    // Refresh children - force refresh to get latest data (includes new vertex and starts queued poll)
-    const fetchChildrenFn = getFetchChildren();
-    if (fetchChildrenFn) {
-      await fetchChildrenFn(item.id, true);
-      // Expand parent if not already expanded so the new row is visible
-      const onToggleExpand = getOnToggleExpand();
-      if (onToggleExpand) {
-        const expanded = getExpandedKeys();
-        if (!expanded.includes(item.id)) {
-          await onToggleExpand(item.id);
-        }
-      }
-    }
-
-    // If new vertex is queued, ensure poll runs (fetchChildren already starts it; this covers edge cases)
-    const startPoll = args.contextData.props?.startSidebarQueuedPollIfNeeded;
-    if (newVertex?.P?.syncStatus === 'queued' && startPoll) {
-      startPoll();
-    }
-
-    handleCloseAddModal();
-  } finally {
-    args.fns.setOperationLoading?.(false);
+  const onOpenEditModal = args.contextData.props?.onOpenEditModal;
+  if (item && onOpenEditModal) {
+    onOpenEditModal(item);
   }
-};
-
-// Handle save callback - refresh after editing
-const handleEditSave = async (updatedVertex) => {
-  const item = getItem();
-  if (!item) return;
-
-  // Update the item in the tree using the parent's update function
-  // The updated vertex from server includes contentCount in P
-  const onItemUpdate = getOnItemUpdate();
-  if (onItemUpdate && updatedVertex) {
-    onItemUpdate(updatedVertex);
-  }
-
-  // The parent update should handle this via updateItemInTree function
-  // The graph will be updated with the new count from the server response
 };
 
 // Drag and drop handlers using @atlaskit/pragmatic-drag-and-drop
@@ -993,17 +890,8 @@ return {
   shouldShowItem,
   isDirectMatch,
   isAncestorOfMatch,
-  isAddModalOpen,
-  setIsAddModalOpen,
   handleOpenAddModal,
-  handleCloseAddModal,
-  handleAddChildSave,
-  isEditModalOpen,
-  setIsEditModalOpen,
   handleOpenEditModal,
-  handleCloseEditModal,
-  handleEditSave,
-  getFormConfig,
   getOnItemUpdate,
   handleDelete,
   getOnItemDelete,
@@ -1529,68 +1417,9 @@ return {
   setExpandedKeys: args.contextData.props?.setExpandedKeys,
   searchActive: args.contextData.props?.searchActive,
   filterTree: args.contextData.props?.filterTree,
-  shouldExpandForSearch: args.contextData.props?.shouldExpandForSearch
-};
-'''
-      }
-    }
-    {
-      id: "13"
-      L: Attr
-      P: {
-        displayOrder: 5
-        componentName: SidebarAddChildModal
-        key: tree_item_add_modal
-        props:
-          '''
-const item = args.fns.getItem();
-const sidebarConfig = args.contextData.props?.sidebarConfig;
-const tableVertexLabel = args.contextData.props?.tableVertexLabel;
-const relationshipType = args.contextData.props?.relationshipType;
-
-return {
-  isOpen: args.fns.isAddModalOpen(),
-  sidebarConfig: sidebarConfig,
-  parentId: item?.id,
-  tableVertexLabel: tableVertexLabel,
-  relationshipType: relationshipType,
-  onSave: args.fns.handleAddChildSave,
-  onClose: args.fns.handleCloseAddModal,
-  hooks: args.contextData.props?.hooks,
-  label: args.contextData.props?.label
-};
-'''
-      }
-    }
-    {
-      id: "14"
-      L: Attr
-      P: {
-        displayOrder: 6
-        componentName: SidebarAddChildModal
-        key: tree_item_edit_modal
-        props:
-          '''
-const item = args.fns.getItem();
-const sidebarConfig = args.contextData.props?.sidebarConfig;
-const tableVertexLabel = args.contextData.props?.tableVertexLabel;
-const relationshipType = args.contextData.props?.relationshipType;
-
-// For edit mode, we don't need parentId since we're just updating the vertex
-// The parent relationship should remain unchanged unless explicitly changed
-return {
-  isOpen: args.fns.isEditModalOpen(),
-  sidebarConfig: sidebarConfig,
-  label: args.contextData.props?.label,
-  hooks: args.contextData.props?.hooks,
-  vertexId: item?.id,
-  parentId: null, // Don't change parent on edit
-  tableVertexLabel: tableVertexLabel,
-  relationshipType: relationshipType,
-  initialVertex: item,
-  mode: "edit",
-  onSave: args.fns.handleEditSave,
-  onClose: args.fns.handleCloseEditModal
+  shouldExpandForSearch: args.contextData.props?.shouldExpandForSearch,
+  onOpenAddModal: args.contextData.props?.onOpenAddModal,
+  onOpenEditModal: args.contextData.props?.onOpenEditModal
 };
 '''
       }
@@ -1614,18 +1443,6 @@ return {
       T: Attr
       S: "2"
       E: "11"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "2"
-      E: "13"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "2"
-      E: "14"
     }
     {
       id: e6

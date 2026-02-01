@@ -12,7 +12,7 @@ const { parentVertexLabel, vertexId, operation, result, outgoingEdges, incomingE
 if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'delete') return;
 
 const shop = args.contextData.shop;
-if (!shop) return;
+if (!shop) { console.log('shopifyMenuAfterDelete: shop not available in contextData'); return; }
 
 try {
   const helpers = await args.executeNamedServerFunction(

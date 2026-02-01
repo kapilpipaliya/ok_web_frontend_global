@@ -15,7 +15,7 @@ const formData = vertex?.P || {};
 if (!formData.id) return;
 
 const shop = args.contextData.shop;
-if (!shop) return;
+if (!shop) { console.log('shopifyProductAfterUpdate: shop not available in contextData'); return; }
 
 try {
   const helpers = await args.executeNamedServerFunction(

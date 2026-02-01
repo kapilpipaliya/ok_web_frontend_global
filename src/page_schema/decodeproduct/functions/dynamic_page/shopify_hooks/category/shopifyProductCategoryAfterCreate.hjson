@@ -18,7 +18,7 @@ const categoryData = vertex?.P || {};
 if (categoryData.id) return;
 
 const shop = args.contextData.shop;
-if (!shop) return;
+if (!shop) { console.log('shopifyProductCategoryAfterCreate: shop not available in contextData'); return; }
 
 try {
   const helpers = await args.executeNamedServerFunction(

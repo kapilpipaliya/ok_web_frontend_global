@@ -10,7 +10,7 @@
 const { menuTitle = "Categories", menuHandle = "categories" } = args.contextData;
 
 const shop = args.contextData.shop;
-if (!shop) return { success: false, error: "shop is required" };
+if (!shop) { console.log('createAllCategoriesMenu: shop not available in contextData'); return { success: false, error: "shop is required" }; }
 
 try {
   const helpers = await args.executeNamedServerFunction(

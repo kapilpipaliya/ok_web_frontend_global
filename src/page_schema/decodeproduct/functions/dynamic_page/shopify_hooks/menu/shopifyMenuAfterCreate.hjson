@@ -12,7 +12,7 @@ const { parentVertexLabel, vertexId, name, parentId, result } = args.contextData
 if (parentVertexLabel !== 'ShopifyProductCategory') return;
 
 const shop = args.contextData.shop;
-if (!shop) return;
+if (!shop) { console.log('shopifyMenuAfterCreate: shop not available in contextData'); return; }
 
 try {
   const helpers = await args.executeNamedServerFunction(

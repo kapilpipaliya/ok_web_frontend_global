@@ -21,6 +21,8 @@ const [selectedItem, setSelectedItem] = args.createSignal(null);
 const [sidebarLoading, setSidebarLoading] = args.createSignal(false);
 const [operationLoading, setOperationLoading] = args.createSignal(false);
 const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
+// Single add/edit modal state: only one item modal open at a time (mode: 'add' | 'edit', and the item/parent)
+const [itemModalState, setItemModalState] = args.createSignal(null);
 const [searchQuery, setSearchQuery] = args.createSignal("");
 const [debouncedSearchQuery, setDebouncedSearchQuery] = args.createSignal("");
 const debouncedSetSearch = args.debounce((value) => setDebouncedSearchQuery(value), 200);
@@ -334,6 +336,61 @@ const handleCloseAddRootModal = () => {
 const handleAddRootSave = async (savedVertex) => {
   await fetchRoot({ preserveExpanded: true });
   setIsAddRootModalOpen(false);
+};
+
+// --- Add/Edit item modal (single modal in parent, only one open at a time) ---
+const isItemQueued = (item) => item?.P?.syncStatus === 'queued';
+
+const handleOpenAddChildModal = (parentItem) => {
+  if (!parentItem) return;
+  if (isItemQueued(parentItem)) {
+    args.showWarningToast?.("Cannot add: item is syncing");
+    return;
+  }
+  setItemModalState({ mode: 'add', parentItem });
+};
+
+const handleOpenEditModal = (item) => {
+  if (!item) return;
+  if (isItemQueued(item)) {
+    args.showWarningToast?.("Cannot edit: item is syncing");
+    return;
+  }
+  setItemModalState({ mode: 'edit', item });
+};
+
+const handleCloseItemModal = () => {
+  setItemModalState(null);
+};
+
+const handleAddChildSaveFromModal = async (savedVertex) => {
+  const state = itemModalState();
+  if (state?.mode !== 'add' || !state.parentItem) return;
+  const parentItem = state.parentItem;
+  setItemModalState(null);
+  try {
+    setOperationLoading(true);
+    const fetchChildrenFn = fetchChildren;
+    if (fetchChildrenFn) {
+      await fetchChildrenFn(parentItem.id, true);
+      const expanded = expandedKeys();
+      if (!expanded.includes(parentItem.id)) {
+        await toggleExpand(parentItem.id);
+      }
+    }
+    if (savedVertex?.P?.syncStatus === 'queued') {
+      startSidebarQueuedPollIfNeeded();
+    }
+  } finally {
+    setOperationLoading(false);
+  }
+};
+
+const handleEditSaveFromModal = (updatedVertex) => {
+  if (updatedVertex) {
+    updateItemInTree(updatedVertex);
+  }
+  setItemModalState(null);
 };
 
 // Update a specific item in the tree (for edits) - graph is automatically updated
@@ -654,6 +711,12 @@ return {
   handleOpenAddRootModal,
   handleCloseAddRootModal,
   handleAddRootSave,
+  itemModalState,
+  handleOpenAddChildModal,
+  handleOpenEditModal,
+  handleCloseItemModal,
+  handleAddChildSaveFromModal,
+  handleEditSaveFromModal,
   updateItemInTree,
   removeItemFromTree,
   getChildren,
@@ -902,7 +965,9 @@ return {
   setExpandedKeys: args.fns.setExpandedKeys,
   searchActive: !!(args.fns.debouncedSearchQuery?.()?.trim?.()),
   filterTree: (item) => args.fns.filterTreeVertex?.(item, args.fns.debouncedSearchQuery()?.trim?.() || ''),
-  shouldExpandForSearch: (item) => args.fns.shouldExpandVertexForSearch?.(item)
+  shouldExpandForSearch: (item) => args.fns.shouldExpandVertexForSearch?.(item),
+  onOpenAddModal: args.fns.handleOpenAddChildModal,
+  onOpenEditModal: args.fns.handleOpenEditModal
 };
 '''
       }
@@ -1034,6 +1099,36 @@ return {
       }
     }
     {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: SidebarAddChildModal
+        key: sidebar_item_add_edit_modal
+        props:
+          '''
+const state = args.fns.itemModalState?.() ?? null;
+const sidebarConfig = args.fns.getSidebarConfig();
+const isOpen = state !== null;
+
+return {
+  isOpen: isOpen,
+  sidebarConfig: sidebarConfig,
+  parentId: state?.mode === 'add' ? state.parentItem?.id : null,
+  vertexId: state?.mode === 'edit' ? state.item?.id : null,
+  initialVertex: state?.mode === 'edit' ? state.item : null,
+  mode: state?.mode ?? "add",
+  tableVertexLabel: args.fns.getTableVertexLabel(),
+  relationshipType: args.fns.getRelationshipType(),
+  onSave: state?.mode === 'add' ? args.fns.handleAddChildSaveFromModal : args.fns.handleEditSaveFromModal,
+  onClose: args.fns.handleCloseItemModal,
+  hooks: args.contextData.props?.hooks,
+  label: args.fns.getSidebarLabel()
+};
+'''
+      }
+    }
+    {
       id: "15"
       L: Attr
       P: {
@@ -1054,7 +1149,7 @@ return `._id {
   pointer-events: auto;
 }`;
 '''
-        displayOrder: 4
+        displayOrder: 5
         componentName: Html
         key: sidebar_loading_overlay
         props:
@@ -1143,6 +1238,12 @@ return {
       T: Attr
       S: "1"
       E: "12"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "1"
+      E: "17"
     }
     {
       id: e10

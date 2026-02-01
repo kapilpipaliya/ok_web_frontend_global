@@ -9,7 +9,7 @@
           '''
 const { parentVertexLabel, name, vertexId, operation, result, oldData, shop } = args.contextData;
 if (parentVertexLabel !== 'ShopifyProductCategory' || operation !== 'update') return;
-if (!shop) return;
+if (!shop) { console.log('shopifyProductCategoryAfterUpdate: shop not available in contextData'); return; }
 
 try {
   const helpers = await args.executeNamedServerFunction(
