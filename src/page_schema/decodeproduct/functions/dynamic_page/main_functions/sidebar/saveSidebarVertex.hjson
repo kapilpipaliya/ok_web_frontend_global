@@ -82,7 +82,7 @@ if (isUpdate || isDelete) {
     if (existingKey === rootKey) {
       return {
         success: false,
-        message: "Root vertex cannot be modified or deleted",
+        message: `Root ${itemLabel} cannot be modified or deleted`,
         data: null
       };
     }
@@ -94,7 +94,7 @@ if (isDelete) {
   if (!vertexId) {
     return {
       success: false,
-      message: "Vertex ID is required for deletion",
+      message: `${itemLabel} ID is required for deletion`,
       data: null
     };
   }
@@ -214,14 +214,14 @@ if (isDelete) {
   if (deletedCount === 0) {
     return {
       success: false,
-      message: "Failed to delete vertex",
+      message: `Failed to delete ${itemLabel}`,
       data: null
     };
   }
 
   const result = {
     success: true,
-    message: "Vertex deleted successfully",
+    message: `${itemLabel} deleted successfully`,
     data: { id: vertexId, ...(deletedVertexData ? { P: deletedVertexData.P } : {}) },
     deleted_vertexes: [vertexId]
   };
@@ -251,7 +251,7 @@ if (isDelete) {
 if (!isUpdate && vertexKey === rootKey) {
   return {
     success: false,
-    message: `Cannot create vertex with key '${rootKey}'. This key is reserved.`,
+    message: `Cannot create ${itemLabel} with key '${rootKey}'. This key is reserved.`,
     data: null
   };
 }
@@ -289,7 +289,7 @@ const duplicateResult = await args.session.run(duplicateCheckQuery, duplicateChe
 if (duplicateResult.records.length > 0) {
   return {
     success: false,
-    message: "A vertex with this name already exists",
+    message: `A ${itemLabel} with this name already exists`,
     data: null
   };
 }
@@ -375,7 +375,7 @@ if (isUpdate) {
   if (updateResult.records.length === 0) {
     return {
       success: false,
-      message: "Vertex not found or you don't have permission to update it",
+      message: `${itemLabel} not found or you don't have permission to update it`,
       data: null
     };
   }
@@ -557,7 +557,7 @@ if (tableVertexLabel && relationshipType) {
 
 const result = {
   success: true,
-  message: isUpdate ? "Vertex updated successfully" : "Vertex created successfully",
+  message: isUpdate ? `${itemLabel} updated successfully` : `${itemLabel} created successfully`,
   data: vertex
 };
 

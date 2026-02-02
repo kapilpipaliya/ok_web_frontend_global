@@ -22,9 +22,14 @@ const doJob = async (args, jobData, dbSession) => {
     admin = authResult.admin;
   } catch (authError) {
     console.error("processShopifyProductAfterMoveItemsToCategory: unauthenticated.admin failed", authError);
+    const errMsg = (authError?.message || String(authError)).substring(0, 2000);
+    if (contentIds?.length) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) IN $contentIds SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { contentIds, syncError: errMsg });
     return;
   }
-  if (!admin) return;
+  if (!admin) {
+    if (contentIds?.length) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) IN $contentIds SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { contentIds, syncError: 'Shopify admin client unavailable' });
+    return;
+  }
 
   let newCategoryName = null;
   if (!isUncategorized) {

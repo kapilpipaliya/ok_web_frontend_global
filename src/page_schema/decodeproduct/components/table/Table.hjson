@@ -756,14 +756,17 @@ const handleSave = async (formDataToSave) => {
         }
       }
       applyLocalFilters();
+      return true;
     } else {
       const errorMsg = result?.message || result?.error || "Failed to save";
       args.showErrorToast?.(errorMsg);
+      return false;
     }
   } catch (error) {
     console.error("Error saving:", error);
     const errorMsg = error?.message || error?.error || "Failed to save item";
     args.showErrorToast?.(errorMsg);
+    return false;
   } finally {
     args.fns.setLoading(false);
   }

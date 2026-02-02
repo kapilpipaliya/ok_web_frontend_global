@@ -42,7 +42,8 @@ try {
 
   const createJobId = (queueName, shop, suffix) => {
     const safeShop = (shop || '').replace(/[^a-z0-9-]/gi, '-');
-    return `${queueName}-${safeShop}-${suffix || Date.now()}`;
+    const ts = Date.now();
+    return `${queueName}-${safeShop}-${suffix || 'job'}-${ts}`;
   };
 
   const addShopifyJob = async (queue, queueName, data, options = {}) => {

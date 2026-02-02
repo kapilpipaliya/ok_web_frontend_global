@@ -27,8 +27,11 @@ const {
   toParentEdgeType, 
   rootKeys = {},
   enableUserScoping,
-  hooks
+  hooks,
+  label: sidebarLabel
 } = args.contextData;
+
+const itemLabel = sidebarLabel && typeof sidebarLabel === 'string' ? sidebarLabel : 'item';
 
 if (!categoryId) {
   return {
@@ -77,7 +80,7 @@ try {
     if (existingKey === rootKey) {
       return {
         success: false,
-        message: "Root vertex cannot be moved"
+        message: `Root ${itemLabel} cannot be moved`
       };
     }
   }
@@ -86,7 +89,7 @@ try {
   if (categoryId === newParentId) {
     return {
       success: false,
-      message: "Cannot move a category to itself"
+      message: `Cannot move a ${itemLabel} to itself`
     };
   }
 
@@ -131,7 +134,7 @@ try {
   if (pathCount > 0) {
     return {
       success: false,
-      message: "Cannot move a category to its own descendant"
+      message: `Cannot move a ${itemLabel} to its own descendant`
     };
   }
 
@@ -218,7 +221,7 @@ try {
     if (createResult.records.length === 0) {
       return {
         success: false,
-        message: "Failed to create new parent relationship. Category or new parent not found or not accessible."
+        message: `Failed to create new parent relationship. ${itemLabel} or new parent not found or not accessible.`
       };
     }
 
@@ -228,7 +231,7 @@ try {
 
   const result = {
     success: true,
-    message: "Category moved successfully",
+    message: `${itemLabel} moved successfully`,
     data: {
       categoryId,
       newParentId: newParentId || null
@@ -252,7 +255,7 @@ try {
   console.error("Error moving sidebar item:", error);
   return {
     success: false,
-    message: error.message || "Failed to move category"
+    message: error.message || `Failed to move ${itemLabel}`
   };
 }
 '''

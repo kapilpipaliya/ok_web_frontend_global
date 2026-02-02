@@ -31,9 +31,14 @@ const doJob = async (args, jobData, dbSession) => {
     admin = authResult.admin;
   } catch (authError) {
     console.error("processShopifyProductCategoryAfterUpdate: unauthenticated.admin failed", authError);
+    const errMsg = (authError?.message || String(authError)).substring(0, 2000);
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg });
     return;
   }
-  if (!admin) return;
+  if (!admin) {
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: 'Shopify admin client unavailable' });
+    return;
+  }
 
   const vertex = result?.data;
   const categoryData = vertex?.P || {};
@@ -44,8 +49,10 @@ const doJob = async (args, jobData, dbSession) => {
 
   if (!shopifyCollectionId) {
     console.warn("processShopifyProductCategoryAfterUpdate: No Shopify collection ID for category vertexId=", vertexId, ", skipping");
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: 'No Shopify collection ID' });
     return;
   }
+
 
   try {
     const updateCollectionMutation = `
@@ -67,18 +74,21 @@ const doJob = async (args, jobData, dbSession) => {
     };
     const response = await admin.graphql(updateCollectionMutation, { variables });
     let apiResponse = response instanceof Response ? await response.json() : response;
-    if (apiResponse.errors && apiResponse.errors.length > 0) return;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      const errMsg = JSON.stringify(apiResponse.errors).substring(0, 2000);
+      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg });
+      return;
+    }
     const userErrors = apiResponse.data?.collectionUpdate?.userErrors || [];
-    if (userErrors.length > 0) return;
+    if (userErrors.length > 0) {
+      const errMsg = JSON.stringify(userErrors).substring(0, 2000);
+      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg });
+      return;
+    }
     const updatedCollection = apiResponse.data?.collectionUpdate?.collection;
-    if (!updatedCollection) return;
-    const shopifyHandle = updatedCollection.handle;
-    if (vertexId && shopifyHandle) {
-      await dbSession.run(
-        `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.handle = $handle, c.updatedAt = datetime()`,
-        { elementId: vertexId, handle: shopifyHandle }
-      );
-      if (result?.data?.P) result.data.P.handle = shopifyHandle;
+    if (!updatedCollection) {
+      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: 'No collection in response' });
+      return;
     }
     if (nameChanged && newCategoryName) {
       const updateProductTagsForCategoryNameChange = async (categoryId, oldName, newName, adminInstance) => {
@@ -126,6 +136,14 @@ const doJob = async (args, jobData, dbSession) => {
           console.error('createAllCategoriesMenu enqueue:', e);
         }
       }
+    }
+    const shopifyHandle = updatedCollection.handle;
+    if (vertexId) {
+      await dbSession.run(
+        `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.syncError = $syncError, c.updatedAt = datetime()${shopifyHandle ? ', c.handle = $handle' : ''}`,
+        { elementId: vertexId, syncError: null, ...(shopifyHandle ? { handle: shopifyHandle } : {}) }
+      );
+      if (result?.data?.P && shopifyHandle) result.data.P.handle = shopifyHandle;
     }
   } catch (error) {
     console.error("processShopifyProductCategoryAfterUpdate: Error", error);

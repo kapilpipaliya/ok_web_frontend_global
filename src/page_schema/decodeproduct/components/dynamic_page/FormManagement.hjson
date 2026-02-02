@@ -352,16 +352,19 @@ const handleSave = async () => {
       }
     }
 
-    await onSave({
+    const result = await onSave({
       vertex: vertex,
       relationships: relationshipData
     });
 
-    // Clean up after successful save: revert form transaction and reset txn id
-    const txnId = formTxnId();
-    if (txnId && txnId > 0) {
-      args.revertTransaction(txnId);
-      setFormTxnId(0);
+    // Clean up only after successful save (when onSave returns truthy)
+    if (result) {
+      const txnId = formTxnId();
+      if (txnId && txnId > 0) {
+        args.revertTransaction(txnId);
+        setFormTxnId(0);
+      }
+      setFormVertexId(null);
     }
   } catch (error) {
     console.error("Error saving:", error);

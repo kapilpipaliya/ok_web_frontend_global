@@ -256,7 +256,7 @@ const initialVertex = args.contextData.props?.initialVertex;
 const onSave = args.contextData.props?.onSave;
 const onClose = args.contextData.props?.onClose;
 
-// Wrap onSave to track txnId and handle cleanup
+// Wrap onSave to track txnId and pass through return value for FormManagement cleanup
 const wrappedOnSave = async (saveData) => {
   // Get txnId from FormManagement (will be set via onFnsReady)
   const txnId = args.fns?.formTxnId?.();
@@ -264,13 +264,11 @@ const wrappedOnSave = async (saveData) => {
     args.fns.setFormTxnId(txnId);
   }
 
-  // Call original onSave with vertex format
+  // Call original onSave with vertex format and return result for FormManagement
   if (onSave) {
-    await onSave(saveData);
+    return await onSave(saveData);
   }
-
-  // Cleanup transaction after successful save
-  args.fns.cleanup();
+  return false;
 };
 
 // Wrap onClose to cleanup transaction

@@ -39,9 +39,14 @@ const doJob = async (args, jobData, dbSession) => {
     admin = authResult.admin;
   } catch (authError) {
     console.error("processShopifyProductCategoryAfterCreate: Shopify unauthenticated.admin failed", authError);
+    const errMsg = (authError?.message || String(authError)).substring(0, 2000);
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg });
     return;
   }
-  if (!admin) return;
+  if (!admin) {
+    if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: 'Shopify admin client unavailable' });
+    return;
+  }
 
   try {
     const createCollectionMutation = `
@@ -69,16 +74,23 @@ const doJob = async (args, jobData, dbSession) => {
 
     if (apiResponse.errors && apiResponse.errors.length > 0) {
       console.error("processShopifyProductCategoryAfterCreate: GraphQL errors:", apiResponse.errors);
+      const errMsg = JSON.stringify(apiResponse.errors).substring(0, 2000);
+      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg });
       return;
     }
     const userErrors = apiResponse.data?.collectionCreate?.userErrors || [];
     if (userErrors.length > 0) {
       console.error("processShopifyProductCategoryAfterCreate: User errors:", userErrors);
+      const errMsg = JSON.stringify(userErrors).substring(0, 2000);
+      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: errMsg });
       return;
     }
 
     const createdCollection = apiResponse.data?.collectionCreate?.collection;
-    if (!createdCollection) return;
+    if (!createdCollection) {
+      if (vertexId) await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: vertexId, syncError: 'No collection in response' });
+      return;
+    }
 
     const shopifyCollectionId = createdCollection.id;
     const shopifyHandle = createdCollection.handle;

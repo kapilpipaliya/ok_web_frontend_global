@@ -30,7 +30,7 @@ const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScopi
 if (!vertex || !vertex.P) {
   return {
     success: false,
-    message: "Vertex data is required"
+    message: `${tableVertexLabel || 'Content'} data is required`
   };
 }
 const formData = vertex.P;

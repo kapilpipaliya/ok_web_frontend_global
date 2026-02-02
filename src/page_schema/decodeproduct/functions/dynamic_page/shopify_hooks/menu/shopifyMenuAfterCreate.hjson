@@ -20,15 +20,9 @@ try {
     { functionLookupSubDomain: 'decodeproduct' }
   );
   if (!helpers.result?.success) return;
-  if (vertexId) {
-    await args.session.run(
-      `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
-      { elementId: vertexId, status: 'queued' }
-    );
-  }
   const queueName = 'processShopifyMenuAfterCreate';
   const queue = helpers.result.data.createShopifyQueue(args, queueName);
-  await helpers.result.data.addShopifyJob(queue, queueName, {
+  const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     parentVertexLabel,
     vertexId,
@@ -37,8 +31,18 @@ try {
     result
   });
   await queue.close();
+  const jobId = job?.id;
+  if (vertexId && jobId) {
+    await args.session.run(
+      `MATCH (n:ShopifyProductCategory) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
+      { elementId: vertexId, status: 'queued', jobId }
+    );
+  }
   const r = args.contextData?.result;
-  if (r?.data?.P && typeof r.data.P === 'object') r.data.P.syncStatus = 'queued';
+  if (r?.data?.P && typeof r.data.P === 'object') {
+    r.data.P.syncStatus = 'queued';
+    if (jobId) r.data.P.syncJobId = jobId;
+  }
 } catch (error) {
   console.error("shopifyMenuAfterCreate: Failed to enqueue job", error);
 }

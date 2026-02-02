@@ -5,6 +5,33 @@
       L: Component
       P: {
         key: SidebarAddChildModal
+        fns:
+          '''
+// Store FormManagement's formTxnId getter (set via onFnsReady from modal content)
+const formTxnIdRef = { current: null };
+
+// Revert transaction when closing without save (Cancel button, etc.)
+const cleanup = () => {
+  const getTxnId = formTxnIdRef.current;
+  const txnId = getTxnId && typeof getTxnId === 'function' ? getTxnId() : null;
+  if (txnId && txnId > 0) {
+    args.revertTransaction(txnId);
+  }
+};
+
+// Close on backdrop click: revert (remove unsaved vertex) then close
+const handleBackdropClick = () => {
+  cleanup();
+  const onClose = args.contextData.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  formTxnIdRef,
+  cleanup,
+  handleBackdropClick
+};
+'''
       }
     }
     {
@@ -51,7 +78,7 @@ return {
   hide: !isOpen,
   onClick: (e) => {
     if (e.target === e.currentTarget) {
-      args.contextData.props?.onClose();
+      args.fns?.handleBackdropClick?.();
     }
   },
 };
@@ -111,22 +138,10 @@ return `._id {
         displayOrder: 1
         fns:
           '''
-// Track form txnId for cleanup
-const [formTxnId, setFormTxnId] = args.createSignal(0);
-
-// Cleanup function to revert transaction
-const cleanup = () => {
-  const txnId = formTxnId();
-  if (txnId && txnId > 0) {
-    args.revertTransaction(txnId);
-    setFormTxnId(0);
-  }
-};
-
+// Use component-level cleanup and formTxnIdRef
 return {
-  formTxnId,
-  setFormTxnId,
-  cleanup
+  cleanup: () => args.fns?.cleanup?.(),
+  formTxnIdRef: args.fns?.formTxnIdRef
 };
 '''
         componentName: Html
@@ -268,19 +283,13 @@ const relationshipType = args.contextData.props?.relationshipType;
 const onSave = args.contextData.props?.onSave;
 const onClose = args.contextData.props?.onClose;
 
-// Wrap onSave to track txnId, handle cleanup, and call saveSidebarVertex
+// Wrap onSave to handle saveSidebarVertex
 const wrappedOnSave = async (saveData) => {
-  // Get txnId from FormManagement (will be set via onFnsReady)
-  const txnId = args.fns?.formTxnId?.();
-  if (txnId && txnId > 0) {
-    args.fns.setFormTxnId(txnId);
-  }
-
   // Extract vertex and properties from saveData
   const vertex = saveData.vertex;
   if (!vertex) {
     args.showErrorToast?.("No vertex data to save");
-    return;
+    return false;
   }
 
   // Get name and key from vertex properties
@@ -289,10 +298,11 @@ const wrappedOnSave = async (saveData) => {
 
   if (!name || !name.trim()) {
     args.showErrorToast?.("Name is required");
-    return;
+    return false;
   }
 
   // Call saveSidebarVertex function
+  const label = args.contextData.props?.label || "Item";
   try {
     const result = await args.executeNamedServerFunction({
       functionName: "saveSidebarVertex",
@@ -308,20 +318,19 @@ const wrappedOnSave = async (saveData) => {
         tableVertexLabel: tableVertexLabel,
         relationshipType: relationshipType,
         enableUserScoping: args.contextData.props?.enableUserScoping,
-        hooks: args.contextData.props?.hooks
+        hooks: args.contextData.props?.hooks,
+        label: label
       }
     });
 
     // Check for errors and show toast
-    const errorMessage = args.fns.extractError?.(result, true, "Failed to create vertex");
+    const errorMessage = args.fns.extractError?.(result, true, `Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
     if (errorMessage) {
-      return;
+      return false;
     }
 
     if (result?.result?.success) {
-      args.showSuccessToast?.(result.result.message || "Vertex created successfully");
-      // Cleanup transaction after successful save
-      args.fns.cleanup();
+      args.showSuccessToast?.(result.result.message || `${label} ${mode === "edit" ? "updated" : "created"} successfully`);
       // Call original onSave if provided
       if (onSave) {
         await onSave(result.result.data);
@@ -330,10 +339,13 @@ const wrappedOnSave = async (saveData) => {
       if (onClose) {
         onClose();
       }
+      return true;
     }
+    return false;
   } catch (error) {
     console.error("Error saving vertex:", error);
-    args.showErrorToast?.("Failed to create vertex");
+    args.showErrorToast?.(`Failed to ${mode === "edit" ? "update" : "create"} ${label}`);
+    return false;
   }
 };
 
@@ -351,7 +363,10 @@ return {
   mode: mode,
   vertexLabel: null,
   onSave: wrappedOnSave,
-  onClose: wrappedOnClose
+  onClose: wrappedOnClose,
+  onFnsReady: (fns) => {
+    if (args.fns?.formTxnIdRef) args.fns.formTxnIdRef.current = fns.formTxnId;
+  }
 };
 '''
       }

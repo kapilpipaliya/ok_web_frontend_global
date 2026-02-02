@@ -119,7 +119,7 @@ try {
   } else {
     resultData = {
       success: false,
-      message: "Failed to create relationship. Category or content not found or not accessible."
+      message: `Failed to create relationship. ${categoryLabel} or ${contentLabel} not found or not accessible.`
     };
   }
 

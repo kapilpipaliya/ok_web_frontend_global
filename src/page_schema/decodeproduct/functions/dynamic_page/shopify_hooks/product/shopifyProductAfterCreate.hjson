@@ -24,15 +24,9 @@ try {
     { functionLookupSubDomain: 'decodeproduct' }
   );
   if (!helpers.result?.success) return;
-  if (elementId) {
-    await args.session.run(
-      `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.updatedAt = datetime()`,
-      { elementId, status: 'queued' }
-    );
-  }
   const queueName = 'processShopifyProductAfterCreate';
   const queue = helpers.result.data.createShopifyQueue(args, queueName);
-  await helpers.result.data.addShopifyJob(queue, queueName, {
+  const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,
     tableVertexLabel,
     operation,
@@ -41,8 +35,18 @@ try {
     result
   });
   await queue.close();
+  const jobId = job?.id;
+  if (elementId && jobId) {
+    await args.session.run(
+      `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
+      { elementId, status: 'queued', jobId }
+    );
+  }
   const r = args.contextData?.result;
-  if (r?.data?.P && typeof r.data.P === 'object') r.data.P.syncStatus = 'queued';
+  if (r?.data?.P && typeof r.data.P === 'object') {
+    r.data.P.syncStatus = 'queued';
+    if (jobId) r.data.P.syncJobId = jobId;
+  }
 } catch (error) {
   console.error("shopifyProductAfterCreate: Failed to enqueue job", error);
 }

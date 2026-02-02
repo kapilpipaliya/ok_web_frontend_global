@@ -18,8 +18,16 @@ const doJob = async (args, jobData, dbSession) => {
   if (!shopifyProductId) { console.log("processShopifyProductAfterUpdate: Product doesn't have Shopify ID, skipping"); return; }
   const shopify = args.getShopifyClient();
   let admin;
-  try { const authResult = await shopify.unauthenticated.admin(shop); admin = authResult.admin; } catch (authError) { console.error("processShopifyProductAfterUpdate: unauthenticated.admin failed", authError); return; }
-  if (!admin) return;
+  try { const authResult = await shopify.unauthenticated.admin(shop); admin = authResult.admin; } catch (authError) {
+    console.error("processShopifyProductAfterUpdate: unauthenticated.admin failed", authError);
+    const errMsg = (authError?.message || String(authError)).substring(0, 2000);
+    if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId, syncError: errMsg });
+    return;
+  }
+  if (!admin) {
+    if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId, syncError: 'Shopify admin client unavailable' });
+    return;
+  }
   const title = formData.title || formData.name || 'Untitled Product';
   const descriptionHtml = formData.descriptionHtml || formData.description || '';
   const vendor = formData.vendor || '';
@@ -32,11 +40,22 @@ const doJob = async (args, jobData, dbSession) => {
   try {
     const response = await admin.graphql(updateProductMutation, { variables });
     let apiResponse = response instanceof Response ? await response.json() : response;
-    if (apiResponse.errors && apiResponse.errors.length > 0) return;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      const errMsg = JSON.stringify(apiResponse.errors).substring(0, 2000);
+      if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId, syncError: errMsg });
+      return;
+    }
     const userErrors = apiResponse.data?.productUpdate?.userErrors || [];
-    if (userErrors.length > 0) return;
+    if (userErrors.length > 0) {
+      const errMsg = JSON.stringify(userErrors).substring(0, 2000);
+      if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId, syncError: errMsg });
+      return;
+    }
     const updatedProduct = apiResponse.data?.productUpdate?.product;
-    if (!updatedProduct) return;
+    if (!updatedProduct) {
+      if (elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId, syncError: 'No product in response' });
+      return;
+    }
     const shopifyHandle = updatedProduct.handle;
     if (elementId && shopifyHandle) {
       await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.handle = $handle, p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId, handle: shopifyHandle });

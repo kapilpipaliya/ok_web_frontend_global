@@ -21,9 +21,14 @@ const doJob = async (args, jobData, dbSession) => {
     admin = authResult.admin;
   } catch (authError) {
     console.error("processShopifyProductAfterCreateRelationship: unauthenticated.admin failed", authError);
+    const errMsg = (authError?.message || String(authError)).substring(0, 2000);
+    if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: contentId, syncError: errMsg });
     return;
   }
-  if (!admin) return;
+  if (!admin) {
+    if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: contentId, syncError: 'Shopify admin client unavailable' });
+    return;
+  }
 
   let categoryName = null;
   const categoryResult = await dbSession.run(
@@ -40,16 +45,29 @@ const doJob = async (args, jobData, dbSession) => {
     `MATCH (p:ShopifyProduct) WHERE elementId(p) = $contentId RETURN p.id as shopifyId`,
     { contentId }
   );
-  if (productResult.records.length === 0) return;
+  if (productResult.records.length === 0) {
+    if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: contentId, syncError: 'Product not found' });
+    return;
+  }
   const shopifyId = productResult.records[0].get('shopifyId');
-  if (!shopifyId) return;
+  if (!shopifyId) {
+    if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: contentId, syncError: 'Product has no Shopify ID' });
+    return;
+  }
 
   try {
     const getProductResponse = await admin.graphql(`query { product(id: "${shopifyId}") { id tags } }`);
     let getProductApiResponse = getProductResponse instanceof Response ? await getProductResponse.json() : getProductResponse;
-    if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) return;
+    if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) {
+      const errMsg = JSON.stringify(getProductApiResponse.errors).substring(0, 2000);
+      if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: contentId, syncError: errMsg });
+      return;
+    }
     const currentProduct = getProductApiResponse.data?.product;
-    if (!currentProduct) return;
+    if (!currentProduct) {
+      if (contentId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: contentId, syncError: 'Product not found in Shopify' });
+      return;
+    }
     const currentTags = currentProduct.tags || [];
     let updatedTags = [...currentTags];
     if (!updatedTags.includes(categoryName)) updatedTags.push(categoryName);
