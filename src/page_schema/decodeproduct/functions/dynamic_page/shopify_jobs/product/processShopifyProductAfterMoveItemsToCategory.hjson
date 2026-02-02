@@ -57,37 +57,37 @@ const doJob = async (args, jobData, dbSession) => {
     `MATCH (p:ShopifyProduct) WHERE elementId(p) IN $contentIds RETURN elementId(p) as elementId, p.id as shopifyId`,
     { contentIds }
   );
-  const productsToUpdate = [];
+  const products = [];
   for (const record of productsResult.records) {
     const shopifyId = record.get('shopifyId');
-    if (shopifyId) productsToUpdate.push({ elementId: record.get('elementId'), shopifyId });
+    if (shopifyId) products.push({ elementId: record.get('elementId'), shopifyId });
   }
-  if (productsToUpdate.length === 0) return;
+  if (products.length === 0) return;
 
-  for (const product of productsToUpdate) {
-    try {
-      const getProductResponse = await admin.graphql(`query { product(id: "${product.shopifyId}") { id tags } }`);
-      let getProductApiResponse = getProductResponse instanceof Response ? await getProductResponse.json() : getProductResponse;
-      if (getProductApiResponse.errors && getProductApiResponse.errors.length > 0) continue;
-      const currentProduct = getProductApiResponse.data?.product;
-      if (!currentProduct) continue;
-      const currentTags = currentProduct.tags || [];
-      let updatedTags = [...currentTags];
-      if (oldCategoryName) updatedTags = updatedTags.filter(tag => tag !== oldCategoryName);
-      if (!isUncategorized && newCategoryName && !updatedTags.includes(newCategoryName)) updatedTags.push(newCategoryName);
-      await admin.graphql(
-        `mutation productSet($input: ProductSetInput!) { productSet(synchronous: true, input: $input) { product { id tags } userErrors { field message } } }`,
-        { variables: { input: { id: product.shopifyId, tags: updatedTags } } }
-      );
-      await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId: product.elementId });
-      await new Promise(r => setTimeout(r, 200));
-    } catch (error) {
-      console.error("processShopifyProductAfterMoveItemsToCategory: Error for product", product.shopifyId, error);
-      const errMsg = error?.message || String(error);
-      await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: product.elementId, syncError: errMsg.substring(0, 2000) });
-    }
+  const h = helpers.result.data;
+  const shopifyIds = products.map(p => p.shopifyId);
+  const tagsMap = await h.batchGetProductTags(admin, shopifyIds);
+  const updates = [];
+  for (const p of products) {
+    const currentTags = tagsMap.get(p.shopifyId) || [];
+    let updatedTags = [...currentTags];
+    if (oldCategoryName) updatedTags = updatedTags.filter(tag => tag !== oldCategoryName);
+    if (!isUncategorized && newCategoryName && !updatedTags.includes(newCategoryName)) updatedTags.push(newCategoryName);
+    if (JSON.stringify([...currentTags].sort()) === JSON.stringify([...updatedTags].sort())) continue;
+    updates.push({ shopifyId: p.shopifyId, tags: updatedTags, elementId: p.elementId });
   }
-  console.log(`✅ Tag update complete for ${productsToUpdate.length} product(s)`);
+  if (updates.length === 0) {
+    console.log(`✅ Tag update skipped (no changes needed) for ${products.length} product(s)`);
+    return;
+  }
+  const { success: successList, failed: failedList } = await h.batchUpdateProductTags(admin, updates);
+  for (const u of successList) {
+    if (u.elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId: u.elementId });
+  }
+  for (const u of failedList) {
+    if (u.elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: u.elementId, syncError: (u.error || 'Tag update failed').substring(0, 2000) });
+  }
+  console.log(`✅ Tag update complete for ${successList.length} product(s)${failedList.length > 0 ? `, ${failedList.length} failed` : ''}`);
 };
 
 const helpers = await args.executeNamedServerFunction(

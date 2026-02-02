@@ -188,6 +188,123 @@ try {
     return { success: true, menu: updatedMenu, menuId: updatedMenu.id, menuHandle: updatedMenu.handle };
   };
 
+  const BATCH_CHUNK_SIZE = 50;
+  const PAYLOAD_SIZE_LIMIT = 900 * 1024;
+  const MAX_HTTP_RETRIES = 3;
+  const RETRY_DELAYS = [1000, 2000, 4000];
+
+  const ensureProductGid = (id) => {
+    if (!id) return null;
+    const s = String(id);
+    return s.startsWith('gid://') ? s : `gid://shopify/Product/${s}`;
+  };
+
+  const batchGetProductTags = async (admin, shopifyIds) => {
+    const result = new Map();
+    const ids = shopifyIds.filter(Boolean);
+    for (let i = 0; i < ids.length; i += BATCH_CHUNK_SIZE) {
+      const chunk = ids.slice(i, i + BATCH_CHUNK_SIZE);
+      const queryParts = [];
+      const variables = {};
+      chunk.forEach((id, idx) => {
+        const varName = `id${idx}`;
+        variables[varName] = ensureProductGid(id);
+        queryParts.push(`p${idx}: product(id: $${varName}) { id tags }`);
+      });
+      const query = `query batchGetProductTags(${chunk.map((_, idx) => `$id${idx}: ID!`).join(', ')}) { ${queryParts.join(' ') } }`;
+      for (let attempt = 0; attempt <= MAX_HTTP_RETRIES; attempt++) {
+        try {
+          const response = await admin.graphql(query, { variables });
+          const apiResponse = response instanceof Response ? await response.json() : response;
+          if (apiResponse.errors && apiResponse.errors.length > 0) {
+            throw new Error(JSON.stringify(apiResponse.errors));
+          }
+          const data = apiResponse.data || {};
+          chunk.forEach((id, idx) => {
+            const product = data[`p${idx}`];
+            if (product) result.set(id, product.tags || []);
+          });
+          break;
+        } catch (e) {
+          const status = e?.status || e?.response?.status;
+          const isRetryable = status === 429 || (status >= 500 && status < 600);
+          if (isRetryable && attempt < MAX_HTTP_RETRIES) {
+            await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt]));
+          } else throw e;
+        }
+      }
+    }
+    return result;
+  };
+
+  const batchUpdateProductTags = async (admin, updates) => {
+    const successList = [];
+    const failedList = [];
+    if (updates.length > 2000) {
+      for (const u of updates) failedList.push({ ...u, error: 'Bulk operation not implemented; max 2000 products' });
+      return { success: successList, failed: failedList };
+    }
+    let i = 0;
+    while (i < updates.length) {
+      let chunkSize = BATCH_CHUNK_SIZE;
+      let chunk = updates.slice(i, i + chunkSize);
+      let mutationParts = [];
+      let variables = {};
+      const buildChunk = (c) => {
+        mutationParts = [];
+        variables = {};
+        c.forEach((u, idx) => {
+          const varName = `input${idx}`;
+          variables[varName] = { id: ensureProductGid(u.shopifyId), tags: u.tags || [] };
+          mutationParts.push(`m${idx}: productSet(synchronous: true, input: $${varName}) { product { id tags } userErrors { field message } }`);
+        });
+      };
+      buildChunk(chunk);
+      let payloadSize = JSON.stringify({ query: '', variables }).length;
+      while (payloadSize > PAYLOAD_SIZE_LIMIT && chunk.length > 1) {
+        chunkSize = Math.max(1, Math.floor(chunkSize / 2));
+        chunk = updates.slice(i, i + chunkSize);
+        buildChunk(chunk);
+        payloadSize = JSON.stringify({ query: '', variables }).length;
+      }
+      const mutation = `mutation batchUpdateProductTags(${chunk.map((_, idx) => `$input${idx}: ProductSetInput!`).join(', ')}) { ${mutationParts.join(' ')} }`;
+      for (let attempt = 0; attempt <= MAX_HTTP_RETRIES; attempt++) {
+        try {
+          const response = await admin.graphql(mutation, { variables });
+          const apiResponse = response instanceof Response ? await response.json() : response;
+          if (apiResponse.errors && apiResponse.errors.length > 0) {
+            for (const u of chunk) failedList.push({ ...u, error: JSON.stringify(apiResponse.errors).substring(0, 500) });
+            break;
+          }
+          const data = apiResponse.data || {};
+          chunk.forEach((u, idx) => {
+            const payload = data[`m${idx}`];
+            const userErrors = payload?.userErrors || [];
+            if (userErrors.length > 0) {
+              failedList.push({ ...u, error: userErrors.map(e => e.message).join('; ').substring(0, 500) });
+            } else if (payload?.product) {
+              successList.push(u);
+            } else {
+              failedList.push({ ...u, error: 'No product in response' });
+            }
+          });
+          break;
+        } catch (e) {
+          const status = e?.status || e?.response?.status;
+          const isRetryable = status === 429 || (status >= 500 && status < 600);
+          if (isRetryable && attempt < MAX_HTTP_RETRIES) {
+            await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt]));
+          } else {
+            for (const u of chunk) failedList.push({ ...u, error: (e?.message || String(e)).substring(0, 500) });
+            break;
+          }
+        }
+      }
+      i += chunk.length;
+    }
+    return { success: successList, failed: failedList };
+  };
+
   const updateTopLevelCategoryMenuLogic = async (args, session, contextData) => {
     const { categoryElementId, shop } = contextData || {};
     if (!categoryElementId) return { success: false, error: "categoryElementId is required" };
@@ -239,6 +356,8 @@ try {
       runWithSession,
       DEFAULT_JOB_OPTIONS,
       getShopifyAdminForShop,
+      batchGetProductTags,
+      batchUpdateProductTags,
       buildNestedMenuItems,
       deleteShopifyMenuLogic,
       createShopifyMenuForCategoryLogic,
