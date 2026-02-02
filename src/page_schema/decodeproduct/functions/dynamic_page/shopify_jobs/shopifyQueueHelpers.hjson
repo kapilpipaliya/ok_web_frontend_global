@@ -86,27 +86,49 @@ try {
     }
   };
 
-  const buildNestedMenuItems = async (session, parentElementId) => {
-    if (!parentElementId) return { success: false, error: "parentElementId is required", menuItems: [] };
+  const buildNestedMenuItemsBatch = async (session, parentElementIds) => {
+    if (!parentElementIds || parentElementIds.length === 0) return new Map();
     const childrenResult = await session.run(
-      `MATCH (parent:ShopifyProductCategory)
-       WHERE elementId(parent) = $parentElementId
+      `MATCH (parent:ShopifyProductCategory) WHERE elementId(parent) IN $parentIds
        MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
        WHERE child.id IS NOT NULL
-       RETURN elementId(child) as elementId, child.name as name, child.id as shopifyId, child.handle as shopifyHandle
-       ORDER BY child.name`,
-      { parentElementId }
+       RETURN elementId(parent) as parentId, elementId(child) as elementId, child.name as name, child.id as shopifyId, child.handle as shopifyHandle
+       ORDER BY parentId, child.name`,
+      { parentIds: parentElementIds }
     );
-    const menuItems = [];
-    for (const record of childrenResult.records) {
-      const shopifyId = record.get('shopifyId');
-      const childName = record.get('name');
-      const childElementId = record.get('elementId');
+    const byParent = new Map();
+    const childRows = [];
+    for (const r of childrenResult.records) {
+      const parentId = r.get('parentId');
+      const childElementId = r.get('elementId');
+      const shopifyId = r.get('shopifyId');
       if (!shopifyId) continue;
-      const nested = await buildNestedMenuItems(session, childElementId);
-      const nestedItems = nested.success ? (nested.menuItems || []) : [];
-      menuItems.push({ title: childName, type: "COLLECTION", resourceId: shopifyId, items: nestedItems });
+      if (!byParent.has(parentId)) byParent.set(parentId, []);
+      byParent.get(parentId).push({ elementId: childElementId, name: r.get('name'), shopifyId, shopifyHandle: r.get('shopifyHandle') });
+      childRows.push({ parentId, elementId: childElementId, name: r.get('name'), shopifyId });
     }
+    const childIds = [...new Set(childRows.map(c => c.elementId))];
+    let nestedMap = new Map();
+    if (childIds.length > 0) {
+      nestedMap = await buildNestedMenuItemsBatch(session, childIds);
+    }
+    const result = new Map();
+    for (const [parentId, children] of byParent) {
+      const items = children.map(c => ({
+        title: c.name,
+        type: "COLLECTION",
+        resourceId: c.shopifyId,
+        items: nestedMap.get(c.elementId) || []
+      }));
+      result.set(parentId, items);
+    }
+    return result;
+  };
+
+  const buildNestedMenuItems = async (session, parentElementId) => {
+    if (!parentElementId) return { success: false, error: "parentElementId is required", menuItems: [] };
+    const batchResult = await buildNestedMenuItemsBatch(session, [parentElementId]);
+    const menuItems = batchResult.get(parentElementId) || [];
     return { success: true, menuItems };
   };
 
@@ -312,8 +334,9 @@ try {
       `MATCH (category:ShopifyProductCategory) WHERE elementId(category) = $categoryElementId
        OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory) WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
        WITH topLevel, category ORDER BY length(path) DESC LIMIT 1
-       RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId, COALESCE(topLevel.name, category.name) as topLevelName,
-              COALESCE(topLevel.menuId, category.menuId) as menuId, COALESCE(topLevel.id, category.id) as shopifyId`,
+       WITH COALESCE(topLevel, category) as node
+       RETURN elementId(node) as topLevelId, node.name as topLevelName, node.menuId as menuId, node.id as shopifyId,
+              NOT EXISTS((node)-[:ProductCategory]->()) as isTopLevel`,
       { categoryElementId }
     );
     if (topLevelResult.records.length === 0) return { success: false, error: "Could not find category" };
@@ -322,12 +345,8 @@ try {
     const topLevelName = topLevel.get('topLevelName');
     const topLevelMenuId = topLevel.get('menuId');
     const topLevelShopifyId = topLevel.get('shopifyId');
+    const isTopLevel = topLevel.get('isTopLevel') ?? true;
     if (!topLevelShopifyId) return { success: false, error: "Top-level category does not have Shopify ID" };
-    const isTopLevelCheck = await session.run(
-      `MATCH (category:ShopifyProductCategory) WHERE elementId(category) = $topLevelId RETURN NOT EXISTS((category)-[:ProductCategory]->()) as isTopLevel`,
-      { topLevelId }
-    );
-    const isTopLevel = isTopLevelCheck.records[0]?.get('isTopLevel') || false;
     if (!isTopLevel) {
       if (topLevelMenuId) {
         const deleteResult = await deleteShopifyMenuLogic(args, session, { menuId: topLevelMenuId, categoryElementId: topLevelId, shop });
@@ -359,6 +378,7 @@ try {
       batchGetProductTags,
       batchUpdateProductTags,
       buildNestedMenuItems,
+      buildNestedMenuItemsBatch,
       deleteShopifyMenuLogic,
       createShopifyMenuForCategoryLogic,
       updateShopifyMenuForCategoryLogic,

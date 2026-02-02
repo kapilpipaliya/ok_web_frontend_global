@@ -34,16 +34,24 @@ const doJob = async (args, jobData, dbSession, subDomain, h) => {
         if (edge && edge.type === 'ProductCategory' && edge.sourceLabel === 'ShopifyProductCategory' && edge.to === vertexId && edge.from) affectedCategoryIds.add(edge.from);
       }
     }
+    const successIds = [];
+    const failedUpdates = [];
     for (const affectedCategoryId of affectedCategoryIds) {
       const menuResult = await h.updateTopLevelCategoryMenuLogic(args, dbSession, { categoryElementId: affectedCategoryId, shop });
       if (menuResult?.success) {
         console.log(`✅ ${menuResult.message}`);
-        await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementId: affectedCategoryId });
+        successIds.push(affectedCategoryId);
       } else if (menuResult?.action !== 'skipped') {
         console.warn("processShopifyMenuAfterDelete: Failed to update menu:", menuResult?.error);
         const errMsg = (menuResult?.error && (typeof menuResult.error === 'string' ? menuResult.error : menuResult.error?.message || String(menuResult.error))) || 'Menu update failed';
-        await dbSession.run(`MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.syncStatus = 'failed', c.syncError = $syncError, c.updatedAt = datetime()`, { elementId: affectedCategoryId, syncError: errMsg.substring(0, 2000) });
+        failedUpdates.push({ elementId: affectedCategoryId, syncError: errMsg.substring(0, 2000) });
       }
+    }
+    if (successIds.length > 0) {
+      await dbSession.run(`UNWIND $elementIds as elementId MATCH (c:ShopifyProductCategory) WHERE elementId(c) = elementId SET c.syncStatus = 'complete', c.updatedAt = datetime()`, { elementIds: successIds });
+    }
+    if (failedUpdates.length > 0) {
+      await dbSession.run(`UNWIND $updates as u MATCH (c:ShopifyProductCategory) WHERE elementId(c) = u.elementId SET c.syncStatus = 'failed', c.syncError = u.syncError, c.updatedAt = datetime()`, { updates: failedUpdates });
     }
   } catch (error) {
     console.error("processShopifyMenuAfterDelete: Error", error);

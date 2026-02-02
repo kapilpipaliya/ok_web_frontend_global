@@ -17,51 +17,16 @@ if (!parentElementId) {
   };
 }
 
-// Get direct children for this parent category
-const childrenResult = await args.session.run(
-  `MATCH (parent:ShopifyProductCategory)
-   WHERE elementId(parent) = $parentElementId
-   MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
-   WHERE child.id IS NOT NULL
-   RETURN elementId(child) as elementId, child.name as name, child.id as shopifyId, child.handle as shopifyHandle
-   ORDER BY child.name`,
-  { parentElementId }
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: 'decodeproduct' }
 );
-
-const menuItems = [];
-
-for (const record of childrenResult.records) {
-  const shopifyId = record.get('shopifyId');
-  const childName = record.get('name');
-  const childElementId = record.get('elementId');
-  
-  if (!shopifyId) {
-    console.warn(`Child category ${childName} does not have a Shopify ID, skipping`);
-    continue;
-  }
-  
-  // Recursively get nested children for this child
-  const nestedResult = await args.executeNamedServerFunction({
-    functionName: "buildNestedMenuItems",
-    contextData: {
-      parentElementId: childElementId
-    }
-  }, { functionLookupSubDomain: 'decodeproduct' });
-  
-  const nestedItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
-  
-  menuItems.push({
-    title: childName,
-    type: "COLLECTION",
-    resourceId: shopifyId,
-    items: nestedItems
-  });
+if (!helpers.result?.success) {
+  return { success: false, error: "Failed to load shopifyQueueHelpers", menuItems: [] };
 }
-
-return {
-  success: true,
-  menuItems: menuItems
-};
+const batchResult = await helpers.result.data.buildNestedMenuItemsBatch(args.session, [parentElementId]);
+const menuItems = batchResult.get(parentElementId) || [];
+return { success: true, menuItems };
 '''
         key: buildNestedMenuItems
       }

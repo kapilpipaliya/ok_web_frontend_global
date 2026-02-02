@@ -245,7 +245,7 @@ if (isUncategorized) {
       console.log(`📦 Retrieved ${allShopifyProducts.length} products so far...`);
       
       // Small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 250));
     } catch (error) {
       console.error("Error fetching products from Shopify:", error);
       break; // Stop pagination on error
@@ -307,7 +307,7 @@ if (isUncategorized) {
       console.log(`📦 Retrieved ${allShopifyProducts.length} products so far...`);
       
       // Small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 250));
     } catch (error) {
       console.error(`Error fetching batch ${i / batchSize + 1} from Shopify:`, error);
       continue; // Skip this batch on error
@@ -404,18 +404,13 @@ if (productsToDelete.length > 0) {
   console.log(`✅ Deleted ${productsToDelete.length} products`);
 }
 
-// Create or update products
-// For specific category, we already fetched only products in that category
-// For uncategorized, we fetched all products
-let createdCount = 0;
-let updatedCount = 0;
-
+// Create or update products (batched)
+const toUpdate = [];
+const toCreate = [];
 for (const shopifyProduct of allShopifyProducts) {
   const id = shopifyProduct.id;
   const existingDbId = existingProducts.get(id);
-
-  // Prepare product properties
-  const productProperties = {
+  const props = {
     id: id,
     title: shopifyProduct.title || '',
     handle: shopifyProduct.handle || '',
@@ -439,40 +434,31 @@ for (const shopifyProduct of allShopifyProducts) {
     options: JSON.stringify(shopifyProduct.options || []),
     category: shopifyProduct.category ? JSON.stringify(shopifyProduct.category) : null
   };
-
   if (existingDbId) {
-    // Update existing product
-    const propertyKeys = Object.keys(productProperties);
-    const propertyAssignments = propertyKeys.map((key, index) => `p.${key} = $prop${index}`).join(', ');
-
-    await args.session.run(
-      `MATCH (p:ShopifyProduct)
-       WHERE elementId(p) = $id
-       SET ${propertyAssignments},
-           p.updatedAt = datetime()`,
-      {
-        id: existingDbId,
-        ...Object.fromEntries(Object.entries(productProperties).map(([key, value], index) => [`prop${index}`, value]))
-      }
-    );
-    updatedCount++;
+    toUpdate.push({ elementId: existingDbId, props });
   } else {
-    // Create new product
-    const propertyKeys = Object.keys(productProperties);
-    const propertyAssignments = propertyKeys.map((key, index) => `p.${key} = $prop${index}`).join(', ');
-
-    await args.session.run(
-      `CREATE (p:ShopifyProduct)
-       SET ${propertyAssignments},
-           p.createdAt = datetime(),
-           p.updatedAt = datetime()`,
-      Object.fromEntries(Object.entries(productProperties).map(([key, value], index) => [`prop${index}`, value]))
-    );
-    createdCount++;
+    toCreate.push({ props });
   }
 }
 
-console.log(`✅ Sync complete: Created ${createdCount}, Updated ${updatedCount}, Deleted ${productsToDelete.length}`);
+if (toUpdate.length > 0) {
+  await args.session.run(
+    `UNWIND $items as item
+     MATCH (p:ShopifyProduct) WHERE elementId(p) = item.elementId
+     SET p += item.props, p.updatedAt = datetime()`,
+    { items: toUpdate }
+  );
+}
+if (toCreate.length > 0) {
+  await args.session.run(
+    `UNWIND $items as item
+     CREATE (p:ShopifyProduct)
+     SET p = item.props, p.createdAt = datetime(), p.updatedAt = datetime()`,
+    { items: toCreate }
+  );
+}
+
+console.log(`✅ Sync complete: Created ${toCreate.length}, Updated ${toUpdate.length}, Deleted ${productsToDelete.length}`);
 '''
         key: shopifyProductBeforeFetchData
       }

@@ -33,13 +33,13 @@ try {
   });
   await queue.close();
   const jobId = job?.id;
-  if (contentIds && Array.isArray(contentIds) && jobId) {
-    for (const elementId of contentIds) {
-      await args.session.run(
-        `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
-        { elementId, status: 'queued', jobId }
-      );
-    }
+  if (contentIds && Array.isArray(contentIds) && contentIds.length > 0 && jobId) {
+    await args.session.run(
+      `UNWIND $contentIds as elementId
+       MATCH (n:ShopifyProduct) WHERE elementId(n) = elementId
+       SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
+      { contentIds, status: 'queued', jobId }
+    );
   }
   const r = args.contextData?.result;
   if (r?.data?.P && typeof r.data.P === 'object') {

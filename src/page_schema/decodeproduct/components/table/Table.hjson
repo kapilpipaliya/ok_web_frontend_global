@@ -56,6 +56,15 @@ const getSelectedRows = () => {
   }
   return propFn();
 };
+
+// Selection filtered to current filteredData - avoids stale selection (e.g. after move or category switch)
+const getEffectiveSelectedRows = () => {
+  const selected = getSelectedRows();
+  const filtered = filteredData();
+  const currentIds = new Set((filtered || []).map(r => r?.id).filter(Boolean));
+  if (currentIds.size === 0) return new Set();
+  return new Set([...selected].filter(id => currentIds.has(id)));
+};
 const setSelectedRows = (newSelected) => {
   const propFn = args.contextData.props?.setSelectedRows;
   if (!propFn) {
@@ -977,12 +986,9 @@ const getRowIdFromElement = (element) => {
 // Helper to check if a row can be dragged
 const canDragRow = (rowId) => {
   if (!rowId) return false;
-  const selected = getSelectedRows();
+  const selected = getEffectiveSelectedRows();
   if (!selected.has(rowId)) return false;
-  
-  const filtered = filteredData();
-  const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
-  return filtered.some(row => itemIds.includes(row.id));
+  return selected.size > 0;
 };
 
 // Initialize draggable for table row - rowId read from element data-row-id
@@ -1003,15 +1009,13 @@ const initTableDraggable = (element) => {
         return { type: 'table-items', itemIds: [], count: 0 };
       }
       
-      const selected = getSelectedRows();
+      const selected = getEffectiveSelectedRows();
       const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
-      const filtered = filteredData();
-      const selectedItems = filtered.filter(row => itemIds.includes(row.id));
       
       return {
         type: 'table-items',
         itemIds,
-        count: selectedItems.length
+        count: itemIds.length
       };
     },
     onGenerateDragPreview: ({ nativeSetDragImage }) => {
@@ -1020,11 +1024,8 @@ const initTableDraggable = (element) => {
       const currentRowId = getRowIdFromElement(element);
       if (!currentRowId || !canDragRow(currentRowId)) return;
 
-      const selected = getSelectedRows();
-      const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
-      const filtered = filteredData();
-      const selectedItems = filtered.filter(row => itemIds.includes(row.id));
-      const count = selectedItems.length;
+      const selected = getEffectiveSelectedRows();
+      const count = selected.size;
 
       if (!count) return;
 
@@ -1110,10 +1111,10 @@ const cleanupTableDraggable = (element) => {
 };
 
 const getSelectedItems = () => {
-  const selected = getSelectedRows();
+  const selected = getEffectiveSelectedRows();
   const filtered = filteredData();
   const selectedIds = Array.from(selected);
-  return filtered.filter(row => selectedIds.includes(row.id));
+  return (filtered || []).filter(row => selectedIds.includes(row.id));
 };
 
 return {
@@ -1164,6 +1165,7 @@ return {
   sortConfig,
   setSortConfig,
   getSelectedRows,
+  getEffectiveSelectedRows,
   setSelectedRows,
   clearSelectedRows,
   isModalOpen,
@@ -1730,9 +1732,9 @@ return {
         props:
           '''
 const showSelection = args.fns.getShowSelection();
-const selected = args.fns.getSelectedRows();
+const selected = args.fns.getEffectiveSelectedRows();
 const filtered = args.fns.filteredData();
-// Check if all rows are selected by comparing vertex IDs
+// Check if all rows are selected by comparing vertex IDs (use effective selection to avoid stale state)
 const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
 
 return {
@@ -2418,7 +2420,7 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = args.fns.filteredData()[rowIndex];
-const selectedRows = args.fns.getSelectedRows();
+const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return [
@@ -2454,7 +2456,7 @@ const rowData = args.fns.filteredData()[rowIndex];
 
 const showSelection = args.fns.getShowSelection();
 
-const selected = args.fns.getSelectedRows();
+const selected = args.fns.getEffectiveSelectedRows();
 const hasSelection = selected.size > 0;
 
 return {
@@ -2487,7 +2489,7 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = args.fns.filteredData()[rowIndex];
-const selectedRows = args.fns.getSelectedRows();
+const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return `._id {
@@ -2506,7 +2508,7 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = args.fns.filteredData()[rowIndex];
-const selectedRows = args.fns.getSelectedRows();
+const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return {
@@ -2529,7 +2531,7 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = args.fns.filteredData()[rowIndex];
-const selectedRows = args.fns.getSelectedRows();
+const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return {

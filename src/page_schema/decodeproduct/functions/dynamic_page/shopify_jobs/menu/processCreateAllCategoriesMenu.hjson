@@ -37,15 +37,16 @@ const doJob = async (args, jobData, dbSession, subDomain, h) => {
       console.log("processCreateAllCategoriesMenu: No top-level categories found");
       return { success: true, action: "skipped", message: "No top-level categories found" };
     }
+    const topLevelRecords = topLevelResult.records;
+    const topLevelElementIds = topLevelRecords.map(r => r.get('elementId')).filter(Boolean);
+    const nestedMap = topLevelElementIds.length > 0 ? await h.buildNestedMenuItemsBatch(dbSession, topLevelElementIds) : new Map();
     const menuItems = [];
-    for (const record of topLevelResult.records) {
+    for (const record of topLevelRecords) {
       const topLevelElementId = record.get('elementId');
       const topLevelName = record.get('name');
       const topLevelShopifyId = record.get('shopifyId');
-      const topLevelHandle = record.get('handle');
       if (!topLevelShopifyId) continue;
-      const nestedResult = await h.buildNestedMenuItems(dbSession, topLevelElementId);
-      const nestedItems = nestedResult?.success ? (nestedResult.menuItems || []) : [];
+      const nestedItems = nestedMap.get(topLevelElementId) || [];
       menuItems.push({ title: topLevelName, type: "COLLECTION", resourceId: topLevelShopifyId, items: nestedItems });
     }
     if (menuItems.length === 0) return { success: false, error: "No categories with Shopify IDs found" };
@@ -57,41 +58,39 @@ const doJob = async (args, jobData, dbSession, subDomain, h) => {
     let storedMenuId = settingResult.records.length > 0 ? settingResult.records[0].get('menuId') : null;
     if (storedMenuId) {
       try {
-        const getMenuResponse = await admin.graphql(
-          `query menu($id: ID!) { menu(id: $id) { id handle title } }`,
-          { variables: { id: storedMenuId } }
+        const updateResponse = await admin.graphql(
+          `mutation menuUpdate($id: ID!, $title: String!, $items: [MenuItemUpdateInput!]!) {
+            menuUpdate(id: $id, title: $title, items: $items) {
+              menu { id handle title items { id title type resourceId } }
+              userErrors { field message }
+            }
+          }`,
+          { variables: { id: storedMenuId, title: menuTitle, items: menuItems } }
         );
-        let getMenuApiResponse = getMenuResponse instanceof Response ? await getMenuResponse.json() : getMenuResponse;
-        if (getMenuApiResponse.data?.menu && (!getMenuApiResponse.errors || getMenuApiResponse.errors.length === 0)) {
-          const updateResponse = await admin.graphql(
-            `mutation menuUpdate($id: ID!, $title: String!, $items: [MenuItemUpdateInput!]!) {
-              menuUpdate(id: $id, title: $title, items: $items) {
-                menu { id handle title items { id title type resourceId } }
-                userErrors { field message }
-              }
-            }`,
-            { variables: { id: storedMenuId, title: menuTitle, items: menuItems } }
-          );
-          let updateApiResponse = updateResponse instanceof Response ? await updateResponse.json() : updateResponse;
-          if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
-            console.error("processCreateAllCategoriesMenu: GraphQL errors:", updateApiResponse.errors);
-            return { success: false, error: "Shopify GraphQL errors", details: updateApiResponse.errors };
-          }
-          const userErrors = updateApiResponse.data?.menuUpdate?.userErrors || [];
-          if (userErrors.length > 0) return { success: false, error: "User errors updating menu", details: userErrors };
-          const updatedMenu = updateApiResponse.data?.menuUpdate?.menu;
-          if (!updatedMenu) return { success: false, error: "Menu update succeeded but no menu returned" };
-          await dbSession.run(
-            `MERGE (s:Setting {key: $key}) ON CREATE SET s.createdAt = datetime()
-             SET s.value = $menuId, s.updatedAt = datetime()`,
-            { key: settingKey, menuId: updatedMenu.id }
-          );
-          return { success: true, action: "updated", menu: updatedMenu, menuId: updatedMenu.id, menuHandle: updatedMenu.handle, message: `Updated all categories menu "${menuTitle}"` };
+        let updateApiResponse = updateResponse instanceof Response ? await updateResponse.json() : updateResponse;
+        if (updateApiResponse.errors && updateApiResponse.errors.length > 0) {
+          throw new Error(JSON.stringify(updateApiResponse.errors));
         }
+        const userErrors = updateApiResponse.data?.menuUpdate?.userErrors || [];
+        const menuNotFoundError = userErrors.find(e => e.message && e.message.toLowerCase().includes('menu does not exist'));
+        if (menuNotFoundError) {
+          throw new Error('Menu does not exist');
+        }
+        if (userErrors.length > 0) return { success: false, error: "User errors updating menu", details: userErrors };
+        const updatedMenu = updateApiResponse.data?.menuUpdate?.menu;
+        if (!updatedMenu) return { success: false, error: "Menu update succeeded but no menu returned" };
+        await dbSession.run(
+          `MERGE (s:Setting {key: $key}) ON CREATE SET s.createdAt = datetime()
+           SET s.value = $menuId, s.updatedAt = datetime()`,
+          { key: settingKey, menuId: updatedMenu.id }
+        );
+        return { success: true, action: "updated", menu: updatedMenu, menuId: updatedMenu.id, menuHandle: updatedMenu.handle, message: `Updated all categories menu "${menuTitle}"` };
       } catch (e) {
-        console.log("processCreateAllCategoriesMenu: Menu not found, creating new:", e.message);
+        if (e?.message?.includes('Menu does not exist') || (e?.message && e.message.toLowerCase().includes('menu'))) {
+          console.log("processCreateAllCategoriesMenu: Menu not found, creating new:", e.message);
+        }
+        storedMenuId = null;
       }
-      storedMenuId = null;
     }
     if (!storedMenuId) {
       const createResponse = await admin.graphql(

@@ -117,11 +117,13 @@ const doJob = async (args, jobData, dbSession) => {
         }
         if (updates.length === 0) return;
         const { success: successList, failed: failedList } = await h.batchUpdateProductTags(adminInstance, updates);
-        for (const u of successList) {
-          if (u.elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId: u.elementId });
+        const successIds = successList.filter(u => u.elementId).map(u => u.elementId);
+        const failedUpdates = failedList.filter(u => u.elementId).map(u => ({ elementId: u.elementId, syncError: (u.error || 'Tag update failed').substring(0, 2000) }));
+        if (successIds.length > 0) {
+          await dbSession.run(`UNWIND $elementIds as elementId MATCH (p:ShopifyProduct) WHERE elementId(p) = elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementIds: successIds });
         }
-        for (const u of failedList) {
-          if (u.elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: u.elementId, syncError: (u.error || 'Tag update failed').substring(0, 2000) });
+        if (failedUpdates.length > 0) {
+          await dbSession.run(`UNWIND $updates as u MATCH (p:ShopifyProduct) WHERE elementId(p) = u.elementId SET p.syncStatus = 'failed', p.syncError = u.syncError, p.updatedAt = datetime()`, { updates: failedUpdates });
         }
       };
       await updateProductTagsForCategoryNameChange(vertexId, oldCategoryName, newCategoryName, admin);

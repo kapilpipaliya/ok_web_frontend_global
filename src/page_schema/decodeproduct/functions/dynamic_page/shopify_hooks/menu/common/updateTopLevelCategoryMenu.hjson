@@ -18,7 +18,7 @@ if (!categoryElementId) {
 }
 
 try {
-  // Find the top-level parent category
+  // Find the top-level parent category (single query with isTopLevel check)
   const topLevelResult = await args.session.run(
     `MATCH (category:ShopifyProductCategory)
      WHERE elementId(category) = $categoryElementId
@@ -27,10 +27,12 @@ try {
      WITH topLevel, category
      ORDER BY length(path) DESC
      LIMIT 1
-     RETURN COALESCE(elementId(topLevel), elementId(category)) as topLevelId,
-            COALESCE(topLevel.name, category.name) as topLevelName,
-            COALESCE(topLevel.menuId, category.menuId) as menuId,
-            COALESCE(topLevel.id, category.id) as shopifyId`,
+     WITH COALESCE(topLevel, category) as node
+     RETURN elementId(node) as topLevelId,
+            node.name as topLevelName,
+            node.menuId as menuId,
+            node.id as shopifyId,
+            NOT EXISTS((node)-[:ProductCategory]->()) as isTopLevel`,
     { categoryElementId }
   );
 
@@ -46,6 +48,7 @@ try {
   const topLevelName = topLevel.get('topLevelName');
   const topLevelMenuId = topLevel.get('menuId');
   const topLevelShopifyId = topLevel.get('shopifyId');
+  const isTopLevel = topLevel.get('isTopLevel') ?? true;
 
   if (!topLevelShopifyId) {
     return {
@@ -53,16 +56,6 @@ try {
       error: "Top-level category does not have Shopify ID"
     };
   }
-
-  // Check if this is actually a top-level category (no parent)
-  const isTopLevelCheck = await args.session.run(
-    `MATCH (category:ShopifyProductCategory)
-     WHERE elementId(category) = $topLevelId
-     RETURN NOT EXISTS((category)-[:ProductCategory]->()) as isTopLevel`,
-    { topLevelId }
-  );
-
-  const isTopLevel = isTopLevelCheck.records[0]?.get('isTopLevel') || false;
 
   if (!isTopLevel) {
     // This category is no longer top-level, delete its menu if it exists

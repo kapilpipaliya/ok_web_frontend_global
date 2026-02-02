@@ -31,28 +31,6 @@ const doJob = async (args, jobData, dbSession) => {
     return;
   }
 
-  let newCategoryName = null;
-  if (!isUncategorized) {
-    const categoryResult = await dbSession.run(
-      `MATCH (cat:${categoryLabel}) WHERE elementId(cat) = $categoryId RETURN cat.name as name`,
-      { categoryId }
-    );
-    if (categoryResult.records.length > 0) newCategoryName = categoryResult.records[0].get('name') || null;
-    if (!newCategoryName) return;
-  }
-
-  let oldCategoryName = null;
-  if (sourceCategoryId && sourceCategoryId !== 'uncategorized') {
-    const oldCategoryResult = await dbSession.run(
-      `MATCH (cat:${categoryLabel}) WHERE elementId(cat) = $sourceCategoryId RETURN cat.name as name`,
-      { sourceCategoryId }
-    );
-    if (oldCategoryResult.records.length > 0) oldCategoryName = oldCategoryResult.records[0].get('name') || null;
-  }
-
-  if (isUncategorized && !oldCategoryName) return;
-  if (!isUncategorized && !newCategoryName) return;
-
   const productsResult = await dbSession.run(
     `MATCH (p:ShopifyProduct) WHERE elementId(p) IN $contentIds RETURN elementId(p) as elementId, p.id as shopifyId`,
     { contentIds }
@@ -63,6 +41,30 @@ const doJob = async (args, jobData, dbSession) => {
     if (shopifyId) products.push({ elementId: record.get('elementId'), shopifyId });
   }
   if (products.length === 0) return;
+
+  const newCategoryId = !isUncategorized && categoryId ? categoryId : null;
+  const oldCategoryId = sourceCategoryId && sourceCategoryId !== 'uncategorized' ? sourceCategoryId : null;
+
+  let newCategoryName = null;
+  let oldCategoryName = null;
+  const idsToFetch = [newCategoryId, oldCategoryId].filter(Boolean);
+  if (idsToFetch.length > 0) {
+    const categoryResult = await dbSession.run(
+      `MATCH (cat:${categoryLabel}) WHERE elementId(cat) IN $ids RETURN elementId(cat) as id, cat.name as name`,
+      { ids: idsToFetch }
+    );
+    const nameByElementId = new Map();
+    for (const r of categoryResult.records) {
+      const elemId = r.get('id');
+      const name = r.get('name');
+      if (elemId != null) nameByElementId.set(String(elemId), name || null);
+    }
+    newCategoryName = newCategoryId ? (nameByElementId.get(String(newCategoryId)) ?? null) : null;
+    oldCategoryName = oldCategoryId ? (nameByElementId.get(String(oldCategoryId)) ?? null) : null;
+  }
+
+  if (isUncategorized && !oldCategoryName) return;
+  if (!isUncategorized && !newCategoryName) return;
 
   const h = helpers.result.data;
   const shopifyIds = products.map(p => p.shopifyId);
@@ -81,11 +83,13 @@ const doJob = async (args, jobData, dbSession) => {
     return;
   }
   const { success: successList, failed: failedList } = await h.batchUpdateProductTags(admin, updates);
-  for (const u of successList) {
-    if (u.elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementId: u.elementId });
+  const successIds = successList.filter(u => u.elementId).map(u => u.elementId);
+  const failedUpdates = failedList.filter(u => u.elementId).map(u => ({ elementId: u.elementId, syncError: (u.error || 'Tag update failed').substring(0, 2000) }));
+  if (successIds.length > 0) {
+    await dbSession.run(`UNWIND $elementIds as elementId MATCH (p:ShopifyProduct) WHERE elementId(p) = elementId SET p.syncStatus = 'complete', p.updatedAt = datetime()`, { elementIds: successIds });
   }
-  for (const u of failedList) {
-    if (u.elementId) await dbSession.run(`MATCH (p:ShopifyProduct) WHERE elementId(p) = $elementId SET p.syncStatus = 'failed', p.syncError = $syncError, p.updatedAt = datetime()`, { elementId: u.elementId, syncError: (u.error || 'Tag update failed').substring(0, 2000) });
+  if (failedUpdates.length > 0) {
+    await dbSession.run(`UNWIND $updates as u MATCH (p:ShopifyProduct) WHERE elementId(p) = u.elementId SET p.syncStatus = 'failed', p.syncError = u.syncError, p.updatedAt = datetime()`, { updates: failedUpdates });
   }
   console.log(`✅ Tag update complete for ${successList.length} product(s)${failedList.length > 0 ? `, ${failedList.length} failed` : ''}`);
 };

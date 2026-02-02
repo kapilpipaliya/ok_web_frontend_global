@@ -181,31 +181,36 @@ try {
     const createdContent = vertices[0];
     const createdElementId = createdContent.id;
 
-    // Handle relationships if provided
+    // Handle relationships if provided (batched by relationshipType + targetLabel)
     // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
     if (relationships && typeof relationships === "object") {
+      const validRels = [];
       for (const [fieldKey, relConfig] of Object.entries(relationships)) {
         if (relConfig && relConfig.targetId && relConfig.relationshipType && relConfig.targetLabel) {
-          try {
-            // Create relationship: FormVertex -[relationshipType]-> TargetVertex
-            const relQuery = `
-              MATCH (c:${vertexLabel})
-              WHERE elementId(c) = $contentId
-              MATCH (target:${relConfig.targetLabel})
-              WHERE elementId(target) = $targetId
-              MERGE (c)-[r:${relConfig.relationshipType}]->(target)
-              ON CREATE SET r.createdAt = datetime()
-              RETURN r
-            `;
-
-            await args.session.run(relQuery, {
-              contentId: createdElementId,
-              targetId: relConfig.targetId
-            });
-          } catch (relError) {
-            console.error(`Error creating relationship for ${fieldKey}:`, relError);
-            // Don't fail the whole operation if relationship creation fails
-          }
+          validRels.push({ ...relConfig, fieldKey });
+        }
+      }
+      const byTypeAndLabel = new Map();
+      for (const r of validRels) {
+        const key = `${r.relationshipType}|${r.targetLabel}`;
+        if (!byTypeAndLabel.has(key)) byTypeAndLabel.set(key, []);
+        byTypeAndLabel.get(key).push({ targetId: r.targetId, fieldKey: r.fieldKey });
+      }
+      for (const [key, items] of byTypeAndLabel) {
+        const [relationshipType, targetLabel] = key.split('|');
+        const targetIds = items.map(i => i.targetId);
+        try {
+          await args.session.run(
+            `UNWIND $targetIds as targetId
+             MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
+             MATCH (target:${targetLabel}) WHERE elementId(target) = targetId
+             MERGE (c)-[r:${relationshipType}]->(target)
+             ON CREATE SET r.createdAt = datetime()
+             RETURN count(r) as created`,
+            { contentId: createdElementId, targetIds }
+          );
+        } catch (relError) {
+          console.error(`Error creating relationships for ${relationshipType}->${targetLabel}:`, relError);
         }
       }
     }

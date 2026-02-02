@@ -895,6 +895,9 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       return { success: false, message: errorMessage };
     }
 
+    // Clear table selection after move (moved items are gone from current view; avoids stale selection and draggable issues)
+    clearSelectedRows();
+
     // Process graph data if available
     if (result?.result?.success && result.result.data) {
       if (result.graph && result.graph.vertexes) {
@@ -1040,7 +1043,7 @@ return {
         props:
           '''
 return {
-  selectedSidebarItem: args.fns.selectedSidebarItem(),
+  selectedSidebarItem: args.fns.selectedSidebarItem,
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
   clearSelectedRows: args.fns.clearSelectedRows

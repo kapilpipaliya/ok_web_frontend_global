@@ -1,5 +1,5 @@
 import { MetaProvider } from "@solidjs/meta";
-import { Router, useNavigate } from "@solidjs/router";
+import { Router, useLocation, useNavigate } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { FileRoutes } from "@solidjs/start/router";
 import { ToastProvider } from "solid-hot-toast";
@@ -58,9 +58,13 @@ export default function App() {
       <GraphContext.Provider value={graph}>
         <Router
           root={(props) => {
-            // <A> and 'use' router primitives can be only used inside a Route.
-            // const location = useLocation();
+            const location = useLocation();
             const navigate = useNavigate();
+
+            const isExcludedFromLoader = () =>
+              location.pathname === "/app" &&
+              (isServer ||
+                window.location.hostname === "decodeproduct.decodecommerce.com");
 
             // Set up Capacitor deep linking listener
             onMount(() => {
@@ -127,7 +131,7 @@ export default function App() {
                     <Toaster />
                     {/* </Show> */}
                   </Show>
-                  <HydrationLoader show={showLoader()} />
+                  <HydrationLoader show={showLoader() && !isExcludedFromLoader()} />
                 </ErrorBoundary>
               </MetaProvider>
             );
