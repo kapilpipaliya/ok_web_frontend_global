@@ -3072,6 +3072,10 @@ if (typeof cellContent === "object" && cellContent !== null) {
     };
   }
   if (cellContent.type === "badge") {
+    const text = (cellContent.text ?? "").toString().trim();
+    if (!text) {
+      return { as: "div", text: "", hide: true };
+    }
     const usePolaris = args.fns.getUsePolarisUI?.() === true;
     const tone = cellContent.tone || "neutral";
     const title = column.badgeTitleAccessor ? column.badgeTitleAccessor(rowData) : undefined;
@@ -3079,7 +3083,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
       return {
         as: "s-badge",
         "attr:tone": tone,
-        text: cellContent.text,
+        text,
         title
       };
     }
@@ -3098,7 +3102,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
     const style = `display: inline-flex; align-items: center; padding: 2px 8px; border-radius: ${br}; font-size: ${fs}; font-weight: 500; background: ${bg}; color: ${fg}; white-space: nowrap;`;
     return {
       as: "span",
-      text: cellContent.text,
+      text,
       style,
       title
     };
