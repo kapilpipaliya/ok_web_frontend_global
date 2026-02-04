@@ -6,6 +6,14 @@ import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
 import { runMigration } from "~/lib/schema/runMigration";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import shopify from "~/lib/shopify/shopify.server";
+import {
+  clearMigrationInProgress,
+  clearMigrationInProgressAndSetLastAt,
+  getMigrationRequestForAllShops,
+  isMigrationInProgress,
+  shouldRunMigrationForShop,
+  tryClaimMigration,
+} from "~/lib/shopify/shopMigrationRequest";
 
 export interface ShopifyAuthParams {
   embedded?: string;
@@ -98,13 +106,29 @@ export function getDatabaseNameForShop(shop: string): string {
   return `shop${normalized}`;
 }
 
+const MIGRATION_RETRY_COUNT = 3;
+const MIGRATION_RETRY_GAP_MS = 2000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Ensure a database exists for the given shop and run migration inside it.
+ *
+ * Migration runs only when the global "migration request for all shops" time
+ * (set by admin) is greater than this shop's last migration time. Migration
+ * "in progress" is stored in the database; if another process is already
+ * migrating, this waits and retries up to 3 times with a time gap so migration
+ * can complete before proceeding.
  *
  * This will:
  * - Create database if it does not exist
  * - Open a session for that database
- * - Run migration function (auto-detected) with a synthetic "Shop" user
+ * - If shouldRunMigrationForShop(shop): try to claim migration (set in-progress in DB)
+ * - If claimed: run migration, clear in-progress and set lastMigrationAt
+ * - If not claimed (migration in progress): wait and retry up to 3 times, then proceed with session
+ * - Return session and subDomain
  */
 export async function ensureShopDatabaseAndMigrate(
   shop: string,
@@ -119,23 +143,48 @@ export async function ensureShopDatabaseAndMigrate(
     migrationSubDomain?: string;
   } = {},
 ): Promise<{ dbSession: Session; subDomain: string }> {
-  const subDomain = getDatabaseNameForShop(shop);
+  const shopSubDomain = getDatabaseNameForShop(shop);
 
   // Try to create database; ignore error if it already exists
   try {
-    await createDatabase(subDomain);
+    await createDatabase(shopSubDomain);
   } catch (error: any) {
     // Neo4j returns an error if database already exists; log and continue
     console.warn(
-      `[Shopify] createDatabase(${subDomain}) failed (may already exist):`,
+      `[Shopify] createDatabase(${shopSubDomain}) failed (may already exist):`,
       error?.message || error,
     );
   }
 
   const driver = await getDriver();
-  const dbSession = driver.session({ database: subDomain });
+  const shopDbSession = driver.session({ database: shopSubDomain });
 
-  // Create a lightweight synthetic "user" vertex for migration context
+  const runMigrationNow = await shouldRunMigrationForShop(shop, shopDbSession);
+  if (!runMigrationNow) {
+    return { dbSession: shopDbSession, subDomain: shopSubDomain };
+  }
+
+  let claimed = await tryClaimMigration(shop, shopDbSession);
+  if (!claimed) {
+    for (let i = 0; i < MIGRATION_RETRY_COUNT; i++) {
+      await sleep(MIGRATION_RETRY_GAP_MS);
+      const stillInProgress = await isMigrationInProgress(shop, shopDbSession);
+      if (!stillInProgress) {
+        const needMigration = await shouldRunMigrationForShop(shop, shopDbSession);
+        if (!needMigration) {
+          await shopDbSession.close();
+          return getDBSessionForShop(shop);
+        }
+        claimed = await tryClaimMigration(shop, shopDbSession);
+        if (claimed) break;
+      }
+    }
+    if (!claimed) {
+      await shopDbSession.close();
+      return getDBSessionForShop(shop);
+    }
+  }
+
   const user: Vertex = {
     id: shop,
     L: ["User"],
@@ -147,27 +196,39 @@ export async function ensureShopDatabaseAndMigrate(
     } as any,
   };
 
-  const migrationResult = await runMigration(dbSession, subDomain, user, {
-    dryRun: options.dryRun ?? false,
-    contextData: {
+  try {
+    const migrationResult = await runMigration(shopDbSession, shopSubDomain, user, {
+      dryRun: options.dryRun ?? false,
+      contextData: {
+        shop,
+        ...options.contextData,
+      },
+      migrationSubDomain: options.migrationSubDomain,
+    });
+
+    if (!migrationResult.success) {
+      console.error(
+        `[Shopify] Migration failed for shop ${shop}:`,
+        migrationResult.error,
+      );
+      await clearMigrationInProgress(shop, shopDbSession);
+      throw new Error(
+        migrationResult.error ||
+          `Migration failed for shop ${shop} (function: ${migrationResult.functionName})`,
+      );
+    }
+
+    const requestAt = await getMigrationRequestForAllShops();
+    await clearMigrationInProgressAndSetLastAt(
       shop,
-      ...options.contextData,
-    },
-    migrationSubDomain: options.migrationSubDomain,
-  });
-
-  if (!migrationResult.success) {
-    console.error(
-      `[Shopify] Migration failed for shop ${shop}:`,
-      migrationResult.error,
+      requestAt ?? new Date(),
+      shopDbSession,
     );
-    throw new Error(
-      migrationResult.error ||
-        `Migration failed for shop ${shop} (function: ${migrationResult.functionName})`,
-    );
+    return { dbSession: shopDbSession, subDomain: shopSubDomain };
+  } catch (err) {
+    await clearMigrationInProgress(shop, shopDbSession);
+    throw err;
   }
-
-  return { dbSession, subDomain };
 }
 
 /**

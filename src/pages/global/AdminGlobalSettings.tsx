@@ -11,6 +11,7 @@ import { StripeSettings } from "~/pages/global/stripe/StripeSettings";
 import { SupportTickets } from "~/pages/global/support/SupportTickets";
 import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
+import { ShopMigrationRequestSettings } from "~/pages/global/shopMigrationRequest/ShopMigrationRequestSettings";
 import { WorkerManagement } from "~/pages/global/worker/WorkerManagement";
 
 export default function AdminGlobalSettings() {
@@ -98,6 +99,13 @@ export default function AdminGlobalSettings() {
       icon: "ph:activity",
       id: "activity-log",
       label: "Activity Log",
+    },
+    {
+      component: ShopMigrationRequestSettings,
+      group: "System",
+      icon: "ph:database",
+      id: "shop-migration-request",
+      label: "Shop migration request",
     },
     {
       component: WorkerManagement,

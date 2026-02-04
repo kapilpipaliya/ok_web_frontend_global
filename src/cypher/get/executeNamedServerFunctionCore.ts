@@ -168,8 +168,8 @@ import {
   ensureShopDatabaseAndMigrate,
   getDBSessionForShop,
   getDatabaseNameForShop,
+  getShopifyClient,
 } from "~/lib/shopify/shopifyHelpers";
-import { getShopifyClient } from "~/lib/shopify/shopifyHelpers";
 import { runMigration } from "~/lib/schema/runMigration";
 import { processResult } from "../conversion/processResult";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";

@@ -40,7 +40,9 @@ const request = event.request;
 
 let dbSession;
 try {
-  // Ensure dedicated database for this shop and run migration
+  // Ensure dedicated database for this shop and run migration.
+  // Migration "in progress" is stored in DB; if another process is migrating,
+  // this waits and retries up to 3 times with a time gap so migration can complete.
   const result = await args.ensureShopDatabaseAndMigrate(shop, {
     dryRun: false,
     contextData: {
