@@ -39,8 +39,13 @@ const [errors, setErrors] = args.createStore({});
 const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 const [selectOptionsCache, setSelectOptionsCache] = args.createStore({});
 
-// Helper to get form vertex from graph
+// Helper to get form vertex from graph (or initialVertex for view mode)
 const getFormVertex = () => {
+  const mode = getMode();
+  const initialVertex = getInitialVertex();
+  if (mode === "view" && initialVertex) {
+    return initialVertex;
+  }
   const vertexId = formVertexId();
   if (!vertexId) return null;
   return args.graph.vertexes[vertexId] || null;
@@ -79,6 +84,13 @@ const initializeForm = () => {
   const hasFields = formConfig?.groups?.length > 0 || formConfig?.fields?.length > 0;
   if (!hasFields) {
     setFormVertexId(null);
+    return;
+  }
+
+  // View mode: no graph mutation, just display initialVertex
+  if (mode === "view" && initialVertex) {
+    setFormVertexId(null);
+    setErrors({});
     return;
   }
 
@@ -434,7 +446,8 @@ return {
   getUserVertices,
   fetchSelectOptions,
   getSelectedVertex,
-  isFieldVisible
+  isFieldVisible,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
 };
 '''
         componentName: Html
@@ -727,6 +740,7 @@ return `._id {
 const field = args.contextData.field;
 const value = args.fns.getFieldValue(field.key);
 const setFieldValue = args.fns.setFieldValue;
+const isViewMode = args.fns.getMode?.() === "view";
 
 // Render appropriate input based on field type
 if (field.type === "textArea") {
@@ -736,7 +750,8 @@ if (field.type === "textArea") {
     onChange: (e) => setFieldValue(field.key, e.target.value),
     placeholder: field.placeholder || "",
     required: field.required || false,
-    maxLength: field.maxLength
+    maxLength: field.maxLength,
+    disabled: isViewMode
   };
 }
 
@@ -767,7 +782,8 @@ if (field.type === "select" && field.selectConfig) {
     options: options(),
     placeholder: field.placeholder || `Select ${field.selectConfig.label}...`,
     required: field.required || false,
-    loading: loading()
+    loading: loading(),
+    disabled: isViewMode
   };
 }
 
@@ -778,7 +794,8 @@ if (field.type === "checkbox") {
     checked: value === true || value === "true",
     onChange: (e) => {
       setFieldValue(field.key, e.target.checked);
-    }
+    },
+    disabled: isViewMode
   };
 }
 
@@ -790,7 +807,8 @@ if (field.type === "date") {
     onChange: (e) => {
       setFieldValue(field.key, e.target.value);
     },
-    required: field.required || false
+    required: field.required || false,
+    disabled: isViewMode
   };
 }
 
@@ -805,7 +823,8 @@ if (field.type === "number") {
     placeholder: field.placeholder || "",
     required: field.required || false,
     min: field.min,
-    max: field.max
+    max: field.max,
+    disabled: isViewMode
   };
 }
 
@@ -820,7 +839,8 @@ return {
   placeholder: field.placeholder || "",
   required: field.required || false,
   maxLength: field.maxLength,
-  minLength: field.minLength
+  minLength: field.minLength,
+  disabled: isViewMode
 };
 '''
       }
@@ -872,7 +892,8 @@ return `._id {
         props:
           '''
 return {
-  as: "div"
+  as: "div",
+  hide: args.fns.getMode?.() === "view"
 };
 '''
       }
@@ -904,7 +925,38 @@ return {
   variant: "secondary",
   onClick: handleCancel,
   text: "Cancel",
-  disabled: args.fns.isSubmitting()
+  disabled: args.fns.isSubmitting(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "15_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+const handleCancel = () => {
+  const txnId = args.fns.formTxnId();
+  if (txnId && txnId > 0) {
+    args.revertTransaction(txnId);
+    args.fns.setFormTxnId(0);
+  }
+  if (onClose) onClose();
+};
+
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Cancel",
+  onClick: handleCancel,
+  disabled: args.fns.isSubmitting(),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -921,7 +973,27 @@ return {
   variant: "primary",
   onClick: args.fns.handleSave,
   text: "Save",
-  disabled: args.fns.isSubmitting()
+  disabled: args.fns.isSubmitting(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "16_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  text: "Save",
+  onClick: args.fns.handleSave,
+  disabled: args.fns.isSubmitting(),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1098,10 +1170,22 @@ return {
       E: "15"
     }
     {
+      id: e20a
+      T: Attr
+      S: "14"
+      E: "15_polaris"
+    }
+    {
       id: e21
       T: Attr
       S: "14"
       E: "16"
+    }
+    {
+      id: e21a
+      T: Attr
+      S: "14"
+      E: "16_polaris"
     }
   ]
 }

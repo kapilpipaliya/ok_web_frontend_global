@@ -1,9 +1,19 @@
 import type { Session as ShopifySession } from "@shopify/shopify-api";
-import type { Session as Neo4jSession } from "neo4j-driver";
 import type { SessionStorage } from "@shopify/shopify-app-session-storage";
 
 import { getDriver } from "~/cypher/core/driver";
+import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
 import { getDatabaseNameForShop } from "./shopifyHelpers";
+
+const DATABASE_NOT_FOUND_CODE = "Neo.ClientError.Database.DatabaseNotFound";
+
+function isDatabaseNotFoundError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    "code" in error &&
+    (error as { code?: string }).code === DATABASE_NOT_FOUND_CODE
+  );
+}
 
 /**
  * Neo4j session store adapter for Shopify sessions.
@@ -76,15 +86,16 @@ export class Neo4jSessionStore implements SessionStorage {
     const sessionId = session.id;
     const subDomain = getDatabaseNameForShop(shop);
 
-    const driver = await getDriver();
-    const dbSession = driver.session({ database: subDomain });
+    const doStore = async (): Promise<boolean> => {
+      const driver = await getDriver();
+      const dbSession = driver.session({ database: subDomain });
 
-    try {
-      // Convert session to object for storage
-      const sessionData = session.toObject();
+      try {
+        // Convert session to object for storage
+        const sessionData = session.toObject();
 
-      // Store session data as properties on a ShopifySession node
-      const query = `
+        // Store session data as properties on a ShopifySession node
+        const query = `
         MERGE (s:ShopifySession {id: $sessionId})
         ON CREATE SET s.createdAt = datetime()
         SET s.shop = $shop,
@@ -98,45 +109,65 @@ export class Neo4jSessionStore implements SessionStorage {
             s.updatedAt = datetime()
       `;
 
-      await dbSession.run(query, {
-        sessionId,
-        shop: sessionData.shop,
-        state: sessionData.state || "",
-        isOnline: sessionData.isOnline,
-        scope: sessionData.scope || null,
-        expires: sessionData.expires
-          ? new Date(sessionData.expires).toISOString()
-          : null,
-        accessToken: sessionData.accessToken || null,
-        refreshToken: sessionData.refreshToken || null,
-        refreshTokenExpires: sessionData.refreshTokenExpires
-          ? new Date(sessionData.refreshTokenExpires).toISOString()
-          : null,
-      });
+        await dbSession.run(query, {
+          sessionId,
+          shop: sessionData.shop,
+          state: sessionData.state || "",
+          isOnline: sessionData.isOnline,
+          scope: sessionData.scope || null,
+          expires: sessionData.expires
+            ? new Date(sessionData.expires).toISOString()
+            : null,
+          accessToken: sessionData.accessToken || null,
+          refreshToken: sessionData.refreshToken || null,
+          refreshTokenExpires: sessionData.refreshTokenExpires
+            ? new Date(sessionData.refreshTokenExpires).toISOString()
+            : null,
+        });
 
-      // Store onlineAccessInfo if present (for online sessions)
-      if (sessionData.onlineAccessInfo) {
-        const onlineInfo = sessionData.onlineAccessInfo;
-        const onlineInfoQuery = `
+        // Store onlineAccessInfo if present (for online sessions)
+        if (sessionData.onlineAccessInfo) {
+          const onlineInfo = sessionData.onlineAccessInfo;
+          const onlineInfoQuery = `
           MATCH (s:ShopifySession {id: $sessionId})
           SET s.onlineAccessInfo = $onlineAccessInfo
         `;
 
-        await dbSession.run(onlineInfoQuery, {
-          sessionId,
-          onlineAccessInfo: JSON.stringify(onlineInfo),
-        });
-      }
+          await dbSession.run(onlineInfoQuery, {
+            sessionId,
+            onlineAccessInfo: JSON.stringify(onlineInfo),
+          });
+        }
 
-      return true;
+        return true;
+      } finally {
+        await dbSession.close();
+      }
+    };
+
+    try {
+      return await doStore();
     } catch (error) {
+      if (isDatabaseNotFoundError(error)) {
+        console.warn(
+          `[Neo4jSessionStore] Database ${subDomain} not found, creating it for shop ${shop}`,
+        );
+        try {
+          await createDatabase(subDomain);
+          return await doStore();
+        } catch (createError) {
+          console.error(
+            `[Neo4jSessionStore] Error creating database or storing session ${sessionId}:`,
+            createError,
+          );
+          return false;
+        }
+      }
       console.error(
         `[Neo4jSessionStore] Error storing session ${sessionId}:`,
         error,
       );
       return false;
-    } finally {
-      await dbSession.close();
     }
   }
 
@@ -176,30 +207,49 @@ export class Neo4jSessionStore implements SessionStorage {
     }
 
     const subDomain = getDatabaseNameForShop(shop);
-    const driver = await getDriver();
-    const dbSession = driver.session({ database: subDomain });
 
-    try {
-      const query = `
+    const doLoad = async (): Promise<ShopifySession | undefined> => {
+      const driver = await getDriver();
+      const dbSession = driver.session({ database: subDomain });
+
+      try {
+        const query = `
         MATCH (s:ShopifySession {id: $id})
         RETURN s
       `;
 
-      const result = await dbSession.run(query, { id });
+        const result = await dbSession.run(query, { id });
 
-      if (result.records.length === 0) {
-        return undefined;
+        if (result.records.length === 0) {
+          return undefined;
+        }
+
+        const node = result.records[0].get("s");
+        const properties = node.properties;
+
+        return await this.reconstructSession(properties);
+      } finally {
+        await dbSession.close();
       }
+    };
 
-      const node = result.records[0].get("s");
-      const properties = node.properties;
-
-      return await this.reconstructSession(properties);
+    try {
+      return await doLoad();
     } catch (error) {
+      if (isDatabaseNotFoundError(error)) {
+        console.warn(
+          `[Neo4jSessionStore] Database ${subDomain} not found, creating it for shop ${shop}`,
+        );
+        try {
+          await createDatabase(subDomain);
+          return await doLoad();
+        } catch (createError) {
+          // Database created but no session exists yet - return undefined
+          return undefined;
+        }
+      }
       console.error(`[Neo4jSessionStore] Error loading session ${id}:`, error);
       return undefined;
-    } finally {
-      await dbSession.close();
     }
   }
 

@@ -27,7 +27,6 @@ return `._id {
   line-height: 1.6;
   font-family: inherit;
   resize: ${resize};
-  min-height: calc(${args.theme.var.touch.input} * 2);
 
   &:focus {
     outline: none;

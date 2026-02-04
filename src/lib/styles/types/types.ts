@@ -8,7 +8,8 @@ export type ThemeColorKey =
   | "text"
   | "background"
   | "border"
-  | "muted";
+  | "muted"
+  | "secondary";
 // Typography and layout types removed - use fixed values in CSS
 // Media breakpoints
 export type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";

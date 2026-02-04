@@ -117,7 +117,6 @@ return `._id {
   align-items: center;
   justify-content: center;
   padding: 0 ${args.theme.var.spacing.md};
-  min-width: ${args.theme.var.touch.minTarget};
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   border: none;

@@ -65,6 +65,10 @@ return {
       skipped: {
         light: "oklch(0.55 0.00 0)",
         dark: "oklch(0.60 0.00 0)"
+      },
+      secondary: {
+        light: "oklch(0.92 0.015 0)",
+        dark: "oklch(0.22 0.02 0)"
       }
     },
     // Custom spacing for mobile-first design

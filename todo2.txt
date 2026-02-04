@@ -673,3 +673,7 @@ https://help.shopify.com/en/manual/shopify-admin/supported-browsers
 
 tree example:
 https://atlassian.design/components/pragmatic-drag-and-drop/examples
+
+
+
+when updating don't forget to change secret in bridge.js file.

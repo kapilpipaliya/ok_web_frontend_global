@@ -54,13 +54,14 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
     ) as ThemeContextType["var"];
 
     // font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    // body {
+    //   background-color: ${safeThemeVars.color?.background};
+    //   color: ${safeThemeVars.color?.text};
+    // }
     return `
       ${CSS_RESET}
 
       body {
-        background-color: ${safeThemeVars.color?.background};
-        color: ${safeThemeVars.color?.text};
-        
         -webkit-text-size-adjust: 100%;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;

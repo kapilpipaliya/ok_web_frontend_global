@@ -749,10 +749,9 @@ return {
       P: {
         css:
           '''
-const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 300;
+const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
 return `._id {
   display: grid;
-  gap: 4px;
   grid-template-columns: ${sidebarWidth}px 2px 1fr;
   height: 100%;
   position: relative;
@@ -802,7 +801,7 @@ return `._id {
         props:
           '''
 return {
-  as: "div"
+  as: args.fns.getUsePolarisUI?.() === true ? "s-scroll-box" : "div"
 };
 '''
       }
@@ -847,7 +846,36 @@ return {
   type: "search",
   placeholder: "Search...",
   value: args.fns.searchQuery(),
-  onInput: (e) => args.fns.onSearchChange(e.target.value)
+  onInput: (e) => args.fns.onSearchChange(e.target.value),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "7_shopify"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_search_bar_shopify
+        props:
+          '''
+return {
+  as: "s-search-field",
+  label: "Search",
+  "attr:labelAccessibilityVisibility": "exclusive",
+  placeholder: "Search items",
+  value: args.fns.searchQuery(),
+  onInput: (e) => args.fns.onSearchChange(e?.target?.value ?? ''),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -893,7 +921,28 @@ return {
   leftIcon: "carbon:add",
   onClick: () => {
     args.fns.handleOpenAddRootModal();
-  }
+  },
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "9_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_add_root_button_polaris
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:icon": "plus",
+  text: `Add Root ${args.fns.getSidebarLabel()}`,
+  onClick: () => args.fns.handleOpenAddRootModal(),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -960,6 +1009,7 @@ return {
   startSidebarQueuedPollIfNeeded: args.fns.startSidebarQueuedPollIfNeeded,
   hooks: args.fns.getHooks(),
   label: args.fns.getSidebarLabel(),
+  contentLabel: args.contextData.props?.contentLabel,
   operationLoading: args.fns.operationLoading,
   setOperationLoading: args.fns.setOperationLoading,
   setExpandedKeys: args.fns.setExpandedKeys,
@@ -1001,7 +1051,7 @@ return `._id {
         props:
           '''
 const setSidebarWidth = args.contextData.props?.setSidebarWidth;
-const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 300;
+const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
 
 return {
   as: "div",
@@ -1228,10 +1278,22 @@ return {
       E: "7"
     }
     {
+      id: e_search_shopify
+      T: Attr
+      S: "3"
+      E: "7_shopify"
+    }
+    {
       id: e6
       T: Attr
       S: "8"
       E: "9"
+    }
+    {
+      id: e6_polaris
+      T: Attr
+      S: "8"
+      E: "9_polaris"
     }
     {
       id: e9

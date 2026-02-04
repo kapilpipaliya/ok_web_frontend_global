@@ -9,6 +9,7 @@
 const [memoizedConfig, setMemoizedConfig] = args.createSignal(null);
 const [memoizedLoadFromSetting, setMemoizedLoadFromSetting] = args.createSignal(false);
 const [isSettingsModalOpen, setIsSettingsModalOpen] = args.createSignal(false);
+const [settingsModalInitialConfig, setSettingsModalInitialConfig] = args.createSignal(null);
 const [settings, setSettings] = args.createSignal(null);
 const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
 const [loading, setLoading] = args.createSignal(false);
@@ -16,8 +17,10 @@ const [configLoading, setConfigLoading] = args.createSignal(true);
 const [selectedSidebarItem, setSelectedSidebarItem] = args.createSignal(null);
 // Store selected rows per category (keyed by category ID or 'uncategorized' or null)
 const [selectedRowsByCategory, setSelectedRowsByCategory] = args.createStore({});
-// Sidebar width state (default 300px)
-const [sidebarWidth, setSidebarWidth] = args.createSignal(300);
+// Sidebar width state (default 240px)
+const [sidebarWidth, setSidebarWidth] = args.createSignal(240);
+// Rows to remove from table after move-to-category (parent-owned state, Table reacts via createEffect)
+const [rowsToRemove, setRowsToRemove] = args.createSignal(null);
 
 // Basic context/prop accessors
 const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
@@ -576,6 +579,7 @@ const evaluateConfig = () => {
     formConfig: args.contextData.props?.formConfig,
     uniqueKeys: [],
     hooks: args.contextData.props?.hooks,
+    usePolarisUI: args.contextData.props?.usePolarisUI,
     enableUserScopingForSidebar: args.contextData.props?.enableUserScopingForSidebar,
     enableUserScopingForContent: args.contextData.props?.enableUserScopingForContent,
     enableLocalFilters: args.contextData.props?.enableLocalFilters,
@@ -693,8 +697,10 @@ const handleExport = async (data = null) => {
 
 // Settings management functions
 
-// Load settings
-const loadSettings = async () => {
+// Load settings - accepts options: { updateState: boolean } (default true)
+// When updateState: false, fetches config without updating state and returns config text
+const loadSettings = async (options = {}) => {
+  const updateState = options.updateState !== false;
   const settingsFn = getSettingsFunction();
   if (!settingsFn) return null;
   try {
@@ -713,9 +719,11 @@ const loadSettings = async () => {
       // Get the raw config text (function body) - don't evaluate it
       const configText = settingData.config;
       if (typeof configText === 'string') {
-        setSettings(configText);
-        setEvaluatedConfig(null); // Clear evaluation cache
-        setMemoizedConfig(null); // Clear memoized cache
+        if (updateState) {
+          setSettings(configText);
+          setEvaluatedConfig(null); // Clear evaluation cache
+          setMemoizedConfig(null); // Clear memoized cache
+        }
         return configText;
       }
     }
@@ -744,9 +752,10 @@ const initializeSettings = async () => {
   }
 };
 
-// Handle opening settings modal
+// Handle opening settings modal - load config without updating state to avoid table loading spinner
 const handleOpenSettings = async () => {
-  await loadSettings();
+  const configText = await loadSettings({ updateState: false });
+  setSettingsModalInitialConfig(configText);
   setIsSettingsModalOpen(true);
 };
 
@@ -793,6 +802,12 @@ const getSidebarConfig = () => {
 const hasSidebar = () => {
   const sidebarConfig = getSidebarConfig();
   return sidebarConfig && (sidebarConfig.enabled !== false);
+};
+
+// Check if Polaris UI should be used (table-level config)
+const getUsePolarisUI = () => {
+  const { config } = getCachedConfig();
+  return config?.usePolarisUI === true;
 };
 
 // Get category key for selected rows storage
@@ -868,16 +883,21 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
     // Guard: don't allow moving into the same active category (compare by id; null means uncategorized)
     const normalizeCategoryId = (id) => (id === null || id === undefined ? 'uncategorized' : id);
     if (normalizeCategoryId(sourceCategoryId) === normalizeCategoryId(categoryId)) {
-      args.showWarningToast?.("Items are already in this category");
-      return { success: false, message: "Items are already in this category" };
+      const label = prop('label') || 'Item';
+      const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
+      const msg = `${plural} are already in this category`;
+      args.showWarningToast?.(msg);
+      return { success: false, message: msg };
     }
     
+    const contentLabelDisplay = prop('label') || 'Item';
     const contextData = {
       contentIds: contentIds,
       categoryId: categoryId,
       relationshipType: sidebarConfig.toParentEdgeType,
       categoryLabel: sidebarConfig.parentVertexLabel,
       contentLabel: tableVertexLabel,
+      contentLabelDisplay: contentLabelDisplay,
       enableUserScopingForSidebar: enableUserScopingForSidebar,
       enableUserScopingForContent: enableUserScopingForContent,
       sourceCategoryId: sourceCategoryId,
@@ -897,6 +917,11 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
 
     // Clear table selection after move (moved items are gone from current view; avoids stale selection and draggable issues)
     clearSelectedRows();
+
+    // Trigger table to remove moved rows (parent state, Table reacts - no reload needed)
+    if (result?.result?.success && contentIds?.length) {
+      setRowsToRemove(contentIds);
+    }
 
     // Process graph data if available
     if (result?.result?.success && result.result.data) {
@@ -932,6 +957,8 @@ return {
   fetchData,
   isSettingsModalOpen,
   setIsSettingsModalOpen,
+  settingsModalInitialConfig,
+  setSettingsModalInitialConfig,
   settings,
   setSettings,
   loading,
@@ -953,10 +980,13 @@ return {
   handleExport,
   getSidebarConfig,
   hasSidebar,
+  getUsePolarisUI,
   selectedSidebarItem,
   setSelectedSidebarItem,
   handleSidebarItemSelect,
   handleMoveItemsToCategory,
+  rowsToRemove,
+  setRowsToRemove,
   getSelectedRows,
   setSelectedRows,
   clearSelectedRows,
@@ -1026,7 +1056,8 @@ return {
   setSidebarWidth: args.fns.setSidebarWidth,
   fetchRoot: args.fns.fetchRoot,
   hooks: config?.sidebar?.hooks,
-  initialCategoryId: args.searchParams?.sidebarCategory
+  initialCategoryId: args.searchParams?.sidebarCategory,
+  contentLabel: args.fns.prop('label')
 };
 '''
       }
@@ -1046,7 +1077,9 @@ return {
   selectedSidebarItem: args.fns.selectedSidebarItem,
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: args.fns.rowsToRemove,
+  setRowsToRemove: args.fns.setRowsToRemove
 }'''
       }
     }
@@ -1081,7 +1114,9 @@ return {
 return {
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
-  clearSelectedRows: args.fns.clearSelectedRows
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: args.fns.rowsToRemove,
+  setRowsToRemove: args.fns.setRowsToRemove
 }'''
       }
     }

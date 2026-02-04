@@ -86,13 +86,13 @@ export function verifyShopifyAdminRequest(
 
 /**
  * Normalize a Shopify shop domain into a Neo4j database name.
- * Example: "productsmanagestore.myshopify.com" -> "shop-productsmanagestore-myshopify-com"
+ * Neo4j database names only allow alphanumeric characters (no hyphens, dots, etc.)
+ * Example: "decode-products-organizer.myshopify.com" -> "shopdecodeproductsorganizermyshopifycom"
  */
 export function getDatabaseNameForShop(shop: string): string {
-  // Only ASCII letters, numbers, dots, and dashes are allowed in Neo4j database names
   const normalized = shop
     .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "") // replace unsupported chars with dash
+    .replace(/[^a-z0-9]+/g, "") // replace unsupported chars with dash
     .replace(/^-+|-+$/g, ""); // trim leading/trailing dashes
 
   return `shop${normalized}`;

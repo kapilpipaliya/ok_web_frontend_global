@@ -26,6 +26,7 @@ const {
   relationshipType, 
   categoryLabel, 
   contentLabel, 
+  contentLabelDisplay,
   enableUserScopingForSidebar, 
   enableUserScopingForContent,
   sourceCategoryId,
@@ -213,9 +214,11 @@ try {
       }
     }
     
+    const label = contentLabelDisplay || 'item';
+    const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
     const uncategorizedResult = {
       success: true,
-      message: `Removed ${successCount} relationship${successCount !== 1 ? 's' : ''} successfully`,
+      message: `Moved ${successCount} ${successCount !== 1 ? plural : label} successfully`,
       data: { movedCount: successCount, updatedCounts: Object.keys(updatedCounts).length > 0 ? updatedCounts : undefined }
     };
     
@@ -483,9 +486,11 @@ try {
         }
       }
       
+      const label = contentLabelDisplay || 'item';
+      const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
       const moveResult = {
         success: true,
-        message: `Moved ${successCount} item${successCount !== 1 ? 's' : ''} successfully${errorCount > 0 ? ` (${errorCount} failed)` : ''}`,
+        message: `Moved ${successCount} ${successCount !== 1 ? plural : label} successfully${errorCount > 0 ? ` (${errorCount} failed)` : ''}`,
         data: { 
           movedCount: successCount, 
           errorCount, 

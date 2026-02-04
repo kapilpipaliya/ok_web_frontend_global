@@ -450,7 +450,8 @@ return {
   isLoadingDefault,
   isExampleExpanded,
   toggleExample,
-  getDetailedExample
+  getDetailedExample,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
 };
 '''
         componentName: Html
@@ -540,7 +541,29 @@ return {
   icon: "carbon:close",
   width: 24,
   height: 24,
-  onClick: onClose
+  onClick: onClose,
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "6_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  onClick: onClose,
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -811,7 +834,27 @@ return {
   variant: "secondary",
   onClick: args.fns.handleLoadDefault,
   text: "Load Default Settings",
-  disabled: args.fns.isLoadingDefault()
+  disabled: args.fns.isLoadingDefault(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "17_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Load Default Settings",
+  onClick: args.fns.handleLoadDefault,
+  disabled: args.fns.isLoadingDefault(),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -902,7 +945,28 @@ const onClose = args.contextData.props?.onClose;
 return {
   variant: "secondary",
   onClick: onClose,
-  text: "Cancel"
+  text: "Cancel",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "21_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const onClose = args.contextData.props?.onClose;
+
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Cancel",
+  onClick: onClose,
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -918,7 +982,26 @@ return {
 return {
   variant: "primary",
   onClick: args.fns.handleSave,
-  text: "Save Settings"
+  text: "Save Settings",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "22_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  text: "Save Settings",
+  onClick: args.fns.handleSave,
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -966,6 +1049,12 @@ return {
       T: Attr
       S: "4"
       E: "6"
+    }
+    {
+      id: e7a
+      T: Attr
+      S: "4"
+      E: "6_polaris"
     }
     {
       id: e8
@@ -1034,6 +1123,12 @@ return {
       E: "17"
     }
     {
+      id: e18a
+      T: Attr
+      S: "16"
+      E: "17_polaris"
+    }
+    {
       id: e19
       T: Attr
       S: "16"
@@ -1046,10 +1141,22 @@ return {
       E: "21"
     }
     {
+      id: e20a
+      T: Attr
+      S: "20"
+      E: "21_polaris"
+    }
+    {
       id: e21
       T: Attr
       S: "20"
       E: "22"
+    }
+    {
+      id: e21a
+      T: Attr
+      S: "20"
+      E: "22_polaris"
     }
   ]
 }

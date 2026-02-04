@@ -10,7 +10,7 @@
 
 const getColumns = () => args.fns.prop('columns') || [];
 
-const getRowHeight = () => args.fns.prop('rowHeight') || 50;
+const getRowHeight = () => args.fns.prop('rowHeight') || 36;
 const getTitle = () => args.fns.prop('title');
 const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder') || "Search...";
 const getAdditionalFilters = () => args.fns.prop('additionalFilters') || [];
@@ -40,6 +40,8 @@ const getOnAfterEdit = () => args.fns.prop('onAfterEdit');
 const getOnAdd = () => args.fns.prop('onAdd');
 const getOnDelete = () => args.fns.prop('onDelete');
 const getOnAfterDelete = () => args.fns.prop('onAfterDelete');
+const getRowClickable = () => args.fns.prop('rowClickable') === true;
+const getOnRowClick = () => args.fns.prop('onRowClick');
 
 const [data, setData] = args.createSignal([]);
 const [filteredData, setFilteredData] = args.createSignal([]);
@@ -424,6 +426,15 @@ const renderCellContent = (row, column, rowIndex) => {
     return { type: "actions", row, column };
   }
 
+  if (column.type === "badge") {
+    const map = column.badgeToneMap || {};
+    const v = (value || "").toString();
+    const key = (column.badgeKeyCase === "lower" ? v.toLowerCase() : v);
+    const entry = map[key];
+    const [text, tone] = Array.isArray(entry) ? entry : [v || "", "neutral"];
+    return { type: "badge", text, tone };
+  }
+
   // Default: return as string
   return value !== null && value !== undefined ? String(value) : "";
 };
@@ -712,6 +723,12 @@ const handleEdit = async (row) => {
   setIsModalOpen(true);
 };
 
+const handleViewRow = (row) => {
+  setModalMode("view");
+  setEditingRow(row);
+  setFormData(row);
+  setIsModalOpen(true);
+};
 
 const handleSave = async (formDataToSave) => {
   const formConfig = args.fns.getFormConfig();
@@ -881,11 +898,21 @@ const shouldHideColumn = (column) => {
   return hideColumns.includes(column.key);
 };
 
-// Get column width (from state or config)
+// Get column width (from state, config, or defaults)
 const getColumnWidth = (columnKey) => {
   const storedWidth = columnWidths[columnKey];
   if (storedWidth) {
     return storedWidth;
+  }
+  const configWidths = args.fns.prop('columnWidths');
+  if (configWidths && configWidths[columnKey]) {
+    return configWidths[columnKey];
+  }
+  if (columnKey === "__selection" || columnKey === "__rowNumber") {
+    return "36px";
+  }
+  if (columnKey === "__actions") {
+    return "120px";
   }
   const columns = getColumns();
   const column = columns.find(col => col.key === columnKey);
@@ -902,16 +929,16 @@ const getGridTemplateColumns = () => {
 
   // Add selection column if enabled
   if (showSelection) {
-    template += `${getColumnWidth("__selection") || "50px"} `;
+    template += `${getColumnWidth("__selection")} `;
   }
 
   // Add actions column if enabled and form config exists
   if (showActions && args.fns.getFormConfig()) {
-    template += `${getColumnWidth("__actions") || "120px"} `;
+    template += `${getColumnWidth("__actions")} `;
   }
 
   if (showRowNumber) {
-    template += `${getColumnWidth("__rowNumber") || "50px"} `;
+    template += `${getColumnWidth("__rowNumber")} `;
   }
 
   columns.forEach(col => {
@@ -941,10 +968,11 @@ const createResizeHandler = (columnKey) => {
 
     const startX = e.clientX || e.touches?.[0]?.clientX || 0;
 
+    const minWidth = (columnKey === "__selection" || columnKey === "__rowNumber") ? 36 : 50;
     const handleMouseMove = (moveEvent) => {
       const clientX = moveEvent.clientX || moveEvent.touches?.[0]?.clientX || startX;
       const deltaX = clientX - startX;
-      const newWidth = Math.max(50, startWidth + deltaX); // Minimum 50px
+      const newWidth = Math.max(minWidth, startWidth + deltaX);
       setColumnWidths({ ...columnWidths, [columnKey]: `${newWidth}px` });
     };
 
@@ -972,6 +1000,21 @@ args.createEffect(() => {
     handleSearch();
   }
 });
+
+// React to parent's rowsToRemove signal (parent-owned state, no reload after move-to-category)
+const rowsToRemove = args.contextData.props?.rowsToRemove;
+const setRowsToRemove = args.contextData.props?.setRowsToRemove;
+if (rowsToRemove && setRowsToRemove) {
+  args.createEffect(() => {
+    const idsToRemove = rowsToRemove?.();
+    if (!idsToRemove || !Array.isArray(idsToRemove) || idsToRemove.length === 0) return;
+    const idSet = new Set(idsToRemove);
+    const updated = data().filter(row => !idSet.has(row.id));
+    setData(updated);
+    applyLocalFilters(updated);
+    setRowsToRemove(null);
+  });
+}
 
 // Drag and drop functionality using @atlaskit/pragmatic-drag-and-drop
 const tableDraggableCleanups = new Map();
@@ -1144,6 +1187,7 @@ return {
   getOnAdd,
   getOnDelete,
   getOnAfterDelete,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true,
   getColumnWidth,
   createResizeHandler,
   columnWidths,
@@ -1189,6 +1233,9 @@ return {
   clearSelection,
   handleAdd,
   handleEdit,
+  handleViewRow,
+  getRowClickable,
+  getOnRowClick,
   shouldHideColumn,
   getGridTemplateColumns,
   renderCellContent,
@@ -1221,7 +1268,6 @@ return {
         css:
           '''
 return `._id {
-  background: ${args.theme.var.color.background};
   display: flex;
   flex-direction: column;
   height: calc(100vh - 16px);
@@ -1466,7 +1512,26 @@ return {
   variant: "primary",
   onClick: args.fns.handleAdd,
   text: "Add",
-  leftIcon: "carbon:add"
+  leftIcon: "carbon:add",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "11_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:icon": "plus",
+  text: "Add",
+  onClick: args.fns.handleAdd
 };
 '''
       }
@@ -1513,7 +1578,27 @@ return {
   text: "Import",
   leftIcon: "carbon:upload",
   disabled: args.fns.loading(),
-  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons()
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "14_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "upload",
+  text: "Import",
+  onClick: () => args.fns.setIsImportModalOpen(true),
+  disabled: args.fns.loading(),
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1532,7 +1617,27 @@ return {
   text: "Export All",
   leftIcon: "carbon:download",
   disabled: args.fns.loading(),
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons()
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "13_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "download",
+  text: "Export All",
+  onClick: args.fns.handleExport,
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1551,7 +1656,27 @@ return {
   text: "Export Filtered",
   leftIcon: "carbon:filter",
   disabled: args.fns.loading(),
-  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons()
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "15_polaris"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "filter",
+  text: "Export Filtered",
+  onClick: () => args.fns.handleExport(args.fns.filteredData()),
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1594,7 +1719,35 @@ return {
   onInput: (e) => {
     args.fns.debouncedSetSearchTerm(e.target.value);
   },
-  leftIcon: "carbon:search"
+  leftIcon: "carbon:search",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "19_polaris"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-search-field",
+  label: "Search",
+  "attr:labelAccessibilityVisibility": "exclusive",
+  placeholder: args.fns.getSearchPlaceholder(),
+  value: args.fns.searchTerm(),
+  onInput: (e) => args.fns.debouncedSetSearchTerm(e?.target?.value ?? ''),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1632,7 +1785,27 @@ return {
   text: "Settings",
   leftIcon: "carbon:settings",
   disabled: args.fns.loading(),
-  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton()
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "21_polaris"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "settings",
+  text: "Settings",
+  onClick: args.fns.handleOpenSettings,
+  disabled: args.fns.loading(),
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1700,7 +1873,7 @@ return {
 const showSelection = args.fns.getShowSelection();
 
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   font-weight: 600;
   font-size: ${args.theme.var.fontSize.sm};
   color: ${args.theme.var.color.text};
@@ -1734,22 +1907,25 @@ return {
 const showSelection = args.fns.getShowSelection();
 const selected = args.fns.getEffectiveSelectedRows();
 const filtered = args.fns.filteredData();
-// Check if all rows are selected by comparing vertex IDs (use effective selection to avoid stale state)
 const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
+const usePolaris = args.fns.getUsePolarisUI?.() === true;
 
 return {
-  as: "input",
-  type: "checkbox",
-  checked: allSelected,
-  onChange: () => {
-    if (allSelected) {
-      args.fns.clearSelection();
-    } else {
-      args.fns.selectAllRows();
-    }
+  as: usePolaris ? "s-checkbox" : "input",
+  type: usePolaris ? undefined : "checkbox",
+  "attr:checked": usePolaris && allSelected ? true : undefined,
+  "attr:accessibilityLabel": usePolaris ? "Select all rows" : undefined,
+  checked: usePolaris ? undefined : allSelected,
+  onChange: usePolaris ? (e) => {
+    const checked = e.target?.checked ?? e.detail?.checked ?? !allSelected;
+    if (checked) args.fns.selectAllRows();
+    else args.fns.clearSelection();
+  } : () => {
+    if (allSelected) args.fns.clearSelection();
+    else args.fns.selectAllRows();
   },
   hide: !showSelection,
-  style: "cursor: pointer; width: 20px; height: 20px;"
+  style: usePolaris ? undefined : "cursor: pointer; width: 20px; height: 20px;"
 };
 '''
       }
@@ -1772,18 +1948,21 @@ return `._id {
   cursor: col-resize;
   z-index: 20;
   touch-action: none;
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: ${args.theme.var.color.primary};
-      opacity: 0.5;
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
     }
   }
 
   &:active {
-    background: ${args.theme.var.color.primary};
-    opacity: 0.7;
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
   }
 
 }`;
@@ -1816,7 +1995,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   font-weight: 600;
   font-size: ${args.theme.var.fontSize.sm};
   color: ${args.theme.var.color.text};
@@ -1890,18 +2069,21 @@ return `._id {
   cursor: col-resize;
   z-index: 20;
   touch-action: none;
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: ${args.theme.var.color.primary};
-      opacity: 0.5;
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
     }
   }
 
   &:active {
-    background: ${args.theme.var.color.primary};
-    opacity: 0.7;
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
   }
 
 }`;
@@ -1956,7 +2138,7 @@ const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   font-weight: 600;
   font-size: ${args.theme.var.fontSize.sm};
   color: ${args.theme.var.color.text};
@@ -2076,18 +2258,21 @@ return `._id {
   cursor: col-resize;
   z-index: 20;
   touch-action: none;
-  transition: background ${args.theme.var.animation.fast} ease;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {
-      background: ${args.theme.var.color.primary};
-      opacity: 0.5;
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
     }
   }
 
   &:active {
-    background: ${args.theme.var.color.primary};
-    opacity: 0.7;
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
   }
 
 }`;
@@ -2131,7 +2316,6 @@ return `._id {
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
   grid-column: 1 / -1;
   grid-row: 2;
-  background: ${args.theme.var.color.background_light_200};
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
@@ -2292,13 +2476,20 @@ if (column.type === "select" && column.options) {
 }
 
 if (column.type === "checkbox") {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  const isChecked = filterValue === true || filterValue === "true";
   return {
     componentName: "Html",
-    as: "input",
-    type: "checkbox",
-    checked: filterValue === true || filterValue === "true",
-    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.checked),
-    style: "cursor: pointer; width: 20px; height: 20px;"
+    as: usePolaris ? "s-checkbox" : "input",
+    type: usePolaris ? undefined : "checkbox",
+    "attr:checked": usePolaris && isChecked ? true : undefined,
+    "attr:accessibilityLabel": usePolaris ? `Filter ${column.label || column.key}` : undefined,
+    checked: usePolaris ? undefined : isChecked,
+    onChange: (e) => {
+      const checked = usePolaris ? (e.target?.checked ?? e.detail?.checked ?? !isChecked) : e.target.checked;
+      args.fns.handleColumnFilterChange(column.key, checked);
+    },
+    style: usePolaris ? undefined : "cursor: pointer; width: 20px; height: 20px;"
   };
 }
 
@@ -2328,6 +2519,19 @@ if (filterType === "select") {
 }
 
 // Default: text input (applies filter immediately on change)
+/*const usePolaris = args.fns.getUsePolarisUI?.() === true;
+if (usePolaris) {
+  return {
+    componentName: "Html",
+    as: "s-text-field",
+    value: filterValue || "",
+    "attr:label": column.label || "Filter",
+    "attr:labelAccessibilityVisibility": "exclusive",
+    "attr:placeholder": "Filter...",
+    onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? ""),
+    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+  };
+}*/
 return {
   componentName: "TextInput",
   type: "text",
@@ -2436,12 +2640,12 @@ return [
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
   grid-column: 1 / -1;
   border-bottom: 1px solid ${args.theme.var.color.border};
-  background: ${isSelected ? args.theme.var.color.primary_light_200 : args.theme.var.color.background};
+  background: ${isSelected ? args.theme.var.color.secondary_light_200 : "transparent"};
   transition: background 0.2s ease;
 
 
   &:hover {
-    background: ${isSelected ? args.theme.var.color.primary_light_300 : args.theme.var.color.background_light_100};
+    background: ${isSelected ? args.theme.var.color.secondary_light_200 : args.theme.var.color.secondary_light_100};
   }
 }`];
 '''
@@ -2455,9 +2659,24 @@ const rowIndex = virtualItem.index;
 const rowData = args.fns.filteredData()[rowIndex];
 
 const showSelection = args.fns.getShowSelection();
+const rowClickable = args.fns.getRowClickable?.();
+const onRowClick = args.fns.getOnRowClick?.();
 
 const selected = args.fns.getEffectiveSelectedRows();
 const hasSelection = selected.size > 0;
+
+const handleRowClick = (e) => {
+  if (onRowClick && typeof onRowClick === "function") {
+    onRowClick(rowData, args);
+  } else if (rowClickable) {
+    args.fns.handleEdit?.(rowData);
+  } else {
+    args.fns.handleViewRow?.(rowData);
+  }
+};
+
+const isRowClickable = rowClickable || (typeof onRowClick === "function");
+const cursorStyle = isRowClickable ? "cursor: pointer;" : (hasSelection ? "cursor: move;" : undefined);
 
 return {
   as: "div",
@@ -2473,7 +2692,8 @@ return {
       args.fns.cleanupTableDraggable(args.ref());
     }
   },
-  style: hasSelection ? "cursor: move;" : undefined
+  onClick: isRowClickable ? handleRowClick : undefined,
+  style: cursorStyle
 };
 '''
       }
@@ -2493,7 +2713,7 @@ const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2534,21 +2754,21 @@ const rowData = args.fns.filteredData()[rowIndex];
 const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
+const usePolaris = args.fns.getUsePolarisUI?.() === true;
+
 return {
-  as: "input",
-  type: "checkbox",
-  checked: isSelected,
+  as: usePolaris ? "s-checkbox" : "input",
+  type: usePolaris ? undefined : "checkbox",
+  "attr:checked": usePolaris && isSelected ? true : undefined,
+  "attr:accessibilityLabel": usePolaris ? "Select row" : undefined,
+  checked: usePolaris ? undefined : isSelected,
   onChange: (e) => {
     e.stopPropagation();
-    if (rowData?.id) {
-      args.fns.toggleRowSelection(rowData.id);
-    }
+    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
   },
-  onClick: (e) => {
-    e.stopPropagation();
-  },
+  onClick: (e) => e.stopPropagation(),
   hide: !showSelection,
-  style: "cursor: pointer; width: 20px; height: 20px; pointer-events: auto; z-index: 10; position: relative;"
+  style: usePolaris ? "pointer-events: auto; z-index: 10; position: relative;" : "cursor: pointer; width: 20px; height: 20px; pointer-events: auto; z-index: 10; position: relative;"
 };
 '''
       }
@@ -2565,7 +2785,7 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.sm};
@@ -2774,7 +2994,7 @@ const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return `._id {
-  padding: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   display: flex;
   align-items: center;
 }`;
@@ -2851,6 +3071,38 @@ if (typeof cellContent === "object" && cellContent !== null) {
       style: "display: flex; gap: 8px; align-items: center;"
     };
   }
+  if (cellContent.type === "badge") {
+    const usePolaris = args.fns.getUsePolarisUI?.() === true;
+    const tone = cellContent.tone || "neutral";
+    const title = column.badgeTitleAccessor ? column.badgeTitleAccessor(rowData) : undefined;
+    if (usePolaris) {
+      return {
+        as: "s-badge",
+        "attr:tone": tone,
+        text: cellContent.text,
+        title
+      };
+    }
+    const t = args.theme.var.color;
+    const br = args.theme.var.borderRadius.full;
+    const fs = args.theme.var.fontSize.xs;
+    const tones = {
+      success: { bg: t.success_light_200, fg: t.success_dark_300 },
+      info: { bg: t.info_light_200, fg: t.info_dark_300 },
+      warning: { bg: t.warning_light_200, fg: t.warning_dark_300 },
+      critical: { bg: t.error_light_200, fg: t.error_dark_300 },
+      caution: { bg: t.warning_light_200, fg: t.warning_dark_300 },
+      neutral: { bg: t.background_light_300, fg: t.text }
+    };
+    const { bg, fg } = tones[tone] || tones.neutral;
+    const style = `display: inline-flex; align-items: center; padding: 2px 8px; border-radius: ${br}; font-size: ${fs}; font-weight: 500; background: ${bg}; color: ${fg}; white-space: nowrap;`;
+    return {
+      as: "span",
+      text: cellContent.text,
+      style,
+      title
+    };
+  }
 }
 
 // Add edit button if actions column and edit is enabled
@@ -2862,7 +3114,7 @@ if (column.type === "actions" && args.fns.getShowEditButton() && args.fns.getFor
 }
 
 // Default text rendering
-const cellTitle = column.key === 'syncStatus' && rowData?.P?.syncError ? rowData.P.syncError : undefined;
+const cellTitle = column.titleAccessor ? column.titleAccessor(rowData) : undefined;
 return {
   as: "div",
   text: typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : "",
@@ -3147,7 +3399,30 @@ return {
     args.fns.setImportData("");
   },
   text: "Cancel",
-  disabled: args.fns.loading()
+  disabled: args.fns.loading(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "61_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Cancel",
+  onClick: () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+  },
+  disabled: args.fns.loading(),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -3168,7 +3443,31 @@ return {
     args.fns.handleSearch();
   }),
   text: "Import",
-  disabled: args.fns.loading() || !args.fns.importData().trim()
+  disabled: args.fns.loading() || !args.fns.importData().trim(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "62_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  text: "Import",
+  onClick: () => args.fns.handleImport(args.fns.importData().trim(), () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+    args.fns.handleSearch();
+  }),
+  disabled: args.fns.loading() || !args.fns.importData().trim(),
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -3185,10 +3484,11 @@ const evaluateConfig = args.fns.evaluateConfig;
 const config = evaluateConfig();
 const getConfigFunction = args.fns.getConfigFunction;
 
-// Get initial config as function body string (from settings or configFunction)
+// Get initial config as function body string (from settingsModalInitialConfig, settings, or configFunction)
 let initialConfig = "";
 try {
-  const currentSettings = args.fns.settings();
+  const modalConfig = args.fns.settingsModalInitialConfig?.();
+  const currentSettings = modalConfig ?? args.fns.settings();
   // If settings exist and it's a string (raw function body), use it
   if (currentSettings && typeof currentSettings === 'string') {
     initialConfig = currentSettings;
@@ -3226,7 +3526,10 @@ try {
 
 return {
   isOpen: args.fns.isSettingsModalOpen(),
-  onClose: () => args.fns.setIsSettingsModalOpen(false),
+  onClose: () => {
+    args.fns.setSettingsModalInitialConfig?.(null);
+    args.fns.setIsSettingsModalOpen(false);
+  },
   initialConfig: initialConfig,
   onSave: args.fns.handleSaveSettings,
   tableVertexLabel: args.fns.getTableVertexLabel()
@@ -3652,6 +3955,12 @@ return {
       E: "13"
     }
     {
+      id: e40_polaris
+      T: Attr
+      S: "12"
+      E: "13_polaris"
+    }
+    {
       id: e41
       T: Attr
       S: "12"
@@ -3662,6 +3971,12 @@ return {
       T: Attr
       S: "12"
       E: "15"
+    }
+    {
+      id: e42_polaris
+      T: Attr
+      S: "12"
+      E: "15_polaris"
     }
     {
       id: e43
@@ -3694,10 +4009,22 @@ return {
       E: "21"
     }
     {
+      id: e45_polaris
+      T: Attr
+      S: "16"
+      E: "21_polaris"
+    }
+    {
       id: e46
       T: Attr
       S: "18"
       E: "19"
+    }
+    {
+      id: e46_polaris
+      T: Attr
+      S: "18"
+      E: "19_polaris"
     }
     {
       id: e47
@@ -3952,10 +4279,22 @@ return {
       E: "61"
     }
     {
+      id: e83_polaris
+      T: Attr
+      S: "60"
+      E: "61_polaris"
+    }
+    {
       id: e84
       T: Attr
       S: "60"
       E: "62"
+    }
+    {
+      id: e84_polaris
+      T: Attr
+      S: "60"
+      E: "62_polaris"
     }
   ]
 }

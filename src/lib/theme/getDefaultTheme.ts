@@ -41,6 +41,10 @@ export function getDefaultTheme() {
       "muted": {
         "light": "${(DEFAULT_THEME.color.muted as ModeSpecificColor).light}",
         "dark": "${(DEFAULT_THEME.color.muted as ModeSpecificColor).dark}"
+      },
+      "secondary": {
+        "light": "${(DEFAULT_THEME.color.secondary as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.secondary as ModeSpecificColor).dark}"
       }
     },
     // Custom spacing for mobile-first design

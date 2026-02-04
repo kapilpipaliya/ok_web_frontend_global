@@ -62,7 +62,6 @@ let baseStyles = `
   transition: all ${args.theme.var.animation.fast} ease;
   border: none;
   ${fullWidth ? 'width: 100%;' : ''}
-  // min-height: ${args.theme.var.touch.minTarget};
 
   &:disabled {
     opacity: 0.6;

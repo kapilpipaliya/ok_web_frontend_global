@@ -1,0 +1,98 @@
+{
+  vertexes: [
+    {
+      id: "theme_root",
+      L: "Theme",
+      P: {
+        key: "ShopifyTheme",
+        name: "Shopify Theme",
+        description: "Theme matching Shopify Polaris design system for embedded admin apps",
+        data:
+          '''
+return {
+  var: {
+    color: {
+      primary: {
+        light: "oklch(0.45 0.15 165)",
+        dark: "oklch(0.55 0.14 165)"
+      },
+      info: {
+        light: "oklch(0.55 0.15 250)",
+        dark: "oklch(0.65 0.12 250)"
+      },
+      success: {
+        light: "oklch(0.52 0.16 155)",
+        dark: "oklch(0.62 0.14 155)"
+      },
+      warning: {
+        light: "oklch(0.80 0.14 75)",
+        dark: "oklch(0.85 0.12 75)"
+      },
+      error: {
+        light: "oklch(0.55 0.22 25)",
+        dark: "oklch(0.65 0.20 25)"
+      },
+      text: {
+        light: "oklch(0.13 0.02 264)",
+        dark: "oklch(0.97 0.01 264)"
+      },
+      background: {
+        light: "oklch(0.99 0.005 264)",
+        dark: "oklch(0.13 0.02 264)"
+      },
+      border: {
+        light: "oklch(0.90 0.01 264)",
+        dark: "oklch(0.28 0.02 264)"
+      },
+      muted: {
+        light: "oklch(0.55 0.02 264)",
+        dark: "oklch(0.55 0.02 264)"
+      },
+      secondary: {
+        light: "oklch(0.92 0.015 264)",
+        dark: "oklch(0.22 0.02 264)"
+      }
+    },
+    spacing: {
+      xxs: "0.125rem",
+      xs: "0.25rem",
+      sm: "0.5rem",
+      md: "1rem",
+      lg: "1.5rem",
+      xl: "2rem",
+      xxl: "3rem"
+    },
+    borderRadius: {
+      sm: "0.5rem",
+      md: "0.5rem",
+      lg: "0.75rem",
+      xl: "1rem",
+      full: "9999px"
+    },
+    animation: {
+      fast: "150ms",
+      normal: "200ms",
+      slow: "300ms"
+    },
+    touch: {
+      minTarget: "44px",
+      button: "36px",
+      input: "36px"
+    },
+    fontSize: {
+      xs: "0.75rem",
+      sm: "0.8125rem",
+      md: "0.875rem",
+      lg: "1rem",
+      xl: "1.125rem",
+      xxl: "1.25rem",
+      title: "1.5rem"
+    }
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

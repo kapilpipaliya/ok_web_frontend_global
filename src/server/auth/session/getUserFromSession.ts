@@ -8,7 +8,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { getDriver } from "~/cypher/core/driver";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getAdminUser } from "~/cypher/permissions/utils/getAdminUser";
-import { getShopifyClient, ensureShopDatabaseAndMigrate, getDBSessionForShop } from "~/lib/shopify/shopifyHelpers";
+import { getShopifyClient, getDBSessionForShop } from "~/lib/shopify/shopifyHelpers";
 import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function getSessionUser(): Promise<undefined | Vertex> {
@@ -73,6 +73,9 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
               // await updateSession(user);
               
               return user;
+            } catch (err) {
+              console.error("Error in dbSession executeWrite:", err);
+              throw err;
             } finally {
               // Close the database session
               await dbSession.close();
@@ -80,6 +83,8 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
           }
         }
       } catch (errorOrResponse) {
+        // Do not copy Response headers/status onto event.response - the response may already
+        // have been sent (e.g. by parallel code in GetInitialData), which causes
         if (errorOrResponse instanceof Response) {
           if (event && event.response) {
             errorOrResponse.headers.forEach((value, key) => {
@@ -88,7 +93,10 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
           }
         }
         // If Shopify authentication fails, fall through to regular session check
-        console.error("Error in Shopify authentication for getSessionUser:", errorOrResponse);
+        // "Cannot set headers after they are sent". Fall through to regular session check.
+        //if (!(errorOrResponse instanceof Response)) {
+          console.error("Error in Shopify authentication for getSessionUser:", errorOrResponse);
+        //}
       }
     }
     
@@ -97,7 +105,8 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
     const sessionUser = httpSession?.data?.user;
     if (!sessionUser) return;
     return sessionUser;
-  } catch {
+  } catch (error) {
+    console.error("Error in getSessionUser:", error);
     return;
   }
 }

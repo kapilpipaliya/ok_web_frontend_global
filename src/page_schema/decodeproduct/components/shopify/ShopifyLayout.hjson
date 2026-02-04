@@ -133,7 +133,7 @@ return {
         props:
           '''return {
   name: "shopify-api-key",
-  content: "eaf60f5e8e2b08bb73601c89368304e8"
+  content: "ae7a41b9d8a4e00a9291b9f967033b94"
 }'''
       }
     }
@@ -169,6 +169,12 @@ return {
       P: {
         displayOrder: 6
         componentName: ConfirmProvider
+        props:
+          '''
+return {
+  getUsePolarisUI: () => true
+};
+'''
       }
     }
     {
@@ -199,7 +205,6 @@ return {
 return {
   size: "medium",
   color: "primary",
-  text: "Authenticating with Shopify...",
   hide: !isLoading
 }'''
         css:
@@ -252,10 +257,57 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10_page"
       L: Attr
       P: {
         displayOrder: 3
+        componentName: Html
+        props:
+          '''const isLoading = args.fns.isLoading?.();
+
+return {
+  as: "s-page",
+  "attr:inlineSize": args.contextData?.props?.pageSize || "large",
+  hide: isLoading
+}'''
+      }
+    }
+    {
+      id: "11_banner"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const authError = args.fns.authError?.();
+
+return {
+  as: "s-banner",
+  "attr:tone": "critical",
+  "attr:heading": "Authentication failed",
+  text: authError || "",
+  hide: !authError
+}'''
+      }
+    }
+    {
+      id: "12_section"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "s-section",
+  "attr:padding": "none"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
         componentName: Slot
         slot: 1children
         props:
@@ -326,6 +378,24 @@ return {
       id: e7
       T: Attr
       S: "5"
+      E: "10_page"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "10_page"
+      E: "11_banner"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "10_page"
+      E: "12_section"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "12_section"
       E: "9"
     }
   ]

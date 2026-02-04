@@ -62,7 +62,7 @@ export default function App() {
             const navigate = useNavigate();
 
             const isExcludedFromLoader = () =>
-              location.pathname === "/app" &&
+              location.pathname.startsWith("/app") &&
               (isServer ||
                 window.location.hostname === "decodeproduct.decodecommerce.com");
 

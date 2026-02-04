@@ -80,6 +80,7 @@ const settingsConfigs = [
   showSelection: true,
   showActions: true,
   resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
   formConfig: {
     gridColumns: 1,
     groups: [
@@ -205,6 +206,7 @@ const settingsConfigs = [
   showSelection: true,
   showActions: true,
   resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
   formConfig: {
     gridColumns: 1,
     groups: [
@@ -349,6 +351,7 @@ const settingsConfigs = [
   showSelection: true,
   showActions: true,
   resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
   formConfig: {
     gridColumns: 1,
     groups: [
@@ -507,15 +510,9 @@ const settingsConfigs = [
     style: "color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;"
   },
   onEdit: (row, args) => {
-    // Open Shopify product edit page
-    const productId = row.P?.id;
-    if (productId && typeof window !== 'undefined' && window.shopify?.config?.shop) {
-      const shopDomain = window.shopify.config.shop;
-      if (window.shopify?.environment?.embedded && args?.navigate) {
-        args.navigate(\`/admin/products/\${productId}\`);
-      } else {
-        window.open(\`https://\${shopDomain}/admin/products/\${productId}\`, '_blank');
-      }
+    var productId = row && row.P && row.P.id
+    if (productId && typeof window !== "undefined" && window.shopify && window.shopify.intents && window.shopify.intents.invoke) {
+      window.shopify.intents.invoke("edit:shopify/Product", { value: productId })
     }
   },
   onAfterAdd: (result, args) => {
@@ -583,23 +580,29 @@ const settingsConfigs = [
       required: true
     },
     {
-      key: "handle",
-      label: "Handle",
-      type: "text",
-      width: "200px"
-    },
-    {
       key: "status",
       label: "Status",
-      type: "text",
-      width: "120px"
+      type: "badge",
+      width: "120px",
+      badgeToneMap: {
+        ACTIVE: ["Active", "success"],
+        DRAFT: ["Draft", "info"],
+        ARCHIVED: ["Archived", "critical"]
+      }
     },
     {
       key: "syncStatus",
       label: "Sync",
-      type: "text",
+      type: "badge",
       width: "100px",
-      valueAccessor: (row) => row.P?.syncStatus
+      valueAccessor: (row) => row.P?.syncStatus,
+      badgeKeyCase: "lower",
+      badgeToneMap: {
+        complete: ["Synced", "success"],
+        queued: ["Syncing", "warning"],
+        failed: ["Failed", "critical"]
+      },
+      badgeTitleAccessor: (row) => row?.P?.syncError || undefined
     },
     {
       key: "variantsCount",
@@ -626,14 +629,17 @@ const settingsConfigs = [
   rowHeight: 80,
   showRowNumber: true,
   showSelection: true,
-  showActions: true,
+  showActions: false,
+  showEditButton: false,
+  rowClickable: true,
   resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
   formConfig: {
-    gridColumns: 1,
+    gridColumns: 2,
     groups: [
       {
         key: "basic",
-        title: "Basic Information",
+        title: "Product Details",
         gridColumns: 2,
         fields: [
           {
@@ -643,12 +649,29 @@ const settingsConfigs = [
             required: true,
             maxLength: 255,
             colSpan: 2
+          },
+          {
+            key: "handle",
+            label: "Handle",
+            type: "text",
+            colSpan: 2
+          },
+          {
+            key: "status",
+            label: "Status",
+            type: "text"
+          },
+          {
+            key: "syncStatus",
+            label: "Sync Status",
+            type: "text"
           }
         ]
       }
     ]
   },
   uniqueKeys: [],
+  usePolarisUI: true,
   enableUserScopingForSidebar: false,
   enableUserScopingForContent: false,
   enableLocalFilters: true,
@@ -762,6 +785,7 @@ const settingsConfigs = [
   showSelection: true,
   showActions: true,
   resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
   formConfig: {
     gridColumns: 1,
     groups: [
@@ -797,6 +821,7 @@ const settingsConfigs = [
     ]
   },
   uniqueKeys: [],
+  usePolarisUI: true,
   sidebar: {
     enabled: true,
     parentVertexLabel: "ShopifyProductCategory",

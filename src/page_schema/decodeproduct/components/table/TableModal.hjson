@@ -126,7 +126,8 @@ const cleanup = () => {
 return {
   formTxnId,
   setFormTxnId,
-  cleanup
+  cleanup,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
 };
 '''
         componentName: Html
@@ -186,6 +187,8 @@ const mode = args.contextData.props?.mode || "add";
 const label = args.contextData.props?.label;
 const title = mode === "add" 
   ? (label ? `Add New ${label}` : "Add New Item")
+  : mode === "view"
+  ? (label ? `View ${label}` : "View Item")
   : (label ? `Edit ${label}` : "Edit Item");
 
 return {
@@ -218,9 +221,7 @@ return `._id {
 const wrappedOnClose = () => {
   args.fns.cleanup();
   const onClose = args.contextData.props?.onClose;
-  if (onClose) {
-    onClose();
-  }
+  if (onClose) onClose();
 };
 
 return {
@@ -228,7 +229,33 @@ return {
   icon: "carbon:close",
   width: 24,
   height: 24,
-  onClick: wrappedOnClose
+  onClick: wrappedOnClose,
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "6_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  const onClose = args.contextData.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  onClick: wrappedOnClose,
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -441,6 +468,12 @@ return {
       T: Attr
       S: "4"
       E: "6"
+    }
+    {
+      id: e13a
+      T: Attr
+      S: "4"
+      E: "6_polaris"
     }
   ]
 }

@@ -4,6 +4,7 @@ import { csrf } from "shieldwall/start";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
+import { addDocumentResponseHeaders } from "~/lib/shopify/shopify.server";
 import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
 
 // Helper to check if logging should be skipped
@@ -99,6 +100,16 @@ export default createMiddleware({
   onBeforeResponse: [
     async (event) => {
       if (typeof window !== "undefined") return;
+
+      // Add Shopify-specific HTTP headers (CSP, etc.) for embedded apps
+      // Must run before response is sent so headers are set correctly
+      // Only apply for the Shopify embedded app host
+      const host =
+        event.request.headers.get("x-forwarded-host") ??
+        event.request.headers.get("host");
+      if (event.response && host === "decoedeproduct.decodecomerce.com") {
+        addDocumentResponseHeaders(event.request, event.response.headers);
+      }
 
       // Strip body from HEAD requests
       if ((event.locals as any).isHeadRequest && event.response) {

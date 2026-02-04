@@ -39,6 +39,10 @@ export const DEFAULT_THEME = {
       light: "oklch(0.6 0.03 250)", // Muted text
       dark: "oklch(0.6 0.03 250)", // Muted text
     },
+    secondary: {
+      light: "oklch(0.92 0.015 250)", // Subtle neutral for hover/selection
+      dark: "oklch(0.22 0.02 250)",
+    },
   },
 } as ThemeContext["var"];
 

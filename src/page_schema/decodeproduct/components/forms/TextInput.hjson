@@ -26,7 +26,6 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.sm};
   background: ${args.theme.var.color.background};
   transition: all ${args.theme.var.animation.fast} ease;
-  // min-height: ${args.theme.var.touch.input};
 
   &:focus-within {
     border-color: ${args.theme.var.color.primary};

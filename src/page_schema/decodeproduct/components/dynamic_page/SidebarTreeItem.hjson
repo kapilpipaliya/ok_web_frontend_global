@@ -531,7 +531,9 @@ const initDropTarget = (element) => {
         // Re-check same-active-category guard (vertex id only)
         const currentSelected = getSelectedItem();
         if (currentSelected && item && currentSelected.id === item.id) {
-          args.showWarningToast?.("Items are already in this category");
+          const contentLabel = args.contextData.props?.contentLabel || "Item";
+          const plural = contentLabel.endsWith('y') ? contentLabel.slice(0, -1) + 'ies' : contentLabel + (contentLabel.endsWith('s') ? '' : 's');
+          args.showWarningToast?.(`${plural} are already in this category`);
           return;
         }
         await handleTableItemsDrop(data.itemIds);
@@ -636,7 +638,9 @@ const handleTableItemsDrop = async (itemIds) => {
     // Prevent dropping into the same active category (vertex id only; backend passes id "uncategorized" for root)
     const currentSelected = getSelectedItem();
     if (currentSelected && item && currentSelected.id === item.id) {
-      args.showWarningToast?.("Items are already in this category");
+      const contentLabel = args.contextData.props?.contentLabel || "Item";
+      const plural = contentLabel.endsWith('y') ? contentLabel.slice(0, -1) + 'ies' : contentLabel + (contentLabel.endsWith('s') ? '' : 's');
+      args.showWarningToast?.(`${plural} are already in this category`);
       return;
     }
     
@@ -654,7 +658,9 @@ const handleTableItemsDrop = async (itemIds) => {
     const result = await onMoveItemsToCategory(itemIds, categoryId, sidebarConfig);
     
     if (result?.success) {
-      args.showSuccessToast?.(result.message || `Moved ${itemIds.length} item${itemIds.length !== 1 ? 's' : ''} successfully`);
+      const contentLabel = args.contextData.props?.contentLabel || "item";
+      const plural = contentLabel.endsWith('y') ? contentLabel.slice(0, -1) + 'ies' : contentLabel + (contentLabel.endsWith('s') ? '' : 's');
+      args.showSuccessToast?.(result.message || `Moved ${itemIds.length} ${itemIds.length !== 1 ? plural : contentLabel} successfully`);
       
       // Determine source category (where items were moved FROM); use vertex id only
       const sourceCategory = currentSelected;
@@ -735,15 +741,6 @@ const handleTableItemsDrop = async (itemIds) => {
         }
         if (ancestorIds.length > 0) {
           setExpandedKeysFn(keys => [...new Set([...(Array.isArray(keys) ? keys : []), ...ancestorIds])]);
-        }
-      }
-      
-      // Refresh table data for currently selected sidebar item
-      if (sourceCategory && args.contextData.props?.onItemSelect) {
-        const onItemSelect = getOnItemSelect();
-        if (onItemSelect) {
-          // Re-select the current item to trigger table refresh
-          onItemSelect({ ...sourceCategory });
         }
       }
     } else {
@@ -923,7 +920,8 @@ return {
   initDropTarget,
   cleanupDragAndDrop,
   handleMoveSidebarItem,
-  handleTableItemsDrop
+  handleTableItemsDrop,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
 };
 '''
         key: SidebarTreeItem
@@ -1290,7 +1288,28 @@ return {
   icon: "ph:plus",
   height: 14,
   width: 14,
-  onClick: args.fns.handleOpenAddModal
+  onClick: args.fns.handleOpenAddModal,
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "9_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "plus",
+  "attr:accessibilityLabel": "Add child",
+  "attr:size": "slim",
+  onClick: args.fns.handleOpenAddModal,
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1321,7 +1340,28 @@ return {
   icon: "ph:pencil",
   height: 14,
   width: 14,
-  onClick: args.fns.handleOpenEditModal
+  onClick: args.fns.handleOpenEditModal,
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "10_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "edit",
+  "attr:accessibilityLabel": "Edit",
+  "attr:size": "slim",
+  onClick: args.fns.handleOpenEditModal,
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1356,7 +1396,31 @@ return {
   height: 14,
   width: 14,
   onClick: args.fns.handleDelete,
-  hide: isRoot
+  hide: isRoot || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "15_polaris"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const item = args.fns.getItem();
+const isRoot = item?.id === 'uncategorized';
+
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:tone": "critical",
+  "attr:icon": "delete",
+  "attr:accessibilityLabel": "Delete",
+  "attr:size": "slim",
+  onClick: args.fns.handleDelete,
+  hide: isRoot || args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -1435,12 +1499,15 @@ return {
   startSidebarQueuedPollIfNeeded: args.contextData.props?.startSidebarQueuedPollIfNeeded,
   hooks: args.contextData.props?.hooks,
   label: args.contextData.props?.label,
+  contentLabel: args.contextData.props?.contentLabel,
   setExpandedKeys: args.contextData.props?.setExpandedKeys,
   searchActive: args.contextData.props?.searchActive,
   filterTree: args.contextData.props?.filterTree,
   shouldExpandForSearch: args.contextData.props?.shouldExpandForSearch,
   onOpenAddModal: args.contextData.props?.onOpenAddModal,
-  onOpenEditModal: args.contextData.props?.onOpenEditModal
+  onOpenEditModal: args.contextData.props?.onOpenEditModal,
+  operationLoading: args.contextData.props?.operationLoading,
+  setOperationLoading: args.contextData.props?.setOperationLoading
 };
 '''
       }
@@ -1508,16 +1575,34 @@ return {
       E: "9"
     }
     {
+      id: e11a
+      T: Attr
+      S: "8"
+      E: "9_polaris"
+    }
+    {
       id: e12
       T: Attr
       S: "8"
       E: "10"
     }
     {
+      id: e12a
+      T: Attr
+      S: "8"
+      E: "10_polaris"
+    }
+    {
       id: e14
       T: Attr
       S: "8"
       E: "15"
+    }
+    {
+      id: e14a
+      T: Attr
+      S: "8"
+      E: "15_polaris"
     }
     {
       id: e13
