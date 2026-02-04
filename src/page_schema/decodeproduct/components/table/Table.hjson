@@ -240,6 +240,23 @@ const applyLocalFilters = () => {
           if (Math.abs(cellDate - filterDate) > 86400000) { // More than 1 day difference
             return false;
           }
+        } else if (col.type === "badge") {
+          // Badge columns: partial match on raw value or display label (e.g. "Act" matches "Active")
+          const cellVal = cellValue != null ? String(cellValue) : "";
+          const cellKey = col.badgeKeyCase === "lower" ? cellVal.toLowerCase() : cellVal;
+          const cellLabel = (col.badgeToneMap && col.badgeToneMap[cellValue] && Array.isArray(col.badgeToneMap[cellValue])) ? col.badgeToneMap[cellValue][0] : cellVal;
+          const cellLabelNorm = col.badgeKeyCase === "lower" ? String(cellLabel).toLowerCase() : cellLabel;
+          const matchOne = (fv) => {
+            const fk = col.badgeKeyCase === "lower" ? String(fv).toLowerCase() : String(fv);
+            if (!fk) return true;
+            return cellKey.includes(fk) || cellLabelNorm.includes(fk);
+          };
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0) return true;
+            if (!filterValue.some(matchOne)) return false;
+          } else {
+            if (!matchOne(filterValue)) return false;
+          }
         }
       }
     }
@@ -520,7 +537,6 @@ const getSelectFilterProps = (columnKey, filterValue, options) => {
       }
     },
     options: options,
-    placeholder: "Filter...",
     search: options.length > 10, // Enable search if many options
     multiple: true
   };
@@ -1160,6 +1176,20 @@ const getSelectedItems = () => {
   return (filtered || []).filter(row => selectedIds.includes(row.id));
 };
 
+const hasActiveFilters = () => {
+  const filters = columnFilters;
+  const keys = Object.keys(filters);
+  for (const k of keys) {
+    const v = filters[k];
+    if (v !== undefined && v !== null && v !== "") {
+      if (Array.isArray(v)) {
+        if (v.length > 0 && !(v.length === 1 && v[0] === "_All_VALUES_")) return true;
+      } else return true;
+    }
+  }
+  return false;
+};
+
 return {
   getColumns,
   getRowHeight,
@@ -1179,6 +1209,7 @@ return {
   getHideImportButtons,
   getHideSettingsButton,
   getIcon,
+  hasActiveFilters,
   getLabel,
   getAddButtonLabel,
   getOnEdit,
@@ -1406,6 +1437,29 @@ return {
   as: "span",
   text: displayTitle,
   hide: !displayTitle
+};
+'''
+      }
+    }
+    {
+      id: "7c"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: true
 };
 '''
       }
@@ -2219,7 +2273,7 @@ return `._id {
   transition: opacity 0.2s ease;
 }`;
 '''
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props:
           '''
@@ -2235,6 +2289,42 @@ return {
   width: 16,
   height: 16,
   hide: !isSorted || column.sortable === false || isRowNumber
+};
+'''
+      }
+    }
+    {
+      id: "32a"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 2px;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.fns.columnFilters;
+const filterValue = columnFilters[column.key];
+const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
+const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+
+return {
+  as: "icon",
+  icon: "carbon:filter",
+  width: 14,
+  height: 14,
+  hide: !hasFilter || isRowNumber,
+  title: "Filter applied"
 };
 '''
       }
@@ -2466,8 +2556,29 @@ if (column.key === "__rowNumber" || column.type === "rowNumber") {
   return { as: "div", hide: true };
 }
 
+// Skip filter for preview / image columns
+if (column.key === "preview" || column.type === "imagePreview" || column.type === "image") {
+  return { as: "div", hide: true };
+}
+
 // Render appropriate filter component based on column type
 if (column.type === "select" && column.options) {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
   return args.fns.getSelectFilterProps(
     column.key,
     filterValue,
@@ -2494,13 +2605,45 @@ if (column.type === "checkbox") {
 }
 
 if (column.type === "date" || column.type === "isoDateTime") {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: filterValue || "",
+      onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+    };
+  }
   return {
     componentName: "TextInput",
     type: "date",
     value: filterValue || "",
-    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value),
-    placeholder: "Filter..."
+    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
   };
+}
+
+// Badge columns: show select from badgeToneMap when available, so filter works by raw value
+if (column.type === "badge" && column.badgeToneMap) {
+  const options = [{ value: "_All_VALUES_", label: "All" }, ...Object.entries(column.badgeToneMap).map(([val, arr]) => ({ value: val, label: Array.isArray(arr) ? arr[0] : String(arr) }))];
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
+  return args.fns.getSelectFilterProps(column.key, filterValue, options);
 }
 
 // Determine filter type (default: "select" for text columns)
@@ -2508,9 +2651,24 @@ const filterType = column.filterType || (column.type === "text" || !column.type 
 
 // If filterType is "select", show select with unique values
 if (filterType === "select") {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
   const uniqueValues = args.fns.getUniqueColumnValues(column);
   const options = [{ value: "_All_VALUES_", label: "All" }, ...uniqueValues.map(val => ({ value: val, label: val }))];
-  
   return args.fns.getSelectFilterProps(
     column.key,
     filterValue,
@@ -2519,23 +2677,20 @@ if (filterType === "select") {
 }
 
 // Default: text input (applies filter immediately on change)
-/*const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = args.fns.getUsePolarisUI?.() === true;
 if (usePolaris) {
   return {
     componentName: "Html",
-    as: "s-text-field",
-    value: filterValue || "",
+    as: "s-search-field",
     "attr:label": column.label || "Filter",
     "attr:labelAccessibilityVisibility": "exclusive",
-    "attr:placeholder": "Filter...",
-    onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? ""),
-    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+    value: filterValue || "",
+    onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
   };
-}*/
+}
 return {
   componentName: "TextInput",
   type: "text",
-  placeholder: "Filter...",
   value: filterValue || "",
   onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
 };
@@ -3935,6 +4090,12 @@ return {
       E: "7b"
     }
     {
+      id: e34c
+      T: Attr
+      S: "7"
+      E: "7c"
+    }
+    {
       id: e35
       T: Attr
       S: "6"
@@ -4119,6 +4280,12 @@ return {
       T: Attr
       S: "30"
       E: "33"
+    }
+    {
+      id: e59a
+      T: Attr
+      S: "30"
+      E: "32a"
     }
     {
       id: e61

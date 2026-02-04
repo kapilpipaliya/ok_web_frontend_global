@@ -672,6 +672,7 @@ const settingsConfigs = [
   },
   uniqueKeys: [],
   usePolarisUI: true,
+  // Filters use Polaris search field (s-search-field) for select and date when usePolarisUI is true
   enableUserScopingForSidebar: false,
   enableUserScopingForContent: false,
   enableLocalFilters: true,

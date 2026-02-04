@@ -15,6 +15,7 @@ import {
   createSchemaImportActivityLog,
 } from "~/lib/schema/importSchemas";
 import { runMigration } from "~/lib/schema/runMigration";
+import { saveMigrationRequestForAllShops } from "~/lib/shopify/shopMigrationRequest";
 import type { Session, Transaction } from "neo4j-driver";
 
 async function validateUserAndPermissions(
@@ -97,6 +98,9 @@ export async function GET({ request }: APIEvent) {
       const migrationResult = await runMigration(dbSession, subDomain, user, {
         dryRun: false,
       });
+
+      // Update global migration request so all Shopify shops run migration on next load
+      await saveMigrationRequestForAllShops();
 
       // Add migration result to response if migration was attempted
       if (migrationResult.functionName) {
