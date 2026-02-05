@@ -10,6 +10,7 @@
     "deploy:activate": "if [ -f .output/server/index.mjs ]; then echo '🔄 Activating new build...' && rm -rf production-old && mv production production-old 2>/dev/null || true && cp -r .output production && echo '✅ New build activated' && echo '📦 Old build saved in production-old for rollback'; else echo '❌ Build invalid (.output/server/index.mjs missing)'; exit 1; fi",
     "rollback": "if [ -d production-old ] && [ -f production-old/server/index.mjs ]; then echo '⏪ Rolling back...' && rm -rf production && mv production-old production && echo '✅ Rollback successful'; else echo '❌ No backup found for rollback'; exit 1; fi",
     "deploy:cleanup": "echo '🧹 Cleaning up...' && rm -rf production-old && echo '✅ Cleanup complete'",
+    "kill:3001": "echo '🔪 Killing process on port 3001...' && (fuser -k 3001/tcp 2>/dev/null || true) && echo '✅ Port 3001 freed'",
     "startDev": "dotenv -e .env -- vinxi start --port 3001",
     "start": "dotenv -e .env -- vinxi start --port 3001",
     "prepare": "husky",

@@ -1,0 +1,420 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Privacy Policy - Shopify Products Organizer
+        url: /app2/privacy
+        key: ShopifyPrivacy
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Privacy Policy"
+}'''
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const d = new Date();
+const lastUpdated = "Last updated: " + d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+return {
+  as: "p",
+  text: lastUpdated
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.muted};
+  font-style: italic;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.9375rem;
+}`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Introduction"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Shopify Products Organizer is committed to protecting your privacy. This policy describes how we collect, use, and protect information when you use our app within your Shopify admin."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Data we collect"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "We access product and store data necessary to provide the app\u2019s features (e.g. product titles, handles, categories). This data is processed in accordance with Shopify\u2019s Partner Program Agreement and applicable data protection laws."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "How we use your data"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "We use your store and product data only to operate the app (e.g. organizing products, syncing categories and menus). We do not sell your data to third parties."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Contact"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "For privacy-related questions or requests, please use the Support page or contact the email address provided in your app installation or Shopify App Store listing."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "17"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e17
+      T: PageLayout
+      S: "1"
+      E: "17"
+    }
+  ]
+}

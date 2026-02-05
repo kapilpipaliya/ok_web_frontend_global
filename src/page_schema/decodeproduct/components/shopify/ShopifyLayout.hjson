@@ -237,8 +237,8 @@ return {
         props:
           '''return {
   as: "s-link",
-  href: "/app",
-  text: "Home"
+  href: "/app2",
+  text: "Products"
 }'''
       }
     }
@@ -251,8 +251,36 @@ return {
         props:
           '''return {
   as: "s-link",
-  href: "/app/additional",
-  text: "Additional page"
+  href: "/app2/support",
+  text: "Support"
+}'''
+      }
+    }
+    {
+      id: "8_nav_link_3"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app2/billing",
+  text: "Billing"
+}'''
+      }
+    }
+    {
+      id: "8_nav_link_4"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app2/privacy",
+  text: "Privacy"
 }'''
       }
     }
@@ -373,6 +401,18 @@ return {
       T: Attr
       S: "8_nav"
       E: "8_nav_link_2"
+    }
+    {
+      id: e10a
+      T: Attr
+      S: "8_nav"
+      E: "8_nav_link_3"
+    }
+    {
+      id: e10b
+      T: Attr
+      S: "8_nav"
+      E: "8_nav_link_4"
     }
     {
       id: e7
