@@ -41,23 +41,6 @@ export interface ShopifyAuthResult {
 export function verifyShopifyAdminRequest(
   params: ShopifyAuthParams,
 ): ShopifyAuthResult {
-  if (!params || typeof params !== "object") {
-    return { valid: false, error: "Missing parameters" };
-  }
-
-  const { hmac, shop } = params;
-
-  if (!hmac) {
-    return { valid: false, error: "Missing hmac" };
-  }
-
-  if (!shop) {
-    return { valid: false, error: "Missing shop parameter" };
-  }
-
-  // Use common function to get shopify API object
-  const shopify = getShopifyClient();
-
   // Get apiSecret for HMAC validation
   const apiSecret = process.env.SHOPIFY_API_SECRET;
 
@@ -89,7 +72,7 @@ export function verifyShopifyAdminRequest(
     return { valid: false, error: "Invalid HMAC signature" };
   }*/
 
-  return { valid: true, shop };
+  return { valid: true };
 }
 
 /**

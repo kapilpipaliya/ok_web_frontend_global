@@ -7,26 +7,22 @@
         description: Authenticates a Shopify admin app request, ensures per-shop database and migration, and updates session
         body:
           '''
-// Context data is expected to contain the raw searchParams from Shopify
-// e.g. {
-//   embedded: "1",
-//   hmac: "...",
-//   host: "...",
-//   id_token: "...",
-//   locale: "en",
-//   session: "...",
-//   shop: "productsmanagestore.myshopify.com",
-//   timestamp: "1766394587",
-// }
 
 const params = args.contextData?.searchParams || {};
 
-const { valid, shop, error } = args.verifyShopifyAdminRequest(params);
+const { valid, error } = args.verifyShopifyAdminRequest(params);
 
-if (!valid || !shop) {
+if (!valid) {
   return {
     success: false,
     error: error || "Invalid Shopify admin app request",
+  };
+}
+
+if (!args.shop) {
+  return {
+    success: false,
+    error: "shop not found",
   };
 }
 
@@ -43,7 +39,7 @@ try {
   // Ensure dedicated database for this shop and run migration.
   // Migration "in progress" is stored in DB; if another process is migrating,
   // this waits and retries up to 3 times with a time gap so migration can complete.
-  const result = await args.ensureShopDatabaseAndMigrate(shop, {
+  const result = await args.ensureShopDatabaseAndMigrate(args.shop, {
     dryRun: false,
     contextData: {
       searchParams: params,
@@ -60,7 +56,7 @@ try {
 
   return {
     success: true,
-    shop,
+    shop: args.shop,
     subDomain,
     message: "Shopify admin app request authenticated",
   };

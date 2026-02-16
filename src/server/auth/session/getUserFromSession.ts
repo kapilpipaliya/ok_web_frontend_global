@@ -18,7 +18,10 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
     if (event) {
       try {
         const urlObj = new URL(event.request.url);
-        if (urlObj.hostname === "decodeproduct.decodecommerce.com") {
+        if (
+          urlObj.hostname === "decodeproduct.decodecommerce.com" &&
+          event.request.headers.get("authorization")
+        ) {
           // Authenticate with Shopify to get shop
           const shopify = getShopifyClient();
           const result = await shopify.authenticate.admin(event.request);
@@ -83,20 +86,40 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
           }
         }
       } catch (errorOrResponse) {
-        // Do not copy Response headers/status onto event.response - the response may already
-        // have been sent (e.g. by parallel code in GetInitialData), which causes
         if (errorOrResponse instanceof Response) {
-          if (event && event.response) {
-            errorOrResponse.headers.forEach((value, key) => {
-              event.response.headers.set(key, value);
-            });
+          // Check if we're in a server function context (API route) vs normal page load
+          const isServerFunctionCall = event && (() => {
+            try {
+              const urlObj = new URL(event.request.url);
+              // Server functions are called via API routes or _server endpoint
+              return urlObj.pathname.startsWith('/api/') || urlObj.pathname.startsWith('/_server');
+            } catch {
+              return false;
+            }
+          })();
+          if (isServerFunctionCall && event?.response) {
+            // In server function context: try to copy headers if they're writable
+            try {
+              // Copy headers from the Shopify Response
+              // This will throw if headers have already been sent
+              errorOrResponse.headers.forEach((value, key) => {
+                event.response.headers.set(key, value);
+              });
+            } catch (headerError) {
+              // Headers were already sent - can't modify them
+              // This is expected for normal page loads where response may have been sent by parallel code
+              console.log("Cannot set headers (already sent), falling through to regular session check");
+            }
+          } else {
+            // Not a server function call or no event.response: fall through to regular session check
+            // The response may already have been sent (e.g. by parallel code in GetInitialData),
+            // which causes "Cannot set headers after they are sent" error.
+            console.log("Shopify authentication returned Response (likely a page load), falling through to regular session check");
           }
-        }
-        // If Shopify authentication fails, fall through to regular session check
-        // "Cannot set headers after they are sent". Fall through to regular session check.
-        //if (!(errorOrResponse instanceof Response)) {
+        } else {
+          // If Shopify authentication fails with a non-Response error, log and fall through
           console.error("Error in Shopify authentication for getSessionUser:", errorOrResponse);
-        //}
+        }
       }
     }
     

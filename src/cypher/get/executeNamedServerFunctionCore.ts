@@ -271,15 +271,15 @@ export async function executeNamedServerFunctionCore(
       let shopFromRequest: string | undefined;
       const event = getRequestEvent();
       if (event) {
-        const request = event.request;
+        const req = event.request;
         try {
-          const urlObj = new URL(request.url);
-          if (urlObj.hostname === "decodeproduct.decodecommerce.com") {
+          const urlObj = new URL(req.url);
+          if (urlObj.hostname === "decodeproduct.decodecommerce.com" && req.headers.get("authorization")) {
             // For decodeproduct.decodecommerce.com, get shop from Shopify authentication
             try {
               const shopify = getShopifyClient();
               // TODO: use unauthenticated.admin(shop) instead of authenticate.admin(request)
-              const result = await shopify.authenticate.admin(request);
+              const result = await shopify.authenticate.admin(req);
               shopFromRequest = result.session.shop;
               if (shopFromRequest) shopForContext = shopForContext ?? shopFromRequest;
             } catch (authError) {
@@ -290,11 +290,27 @@ export async function executeNamedServerFunctionCore(
           // ignore invalid URLs
         }
       }
-      
-      // Check if we should use the shop from request (if available)
-      // Only use shop database if useSessionShop isn't explicitly set to false
-      // and we have a shop from the request
-      if (context.useSessionShop !== false && shopFromRequest) {
+
+      // Shopify support functions: always use default (central) DB so all tickets
+      // are in one place and admin can see all shops' tickets
+      const SUPPORT_FUNCTION_KEYS = [
+        "shopifySupportCreateTicket",
+        "shopifySupportListTickets",
+        "shopifySupportGetConversation",
+        "shopifySupportReplyAsShop",
+        "shopifySupportReplyAsAdmin",
+      ];
+      const useCentralDbForSupport =
+        SUPPORT_FUNCTION_KEYS.includes(request.functionName);
+
+      if (useCentralDbForSupport) {
+        // Support tickets live in central DB so admin sees all shops
+        fallbackSessionData = await getDBSessionForSubdomain();
+        dbSession = fallbackSessionData.dbSession;
+        subDomain = fallbackSessionData.subDomain;
+        context.dbSession = dbSession;
+        context.subDomain = subDomain;
+      } else if (context.useSessionShop !== false && shopFromRequest) {
         // Derive database name for this shop
         subDomain = getDatabaseNameForShop(shopFromRequest);
         dbSession = (await getDriver()).session({
@@ -304,7 +320,6 @@ export async function executeNamedServerFunctionCore(
         context.subDomain = subDomain;
       } else {
         // Fallback: use standard subdomain-based session resolution
-        // If getDBSessionForSubdomain() fails (e.g., Neo4j down), error is caught below
         fallbackSessionData = await getDBSessionForSubdomain();
         dbSession = fallbackSessionData.dbSession;
         subDomain = fallbackSessionData.subDomain;
@@ -598,6 +613,7 @@ export async function executeNamedServerFunctionCore(
       debounce,
       getRequestEvent,
       cloneVertexWithEdges,
+      shop: shopForContext,
     };
 
     // Execute the function
