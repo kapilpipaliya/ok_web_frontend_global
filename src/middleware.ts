@@ -7,6 +7,13 @@ import { logger } from "./lib/logger";
 import { addDocumentResponseHeaders } from "~/lib/shopify/shopify.server";
 import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
 
+/** Skip CSRF for Shopify webhooks (they are verified by HMAC, not origin). */
+const csrfUnlessWebhooks = async (event: Parameters<typeof csrf>[0]) => {
+  const pathname = new URL(event.request.url).pathname;
+  if (pathname.startsWith("/webhooks/")) return;
+  return csrf(event);
+};
+
 // Helper to check if logging should be skipped
 const shouldSkipLogging = (pathname: string) => {
   return (
@@ -60,7 +67,7 @@ export default createMiddleware({
         );
       }
     },
-    csrf,
+    csrfUnlessWebhooks,
     // Initialize workers on first request (server-side only)
     async (event) => {
       // Only run on server
@@ -83,9 +90,9 @@ export default createMiddleware({
     //   xFrameOptions: "SAMEORIGIN", // Allows iframes from the same origin
     // }),
     async (event) => {
-      // Allow _server paths without permission check
+      // Allow _server and webhooks without permission check
       const url = new URL(event.request.url);
-      if (url.pathname === "/_server") {
+      if (url.pathname === "/_server" || url.pathname.startsWith("/webhooks/")) {
         return;
       }
 

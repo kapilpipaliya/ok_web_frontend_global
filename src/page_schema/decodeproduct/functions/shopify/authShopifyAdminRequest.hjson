@@ -19,13 +19,6 @@ if (!valid) {
   };
 }
 
-if (!args.shop) {
-  return {
-    success: false,
-    error: "shop not found",
-  };
-}
-
 const shopify = args.getShopifyClient();
 
 const event = args.getRequestEvent();
@@ -36,10 +29,23 @@ const request = event.request;
 
 let dbSession;
 try {
+  // Authenticate the request using Shopify's admin authentication
+  // This verifies the OAuth session and ensures the user has proper permissions
+  // If authentication fails, the user will be redirected to login
+  const authResult = await shopify.authenticate.admin(request);
+  const shop = authResult.session.shop;
+
+  if (!args.shop) {
+    return {
+      success: false,
+      error: "shop not found",
+    };
+  }
+
   // Ensure dedicated database for this shop and run migration.
   // Migration "in progress" is stored in DB; if another process is migrating,
   // this waits and retries up to 3 times with a time gap so migration can complete.
-  const result = await args.ensureShopDatabaseAndMigrate(args.shop, {
+  const result = await args.ensureShopDatabaseAndMigrate(shop, {
     dryRun: false,
     contextData: {
       searchParams: params,
@@ -49,14 +55,9 @@ try {
   dbSession = result.dbSession;
   const { subDomain } = result;
 
-  // Authenticate the request using Shopify's admin authentication
-  // This verifies the OAuth session and ensures the user has proper permissions
-  // If authentication fails, the user will be redirected to login
-  await shopify.authenticate.admin(request);
-
   return {
     success: true,
-    shop: args.shop,
+    shop,
     subDomain,
     message: "Shopify admin app request authenticated",
   };
