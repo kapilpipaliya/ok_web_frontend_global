@@ -446,8 +446,8 @@ export class Neo4jSessionStore implements SessionStorage {
       `;
 
       const result = await dbSession.run(query, { shop });
-      const deletedCount =
-        result.records[0]?.get("deletedCount")?.toNumber() || 0;
+      const raw = result.records[0]?.get("deletedCount");
+      const deletedCount = raw != null ? Number(raw) || 0 : 0;
       return deletedCount;
     } catch (error) {
       console.error(
