@@ -1041,6 +1041,7 @@ return `._id {
   &:hover .tree-item-actions {
     opacity: 1;
     visibility: visible;
+    display: flex;
   }
 }`;
 '''
@@ -1236,10 +1237,10 @@ return `._id {
   color: ${args.theme.var.color.primary};
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-  display: flex;
+  display: none;
   gap: 4px;
   align-items: center;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
   &:hover {
     opacity: 1;
   }

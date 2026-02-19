@@ -1,0 +1,248 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ShopifyAuth
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 2
+        fns:
+          '''// Create signals for loading state and auth data
+const [isLoading, setIsLoading] = args.createSignal(true);
+const [authData, setAuthData] = args.createSignal(null);
+const [authError, setAuthError] = args.createSignal(null);
+
+// Function to fetch auth data
+const fetchAuthData = async () => {
+  try {
+    setIsLoading(true);
+    setAuthError(null);
+
+    const searchParams = args.untrack(() => ({ ...args.searchParams }));
+
+    // Call the named server function "authShopifyAdminRequest"
+    const result = await args.executeNamedServerFunction(
+      {
+        functionName: "authShopifyAdminRequest",
+        contextData: {
+          searchParams,
+        },
+      },
+      {
+        useSessionShop: false
+      }
+    );
+
+    if (result?.error || result?.result?.success === false) {
+      console.error("Shopify auth failed:", result?.error || result?.result?.error);
+      const errorMessage = result?.error || result?.result?.error || "Shopify auth failed";
+      setAuthError(errorMessage);
+      setAuthData({
+        data: null,
+        error: errorMessage,
+        needsOAuth: result?.result?.needsOAuth || false,
+        redirectUrl: result?.result?.redirectUrl,
+      });
+      return;
+    }
+
+    const authResult = {
+      data: result?.result,
+      needsOAuth: result?.result?.needsOAuth || false,
+      redirectUrl: result?.result?.redirectUrl,
+    };
+
+    setAuthData(authResult);
+
+    // Check if OAuth redirect is needed
+    if (authResult?.needsOAuth && authResult?.redirectUrl) {
+      // Redirect to OAuth begin endpoint
+      window.location.href = authResult.redirectUrl;
+    }
+  } catch (err) {
+    console.error("Error fetching Shopify auth data:", err);
+    const errorMessage = err?.message || "Failed to authenticate with Shopify";
+    setAuthError(errorMessage);
+    setAuthData({
+      data: null,
+      error: errorMessage,
+      needsOAuth: false,
+      redirectUrl: null,
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Handle Shopify navigate event
+// when route is loaded outside the Shopify admin, then the user will be redirected to the Shopify admin
+const handleNavigate = (event) => {
+  const href = event.target?.getAttribute('href');
+  if (href) {
+    args.navigate(href);
+  }
+};
+
+// Fetch auth data and register event listener on mount
+const onMount = () => {
+  fetchAuthData();
+  document.addEventListener('shopify:navigate', handleNavigate);
+};
+
+// Unregister event listener on cleanup
+const onCleanup = () => {
+  document.removeEventListener('shopify:navigate', handleNavigate);
+};
+
+return {
+  isLoading,
+  setIsLoading,
+  authData,
+  setAuthData,
+  authError,
+  setAuthError,
+  fetchAuthData,
+  handleNavigate,
+  onMount,
+  onCleanup
+}'''
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  onMount: args.fns.onMount,
+  onCleanup: args.fns.onCleanup
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}`;'''
+        displayOrder: 1
+        componentName: LoadingSpinner
+        key: unique_2
+        props:
+          '''const isLoading = args.fns.isLoading?.();
+
+return {
+  size: "medium",
+  color: "primary",
+  hide: !isLoading
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''const isLoading = args.fns.isLoading?.();
+
+return {
+  as: "s-page",
+  "attr:inlineSize": args.contextData?.props?.pageSize || "large",
+  hide: isLoading
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_4
+        props:
+          '''const authError = args.fns.authError?.();
+
+return {
+  as: "s-banner",
+  "attr:tone": "critical",
+  "attr:heading": "Authentication failed",
+  text: authError || "",
+  hide: !authError
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: unique_5
+        props:
+          '''return {
+  as: "s-section",
+  "attr:padding": "none"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        slotName: children
+        displayOrder: 1
+        componentName: Slot
+        key: unique_6
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+  ]
+}

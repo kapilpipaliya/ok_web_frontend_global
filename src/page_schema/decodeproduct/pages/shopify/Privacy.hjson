@@ -6,7 +6,7 @@
       P: {
         fns: return { enabled: () => true }
         title: Privacy Policy - Shopify Products Organizer
-        url: /app2/privacy
+        url: /app/privacy
         key: ShopifyPrivacy
         props:
           '''return {

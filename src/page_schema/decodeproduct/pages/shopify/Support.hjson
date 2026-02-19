@@ -6,7 +6,7 @@
       P: {
         fns: return { enabled: () => true }
         title: Support - Shopify Products Organizer
-        url: /app2/support
+        url: /app/support
         key: ShopifySupport
         props:
           '''return {

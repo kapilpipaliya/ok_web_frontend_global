@@ -14,112 +14,13 @@
   });
 };
 
-// Create signals for loading state and auth data
-const [isLoading, setIsLoading] = args.createSignal(true);
-const [authData, setAuthData] = args.createSignal(null);
-const [authError, setAuthError] = args.createSignal(null);
-
-// Function to fetch auth data
-const fetchAuthData = async () => {
-  try {
-    setIsLoading(true);
-    setAuthError(null);
-
-    const searchParams = args.untrack(() => ({...args.searchParams}));
-
-    // Call the named server function "authShopifyAdminRequest"
-    const result = await args.executeNamedServerFunction(
-      {
-        functionName: "authShopifyAdminRequest",
-        contextData: {
-          searchParams,
-        },
-      }, 
-      {
-        useSessionShop: false
-      }
-    );
-
-    if (result?.error || result?.result?.success === false) {
-      console.error("Shopify auth failed:", result?.error || result?.result?.error);
-      const errorMessage = result?.error || result?.result?.error || "Shopify auth failed";
-      setAuthError(errorMessage);
-      setAuthData({
-        data: null,
-        error: errorMessage,
-        needsOAuth: result?.result?.needsOAuth || false,
-        redirectUrl: result?.result?.redirectUrl,
-      });
-      return;
-    }
-
-    const authResult = {
-      data: result?.result,
-      needsOAuth: result?.result?.needsOAuth || false,
-      redirectUrl: result?.result?.redirectUrl,
-    };
-
-    setAuthData(authResult);
-
-    // Check if OAuth redirect is needed
-    if (authResult?.needsOAuth && authResult?.redirectUrl) {
-      // Redirect to OAuth begin endpoint
-      window.location.href = authResult.redirectUrl;
-    }
-  } catch (err) {
-    console.error("Error fetching Shopify auth data:", err);
-    const errorMessage = err?.message || "Failed to authenticate with Shopify";
-    setAuthError(errorMessage);
-    setAuthData({
-      data: null,
-      error: errorMessage,
-      needsOAuth: false,
-      redirectUrl: null,
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-// Handle Shopify navigate event
-// when route is loaded outside the Shopify admin, then the user will be redirected to the Shopify admin
-const handleNavigate = (event) => {
-  const href = event.target?.getAttribute('href');
-  if (href) {
-    args.navigate(href);
-  }
-};
-
-// Fetch auth data and register event listener on mount
-const onMount = () => {
-  fetchAuthData();
-  document.addEventListener('shopify:navigate', handleNavigate);
-};
-
-// Unregister event listener on cleanup
-const onCleanup = () => {
-  document.removeEventListener('shopify:navigate', handleNavigate);
-};
-
 return {
   executeYTOFunction,
-  isLoading,
-  setIsLoading,
-  authData,
-  setAuthData,
-  authError,
-  setAuthError,
-  fetchAuthData,
-  handleNavigate,
-  onMount,
-  onCleanup
 }'''
         title: ShopifyLayout
         key: ShopifyLayout
         props:
           '''return {
-  onMount: args.fns.onMount,
-  onCleanup: args.fns.onCleanup
 }'''
       }
     }
@@ -194,141 +95,21 @@ return {
       }
     }
     {
-      id: "7_loader"
+      id: "7"
       L: Attr
       P: {
         displayOrder: 2
-        componentName: LoadingSpinner
-        props:
-          '''const isLoading = args.fns.isLoading?.();
-
-return {
-  size: "medium",
-  color: "primary",
-  hide: !isLoading
-}'''
-        css:
-          '''return `._id {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}`;'''
+        componentName: ShopifyNavigation
+        key: unique_3
       }
     }
     {
-      id: "8_nav"
-      L: Attr
-      P: {
-        displayOrder: 2.5
-        componentName: Html
-        props:
-          '''return {
-  as: "s-app-nav"
-}'''
-      }
-    }
-    {
-      id: "8_nav_link_1"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "s-link",
-  href: "/app2",
-  text: "Products"
-}'''
-      }
-    }
-    {
-      id: "8_nav_link_2"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "s-link",
-  href: "/app2/support",
-  text: "Support"
-}'''
-      }
-    }
-    {
-      id: "8_nav_link_3"
+      id: "8"
       L: Attr
       P: {
         displayOrder: 3
-        componentName: Html
-        props:
-          '''return {
-  as: "s-link",
-  href: "/app2/billing",
-  text: "Billing"
-}'''
-      }
-    }
-    {
-      id: "8_nav_link_4"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: Html
-        props:
-          '''return {
-  as: "s-link",
-  href: "/app2/privacy",
-  text: "Privacy"
-}'''
-      }
-    }
-    {
-      id: "10_page"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''const isLoading = args.fns.isLoading?.();
-
-return {
-  as: "s-page",
-  "attr:inlineSize": args.contextData?.props?.pageSize || "large",
-  hide: isLoading
-}'''
-      }
-    }
-    {
-      id: "11_banner"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''const authError = args.fns.authError?.();
-
-return {
-  as: "s-banner",
-  "attr:tone": "critical",
-  "attr:heading": "Authentication failed",
-  text: authError || "",
-  hide: !authError
-}'''
-      }
-    }
-    {
-      id: "12_section"
-      L: Attr
-      P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "s-section",
-  "attr:padding": "none"
-}'''
+        componentName: ShopifyAuth
+        key: unique_1
       }
     }
     {
@@ -337,13 +118,8 @@ return {
       P: {
         displayOrder: 1
         componentName: Slot
-        slot: 1children
-        props:
-          '''const isLoading = args.fns.isLoading?.();
-
-return {
-  hide: isLoading
-}'''
+        slot: 2children
+        key: unique_2
       }
     }
   ]
@@ -382,60 +158,18 @@ return {
       id: e6
       T: Attr
       S: "5"
-      E: "7_loader"
-    }
-    {
-      id: e8
-      T: Attr
-      S: "5"
-      E: "8_nav"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "8_nav"
-      E: "8_nav_link_1"
-    }
-    {
-      id: e10
-      T: Attr
-      S: "8_nav"
-      E: "8_nav_link_2"
-    }
-    {
-      id: e10a
-      T: Attr
-      S: "8_nav"
-      E: "8_nav_link_3"
-    }
-    {
-      id: e10b
-      T: Attr
-      S: "8_nav"
-      E: "8_nav_link_4"
+      E: "7"
     }
     {
       id: e7
       T: Attr
       S: "5"
-      E: "10_page"
+      E: "8"
     }
     {
-      id: e11
+      id: e8
       T: Attr
-      S: "10_page"
-      E: "11_banner"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "10_page"
-      E: "12_section"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "12_section"
+      S: "8"
       E: "9"
     }
   ]

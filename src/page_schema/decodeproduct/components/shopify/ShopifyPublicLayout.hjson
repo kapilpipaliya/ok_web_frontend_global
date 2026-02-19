@@ -1,0 +1,106 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''const executeYTOFunction = async (functionName, contextData = {}) => {
+  return await args.executeNamedServerFunction({
+    functionName,
+    contextData: {
+      ...contextData,
+    }
+  });
+};
+
+return {
+  executeYTOFunction,
+}'''
+        key: ShopifyPublicLayout
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: script
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  src: "https://cdn.shopify.com/shopifycloud/polaris.js"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: ConfirmProvider
+        key: unique_2
+        props:
+          '''
+return {
+  getUsePolarisUI: () => true
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_3
+        props:
+          '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Slot
+        slot: 1children
+        key: unique_6
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+  ]
+}
