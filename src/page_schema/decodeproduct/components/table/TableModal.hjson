@@ -310,6 +310,7 @@ return {
   formConfig: formConfig,
   initialVertex: initialVertex,
   mode: mode,
+  inModal: true,
   vertexLabel: tableVertexLabel,
   onSave: wrappedOnSave,
   onClose: wrappedOnClose

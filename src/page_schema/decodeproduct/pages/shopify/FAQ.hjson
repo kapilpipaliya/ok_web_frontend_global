@@ -1,0 +1,267 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: FAQ - Shopify Products Organizer
+        url: /app/support/faq
+        key: ShopifyFAQ
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Frequently asked questions"
+}'''
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Common questions about the Shopify Products Organizer app."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        loop: true
+        contextName: faqItem
+        props:
+          '''return {
+  as: "div",
+  data: [
+    { q: "How do I connect my Shopify store?", a: "Go to Settings in the app and use the Shopify connection option. You will be asked to authorize the app to access your store data. Once connected, products and collections will sync automatically." },
+    { q: "Why are my products not syncing?", a: "Check that the app has the required read permissions for products and inventory. Ensure your store is connected and try manually refreshing from the Products page. If it still fails, open a support request with the error message you see." },
+    { q: "Can I organize products into custom groups?", a: "Yes. Use the table and dynamic page builder to create custom groupings, tags, or categories. You can also use collections in Shopify and the app will respect them." },
+    { q: "How do I get help with a bug or feature request?", a: "Use the Support page to create a new request. Describe the issue or feature and our team will reply in the same thread. You can also check Documentation and Tutorial for self-service help." }
+  ]
+}'''
+        css:
+          '''return `._id {
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_100};
+}`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.faqItem;
+return {
+  as: "h3",
+  text: item?.q || ""
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.faqItem;
+return {
+  as: "p",
+  text: item?.a || ""
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Need more help? Visit the Support page to create a request and talk to our team."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-top: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "10"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e10
+      T: PageLayout
+      S: "1"
+      E: "10"
+    }
+  ]
+}

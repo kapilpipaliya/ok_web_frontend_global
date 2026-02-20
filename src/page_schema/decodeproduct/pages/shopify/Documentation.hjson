@@ -1,0 +1,596 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Documentation - Shopify Products Organizer
+        url: /app/support/docs
+        key: ShopifyDocumentation
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Documentation"
+}'''
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This guide explains how to use the app in plain language. You don't need any technical knowledge—just follow along."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting around the app"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "At the top of the app you'll see a menu with links: Products, Support, FAQ, Documentation, Tutorial, Billing, and Privacy. Click any link to go to that section. The big area below the menu shows the page you chose. You're always in the same app—only the main area changes when you click a different link."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Products is where you see and manage your product list. Support is where you send a message to our team or see replies. FAQ, Documentation, and Tutorial are help pages you can read anytime. Billing and Privacy are for your subscription and our privacy policy. You can bookmark or share a page if you want to come back to it later."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting started"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "First, connect your Shopify store in Settings. Once connected, your products and collections show up automatically. Use the main table to view, search, and edit your products. You can also create your own pages and forms to organize things the way you like."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Products and table"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "The products table shows all your Shopify products in a list. You can search and filter to find what you need. Click a cell to edit it, or open a product to see and edit all its details. In table settings you choose which columns appear and how the list is sorted."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Your own pages and forms"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "You can create your own pages and forms to add or edit products and organize them into groups. Forms check that required fields are filled in before saving, so you don't miss important information."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "What happens when you add or change something"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When you add, edit, or delete a product here, the app updates your Shopify store for you—in the background. The same goes for categories and menus: when you create or change them in the app, the app keeps your Shopify store in sync. You don't have to do anything extra; it happens automatically."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Products: Add a new product and it will appear in your Shopify store. Edit one and the changes go to Shopify. Delete one and it's removed from Shopify. When you put products into categories or move them between categories, the app updates everything in your store to match."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Categories and menus: When you create a category, the app can add it to your store's navigation. When you change or remove a category, the app updates or removes that part of the menu in Shopify. Any time you create, edit, delete, or move a menu, the app keeps your store's navigation in sync. All of this happens in the background so the app stays quick and easy to use."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Need more help? Go to Support to send a message to our team. We'll reply in the same thread."
+}'''
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-top: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "15"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "2"
+      E: "16"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "19"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "11"
+      E: "13"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "2"
+      E: "20"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "20"
+      E: "22"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "20"
+      E: "23"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "20"
+      E: "24"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e15
+      T: PageLayout
+      S: "1"
+      E: "15"
+    }
+  ]
+}

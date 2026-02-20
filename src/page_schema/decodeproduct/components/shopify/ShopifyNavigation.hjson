@@ -65,10 +65,73 @@
       }
     }
     {
-      id: "6"
+      id: "8"
       L: Attr
       P: {
         displayOrder: 3
+        componentName: Html
+        key: unique_faq
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app/support/faq",
+  text: "FAQ",
+  hide: true
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: unique_docs
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app/support/docs",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        key: unique_tutorial
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app/support/tutorial",
+  text: "Tutorial",
+  hide: true
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        key: unique_changelog
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app/support/changelog",
+  text: "Changelog",
+  hide: true
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 7
         componentName: Html
         key: unique_4
         props:
@@ -83,7 +146,7 @@
       id: "7"
       L: Attr
       P: {
-        displayOrder: 4
+        displayOrder: 8
         componentName: Html
         key: unique_5
         props:
@@ -119,6 +182,30 @@
       T: Attr
       S: "3"
       E: "5"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "11"
     }
     {
       id: e5

@@ -35,7 +35,7 @@ try {
   const authResult = await shopify.authenticate.admin(request);
   const shop = authResult.session.shop;
 
-  if (!args.shop) {
+  if (!shop) {
     return {
       success: false,
       error: "shop not found",
@@ -43,6 +43,8 @@ try {
   }
 
   // Ensure dedicated database for this shop and run migration.
+  // After schema import, saveMigrationRequestForAllShops() sets a global flag so
+  // shouldRunMigrationForShop(shop) is true; migration runs here for the current shop.
   // Migration "in progress" is stored in DB; if another process is migrating,
   // this waits and retries up to 3 times with a time gap so migration can complete.
   const result = await args.ensureShopDatabaseAndMigrate(shop, {

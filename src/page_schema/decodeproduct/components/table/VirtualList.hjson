@@ -82,6 +82,80 @@ const handleScroll = (e) => {
   }
 };
 
+// Optional keyboard nav: when getActiveIndex/setActiveIndex/getItemRef are provided, handle Arrow keys and Space
+const getActiveIndex = () => args.contextData.props?.getActiveIndex?.() ?? -1;
+const setActiveIndex = (n) => args.contextData.props?.setActiveIndex?.(n);
+const getItemCount = () => (getItems()?.length ?? 0);
+const getItemRef = (index) => args.contextData.props?.getItemRef?.(index);
+const getScrollToItemHeight = () => {
+  const h = getItemHeight();
+  return typeof h === 'function' ? h() : h;
+};
+
+const focusRowAtIndex = (index) => {
+  if (index < 0) return;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const rowEl = getItemRef(index);
+      if (rowEl && typeof rowEl.focus === 'function') rowEl.focus();
+    });
+  });
+};
+
+const scrollToIndexAndFocus = (nextIndex) => {
+  if (nextIndex < 0) return;
+  const container = scrollElement();
+  const rowHeight = getScrollToItemHeight();
+  if (container && typeof rowHeight === 'number') {
+    const scroll = scrollTop();
+    const rowTop = nextIndex * rowHeight;
+    const rowBottom = rowTop + rowHeight;
+    const viewTop = scroll;
+    const viewBottom = scroll + container.clientHeight;
+    const isVisible = rowTop >= viewTop && rowBottom <= viewBottom;
+    if (!isVisible) {
+      const targetScroll = nextIndex * rowHeight;
+      const maxScroll = container.scrollHeight - container.clientHeight;
+      container.scrollTop = Math.max(0, Math.min(targetScroll, maxScroll));
+    }
+  }
+  focusRowAtIndex(nextIndex);
+};
+
+const handleListKeyDown = (e) => {
+  const key = e.key;
+  const len = getItemCount();
+  const current = getActiveIndex();
+
+  if (key === "ArrowDown") {
+    e.preventDefault();
+    const nextIndex = len === 0 ? -1 : Math.min(current + 1, len - 1);
+    setActiveIndex(nextIndex);
+    if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
+    focusRowAtIndex(nextIndex);
+    return;
+  }
+  if (key === "ArrowUp") {
+    e.preventDefault();
+    const nextIndex = Math.max(-1, current - 1);
+    setActiveIndex(nextIndex);
+    if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
+    focusRowAtIndex(nextIndex);
+    return;
+  }
+  if (key === " " || key === "Spacebar") {
+    const onSpaceKey = args.contextData.props?.onSpaceKey;
+    if (onSpaceKey && current >= 0) {
+      e.preventDefault();
+      onSpaceKey(current);
+    }
+  }
+};
+
+const useListKeyNav = () =>
+  typeof args.contextData.props?.setActiveIndex === 'function' &&
+  typeof args.contextData.props?.getItemRef === 'function';
+
 return {
   scrollTop,
   setScrollTop,
@@ -91,19 +165,32 @@ return {
   getVirtualItems,
   getTotalSize,
   handleScroll,
-  getItems
+  getItems,
+  handleListKeyDown,
+  useListKeyNav
 };
 '''
         componentName: Html
         props:
           '''
 const containerClass = args.contextData.props?.class || "";
+const tabIndex = args.contextData.props?.tabIndex;
+const externalOnKeyDown = args.contextData.props?.onKeyDown;
+const role = args.contextData.props?.role;
+const ariaLabel = args.contextData.props?.["attr:aria-label"];
+const useKeyNav = args.fns.useListKeyNav?.();
+
+const onKeyDown = useKeyNav ? args.fns.handleListKeyDown : externalOnKeyDown;
 
 return {
   as: "div",
   class: containerClass,
   ref: args.fns.setScrollElement,
-  onScroll: args.fns.handleScroll
+  onScroll: args.fns.handleScroll,
+  //...(tabIndex !== undefined && { tabIndex }),
+  ...(onKeyDown && { onKeyDown }),
+  ...(role && { role }),
+  ...(ariaLabel && { "attr:aria-label": ariaLabel })
 };
 '''
       }

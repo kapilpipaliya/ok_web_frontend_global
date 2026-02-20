@@ -389,6 +389,7 @@ return {
   vertexLabel: null,
   onSave: wrappedOnSave,
   onClose: wrappedOnClose,
+  inModal: true,
   onFnsReady: (fns) => {
     if (args.fns?.formTxnIdRef) args.fns.formTxnIdRef.current = fns.formTxnId;
   }

@@ -16,6 +16,7 @@ import {
 } from "~/lib/schema/importSchemas";
 import { runMigration } from "~/lib/schema/runMigration";
 import { saveMigrationRequestForAllShops } from "~/lib/shopify/shopMigrationRequest";
+import { ensureShopDatabaseAndMigrate } from "~/lib/shopify/shopifyHelpers";
 import type { Session, Transaction } from "neo4j-driver";
 
 async function validateUserAndPermissions(
@@ -100,7 +101,38 @@ export async function GET({ request }: APIEvent) {
       });
 
       // Update global migration request so all Shopify shops run migration on next load
+      // (authShopifyAdminRequest calls ensureShopDatabaseAndMigrate when the shop page opens)
       await saveMigrationRequestForAllShops();
+
+      // If request includes current shop (e.g. import opened from Shopify app), run migration for that shop now
+      // not tested yet
+      const url = new URL(request.url);
+      const currentShop = url.searchParams.get("shop");
+      if (currentShop && /\.myshopify\.com$/i.test(currentShop)) {
+        try {
+          const shopMigrationResult = await ensureShopDatabaseAndMigrate(
+            currentShop,
+            {
+              dryRun: false,
+              contextData: {},
+              migrationSubDomain: "decodeproduct",
+            },
+          );
+          console.log(
+            "[Schema Import] Migration run for current shop:",
+            currentShop,
+            "subDomain:",
+            shopMigrationResult.subDomain,
+          );
+          await shopMigrationResult.dbSession.close();
+        } catch (err) {
+          console.warn(
+            "[Schema Import] Migration for current shop failed:",
+            currentShop,
+            err,
+          );
+        }
+      }
 
       // Add migration result to response if migration was attempted
       if (migrationResult.functionName) {

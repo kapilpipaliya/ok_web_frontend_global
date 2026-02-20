@@ -878,13 +878,24 @@ return {
       P: {
         css:
           '''
+const inModal = args.contextData.props?.inModal === true;
+const lg = args.theme.var.spacing.lg;
+const md = args.theme.var.spacing.md;
 return `._id {
-  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
+  padding: ${md} ${lg};
   border-top: 1px solid ${args.theme.var.color.border};
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${md};
+  ${inModal ? `
+  margin-left: -${lg};
+  margin-right: -${lg};
+  margin-bottom: -${lg};
+  padding-left: ${lg};
+  padding-right: ${lg};
+  padding-bottom: ${lg};
+  ` : ''}
 }`;
 '''
         displayOrder: 2

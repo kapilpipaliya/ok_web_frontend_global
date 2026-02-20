@@ -92,6 +92,12 @@ const [importData, setImportData] = args.createSignal("");
 const [columnWidths, setColumnWidths] = args.createStore({});
 const [isResizing, setIsResizing] = args.createSignal(false);
 const pollRef = { id: null };
+const rowRefs = {};
+const setRowRef = (index, el) => {
+  if (el) rowRefs[index] = el;
+  else delete rowRefs[index];
+};
+const getRowRef = (index) => rowRefs[index];
 
 // Initialize from query parameters
 const initializeFromQueryParams = () => {
@@ -626,6 +632,25 @@ const pollQueuedRows = async () => {
   }
 };
 
+// Start background poll when any row has syncStatus 'queued'. Pass optional data array to check; if omitted, uses current data().
+const startPollIfQueued = (dataToCheck) => {
+  const rows = dataToCheck !== undefined ? dataToCheck : data();
+  if (pollRef.id) {
+    clearTimeout(pollRef.id);
+    pollRef.id = null;
+  }
+  const config = args.fns.evaluateConfig?.() || {};
+  const intervalMs = config?.refetchIntervalWhenQueued;
+  const refresh = args.fns.refreshQueuedRows;
+  const hasQueued = Array.isArray(rows) && rows.some(r => (r.P?.syncStatus) === 'queued');
+  if (intervalMs && refresh && typeof refresh === 'function' && hasQueued) {
+    pollRef.id = setTimeout(() => {
+      pollRef.id = null;
+      pollQueuedRows();
+    }, intervalMs);
+  }
+};
+
 // Handle search
 const handleSearch = () => {
   const config = args.fns.evaluateConfig?.() || {};
@@ -655,18 +680,7 @@ const handleSearch = () => {
         setFilteredData(data);
       }
       
-      // Poll when any row has syncStatus === 'queued': background refresh only queued ids, merge result (no loader)
-      if (pollRef.id) {
-        clearTimeout(pollRef.id);
-        pollRef.id = null;
-      }
-      const intervalMs = config?.refetchIntervalWhenQueued;
-      if (intervalMs && Array.isArray(data) && data.some(r => (r.P?.syncStatus) === 'queued')) {
-        pollRef.id = setTimeout(() => {
-          pollRef.id = null;
-          pollQueuedRows();
-        }, intervalMs);
-      }
+      startPollIfQueued(data);
     }
   );
 };
@@ -691,6 +705,16 @@ const selectAllRows = () => {
 
 const clearSelection = () => {
   clearSelectedRows();
+};
+
+// Keyboard: active row by id (null = none); index derived from data so no createEffect needed
+const [activeRowId, setActiveRowId] = args.createSignal(null);
+const getActiveRowIndex = () => {
+  const id = activeRowId();
+  if (id == null) return -1;
+  const filtered = filteredData();
+  const idx = filtered?.findIndex((r) => r?.id === id) ?? -1;
+  return idx >= 0 ? idx : -1;
 };
 
 // Handle add/edit
@@ -798,6 +822,7 @@ const handleSave = async (formDataToSave) => {
         }
       }
       applyLocalFilters();
+      startPollIfQueued();
       return true;
     } else {
       const errorMsg = result?.message || result?.error || "Failed to save";
@@ -1011,6 +1036,7 @@ const createResizeHandler = (columnKey) => {
 const selectedSidebarItem = args.fns.selectedSidebarItem;
 args.createEffect(() => {
   const item = selectedSidebarItem?.();
+  setActiveRowId(null);
   // When sidebar selection changes, refresh table data
   if (item) {
     handleSearch();
@@ -1262,6 +1288,10 @@ return {
   toggleRowSelection,
   selectAllRows,
   clearSelection,
+  activeRowId,
+  activeRowIndex: getActiveRowIndex,
+  setActiveRowIndex: (rowIndex) => setActiveRowId(filteredData()?.[rowIndex]?.id ?? null),
+  setActiveRowId,
   handleAdd,
   handleEdit,
   handleViewRow,
@@ -1275,7 +1305,9 @@ return {
   initTableDraggable,
   cleanupTableDraggable,
   getSelectedItems,
-  getSelectFilterProps
+  getSelectFilterProps,
+  setRowRef,
+  getRowRef
 };
 '''
         key: Table
@@ -1330,10 +1362,10 @@ return {
         css:
           '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.sm};
   display: flex;
   flex-direction: column;
-  gap: ${args.theme.var.spacing.md};
+  gap: ${args.theme.var.spacing.sm};
 }`;
 '''
         displayOrder: 2
@@ -1481,8 +1513,11 @@ return `._id {
         componentName: Html
         props:
           '''
+const customActions = args.fns.getCustomActions?.() || [];
+const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
 return {
-  as: "div"
+  as: "div",
+  hide: !hasCustomActions
 };
 '''
       }
@@ -1585,7 +1620,8 @@ return {
   "attr:variant": "primary",
   "attr:icon": "plus",
   text: "Add",
-  onClick: args.fns.handleAdd
+  onClick: args.fns.handleAdd,
+  hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
       }
@@ -2720,7 +2756,18 @@ return {
   items: args.fns.filteredData(),
   itemHeight: args.fns.getRowHeight(),
   containerClass: "table-body-list",
-  hide: isLoading
+  hide: isLoading,
+  tabIndex: 0,
+  role: "listbox",
+  "attr:aria-label": "Table rows; use arrow keys to move, Space to toggle selection",
+  getActiveIndex: () => args.fns.activeRowIndex?.(),
+  setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
+  getItemRef: (index) => args.fns.getRowRef?.(index),
+  onSpaceKey: (index) => {
+    if (!args.fns.getShowSelection?.()) return;
+    const row = args.fns.filteredData?.()?.[index];
+    if (row?.id) args.fns.toggleRowSelection?.(row.id);
+  }
 };
 '''
       }
@@ -2781,6 +2828,7 @@ const rowIndex = virtualItem.index;
 const rowData = args.fns.filteredData()[rowIndex];
 const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
+const isActive = args.fns.activeRowId?.() === rowData?.id;
 
 return [
 `._id {
@@ -2797,7 +2845,7 @@ return [
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${isSelected ? args.theme.var.color.secondary_light_200 : "transparent"};
   transition: background 0.2s ease;
-
+  ${isActive ? `outline: 2px solid ${args.theme.var.color.primary}; outline-offset: -2px;` : ""}
 
   &:hover {
     background: ${isSelected ? args.theme.var.color.secondary_light_200 : args.theme.var.color.secondary_light_100};
@@ -2835,19 +2883,26 @@ const cursorStyle = isRowClickable ? "cursor: pointer;" : (hasSelection ? "curso
 
 return {
   as: "div",
+  role: "option",
+  tabIndex: -1,
+  "attr:aria-selected": args.fns.activeRowId?.() === rowData?.id,
   "data-row-id": rowData?.id ?? undefined,
   ref: (el) => {
+    args.fns.setRowRef?.(rowIndex, el ?? null);
     if (el && args.fns.initTableDraggable) {
       args.fns.initTableDraggable(el);
     }
   },
   onCleanup: () => {
-    // Cleanup draggable on unmount using args.ref() to get element
+    args.fns.setRowRef?.(rowIndex, null);
     if (args.fns.cleanupTableDraggable && args.ref) {
       args.fns.cleanupTableDraggable(args.ref());
     }
   },
-  onClick: isRowClickable ? handleRowClick : undefined,
+  onClick: (e) => {
+    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    if (isRowClickable) handleRowClick(e);
+  },
   style: cursorStyle
 };
 '''
@@ -2897,6 +2952,21 @@ return {
       id: "43"
       L: Attr
       P: {
+        css:
+          '''
+// s-checkbox has issue so always use native checkbox
+const usePolaris = false; // args.fns.getUsePolarisUI?.() === true;
+if (usePolaris) return '';
+return `._id {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.text};
+  flex-shrink: 0;
+}
+`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -2909,7 +2979,7 @@ const rowData = args.fns.filteredData()[rowIndex];
 const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
-const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false; // args.fns.getUsePolarisUI?.() === true;
 
 return {
   as: usePolaris ? "s-checkbox" : "input",
@@ -2919,11 +2989,11 @@ return {
   checked: usePolaris ? undefined : isSelected,
   onChange: (e) => {
     e.stopPropagation();
+    args.fns.setActiveRowId?.(rowData?.id ?? null);
     if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
   },
   onClick: (e) => e.stopPropagation(),
-  hide: !showSelection,
-  style: usePolaris ? "pointer-events: auto; z-index: 10; position: relative;" : "cursor: pointer; width: 20px; height: 20px; pointer-events: auto; z-index: 10; position: relative;"
+  hide: !showSelection
 };
 '''
       }
@@ -4112,6 +4182,12 @@ return {
       T: Attr
       S: "10"
       E: "11"
+    }
+    {
+      id: e39_polaris
+      T: Attr
+      S: "10"
+      E: "11_polaris"
     }
     {
       id: e40

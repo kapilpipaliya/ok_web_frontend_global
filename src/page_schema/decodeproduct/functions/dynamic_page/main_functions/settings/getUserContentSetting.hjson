@@ -47,18 +47,28 @@ const result = await args.session.run(query, {
 if (result.records.length === 0) {
   // No user setting found, try to get default setting
   const defaultKey = `${tableVertexLabel}_settings_default`;
-  const defaultQuery = `
-    MATCH (s:Setting {key: $defaultKey})
-    RETURN s
-    LIMIT 1
-  `;
+  let defaultResult = await args.session.run(
+    `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
+    { defaultKey }
+  );
 
-  const defaultResult = await args.session.run(defaultQuery, {
-    defaultKey: defaultKey
-  });
+  // If no default exists, run migration to create default settings (so hooks and full config are available)
+  if (defaultResult.records.length === 0 && args.executeNamedServerFunction) {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: 'migrateContentTableSettings',
+        contextData: { dryRun: false }
+      });
+      defaultResult = await args.session.run(
+        `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
+        { defaultKey }
+      );
+    } catch (migrateError) {
+      console.error('getUserContentSetting: migrateContentTableSettings failed', migrateError);
+    }
+  }
 
   if (defaultResult.records.length > 0) {
-    // Use processResult to populate graph structure
     const defaultVertices = args.processResult(defaultResult.records, args.context, 's');
     const defaultVertex = defaultVertices[0];
     return {
@@ -71,7 +81,6 @@ if (result.records.length === 0) {
     };
   }
 
-  // No setting found, return null
   return {
     success: true,
     data: {
