@@ -1,0 +1,2584 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: How Better Product Organization Improves Your Store's SEO
+        url: /blogs/how-better-product-organization-improves-your-stores-seo
+        key: ShopifyBlogPostSEO
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.5rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "How Better Product Organization Improves Your Store's SEO"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Most merchants think SEO is about:"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Keywords"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Meta titles"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Backlinks"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Content"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Those matter."
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 5
+        textType: markdown
+        componentName: Html
+        text:
+          '''But there's something more foundational that directly impacts rankings:
+
+**Site structure.**'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Inside Shopify, your product and collection architecture influences:"
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Crawlability"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Indexing efficiency"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Internal link distribution"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Keyword hierarchy"
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Category authority"
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "If your structure is messy, your SEO performance suffers — even with good content."
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Why Site Structure Matters for SEO"
+}'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Search engines analyze your store like a map."
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "They look at:"
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 12
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "URL hierarchy"
+}'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Collection grouping"
+}'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Navigation structure"
+}'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Internal links"
+}'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Category depth"
+}'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 13
+        textType: markdown
+        componentName: Html
+        text:
+          '''A clean structure tells search engines:
+
+- This store is organized.
+- These categories are important.
+- These products belong here.'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 14
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "A flat or inconsistent structure weakens that signal."
+}'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 15
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "The SEO Problems Caused by Poor Organization"
+}'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 16
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Many stores unintentionally create:"
+}'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 17
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Duplicate collections"
+}'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Inconsistent tagging"
+}'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Thin category pages"
+}'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Orphaned products"
+}'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Weak internal linking"
+}'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 18
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This causes:"
+}'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 19
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Keyword cannibalization"
+}'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Crawl waste"
+}'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Lower topical authority"
+}'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Reduced ranking potential"
+}'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 20
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Structure affects visibility."
+}'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 21
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Category Hierarchy = Keyword Hierarchy"
+}'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 22
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When you build structured parent and subcategories, you create:"
+}'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 23
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Top-level category keywords"
+}'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Supporting subcategory keywords"
+}'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Product-level long-tail keywords"
+}'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 24
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "For example:"
+}'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 25
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Parent category → Broad keyword"
+}'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Subcategory → More specific keyword"
+}'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Product → High-intent keyword"
+}'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 26
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This layered structure helps search engines understand topical relevance."
+}'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 27
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Internal Linking and SEO Authority Flow"
+}'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 28
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When navigation mirrors a clean category structure:"
+}'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 29
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Link equity flows logically"
+}'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Important categories receive stronger signals"
+}'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Related products support each other"
+}'''
+      }
+    }
+    {
+      id: "64"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Crawlers discover content faster"
+}'''
+      }
+    }
+    {
+      id: "65"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 30
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Without structured grouping, authority becomes diluted."
+}'''
+      }
+    }
+    {
+      id: "66"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 31
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "How Decode Products Organizer Supports SEO"
+}'''
+      }
+    }
+    {
+      id: "67"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 32
+        textType: markdown
+        componentName: Html
+        text:
+          '''Decode Products Organizer was built primarily for operational efficiency — but structured organization naturally improves SEO performance.
+
+\
+Here's how:'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "68"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 33
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "1. Clean Category Architecture"
+}'''
+      }
+    }
+    {
+      id: "69"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 34
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "You can build:"
+}'''
+      }
+    }
+    {
+      id: "70"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 35
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "71"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Parent categories"
+}'''
+      }
+    }
+    {
+      id: "72"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Subcategories"
+}'''
+      }
+    }
+    {
+      id: "73"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Multi-level navigation"
+}'''
+      }
+    }
+    {
+      id: "74"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 36
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This reinforces keyword relationships."
+}'''
+      }
+    }
+    {
+      id: "75"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 37
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "2. Consistent Product Categorization"
+}'''
+      }
+    }
+    {
+      id: "76"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 38
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When products move:"
+}'''
+      }
+    }
+    {
+      id: "77"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 39
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "78"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Correct category tags are added"
+}'''
+      }
+    }
+    {
+      id: "79"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Old category tags are removed"
+}'''
+      }
+    }
+    {
+      id: "80"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Collections stay aligned"
+}'''
+      }
+    }
+    {
+      id: "81"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 40
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This reduces duplication and confusion in your structure."
+}'''
+      }
+    }
+    {
+      id: "82"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 41
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "3. Logical Navigation Structure"
+}'''
+      }
+    }
+    {
+      id: "83"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 42
+        textType: markdown
+        componentName: Html
+        text:
+          '''Search engines crawl your navigation.
+
+\
+A structured menu:
+- Improves crawl depth control
+- Highlights priority categories
+- Strengthens internal linking
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "84"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 43
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "85"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 44
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Clean navigation = stronger SEO signals."
+}'''
+      }
+    }
+    {
+      id: "86"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 45
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "4. Scalable SEO Framework"
+}'''
+      }
+    }
+    {
+      id: "87"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 46
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "As your store grows:"
+}'''
+      }
+    }
+    {
+      id: "88"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 47
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "89"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "New categories fit into existing hierarchy"
+}'''
+      }
+    }
+    {
+      id: "90"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Seasonal products remain structured"
+}'''
+      }
+    }
+    {
+      id: "91"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "URL logic remains consistent"
+}'''
+      }
+    }
+    {
+      id: "92"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 48
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "SEO stability improves over time."
+}'''
+      }
+    }
+    {
+      id: "93"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 49
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "SEO Is Not Just Content — It's Architecture"
+}'''
+      }
+    }
+    {
+      id: "94"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 50
+        textType: markdown
+        componentName: Html
+        text:
+          '''Many stores invest in:
+- Blog articles
+- Product descriptions
+- Meta optimization
+
+But ignore structural SEO.'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "95"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 51
+        textType: markdown
+        componentName: Html
+        text:
+          '''Search engines reward:
+- Clarity
+- Consistency
+- Logical hierarchy
+
+\
+Structure is the foundation.'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "96"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 52
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Long-Term SEO Compounds with Good Structure"
+}'''
+      }
+    }
+    {
+      id: "97"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 53
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When your catalog is organized:"
+}'''
+      }
+    }
+    {
+      id: "98"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 54
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "99"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Crawling becomes more efficient"
+}'''
+      }
+    }
+    {
+      id: "100"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Indexing becomes more accurate"
+}'''
+      }
+    }
+    {
+      id: "101"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Category authority strengthens"
+}'''
+      }
+    }
+    {
+      id: "102"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Ranking potential increases"
+}'''
+      }
+    }
+    {
+      id: "103"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 55
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "The benefits accumulate month after month."
+}'''
+      }
+    }
+    {
+      id: "104"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 56
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Final Thought"
+}'''
+      }
+    }
+    {
+      id: "105"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 57
+        textType: markdown
+        componentName: Html
+        text:
+          '''You can optimize every product title.
+
+You can write hundreds of blog posts.
+
+But if your site structure and category hierarchy are weak, your SEO growth will always face limitations.
+
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "106"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 58
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Clean structure is invisible to customers — but critical to search engines."
+}'''
+      }
+    }
+    {
+      id: "107"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 59
+        textType: markdown
+        componentName: Html
+        text:
+          '''And that's where structured product organization becomes more than convenience. 
+
+It becomes an SEO advantage.'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "108"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "108"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "19"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "20"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
+      E: "21"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "22"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "2"
+      E: "23"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "2"
+      E: "29"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "2"
+      E: "30"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "2"
+      E: "31"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "2"
+      E: "32"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "2"
+      E: "33"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "2"
+      E: "39"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "2"
+      E: "40"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "2"
+      E: "45"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "2"
+      E: "46"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "2"
+      E: "47"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "2"
+      E: "48"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "2"
+      E: "52"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "2"
+      E: "53"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "2"
+      E: "57"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "2"
+      E: "58"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "2"
+      E: "59"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "2"
+      E: "60"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "2"
+      E: "65"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "2"
+      E: "66"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "2"
+      E: "67"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "2"
+      E: "68"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "2"
+      E: "69"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "2"
+      E: "70"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "2"
+      E: "74"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "2"
+      E: "75"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "2"
+      E: "76"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "2"
+      E: "77"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "2"
+      E: "81"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "2"
+      E: "82"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "2"
+      E: "83"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "2"
+      E: "84"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "2"
+      E: "85"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "2"
+      E: "86"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "2"
+      E: "87"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "2"
+      E: "88"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "2"
+      E: "92"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "2"
+      E: "93"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "2"
+      E: "94"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "2"
+      E: "95"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "2"
+      E: "96"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "2"
+      E: "97"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "2"
+      E: "98"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "2"
+      E: "103"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "2"
+      E: "104"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "2"
+      E: "105"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "2"
+      E: "106"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "2"
+      E: "107"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "5"
+      E: "9"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "13"
+      E: "16"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "13"
+      E: "17"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "13"
+      E: "18"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "23"
+      E: "26"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "23"
+      E: "28"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "33"
+      E: "34"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "33"
+      E: "35"
+    }
+    {
+      id: e78
+      T: Attr
+      S: "33"
+      E: "36"
+    }
+    {
+      id: e79
+      T: Attr
+      S: "33"
+      E: "37"
+    }
+    {
+      id: e80
+      T: Attr
+      S: "33"
+      E: "38"
+    }
+    {
+      id: e81
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e82
+      T: Attr
+      S: "40"
+      E: "42"
+    }
+    {
+      id: e83
+      T: Attr
+      S: "40"
+      E: "43"
+    }
+    {
+      id: e84
+      T: Attr
+      S: "40"
+      E: "44"
+    }
+    {
+      id: e85
+      T: Attr
+      S: "48"
+      E: "49"
+    }
+    {
+      id: e86
+      T: Attr
+      S: "48"
+      E: "50"
+    }
+    {
+      id: e87
+      T: Attr
+      S: "48"
+      E: "51"
+    }
+    {
+      id: e88
+      T: Attr
+      S: "53"
+      E: "54"
+    }
+    {
+      id: e89
+      T: Attr
+      S: "53"
+      E: "55"
+    }
+    {
+      id: e90
+      T: Attr
+      S: "53"
+      E: "56"
+    }
+    {
+      id: e91
+      T: Attr
+      S: "60"
+      E: "61"
+    }
+    {
+      id: e92
+      T: Attr
+      S: "60"
+      E: "62"
+    }
+    {
+      id: e93
+      T: Attr
+      S: "60"
+      E: "63"
+    }
+    {
+      id: e94
+      T: Attr
+      S: "60"
+      E: "64"
+    }
+    {
+      id: e95
+      T: Attr
+      S: "70"
+      E: "71"
+    }
+    {
+      id: e96
+      T: Attr
+      S: "70"
+      E: "72"
+    }
+    {
+      id: e97
+      T: Attr
+      S: "70"
+      E: "73"
+    }
+    {
+      id: e98
+      T: Attr
+      S: "77"
+      E: "78"
+    }
+    {
+      id: e99
+      T: Attr
+      S: "77"
+      E: "79"
+    }
+    {
+      id: e100
+      T: Attr
+      S: "77"
+      E: "80"
+    }
+    {
+      id: e101
+      T: Attr
+      S: "88"
+      E: "89"
+    }
+    {
+      id: e102
+      T: Attr
+      S: "88"
+      E: "90"
+    }
+    {
+      id: e103
+      T: Attr
+      S: "88"
+      E: "91"
+    }
+    {
+      id: e104
+      T: Attr
+      S: "98"
+      E: "99"
+    }
+    {
+      id: e105
+      T: Attr
+      S: "98"
+      E: "100"
+    }
+    {
+      id: e106
+      T: Attr
+      S: "98"
+      E: "101"
+    }
+    {
+      id: e107
+      T: Attr
+      S: "98"
+      E: "102"
+    }
+  ]
+}

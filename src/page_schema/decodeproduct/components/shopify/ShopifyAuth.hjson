@@ -214,7 +214,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         key: ""
         props:
@@ -229,13 +229,13 @@ return {
       id: "8"
       L: Attr
       P: {
+        as: img
         css:
           '''return `._id {
   width: 32px;
   height: 32px;
   object-fit: contain;
 }`;'''
-        as: img
         src: /api/file/downloadCompanySquareLogo
         displayOrder: 1
         componentName: Html
@@ -256,7 +256,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 3
+        displayOrder: 2
         componentName: Html
         key: unique_16
         props:
@@ -281,7 +281,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 4
+        displayOrder: 3
         componentName: Html
         key: unique_10
         props:
@@ -306,7 +306,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 5
+        displayOrder: 4
         componentName: Html
         key: unique_11
         props:
@@ -331,7 +331,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 6
+        displayOrder: 5
         componentName: Html
         key: unique_19
         props:
@@ -356,7 +356,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 7
+        displayOrder: 6
         componentName: Html
         key: unique_12
         props:
@@ -381,7 +381,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 8
+        displayOrder: 7
         componentName: Html
         key: unique_13
         props:
@@ -394,6 +394,31 @@ return {
     }
     {
       id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/blogs" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        key: unique_9
+        props:
+          '''return {
+  as: "a",
+  href: "/blogs",
+  text: "Blogs"
+}'''
+      }
+    }
+    {
+      id: "16"
       L: Attr
       P: {
         css:
@@ -418,7 +443,7 @@ return {
       }
     }
     {
-      id: "16"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -446,7 +471,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "18"
       L: Attr
       P: {
         as: div
@@ -457,7 +482,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "19"
       L: Attr
       P: {
         as: icon
@@ -468,7 +493,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "20"
       L: Attr
       P: {
         displayOrder: 3
@@ -487,7 +512,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "21"
       L: Attr
       P: {
         displayOrder: 4
@@ -504,7 +529,7 @@ return {
       }
     }
     {
-      id: "21"
+      id: "22"
       L: Attr
       P: {
         slotName: children
@@ -543,13 +568,13 @@ return {
       id: e5
       T: Attr
       S: "3"
-      E: "19"
+      E: "20"
     }
     {
       id: e6
       T: Attr
       S: "3"
-      E: "20"
+      E: "21"
     }
     {
       id: e7
@@ -614,26 +639,32 @@ return {
     {
       id: e17
       T: Attr
-      S: "7"
-      E: "8"
+      S: "6"
+      E: "17"
     }
     {
       id: e18
       T: Attr
-      S: "16"
-      E: "17"
+      S: "7"
+      E: "8"
     }
     {
       id: e19
       T: Attr
-      S: "16"
+      S: "17"
       E: "18"
     }
     {
       id: e20
       T: Attr
-      S: "20"
-      E: "21"
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "21"
+      E: "22"
     }
   ]
 }

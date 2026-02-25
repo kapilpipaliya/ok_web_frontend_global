@@ -1,0 +1,2134 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: The Hidden Cost of Poor Product Organization in Shopify Stores
+        url: /blogs/the-hidden-cost-of-poor-product-organization
+        key: ShopifyBlogPostHiddenCost
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.5rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "The Hidden Cost of Poor Product Organization in Shopify Stores"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Most store owners focus on marketing, ads, and conversions."
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "p",
+  text: "But very few pay attention to something equally critical:"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        key: unique_2
+        props:
+          '''return {
+  as: "p",
+  text: "Product structure."
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+}`;'''
+        displayOrder: 5
+        textType: markdown
+        componentName: Html
+        text:
+          '''Inside Shopify, product organization directly affects: 
+- Navigation clarity
+- Customer experience
+- Internal workflow speed
+- SEO structure
+- Scalability.
+
+\
+When structure breaks, everything slows down.
+'''
+        key: unique_1
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "The Real Problem Isn't Products — It's Structure"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Adding products is easy."
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Managing them long-term is not."
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "As catalogs grow, stores start experiencing:"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Duplicate collections"
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Inconsistent tagging"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Flat category architecture"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Confusing navigation menus"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Time-consuming manual updates"
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "The admin becomes reactive instead of strategic."
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 12
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Instead of planning growth, you spend time fixing structure."
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 13
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Why Manual Collection Management Doesn't Scale"
+}'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 14
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "In a growing store:"
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 15
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Products move between categories"
+}'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Seasonal collections change"
+}'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "New parent categories are introduced"
+}'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Old structures need to be removed"
+}'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 16
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "If you handle this manually:"
+}'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 17
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "You update tags"
+}'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Then update collections"
+}'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Then update navigation"
+}'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Then double-check everything"
+}'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 18
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This process is repetitive and error-prone."
+}'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 19
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "One mistake in tagging can affect multiple collections."
+}'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 20
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Structure Impacts Customer Experience More Than You Think"
+}'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 21
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Customers don't see your admin."
+}'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 22
+        componentName: Html
+        key: unique_4
+        props:
+          '''return {
+  as: "p",
+  text: "But they experience its consequences."
+}'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 23
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Poor structure leads to:"
+}'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 24
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Confusing navigation"
+}'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Hard-to-find products"
+}'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Irrelevant collection results"
+}'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Reduced conversion rates"
+}'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 25
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Clear hierarchy creates confidence."
+}'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 26
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When users can browse logically, they stay longer and buy more."
+}'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 27
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Why I Focused on Category Architecture"
+}'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 28
+        textType: markdown
+        componentName: Html
+        text:
+          '''When building **Decode Products Organizer**, the goal wasn't just organization. 
+
+It was structured architecture.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 29
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Instead of flat collections, you create:"
+}'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 30
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Parent categories"
+}'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Subcategories"
+}'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Logical product grouping"
+}'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Clean syncing with collections"
+}'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Controlled navigation hierarchy"
+}'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 31
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This transforms product management from manual work into system-driven management."
+}'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 32
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Operational Benefits for Growing Stores"
+}'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 33
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Here's what structured organization changes:"
+}'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 34
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "1. Faster Catalog Updates"
+}'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 35
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Moving products between categories becomes instant and consistent."
+}'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 36
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "2. Automatic Syncing"
+}'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 37
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Category changes reflect in collections without manual cleanup."
+}'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 38
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "3. Clean Tag Management"
+}'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 39
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Previous category tags are removed before new ones are added."
+}'''
+      }
+    }
+    {
+      id: "64"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 40
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "4. Scalable Navigation"
+}'''
+      }
+    }
+    {
+      id: "65"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 41
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Multi-level navigation stays aligned with your catalog."
+}'''
+      }
+    }
+    {
+      id: "66"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 42
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "5. Reduced Maintenance Overhead"
+}'''
+      }
+    }
+    {
+      id: "67"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 43
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Less time fixing structure means more time optimizing growth."
+}'''
+      }
+    }
+    {
+      id: "68"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 44
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Agencies and Large Stores Benefit Even More"
+}'''
+      }
+    }
+    {
+      id: "69"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 45
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "If you manage multiple stores or client accounts:"
+}'''
+      }
+    }
+    {
+      id: "70"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 46
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "71"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Standardized structure reduces onboarding time"
+}'''
+      }
+    }
+    {
+      id: "72"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Less manual correction reduces support requests"
+}'''
+      }
+    }
+    {
+      id: "73"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Clear hierarchy improves store handover"
+}'''
+      }
+    }
+    {
+      id: "74"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 47
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Structure becomes a competitive advantage."
+}'''
+      }
+    }
+    {
+      id: "75"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 48
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Growth Demands Systems, Not Manual Effort"
+}'''
+      }
+    }
+    {
+      id: "76"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 49
+        textType: markdown
+        componentName: Html
+        text:
+          '''Early-stage stores can survive with manual tagging.
+
+\
+Scaling stores cannot.
+
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "77"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 50
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Once you cross 100+ products, operational inefficiency compounds:"
+}'''
+      }
+    }
+    {
+      id: "78"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 51
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "79"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "More time spent organizing"
+}'''
+      }
+    }
+    {
+      id: "80"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "More risk of inconsistency"
+}'''
+      }
+    }
+    {
+      id: "81"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "More frustration"
+}'''
+      }
+    }
+    {
+      id: "82"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 52
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "A structured product architecture prevents chaos before it begins."
+}'''
+      }
+    }
+    {
+      id: "83"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 2rem 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 53
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Final Thought"
+}'''
+      }
+    }
+    {
+      id: "84"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 54
+        textType: markdown
+        componentName: Html
+        text:
+          '''Marketing drives traffic. 
+
+Design drives aesthetics. 
+
+But structure drives scalability.'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "85"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 55
+        textType: markdown
+        componentName: Html
+        text:
+          '''If your store is growing, product organization cannot remain manual. 
+
+It must become systematic.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "86"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 56
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "That's exactly why Decode Products Organizer exists — to turn product management into a structured, scalable system instead of a repetitive task."
+}'''
+      }
+    }
+    {
+      id: "87"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "87"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "18"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "2"
+      E: "19"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "2"
+      E: "20"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "2"
+      E: "21"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "2"
+      E: "22"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "2"
+      E: "27"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "2"
+      E: "28"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "2"
+      E: "33"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "2"
+      E: "34"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "2"
+      E: "35"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "2"
+      E: "36"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "2"
+      E: "37"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "2"
+      E: "38"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "2"
+      E: "39"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "2"
+      E: "44"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "2"
+      E: "45"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "2"
+      E: "46"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "2"
+      E: "47"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "2"
+      E: "48"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "2"
+      E: "49"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "2"
+      E: "55"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "2"
+      E: "56"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "2"
+      E: "57"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "2"
+      E: "58"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "2"
+      E: "59"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "2"
+      E: "60"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "2"
+      E: "61"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "2"
+      E: "62"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "2"
+      E: "63"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "2"
+      E: "64"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "2"
+      E: "65"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "2"
+      E: "66"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "2"
+      E: "67"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "2"
+      E: "68"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "2"
+      E: "69"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "2"
+      E: "70"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "2"
+      E: "74"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "2"
+      E: "75"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "2"
+      E: "76"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "2"
+      E: "77"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "2"
+      E: "78"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "2"
+      E: "82"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "2"
+      E: "83"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "2"
+      E: "84"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "2"
+      E: "85"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "2"
+      E: "86"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "12"
+      E: "15"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "12"
+      E: "16"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "12"
+      E: "17"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "22"
+      E: "25"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "22"
+      E: "26"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "28"
+      E: "30"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "28"
+      E: "31"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "28"
+      E: "32"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "39"
+      E: "40"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "39"
+      E: "41"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "39"
+      E: "42"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "39"
+      E: "43"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "49"
+      E: "50"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "49"
+      E: "51"
+    }
+    {
+      id: e78
+      T: Attr
+      S: "49"
+      E: "52"
+    }
+    {
+      id: e79
+      T: Attr
+      S: "49"
+      E: "53"
+    }
+    {
+      id: e80
+      T: Attr
+      S: "49"
+      E: "54"
+    }
+    {
+      id: e81
+      T: Attr
+      S: "70"
+      E: "71"
+    }
+    {
+      id: e82
+      T: Attr
+      S: "70"
+      E: "72"
+    }
+    {
+      id: e83
+      T: Attr
+      S: "70"
+      E: "73"
+    }
+    {
+      id: e84
+      T: Attr
+      S: "78"
+      E: "79"
+    }
+    {
+      id: e85
+      T: Attr
+      S: "78"
+      E: "80"
+    }
+    {
+      id: e86
+      T: Attr
+      S: "78"
+      E: "81"
+    }
+  ]
+}

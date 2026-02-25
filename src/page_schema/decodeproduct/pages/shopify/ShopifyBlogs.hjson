@@ -1,0 +1,233 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Blogs - Decode Products Organizer
+        key: ShopifyBlogs
+        url: /blogs
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Blogs"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Articles and updates about Decode Products Organizer and organizing your Shopify catalog."
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/blogs/why-i-built-decode-products-organizer",
+  text: "Why I Built Decode Products Organizer — And How It Saves You Hours Inside Shopify"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/blogs/the-hidden-cost-of-poor-product-organization",
+  text: "The Hidden Cost of Poor Product Organization in Shopify Stores"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/blogs/how-better-product-organization-improves-your-stores-seo",
+  text: "How Better Product Organization Improves Your Store's SEO"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+  ]
+}

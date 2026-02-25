@@ -5,7 +5,7 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: DecodeProduct
+        title: Decode Products Organizer Shopify App
         url: /app
         key: DecodeProduct
         props:
@@ -18,20 +18,57 @@
       id: "2"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: DynamicPage
-        key: unique_2
+        key: ""
         props:
-          '''
-return {
+          '''return {
   tableVertexLabel: "ShopifyProduct",
-  loadFromSetting: true
+  loadFromSetting: true,
+  hide: !args.fns.isInIframe()
 };
 '''
       }
     }
     {
       id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  padding: 1rem;
+}`;'''
+        as: div
+        displayOrder: 2
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  hide: args.fns.isInIframe()
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css: ""
+        displayOrder: 1
+        textType: markdown
+        componentName: Html
+        text: Please open the [Products](/app) page in your Shopify admin.
+        key: unique_2
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
       L: PageLayout
       P: {
         componentName: ShopifyLayout
@@ -47,9 +84,21 @@ return {
     }
     {
       id: e2
-      T: PageLayout
+      T: Attr
       S: "1"
       E: "3"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
     }
   ]
 }
