@@ -1,6 +1,9 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { deleteShopDataAndDatabase } from "~/lib/shopify/deleteShopDataAndDatabase";
+import {
+  deleteShopDataAndDatabase,
+  deleteShopVertexFromGlobalDb,
+} from "~/lib/shopify/deleteShopDataAndDatabase";
 import { authenticate } from "~/lib/shopify/shopify.server";
 
 /**
@@ -19,6 +22,7 @@ export async function POST({ request }: APIEvent) {
 
     if (shopDomain) {
       await deleteShopDataAndDatabase(shopDomain);
+      await deleteShopVertexFromGlobalDb(shopDomain, request);
     }
 
     return new Response(null, { status: 200 });

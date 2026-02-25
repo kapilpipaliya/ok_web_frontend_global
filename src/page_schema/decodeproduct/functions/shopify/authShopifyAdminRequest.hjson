@@ -42,6 +42,14 @@ try {
     };
   }
 
+  // Save unique shop name in subdomain DB (caller passes useSessionShop: false so args.session is subdomain session)
+  await args.session.run(
+    `MERGE (s:ShopifyShop {shop: $shop})
+     ON CREATE SET s.createdAt = datetime(), s.updatedAt = datetime()
+     ON MATCH SET s.updatedAt = datetime()`,
+    { shop }
+  );
+
   // Ensure dedicated database for this shop and run migration.
   // After schema import, saveMigrationRequestForAllShops() sets a global flag so
   // shouldRunMigrationForShop(shop) is true; migration runs here for the current shop.

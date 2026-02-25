@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Migrates or creates default table configuration settings for Book, AudioVideo, Category, ShopifyProduct, and ShopifyProductCategory. Updates existing settings if they already exist.
+        description: Migrates or creates default table configuration settings for Book, AudioVideo, Category, ShopifyProduct, ShopifyProductCategory, Support, and ShopifyShop. Updates existing settings if they already exist.
         body:
           '''
 /**
@@ -923,6 +923,61 @@ const settingsConfigs = [
     }
   }
 };`
+  },
+  {
+    key: 'ShopifyShop_settings_default',
+    tableVertexLabel: 'ShopifyShop',
+    icon: '🏪',
+    name: 'ShopifyShop',
+    config: `return {
+  title: "Shops",
+  label: "Shop",
+  icon: "carbon:store",
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "shop",
+      label: "Shop domain",
+      type: "text",
+      width: "320px",
+      required: true
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      type: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    },
+    {
+      key: "updatedAt",
+      label: "Updated",
+      type: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.updatedAt || row.updatedAt
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: false,
+  showActions: false,
+  showEditButton: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "40px" },
+  formConfig: null,
+  uniqueKeys: [],
+  usePolarisUI: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  hooks: {},
+  sidebar: {
+    enabled: false
+  }
+};`
   }
 ];
 
@@ -994,7 +1049,9 @@ const stats = {
   shopifyProductSettingsCreated: 0,
   shopifyProductSettingsUpdated: 0,
   shopifyProductCategorySettingsCreated: 0,
-  shopifyProductCategorySettingsUpdated: 0
+  shopifyProductCategorySettingsUpdated: 0,
+  shopifyShopSettingsCreated: 0,
+  shopifyShopSettingsUpdated: 0
 };
 
 for (let i = 0; i < settingsConfigs.length; i++) {
@@ -1017,6 +1074,9 @@ for (let i = 0; i < settingsConfigs.length; i++) {
   } else if (setting.tableVertexLabel === 'ShopifyProductCategory') {
     stats.shopifyProductCategorySettingsCreated += result.created;
     stats.shopifyProductCategorySettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyShop') {
+    stats.shopifyShopSettingsCreated += result.created;
+    stats.shopifyShopSettingsUpdated += result.updated;
   }
 }
 
@@ -1030,6 +1090,7 @@ console.log(`AudioVideo settings - Created: ${stats.audioVideoSettingsCreated}, 
 console.log(`Category settings - Created: ${stats.categorySettingsCreated}, Updated: ${stats.categorySettingsUpdated}`);
 console.log(`ShopifyProduct settings - Created: ${stats.shopifyProductSettingsCreated}, Updated: ${stats.shopifyProductSettingsUpdated}`);
 console.log(`ShopifyProductCategory settings - Created: ${stats.shopifyProductCategorySettingsCreated}, Updated: ${stats.shopifyProductCategorySettingsUpdated}`);
+console.log(`ShopifyShop settings - Created: ${stats.shopifyShopSettingsCreated}, Updated: ${stats.shopifyShopSettingsUpdated}`);
 console.log('==========================================');
 
 return {
