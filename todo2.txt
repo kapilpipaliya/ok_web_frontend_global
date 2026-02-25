@@ -683,3 +683,11 @@ when updating don't forget to change secret in bridge.js file.
 @src/page_schema/decodeproduct/components/dynamic_page/DynamicPage.hjson @src/page_schema/decodeproduct/components/table/Table.hjson @src/page_schema/decodeproduct/components/dynamic_page/Sidebar.hjson instead of saving local state for table data, save in local graph database using args.setGraphData function. make sure API return graph format too like sidebar fetch children for each item. if local data is present we will display local data and fetch in background and update table. it will speed up performance. see @src/cypher/get/executeNamedServerFunctionCore.ts for functions registred to args in server function. follow @src/routes/api/chat/SYSTEM_PROMPT.md 
 see @src/page_schema/decodeproduct  for any files. 
 dont use local state.
+
+
+instead of saving local state for table data, save in args.graph using args.setGraph function. make sure API return graph format too like sidebar fetch.
+for each category use first display local data and then update the server side data.
+
+
+privacy page taken from:
+https://options.globo.io/pages/privacy-policy

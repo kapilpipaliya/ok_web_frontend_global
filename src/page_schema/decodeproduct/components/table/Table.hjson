@@ -1990,6 +1990,17 @@ return {
       id: "25"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.text};
+  flex-shrink: 0;
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -1998,7 +2009,8 @@ const showSelection = args.fns.getShowSelection();
 const selected = args.fns.getEffectiveSelectedRows();
 const filtered = args.fns.filteredData();
 const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
-const usePolaris = args.fns.getUsePolarisUI?.() === true;
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
 
 return {
   as: usePolaris ? "s-checkbox" : "input",
@@ -2014,8 +2026,7 @@ return {
     if (allSelected) args.fns.clearSelection();
     else args.fns.selectAllRows();
   },
-  hide: !showSelection,
-  style: usePolaris ? undefined : "cursor: pointer; width: 20px; height: 20px;"
+  hide: !showSelection
 };
 '''
       }
@@ -2623,7 +2634,8 @@ if (column.type === "select" && column.options) {
 }
 
 if (column.type === "checkbox") {
-  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  // const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  const usePolaris = false;
   const isChecked = filterValue === true || filterValue === "true";
   return {
     componentName: "Html",
@@ -2636,7 +2648,7 @@ if (column.type === "checkbox") {
       const checked = usePolaris ? (e.target?.checked ?? e.detail?.checked ?? !isChecked) : e.target.checked;
       args.fns.handleColumnFilterChange(column.key, checked);
     },
-    style: usePolaris ? undefined : "cursor: pointer; width: 20px; height: 20px;"
+    css: usePolaris ? undefined : "return `._id { pointer-events: auto; cursor: pointer; width: 1rem; height: 1rem; accent-color: ${args.theme?.var?.color?.text ?? 'inherit'}; flex-shrink: 0; }`;"
   };
 }
 
@@ -2955,7 +2967,8 @@ return {
         css:
           '''
 // s-checkbox has issue so always use native checkbox
-const usePolaris = false; // args.fns.getUsePolarisUI?.() === true;
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
 if (usePolaris) return '';
 return `._id {
   pointer-events: auto;
@@ -2979,7 +2992,8 @@ const rowData = args.fns.filteredData()[rowIndex];
 const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
-const usePolaris = false; // args.fns.getUsePolarisUI?.() === true;
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
 
 return {
   as: usePolaris ? "s-checkbox" : "input",

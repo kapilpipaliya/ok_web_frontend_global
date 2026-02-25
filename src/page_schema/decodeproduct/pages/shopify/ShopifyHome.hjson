@@ -1,0 +1,1091 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Decode Products Organizer – Organize and manage your Shopify products
+        url: /
+        key: ShopifyHome
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "meta_desc"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "description",
+  content: "Decode Products Organizer helps you organize your Shopify product catalog in nested categories. View products by category. Available in the Shopify App Store."
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "main"
+}'''
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Decode Products Organizer"
+}'''
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Organize your products in nested categories and view them by category with ease."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Decode Products Organizer is a Shopify app that helps you organize your product catalog in nested categories and view products by category. Manage everything without leaving your Shopify admin."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "What is Decode Products Organizer?"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "It connects to your store and lets you organize products in nested categories—parent and child. You build a category tree, choose a category, and see its products. The app runs inside your Shopify admin."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Key features"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Nested categories: Organize your products in a hierarchy of categories. Add categories, build a parent-child tree, and assign products to categories. Choose a category to see its products—so you can browse and manage your catalog by category instead of one long list."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Product table: See products in the chosen category with columns for title, status, dates, and more. Choose which columns to show in settings."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "12b"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Video guides: Watch tutorials and updates on our YouTube channel."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Settings: Choose which columns to show so the table fits how you work."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Support and help: Use the Support page to contact the team, and check FAQ, Documentation, and Tutorial from the app for answers and step-by-step guidance."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "How it works"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "1. Install the app from the Shopify App Store and open it from your Shopify admin. Your store’s products are loaded into the app."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "2. Add categories, build your category tree, and choose a category. The table shows products in that category."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "3. Use Settings to choose which columns to show. Use Support, FAQ, Documentation, or Tutorial if you need help."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Benefits"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "You can organize products in nested categories and view products by category. The category tree keeps your catalog organized; the table shows products in the category you choose. Tailor columns in settings and get help from documentation and support when you need it."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Who it's for"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Decode Products Organizer is for Shopify store owners and staff who want to organize products in nested categories and view products by category without leaving the admin. It suits stores of any size that want a clear category structure and a focused view of their catalog."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting started"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Install the app from the Shopify App Store, then open it and go to Products. Add categories, build your category tree, and choose a category to see its products. Use Settings to customize columns and check FAQ or Documentation for detailed help. If you have questions, use Support from the app to get in touch."
+}'''
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "29a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Links"
+}'''
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+      }
+    }
+    {
+      id: "29b"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "29c"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "https://www.youtube.com/@DecodeProductsOrganizer/videos",
+  rel: "noopener noreferrer",
+  target: "_blank",
+  text: "YouTube"
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "29d"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/faq",
+  text: "FAQ"
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "29e"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/docs",
+  text: "Documentation"
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "29f"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/support",
+  text: "Support"
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "29g"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/tutorial",
+  text: "Tutorial"
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "29h"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/billing",
+  text: "Billing"
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "29i"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/privacy",
+  text: "Privacy"
+}'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+  min-height: 12rem;
+}`;'''
+      }
+    }
+    {
+      id: "30b"
+      L: Attr
+      P: {
+        displayOrder: 12
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+        css:
+          '''return `._id {
+  margin-top: 1.5rem;
+  min-height: 12rem;
+}`;'''
+      }
+    }
+    {
+      id: "31"
+      L: PageLayout
+      P: {
+        componentName: ShopifyPublicLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e0
+      T: Attr
+      S: "1"
+      E: "meta_desc"
+    }
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e10b
+      T: Attr
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "12b"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "9"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "14"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "2"
+      E: "15"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "15"
+      E: "18"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "15"
+      E: "19"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "2"
+      E: "20"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "20"
+      E: "22"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "2"
+      E: "23"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "2"
+      E: "26"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "26"
+      E: "28"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "2"
+      E: "29"
+    }
+    {
+      id: e28a
+      T: Attr
+      S: "29"
+      E: "29a"
+    }
+    {
+      id: e28b
+      T: Attr
+      S: "29"
+      E: "29b"
+    }
+    {
+      id: e28c
+      T: Attr
+      S: "29b"
+      E: "29c"
+    }
+    {
+      id: e28d
+      T: Attr
+      S: "29b"
+      E: "29d"
+    }
+    {
+      id: e28e
+      T: Attr
+      S: "29b"
+      E: "29e"
+    }
+    {
+      id: e28f
+      T: Attr
+      S: "29b"
+      E: "29f"
+    }
+    {
+      id: e28g
+      T: Attr
+      S: "29b"
+      E: "29g"
+    }
+    {
+      id: e28h
+      T: Attr
+      S: "29b"
+      E: "29h"
+    }
+    {
+      id: e28i
+      T: Attr
+      S: "29b"
+      E: "29i"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "2"
+      E: "30"
+    }
+    {
+      id: e29b
+      T: Attr
+      S: "2"
+      E: "30b"
+    }
+    {
+      id: e30
+      T: PageLayout
+      S: "1"
+      E: "31"
+    }
+  ]
+}

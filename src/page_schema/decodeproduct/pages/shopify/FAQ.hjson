@@ -5,8 +5,8 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: FAQ - Shopify Products Organizer
-        url: /app/support/faq
+        title: FAQ - Decode Products Organizer
+        url: /faq
         key: ShopifyFAQ
         props:
           '''return {
@@ -20,6 +20,19 @@
       P: {
         displayOrder: 1
         componentName: Html
+        key: faq_root
+        fns:
+          '''
+const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const toggleExpanded = (index) => {
+  setExpandedIndex((prev) => (prev === index ? null : index));
+};
+return {
+  expandedIndex,
+  setExpandedIndex,
+  toggleExpanded
+};
+'''
         props:
           '''return {
   as: "div"
@@ -74,7 +87,7 @@
         props:
           '''return {
   as: "p",
-  text: "Common questions about the Shopify Products Organizer app."
+  text: "Common questions about the Decode Products Organizer app."
 }'''
         css:
           '''return `._id {
@@ -115,18 +128,16 @@
           '''return {
   as: "div",
   data: [
-    { q: "How do I connect my Shopify store?", a: "Go to Settings in the app and use the Shopify connection option. You will be asked to authorize the app to access your store data. Once connected, products and collections will sync automatically." },
-    { q: "Why are my products not syncing?", a: "Check that the app has the required read permissions for products and inventory. Ensure your store is connected and try manually refreshing from the Products page. If it still fails, open a support request with the error message you see." },
-    { q: "Can I organize products into custom groups?", a: "Yes. Use the table and dynamic page builder to create custom groupings, tags, or categories. You can also use collections in Shopify and the app will respect them." },
-    { q: "How do I get help with a bug or feature request?", a: "Use the Support page to create a new request. Describe the issue or feature and our team will reply in the same thread. You can also check Documentation and Tutorial for self-service help." }
+    { index: 0, q: "Drag and drop is not working.", a: "Please use the latest Chrome, Safari or Firefox. If it still does not work, contact us at the Support page." },
+    { index: 1, q: "How can we add a custom column in the table?", a: "On the Products page, click Settings. In the configuration, under the columns key, add the required column. Make sure the name matches the Shopify docs." }
   ]
 }'''
         css:
           '''return `._id {
   border-radius: 0.75rem;
   border: 1px solid ${args.theme.var.color.border};
-  padding: 1rem;
   background: ${args.theme.var.color.background_light_100};
+  overflow: hidden;
 }`;'''
       }
     }
@@ -139,18 +150,47 @@
         props:
           '''
 const item = args.contextData.faqItem;
+const index = item?.index ?? -1;
+const isExpanded = args.fns.expandedIndex?.() === index;
 return {
-  as: "h3",
-  text: item?.q || ""
+  as: "button",
+  type: "button",
+  text: item?.q || "",
+  "data-expanded": isExpanded ? "true" : "false",
+  onClick: () => args.fns.toggleExpanded?.(index)
 };
 '''
         css:
           '''
 return `._id {
+  width: 100%;
+  text-align: left;
   font-size: 1rem;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-  margin: 0 0 0.5rem 0;
+  margin: 0;
+  padding: 1rem 2.5rem 1rem 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+._id::after {
+  content: "";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.text};
+  transition: transform 0.2s ease;
+}
+
+._id[data-expanded="true"]::after {
+  transform: translateY(-50%) rotate(225deg);
 }`;
 '''
       }
@@ -164,9 +204,11 @@ return `._id {
         props:
           '''
 const item = args.contextData.faqItem;
+const index = item?.index ?? -1;
 return {
   as: "p",
-  text: item?.a || ""
+  text: item?.a || "",
+  show: () => args.fns.expandedIndex?.() === index
 };
 '''
         css:
@@ -176,6 +218,8 @@ return `._id {
   line-height: 1.6;
   color: ${args.theme.var.color.muted};
   margin: 0;
+  padding: 0 1rem 1rem 1rem;
+  border-top: 1px solid ${args.theme.var.color.border};
 }`;
 '''
       }

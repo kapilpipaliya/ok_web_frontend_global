@@ -659,7 +659,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const hideExample = typeof window !== 'undefined' && window.innerHeight < 800;
+const hideExample = typeof window !== 'undefined' && window.innerHeight < 1000;
 return {
   as: "div",
   hide: hideExample

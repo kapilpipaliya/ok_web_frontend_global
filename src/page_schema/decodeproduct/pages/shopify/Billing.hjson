@@ -5,8 +5,8 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: Billing - Shopify Products Organizer
-        url: /app/billing
+        title: Billing - Decode Products Organizer
+        url: /billing
         key: ShopifyBilling
         props:
           '''return {
@@ -74,7 +74,7 @@
         props:
           '''return {
   as: "p",
-  text: "Billing for the Shopify Products Organizer app is managed through your Shopify admin. Your current plan, payment method, and invoices are available in your Shopify billing settings."
+  text: "Billing for the Decode Products Organizer app is managed through your Shopify admin. Your current plan, payment method, and invoices are available in your Shopify billing settings."
 }'''
         css:
           '''return `._id {

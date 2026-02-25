@@ -5,8 +5,8 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: Changelog - Shopify Products Organizer
-        url: /app/support/changelog
+        title: Changelog - Decode Products Organizer
+        url: /changelog
         key: ShopifyChangelog
         props:
           '''return {
@@ -74,7 +74,7 @@
         props:
           '''return {
   as: "p",
-  text: "Recent updates and improvements to the Shopify Products Organizer app."
+  text: "Recent updates and improvements to the Decode Products Organizer app."
 }'''
         css:
           '''return `._id {

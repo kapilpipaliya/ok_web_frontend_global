@@ -59,7 +59,7 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app/support",
+  href: "/support",
   text: "Support"
 }'''
       }
@@ -74,9 +74,8 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app/support/faq",
-  text: "FAQ",
-  hide: true
+  href: "/faq",
+  text: "FAQ"
 }'''
       }
     }
@@ -90,7 +89,7 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app/support/docs",
+  href: "/docs",
   text: "Documentation"
 }'''
       }
@@ -105,7 +104,7 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app/support/tutorial",
+  href: "/tutorial",
   text: "Tutorial",
   hide: true
 }'''
@@ -121,7 +120,7 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app/support/changelog",
+  href: "/changelog",
   text: "Changelog",
   hide: true
 }'''
@@ -137,7 +136,7 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app/billing",
+  href: "/billing",
   text: "Billing"
 }'''
       }
@@ -152,7 +151,7 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app/privacy",
+  href: "/privacy",
   text: "Privacy"
 }'''
       }

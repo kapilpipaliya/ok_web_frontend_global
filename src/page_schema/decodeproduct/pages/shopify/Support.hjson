@@ -5,8 +5,8 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: Support - Shopify Products Organizer
-        url: /app/support
+        title: Support - Decode Products Organizer
+        url: /support
         key: ShopifySupport
         props:
           '''return {
@@ -382,7 +382,7 @@ return `._id {
         props:
           '''return {
   as: "p",
-  text: "Need help with the Shopify Products Organizer app? Create a support request or continue an existing conversation with our team."
+  text: "Need help with the Decode Products Organizer app? Create a support request or continue an existing conversation with our team."
 }'''
         css:
           '''return `._id {
