@@ -52,9 +52,9 @@ const fetchRoot = async (options) => {
   try {
     const tableVertexLabel = getTableVertexLabel();
     const relationshipType = getRelationshipType();
-    
+
     const enableUserScoping = args.contextData.props?.enableUserScoping === true;
-    
+
     const sidebarContextData = {
       parentVertexLabel,
       toParentEdgeType,
@@ -78,15 +78,15 @@ const fetchRoot = async (options) => {
 
     if (result?.result?.success && result.result.data) {
       const rootItems = result.result.data;
-      
+
       if (result.graph && result.graph.vertexes) {
         args.setGraphData(0, result.graph, {});
       }
-      
+
       if (!options?.preserveExpanded) {
         setExpandedKeys([]);
       }
-      
+
       // Restore selection from URL (vertex id) so reload activates same category
       const initialCategoryId = args.contextData.props?.initialCategoryId;
       if (initialCategoryId && args.graph?.vertexes?.[initialCategoryId]) {
@@ -139,9 +139,9 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
   try {
     const tableVertexLabel = getTableVertexLabel();
     const relationshipType = getRelationshipType();
-    
+
     const enableUserScoping = args.contextData.props?.enableUserScoping === true;
-    
+
     const result = await args.executeNamedServerFunction({
       functionName: "getVertexChildren",
       contextData: {
@@ -199,11 +199,11 @@ const sortItems = (items) => {
   return [...items].sort((a, b) => {
     const isAUncategorized = isUncategorized(a);
     const isBUncategorized = isUncategorized(b);
-    
+
     // Uncategorized items come first
     if (isAUncategorized && !isBUncategorized) return -1;
     if (!isAUncategorized && isBUncategorized) return 1;
-    
+
     // Both are uncategorized or both are not - sort alphabetically
     const nameA = getItemSortName(a);
     const nameB = getItemSortName(b);
@@ -219,7 +219,7 @@ const getChildren = (parentId) => {
   const graph = args.graph;
   const parentVertex = graph.vertexes[parentId];
   if (!parentVertex) return [];
-  
+
   // Use evalExpression to get children via incoming edge
   // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
   // Expression format: ->EdgeType (outgoing) or <-EdgeType (incoming)
@@ -227,7 +227,7 @@ const getChildren = (parentId) => {
     `<-${toParentEdgeType}`,
     { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
   ) || [];
-  
+
   return sortItems(children);
 };
 
@@ -486,7 +486,7 @@ const removeItemFromTree = (itemId) => {
   const toParentEdgeType = getToParentEdgeType();
   const deletedVertex = args.graph.vertexes[itemId];
   let parentItem = null;
-  
+
   if (deletedVertex && deletedVertex.IN && deletedVertex.IN[toParentEdgeType]) {
     const parentIds = deletedVertex.IN[toParentEdgeType];
     if (parentIds.length > 0) {
@@ -517,19 +517,19 @@ const getAllVisibleItems = () => {
   const rootItems = getRoot();
   const expandedKeysList = expandedKeys();
   const toParentEdgeType = getToParentEdgeType();
-  
+
   const result = [];
-  
+
   const traverse = (items) => {
     for (const item of items) {
       if (!item) continue;
       result.push(item);
-      
+
       // If item is expanded, add its children recursively
       if (Array.isArray(expandedKeysList) && expandedKeysList.includes(item.id)) {
         // Use getChildren function to get children
         const children = getChildren(item.id) || [];
-        
+
         // Recursively traverse children
         if (children.length > 0) {
           traverse(children);
@@ -537,7 +537,7 @@ const getAllVisibleItems = () => {
       }
     }
   };
-  
+
   traverse(rootItems);
   return result;
 };
@@ -547,17 +547,17 @@ const getParentCategory = (itemId) => {
   if (!itemId) return null;
   const toParentEdgeType = getToParentEdgeType();
   if (!toParentEdgeType) return null;
-  
+
   const item = args.graph?.vertexes?.[itemId];
   if (!item) return null;
-  
+
   // Relationship: child-[toParentEdgeType]->parent
   // Use ->toParentEdgeType to get parent
   const parent = args.evalExpression(
     `->${toParentEdgeType}`,
     { graph: args.graph, setGraph: args.setGraph, vertexes: [item] }
   );
-  
+
   return parent && parent.length > 0 ? parent[0] : null;
 };
 
@@ -572,15 +572,15 @@ const getFirstChild = (itemId) => {
 const navigateToCategory = async (direction) => {
   const currentSelected = selectedItem();
   if (!currentSelected) return;
-  
+
   const allItems = getAllVisibleItems();
   const currentIndex = allItems.findIndex(i => i.id === currentSelected.id);
-  
+
   if (currentIndex === -1) return;
-  
+
   let targetItem = null;
   const expandedKeysList = expandedKeys();
-  
+
   switch (direction) {
     case 'up':
       // Select previous item
@@ -588,14 +588,14 @@ const navigateToCategory = async (direction) => {
         targetItem = allItems[currentIndex - 1];
       }
       break;
-      
+
     case 'down':
       // Select next item
       if (currentIndex < allItems.length - 1) {
         targetItem = allItems[currentIndex + 1];
       }
       break;
-      
+
     case 'left':
       // Collapse if expanded, or select parent
       const isExpanded = Array.isArray(expandedKeysList) && expandedKeysList.includes(currentSelected.id);
@@ -609,7 +609,7 @@ const navigateToCategory = async (direction) => {
         }
       }
       break;
-      
+
     case 'right':
       // Expand if collapsed, or select first child
       const isExpanded2 = Array.isArray(expandedKeysList) && expandedKeysList.includes(currentSelected.id);
@@ -624,7 +624,7 @@ const navigateToCategory = async (direction) => {
       }
       break;
   }
-  
+
   // Select the target item if found
   if (targetItem) {
     handleItemSelect(targetItem);
@@ -636,7 +636,7 @@ const handleSidebarKeyDown = async (e) => {
   // Only handle if sidebar has focus and no modal is open
   const currentSelected = selectedItem();
   if (!currentSelected) return;
-  
+
   // Handle keyboard shortcuts for navigation/selection
   switch (e.key) {
     case 'ArrowUp':
@@ -644,38 +644,38 @@ const handleSidebarKeyDown = async (e) => {
       e.stopPropagation();
       await navigateToCategory('up');
       break;
-      
+
     case 'ArrowDown':
       e.preventDefault();
       e.stopPropagation();
       await navigateToCategory('down');
       break;
-      
+
     case 'ArrowLeft':
       e.preventDefault();
       e.stopPropagation();
       await navigateToCategory('left');
       break;
-      
+
     case 'ArrowRight':
       e.preventDefault();
       e.stopPropagation();
       await navigateToCategory('right');
       break;
-      
+
     case 'Enter':
       // Select/activate the current item (same as clicking)
       e.preventDefault();
       e.stopPropagation();
       // handleItemSelect is already called, but we can trigger any additional action if needed
       break;
-      
+
     case 'Escape':
       // Cancel any ongoing operation (if needed)
       e.preventDefault();
       e.stopPropagation();
       break;
-      
+
     default:
       // Let other keys pass through
       return;
@@ -805,7 +805,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "4"
       L: Attr
       P: {
         css:
@@ -851,7 +851,7 @@ return {
       }
     }
     {
-      id: "7_shopify"
+      id: "5"
       L: Attr
       P: {
         css:
@@ -879,7 +879,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "6"
       L: Attr
       P: {
         css:
@@ -903,7 +903,27 @@ return {
       }
     }
     {
-      id: "9"
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_add_root_button_polaris
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:icon": "plus",
+  text: `Add Root ${args.fns.getSidebarLabel()}`,
+  onClick: () => args.fns.handleOpenAddRootModal(),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "8"
       L: Attr
       P: {
         displayOrder: 1
@@ -925,27 +945,7 @@ return {
       }
     }
     {
-      id: "9_polaris"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        key: sidebar_add_root_button_polaris
-        props:
-          '''
-return {
-  as: "s-button",
-  "attr:variant": "primary",
-  "attr:icon": "plus",
-  text: `Add Root ${args.fns.getSidebarLabel()}`,
-  onClick: () => args.fns.handleOpenAddRootModal(),
-  hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
-      }
-    }
-    {
-      id: "4"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -971,7 +971,7 @@ return {
       }
     }
     {
-      id: "5"
+      id: "10"
       L: Attr
       P: {
         displayOrder: 1
@@ -1020,6 +1020,55 @@ return {
       }
     }
     {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(0.2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        key: sidebar_loading_overlay
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.operationLoading()
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        key: sidebar_loading_spinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
       id: "13"
       L: Attr
       P: {
@@ -1036,7 +1085,7 @@ return `._id {
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  
+
   &:hover {
     background-color: ${args.theme.var.color.primary}40;
   }
@@ -1056,21 +1105,21 @@ return {
     e.preventDefault();
     e.stopPropagation();
     if (!setSidebarWidth) return;
-    
+
     const startX = e.clientX;
     const startWidth = sidebarWidth;
-    
+
     const handleMouseMove = (moveEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const newWidth = Math.max(200, Math.min(800, startWidth + deltaX)); // Min 200px, Max 800px
       setSidebarWidth(newWidth);
     };
-    
+
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }
@@ -1079,7 +1128,7 @@ return {
       }
     }
     {
-      id: "6"
+      id: "14"
       L: Attr
       P: {
         css:
@@ -1101,7 +1150,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "15"
       L: Attr
       P: {
         displayOrder: 1
@@ -1117,7 +1166,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "16"
       L: Attr
       P: {
         displayOrder: 3
@@ -1174,55 +1223,6 @@ return {
 '''
       }
     }
-    {
-      id: "15"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(0.2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  pointer-events: auto;
-}`;
-'''
-        displayOrder: 5
-        componentName: Html
-        key: sidebar_loading_overlay
-        props:
-          '''
-return {
-  as: "div",
-  hide: !args.fns.operationLoading()
-};
-'''
-      }
-    }
-    {
-      id: "16"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: LoadingSpinner
-        key: sidebar_loading_spinner
-        props:
-          '''
-return {
-  size: "medium",
-  color: "primary"
-};
-'''
-      }
-    }
   ]
   edges: [
     {
@@ -1234,92 +1234,92 @@ return {
     {
       id: e2
       T: Attr
-      S: "2"
-      E: "3"
+      S: "1"
+      E: "16"
     }
     {
       id: e3
-      T: Attr
-      S: "2"
-      E: "13"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "2"
-      E: "6"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "6"
-      E: "14"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "3"
-      E: "8"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
-      id: e_search
-      T: Attr
-      S: "3"
-      E: "7"
-    }
-    {
-      id: e_search_shopify
-      T: Attr
-      S: "3"
-      E: "7_shopify"
-    }
-    {
-      id: e6
-      T: Attr
-      S: "8"
-      E: "9"
-    }
-    {
-      id: e6_polaris
-      T: Attr
-      S: "8"
-      E: "9_polaris"
-    }
-    {
-      id: e9
-      T: Attr
-      S: "1"
-      E: "12"
-    }
-    {
-      id: e17
       T: Attr
       S: "1"
       E: "17"
     }
     {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
       id: e10
       T: Attr
-      S: "4"
-      E: "5"
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "6"
+      E: "8"
     }
     {
       id: e14
       T: Attr
-      S: "3"
-      E: "15"
+      S: "9"
+      E: "10"
     }
     {
       id: e15
       T: Attr
-      S: "15"
-      E: "16"
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "14"
+      E: "15"
     }
   ]
 }

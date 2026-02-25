@@ -15,7 +15,7 @@
       }
     }
     {
-      id: "3"
+      id: "2"
       L: Attr
       P: {
         displayOrder: 2
@@ -31,7 +31,7 @@ return {
       }
     }
     {
-      id: "4"
+      id: "3"
       L: PageLayout
       P: {
         componentName: ShopifyLayout
@@ -40,16 +40,16 @@ return {
   ]
   edges: [
     {
-      id: e2
+      id: e1
       T: Attr
       S: "1"
-      E: "3"
+      E: "2"
     }
     {
-      id: e3
+      id: e2
       T: PageLayout
       S: "1"
-      E: "4"
+      E: "3"
     }
   ]
 }

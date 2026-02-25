@@ -77,11 +77,14 @@
   margin-bottom: 1.5rem;
 }`;'''
         displayOrder: 2
+        textType: markdown
         componentName: Html
+        text:
+          '''This guide explains how to use **Decode Products Organizer** app in plain language. You don't need any technical knowledge—just follow along.
+'''
         props:
           '''return {
   as: "p",
-  text: "This guide explains how to use the app in plain language. You don't need any technical knowledge—just follow along."
 }'''
       }
     }
@@ -133,11 +136,12 @@
   margin: 0 0 0.5rem 0;
 }`;'''
         displayOrder: 2
+        textType: markdown
         componentName: Html
+        text: In the Shopify admin main sidebar you'll see a menu **Decode Products Organizer** with links: [Products](/app), [Support](/support), [FAQ](/faq), [Documentation](/docs), [Billing](/billing), and [Privacy](/privacy). Click any link to go to that section.
         props:
           '''return {
   as: "p",
-  text: "In the sidebar you'll see a menu with links: Products, Support, FAQ, Documentation, Billing, and Privacy. Click any link to go to that section."
 }'''
       }
     }
@@ -153,11 +157,14 @@
   margin: 0;
 }`;'''
         displayOrder: 3
+        textType: markdown
         componentName: Html
+        text:
+          '''[Products](/app) is where you see and manage your product list. [Support](/support) is where you send a message to our team or see replies. [FAQ](/faq), [Documentation](/docs), and [Tutorial](/tutorial) are help pages you can read anytime. [Billing](/billing) and [Privacy](/privacy) are for your subscription and our privacy policy. You can bookmark or share a page if you want to come back to it later.
+'''
         props:
           '''return {
   as: "p",
-  text: "Products is where you see and manage your product list. Support is where you send a message to our team or see replies. FAQ, Documentation, and Tutorial are help pages you can read anytime. Billing and Privacy are for your subscription and our privacy policy. You can bookmark or share a page if you want to come back to it later."
 }'''
       }
     }
@@ -209,11 +216,14 @@
   margin: 0;
 }`;'''
         displayOrder: 2
+        textType: markdown
         componentName: Html
+        text:
+          '''First, go to the Shopify App Store and install the **Decode Products Organizer** app.
+'''
         props:
           '''return {
   as: "p",
-  text: "First, go to the Shopify App Store and install the Decode Products Organizer app."
 }'''
       }
     }
@@ -289,11 +299,14 @@
   margin: 0;
 }`;'''
         displayOrder: 2
+        textType: markdown
         componentName: Html
+        text:
+          '''The [Products](/app) page shows all your Shopify products in a list. You can search and filter to find what you need. Click a row to open a product in a modal to see and edit all its details. In table settings you choose which columns appear and how the list is sorted.
+'''
         props:
           '''return {
   as: "p",
-  text: "The products page shows all your Shopify products in a list. You can search and filter to find what you need. Click a row to open a product in a modal to see and edit all its details. In table settings you choose which columns appear and how the list is sorted."
 }'''
       }
     }
@@ -335,7 +348,7 @@
         displayOrder: 4
         textType: markdown
         componentName: Html
-        text: In the Sidebar, you can create categories and sub-categories.
+        text: In the Products page sidebar, you can create categories and sub-categories.
         key: unique_3
         props:
           '''return {
@@ -431,7 +444,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         displayOrder: 8
         textType: markdown
         componentName: Html
-        text: when you move the products to a different category, each products is updated and the category name is added as a tag in each products, if a product is already in a category then previous category tag is removed first before adding a new tag.
+        text: when you move the products to a different category, **each products is updated and the associated category name is added as a tag** in each products, if a product was already in a different category then previous category tag is removed first before adding a new tag.
         key: unique_7
         props:
           '''return {
@@ -479,7 +492,7 @@ select the rows and drag and drop to a category in the sidebar to assign product
         componentName: Html
         text:
           '''\
-When you create a category, a smart collection is created too in the Shopify that includes all the products that have specific tag.'''
+**When you create a category, a smart collection is created too** in the Shopify that includes all the products that have specific tag.'''
         key: unique_9
         props:
           '''return {
@@ -584,7 +597,7 @@ When you create a category, a smart collection is created too in the Shopify tha
         textType: markdown
         componentName: Html
         text:
-          '''When you create a new root category, the new menu is also created for that category in the Shopify. When you change or remove a category or a child category, the app updates or removes that part of the menu in Shopify. Any time you create, edit, delete, or move a category, the app keeps the menu in sync. All of this happens in the background so the app stays quick and easy to use.
+          '''**When you create a new root category, the new menu is also created** for that category in the Shopify. When you change or remove a category or a child category, the app updates or removes that part of the menu in Shopify. Any time you create, edit, delete, or move a category, the app keeps the menu in sync. All of this happens in the background so the app stays quick and easy to use.
 
 '''
         key: unique_12
@@ -700,11 +713,14 @@ When you create a category, a smart collection is created too in the Shopify tha
   margin-top: 1.5rem;
 }`;'''
         displayOrder: 8
+        textType: markdown
         componentName: Html
+        text:
+          '''Need more help? Go to [Support](/support) to send a message to our team. We'll reply in the same thread.
+'''
         props:
           '''return {
   as: "p",
-  text: "Need more help? Go to Support to send a message to our team. We'll reply in the same thread."
 }'''
       }
     }

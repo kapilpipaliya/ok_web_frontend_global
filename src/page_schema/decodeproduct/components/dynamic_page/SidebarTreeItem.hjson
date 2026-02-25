@@ -105,9 +105,9 @@ const fetchChildrenIfNeeded = async () => {
 
   const expanded = isExpanded();
   if (!expanded) return;
-  
+
   const childrenList = getChildren();
-  
+
   // Always fetch children when expanded if we don't have them loaded yet
   // This ensures nested children are fetched from the server
   if (childrenList.length === 0) {
@@ -168,18 +168,18 @@ const getItemName = () => {
 const getItemIcon = () => {
   const item = getItem();
   if (!item) return null;
-  
+
   // First check if item has explicit icon
   if (item.P?.icon) {
     return item.P.icon;
   }
-  
+
   // Then check for default icon in sidebarConfig
   const sidebarConfig = args.contextData.props?.sidebarConfig;
   if (sidebarConfig?.defaultIcon) {
     return sidebarConfig.defaultIcon;
   }
-  
+
   // No icon configured
   return null;
 };
@@ -198,13 +198,13 @@ const isQueued = () => getSyncStatus() === 'queued';
 const hasChildren = () => {
   const item = getItem();
   if (!item) return false;
-  
+
   // Check if we have children in graph
   const childrenList = getChildren();
   if (childrenList.length > 0) {
     return true;
   }
-  
+
   // If no children in graph, check if the vertex has IN relationships indicating it has children
   // Relationship direction: child-[toParentEdgeType]->parent
   // So parent has IN relationships from children (children point to parent)
@@ -213,7 +213,7 @@ const hasChildren = () => {
   if (toParentEdgeType && item.IN && item.IN[toParentEdgeType] && item.IN[toParentEdgeType].length > 0) {
     return true;
   }
-  
+
   // For nested items that haven't been fetched yet, we don't know if they have children
   // But we should allow expansion to check - show expand button if item might have children
   // This allows nested items to be expanded to fetch and check for children
@@ -264,15 +264,15 @@ const isDescendantOf = (targetId, categoryId) => {
   if (!targetId || !categoryId || targetId === categoryId) {
     return false;
   }
-  
+
   const toParentEdgeType = getToParentEdgeType();
   if (!toParentEdgeType) return false;
-  
+
   try {
     // Get target vertex from graph
     const targetVertex = args.graph?.vertexes?.[targetId];
     if (!targetVertex) return false;
-    
+
     // Traverse up the parent chain to see if we reach categoryId
     // Use evalExpression to follow the toParentEdgeType relationship backwards
     // Since child-[toParentEdgeType]->parent, we use ->toParentEdgeType to go from child to parent
@@ -280,20 +280,20 @@ const isDescendantOf = (targetId, categoryId) => {
       `->${toParentEdgeType}`,
       { graph: args.graph, setGraph: args.setGraph, vertexes: [targetVertex] }
     );
-    
+
     if (!parent || parent.length === 0) {
       // No parent, so not a descendant
       return false;
     }
-    
+
     const parentId = parent[0]?.id;
     if (!parentId) return false;
-    
+
     // If parent is the category we're checking against, target is a direct child
     if (parentId === categoryId) {
       return true;
     }
-    
+
     // Recursively check if parent is a descendant
     return isDescendantOf(parentId, categoryId);
   } catch (error) {
@@ -307,42 +307,42 @@ const validateDropTarget = (categoryId, targetId) => {
   if (!categoryId || !targetId) {
     return { valid: false, reason: "Missing category or target ID" };
   }
-  
+
   // Check 1: Cannot drop on itself
   if (categoryId === targetId) {
     return { valid: false, reason: "Cannot move a category to itself" };
   }
-  
+
   // Check 2: Cannot drag root/uncategorized (backend passes id as "uncategorized")
   if (categoryId === 'uncategorized') {
     return { valid: false, reason: "Root items cannot be moved" };
   }
-  
+
   // Check 3: Cannot drop on a descendant
   if (isDescendantOf(targetId, categoryId)) {
     return { valid: false, reason: "Cannot move a category to its own descendant" };
   }
-  
+
   return { valid: true };
 };
 
 // Initialize draggable for sidebar item using pragmatic-drag-and-drop
 const initDraggable = (element) => {
   if (!element || !args.draggable) return;
-  
+
   const item = getItem();
   if (!item) return;
-  
+
   // Prevent dragging uncategorized (backend passes id as "uncategorized")
   if (item.id === 'uncategorized') {
     return;
   }
-  
+
   // Clean up existing draggable if any
   if (draggableCleanup.current) {
     draggableCleanup.current();
   }
-  
+
   const cleanup = args.draggable({
     element,
     canDrag: () => !isQueued(),
@@ -423,7 +423,7 @@ const initDraggable = (element) => {
       }
     }
   });
-  
+
   draggableCleanup.current = cleanup;
   return cleanup;
 };
@@ -431,15 +431,15 @@ const initDraggable = (element) => {
 // Initialize drop target for sidebar item using pragmatic-drag-and-drop
 const initDropTarget = (element) => {
   if (!element || !args.dropTargetForElements) return;
-  
+
   const item = getItem();
   if (!item) return;
-  
+
   // Clean up existing drop target if any
   if (dropTargetCleanup.current) {
     dropTargetCleanup.current();
   }
-  
+
   const cleanup = args.dropTargetForElements({
     element,
     getData: () => ({}),
@@ -448,7 +448,7 @@ const initDropTarget = (element) => {
       // so onDrag fires and we can show red highlight; onDrop will reject the drop
       const source = args.source;
       const data = source.data;
-      
+
       // Validate table items drop
       if (data && data.type === 'table-items') {
         // Check if there are valid item IDs
@@ -457,12 +457,12 @@ const initDropTarget = (element) => {
         }
         return true;
       }
-      
+
       // Allow sidebar items
       if (data && data.type === 'sidebar-item') {
         return true;
       }
-      
+
       return false;
     },
     onDragEnter: () => {
@@ -471,14 +471,14 @@ const initDropTarget = (element) => {
     onDrag: (event) => {
       const source = event.source;
       const data = source.data;
-      
+
       // Cannot drop onto a queued (syncing) item
       if (isQueued()) {
         setIsValidDrop(false);
         setIsDragOver(true);
         return;
       }
-      
+
       // Validate drop target for sidebar items
       if (data && data.type === 'sidebar-item' && data.categoryId) {
         const validation = validateDropTarget(data.categoryId, item.id);
@@ -499,16 +499,16 @@ const initDropTarget = (element) => {
     },
     onDrop: async (event) => {
       setIsDragOver(false);
-      
+
       // Cannot drop onto a queued (syncing) item
       if (isQueued()) {
         args.showWarningToast?.("Cannot drop here: item is syncing");
         return;
       }
-      
+
       const source = event.source;
       const data = source.data;
-      
+
       // Handle sidebar item drops
       if (data && data.type === 'sidebar-item' && data.categoryId) {
         // Re-validate before proceeding
@@ -517,15 +517,15 @@ const initDropTarget = (element) => {
           args.showWarningToast?.(validation.reason || "Cannot drop here");
           return;
         }
-        
+
         // Determine new parent ID (backend uses id "uncategorized" for root)
         const newParentId = item.id === 'uncategorized' ? null : item.id;
-        
+
         // Move the sidebar item
         await handleMoveSidebarItem(data.categoryId, newParentId);
         return;
       }
-      
+
       // Handle table item drops (existing functionality)
       if (data && data.type === 'table-items' && data.itemIds && Array.isArray(data.itemIds)) {
         // Re-check same-active-category guard (vertex id only)
@@ -543,7 +543,7 @@ const initDropTarget = (element) => {
       setIsDragOver(event.isActive);
     }
   });
-  
+
   dropTargetCleanup.current = cleanup;
   return cleanup;
 };
@@ -568,7 +568,7 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
   const enableUserScoping = args.contextData.props?.enableUserScoping === true;
   const hooks = args.contextData.props?.hooks;
   const label = args.contextData.props?.label || "Item";
-  
+
   const moveContextData = {
     categoryId,
     newParentId,
@@ -579,10 +579,10 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
     hooks: hooks,
     label: label
   };
-  
+
   try {
     args.fns.setOperationLoading?.(true);
-    
+
     const result = await args.executeNamedServerFunction({
       functionName: "moveSidebarItem",
       contextData: moveContextData
@@ -607,7 +607,7 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
       args.showSuccessToast?.(result.result.message || `${label} moved successfully`);
       return true;
     }
-    
+
     return false;
   } catch (error) {
     console.error("Error moving sidebar item:", error);
@@ -624,17 +624,17 @@ const handleTableItemsDrop = async (itemIds) => {
   try {
     const item = getItem();
     if (!item) return;
-    
+
     const onMoveItemsToCategory = args.contextData.props?.onMoveItemsToCategory;
     if (!onMoveItemsToCategory) {
       args.showErrorToast?.("Move function not available");
       return;
     }
-    
+
     const parentVertexLabel = getParentVertexLabel();
     const toParentEdgeType = getToParentEdgeType();
     const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
-    
+
     // Prevent dropping into the same active category (vertex id only; backend passes id "uncategorized" for root)
     const currentSelected = getSelectedItem();
     if (currentSelected && item && currentSelected.id === item.id) {
@@ -643,33 +643,33 @@ const handleTableItemsDrop = async (itemIds) => {
       args.showWarningToast?.(`${plural} are already in this category`);
       return;
     }
-    
+
     // Determine category ID - backend expects null for uncategorized (id is "uncategorized")
     const categoryId = item.id === 'uncategorized' ? null : item.id;
-    
+
     // Get sidebar config
     const sidebarConfig = {
       parentVertexLabel: parentVertexLabel,
       toParentEdgeType: toParentEdgeType,
       rootKeys: rootKeys
     };
-    
+
     // Call move function from parent
     const result = await onMoveItemsToCategory(itemIds, categoryId, sidebarConfig);
-    
+
     if (result?.success) {
       const contentLabel = args.contextData.props?.contentLabel || "item";
       const plural = contentLabel.endsWith('y') ? contentLabel.slice(0, -1) + 'ies' : contentLabel + (contentLabel.endsWith('s') ? '' : 's');
       args.showSuccessToast?.(result.message || `Moved ${itemIds.length} ${itemIds.length !== 1 ? plural : contentLabel} successfully`);
-      
+
       // Determine source category (where items were moved FROM); use vertex id only
       const sourceCategory = currentSelected;
       const isSourceUncategorized = sourceCategory && sourceCategory.id === 'uncategorized';
       const isTargetUncategorized = item.id === 'uncategorized';
-      
+
       // Update content counts using mergeVertexProperties
       const updatedCounts = result.data?.updatedCounts;
-      
+
       if (updatedCounts) {
         // Update target category count (if not uncategorized)
         if (updatedCounts.targetCategoryId && !isTargetUncategorized && item.id === updatedCounts.targetCategoryId) {
@@ -677,14 +677,14 @@ const handleTableItemsDrop = async (itemIds) => {
             contentCount: updatedCounts.targetCount
           });
         }
-        
+
         // Update source category count (if not uncategorized)
         if (updatedCounts.sourceCategoryId && !isSourceUncategorized && currentSelected && currentSelected.id === updatedCounts.sourceCategoryId) {
           args.mergeVertexProperties(0, currentSelected.id, args.graph, args.setGraph, {
             contentCount: updatedCounts.sourceCount
           });
         }
-        
+
         // For uncategorized target, update the uncategorized vertex directly if it exists
         if (isTargetUncategorized && updatedCounts.targetCategoryId === 'uncategorized' && updatedCounts.targetCount !== undefined) {
           // Try to find and update the uncategorized vertex in the graph
@@ -701,7 +701,7 @@ const handleTableItemsDrop = async (itemIds) => {
             }
           }
         }
-        
+
         // For uncategorized source, update the uncategorized vertex directly if it exists
         if (isSourceUncategorized && updatedCounts.sourceCategoryId === 'uncategorized' && updatedCounts.sourceCount !== undefined) {
           // Try to find and update the uncategorized vertex in the graph
@@ -719,7 +719,7 @@ const handleTableItemsDrop = async (itemIds) => {
           }
         }
       }
-      
+
       // Always refresh root items if moving to/from uncategorized (as fallback); preserve expanded state so tree does not collapse
       if (isSourceUncategorized || isTargetUncategorized) {
         const fetchRootFn = getFetchRoot();
@@ -727,7 +727,7 @@ const handleTableItemsDrop = async (itemIds) => {
           await fetchRootFn({ preserveExpanded: true });
         }
       }
-      
+
       // Keep drop target and its ancestors expanded so the parent item does not collapse
       const setExpandedKeysFn = args.contextData.props?.setExpandedKeys;
       if (setExpandedKeysFn && item?.id) {
@@ -798,7 +798,7 @@ const handleDelete = async (e) => {
   // Delete the vertex (use label from getSidebarLabel: config?.label || config?.parentVertexLabel)
   try {
     args.fns.setOperationLoading?.(true);
-    
+
     const label = args.contextData.props?.label || "Item";
     const result = await args.executeNamedServerFunction({
       functionName: "saveSidebarVertex",
@@ -822,11 +822,11 @@ const handleDelete = async (e) => {
 
     if (result?.result?.success) {
       args.showSuccessToast?.(`${label} deleted successfully`);
-      
+
       // Get vertex from graph to collect all connected edges
       const vertex = args.graph.vertexes[item.id];
       const edgeIdsToDelete = [];
-      
+
       if (vertex) {
         // Collect all outgoing edge IDs
         if (vertex.OUT) {
@@ -835,7 +835,7 @@ const handleDelete = async (e) => {
             edgeIdsToDelete.push(...edgeIds);
           }
         }
-        
+
         // Collect all incoming edge IDs
         if (vertex.IN) {
           for (const edgeType in vertex.IN) {
@@ -844,12 +844,12 @@ const handleDelete = async (e) => {
           }
         }
       }
-      
+
       // Delete all edges before calling setGraphData
       for (const edgeId of edgeIdsToDelete) {
         args.deleteEdge(0, edgeId, args.graph, args.setGraph);
       }
-      
+
       // Use setGraphData to handle vertex deletion from graph
       if (result.graph) {
         const graphData = {
@@ -860,7 +860,7 @@ const handleDelete = async (e) => {
         };
         args.setGraphData(0, graphData, {});
       }
-      
+
       // Notify parent to remove item from tree
       const onItemDelete = getOnItemDelete();
       if (onItemDelete) {
@@ -1033,11 +1033,11 @@ return `._id {
   padding: 2px 0;
   transition: all 0.15s ease-in-out;
   ${args.fns.hasChildren() ? "" : `border-left: 1px dashed ${args.theme.var.color.border};`}
-  
+
   &:hover {
     background-color: ${args.theme.var.color.background_dark_150};
   }
-  
+
   &:hover .tree-item-actions {
     opacity: 1;
     visibility: visible;
@@ -1188,7 +1188,7 @@ return {
       }
     }
     {
-      id: "16"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -1226,7 +1226,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -1264,7 +1264,27 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "plus",
+  "attr:accessibilityLabel": "Add child",
+  "attr:size": "slim",
+  onClick: args.fns.handleOpenAddModal,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "11"
       L: Attr
       P: {
         css:
@@ -1296,27 +1316,7 @@ return {
       }
     }
     {
-      id: "9_polaris"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "s-button",
-  "attr:variant": "plain",
-  "attr:icon": "plus",
-  "attr:accessibilityLabel": "Add child",
-  "attr:size": "slim",
-  onClick: args.fns.handleOpenAddModal,
-  hide: args.fns.getUsePolarisUI?.() !== true
-};
-'''
-      }
-    }
-    {
-      id: "10"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -1348,7 +1348,7 @@ return {
       }
     }
     {
-      id: "10_polaris"
+      id: "13"
       L: Attr
       P: {
         displayOrder: 2
@@ -1368,7 +1368,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "14"
       L: Attr
       P: {
         css:
@@ -1403,7 +1403,7 @@ return {
       }
     }
     {
-      id: "15_polaris"
+      id: "15"
       L: Attr
       P: {
         displayOrder: 3
@@ -1427,7 +1427,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "16"
       L: Attr
       P: {
         css:
@@ -1460,7 +1460,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "17"
       L: Attr
       P: {
         css:
@@ -1531,85 +1531,85 @@ return {
       id: e3
       T: Attr
       S: "2"
-      E: "11"
+      E: "16"
     }
     {
-      id: e6
+      id: e4
       T: Attr
       S: "3"
       E: "4"
     }
     {
-      id: e7
+      id: e5
       T: Attr
       S: "3"
       E: "6"
     }
     {
-      id: e8
+      id: e6
       T: Attr
       S: "3"
       E: "7"
     }
     {
-      id: e9
+      id: e7
       T: Attr
       S: "3"
       E: "8"
     }
     {
-      id: e10
+      id: e8
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e9
       T: Attr
       S: "4"
       E: "5"
     }
     {
-      id: e16
+      id: e10
       T: Attr
-      S: "3"
-      E: "16"
+      S: "9"
+      E: "10"
     }
     {
       id: e11
       T: Attr
-      S: "8"
-      E: "9"
-    }
-    {
-      id: e11a
-      T: Attr
-      S: "8"
-      E: "9_polaris"
+      S: "9"
+      E: "11"
     }
     {
       id: e12
       T: Attr
-      S: "8"
-      E: "10"
-    }
-    {
-      id: e12a
-      T: Attr
-      S: "8"
-      E: "10_polaris"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "8"
-      E: "15"
-    }
-    {
-      id: e14a
-      T: Attr
-      S: "8"
-      E: "15_polaris"
+      S: "9"
+      E: "12"
     }
     {
       id: e13
       T: Attr
-      S: "11"
-      E: "12"
+      S: "9"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "16"
+      E: "17"
     }
   ]
 }

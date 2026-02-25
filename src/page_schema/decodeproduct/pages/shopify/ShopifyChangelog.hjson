@@ -5,9 +5,9 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: Billing - Decode Products Organizer
-        url: /billing
-        key: ShopifyBilling
+        title: Changelog - Decode Products Organizer
+        url: /changelog
+        key: ShopifyChangelog
         props:
           '''return {
   isNoPermissionCheck: true
@@ -18,12 +18,6 @@
       id: "2"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-}'''
         css:
           '''return `._id {
   max-width: 800px;
@@ -37,19 +31,18 @@
     padding: ${args.theme.var.spacing?.md || "1rem"};
   }
 }`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
       }
     }
     {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "h1",
-  text: "Billing & plans"
-}'''
         css:
           '''return `._id {
   font-size: 2rem;
@@ -63,19 +56,19 @@
     font-size: 1.75rem;
   }
 }`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Changelog"
+}'''
       }
     }
     {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "p",
-  text: "Billing for the Decode Products Organizer app is managed through your Shopify admin. Your current plan, payment method, and invoices are available in your Shopify billing settings."
-}'''
         css:
           '''return `._id {
   font-size: 1rem;
@@ -83,35 +76,35 @@
   color: ${args.theme.var.color.muted};
   margin-bottom: 1.5rem;
 }`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Recent updates and improvements to the Decode Products Organizer app."
+}'''
       }
     }
     {
       id: "5"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
           '''return {
-  as: "section"
+  as: "div"
 }'''
-        css:
-          '''return `._id {
-  margin-top: 1.5rem;
-}`;'''
       }
     }
     {
       id: "6"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "h2",
-  text: "Manage your subscription"
-}'''
         css:
           '''return `._id {
   font-size: 1.25rem;
@@ -119,19 +112,19 @@
   color: ${args.theme.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "February 2025"
+}'''
       }
     }
     {
       id: "7"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "p",
-  text: "To upgrade, downgrade, or cancel your plan, or to update your payment method, go to Settings > Billing in your Shopify admin."
-}'''
         css:
           '''return `._id {
   font-size: 0.9375rem;
@@ -139,10 +132,37 @@
   color: ${args.theme.var.color.muted};
   margin: 0;
 }`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Help and support: Added FAQ, Documentation, Tutorial, and Changelog pages so you can find answers and see what's new. Navigation: New links in the top menu for easy access to help content. Documentation is written in plain language for everyone."
+}'''
       }
     }
     {
       id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-top: 1.5rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "We'll add new entries here as we release updates. Check back anytime to see the latest changes."
+}'''
+      }
+    }
+    {
+      id: "9"
       L: PageLayout
       P: {
         componentName: ShopifyLayout
@@ -151,10 +171,16 @@
   ]
   edges: [
     {
-      id: e2
+      id: e1
       T: Attr
       S: "1"
       E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "9"
     }
     {
       id: e3
@@ -177,20 +203,20 @@
     {
       id: e6
       T: Attr
-      S: "5"
-      E: "6"
+      S: "2"
+      E: "8"
     }
     {
       id: e7
       T: Attr
       S: "5"
-      E: "7"
+      E: "6"
     }
     {
       id: e8
-      T: PageLayout
-      S: "1"
-      E: "8"
+      T: Attr
+      S: "5"
+      E: "7"
     }
   ]
 }

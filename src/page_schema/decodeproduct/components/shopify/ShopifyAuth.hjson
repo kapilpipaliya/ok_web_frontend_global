@@ -15,7 +15,7 @@
         displayOrder: 2
         fns:
           '''// Create signals for loading state and auth data
-const [isLoading, setIsLoading] = args.createSignal(true);
+const [isLoading, setIsLoading] = args.createSignal(false);
 const [authData, setAuthData] = args.createSignal(null);
 const [authError, setAuthError] = args.createSignal(null);
 
@@ -92,7 +92,9 @@ const handleNavigate = (event) => {
 
 // Fetch auth data and register event listener on mount
 const onMount = () => {
-  fetchAuthData();
+  if (args.fns.isInIframe()) {
+    fetchAuthData();
+  }
   document.addEventListener('shopify:navigate', handleNavigate);
 };
 
@@ -126,6 +128,20 @@ return {
       id: "3"
       L: Attr
       P: {
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "s-page",
+  "attr:inlineSize": args.contextData?.props?.pageSize || "large"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
         css:
           '''return `._id {
   display: flex;
@@ -147,27 +163,315 @@ return {
       }
     }
     {
-      id: "4"
+      id: "5"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  margin: 2rem 0;
+}`;'''
         displayOrder: 2
         componentName: Html
-        key: unique_3
+        key: unique_7
         props:
-          '''const isLoading = args.fns.isLoading?.();
-
-return {
-  as: "s-page",
-  "attr:inlineSize": args.contextData?.props?.pageSize || "large",
-  hide: isLoading
+          '''return {
+  as: "section",
+  hide: args.fns.isInIframe()
 }'''
       }
     }
     {
-      id: "5"
+      id: "6"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+}`;'''
         displayOrder: 1
+        componentName: Html
+        key: unique_8
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: ""
+        props:
+          '''return {
+  as: "a",
+  href: "/",
+  alt: "Home"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}`;'''
+        as: img
+        src: /api/file/downloadCompanySquareLogo
+        displayOrder: 1
+        componentName: Html
+        key: unique_20
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+    ${args.location.pathname === "/docs" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_16
+        props:
+          '''return {
+  as: "a",
+  href: "/docs",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/faq" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        key: unique_10
+        props:
+          '''return {
+  as: "a",
+  href: "/faq",
+  text: "FAQ"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+    ${args.location.pathname === "/tutorial" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        key: unique_11
+        props:
+          '''return {
+  as: "a",
+  href: "/tutorial",
+  text: "Tutorial"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+    ${args.location.pathname === "/roadmap" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        key: unique_19
+        props:
+          '''return {
+  as: "a",
+  href: "/roadmap",
+  text: "Roadmap"
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/support" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        key: unique_12
+        props:
+          '''return {
+  as: "a",
+  href: "/support",
+  text: "Support"
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/billing" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        key: unique_13
+        props:
+          '''return {
+  as: "a",
+  href: "/billing",
+  text: "Billing"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/privacy" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        key: unique_14
+        props:
+          '''return {
+  as: "a",
+  href: "/privacy",
+  text: "Privacy"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        key: unique_15
+        props:
+          '''return {
+  as: "a",
+  href: "https://www.youtube.com/@DecodeProductsOrganizer/videos",
+  rel: "noopener noreferrer",
+  target: "_blank"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        componentName: Html
+        text: YouTube
+        key: unique_18
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        as: icon
+        displayOrder: 2
+        icon: lets-icons:external
+        componentName: Html
+        key: unique_17
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 3
         componentName: Html
         key: unique_4
         props:
@@ -183,21 +487,24 @@ return {
       }
     }
     {
-      id: "6"
+      id: "20"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 4
         componentName: Html
         key: unique_5
         props:
-          '''return {
+          '''const isLoading = args.fns.isLoading?.();
+
+return {
   as: "s-section",
-  "attr:padding": "none"
+  "attr:padding": "none",
+  hide: isLoading
 }'''
       }
     }
     {
-      id: "7"
+      id: "21"
       L: Attr
       P: {
         slotName: children
@@ -223,26 +530,110 @@ return {
     {
       id: e3
       T: Attr
-      S: "2"
+      S: "3"
       E: "4"
     }
     {
       id: e4
       T: Attr
-      S: "4"
+      S: "3"
       E: "5"
     }
     {
       id: e5
       T: Attr
-      S: "4"
-      E: "6"
+      S: "3"
+      E: "19"
     }
     {
       id: e6
       T: Attr
+      S: "3"
+      E: "20"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
       S: "6"
       E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "6"
+      E: "13"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "6"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "6"
+      E: "15"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "6"
+      E: "16"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "20"
+      E: "21"
     }
   ]
 }

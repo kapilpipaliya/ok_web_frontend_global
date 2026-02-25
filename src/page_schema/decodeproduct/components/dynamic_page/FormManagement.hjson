@@ -465,7 +465,7 @@ return {
       }
     }
     {
-      id: "4"
+      id: "3"
       L: Attr
       P: {
         css:
@@ -487,7 +487,7 @@ return {
       }
     }
     {
-      id: "5"
+      id: "4"
       L: Attr
       P: {
         contextName: fieldGroup
@@ -549,7 +549,7 @@ return {
       }
     }
     {
-      id: "6"
+      id: "5"
       L: Attr
       P: {
         css:
@@ -575,7 +575,7 @@ return {
       }
     }
     {
-      id: "7"
+      id: "6"
       L: Attr
       P: {
         css:
@@ -608,7 +608,7 @@ return {
       }
     }
     {
-      id: "8"
+      id: "7"
       L: Attr
       P: {
         contextName: field
@@ -633,7 +633,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "8"
       L: Attr
       P: {
         css:
@@ -665,7 +665,7 @@ return {
       }
     }
     {
-      id: "10"
+      id: "9"
       L: Attr
       P: {
         css:
@@ -698,7 +698,7 @@ return {
       }
     }
     {
-      id: "11"
+      id: "10"
       L: Attr
       P: {
         css:
@@ -724,7 +724,7 @@ return {
       }
     }
     {
-      id: "12"
+      id: "11"
       L: Attr
       P: {
         css:
@@ -846,7 +846,7 @@ return {
       }
     }
     {
-      id: "13"
+      id: "12"
       L: Attr
       P: {
         css:
@@ -873,7 +873,7 @@ return {
       }
     }
     {
-      id: "14"
+      id: "13"
       L: Attr
       P: {
         css:
@@ -910,7 +910,7 @@ return {
       }
     }
     {
-      id: "15"
+      id: "14"
       L: Attr
       P: {
         displayOrder: 1
@@ -943,7 +943,7 @@ return {
       }
     }
     {
-      id: "15_polaris"
+      id: "15"
       L: Attr
       P: {
         displayOrder: 1
@@ -977,24 +977,6 @@ return {
       L: Attr
       P: {
         displayOrder: 2
-        componentName: Button
-        props:
-          '''
-return {
-  variant: "primary",
-  onClick: args.fns.handleSave,
-  text: "Save",
-  disabled: args.fns.isSubmitting(),
-  hide: args.fns.getUsePolarisUI?.() === true
-};
-'''
-      }
-    }
-    {
-      id: "16_polaris"
-      L: Attr
-      P: {
-        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -1011,12 +993,20 @@ return {
     }
     {
       id: "17"
-      L: ComponentVariant
+      L: Attr
       P: {
-        displayOrder: 3
-        type: string
-        defValue: add
-        key: mode
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleSave,
+  text: "Save",
+  disabled: args.fns.isSubmitting(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
       }
     }
     {
@@ -1032,27 +1022,27 @@ return {
       id: "19"
       L: ComponentVariant
       P: {
-        displayOrder: 6
-        type: function
-        key: onClose
-      }
-    }
-    {
-      id: "20"
-      L: ComponentVariant
-      P: {
         displayOrder: 2
         type: object
         key: initialVertex
       }
     }
     {
-      id: "21"
+      id: "20"
       L: ComponentVariant
       P: {
         displayOrder: 1
         type: object
         key: formConfig
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariant
+      P: {
+        displayOrder: 6
+        type: function
+        key: onClose
       }
     }
     {
@@ -1062,6 +1052,16 @@ return {
         displayOrder: 5
         type: function
         key: onSave
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        displayOrder: 3
+        type: string
+        defValue: add
+        key: mode
       }
     }
   ]
@@ -1076,48 +1076,54 @@ return {
       id: e2
       T: ComponentVariant
       S: "1"
-      E: "17"
+      E: "18"
     }
     {
       id: e3
       T: ComponentVariant
       S: "1"
-      E: "18"
+      E: "19"
     }
     {
       id: e4
       T: ComponentVariant
       S: "1"
-      E: "19"
+      E: "20"
     }
     {
       id: e5
       T: ComponentVariant
       S: "1"
-      E: "20"
+      E: "21"
     }
     {
       id: e6
       T: ComponentVariant
       S: "1"
-      E: "21"
+      E: "22"
     }
     {
       id: e7
       T: ComponentVariant
       S: "1"
-      E: "22"
+      E: "23"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "3"
     }
     {
       id: e9
       T: Attr
       S: "2"
-      E: "14"
+      E: "13"
     }
     {
       id: e10
       T: Attr
-      S: "2"
+      S: "3"
       E: "4"
     }
     {
@@ -1135,68 +1141,62 @@ return {
     {
       id: e13
       T: Attr
-      S: "6"
+      S: "5"
       E: "7"
     }
     {
       id: e14
       T: Attr
-      S: "6"
+      S: "7"
       E: "8"
     }
     {
       id: e15
       T: Attr
-      S: "8"
+      S: "7"
       E: "9"
     }
     {
       id: e16
       T: Attr
-      S: "8"
+      S: "9"
       E: "10"
     }
     {
       id: e17
       T: Attr
-      S: "10"
+      S: "9"
       E: "11"
     }
     {
       id: e18
       T: Attr
-      S: "10"
+      S: "9"
       E: "12"
     }
     {
       id: e19
       T: Attr
-      S: "10"
-      E: "13"
+      S: "13"
+      E: "14"
     }
     {
       id: e20
       T: Attr
-      S: "14"
+      S: "13"
       E: "15"
-    }
-    {
-      id: e20a
-      T: Attr
-      S: "14"
-      E: "15_polaris"
     }
     {
       id: e21
       T: Attr
-      S: "14"
+      S: "13"
       E: "16"
     }
     {
-      id: e21a
+      id: e22
       T: Attr
-      S: "14"
-      E: "16_polaris"
+      S: "13"
+      E: "17"
     }
   ]
 }

@@ -1,12 +1,9 @@
 {
   vertexes: [
     {
-      id: "theme_root",
-      L: "Theme",
+      id: "1"
+      L: Theme
       P: {
-        key: "ShopifyTheme",
-        name: "Shopify Theme",
-        description: "Theme matching Shopify Polaris design system for embedded admin apps",
         data:
           '''
 return {
@@ -91,6 +88,9 @@ return {
   }
 };
 '''
+        name: Shopify Theme
+        description: Theme matching Shopify Polaris design system for embedded admin apps
+        key: ShopifyTheme
       }
     }
   ]

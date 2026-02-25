@@ -6,8 +6,8 @@
       P: {
         fns: return { enabled: () => true }
         title: Support - Decode Products Organizer
-        url: /support
         key: ShopifySupport
+        url: /support
         props:
           '''return {
   isNoPermissionCheck: true
@@ -18,9 +18,22 @@
       id: "2"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;
+'''
         displayOrder: 1
-        componentName: Html
-        key: support_root
         fns:
           '''
 // Signals for support tickets and conversation
@@ -273,7 +286,7 @@ const formatTimestamp = (timestamp) => {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-    
+
     if (diffMins < 1) {
       return "Just now";
     } else if (diffMins < 60) {
@@ -321,29 +334,19 @@ return {
   sendReply
 };
 '''
+        componentName: Html
+        key: support_root
         props:
           '''
 return {
   as: "div",
   onMount: async () => {
-    await args.fns.initializeSupport();
-  }
+    if (args.fns.isInIframe()) {
+      await args.fns.initializeSupport();
+    }
+  },
+  hide: !args.fns.isInIframe()
 };
-'''
-        css:
-          '''
-return `._id {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: ${args.theme.var.spacing?.lg || "2rem"};
-  color: ${args.theme.var.color.text};
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: ${args.theme.var.spacing?.md || "1rem"};
-  }
-}`;
 '''
       }
     }
@@ -351,13 +354,6 @@ return `._id {
       id: "3"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "h1",
-  text: "Help & Support"
-}'''
         css:
           '''return `._id {
   font-size: 2rem;
@@ -371,19 +367,19 @@ return `._id {
     font-size: 1.75rem;
   }
 }`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Help & Support"
+}'''
       }
     }
     {
       id: "4"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "p",
-  text: "Need help with the Decode Products Organizer app? Create a support request or continue an existing conversation with our team."
-}'''
         css:
           '''return `._id {
   font-size: 1rem;
@@ -391,35 +387,35 @@ return `._id {
   color: ${args.theme.var.color.muted};
   margin-bottom: 1.5rem;
 }`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Need help with the Decode Products Organizer app? Create a support request or continue an existing conversation with our team."
+}'''
       }
     }
     {
       id: "5"
       L: Attr
       P: {
+        css:
+          '''return `._id {
+  margin-top: 1.5rem;
+}`;'''
         displayOrder: 3
         componentName: Html
         props:
           '''return {
   as: "section"
 }'''
-        css:
-          '''return `._id {
-  margin-top: 1.5rem;
-}`;'''
       }
     }
     {
       id: "6"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "h2",
-  text: "Create a new request"
-}'''
         css:
           '''return `._id {
   font-size: 1.25rem;
@@ -427,18 +423,19 @@ return `._id {
   color: ${args.theme.var.color.text};
   margin: 0 0 0.5rem 0;
 }`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Create a new request"
+}'''
       }
     }
     {
       id: "7"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''return {
-  as: "div"
-}'''
         css:
           '''
 return `._id {
@@ -454,20 +451,18 @@ return `._id {
   }
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
       }
     }
     {
-      id: "7_left_card"
+      id: "8"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
         css:
           '''
 return `._id {
@@ -477,21 +472,20 @@ return `._id {
   background: ${args.theme.var.color.background_light_100};
 }`;
 '''
-      }
-    }
-    {
-      id: "7_left_form_title"
-      L: Attr
-      P: {
         displayOrder: 1
         componentName: Html
         props:
           '''
 return {
-  as: "p",
-  text: "Describe what you need help with and our team will reply in this conversation."
+  as: "div"
 };
 '''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -501,12 +495,32 @@ return `._id {
   margin: 0 0 0.75rem 0;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Describe what you need help with and our team will reply in this conversation."
+};
+'''
       }
     }
     {
-      id: "7_left_name"
+      id: "10"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.9375rem;
+}`;
+'''
         displayOrder: 2
         componentName: Html
         props:
@@ -519,6 +533,12 @@ return {
   onInput: (e) => args.fns.setNewName?.(e.target.value)
 };
 '''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -530,12 +550,6 @@ return `._id {
   font-size: 0.9375rem;
 }`;
 '''
-      }
-    }
-    {
-      id: "7_left_email"
-      L: Attr
-      P: {
         displayOrder: 3
         componentName: Html
         props:
@@ -548,6 +562,12 @@ return {
   onInput: (e) => args.fns.setNewEmail?.(e.target.value)
 };
 '''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -559,12 +579,6 @@ return `._id {
   font-size: 0.9375rem;
 }`;
 '''
-      }
-    }
-    {
-      id: "7_left_subject"
-      L: Attr
-      P: {
         displayOrder: 4
         componentName: Html
         props:
@@ -577,35 +591,12 @@ return {
   onInput: (e) => args.fns.setNewSubject?.(e.target.value)
 };
 '''
-        css:
-          '''
-return `._id {
-  width: 100%;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  font-size: 0.9375rem;
-}`;
-'''
       }
     }
     {
-      id: "7_left_message"
+      id: "13"
       L: Attr
       P: {
-        displayOrder: 5
-        componentName: Html
-        props:
-          '''
-return {
-  as: "textarea",
-  rows: 4,
-  placeholder: "Describe your issue or question (required)",
-  value: args.fns.newMessage?.() || "",
-  onInput: (e) => args.fns.setNewMessage?.(e.target.value)
-};
-'''
         css:
           '''
 return `._id {
@@ -619,12 +610,37 @@ return `._id {
   min-height: 120px;
 }`;
 '''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "textarea",
+  rows: 4,
+  placeholder: "Describe your issue or question (required)",
+  value: args.fns.newMessage?.() || "",
+  onInput: (e) => args.fns.setNewMessage?.(e.target.value)
+};
+'''
       }
     }
     {
-      id: "7_left_button"
+      id: "14"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: none;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+}`;
+'''
         displayOrder: 6
         componentName: Html
         props:
@@ -640,33 +656,12 @@ return {
   }
 };
 '''
-        css:
-          '''
-return `._id {
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  font-size: 0.9375rem;
-  font-weight: 500;
-  cursor: pointer;
-}`;
-'''
       }
     }
     {
-      id: "7_right_card"
+      id: "15"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
         css:
           '''
 return `._id {
@@ -680,12 +675,28 @@ return `._id {
   min-height: 220px;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
     }
     {
-      id: "7_right_title"
+      id: "16"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -695,28 +706,12 @@ return {
   text: "Your requests"
 };
 '''
-        css:
-          '''
-return `._id {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-}`;
-'''
       }
     }
     {
-      id: "7_right_list"
+      id: "17"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
         css:
           '''
 return `._id {
@@ -731,13 +726,7 @@ return `._id {
   }
 }`;
 '''
-      }
-    }
-    {
-      id: "7_right_ticket_list"
-      L: Attr
-      P: {
-        displayOrder: 1
+        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -745,6 +734,12 @@ return {
   as: "div"
 };
 '''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
         css:
           '''
 return `._id {
@@ -755,16 +750,30 @@ return `._id {
   background: ${args.theme.var.color.background};
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
     }
     {
-      id: "7_right_ticket_loop"
+      id: "19"
       L: Attr
       P: {
+        contextName: ticket
+        css:
+          '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        loop: true
         displayOrder: 1
         componentName: Html
-        loop: true
-        contextName: ticket
         props:
           '''
 return {
@@ -772,36 +781,12 @@ return {
   data: args.fns.tickets?.() || []
 };
 '''
-        css:
-          '''
-return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border};
-}`;
-'''
       }
     }
     {
-      id: "7_right_ticket_item"
+      id: "20"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const t = args.contextData.ticket;
-if (!t) return {};
-const selectedId = args.fns.selectedTicketId?.();
-const isSelected = selectedId && t.id === selectedId;
-const unread = t.P?.unreadForShop || 0;
-
-return {
-  as: "button",
-  type: "button",
-  onClick: () => args.fns.handleSelectTicket?.(t),
-  "data-selected": isSelected ? "true" : "false",
-  "data-unread": unread > 0 ? "true" : "false"
-};
-'''
         css:
           '''
 return `._id {
@@ -822,12 +807,37 @@ return `._id {
   font-weight: 600;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const t = args.contextData.ticket;
+if (!t) return {};
+const selectedId = args.fns.selectedTicketId?.();
+const isSelected = selectedId && t.id === selectedId;
+const unread = t.P?.unreadForShop || 0;
+
+return {
+  as: "button",
+  type: "button",
+  onClick: () => args.fns.handleSelectTicket?.(t),
+  "data-selected": isSelected ? "true" : "false",
+  "data-unread": unread > 0 ? "true" : "false"
+};
+'''
       }
     }
     {
-      id: "7_right_ticket_subject"
+      id: "21"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  margin-bottom: 0.15rem;
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -838,19 +848,24 @@ return {
   text: t?.P?.subject || "[No subject]"
 };
 '''
-        css:
-          '''
-return `._id {
-  font-size: 0.9375rem;
-  margin-bottom: 0.15rem;
-}`;
-'''
       }
     }
     {
-      id: "7_right_ticket_meta"
+      id: "22"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.muted};
+}
+
+._id[data-selected="true"] {
+  color: ${args.theme.var.color.primary_light_200_text};
+  opacity: 0.9;
+}`;
+'''
         displayOrder: 2
         componentName: Html
         props:
@@ -871,32 +886,12 @@ return {
     : createdText
 };
 '''
-        css:
-          '''
-return `._id {
-  font-size: 0.8125rem;
-  color: ${args.theme.var.color.muted};
-}
-
-._id[data-selected="true"] {
-  color: ${args.theme.var.color.primary_light_200_text};
-  opacity: 0.9;
-}`;
-'''
       }
     }
     {
-      id: "7_right_conversation"
+      id: "23"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-return {
-  as: "div"
-};
-'''
         css:
           '''
 return `._id {
@@ -909,12 +904,28 @@ return `._id {
   gap: 0.5rem;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
       }
     }
     {
-      id: "7_right_conversation_header"
+      id: "24"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -927,30 +938,12 @@ return {
     : "Select a request to view the conversation"
 };
 '''
-        css:
-          '''
-return `._id {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}`;
-'''
       }
     }
     {
-      id: "7_right_conversation_body"
+      id: "25"
       L: Attr
       P: {
-        displayOrder: 2
-        componentName: Html
-        props:
-          '''
-const loading = args.fns.loadingConversation?.();
-return {
-  as: "div",
-  "data-loading": loading ? "true" : "false"
-};
-'''
         css:
           '''
 return `._id {
@@ -965,16 +958,26 @@ return `._id {
   opacity: 0.6;
 }`;
 '''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const loading = args.fns.loadingConversation?.();
+return {
+  as: "div",
+  "data-loading": loading ? "true" : "false"
+};
+'''
       }
     }
     {
-      id: "7_right_conversation_loop"
+      id: "26"
       L: Attr
       P: {
+        contextName: message
+        loop: true
         displayOrder: 1
         componentName: Html
-        loop: true
-        contextName: message
         props:
           '''
 return {
@@ -985,23 +988,9 @@ return {
       }
     }
     {
-      id: "7_right_conversation_item"
+      id: "27"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''
-const m = args.contextData.message;
-if (!m) return {};
-const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
-const isShop = sender === "shop";
-
-return {
-  as: "div",
-  "data-sender": isShop ? "shop" : "admin"
-};
-'''
         css:
           '''
 return `._id {
@@ -1017,12 +1006,46 @@ return `._id {
   justify-content: flex-start;
 }`;
 '''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const m = args.contextData.message;
+if (!m) return {};
+const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
+const isShop = sender === "shop";
+
+return {
+  as: "div",
+  "data-sender": isShop ? "shop" : "admin"
+};
+'''
       }
     }
     {
-      id: "7_right_conversation_bubble"
+      id: "28"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  max-width: 80%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+._id[data-sender="shop"] {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}
+
+._id[data-sender="admin"] {
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.background_light_200_text};
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -1048,30 +1071,10 @@ return {
   text: ""
 };
 '''
-        css:
-          '''
-return `._id {
-  max-width: 80%;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-._id[data-sender="shop"] {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-}
-
-._id[data-sender="admin"] {
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.background_light_200_text};
-}`;
-'''
       }
     }
     {
-      id: "7_right_conversation_bubble_text"
+      id: "29"
       L: Attr
       P: {
         displayOrder: 1
@@ -1087,9 +1090,17 @@ return {
       }
     }
     {
-      id: "7_right_conversation_bubble_meta"
+      id: "30"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}`;
+'''
         displayOrder: 2
         componentName: Html
         props:
@@ -1102,7 +1113,7 @@ if (createdAt) {
     const date = new Date(createdAt);
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
-    
+
     if (isToday) {
       // Show time only for today's messages
       createdText = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
@@ -1121,30 +1132,12 @@ return {
   text: createdText || ""
 };
 '''
-        css:
-          '''
-return `._id {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  opacity: 0.8;
-}`;
-'''
       }
     }
     {
-      id: "7_right_reply_box"
+      id: "31"
       L: Attr
       P: {
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''
-const hasTicket = !!args.fns.selectedTicketId?.();
-return {
-  as: "div",
-  "data-disabled": hasTicket ? "false" : "true"
-};
-'''
         css:
           '''
 return `._id {
@@ -1157,12 +1150,33 @@ return `._id {
   opacity: 0.6;
 }`;
 '''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const hasTicket = !!args.fns.selectedTicketId?.();
+return {
+  as: "div",
+  "data-disabled": hasTicket ? "false" : "true"
+};
+'''
       }
     }
     {
-      id: "7_right_reply_input"
+      id: "32"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.875rem;
+  resize: vertical;
+}`;
+'''
         displayOrder: 1
         componentName: Html
         props:
@@ -1178,23 +1192,26 @@ return {
   onInput: (e) => args.fns.setReplyText?.(e.target.value)
 };
 '''
-        css:
-          '''
-return `._id {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  font-size: 0.875rem;
-  resize: vertical;
-}`;
-'''
       }
     }
     {
-      id: "7_right_reply_button"
+      id: "33"
       L: Attr
       P: {
+        css:
+          '''
+return `._id {
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  border: none;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-self: flex-end;
+  cursor: pointer;
+}`;
+'''
         displayOrder: 2
         componentName: Html
         props:
@@ -1214,24 +1231,49 @@ return {
   }
 };
 '''
-        css:
-          '''
-return `._id {
-  padding: 0.45rem 0.9rem;
-  border-radius: 9999px;
-  border: none;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  font-size: 0.875rem;
-  font-weight: 500;
-  align-self: flex-end;
-  cursor: pointer;
-}`;
-'''
       }
     }
     {
-      id: "8"
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  padding: 1rem;
+}`;'''
+        as: div
+        displayOrder: 2
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  hide: args.fns.isInIframe()
+}'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css: ""
+        displayOrder: 1
+        textType: markdown
+        componentName: Html
+        text:
+          '''Please open the [Support](/support) page in your Shopify admin to contact us and continue the conversation, or email us directly at support@decodecommerce.com.
+We will be happy to assist you with organizing your products.'''
+        key: ""
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "36"
       L: PageLayout
       P: {
         componentName: ShopifyLayout
@@ -1240,202 +1282,214 @@ return `._id {
   ]
   edges: [
     {
-      id: e2
+      id: e1
       T: Attr
       S: "1"
       E: "2"
     }
     {
-      id: e3
+      id: e2
       T: Attr
-      S: "2"
-      E: "3"
+      S: "1"
+      E: "34"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "36"
     }
     {
       id: e4
       T: Attr
       S: "2"
-      E: "4"
+      E: "3"
     }
     {
       id: e5
       T: Attr
       S: "2"
-      E: "5"
+      E: "4"
     }
     {
       id: e6
       T: Attr
-      S: "5"
-      E: "6"
+      S: "2"
+      E: "5"
     }
     {
       id: e7
       T: Attr
       S: "5"
-      E: "7"
-    }
-    {
-      id: e7a
-      T: Attr
-      S: "7"
-      E: "7_left_card"
-    }
-    {
-      id: e7b
-      T: Attr
-      S: "7_left_card"
-      E: "7_left_form_title"
-    }
-    {
-      id: e7c
-      T: Attr
-      S: "7_left_card"
-      E: "7_left_name"
-    }
-    {
-      id: e7d
-      T: Attr
-      S: "7_left_card"
-      E: "7_left_email"
-    }
-    {
-      id: e7e
-      T: Attr
-      S: "7_left_card"
-      E: "7_left_subject"
-    }
-    {
-      id: e7f
-      T: Attr
-      S: "7_left_card"
-      E: "7_left_message"
-    }
-    {
-      id: e7g
-      T: Attr
-      S: "7_left_card"
-      E: "7_left_button"
-    }
-    {
-      id: e7h
-      T: Attr
-      S: "7"
-      E: "7_right_card"
-    }
-    {
-      id: e7i
-      T: Attr
-      S: "7_right_card"
-      E: "7_right_title"
-    }
-    {
-      id: e7j
-      T: Attr
-      S: "7_right_card"
-      E: "7_right_list"
-    }
-    {
-      id: e7k
-      T: Attr
-      S: "7_right_list"
-      E: "7_right_ticket_list"
-    }
-    {
-      id: e7l
-      T: Attr
-      S: "7_right_ticket_list"
-      E: "7_right_ticket_loop"
-    }
-    {
-      id: e7m
-      T: Attr
-      S: "7_right_ticket_loop"
-      E: "7_right_ticket_item"
-    }
-    {
-      id: e7n
-      T: Attr
-      S: "7_right_ticket_item"
-      E: "7_right_ticket_subject"
-    }
-    {
-      id: e7o
-      T: Attr
-      S: "7_right_ticket_item"
-      E: "7_right_ticket_meta"
-    }
-    {
-      id: e7p
-      T: Attr
-      S: "7_right_list"
-      E: "7_right_conversation"
-    }
-    {
-      id: e7q
-      T: Attr
-      S: "7_right_conversation"
-      E: "7_right_conversation_header"
-    }
-    {
-      id: e7r
-      T: Attr
-      S: "7_right_conversation"
-      E: "7_right_conversation_body"
-    }
-    {
-      id: e7s
-      T: Attr
-      S: "7_right_conversation_body"
-      E: "7_right_conversation_loop"
-    }
-    {
-      id: e7t
-      T: Attr
-      S: "7_right_conversation_loop"
-      E: "7_right_conversation_item"
-    }
-    {
-      id: e7u
-      T: Attr
-      S: "7_right_conversation_item"
-      E: "7_right_conversation_bubble"
-    }
-    {
-      id: e7v
-      T: Attr
-      S: "7_right_conversation_bubble"
-      E: "7_right_conversation_bubble_text"
-    }
-    {
-      id: e7w
-      T: Attr
-      S: "7_right_conversation_bubble"
-      E: "7_right_conversation_bubble_meta"
-    }
-    {
-      id: e7x
-      T: Attr
-      S: "7_right_conversation"
-      E: "7_right_reply_box"
-    }
-    {
-      id: e7y
-      T: Attr
-      S: "7_right_reply_box"
-      E: "7_right_reply_input"
-    }
-    {
-      id: e7z
-      T: Attr
-      S: "7_right_reply_box"
-      E: "7_right_reply_button"
+      E: "6"
     }
     {
       id: e8
-      T: PageLayout
-      S: "1"
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "7"
       E: "8"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "15"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "8"
+      E: "11"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "8"
+      E: "12"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "8"
+      E: "13"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "8"
+      E: "14"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "15"
+      E: "16"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "15"
+      E: "17"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "23"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "20"
+      E: "22"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "23"
+      E: "31"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "28"
+      E: "30"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "31"
+      E: "33"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "34"
+      E: "35"
     }
   ]
 }

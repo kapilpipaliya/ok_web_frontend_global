@@ -1,0 +1,166 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: ShopifyRoadmap
+        url: /roadmap
+        key: ShopifyRoadmap
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_2
+        props:
+          '''return {
+  as: "h1",
+  text: "Roadmap"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_4
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_3
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css: ""
+        displayOrder: 1
+        textType: markdown
+        componentName: Html
+        text: - Integrate AI to automatically categorize uncategorized products into the appropriate categories.
+        key: unique_5
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+  ]
+}

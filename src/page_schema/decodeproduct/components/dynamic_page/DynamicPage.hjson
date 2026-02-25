@@ -51,7 +51,7 @@ const prop = (p) => {
 // Optionally shows toast notification if showToast is true
 const extractError = (result, showToast = false, defaultMessage = null) => {
   if (!result) return defaultMessage;
-  
+
   // Check top-level error
   if (result.error) {
     if (showToast) {
@@ -59,7 +59,7 @@ const extractError = (result, showToast = false, defaultMessage = null) => {
     }
     return result.error;
   }
-  
+
   // Check result-level error
   if (result.result?.error) {
     if (showToast) {
@@ -67,7 +67,7 @@ const extractError = (result, showToast = false, defaultMessage = null) => {
     }
     return result.result.error;
   }
-  
+
   // Check success: false with message
   if (result.result && result.result.success === false) {
     const errorMessage = result.result.message || result.result.error || defaultMessage;
@@ -76,7 +76,7 @@ const extractError = (result, showToast = false, defaultMessage = null) => {
     }
     return errorMessage;
   }
-  
+
   return null;
 };
 
@@ -90,13 +90,13 @@ const getGenericSettingsFunction = () => {
         tableVertexLabel,
         key: `${tableVertexLabel}_settings`
       });
-      
+
       // Check for errors and show toast
       const errorMessage = extractError(result, true, "Failed to load settings");
       if (errorMessage) {
         return { success: false, data: { setting: null } };
       }
-      
+
       // Return successful result
       if (result?.result?.success && result.result.data?.setting) {
         return result.result;
@@ -162,12 +162,12 @@ const getGenericDataFunction = () => {
       if (errorMessage) {
         return { data: [] };
       }
-      
+
       // Return successful result
       if (result?.result?.success && result.result.data) {
         return { data: Array.isArray(result.result.data) ? result.result.data : [] };
       }
-      
+
       return { data: [] };
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -203,13 +203,13 @@ const getSidebarConfigForCount = () => {
 // when it's defined later. This ensures the function is available when getGenericSaveFunction is called.
 const updateSidebarCategoryCount = (categoryId, increment = 1) => {
   if (!categoryId) return;
-  
+
   const sidebarConfig = getSidebarConfigForCount();
   if (!sidebarConfig) return;
-  
+
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
-  
+
   // Check if it's uncategorized
   if (categoryId === 'uncategorized' || categoryId === rootKey) {
     // For uncategorized, update the uncategorized vertex directly if it exists
@@ -223,7 +223,7 @@ const updateSidebarCategoryCount = (categoryId, increment = 1) => {
     }
     return;
   }
-  
+
   // For regular categories, update the count directly
   const categoryVertex = args.graph?.vertexes?.[categoryId];
   if (categoryVertex) {
@@ -309,7 +309,7 @@ const getGenericSaveFunction = () => {
                 enableUserScopingForContent: enableUserScopingForContent,
                 hooks: config?.hooks
               });
-              
+
               // Update category count - increment by 1
               updateSidebarCategoryCount(sidebarItem.id, 1);
             } catch (relError) {
@@ -322,16 +322,16 @@ const getGenericSaveFunction = () => {
           }
         }
       }
-      
+
       // If deleting an item, decrement the category count
       if (mode === "delete" && result?.result?.success && originalRow) {
         const sidebarItem = selectedSidebarItem();
         const sidebarConfig = getSidebarConfig();
-        
+
         if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
           const rootKeys = sidebarConfig.rootKeys || {};
           const rootKey = rootKeys.key;
-          
+
           // Use the currently selected sidebar item to determine which category to decrement
           if (sidebarItem.P?.key === rootKey || sidebarItem.P?.key === 'uncategorized') {
             // If uncategorized is selected, decrement uncategorized count
@@ -348,12 +348,12 @@ const getGenericSaveFunction = () => {
       if (errorMessage) {
         return { success: false, message: errorMessage };
       }
-      
+
       // Return successful result
       if (result?.result?.success) {
         return { success: true, data: result.result.data };
       }
-      
+
       return { success: false, message: "Failed to save" };
     } catch (error) {
       console.error("Error saving:", error);
@@ -371,18 +371,18 @@ const getGenericSaveSettingsFunction = () => {
         key: `${tableVertexLabel}_settings`,
         config: configText
       });
-      
+
       // Check for errors (don't show toast here, let caller handle it)
       const errorMessage = extractError(result, false, "Failed to save settings");
       if (errorMessage) {
         return { success: false, message: errorMessage };
       }
-      
+
       // Return successful result
       if (result?.result?.success) {
         return { success: true, message: result.result.message || "Settings saved successfully" };
       }
-      
+
       return { success: false, message: "Failed to save settings" };
     } catch (error) {
       console.error("Error saving settings:", error);
@@ -405,18 +405,18 @@ const getGenericImportFunction = () => {
         enableUserScoping: enableUserScopingForContent,
         hooks: config?.hooks
       });
-      
+
       // Check for errors (don't show toast here, let caller handle it)
       const errorMessage = extractError(result, false, "Failed to import data");
       if (errorMessage) {
         return { success: false, message: errorMessage };
       }
-      
+
       // Return successful result
       if (result?.result?.success) {
         return { success: true, message: result.result.message };
       }
-      
+
       return { success: false, message: "Failed to import data" };
     } catch (error) {
       console.error("Error importing data:", error);
@@ -442,13 +442,13 @@ const getGenericExportFunction = () => {
         enableUserScoping: enableUserScopingForContent,
         hooks: config?.hooks
       });
-      
+
       // Check for errors (don't show toast here, let caller handle it)
       const errorMessage = extractError(result, false, "Failed to export data");
       if (errorMessage) {
         return { success: false, message: errorMessage };
       }
-      
+
       // Return successful result
       if (result?.result?.success) {
         return {
@@ -458,7 +458,7 @@ const getGenericExportFunction = () => {
           filename: result.result.filename
         };
       }
-      
+
       return { success: false, message: "Failed to export data" };
     } catch (error) {
       console.error("Error exporting data:", error);
@@ -600,10 +600,10 @@ const updateMemoizedConfig = () => {
 const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
   const dataFn = getDataFunction();
   if (!dataFn) return;
-  
+
   // Capture the category item at the time of fetch
   const categoryItemForFetch = selectedSidebarItem();
-  
+
   setLoading(true);
   try {
     const result = await dataFn({
@@ -705,7 +705,7 @@ const loadSettings = async (options = {}) => {
   if (!settingsFn) return null;
   try {
     const result = await settingsFn();
-    
+
     // Handle error cases (result from settingsFn is already processed, check success flag)
     if (result && result.success === false) {
       if (result.message) {
@@ -713,7 +713,7 @@ const loadSettings = async (options = {}) => {
       }
       return null;
     }
-    
+
     if (result?.success && result?.data?.setting) {
       const settingData = result.data.setting.P || {};
       // Get the raw config text (function body) - don't evaluate it
@@ -822,7 +822,7 @@ const getCategoryKey = (item) => {
   }
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
-  
+
   // Use 'uncategorized' for uncategorized items, otherwise use item ID
   if (item.P?.key === rootKey || item.P?.key === 'uncategorized' || item.id === 'uncategorized') {
     return 'uncategorized';
@@ -867,13 +867,13 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   if (!tableVertexLabel || !sidebarConfig) {
     return { success: false, message: "Missing configuration" };
   }
-  
+
   const { config } = getCachedConfig();
   const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
   const enableUserScopingForContent = config?.enableUserScopingForContent === true;
-  
+
   const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
-  
+
   try {
     setLoading(true);
     // Get source category ID from selected sidebar item (vertex id only; backend passes "uncategorized" for root)
@@ -889,7 +889,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
       args.showWarningToast?.(msg);
       return { success: false, message: msg };
     }
-    
+
     const contentLabelDisplay = prop('label') || 'Item';
     const contextData = {
       contentIds: contentIds,
@@ -1013,6 +1013,53 @@ return {
         css:
           '''
 return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+  z-index: 1000;
+}`;
+'''
+        displayOrder: 0
+        componentName: Html
+        key: config_loading_overlay
+        props:
+          '''
+const configLoading = args.fns.configLoading();
+return {
+  as: "div",
+  hide: !configLoading
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "large",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
   height: 100%;
 }`;
 '''
@@ -1030,7 +1077,7 @@ return {
       }
     }
     {
-      id: "3"
+      id: "5"
       L: Attr
       P: {
         displayOrder: 1
@@ -1063,7 +1110,7 @@ return {
       }
     }
     {
-      id: "4"
+      id: "6"
       L: Attr
       P: {
         slotName: main
@@ -1084,7 +1131,7 @@ return {
       }
     }
     {
-      id: "5"
+      id: "7"
       L: Attr
       P: {
         displayOrder: 2
@@ -1102,7 +1149,7 @@ return {
       }
     }
     {
-      id: "6"
+      id: "8"
       L: Attr
       P: {
         displayOrder: 1
@@ -1120,53 +1167,6 @@ return {
 }'''
       }
     }
-    {
-      id: "7"
-      L: Attr
-      P: {
-        css:
-          '''
-return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${args.theme.var.color.background};
-  z-index: 1000;
-}`;
-'''
-        displayOrder: 0
-        componentName: Html
-        key: config_loading_overlay
-        props:
-          '''
-const configLoading = args.fns.configLoading();
-return {
-  as: "div",
-  hide: !configLoading
-};
-'''
-      }
-    }
-    {
-      id: "8"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: LoadingSpinner
-        props:
-          '''
-return {
-  size: "large",
-  color: "primary"
-};
-'''
-      }
-    }
   ]
   edges: [
     {
@@ -1179,31 +1179,31 @@ return {
       id: e2
       T: Attr
       S: "1"
-      E: "5"
+      E: "4"
     }
     {
       id: e3
+      T: Attr
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e4
       T: Attr
       S: "2"
       E: "3"
     }
     {
-      id: e4
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
       id: e5
       T: Attr
-      S: "5"
-      E: "6"
+      S: "4"
+      E: "5"
     }
     {
       id: e6
       T: Attr
-      S: "1"
-      E: "7"
+      S: "5"
+      E: "6"
     }
     {
       id: e7

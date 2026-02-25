@@ -398,11 +398,12 @@ return {
   margin: 0;
 }`;'''
         displayOrder: 2
+        textType: markdown
         componentName: Html
+        text: If you are in the EU, you have the right to access, update or delete your Information and obtain a copy of your information we store on our systems and have us update, correct or delete it. You are also entitled to obtain your Information in a structured, commonly used and machine-readable format, and have the right to transmit those data to another data controller. If you wish to exercise any of these rights, contact us directly at privacy@decodecommerce.com. You have a right to submit a complaint to the relevant supervisory data protection authority. If you are in the EU, you can lodge a complaint to the supervisory authority under the General Data Protection Regulations (GDPR), in particular in the Member State of your residence, place of work or where the alleged infringement of the GDPR occurred.
         props:
           '''return {
   as: "p",
-  text: "If you are in the EU, you have the right to access, update or delete your Information and obtain a copy of your information we store on our systems and have us update, correct or delete it. You are also entitled to obtain your Information in a structured, commonly used and machine-readable format, and have the right to transmit those data to another data controller. If you wish to exercise any of these rights, contact us directly at privacy@decodecommerce.com. You have a right to submit a complaint to the relevant supervisory data protection authority. If you are in the EU, you can lodge a complaint to the supervisory authority under the General Data Protection Regulations (GDPR), in particular in the Member State of your residence, place of work or where the alleged infringement of the GDPR occurred."
 }'''
       }
     }
@@ -454,11 +455,12 @@ return {
   margin: 0;
 }`;'''
         displayOrder: 2
+        textType: markdown
         componentName: Html
+        text: We may update this privacy policy at any time in order to reflect, for example, changes to our practices or for other operational, legal or regulatory reasons. If we make changes to this policy, we will notify you by email of updates, so that you are aware of information we collect, how we use it, and under what circumstances, if any.
         props:
           '''return {
   as: "p",
-  text: "We may update this privacy policy at any time in order to reflect, for example, changes to our practices or for other operational, legal or regulatory reasons. If we make changes to this policy, we will notify you by email of updates, so that you are aware of information we collect, how we use it, and under what circumstances, if any."
 }'''
       }
     }
@@ -510,11 +512,12 @@ return {
   margin: 0;
 }`;'''
         displayOrder: 2
+        textType: markdown
         componentName: Html
+        text: If you would like to access, correct, amend or delete any personal information, or require any additional information about our privacy policy please contact us via the [Support](/support) page in the app or at privacy@decodecommerce.com.
         props:
           '''return {
   as: "p",
-  text: "If you would like to access, correct, amend or delete any personal information, or require any additional information about our privacy policy please contact us via the Support page in the app or at privacy@decodecommerce.com."
 }'''
       }
     }

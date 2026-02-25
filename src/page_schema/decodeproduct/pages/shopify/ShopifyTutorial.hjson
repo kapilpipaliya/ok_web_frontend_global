@@ -1,0 +1,857 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Tutorial - Decode Products Organizer
+        url: /tutorial
+        key: ShopifyTutorial
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Tutorial"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: Follow these steps to get the most out of the **Decode Products Organizer** app.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css: ""
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_2
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: "1"
+        key: ""
+        props:
+          '''return {
+  as: "div",
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.35rem 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: Install the App
+        key: unique_4
+        props:
+          '''
+return {
+  as: "h3"
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: Install **Decode Products Organizer** from [Shopify App Store]( https://apps.shopify.com/ ) . Authorize the app when prompted.
+        key: unique_5
+        props:
+          '''return {
+  as: "p",
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 3
+        componentName: Html
+        key: ""
+      }
+    }
+    {
+      id: "13"
+      L: File
+      P: {
+        originalFileName: decode_products_organizer_app_install.png
+        fileName: decode_products_organizer_app_install.png
+        fileSize: 152356
+        subDomain: decodeproduct
+        filePath: /root/UploadFiles/decodeproduct/2026/02/23/decode_products_organizer_app_install.png
+        checksum: 89ecad8e20ec21d84718294d600569a2302c7412330f01458aba53be12765de9
+        mimeType: image/png
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_16
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: "2"
+        key: unique_17
+        props:
+          '''return {
+  as: "div",
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_18
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.35rem 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: Explore the products table
+        key: unique_19
+        props:
+          '''
+return {
+  as: "h3"
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''Open the main products table. In the sidebar, create the categories you want to use for organizing products.\
+You can try filtering and searching to find products. Click a row to open the detail modal and edit product info.'''
+        key: unique_20
+        props:
+          '''return {
+  as: "p",
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 3
+        componentName: Html
+        key: unique_21
+      }
+    }
+    {
+      id: "20"
+      L: File
+      P: {
+        originalFileName: decode_products_organizer_app_move_to_categories.png
+        fileName: decode_products_organizer_app_move_to_categories.png
+        fileSize: 134001
+        subDomain: decodeproduct
+        filePath: /root/UploadFiles/decodeproduct/2026/02/23/decode_products_organizer_app_move_to_categories.png
+        checksum: e6c0677e93ff5a6643e7db4ae0f4c2c0c7ade27421311418090147abf222787c
+        mimeType: image/png
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_11
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: "3"
+        key: unique_12
+        props:
+          '''return {
+  as: "div",
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_13
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.35rem 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: Adjust table settings
+        key: unique_14
+        props:
+          '''
+return {
+  as: "h3"
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''Use table settings to choose which columns to show, column order, and default sort. Save your preferences for next time.
+
+All application behavior can be configured from Settings. If you need assistance, please contact support.'''
+        key: unique_15
+        props:
+          '''return {
+  as: "p",
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 3
+        componentName: Html
+        key: ""
+      }
+    }
+    {
+      id: "27"
+      L: File
+      P: {
+        originalFileName: decode_products_organizer_app_menu_settings.png
+        fileName: decode_products_organizer_app_menu_settings.png
+        fileSize: 224980
+        subDomain: decodeproduct
+        filePath: /root/UploadFiles/decodeproduct/2026/02/24/decode_products_organizer_app_menu_settings.png
+        checksum: b0a453121a8374d31851a35856e8453a45aa0e4feb6d90410648b9a084396988
+        mimeType: image/png
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        as: div
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        key: unique_6
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: "4"
+        key: unique_7
+        props:
+          '''return {
+  as: "div",
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_8
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.35rem 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        text: Create a support request if needed
+        key: unique_9
+        props:
+          '''
+return {
+  as: "h3"
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: If you run into issues or have a feature idea, go to the [Support](/support) page and create a new request. Our team will reply in the same thread.
+        key: unique_10
+        props:
+          '''return {
+  as: "p",
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "33"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "14"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "21"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "28"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e16
+      T: AttrSrc
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "16"
+      E: "19"
+    }
+    {
+      id: e22
+      T: AttrSrc
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "21"
+      E: "22"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "21"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "23"
+      E: "25"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "23"
+      E: "26"
+    }
+    {
+      id: e28
+      T: AttrSrc
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "28"
+      E: "29"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "28"
+      E: "30"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "30"
+      E: "32"
+    }
+  ]
+}
