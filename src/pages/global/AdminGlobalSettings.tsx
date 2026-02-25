@@ -3,6 +3,7 @@ import { ActivityLog } from "~/pages/global/activity/ActivityLog";
 import { EmailAudit } from "~/pages/global/email/EmailAudit";
 import { EmailSetting } from "~/pages/global/email/EmailSetting";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
+import { RobotsTxtSettings } from "~/pages/global/robotsTxt/RobotsTxtSettings";
 import { OAuthSetting } from "~/pages/global/oauth/OAuthSetting";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 import { RazorpaySettings } from "~/pages/global/razorpay/RazorpaySettings";
@@ -22,6 +23,13 @@ export default function AdminGlobalSettings() {
       icon: "ph:gear",
       id: "general",
       label: "General",
+    },
+    {
+      component: RobotsTxtSettings,
+      group: "Basic Settings",
+      icon: "ph:file-text",
+      id: "robots-txt",
+      label: "robots.txt",
     },
     // {
     //   component: CompanySettings,
