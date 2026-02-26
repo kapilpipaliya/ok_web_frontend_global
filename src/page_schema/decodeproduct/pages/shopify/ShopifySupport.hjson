@@ -647,10 +647,10 @@ return `._id {
           '''
 const creating = args.fns.creatingTicket?.();
 return {
-  as: "button",
-  type: "button",
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:disabled": creating ? true : undefined,
   text: creating ? "Sending..." : "Send request",
-  disabled: creating,
   onClick: async () => {
     await args.fns.createTicket?.();
   }
@@ -1222,10 +1222,10 @@ const disabled =
 const sending = args.fns.sendingReply?.();
 
 return {
-  as: "button",
-  type: "button",
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:disabled": disabled ? true : undefined,
   text: sending ? "Sending..." : "Send",
-  disabled,
   onClick: async () => {
     await args.fns.sendReply?.();
   }
@@ -1239,17 +1239,35 @@ return {
       P: {
         css:
           '''return `._id {
-  font-size: 1rem;
-  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
   color: ${args.theme.var.color.text};
-  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
 }`;'''
-        as: div
-        displayOrder: 2
+        displayOrder: 3
+        fns:
+          '''
+const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const toggleExpanded = (index) => {
+  setExpandedIndex((prev) => (prev === index ? null : index));
+};
+return {
+  expandedIndex,
+  setExpandedIndex,
+  toggleExpanded
+};
+'''
         componentName: Html
-        key: unique_1
+        key: unique_2
         props:
           '''return {
+  as: "div",
   hide: args.fns.isInIframe()
 }'''
       }
@@ -1258,14 +1276,20 @@ return {
       id: "35"
       L: Attr
       P: {
-        css: ""
-        displayOrder: 1
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
         textType: markdown
         componentName: Html
         text:
           '''Please open the [Support](/support) page in your Shopify admin to contact us and continue the conversation, or email us directly at support@decodecommerce.com.
 We will be happy to assist you with organizing your products.'''
-        key: ""
+        key: unique_4
         props:
           '''return {
   as: "p",

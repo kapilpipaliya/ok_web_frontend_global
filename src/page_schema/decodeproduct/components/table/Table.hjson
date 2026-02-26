@@ -1934,14 +1934,15 @@ return {
       P: {
         css:
           '''
+const usePolaris = args.fns.getUsePolarisUI?.() === true
 return `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
   grid-column: 1 / -1;
   grid-row: 1;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${usePolaris ? "#f7f7f7" : args.theme.var.color.background_light_100};
   border-top: 1px solid ${args.theme.var.color.border};
-  border-bottom: 2px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
         displayOrder: 1
@@ -2906,9 +2907,10 @@ return {
     }
   },
   onCleanup: () => {
+    const el = args.fns.getRowRef?.(rowIndex) ?? args.ref?.();
     args.fns.setRowRef?.(rowIndex, null);
-    if (args.fns.cleanupTableDraggable && args.ref) {
-      args.fns.cleanupTableDraggable(args.ref());
+    if (args.fns.cleanupTableDraggable && el) {
+      args.fns.cleanupTableDraggable(el);
     }
   },
   onClick: (e) => {
@@ -2939,6 +2941,7 @@ return `._id {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }`;
 '''
         displayOrder: 0.5
@@ -2950,12 +2953,15 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
 const rowData = args.fns.filteredData()[rowIndex];
-const selectedRows = args.fns.getEffectiveSelectedRows();
-const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return {
   as: "div",
   hide: !showSelection,
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
+  }
 };
 '''
       }

@@ -6,8 +6,8 @@
       P: {
         fns: return { enabled: () => true }
         title: Decode Products Organizer Shopify App
-        url: /app
         key: DecodeProduct
+        url: /app
         props:
           '''return {
   isNoPermissionCheck: true
