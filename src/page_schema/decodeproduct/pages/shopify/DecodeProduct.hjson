@@ -47,7 +47,7 @@
         key: unique_1
         props:
           '''return {
-  hide: args.fns.isInIframe()
+  show: args.fns.isInIframe() === false
 }'''
       }
     }

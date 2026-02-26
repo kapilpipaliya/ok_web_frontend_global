@@ -12,6 +12,19 @@ uri = "/webhooks/app/scopes_update"
 topics = ["app/uninstalled"]
 uri = "/webhooks/app/uninstalled"
 
+# Product lifecycle webhooks
+[[webhooks.subscriptions]]
+topics = ["products/create"]
+uri = "/webhooks/products/create"
+
+[[webhooks.subscriptions]]
+topics = ["products/update"]
+uri = "/webhooks/products/update"
+
+[[webhooks.subscriptions]]
+topics = ["products/delete"]
+uri = "/webhooks/products/delete"
+
 # Mandatory compliance webhooks (required for App Store)
 [[webhooks.subscriptions]]
 compliance_topics = ["customers/data_request"]
