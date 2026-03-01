@@ -168,7 +168,9 @@ return {
       P: {
         css:
           '''return `._id {
-  margin: 2rem 0;
+  margin: 2rem 0.5rem;
+  display: flex;
+  justify-content: center;
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -251,7 +253,7 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-    ${args.location.pathname === "/docs" ? `color: ${args.theme.var.color.info};` : ""}
+    ${args.location.pathname === "/home" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -262,8 +264,8 @@ return {
         props:
           '''return {
   as: "a",
-  href: "/docs",
-  text: "Documentation"
+  href: "/",
+  text: "Home"
 }'''
       }
     }
@@ -276,19 +278,19 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/faq" ? `color: ${args.theme.var.color.info};` : ""}
+    ${args.location.pathname === "/docs" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
 }`;'''
         displayOrder: 3
         componentName: Html
-        key: unique_10
+        key: unique_23
         props:
           '''return {
   as: "a",
-  href: "/faq",
-  text: "FAQ"
+  href: "/docs",
+  text: "Documentation"
 }'''
       }
     }
@@ -301,19 +303,19 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-    ${args.location.pathname === "/tutorial" ? `color: ${args.theme.var.color.info};` : ""}
+  ${args.location.pathname === "/faq" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
 }`;'''
         displayOrder: 4
         componentName: Html
-        key: unique_11
+        key: unique_10
         props:
           '''return {
   as: "a",
-  href: "/tutorial",
-  text: "Tutorial"
+  href: "/faq",
+  text: "FAQ"
 }'''
       }
     }
@@ -326,19 +328,19 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-    ${args.location.pathname === "/roadmap" ? `color: ${args.theme.var.color.info};` : ""}
+    ${args.location.pathname === "/tutorial" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
 }`;'''
         displayOrder: 5
         componentName: Html
-        key: unique_19
+        key: unique_11
         props:
           '''return {
   as: "a",
-  href: "/roadmap",
-  text: "Roadmap"
+  href: "/tutorial",
+  text: "Tutorial"
 }'''
       }
     }
@@ -351,19 +353,19 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/support" ? `color: ${args.theme.var.color.info};` : ""}
+    ${args.location.pathname === "/roadmap" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
 }`;'''
         displayOrder: 6
         componentName: Html
-        key: unique_12
+        key: unique_19
         props:
           '''return {
   as: "a",
-  href: "/support",
-  text: "Support"
+  href: "/roadmap",
+  text: "Roadmap"
 }'''
       }
     }
@@ -376,19 +378,19 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/billing" ? `color: ${args.theme.var.color.info};` : ""}
+  ${args.location.pathname === "/support" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
 }`;'''
         displayOrder: 7
         componentName: Html
-        key: unique_13
+        key: unique_12
         props:
           '''return {
   as: "a",
-  href: "/billing",
-  text: "Billing"
+  href: "/support",
+  text: "Support"
 }'''
       }
     }
@@ -401,19 +403,19 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/blogs" ? `color: ${args.theme.var.color.info};` : ""}
+  ${args.location.pathname === "/billing" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
 }`;'''
         displayOrder: 8
         componentName: Html
-        key: unique_9
+        key: unique_13
         props:
           '''return {
   as: "a",
-  href: "/blogs",
-  text: "Blogs"
+  href: "/billing",
+  text: "Billing"
 }'''
       }
     }
@@ -426,12 +428,37 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/privacy" ? `color: ${args.theme.var.color.info};` : ""}
+  ${args.location.pathname === "/blogs" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
 }`;'''
         displayOrder: 9
+        componentName: Html
+        key: unique_9
+        props:
+          '''return {
+  as: "a",
+  href: "/blogs",
+  text: "Blogs"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/privacy" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 10
         componentName: Html
         key: unique_14
         props:
@@ -443,7 +470,7 @@ return {
       }
     }
     {
-      id: "17"
+      id: "18"
       L: Attr
       P: {
         css:
@@ -458,7 +485,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 10
+        displayOrder: 11
         componentName: Html
         key: unique_15
         props:
@@ -471,7 +498,7 @@ return {
       }
     }
     {
-      id: "18"
+      id: "19"
       L: Attr
       P: {
         as: div
@@ -482,7 +509,7 @@ return {
       }
     }
     {
-      id: "19"
+      id: "20"
       L: Attr
       P: {
         as: icon
@@ -493,7 +520,7 @@ return {
       }
     }
     {
-      id: "20"
+      id: "21"
       L: Attr
       P: {
         displayOrder: 3
@@ -512,7 +539,7 @@ return {
       }
     }
     {
-      id: "21"
+      id: "22"
       L: Attr
       P: {
         displayOrder: 4
@@ -529,7 +556,7 @@ return {
       }
     }
     {
-      id: "22"
+      id: "23"
       L: Attr
       P: {
         slotName: children
@@ -539,7 +566,7 @@ return {
       }
     }
     {
-      id: "23"
+      id: "24"
       L: Attr
       P: {
         css:
@@ -564,7 +591,7 @@ return {
       }
     }
     {
-      id: "24"
+      id: "25"
       L: Attr
       P: {
         css:
@@ -622,19 +649,19 @@ return {
       id: e5
       T: Attr
       S: "3"
-      E: "20"
+      E: "21"
     }
     {
       id: e6
       T: Attr
       S: "3"
-      E: "21"
+      E: "22"
     }
     {
       id: e7
       T: Attr
       S: "3"
-      E: "23"
+      E: "24"
     }
     {
       id: e8
@@ -705,32 +732,38 @@ return {
     {
       id: e19
       T: Attr
-      S: "7"
-      E: "8"
+      S: "6"
+      E: "18"
     }
     {
       id: e20
       T: Attr
-      S: "17"
-      E: "18"
+      S: "7"
+      E: "8"
     }
     {
       id: e21
       T: Attr
-      S: "17"
+      S: "18"
       E: "19"
     }
     {
       id: e22
       T: Attr
-      S: "21"
-      E: "22"
+      S: "18"
+      E: "20"
     }
     {
       id: e23
       T: Attr
-      S: "23"
-      E: "24"
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "24"
+      E: "25"
     }
   ]
 }

@@ -10,7 +10,21 @@
 const QUEUE_NAME = 'processShopifyProductAfterDelete';
 
 const doJob = async (args, jobData, dbSession) => {
-  const { tableVertexLabel, operation, elementId, result, shop } = jobData;
+  const { tableVertexLabel, operation, elementId, result, shop, fromWebhook, payload } = jobData;
+
+  if (fromWebhook && payload) {
+    const h = await args.executeNamedServerFunction(
+      { functionName: 'shopifyQueueHelpers', contextData: {} },
+      { functionLookupSubDomain: 'decodeproduct' }
+    );
+    if (!h?.result?.success) return;
+    const id = h.result.data.ensureProductGid(payload.admin_graphql_api_id || payload.id);
+    if (!id) return;
+    await dbSession.run(`MATCH (p:ShopifyProduct { id: $id }) DETACH DELETE p`, { id });
+    console.log(`processShopifyProductAfterDelete (webhook): removed product ${id} for ${shop}`);
+    return;
+  }
+
   if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'delete') return;
 
   const deletedData = result?.data;

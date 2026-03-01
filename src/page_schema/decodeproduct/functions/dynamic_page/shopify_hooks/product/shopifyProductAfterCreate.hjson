@@ -7,7 +7,31 @@
         description: Enqueues background job to create a product in Shopify when a new ShopifyProduct is added.
         body:
           '''
-const { tableVertexLabel, operation, elementId, data, result } = args.contextData;
+const { tableVertexLabel, operation, elementId, data, result, fromWebhook, payload } = args.contextData;
+
+const shop = args.contextData.shop;
+if (!shop) { console.log('shopifyProductAfterCreate: shop not available in contextData'); return; }
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: 'decodeproduct' }
+);
+if (!helpers.result?.success) return;
+
+const queueName = 'processShopifyProductAfterCreate';
+
+if (fromWebhook && payload) {
+  try {
+    const queue = helpers.result.data.createShopifyQueue(args, queueName);
+    await helpers.result.data.addShopifyJob(queue, queueName, { shop, payload, fromWebhook: true });
+    await queue.close();
+    console.log('shopifyProductAfterCreate: webhook job enqueued for', shop);
+  } catch (error) {
+    console.error('shopifyProductAfterCreate: Failed to enqueue webhook job', error);
+    throw error;
+  }
+  return;
+}
 
 if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'create') return;
 
@@ -15,16 +39,7 @@ const vertex = data?.vertex;
 const formData = vertex?.P || {};
 if (formData.id) return;
 
-const shop = args.contextData.shop;
-if (!shop) { console.log('shopifyProductAfterCreate: shop not available in contextData'); return; }
-
 try {
-  const helpers = await args.executeNamedServerFunction(
-    { functionName: 'shopifyQueueHelpers', contextData: {} },
-    { functionLookupSubDomain: 'decodeproduct' }
-  );
-  if (!helpers.result?.success) return;
-  const queueName = 'processShopifyProductAfterCreate';
   const queue = helpers.result.data.createShopifyQueue(args, queueName);
   const job = await helpers.result.data.addShopifyJob(queue, queueName, {
     shop,

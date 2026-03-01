@@ -10,7 +10,28 @@
 const QUEUE_NAME = 'processShopifyProductAfterUpdate';
 
 const doJob = async (args, jobData, dbSession) => {
-  const { tableVertexLabel, operation, elementId, data: vertexPayload, result, shop } = jobData;
+  const { tableVertexLabel, operation, elementId, data: vertexPayload, result, shop, fromWebhook, payload } = jobData;
+
+  if (fromWebhook && payload) {
+    const h = await args.executeNamedServerFunction(
+      { functionName: 'shopifyQueueHelpers', contextData: {} },
+      { functionLookupSubDomain: 'decodeproduct' }
+    );
+    if (!h?.result?.success) return;
+    const propsFromWebhookPayload = h.result.data.propsFromWebhookPayload;
+    const props = propsFromWebhookPayload(payload);
+    const id = props.id;
+    if (!id) return;
+    await dbSession.run(
+      `MERGE (p:ShopifyProduct { id: $id })
+       ON CREATE SET p.createdAt = datetime(), p.updatedAt = datetime()
+       SET p += $props, p.updatedAt = datetime()`,
+      { id, props }
+    );
+    console.log(`processShopifyProductAfterUpdate (webhook): synced product ${id} for ${shop}`);
+    return;
+  }
+
   if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'update') return;
   const vertex = vertexPayload?.vertex;
   const formData = vertex?.P || {};

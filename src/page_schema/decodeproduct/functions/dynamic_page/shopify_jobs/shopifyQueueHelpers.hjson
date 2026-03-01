@@ -221,6 +221,37 @@ try {
     return s.startsWith('gid://') ? s : `gid://shopify/Product/${s}`;
   };
 
+  // Build full ShopifyProduct props from webhook payload (same keys as shopifyProductBeforeFetchData)
+  const propsFromWebhookPayload = (payload) => {
+    const variants = payload.variants || [];
+    const now = new Date().toISOString();
+    const id = ensureProductGid(payload.admin_graphql_api_id || payload.id);
+    return {
+      id,
+      title: payload.title || '',
+      handle: payload.handle || '',
+      descriptionHtml: payload.body_html || payload.description_html || '',
+      vendor: payload.vendor || '',
+      productType: payload.product_type || '',
+      status: (payload.status || 'draft').toUpperCase(),
+      tags: Array.isArray(payload.tags) ? payload.tags : [],
+      createdAt: payload.created_at || now,
+      updatedAt: payload.updated_at || now,
+      publishedAt: payload.published_at || null,
+      onlineStoreUrl: payload.online_store_url || payload.onlineStoreUrl || null,
+      totalInventory: payload.total_inventory ?? 0,
+      tracksInventory: payload.tracks_inventory ?? false,
+      variantsCount: variants.length || 0,
+      variants: JSON.stringify(variants),
+      media: JSON.stringify(payload.media || []),
+      metafields: JSON.stringify(payload.metafields || []),
+      collections: JSON.stringify(payload.collections || []),
+      options: JSON.stringify(payload.options || []),
+      category: payload.category ? JSON.stringify(payload.category) : null,
+      syncStatus: 'complete'
+    };
+  };
+
   const batchGetProductTags = async (admin, shopifyIds) => {
     const result = new Map();
     const ids = shopifyIds.filter(Boolean);
@@ -375,6 +406,8 @@ try {
       runWithSession,
       DEFAULT_JOB_OPTIONS,
       getShopifyAdminForShop,
+      ensureProductGid,
+      propsFromWebhookPayload,
       batchGetProductTags,
       batchUpdateProductTags,
       buildNestedMenuItems,

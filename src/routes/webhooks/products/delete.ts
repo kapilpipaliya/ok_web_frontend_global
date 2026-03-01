@@ -1,19 +1,42 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
+import { getDriver } from "~/cypher/core/driver";
+import { getDatabaseNameForShop } from "~/lib/shopify/shopifyHelpers";
 import { authenticate } from "~/lib/shopify/shopify.server";
 
 /**
  * Product Delete Webhook
  *
- * Notified when a product is deleted in the shop.
- * Payload contains the product id (admin_graphql_api_id).
+ * Notified when a product is deleted in the shop. Calls shopifyProductAfterDelete with fromWebhook,
+ * which enqueues processShopifyProductAfterDelete; the job removes the product from Neo4j.
  */
 export async function POST({ request }: APIEvent) {
   try {
     const { topic, shop, payload } = await authenticate.webhook(request);
     console.log(`Received ${topic} webhook for ${shop}`);
-    // payload contains the deleted product id; add cleanup/notification logic here
-    void payload;
+
+    const subDomain = getDatabaseNameForShop(shop);
+    const driver = await getDriver();
+    const dbSession = driver.session({ database: subDomain });
+    try {
+      await executeNamedServerFunctionCore(
+        {
+          functionName: "shopifyProductAfterDelete",
+          contextData: { shop, payload, fromWebhook: true },
+        },
+        {
+          dbSession,
+          subDomain,
+          functionLookupSubDomain: "decodeproduct",
+          nodes: {},
+          relationships: {},
+        },
+      );
+    } finally {
+      await dbSession.close();
+    }
+
     return new Response(null, { status: 200 });
   } catch (error) {
     if (error instanceof Response) return error;
