@@ -1,4 +1,4 @@
-import { getShopifyClient } from "~/lib/shopify/shopifyHelpers";
+import { getShopify } from "~/lib/shopify/shopify.server";
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
@@ -9,7 +9,7 @@ const JSON_HEADERS = { "Content-Type": "application/json" };
  */
 export async function handleAuthRequest(request: Request): Promise<Response> {
   try {
-    const shopify = getShopifyClient();
+    const shopify = await getShopify(request);
     const result = await shopify.authenticate.admin(request);
     const shop = result.session?.shop ?? null;
     return new Response(

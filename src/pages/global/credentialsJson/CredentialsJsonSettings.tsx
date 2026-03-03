@@ -62,7 +62,7 @@ export function CredentialsJsonSettings() {
             css: PROPERTIES.Css.TextFieldCss,
             componentName: "SystemTextInput",
             key: "credentialsJson",
-            placeholder: '{"key": "value"}',
+            placeholder: '{"shopifyAPIKey": "...", "shopifyAPISecret": "...", "shopifyAppUrl": "https://...", "shopifyScopes": "read_products,write_products"}',
             rows: 16,
             type: "textarea",
           },

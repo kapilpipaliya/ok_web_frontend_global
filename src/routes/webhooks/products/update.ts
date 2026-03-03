@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
 import { getDriver } from "~/cypher/core/driver";
 import { getDatabaseNameForShop } from "~/lib/shopify/shopifyHelpers";
-import { authenticate } from "~/lib/shopify/shopify.server";
+import { getShopify } from "~/lib/shopify/shopify.server";
 
 /**
  * Product Update Webhook
@@ -13,7 +13,8 @@ import { authenticate } from "~/lib/shopify/shopify.server";
  */
 export async function POST({ request }: APIEvent) {
   try {
-    const { topic, shop, payload } = await authenticate.webhook(request);
+    const shopify = await getShopify(request);
+    const { topic, shop, payload } = await shopify.authenticate.webhook(request);
     console.log(`Received ${topic} webhook for ${shop}`);
 
     const subDomain = getDatabaseNameForShop(shop);

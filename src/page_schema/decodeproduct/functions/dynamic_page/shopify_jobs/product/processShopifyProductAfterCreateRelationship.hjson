@@ -14,7 +14,7 @@ const doJob = async (args, jobData, dbSession) => {
   if (contentLabel !== 'ShopifyProduct') return;
   if (!categoryId || categoryId === 'uncategorized') return;
 
-  const shopify = args.getShopifyClient();
+  const shopify = await args.getShopifyClient();
   let admin;
   try {
     const authResult = await shopify.unauthenticated.admin(shop);

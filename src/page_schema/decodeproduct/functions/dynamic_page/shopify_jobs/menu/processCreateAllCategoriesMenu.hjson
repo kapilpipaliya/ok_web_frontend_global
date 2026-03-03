@@ -11,7 +11,7 @@ const QUEUE_NAME = 'processCreateAllCategoriesMenu';
 
 const doJob = async (args, jobData, dbSession, subDomain, h) => {
   const { menuTitle = "Categories", menuHandle = "categories", shop } = jobData;
-  const shopify = args.getShopifyClient();
+  const shopify = await args.getShopifyClient();
   let admin;
   try {
     const authResult = await shopify.unauthenticated.admin(shop);

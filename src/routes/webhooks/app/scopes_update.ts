@@ -1,10 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 import { Session } from "@shopify/shopify-api";
 
-import {
-  authenticate,
-  sessionStorage,
-} from "~/lib/shopify/shopify.server";
+import { getShopify } from "~/lib/shopify/shopify.server";
 
 /**
  * App Scopes Update Webhook Handler
@@ -14,8 +11,9 @@ import {
  * Authenticates the request, then updates the session's scope in Neo4j.
  */
 export async function POST({ request }: APIEvent) {
+  const shopify = await getShopify(request);
   const { payload, session, topic, shop } =
-    await authenticate.webhook(request);
+    await shopify.authenticate.webhook(request);
 
   console.log(`Received ${topic} webhook for ${shop}`);
 
@@ -30,7 +28,7 @@ export async function POST({ request }: APIEvent) {
     const sessionData = session.toObject();
     sessionData.scope = scopeString;
     const updatedSession = new Session(sessionData);
-    await sessionStorage.storeSession(updatedSession);
+    await shopify.sessionStorage.storeSession(updatedSession);
   }
 
   return new Response(null, { status: 200 });

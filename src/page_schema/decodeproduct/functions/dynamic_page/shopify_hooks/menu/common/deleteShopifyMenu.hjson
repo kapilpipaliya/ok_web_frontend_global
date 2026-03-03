@@ -17,7 +17,7 @@ if (!menuId) {
   };
 }
 
-const shopify = args.getShopifyClient();
+const shopify = await args.getShopifyClient();
 let admin;
 const shop = args.contextData.shop;
 if (shop) {

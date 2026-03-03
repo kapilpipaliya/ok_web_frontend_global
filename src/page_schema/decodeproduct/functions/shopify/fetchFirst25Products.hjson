@@ -11,7 +11,7 @@
 // For embedded apps, uses shopify session management to get session from request.
 
 // Get Shopify API object (configured via env vars with Neo4j session store)
-const shopify = args.getShopifyClient();
+const shopify = await args.getShopifyClient();
 
 // Authenticate the request using Shopify's admin authentication
 // This verifies the OAuth session and ensures the user has proper permissions

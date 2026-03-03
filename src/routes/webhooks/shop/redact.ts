@@ -4,7 +4,7 @@ import {
   deleteShopDataAndDatabase,
   deleteShopVertexFromGlobalDb,
 } from "~/lib/shopify/deleteShopDataAndDatabase";
-import { authenticate } from "~/lib/shopify/shopify.server";
+import { getShopify } from "~/lib/shopify/shopify.server";
 
 /**
  * Mandatory compliance webhook: shop/redact
@@ -14,7 +14,8 @@ import { authenticate } from "~/lib/shopify/shopify.server";
  */
 export async function POST({ request }: APIEvent) {
   try {
-    const { topic, payload } = await authenticate.webhook(request);
+    const shopify = await getShopify(request);
+    const { topic, payload } = await shopify.authenticate.webhook(request);
 
     const shopDomain =
       (payload as { shop_domain?: string }).shop_domain ?? "";

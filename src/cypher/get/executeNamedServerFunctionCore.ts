@@ -163,12 +163,12 @@ import { test } from "~/lib/utils/testing";
 import { webhooks } from "~/lib/utils/webhooks";
 import { updateSession } from "~/server/auth/session/updateSession";
 import { executeServerFunction } from "~/cypher/get/executeServerFunction";
+import { getShopify } from "~/lib/shopify/shopify.server";
 import {
   verifyShopifyAdminRequest,
   ensureShopDatabaseAndMigrate,
   getDBSessionForShop,
   getDatabaseNameForShop,
-  getShopifyClient,
 } from "~/lib/shopify/shopifyHelpers";
 import { runMigration } from "~/lib/schema/runMigration";
 import { processResult } from "../conversion/processResult";
@@ -254,6 +254,9 @@ export async function executeNamedServerFunctionCore(
   // Save the fallback session data in an intermediate variable for reuse
   let fallbackSessionData: { dbSession: Session; subDomain: string } | undefined;
 
+  // Request for Shopify auth and getShopifyClient (used when building args)
+  let requestForShopify: Request | undefined;
+
   try {
     // IMPORTANT: Session creation is inside try-catch
     // Previously this was outside, causing non-serializable Neo4j driver errors
@@ -272,13 +275,13 @@ export async function executeNamedServerFunctionCore(
       const event = getRequestEvent();
       if (event) {
         const req = event.request;
+        requestForShopify = req;
         try {
           const urlObj = new URL(req.url);
           if (urlObj.hostname === "decodeproduct.decodecommerce.com" && req.headers.get("authorization")) {
             // For decodeproduct.decodecommerce.com, get shop from Shopify authentication
             try {
-              const shopify = getShopifyClient();
-              // TODO: use unauthenticated.admin(shop) instead of authenticate.admin(request)
+              const shopify = await getShopify(req);
               const result = await shopify.authenticate.admin(req);
               shopFromRequest = result.session.shop;
               if (shopFromRequest) shopForContext = shopForContext ?? shopFromRequest;
@@ -601,12 +604,13 @@ export async function executeNamedServerFunctionCore(
       updateSession,
       // Generic server function executor (functionBody-based)
       executeServerFunction,
-      // Shopify helpers
-      verifyShopifyAdminRequest,
+      // Shopify helpers (request required; subdomain from request)
+      verifyShopifyAdminRequest: (params: Parameters<typeof verifyShopifyAdminRequest>[0]) =>
+        verifyShopifyAdminRequest(params, requestForShopify!),
       ensureShopDatabaseAndMigrate,
       getDBSessionForShop,
       getDatabaseNameForShop,
-      getShopifyClient,
+      getShopifyClient: () => getShopify(requestForShopify!),
       getSessionUser,
       runMigration,
       processResult,

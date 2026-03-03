@@ -76,7 +76,7 @@ try {
 
   const getShopifyAdminForShop = async (args, shop) => {
     if (!shop) return { admin: null, shop: null };
-    const shopify = args.getShopifyClient();
+    const shopify = await args.getShopifyClient();
     try {
       const authResult = await shopify.unauthenticated.admin(shop);
       return { admin: authResult.admin, shop: authResult.session?.shop || shop };

@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { authenticate } from "~/lib/shopify/shopify.server";
+import { getShopify } from "~/lib/shopify/shopify.server";
 
 /**
  * Mandatory compliance webhook: customers/data_request
@@ -10,7 +10,8 @@ import { authenticate } from "~/lib/shopify/shopify.server";
  * store owner. Acknowledge receipt with 200.
  */
 export async function POST({ request }: APIEvent) {
-  const { topic, shop, payload } = await authenticate.webhook(request);
+  const shopify = await getShopify(request);
+  const { topic, shop, payload } = await shopify.authenticate.webhook(request);
 
   console.log(`Received ${topic} webhook for ${shop}`);
 

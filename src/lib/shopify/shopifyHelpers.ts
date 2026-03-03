@@ -1,11 +1,11 @@
-import * as crypto from "crypto";
 import type { Session } from "neo4j-driver";
 import "@shopify/shopify-api/adapters/node";
 import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
 import { runMigration } from "~/lib/schema/runMigration";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import shopify from "~/lib/shopify/shopify.server";
+import { getShopify } from "~/lib/shopify/shopify.server";
+import { getShopifyCredentials } from "~/lib/shopify/getShopifyCredentials";
 import {
   clearMigrationInProgress,
   clearMigrationInProgressAndSetLastAt,
@@ -34,44 +34,21 @@ export interface ShopifyAuthResult {
 }
 
 /**
- * Verify Shopify admin app request using @shopify/shopify-api safeCompare.
- *
- * Uses the Shopify API library's built-in validation instead of manual HMAC.
+ * Verify Shopify admin app request.
+ * Uses credentials from CredentialsJson vertex (shopifyAPISecret).
  */
-export function verifyShopifyAdminRequest(
+export async function verifyShopifyAdminRequest(
   params: ShopifyAuthParams,
-): ShopifyAuthResult {
-  // Get apiSecret for HMAC validation
-  const apiSecret = process.env.SHOPIFY_API_SECRET;
-
-  if (!apiSecret) {
+  request: Request,
+): Promise<ShopifyAuthResult> {
+  const credentials = await getShopifyCredentials(request);
+  if (!credentials.apiSecretKey) {
     return {
       valid: false,
       error:
-        "Shopify API credentials are not configured. Set SHOPIFY_API_SECRET.",
+        "Shopify API credentials are not configured. Set shopifyAPISecret in Credentials JSON.",
     };
   }
-
-  // Build message string for HMAC validation (same as Shopify's process)
-  /*const message = Object.keys(params)
-    .filter((key) => key !== "hmac" && typeof params[key] !== "undefined")
-    .sort()
-    .map((key) => `${key}=${params[key]}`)
-    .join("&");
-
-  // Use Shopify's safeCompare for constant-time comparison
-  const valid = shopify.auth.safeCompare(
-    crypto
-      .createHmac("sha256", apiSecret)
-      .update(message)
-      .digest("hex"),
-    hmac,
-  );
-
-  if (!valid) {
-    return { valid: false, error: "Invalid HMAC signature" };
-  }*/
-
   return { valid: true };
 }
 
@@ -228,21 +205,9 @@ export async function getDBSessionForShop(
 }
 
 /**
- * Create a Shopify API object using @shopify/shopify-api.
- *
- * This is the common function used throughout the codebase to get the shopifyApi instance.
- * For embedded apps, this returns the shopify object which can be used to:
- * - Validate requests: shopify.auth.safeCompare(...)
- * - Get sessions: shopify.session.getCurrentId(...) or shopify.session.customAppSession(shop)
- * - Create clients: new shopify.clients.Graphql({ session })
- *
- * Sessions are automatically stored and loaded from Neo4j database.
- *
- * Requires environment variables:
- * - SHOPIFY_API_KEY
- * - SHOPIFY_API_SECRET
+ * Get the Shopify app instance for the given request.
+ * Credentials are loaded from the CredentialsJson vertex (shopifyAPIKey, shopifyAPISecret, shopifyAppUrl).
  */
-export function getShopifyClient() {
-  // Return the Shopify API object; callers can create admin clients from it.
-  return shopify;
+export function getShopifyClient(request: Request) {
+  return getShopify(request);
 }

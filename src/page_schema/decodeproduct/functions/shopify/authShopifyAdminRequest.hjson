@@ -10,7 +10,7 @@
 
 const params = args.contextData?.searchParams || {};
 
-const { valid, error } = args.verifyShopifyAdminRequest(params);
+const { valid, error } = await args.verifyShopifyAdminRequest(params);
 
 if (!valid) {
   return {
@@ -19,7 +19,7 @@ if (!valid) {
   };
 }
 
-const shopify = args.getShopifyClient();
+const shopify = await args.getShopifyClient();
 
 const event = args.getRequestEvent();
 if (!event) {

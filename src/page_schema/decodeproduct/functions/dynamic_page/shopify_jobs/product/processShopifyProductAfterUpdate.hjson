@@ -37,7 +37,7 @@ const doJob = async (args, jobData, dbSession) => {
   const formData = vertex?.P || {};
   const shopifyProductId = formData.id;
   if (!shopifyProductId) { console.log("processShopifyProductAfterUpdate: Product doesn't have Shopify ID, skipping"); return; }
-  const shopify = args.getShopifyClient();
+  const shopify = await args.getShopifyClient();
   let admin;
   try { const authResult = await shopify.unauthenticated.admin(shop); admin = authResult.admin; } catch (authError) {
     console.error("processShopifyProductAfterUpdate: unauthenticated.admin failed", authError);

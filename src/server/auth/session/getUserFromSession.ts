@@ -8,7 +8,8 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { getDriver } from "~/cypher/core/driver";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getAdminUser } from "~/cypher/permissions/utils/getAdminUser";
-import { getShopifyClient, getDBSessionForShop } from "~/lib/shopify/shopifyHelpers";
+import { getShopify } from "~/lib/shopify/shopify.server";
+import { getDBSessionForShop } from "~/lib/shopify/shopifyHelpers";
 import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function getSessionUser(): Promise<undefined | Vertex> {
@@ -23,7 +24,7 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
           event.request.headers.get("authorization")
         ) {
           // Authenticate with Shopify to get shop
-          const shopify = getShopifyClient();
+          const shopify = await getShopify(event.request);
           const result = await shopify.authenticate.admin(event.request);
           const shop = result.session.shop;
           

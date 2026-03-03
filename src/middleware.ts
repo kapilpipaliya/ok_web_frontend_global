@@ -4,7 +4,7 @@ import { csrf } from "shieldwall/start";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
-import { addDocumentResponseHeaders } from "~/lib/shopify/shopify.server";
+import { getShopify } from "~/lib/shopify/shopify.server";
 import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
 
 /** Skip CSRF for Shopify webhooks (they are verified by HMAC, not origin). */
@@ -115,7 +115,8 @@ export default createMiddleware({
         event.request.headers.get("x-forwarded-host") ??
         event.request.headers.get("host");
       if (event.response && host === "decoedeproduct.decodecomerce.com") {
-        addDocumentResponseHeaders(event.request, event.response.headers);
+        const shopify = await getShopify(event.request);
+        shopify.addDocumentResponseHeaders(event.request, event.response.headers);
       }
 
       // Strip body from HEAD requests

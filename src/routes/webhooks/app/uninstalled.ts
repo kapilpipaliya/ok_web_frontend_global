@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { deleteShopDataAndDatabase } from "~/lib/shopify/deleteShopDataAndDatabase";
-import { authenticate } from "~/lib/shopify/shopify.server";
+import { getShopify } from "~/lib/shopify/shopify.server";
 import { getNeo4jSessionStore } from "~/lib/shopify/neo4jSessionStore";
 
 /**
@@ -13,7 +13,8 @@ import { getNeo4jSessionStore } from "~/lib/shopify/neo4jSessionStore";
  * Neo4j database.
  */
 export async function POST({ request }: APIEvent) {
-  const { shop, topic } = await authenticate.webhook(request);
+  const shopify = await getShopify(request);
+  const { shop, topic } = await shopify.authenticate.webhook(request);
 
   console.log(`Received ${topic} webhook for ${shop}`);
 
