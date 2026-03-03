@@ -66,6 +66,10 @@ export const API = {
       getUrl: "/api/settings/robotsTxt/get",
       updateUrl: "/api/settings/robotsTxt/update",
     },
+    credentialsJson: {
+      getUrl: "/api/settings/credentialsJson/get",
+      updateUrl: "/api/settings/credentialsJson/update",
+    },
     theme: {
       deleteUrl: "/api/settings/theme/delete",
     },

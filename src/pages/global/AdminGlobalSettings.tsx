@@ -4,6 +4,7 @@ import { EmailAudit } from "~/pages/global/email/EmailAudit";
 import { EmailSetting } from "~/pages/global/email/EmailSetting";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
 import { RobotsTxtSettings } from "~/pages/global/robotsTxt/RobotsTxtSettings";
+import { CredentialsJsonSettings } from "~/pages/global/credentialsJson/CredentialsJsonSettings";
 import { OAuthSetting } from "~/pages/global/oauth/OAuthSetting";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 import { RazorpaySettings } from "~/pages/global/razorpay/RazorpaySettings";
@@ -30,6 +31,13 @@ export default function AdminGlobalSettings() {
       icon: "ph:file-text",
       id: "robots-txt",
       label: "robots.txt",
+    },
+    {
+      component: CredentialsJsonSettings,
+      group: "Basic Settings",
+      icon: "ph:file-json",
+      id: "credentials-json",
+      label: "Credentials JSON",
     },
     // {
     //   component: CompanySettings,
