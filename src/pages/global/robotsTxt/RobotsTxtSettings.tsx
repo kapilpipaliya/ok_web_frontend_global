@@ -37,7 +37,7 @@ export function RobotsTxtSettings() {
     {
       id: formDataId,
       IN: {},
-      L: ["GlobalSetting"],
+      L: ["RobotsTxt"],
       OUT: {},
       P: {},
     },

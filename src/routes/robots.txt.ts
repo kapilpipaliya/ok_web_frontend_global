@@ -9,7 +9,7 @@ export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
   try {
     const result = await dbSession.run(
-      `MATCH (s:GlobalSetting) RETURN s.robotsTxt as robotsTxt LIMIT 1`,
+      `MATCH (r:RobotsTxt) RETURN r.robotsTxt as robotsTxt LIMIT 1`,
     );
     const robotsTxt =
       (result.records[0]?.get("robotsTxt") as string | undefined) ?? "";

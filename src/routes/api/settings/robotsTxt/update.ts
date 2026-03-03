@@ -28,40 +28,21 @@ export async function POST({ request }: APIEvent) {
     const robotsTxt =
       typeof body.robotsTxt === "string" ? body.robotsTxt : "";
 
-    const checkResult = await dbSession.run(
-      `MATCH (s:GlobalSetting) RETURN s LIMIT 1`,
+    const result = await dbSession.run(
+      `MERGE (r:RobotsTxt { key: $key })
+       ON CREATE SET r.robotsTxt = $robotsTxt, r.createdAt = datetime(), r.updatedAt = datetime()
+       ON MATCH SET r.robotsTxt = $robotsTxt, r.updatedAt = datetime()
+       RETURN r`,
+      { key: "default", robotsTxt },
     );
 
-    let settingsVertex: ReturnType<typeof convertNodeToJson>;
-
-    if (checkResult.records.length === 0) {
-      const createResult = await dbSession.run(
-        `CREATE (s:GlobalSetting {
-          key: $key,
-          robotsTxt: $robotsTxt,
-          createdAt: datetime(),
-          updatedAt: datetime()
-        })
-        RETURN s`,
-        { key: "Default", robotsTxt },
-      );
-      settingsVertex = convertNodeToJson(createResult.records[0].get("s"));
-    } else {
-      const result = await dbSession.run(
-        `MATCH (s:GlobalSetting)
-         SET s.robotsTxt = $robotsTxt,
-             s.updatedAt = datetime()
-         RETURN s`,
-        { robotsTxt },
-      );
-      settingsVertex = convertNodeToJson(result.records[0].get("s"));
-    }
+    const robotsTxtVertex = convertNodeToJson(result.records[0].get("r"));
 
     await createActivityLog(
       dbSession,
       "UPDATE_ROBOTS_TXT",
-      "GlobalSetting",
-      settingsVertex.P?.key ?? "Default",
+      "RobotsTxt",
+      robotsTxtVertex.P?.key ?? "default",
       user?.P?.email ?? "",
       "Updated robots.txt content",
     );
@@ -69,9 +50,9 @@ export async function POST({ request }: APIEvent) {
     return {
       graph: {
         edges: {},
-        vertexes: { [settingsVertex.id]: settingsVertex },
+        vertexes: { [robotsTxtVertex.id]: robotsTxtVertex },
       },
-      result: settingsVertex,
+      result: robotsTxtVertex,
     };
   } catch (error) {
     return handleAPIError(error);
