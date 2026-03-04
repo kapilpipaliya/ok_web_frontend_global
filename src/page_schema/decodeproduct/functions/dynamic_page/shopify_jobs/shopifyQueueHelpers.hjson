@@ -64,11 +64,11 @@ try {
 
   const runWithSession = async (args, shop, callback) => {
     if (!shop) throw new Error('runWithSession requires shop');
-    const subDomain = args.getDatabaseNameForShop(shop);
+    const shopDatabaseName = args.getDatabaseNameForShop(shop, args.rawSubDomain);
     const driver = await args.getDriver();
-    const dbSession = driver.session({ database: subDomain });
+    const dbSession = driver.session({ database: shopDatabaseName });
     try {
-      return await callback(dbSession, subDomain);
+      return await callback(dbSession, shopDatabaseName);
     } finally {
       await dbSession.close();
     }

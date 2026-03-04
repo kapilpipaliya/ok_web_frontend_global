@@ -33,9 +33,9 @@ import {
 export async function initSubdomainWorkersUI() {
   "use server";
 
-  const { subDomain } = await getDBSessionForSubdomain();
-
-  // Initialize workers on current node
+  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+  try {
+    // Initialize workers on current node
   const localResult = await initSubdomainWorkers();
 
   // Broadcast to other cluster nodes
@@ -66,6 +66,9 @@ export async function initSubdomainWorkersUI() {
   }
 
   return localResult;
+  } finally {
+    await dbSession.close();
+  }
 }
 
 /**
@@ -75,9 +78,9 @@ export async function initSubdomainWorkersUI() {
 export async function stopWorkers() {
   "use server";
 
-  const { subDomain } = await getDBSessionForSubdomain();
-
-  // Stop workers on current node
+  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+  try {
+    // Stop workers on current node
   await closeAllWorkers();
   console.log("[Workers] Stopped all workers for current subdomain");
 
@@ -106,6 +109,9 @@ export async function stopWorkers() {
   } catch (error) {
     console.error("[Workers] Error broadcasting worker stop:", error);
     // Continue - local stop succeeded
+  }
+  } finally {
+    await dbSession.close();
   }
 }
 
@@ -266,10 +272,10 @@ export async function startWorker(workerKey: string) {
     }
 
     // Get current subdomain
-    const { subDomain } = await getDBSessionForSubdomain();
-
-    // Start worker on current node
-    const localResult = await startWorkerForSubdomainCore(subDomain, workerKey);
+    const { dbSession, subDomain } = await getDBSessionForSubdomain();
+    try {
+      // Start worker on current node
+      const localResult = await startWorkerForSubdomainCore(subDomain, workerKey);
 
     if (!localResult.success) {
       return localResult;
@@ -303,6 +309,9 @@ export async function startWorker(workerKey: string) {
     }
 
     return localResult;
+    } finally {
+      await dbSession.close();
+    }
   } catch (error: any) {
     console.error(`[Workers] Error starting ${workerKey}:`, error);
     return { success: false, error: error.message };
@@ -317,9 +326,9 @@ export async function stopWorker(workerKey: string) {
   "use server";
 
   // Get current subdomain
-  const { subDomain } = await getDBSessionForSubdomain();
-
-  const subdomainWorkers = workerState.activeWorkers.get(subDomain);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+  try {
+    const subdomainWorkers = workerState.activeWorkers.get(subDomain);
   const worker = subdomainWorkers?.get(workerKey);
 
   if (!worker) {
@@ -381,6 +390,9 @@ export async function stopWorker(workerKey: string) {
     console.error(`[Workers] Error stopping ${workerKey}:`, error);
     return { success: false, error: error.message };
   }
+  } finally {
+    await dbSession.close();
+  }
 }
 
 /**
@@ -389,8 +401,9 @@ export async function stopWorker(workerKey: string) {
 export async function getWorkerStatus() {
   "use server";
 
-  const { subDomain } = await getDBSessionForSubdomain();
-  const workers = await getWorkerList();
+  const { dbSession, subDomain } = await getDBSessionForSubdomain();
+  try {
+    const workers = await getWorkerList();
 
   // Get active workers count for this subdomain
   const subdomainWorkers = workerState.activeWorkers.get(subDomain);
@@ -406,6 +419,9 @@ export async function getWorkerStatus() {
     activeWorkers: activeWorkersCount,
     workers,
   };
+  } finally {
+    await dbSession.close();
+  }
 }
 
 /**

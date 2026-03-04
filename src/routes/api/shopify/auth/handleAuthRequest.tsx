@@ -1,3 +1,4 @@
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
@@ -8,8 +9,9 @@ const JSON_HEADERS = { "Content-Type": "application/json" };
  * On success: { ok: true, shop }. On redirect (OAuth): returns that Response. On error: { ok: false, error }.
  */
 export async function handleAuthRequest(request: Request): Promise<Response> {
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
-    const shopify = await getShopify(request);
+    const shopify = await getShopify(subDomain, dbSession);
     const result = await shopify.authenticate.admin(request);
     const shop = result.session?.shop ?? null;
     return new Response(
@@ -23,5 +25,7 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
       JSON.stringify({ ok: false, error: message }),
       { status: 401, headers: JSON_HEADERS }
     );
+  } finally {
+    await dbSession.close();
   }
 }

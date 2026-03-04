@@ -6,6 +6,10 @@ import { getDriver } from "~/cypher/core/driver";
 import { getSubDomain } from "~/cypher/session/getSubDomain";
 
 // TODO: This should not throw error, else its not captured by the API error handler and sent to the client, or either handle erroor in API Endpoints.
+/**
+ * Returns a Neo4j session for the current subdomain. Callers must always close
+ * the session when done (e.g. in a finally block: await dbSession.close()).
+ */
 export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   const url = getURL(request);
   const subDomain = await getSubDomain(url.hostname);

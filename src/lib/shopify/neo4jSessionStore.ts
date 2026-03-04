@@ -18,12 +18,12 @@ function isDatabaseNotFoundError(error: unknown): boolean {
 /**
  * Neo4j session store adapter for Shopify sessions.
  *
- * Stores Shopify OAuth sessions in Neo4j database, with one database per shop.
- * Each session is stored as a ShopifySession node with the session ID as the key.
+ * Stores Shopify OAuth sessions in Neo4j database, with one database per shop per app subdomain.
+ * appSubDomain is the request subdomain (e.g. "decodeproduct") so different subdomain apps don't share DBs.
  *
  * Usage:
  * ```typescript
- * const sessionStore = new Neo4jSessionStore();
+ * const sessionStore = new Neo4jSessionStore(appSubDomain);
  * const shopify = shopifyApi({
  *   // ... config
  *   sessionStorage: sessionStore,
@@ -31,6 +31,8 @@ function isDatabaseNotFoundError(error: unknown): boolean {
  * ```
  */
 export class Neo4jSessionStore implements SessionStorage {
+  constructor(private readonly appSubDomain: string) {}
+
   /**
    * Helper method to reconstruct a Shopify Session from Neo4j node properties.
    *
@@ -84,11 +86,11 @@ export class Neo4jSessionStore implements SessionStorage {
   async storeSession(session: ShopifySession): Promise<boolean> {
     const shop = session.shop;
     const sessionId = session.id;
-    const subDomain = getDatabaseNameForShop(shop);
+    const shopDatabaseName = getDatabaseNameForShop(shop, this.appSubDomain);
 
     const doStore = async (): Promise<boolean> => {
       const driver = await getDriver();
-      const dbSession = driver.session({ database: subDomain });
+      const dbSession = driver.session({ database: shopDatabaseName });
 
       try {
         // Convert session to object for storage
@@ -150,10 +152,10 @@ export class Neo4jSessionStore implements SessionStorage {
     } catch (error) {
       if (isDatabaseNotFoundError(error)) {
         console.warn(
-          `[Neo4jSessionStore] Database ${subDomain} not found, creating it for shop ${shop}`,
+          `[Neo4jSessionStore] Database ${shopDatabaseName} not found, creating it for shop ${shop}`,
         );
         try {
-          await createDatabase(subDomain);
+          await createDatabase(shopDatabaseName);
           return await doStore();
         } catch (createError) {
           console.error(
@@ -206,11 +208,11 @@ export class Neo4jSessionStore implements SessionStorage {
       return undefined;
     }
 
-    const subDomain = getDatabaseNameForShop(shop);
+    const shopDatabaseName = getDatabaseNameForShop(shop, this.appSubDomain);
 
     const doLoad = async (): Promise<ShopifySession | undefined> => {
       const driver = await getDriver();
-      const dbSession = driver.session({ database: subDomain });
+      const dbSession = driver.session({ database: shopDatabaseName });
 
       try {
         const query = `
@@ -238,10 +240,10 @@ export class Neo4jSessionStore implements SessionStorage {
     } catch (error) {
       if (isDatabaseNotFoundError(error)) {
         console.warn(
-          `[Neo4jSessionStore] Database ${subDomain} not found, creating it for shop ${shop}`,
+          `[Neo4jSessionStore] Database ${shopDatabaseName} not found, creating it for shop ${shop}`,
         );
         try {
-          await createDatabase(subDomain);
+          await createDatabase(shopDatabaseName);
           return await doLoad();
         } catch (createError) {
           // Database created but no session exists yet - return undefined
@@ -284,9 +286,9 @@ export class Neo4jSessionStore implements SessionStorage {
       return false;
     }
 
-    const subDomain = getDatabaseNameForShop(shop);
+    const shopDatabaseName = getDatabaseNameForShop(shop, this.appSubDomain);
     const driver = await getDriver();
-    const dbSession = driver.session({ database: subDomain });
+    const dbSession = driver.session({ database: shopDatabaseName });
 
     try {
       const query = `
@@ -354,8 +356,8 @@ export class Neo4jSessionStore implements SessionStorage {
     let allSuccessful = true;
 
     for (const [shop, sessionIds] of shopSessionsMap) {
-      const subDomain = getDatabaseNameForShop(shop);
-      const dbSession = driver.session({ database: subDomain });
+      const shopDatabaseName = getDatabaseNameForShop(shop, this.appSubDomain);
+      const dbSession = driver.session({ database: shopDatabaseName });
 
       try {
         const query = `
@@ -386,9 +388,9 @@ export class Neo4jSessionStore implements SessionStorage {
    * @returns Promise<ShopifySession[]> - Array of sessions (empty if none found)
    */
   async findSessionsByShop(shop: string): Promise<ShopifySession[]> {
-    const subDomain = getDatabaseNameForShop(shop);
+    const shopDatabaseName = getDatabaseNameForShop(shop, this.appSubDomain);
     const driver = await getDriver();
-    const dbSession = driver.session({ database: subDomain });
+    const dbSession = driver.session({ database: shopDatabaseName });
 
     try {
       const query = `
@@ -434,9 +436,9 @@ export class Neo4jSessionStore implements SessionStorage {
    * @returns Promise<number> - Number of sessions deleted
    */
   async deleteSessionsByShop(shop: string): Promise<number> {
-    const subDomain = getDatabaseNameForShop(shop);
+    const shopDatabaseName = getDatabaseNameForShop(shop, this.appSubDomain);
     const driver = await getDriver();
-    const dbSession = driver.session({ database: subDomain });
+    const dbSession = driver.session({ database: shopDatabaseName });
 
     try {
       const query = `
@@ -461,15 +463,17 @@ export class Neo4jSessionStore implements SessionStorage {
   }
 }
 
-// Singleton instance of Neo4j session store
-let neo4jSessionStoreInstance: Neo4jSessionStore | null = null;
+const sessionStoreCache = new Map<string, Neo4jSessionStore>();
 
 /**
- * Get or create the Neo4j session store instance.
+ * Get or create the Neo4j session store for the given app subdomain.
+ * Each subdomain gets its own store so shop databases don't conflict across subdomain apps.
  */
-export function getNeo4jSessionStore(): Neo4jSessionStore {
-  if (!neo4jSessionStoreInstance) {
-    neo4jSessionStoreInstance = new Neo4jSessionStore();
+export function getNeo4jSessionStore(appSubDomain: string): Neo4jSessionStore {
+  let store = sessionStoreCache.get(appSubDomain);
+  if (!store) {
+    store = new Neo4jSessionStore(appSubDomain);
+    sessionStoreCache.set(appSubDomain, store);
   }
-  return neo4jSessionStoreInstance;
+  return store;
 }

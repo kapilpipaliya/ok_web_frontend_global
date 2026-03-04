@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 import { Session } from "@shopify/shopify-api";
 
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
 
 /**
@@ -11,25 +12,30 @@ import { getShopify } from "~/lib/shopify/shopify.server";
  * Authenticates the request, then updates the session's scope in Neo4j.
  */
 export async function POST({ request }: APIEvent) {
-  const shopify = await getShopify(request);
-  const { payload, session, topic, shop } =
-    await shopify.authenticate.webhook(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  try {
+    const shopify = await getShopify(subDomain, dbSession);
+    const { payload, session, topic, shop } =
+      await shopify.authenticate.webhook(request);
 
-  console.log(`Received ${topic} webhook for ${shop}`);
+    console.log(`Received ${topic} webhook for ${shop}`);
 
-  const current = payload.current as string[];
-  const scopeString = Array.isArray(current)
-    ? current.join(",")
-    : typeof current === "string"
-      ? current
-      : String(current ?? "");
+    const current = payload.current as string[];
+    const scopeString = Array.isArray(current)
+      ? current.join(",")
+      : typeof current === "string"
+        ? current
+        : String(current ?? "");
 
-  if (session) {
-    const sessionData = session.toObject();
-    sessionData.scope = scopeString;
-    const updatedSession = new Session(sessionData);
-    await shopify.sessionStorage.storeSession(updatedSession);
+    if (session) {
+      const sessionData = session.toObject();
+      sessionData.scope = scopeString;
+      const updatedSession = new Session(sessionData);
+      await shopify.sessionStorage.storeSession(updatedSession);
+    }
+
+    return new Response(null, { status: 200 });
+  } finally {
+    await dbSession.close();
   }
-
-  return new Response(null, { status: 200 });
 }

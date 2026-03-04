@@ -24,66 +24,82 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
           event.request.headers.get("authorization")
         ) {
           // Authenticate with Shopify to get shop
-          const shopify = await getShopify(event.request);
-          const result = await shopify.authenticate.admin(event.request);
-          const shop = result.session.shop;
-          
-          if (shop) {
-            // Get database session for this shop (assumes database already exists)
-            const { dbSession, subDomain } = await getDBSessionForShop(shop);
-            
-            try {
-              // Find or create user in the database
-              const user = await dbSession.executeWrite(async (tx) => {
-                // Check if user already exists by email (shop) or uuid (shop)
-                const existingUserResult = await tx.run(
-                  `MATCH (u:User)
-                   WHERE u.email = $shop OR u.uuid = $shop
-                   RETURN u
-                   LIMIT 1`,
-                  { shop }
+          const { dbSession: authDbSession, subDomain } = await getDBSessionForSubdomain(event.request);
+          try {
+            const shopify = await getShopify(subDomain, authDbSession);
+            const result = await shopify.authenticate.admin(event.request);
+            const shop = result.session.shop;
+
+            if (shop) {
+              // Get database session for this shop (assumes database already exists)
+              const appSessionData = await getDBSessionForSubdomain(
+                event.request,
+              );
+              try {
+                const { dbSession, subDomain } = await getDBSessionForShop(
+                  shop,
+                  appSessionData.subDomain,
                 );
 
-                let userNode;
-                
-                if (existingUserResult.records.length > 0) {
-                  // User exists, return the existing node (no updates needed)
-                  userNode = existingUserResult.records[0].get('u');
-                } else {
-                  // User doesn't exist, create it with only basic properties
-                  const createResult = await tx.run(
-                    `CREATE (u:User {
-                      email: $shop,
-                      uuid: $shop,
-                      createdAt: datetime()
-                    })
-                    RETURN u`,
-                    {
-                      shop,
+                try {
+                  // Find or create user in the database
+                  const user = await dbSession.executeWrite(async (tx) => {
+                    // Check if user already exists by email (shop) or uuid (shop)
+                    const existingUserResult = await tx.run(
+                      `MATCH (u:User)
+                       WHERE u.email = $shop OR u.uuid = $shop
+                       RETURN u
+                       LIMIT 1`,
+                      { shop }
+                    );
+
+                    let userNode;
+
+                    if (existingUserResult.records.length > 0) {
+                      // User exists, return the existing node (no updates needed)
+                      userNode = existingUserResult.records[0].get('u');
+                    } else {
+                      // User doesn't exist, create it with only basic properties
+                      const createResult = await tx.run(
+                        `CREATE (u:User {
+                          email: $shop,
+                          uuid: $shop,
+                          createdAt: datetime()
+                        })
+                        RETURN u`,
+                        {
+                          shop,
+                        }
+                      );
+                      userNode = createResult.records[0].get('u');
                     }
-                  );
-                  userNode = createResult.records[0].get('u');
+
+                    // Convert Neo4j node to Vertex format
+                    return convertNodeToJson(userNode);
+                  });
+
+                  // Add Shopify-related properties to user object for session only (not saved in DB)
+                  user.P.shop = shop;
+                  user.P.shopDb = subDomain;
+
+                  // Update HTTP session with the user from database (with Shopify properties in session only)
+                  // await updateSession(user);
+
+                  return user;
+                } catch (err) {
+                  console.error("Error in dbSession executeWrite:", err);
+                  throw err;
+                } finally {
+                  await dbSession.close();
                 }
-
-                // Convert Neo4j node to Vertex format
-                return convertNodeToJson(userNode);
-              });
-
-              // Add Shopify-related properties to user object for session only (not saved in DB)
-              user.P.shop = shop;
-              user.P.shopDb = subDomain;
-
-              // Update HTTP session with the user from database (with Shopify properties in session only)
-              // await updateSession(user);
-              
-              return user;
-            } catch (err) {
-              console.error("Error in dbSession executeWrite:", err);
-              throw err;
-            } finally {
-              // Close the database session
-              await dbSession.close();
+              } finally {
+                await appSessionData.dbSession.close();
+              }
             }
+
+            return undefined;
+          } finally {
+            await authDbSession.close();
           }
         }
       } catch (errorOrResponse) {

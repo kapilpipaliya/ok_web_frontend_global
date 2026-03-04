@@ -1,8 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { deleteShopDataAndDatabase } from "~/lib/shopify/deleteShopDataAndDatabase";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
-import { getNeo4jSessionStore } from "~/lib/shopify/neo4jSessionStore";
 
 /**
  * App Uninstalled Webhook Handler
@@ -13,14 +12,18 @@ import { getNeo4jSessionStore } from "~/lib/shopify/neo4jSessionStore";
  * Neo4j database.
  */
 export async function POST({ request }: APIEvent) {
-  const shopify = await getShopify(request);
-  const { shop, topic } = await shopify.authenticate.webhook(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  try {
+    const shopify = await getShopify(subDomain, dbSession);
+    const { shop, topic } = await shopify.authenticate.webhook(request);
 
-  console.log(`Received ${topic} webhook for ${shop}`);
+    console.log(`Received ${topic} webhook for ${shop}`);
 
-  const sessionStore = getNeo4jSessionStore();
-  const deletedCount = await sessionStore.deleteSessionsByShop(shop);
-  console.log(`Deleted ${deletedCount} sessions for ${shop}`);
+    const deletedCount = await shopify.sessionStorage.deleteSessionsByShop(shop);
+    console.log(`Deleted ${deletedCount} sessions for ${shop}`);
 
-  return new Response(null, { status: 200 });
+    return new Response(null, { status: 200 });
+  } finally {
+    await dbSession.close();
+  }
 }

@@ -1,7 +1,6 @@
-import type { APIEvent } from "@solidjs/start/server";
+import type { Session } from "neo4j-driver";
 
 import { getDriver } from "~/cypher/core/driver";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 
 export interface ShopifyCredentials {
   apiKey: string;
@@ -10,54 +9,64 @@ export interface ShopifyCredentials {
   shopifyScopes: string;
 }
 
-/**
- * Load Shopify credentials from the CredentialsJson vertex for the given subdomain.
- * Returns shopifyAPIKey, shopifyAPISecret, and shopifyAppUrl from the vertex JSON (no env fallback).
- */
-export async function getShopifyCredentialsForSubdomain(
-  subDomain: string,
-): Promise<ShopifyCredentials> {
-  const driver = await getDriver();
-  const dbSession = driver.session({ database: subDomain });
+function parseCredentialsJson(raw: string): ShopifyCredentials {
+  const empty = {
+    apiKey: "",
+    apiSecretKey: "",
+    shopifyAppUrl: "",
+    shopifyScopes: "",
+  };
+  if (!raw) return empty;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return {
+      apiKey: typeof parsed.shopifyAPIKey === "string" ? parsed.shopifyAPIKey : "",
+      apiSecretKey: typeof parsed.shopifyAPISecret === "string" ? parsed.shopifyAPISecret : "",
+      shopifyAppUrl: typeof parsed.shopifyAppUrl === "string" ? parsed.shopifyAppUrl : "",
+      shopifyScopes: typeof parsed.shopifyScopes === "string" ? parsed.shopifyScopes : "",
+    };
+  } catch {
+    return empty;
+  }
+}
 
+/**
+ * Load Shopify credentials from the CredentialsJson vertex using an existing session.
+ * Does not close the session.
+ */
+export async function getShopifyCredentialsFromSession(
+  dbSession: Session,
+): Promise<ShopifyCredentials> {
+  const empty: ShopifyCredentials = {
+    apiKey: "",
+    apiSecretKey: "",
+    shopifyAppUrl: "",
+    shopifyScopes: "",
+  };
   try {
     const result = await dbSession.run(
       `MATCH (c:CredentialsJson) RETURN c.credentialsJson as credentialsJson LIMIT 1`,
     );
     const raw =
       (result.records[0]?.get("credentialsJson") as string | undefined) ?? "";
-
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as Record<string, unknown>;
-        return {
-          apiKey: typeof parsed.shopifyAPIKey === "string" ? parsed.shopifyAPIKey : "",
-          apiSecretKey: typeof parsed.shopifyAPISecret === "string" ? parsed.shopifyAPISecret : "",
-          shopifyAppUrl: typeof parsed.shopifyAppUrl === "string" ? parsed.shopifyAppUrl : "",
-          shopifyScopes: typeof parsed.shopifyScopes === "string" ? parsed.shopifyScopes : "",
-        };
-      } catch {
-        // invalid JSON
-      }
-    }
-  } finally {
-    await dbSession.close();
+    return parseCredentialsJson(raw);
+  } catch {
+    return empty;
   }
-
-  return {
-    apiKey: "",
-    apiSecretKey: "",
-    shopifyAppUrl: "",
-    shopifyScopes: "",
-  };
 }
 
 /**
- * Load Shopify credentials from the CredentialsJson vertex for the request's subdomain.
+ * Load credentials for a subdomain by opening a short-lived session.
+ * Use when no session is available (e.g. job/worker context).
  */
-export async function getShopifyCredentials(
-  request: APIEvent["request"],
+export async function getShopifyCredentialsForSubdomain(
+  subDomain: string,
 ): Promise<ShopifyCredentials> {
-  const { subDomain } = await getDBSessionForSubdomain(request);
-  return getShopifyCredentialsForSubdomain(subDomain);
+  const driver = await getDriver();
+  const session = driver.session({ database: subDomain });
+  try {
+    return await getShopifyCredentialsFromSession(session);
+  } finally {
+    await session.close();
+  }
 }

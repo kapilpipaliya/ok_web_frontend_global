@@ -1,9 +1,11 @@
 /**
  * Shopify Server Configuration
  *
- * Credentials (apiKey, apiSecretKey, shopifyAppUrl) are loaded from the CredentialsJson vertex
- * per subdomain. Subdomain is always derived from the request.
+ * Credentials are loaded from the CredentialsJson vertex per subdomain.
+ * Pass dbSession when you have one (e.g. request); otherwise a short-lived session is used (e.g. jobs).
  */
+
+import type { Session } from "neo4j-driver";
 
 import "@shopify/shopify-app-react-router/adapters/node";
 
@@ -13,18 +15,21 @@ import {
   shopifyApp,
 } from "@shopify/shopify-app-react-router/server";
 
-import { getNeo4jSessionStore } from "./neo4jSessionStore";
 import {
-  getShopifyCredentials,
+  getShopifyCredentialsForSubdomain,
+  getShopifyCredentialsFromSession,
   type ShopifyCredentials,
 } from "./getShopifyCredentials";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { getNeo4jSessionStore } from "./neo4jSessionStore";
 
 type ShopifyAppInstance = ReturnType<typeof shopifyApp>;
 
 const appCache = new Map<string, ShopifyAppInstance>();
 
-function createShopifyAppInstance(credentials: ShopifyCredentials): ShopifyAppInstance {
+function createShopifyAppInstance(
+  credentials: ShopifyCredentials,
+  appSubDomain: string,
+): ShopifyAppInstance {
   return shopifyApp({
     apiKey: credentials.apiKey,
     apiSecretKey: credentials.apiSecretKey,
@@ -35,7 +40,7 @@ function createShopifyAppInstance(credentials: ShopifyCredentials): ShopifyAppIn
       .filter(Boolean),
     appUrl: credentials.shopifyAppUrl,
     authPathPrefix: "/auth",
-    sessionStorage: getNeo4jSessionStore(),
+    sessionStorage: getNeo4jSessionStore(appSubDomain),
     distribution: AppDistribution.AppStore,
     future: {
       expiringOfflineAccessTokens: true,
@@ -47,16 +52,20 @@ function createShopifyAppInstance(credentials: ShopifyCredentials): ShopifyAppIn
 }
 
 /**
- * Get the Shopify app instance for the request's subdomain.
- * Credentials are loaded from the CredentialsJson vertex (shopifyAPIKey, shopifyAPISecret, shopifyAppUrl).
+ * Get the Shopify app instance for the given subdomain.
+ * Pass dbSession when available (e.g. HTTP request); omit for jobs (uses short-lived session for credentials).
  */
-export async function getShopify(request: Request): Promise<ShopifyAppInstance> {
-  const { subDomain } = await getDBSessionForSubdomain(request);
-  let app = appCache.get(subDomain);
+export async function getShopify(
+  appSubDomain: string,
+  dbSession?: Session,
+): Promise<ShopifyAppInstance> {
+  let app = appCache.get(appSubDomain);
   if (!app) {
-    const credentials = await getShopifyCredentials(request);
-    app = createShopifyAppInstance(credentials);
-    appCache.set(subDomain, app);
+    const credentials = dbSession
+      ? await getShopifyCredentialsFromSession(dbSession)
+      : await getShopifyCredentialsForSubdomain(appSubDomain);
+    app = createShopifyAppInstance(credentials, appSubDomain);
+    appCache.set(appSubDomain, app);
   }
   return app;
 }

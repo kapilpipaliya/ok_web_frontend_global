@@ -1,5 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
 
 /**
@@ -10,14 +11,19 @@ import { getShopify } from "~/lib/shopify/shopify.server";
  * payload (customer, orders_to_redact). Acknowledge receipt with 200.
  */
 export async function POST({ request }: APIEvent) {
-  const shopify = await getShopify(request);
-  const { topic, shop, payload } = await shopify.authenticate.webhook(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  try {
+    const shopify = await getShopify(subDomain, dbSession);
+    const { topic, shop, payload } = await shopify.authenticate.webhook(request);
 
-  console.log(`Received ${topic} webhook for ${shop}`);
+    console.log(`Received ${topic} webhook for ${shop}`);
 
-  // If your app stores customer or order data, use payload (customer,
-  // orders_to_redact) to redact/delete it. Otherwise acknowledge.
-  void payload;
+    // If your app stores customer or order data, use payload (customer,
+    // orders_to_redact) to redact/delete it. Otherwise acknowledge.
+    void payload;
 
-  return new Response(null, { status: 200 });
+    return new Response(null, { status: 200 });
+  } finally {
+    await dbSession.close();
+  }
 }

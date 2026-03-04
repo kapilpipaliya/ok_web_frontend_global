@@ -4,8 +4,9 @@ import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
 import { runMigration } from "~/lib/schema/runMigration";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
-import { getShopifyCredentials } from "~/lib/shopify/getShopifyCredentials";
+import { getShopifyCredentialsFromSession } from "~/lib/shopify/getShopifyCredentials";
 import {
   clearMigrationInProgress,
   clearMigrationInProgressAndSetLastAt,
@@ -41,29 +42,46 @@ export async function verifyShopifyAdminRequest(
   params: ShopifyAuthParams,
   request: Request,
 ): Promise<ShopifyAuthResult> {
-  const credentials = await getShopifyCredentials(request);
-  if (!credentials.apiSecretKey) {
-    return {
-      valid: false,
-      error:
-        "Shopify API credentials are not configured. Set shopifyAPISecret in Credentials JSON.",
-    };
+  const { dbSession } = await getDBSessionForSubdomain(request);
+  try {
+    const credentials = await getShopifyCredentialsFromSession(dbSession);
+    if (!credentials.apiSecretKey) {
+      return {
+        valid: false,
+        error:
+          "Shopify API credentials are not configured. Set shopifyAPISecret in Credentials JSON.",
+      };
+    }
+    return { valid: true };
+  } finally {
+    await dbSession.close();
   }
-  return { valid: true };
 }
 
 /**
  * Normalize a Shopify shop domain into a Neo4j database name.
- * Neo4j database names only allow alphanumeric characters (no hyphens, dots, etc.)
- * Example: "decode-products-organizer.myshopify.com" -> "shopdecodeproductsorganizermyshopifycom"
+ * When appSubDomain is provided, prefixes with the app subdomain so the same shop
+ * on different subdomain apps gets different databases (no conflict).
+ * Neo4j database names only allow alphanumeric and underscore.
+ * Example: ("decode-products-organizer.myshopify.com") -> "shopdecodeproductsorganizermyshopifycom"
+ * Example: ("decode-products-organizer.myshopify.com", "decodeproduct") -> "shop_decodeproduct_decodeproductsorganizermyshopifycom"
  */
-export function getDatabaseNameForShop(shop: string): string {
-  const normalized = shop
+export function getDatabaseNameForShop(shop: string, appSubDomain?: string): string {
+  let normalizedShop = shop
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "") // replace unsupported chars with dash
     .replace(/^-+|-+$/g, ""); // trim leading/trailing dashes
 
-  return `shop${normalized}`;
+  normalizedShop = normalizedShop.replace(/myshopifycom$/, "");
+
+  if (appSubDomain) {
+    const normalizedAppSubDomain = appSubDomain
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .replace(/^-+|-+$/g, "");
+    return normalizedAppSubDomain ? `shop${normalizedAppSubDomain}${normalizedShop}` : `shop${normalizedShop}`;
+  }
+  return `shop${normalizedShop}`;
 }
 
 const MIGRATION_RETRY_COUNT = 3;
@@ -101,27 +119,29 @@ export async function ensureShopDatabaseAndMigrate(
      * its key can be looked up from a different database (e.g. a global/admin DB).
      */
     migrationSubDomain?: string;
+    /** App subdomain from request so shop DB is namespaced per subdomain app. */
+    appSubDomain?: string;
   } = {},
 ): Promise<{ dbSession: Session; subDomain: string }> {
-  const shopSubDomain = getDatabaseNameForShop(shop);
+  const shopDatabaseName = getDatabaseNameForShop(shop, options.appSubDomain);
 
   // Try to create database; ignore error if it already exists
   try {
-    await createDatabase(shopSubDomain);
+    await createDatabase(shopDatabaseName);
   } catch (error: any) {
     // Neo4j returns an error if database already exists; log and continue
     console.warn(
-      `[Shopify] createDatabase(${shopSubDomain}) failed (may already exist):`,
+      `[Shopify] createDatabase(${shopDatabaseName}) failed (may already exist):`,
       error?.message || error,
     );
   }
 
   const driver = await getDriver();
-  const shopDbSession = driver.session({ database: shopSubDomain });
+  const shopDbSession = driver.session({ database: shopDatabaseName });
 
   const runMigrationNow = await shouldRunMigrationForShop(shop, shopDbSession);
   if (!runMigrationNow) {
-    return { dbSession: shopDbSession, subDomain: shopSubDomain };
+    return { dbSession: shopDbSession, subDomain: shopDatabaseName };
   }
 
   let claimed = await tryClaimMigration(shop, shopDbSession);
@@ -133,7 +153,7 @@ export async function ensureShopDatabaseAndMigrate(
         const needMigration = await shouldRunMigrationForShop(shop, shopDbSession);
         if (!needMigration) {
           await shopDbSession.close();
-          return getDBSessionForShop(shop);
+          return getDBSessionForShop(shop, options.appSubDomain);
         }
         claimed = await tryClaimMigration(shop, shopDbSession);
         if (claimed) break;
@@ -141,7 +161,7 @@ export async function ensureShopDatabaseAndMigrate(
     }
     if (!claimed) {
       await shopDbSession.close();
-      return getDBSessionForShop(shop);
+      return getDBSessionForShop(shop, options.appSubDomain);
     }
   }
 
@@ -157,7 +177,7 @@ export async function ensureShopDatabaseAndMigrate(
   };
 
   try {
-    const migrationResult = await runMigration(shopDbSession, shopSubDomain, user, {
+    const migrationResult = await runMigration(shopDbSession, shopDatabaseName, user, {
       dryRun: options.dryRun ?? false,
       contextData: {
         shop,
@@ -184,7 +204,7 @@ export async function ensureShopDatabaseAndMigrate(
       requestAt ?? new Date(),
       shopDbSession,
     );
-    return { dbSession: shopDbSession, subDomain: shopSubDomain };
+    return { dbSession: shopDbSession, subDomain: shopDatabaseName };
   } catch (err) {
     await clearMigrationInProgress(shop, shopDbSession);
     throw err;
@@ -197,17 +217,10 @@ export async function ensureShopDatabaseAndMigrate(
  */
 export async function getDBSessionForShop(
   shop: string,
+  appSubDomain?: string,
 ): Promise<{ dbSession: Session; subDomain: string }> {
-  const subDomain = getDatabaseNameForShop(shop);
+  const shopDatabaseName = getDatabaseNameForShop(shop, appSubDomain);
   const driver = await getDriver();
-  const dbSession = driver.session({ database: subDomain });
-  return { dbSession, subDomain };
-}
-
-/**
- * Get the Shopify app instance for the given request.
- * Credentials are loaded from the CredentialsJson vertex (shopifyAPIKey, shopifyAPISecret, shopifyAppUrl).
- */
-export function getShopifyClient(request: Request) {
-  return getShopify(request);
+  const dbSession = driver.session({ database: shopDatabaseName });
+  return { dbSession, subDomain: shopDatabaseName };
 }

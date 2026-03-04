@@ -109,6 +109,7 @@ export async function GET({ request }: APIEvent) {
       const url = new URL(request.url);
       const currentShop = url.searchParams.get("shop");
       if (currentShop && /\.myshopify\.com$/i.test(currentShop)) {
+        const appSessionData = await getDBSessionForSubdomain(request);
         try {
           const shopMigrationResult = await ensureShopDatabaseAndMigrate(
             currentShop,
@@ -116,6 +117,7 @@ export async function GET({ request }: APIEvent) {
               dryRun: false,
               contextData: {},
               migrationSubDomain: "decodeproduct",
+              appSubDomain: appSessionData.subDomain,
             },
           );
           console.log(
@@ -131,6 +133,8 @@ export async function GET({ request }: APIEvent) {
             currentShop,
             err,
           );
+        } finally {
+          await appSessionData.dbSession.close();
         }
       }
 

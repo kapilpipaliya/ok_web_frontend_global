@@ -17,4 +17,7 @@ export interface EvalExpressionContext {
   deletedEdges?: Id[];
   deletedVertexes?: Id[];
   dbSession?: Session;
+  rawSubDomain?: string;
+  /** subdomain-level DB session for Shopify credential lookup. Passed when invoking from contextAwareExecuteNamedServerFunction. */
+  rawDbSession?: Session;
 }

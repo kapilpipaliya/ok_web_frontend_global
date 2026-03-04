@@ -4,6 +4,7 @@ import { csrf } from "shieldwall/start";
 
 import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 import { logger } from "./lib/logger";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
 import { initializeWorkersIfNeeded } from "~/server/initWorkersOnStartup";
 
@@ -115,8 +116,13 @@ export default createMiddleware({
         event.request.headers.get("x-forwarded-host") ??
         event.request.headers.get("host");
       if (event.response && host === "decoedeproduct.decodecomerce.com") {
-        const shopify = await getShopify(event.request);
-        shopify.addDocumentResponseHeaders(event.request, event.response.headers);
+        const { dbSession, subDomain } = await getDBSessionForSubdomain(event.request);
+        try {
+          const shopify = await getShopify(subDomain, dbSession);
+          shopify.addDocumentResponseHeaders(event.request, event.response.headers);
+        } finally {
+          await dbSession.close();
+        }
       }
 
       // Strip body from HEAD requests

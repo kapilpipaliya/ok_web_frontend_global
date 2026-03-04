@@ -251,11 +251,12 @@ export async function executeNamedServerFunctionCore(
   let functionLookupSession: Session | undefined;
   let functionLookupSessionCreated = false;
 
-  // Save the fallback session data in an intermediate variable for reuse
   let fallbackSessionData: { dbSession: Session; subDomain: string } | undefined;
 
   // Request for Shopify auth and getShopifyClient (used when building args)
-  let requestForShopify: Request | undefined;
+  let rawRequest: Request | undefined;
+  /** App subdomain from request for Shopify shop DB namespacing and getShopifyClient */
+  let rawSubDomain: string | undefined;
 
   try {
     // IMPORTANT: Session creation is inside try-catch
@@ -265,23 +266,34 @@ export async function executeNamedServerFunctionCore(
       // Reuse existing session from context
       dbSession = context.dbSession;
       subDomain = context.subDomain;
+      rawSubDomain = context.rawSubDomain ?? subDomain;
+      if (context.rawDbSession != null) {
+        fallbackSessionData = {
+          dbSession: context.rawDbSession,
+          subDomain: rawSubDomain ?? "",
+        };
+      }
     } else {
       // Note: for worker functions, this will not work, so always pass the session in the context.
       // Create new session
       sessionCreatedLocally = true;
-      
+
+      // Resolve subdomain/session once for fallback and function lookup
+      fallbackSessionData = await getDBSessionForSubdomain();
+      rawSubDomain = fallbackSessionData.subDomain;
+
       // Extract shop from request URL instead of session
       let shopFromRequest: string | undefined;
       const event = getRequestEvent();
       if (event) {
         const req = event.request;
-        requestForShopify = req;
+        rawRequest = req;
         try {
           const urlObj = new URL(req.url);
           if (urlObj.hostname === "decodeproduct.decodecommerce.com" && req.headers.get("authorization")) {
             // For decodeproduct.decodecommerce.com, get shop from Shopify authentication
             try {
-              const shopify = await getShopify(req);
+              const shopify = await getShopify(rawSubDomain!, fallbackSessionData!.dbSession);
               const result = await shopify.authenticate.admin(req);
               shopFromRequest = result.session.shop;
               if (shopFromRequest) shopForContext = shopForContext ?? shopFromRequest;
@@ -308,22 +320,24 @@ export async function executeNamedServerFunctionCore(
 
       if (useCentralDbForSupport) {
         // Support tickets live in central DB so admin sees all shops
-        fallbackSessionData = await getDBSessionForSubdomain();
         dbSession = fallbackSessionData.dbSession;
         subDomain = fallbackSessionData.subDomain;
         context.dbSession = dbSession;
         context.subDomain = subDomain;
       } else if (context.useSessionShop !== false && shopFromRequest) {
-        // Derive database name for this shop
-        subDomain = getDatabaseNameForShop(shopFromRequest);
+        // Derive database name for this shop (namespaced by app subdomain)
+        const shopDatabaseName = getDatabaseNameForShop(
+          shopFromRequest,
+          rawSubDomain,
+        );
+        subDomain = shopDatabaseName;
         dbSession = (await getDriver()).session({
-          database: subDomain,
+          database: shopDatabaseName,
         });
         context.dbSession = dbSession;
         context.subDomain = subDomain;
       } else {
         // Fallback: use standard subdomain-based session resolution
-        fallbackSessionData = await getDBSessionForSubdomain();
         dbSession = fallbackSessionData.dbSession;
         subDomain = fallbackSessionData.subDomain;
         context.dbSession = dbSession;
@@ -347,9 +361,8 @@ export async function executeNamedServerFunctionCore(
       functionLookupSessionCreated = true;
     } else {
       // Fallback: use fallback database session for function lookup
-      // If we already have fallbackSessionData from above, reuse it; otherwise fetch it
       if (!fallbackSessionData) {
-        fallbackSessionData = await getDBSessionForSubdomain();
+        fallbackSessionData = await getDBSessionForSubdomain(rawRequest);
         functionLookupSessionCreated = true;
       }
       functionLookupSession = fallbackSessionData.dbSession;
@@ -400,31 +413,35 @@ export async function executeNamedServerFunctionCore(
         : {}),
     };
 
-    // Create a context-aware executeNamedServerFunction that preserves session/subdomain
+    // Create a context-aware executeNamedServerFunction.
+    // When we have app context (rawSubDomain / rawDbSession), nested runs use MAIN (app) db
+    // so hooks and nested functions run in app context; otherwise use current session/subdomain.
     const contextAwareExecuteNamedServerFunction = async (
       req: NamedServerFunctionRequest,
       ctx?: EvalExpressionContext & { [key: `$${string}`]: any },
     ) => {
-      // Create a new session for each nested function call
+      const nestedDbName = subDomain;
       const nestedSession = (await getDriver()).session({
-        database: subDomain,
+        database: nestedDbName,
       });
 
       try {
-        // If no context provided, create one with the new session
-        const executionContext = ctx || {
-          dbSession: nestedSession,
-          subDomain: subDomain,
-          nodes: {}, // context.nodes || {},
-          relationships: {}, // context.relationships || {},
-          vertexes: {} as unknown as any, // context.vertexes,
-        };
+        const executionContext: EvalExpressionContext & { [key: `$${string}`]: any } = ctx
+          ? { ...ctx, dbSession: nestedSession, subDomain: nestedDbName, rawSubDomain, rawDbSession: fallbackSessionData?.dbSession }
+          : {
+              dbSession: nestedSession,
+              subDomain: nestedDbName,
+              rawSubDomain,
+              rawDbSession: fallbackSessionData?.dbSession,
+              nodes: {},
+              relationships: {},
+              vertexes: {} as unknown as any,
+            };
 
-        req.contextData =  { ...parentContextDataForHooks, ...(req.contextData || {}) };
+        req.contextData = { ...parentContextDataForHooks, ...(req.contextData || {}) };
 
         return await executeNamedServerFunctionCore(req, executionContext);
       } finally {
-        // Always close the session we created
         await nestedSession.close();
       }
     };
@@ -606,11 +623,13 @@ export async function executeNamedServerFunctionCore(
       executeServerFunction,
       // Shopify helpers (request required; subdomain from request)
       verifyShopifyAdminRequest: (params: Parameters<typeof verifyShopifyAdminRequest>[0]) =>
-        verifyShopifyAdminRequest(params, requestForShopify!),
+        verifyShopifyAdminRequest(params, rawRequest!),
       ensureShopDatabaseAndMigrate,
+      rawSubDomain: rawSubDomain,
       getDBSessionForShop,
       getDatabaseNameForShop,
-      getShopifyClient: () => getShopify(requestForShopify!),
+      getShopifyClient: () =>
+        getShopify(rawSubDomain!),
       getSessionUser,
       runMigration,
       processResult,
@@ -669,6 +688,14 @@ export async function executeNamedServerFunctionCore(
     if (sessionCreatedLocally && dbSession) {
       await dbSession.close(); // Release connection back to pool
       delete context.dbSession; // Remove from context to prevent reuse
+    }
+    // When we created a separate subdomain-level session, fallbackSessionData.dbSession was never assigned to dbSession — close it to avoid leaks
+    if (
+      sessionCreatedLocally &&
+      fallbackSessionData?.dbSession &&
+      fallbackSessionData.dbSession !== dbSession
+    ) {
+      await fallbackSessionData.dbSession.close();
     }
     // Close function lookup session if we created it
     if (functionLookupSessionCreated) {
