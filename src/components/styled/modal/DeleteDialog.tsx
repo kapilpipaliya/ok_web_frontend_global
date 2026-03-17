@@ -30,6 +30,7 @@ export function DialogWithButtons(
   return (
     <CustomModal
       customTitle={<span>{props.title}</span>}
+      containerCss={"return `._id {z-index: 3;}`;"}
       dialogCss={
         "return `._id {min-width: 20%; border-radius: 10px; padding: 0;}`;"
       }

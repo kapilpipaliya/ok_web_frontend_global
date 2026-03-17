@@ -8,7 +8,11 @@ import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
 import type { DataGridStore } from "~/features/grid/context/DataGridContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { getFilesData } from "./sidebar/getFilesData";
+import {
+  getFilesData,
+  UNCATEGORIZED_ID,
+  UNCATEGORIZED_VERTEX,
+} from "./sidebar/getFilesData";
 import { getParentData } from "./sidebar/getParentData";
 import { getRootData } from "./sidebar/getRootData";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -186,10 +190,18 @@ async function fetchRootData(
     rootKeys,
   );
   if ("result" in rootData && rootData.result.length > 0) {
-    root = rootData.result;
+    const backendRoot = rootData.result as Vertex[];
+    // Prepend Uncategorized only for file manager (Folder root)
+    root =
+      parentVertexLabel === "Folder"
+        ? [UNCATEGORIZED_VERTEX, ...backendRoot]
+        : backendRoot;
     expandedKeys = [...expandedKeys, ...root!.map((v) => v.id)];
     if (!selectedItem) {
-      selectedItem = { ...root![0] } as Vertex;
+      // Default to first real root (Root), not Uncategorized, when opening file manager
+      const firstRoot =
+        root!.find((v) => v.id !== UNCATEGORIZED_ID) ?? root![0];
+      selectedItem = { ...firstRoot } as Vertex;
     }
   }
 

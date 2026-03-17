@@ -23,6 +23,9 @@ export async function POST({ request }: APIEvent) {
     void payload;
 
     return new Response(null, { status: 200 });
+  } catch (error) {
+    if (error instanceof Response) return error;
+    throw error;
   } finally {
     await dbSession.close();
   }

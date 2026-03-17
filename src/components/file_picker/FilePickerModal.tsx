@@ -18,7 +18,7 @@ export function FilePickerModal(props: {
 }) {
   return (
     <CustomModal
-      containerCss={"return `._id {z-index: 2000;}`;"}
+      containerCss={"return `._id {z-index: 1;}`;"}
       dialogCss={
         "return `._id {width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;}`;"
       }

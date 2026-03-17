@@ -167,29 +167,31 @@ export function FormConfig() {
   return (
     <Suspense>
       <For each={layoutStore().openedFormIds}>
-        {(openedFormId) => (
-          <div
-            style={{
-              display:
-                layoutStore().formId === graph.vertexes[openedFormId].P.formId
-                  ? "block"
-                  : "none",
-            }}
-          >
-            <PageViewWrapper
-              dataId={graph.vertexes[openedFormId].P.dataId}
-              formDataId={graph.vertexes[openedFormId].P.formDataId}
-              hideSaveCancelButton={true}
-              isDesignMode={true}
-              isNoPermissionCheck={true}
-              pageVertexName={graph.vertexes[openedFormId].P.label}
-              parentId={graph.vertexes[openedFormId].P.parentId}
-              txnId={graph.vertexes[openedFormId].P.txnId}
-              uuid={graph.vertexes[openedFormId].P.formId}
-            />
-            {/* <TransactionDebugView openedFormId={openedFormId} /> */}
-          </div>
-        )}
+        {(openedFormId) => {
+          const label = () => graph.vertexes[openedFormId]?.P?.label as string;
+          const isActive = () =>
+            layoutStore().formId === graph.vertexes[openedFormId].P.formId;
+          if (label() === "Function") return null;
+          return (
+            <div
+              style={{
+                display: isActive() ? "block" : "none",
+              }}
+            >
+              <PageViewWrapper
+                dataId={graph.vertexes[openedFormId].P.dataId}
+                formDataId={graph.vertexes[openedFormId].P.formDataId}
+                hideSaveCancelButton={true}
+                isDesignMode={true}
+                isNoPermissionCheck={true}
+                pageVertexName={graph.vertexes[openedFormId].P.label}
+                parentId={graph.vertexes[openedFormId].P.parentId}
+                txnId={graph.vertexes[openedFormId].P.txnId}
+                uuid={graph.vertexes[openedFormId].P.formId}
+              />
+            </div>
+          );
+        }}
       </For>
     </Suspense>
   );

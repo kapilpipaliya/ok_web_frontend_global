@@ -64,6 +64,10 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
         if (key === "$not" && typeof value === "object") {
           return "NOT (" + translateFilter(value as MongoFilter) + ")";
         }
+        /** Filter: node has no outgoing edge of this type. Produces NOT EXISTS { MATCH (n)-[:EdgeType]->() } */
+        if (key === "__noOutgoingEdge__" && typeof value === "string") {
+          return `NOT EXISTS { MATCH (n)-[:\`${value}\`]->() }`;
+        }
         if (
           typeof value === "object" &&
           value !== null &&
@@ -79,6 +83,7 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
         params[paramName] = value;
         return `n.${key} = $${paramName}`;
       })
+      .filter(Boolean)
       .join(" AND ");
   };
 

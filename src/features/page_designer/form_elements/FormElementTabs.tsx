@@ -28,6 +28,7 @@ import {
 } from "../context/LayoutContext";
 import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
+import { FunctionsList } from "./functions/FunctionsList";
 import { openInNewInternalTab } from "./pages/functions/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
@@ -215,7 +216,7 @@ export function FormElementTabs() {
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
     { collection: "Page", title: "Pages" },
-    // { collection: "EmailTemplate", title: "Email Template" },
+    { collection: "Function", title: "Functions" },
   ];
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
 
@@ -287,6 +288,9 @@ export function FormElementTabs() {
                 </DesignerFormIdContext.Provider>
               </Show>
             </As>
+          </Match>
+          <Match when={selectedTab().collection === "Function"}>
+            <FunctionsList />
           </Match>
           <Match
             keyed

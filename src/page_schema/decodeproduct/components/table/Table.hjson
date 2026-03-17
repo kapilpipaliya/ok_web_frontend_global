@@ -8,7 +8,12 @@
         fns:
           '''
 
-const getColumns = () => args.fns.prop('columns') || [];
+const getColumns = () => {
+  const base = args.fns.prop('columns') || [];
+  const groupBy = getGroupByConfig();
+  if (groupBy) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
+  return base;
+};
 
 const getRowHeight = () => args.fns.prop('rowHeight') || 36;
 const getTitle = () => args.fns.prop('title');
@@ -46,6 +51,59 @@ const getOnRowClick = () => args.fns.prop('onRowClick');
 const [data, setData] = args.createSignal([]);
 const [filteredData, setFilteredData] = args.createSignal([]);
 
+const getGroupByConfig = () => args.fns.prop('groupBy') || null;
+const [collapsedKeys, setCollapsedKeys] = args.createStore({});
+const toggleExpanded = (key) => {
+  if (collapsedKeys[key]) {
+    setCollapsedKeys(key, undefined);
+  } else {
+    setCollapsedKeys(key, true);
+  }
+};
+const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
+  if (!filtered || filtered.length === 0) return [];
+  const getKey = (row) => {
+    const val = row?.P?.[groupByKey] ?? row?.[groupByKey];
+    return val != null ? String(val) : '';
+  };
+  const groups = new Map();
+  const keyOrder = [];
+  for (const row of filtered) {
+    const k = getKey(row);
+    if (!groups.has(k)) {
+      groups.set(k, []);
+      keyOrder.push(k);
+    }
+    groups.get(k).push(row);
+  }
+  const result = [];
+  for (const key of keyOrder) {
+    const rows = groups.get(key) || [];
+    const first = rows[0];
+    const parentRow = {
+      id: 'group-' + key,
+      _isParent: true,
+      _parentKey: key,
+      P: first?.P ? { ...first.P } : { [groupByKey]: key }
+    };
+    result.push(parentRow);
+    if (!collapsedObj[key]) {
+      for (const r of rows) {
+        result.push({ ...r, _isParent: false, _parentKey: key });
+      }
+    }
+  }
+  return result;
+};
+const getDisplayData = () => {
+  const g = getGroupByConfig();
+  const filtered = filteredData() || [];
+  if (!g) return filtered;
+  const key = typeof g === 'string' ? g : (g.key || '');
+  if (!key) return filtered;
+  return buildDisplayData(filtered, key, collapsedKeys);
+};
+
 const [searchTerm, setSearchTerm] = args.createSignal("");
 const [columnFilters, setColumnFilters] = args.createStore({});
 const [sortConfig, setSortConfig] = args.createStore({ column: null, direction: null });
@@ -59,11 +117,11 @@ const getSelectedRows = () => {
   return propFn();
 };
 
-// Selection filtered to current filteredData - avoids stale selection (e.g. after move or category switch)
+// Selection filtered to current display data - avoids stale selection (e.g. after move or category switch)
 const getEffectiveSelectedRows = () => {
   const selected = getSelectedRows();
-  const filtered = filteredData();
-  const currentIds = new Set((filtered || []).map(r => r?.id).filter(Boolean));
+  const displayed = getDisplayData();
+  const currentIds = new Set((displayed || []).map(r => r?.id).filter(Boolean));
   if (currentIds.size === 0) return new Set();
   return new Set([...selected].filter(id => currentIds.has(id)));
 };
@@ -375,6 +433,12 @@ const getCellValue = (row, column) => {
 
 // Render cell content based on column type
 const renderCellContent = (row, column, rowIndex) => {
+  if (column.type === 'expand' || column.key === '__expand') {
+    const parentKey = row._parentKey;
+    const isParent = row._isParent === true;
+    const isExpanded = parentKey != null && !collapsedKeys[parentKey];
+    return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
+  }
   const value = getCellValue(row, column);
 
   if (column.type === "rowNumber") {
@@ -698,8 +762,8 @@ const toggleRowSelection = (vertexId) => {
 };
 
 const selectAllRows = () => {
-  const filtered = filteredData();
-  const allVertexIds = new Set(filtered.map(row => row.id).filter(id => id !== undefined && id !== null));
+  const displayed = getDisplayData();
+  const allVertexIds = new Set((displayed || []).map(row => row.id).filter(id => id !== undefined && id !== null));
   setSelectedRows(allVertexIds);
 };
 
@@ -712,8 +776,8 @@ const [activeRowId, setActiveRowId] = args.createSignal(null);
 const getActiveRowIndex = () => {
   const id = activeRowId();
   if (id == null) return -1;
-  const filtered = filteredData();
-  const idx = filtered?.findIndex((r) => r?.id === id) ?? -1;
+  const displayed = getDisplayData();
+  const idx = (displayed && displayed.findIndex((r) => r && r.id === id)) ?? -1;
   return idx >= 0 ? idx : -1;
 };
 
@@ -1290,7 +1354,7 @@ return {
   clearSelection,
   activeRowId,
   activeRowIndex: getActiveRowIndex,
-  setActiveRowIndex: (rowIndex) => setActiveRowId(filteredData()?.[rowIndex]?.id ?? null),
+  setActiveRowIndex: (rowIndex) => setActiveRowId(getDisplayData()?.[rowIndex]?.id ?? null),
   setActiveRowId,
   handleAdd,
   handleEdit,
@@ -1307,7 +1371,12 @@ return {
   getSelectedItems,
   getSelectFilterProps,
   setRowRef,
-  getRowRef
+  getRowRef,
+  getDisplayData,
+  getGroupByConfig,
+  toggleExpanded,
+  collapsedKeys,
+  setCollapsedKeys
 };
 '''
         key: Table
@@ -1333,7 +1402,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 16px);
+  height: calc(100vh);
 }`;
 '''
         displayOrder: 1
@@ -2766,20 +2835,34 @@ return `._id {
           '''
 const isLoading = args.fns.loading();
 return {
-  items: args.fns.filteredData(),
+  items: args.fns.getDisplayData(),
   itemHeight: args.fns.getRowHeight(),
   containerClass: "table-body-list",
   hide: isLoading,
   tabIndex: 0,
   role: "listbox",
-  "attr:aria-label": "Table rows; use arrow keys to move, Space to toggle selection",
+  "attr:aria-label": "Table rows; use arrow keys to move, Left/Right to collapse/expand group, Space to toggle selection",
   getActiveIndex: () => args.fns.activeRowIndex?.(),
   setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
   getItemRef: (index) => args.fns.getRowRef?.(index),
   onSpaceKey: (index) => {
     if (!args.fns.getShowSelection?.()) return;
-    const row = args.fns.filteredData?.()?.[index];
+    const displayData = args.fns.getDisplayData();
+    const row = displayData[index];
     if (row?.id) args.fns.toggleRowSelection?.(row.id);
+  },
+  onExpandCollapse: (index, action) => {
+    const displayData = args.fns.getDisplayData?.() ?? [];
+    const row = displayData[index];
+    if (row?._isParent !== true || row._parentKey == null) return;
+    const parentKey = row._parentKey;
+    const setCollapsedKeysFn = args.fns.setCollapsedKeys;
+    if (!setCollapsedKeysFn) return;
+    if (action === "collapse") {
+      setCollapsedKeysFn(parentKey, true);
+    } else {
+      setCollapsedKeysFn(parentKey, undefined);
+    }
   }
 };
 '''
@@ -2838,7 +2921,7 @@ return {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[rowIndex];
+const rowData = args.fns.getDisplayData()[rowIndex];
 const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 const isActive = args.fns.activeRowId?.() === rowData?.id;
@@ -2872,7 +2955,7 @@ return [
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[rowIndex];
+const rowData = args.fns.getDisplayData()[rowIndex];
 
 const showSelection = args.fns.getShowSelection();
 const rowClickable = args.fns.getRowClickable?.();
@@ -2932,7 +3015,7 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[rowIndex];
+const rowData = args.fns.getDisplayData()[rowIndex];
 const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
@@ -2952,7 +3035,7 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[rowIndex];
+const rowData = args.fns.getDisplayData()[rowIndex];
 
 return {
   as: "div",
@@ -2994,7 +3077,7 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[rowIndex];
+const rowData = args.fns.getDisplayData()[rowIndex];
 const selectedRows = args.fns.getEffectiveSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
@@ -3044,7 +3127,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 
 return {
   as: "div",
@@ -3065,7 +3148,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 
 return {
   icon: "carbon:edit",
@@ -3100,7 +3183,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 const editLink = args.fns.prop('editLink');
 const getHrefFn = editLink?.getHref;
 const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
@@ -3145,7 +3228,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 const editLink = args.fns.prop('editLink');
 const getHrefFn = editLink?.getHref;
 const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
@@ -3187,7 +3270,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 
 return {
   icon: "carbon:trash-can",
@@ -3219,7 +3302,7 @@ const showRowNumber = args.fns.getShowRowNumber();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 
 return {
   data: showRowNumber 
@@ -3252,7 +3335,7 @@ const column = args.contextData.column;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return {
@@ -3275,11 +3358,25 @@ const column = args.contextData.column;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.filteredData()[virtualItem.index];
+const rowData = args.fns.getDisplayData()[virtualItem.index];
 const cellContent = args.fns.renderCellContent(rowData, column, rowIndex);
 
 // Handle different content types
 if (typeof cellContent === "object" && cellContent !== null) {
+  if (cellContent.type === "expand") {
+    const isParent = cellContent.isParent === true;
+    const isExpanded = cellContent.isExpanded === true;
+    const onToggle = cellContent.onToggle;
+    if (!isParent) return { as: "div", style: "width: 16px; flex-shrink: 0;" };
+    return {
+      as: "button",
+      type: "button",
+      style: "display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: none; background: transparent; cursor: pointer; border-radius: 4px; color: " + args.theme.var.color.text + ";",
+      "attr:aria-label": isExpanded ? "Collapse" : "Expand",
+      onClick: (e) => { e.stopPropagation(); onToggle?.(); },
+      text: isExpanded ? "▼" : "▶"
+    };
+  }
   if (cellContent.type === "image") {
     return {
       as: "img",

@@ -1,0 +1,244 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user content with filtering, sorting, and search support. Works with any tableVertexLabel.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: []
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { 
+  tableVertexLabel, 
+  search, 
+  filters = {}, 
+  sort = {},
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType,
+  enableUserScoping,
+  hooks,
+  elementIds,
+  onlyNotQueued
+} = args.contextData;
+
+if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
+  return {
+    success: false,
+    message: "tableVertexLabel is required and must be a string",
+    data: []
+  };
+}
+
+// Lightweight path: return only rows that are no longer queued (for background refresh without full reload)
+if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0) {
+  const query = `
+  MATCH (c:${tableVertexLabel})
+  WHERE elementId(c) IN $elementIds
+  AND (c.syncStatus IS NULL OR c.syncStatus <> 'queued')
+  OPTIONAL MATCH (c)-[r]->(related)
+  RETURN c, r, related
+  `;
+  const queryResult = await args.session.run(query, { elementIds });
+  args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+  const nodes = args.context.nodes || {};
+  const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
+  return {
+    success: true,
+    data: items,
+    relatedVertices: Object.values(nodes).filter(v => !v.L || !v.L.includes(tableVertexLabel)),
+    message: `Found ${items.length} row(s) no longer queued`
+  };
+}
+
+// Determine vertex label and relationship type based on tableVertexLabel
+const vertexLabel = tableVertexLabel;
+// Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
+const relationshipType = `User${vertexLabel}`;
+
+// Build WHERE clause for filters
+const whereConditions = [];
+const queryParams = enableUserScoping ? { userUuid: user.P.uuid } : {};
+
+// Add search filter
+if (search && search.trim()) {
+  const searchTerm = search.trim().toLowerCase();
+  whereConditions.push(`(
+    toLower(COALESCE(c.name, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.description, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.title, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.subTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.event, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.language, '')) CONTAINS $searchTerm
+  )`);
+  queryParams.searchTerm = searchTerm;
+}
+
+// Add column filters
+if (filters && typeof filters === "object") {
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== null && value !== "") {
+      const paramKey = `filter_${key}`;
+      // Support both single values and arrays (for multiple select filters)
+      if (Array.isArray(value) && value.length > 0) {
+        whereConditions.push(`c.${key} IN $${paramKey}`);
+        queryParams[paramKey] = value;
+      } else if (!Array.isArray(value)) {
+        whereConditions.push(`c.${key} = $${paramKey}`);
+        queryParams[paramKey] = value;
+      }
+    }
+  }
+}
+
+let whereClause = whereConditions.length > 0 
+  ? "WHERE " + whereConditions.join(" AND ")
+  : "";
+
+// Build ORDER BY clause
+let orderByClause = "";
+if (sort && sort.column) {
+  const direction = sort.direction === "desc" ? "DESC" : "ASC";
+  orderByClause = `ORDER BY c.${sort.column} ${direction}`;
+} else {
+  // Default sorting - try name first, then title, then createdAt
+  orderByClause = "ORDER BY COALESCE(c.name, c.title, '') ASC, c.createdAt DESC";
+}
+
+// Build category filter if provided
+let categoryFilter = "";
+if (categoryId && parentVertexLabel && toParentEdgeType) {
+  // Filter by category relationship - content points to category: content-[toParentEdgeType]->category
+  categoryFilter = `
+  MATCH (cat:${parentVertexLabel})
+  WHERE elementId(cat) = $categoryId
+  MATCH (c)-[:${toParentEdgeType}]->(cat)`;
+  queryParams.categoryId = categoryId;
+} else if (showUnassigned && parentVertexLabel && toParentEdgeType) {
+  // Show items without any category relationship
+  const unassignedCondition = `NOT EXISTS {
+    MATCH (c)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+  }`;
+  if (whereClause) {
+    whereClause = whereClause + " AND " + unassignedCondition;
+  } else {
+    whereClause = "WHERE " + unassignedCondition;
+  }
+}
+
+// Execute beforeFetchData hooks
+await args.executeHooks(hooks?.beforeFetchData, {
+  tableVertexLabel,
+  search,
+  filters,
+  sort,
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType,
+  enableUserScoping
+});
+
+// Optimized query with indexed user lookup first and related vertices
+let query = "";
+if (!enableUserScoping) {
+  if (categoryId && parentVertexLabel && toParentEdgeType) {
+    // Query with category filter - content points to category: content-[toParentEdgeType]->category
+    query = `
+    MATCH (cat:${parentVertexLabel})
+    WHERE elementId(cat) = $categoryId
+    MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else {
+    // Standard query without category filter
+    query = `
+    MATCH (c:${vertexLabel})
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  }
+} else {
+  if (categoryId && parentVertexLabel && toParentEdgeType) {
+    // Query with category filter - content points to category: content-[toParentEdgeType]->category
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (cat:${parentVertexLabel})
+    WHERE elementId(cat) = $categoryId
+    MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
+    MATCH (u)-[:${relationshipType}]->(c)
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else {
+    // Standard query without category filter
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
+    ${whereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  }
+}
+
+const queryResult = await args.session.run(query, queryParams);
+
+// Use processResult to populate graph structure (nodes + relationships)
+if (!args.context.nodes) args.context.nodes = {};
+if (!args.context.relationships) args.context.relationships = {};
+args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
+const nodes = args.context.nodes || {};
+const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
+
+const result = {
+  success: true,
+  data: items,
+  relatedVertices: Object.values(nodes).filter(v => !v.L || !v.L.includes(vertexLabel)),
+  message: `Found ${items.length} ${tableVertexLabel} item${items.length !== 1 ? 's' : ''}`
+};
+
+// Execute afterFetchData hooks
+await args.executeHooks(hooks?.afterFetchData, {
+  tableVertexLabel,
+  search,
+  filters,
+  sort,
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType,
+  enableUserScoping,
+  result: result
+});
+
+return result;
+'''
+        key: getUserContent
+      }
+    }
+  ]
+  edges: []
+}

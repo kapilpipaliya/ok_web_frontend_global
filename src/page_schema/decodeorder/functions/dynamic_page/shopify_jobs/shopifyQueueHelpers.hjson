@@ -1,0 +1,434 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Common helper functions for creating and managing BullMQ queue for Shopify after-hook jobs
+        body:
+          '''
+try {
+  const { Queue } = args.bullmq;
+
+  const getRedisConnection = () => {
+    return args.bullmq.redisConnection || {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+      maxLoadingRetryTime: 5000,
+      retryStrategy(times) {
+        if (times > 3) return null;
+        return Math.min(times * 200, 2000);
+      },
+      reconnectOnError(err) {
+        if (err.message && err.message.includes('READONLY')) return true;
+        return false;
+      }
+    };
+  };
+
+  const DEFAULT_JOB_OPTIONS = {
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 5000 },
+    removeOnComplete: 100,
+    removeOnFail: false
+  };
+
+  const createShopifyQueue = (args, queueName) => {
+    const connection = getRedisConnection();
+    return new Queue(queueName, { connection });
+  };
+
+  const createJobId = (queueName, shop, suffix) => {
+    const safeShop = (shop || '').replace(/[^a-z0-9-]/gi, '-');
+    const ts = Date.now();
+    return `${queueName}-${safeShop}-${suffix || 'job'}-${ts}`;
+  };
+
+  const addShopifyJob = async (queue, queueName, data, options = {}) => {
+    const shop = data.shop;
+    if (!shop) {
+      throw new Error('addShopifyJob requires data.shop');
+    }
+    const suffix = data.vertexId || data.elementId || data.categoryElementId || Date.now();
+    const jobId = options.jobId || createJobId(queueName, shop, String(suffix));
+    const jobOptions = {
+      ...DEFAULT_JOB_OPTIONS,
+      ...options,
+      jobId
+    };
+    const job = await queue.add(queueName, data, jobOptions);
+    return job;
+  };
+
+  const runWithSession = async (args, shop, callback) => {
+    if (!shop) throw new Error('runWithSession requires shop');
+    const shopDatabaseName = args.getDatabaseNameForShop(shop, args.rawSubDomain);
+    const driver = await args.getDriver();
+    const dbSession = driver.session({ database: shopDatabaseName });
+    try {
+      return await callback(dbSession, shopDatabaseName);
+    } finally {
+      await dbSession.close();
+    }
+  };
+
+  const getShopifyAdminForShop = async (args, shop) => {
+    if (!shop) return { admin: null, shop: null };
+    const shopify = await args.getShopifyClient();
+    try {
+      const authResult = await shopify.unauthenticated.admin(shop);
+      return { admin: authResult.admin, shop: authResult.session?.shop || shop };
+    } catch (authError) {
+      console.error("getShopifyAdminForShop: failed", authError);
+      return { admin: null, shop: null };
+    }
+  };
+
+  const buildNestedMenuItemsBatch = async (session, parentElementIds) => {
+    if (!parentElementIds || parentElementIds.length === 0) return new Map();
+    const childrenResult = await session.run(
+      `MATCH (parent:ShopifyProductCategory) WHERE elementId(parent) IN $parentIds
+       MATCH (child:ShopifyProductCategory)-[:ProductCategory]->(parent)
+       WHERE child.id IS NOT NULL
+       RETURN elementId(parent) as parentId, elementId(child) as elementId, child.name as name, child.id as shopifyId, child.handle as shopifyHandle
+       ORDER BY parentId, child.name`,
+      { parentIds: parentElementIds }
+    );
+    const byParent = new Map();
+    const childRows = [];
+    for (const r of childrenResult.records) {
+      const parentId = r.get('parentId');
+      const childElementId = r.get('elementId');
+      const shopifyId = r.get('shopifyId');
+      if (!shopifyId) continue;
+      if (!byParent.has(parentId)) byParent.set(parentId, []);
+      byParent.get(parentId).push({ elementId: childElementId, name: r.get('name'), shopifyId, shopifyHandle: r.get('shopifyHandle') });
+      childRows.push({ parentId, elementId: childElementId, name: r.get('name'), shopifyId });
+    }
+    const childIds = [...new Set(childRows.map(c => c.elementId))];
+    let nestedMap = new Map();
+    if (childIds.length > 0) {
+      nestedMap = await buildNestedMenuItemsBatch(session, childIds);
+    }
+    const result = new Map();
+    for (const [parentId, children] of byParent) {
+      const items = children.map(c => ({
+        title: c.name,
+        type: "COLLECTION",
+        resourceId: c.shopifyId,
+        items: nestedMap.get(c.elementId) || []
+      }));
+      result.set(parentId, items);
+    }
+    return result;
+  };
+
+  const buildNestedMenuItems = async (session, parentElementId) => {
+    if (!parentElementId) return { success: false, error: "parentElementId is required", menuItems: [] };
+    const batchResult = await buildNestedMenuItemsBatch(session, [parentElementId]);
+    const menuItems = batchResult.get(parentElementId) || [];
+    return { success: true, menuItems };
+  };
+
+  const deleteShopifyMenuLogic = async (args, session, contextData) => {
+    const { menuId, categoryElementId, shop } = contextData || {};
+    if (!menuId) return { success: false, error: "menuId is required" };
+    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(args, shop);
+    if (!resolvedShop || !admin) return { success: false, error: "shop and admin are required" };
+    const deleteMenuMutation = `mutation menuDelete($id: ID!) { menuDelete(id: $id) { deletedMenuId userErrors { field message } } }`;
+    const deleteResponse = await admin.graphql(deleteMenuMutation, { variables: { id: menuId } });
+    const deleteApiResponse = deleteResponse instanceof Response ? await deleteResponse.json() : deleteResponse;
+    if (deleteApiResponse.errors && deleteApiResponse.errors.length > 0)
+      return { success: false, error: "Error deleting menu", details: deleteApiResponse.errors };
+    const userErrors = deleteApiResponse.data?.menuDelete?.userErrors || [];
+    if (userErrors.length > 0) return { success: false, error: "User errors deleting menu", details: userErrors };
+    if (categoryElementId) {
+      await session.run(
+        `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId REMOVE c.menuId, c.menuHandle`,
+        { elementId: categoryElementId }
+      );
+    }
+    return { success: true, deletedMenuId: deleteApiResponse.data?.menuDelete?.deletedMenuId };
+  };
+
+  const createShopifyMenuForCategoryLogic = async (args, session, contextData) => {
+    const { categoryElementId, categoryName, shop } = contextData || {};
+    if (!categoryElementId || !categoryName) return { success: false, error: "categoryElementId and categoryName are required" };
+    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(args, shop);
+    if (!resolvedShop || !admin) return { success: false, error: "shop and admin are required" };
+    const menuHandle = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const nested = await buildNestedMenuItems(session, categoryElementId);
+    const menuItems = nested.success ? (nested.menuItems || []) : [];
+    const createMenuMutation = `mutation menuCreate($title: String!, $handle: String!, $items: [MenuItemCreateInput!]!) {
+      menuCreate(title: $title, handle: $handle, items: $items) { menu { id handle title items { id title type resourceId } } userErrors { field message } } }`;
+    const createResponse = await admin.graphql(createMenuMutation, { variables: { title: categoryName, handle: menuHandle, items: menuItems } });
+    const createApiResponse = createResponse instanceof Response ? await createResponse.json() : createResponse;
+    if (createApiResponse.errors && createApiResponse.errors.length > 0)
+      return { success: false, error: "Shopify GraphQL errors", details: createApiResponse.errors };
+    const userErrors = createApiResponse.data?.menuCreate?.userErrors || [];
+    if (userErrors.length > 0) return { success: false, error: "User errors creating menu", details: userErrors };
+    const newMenu = createApiResponse.data?.menuCreate?.menu;
+    if (!newMenu) return { success: false, error: "Menu creation succeeded but no menu returned" };
+    await session.run(
+      `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.menuId = $menuId, c.menuHandle = $menuHandle, c.updatedAt = datetime()`,
+      { elementId: categoryElementId, menuId: newMenu.id, menuHandle: newMenu.handle }
+    );
+    return { success: true, menu: newMenu, menuId: newMenu.id, menuHandle: newMenu.handle };
+  };
+
+  const updateShopifyMenuForCategoryLogic = async (args, session, contextData) => {
+    const { categoryElementId, categoryName, menuId, shop } = contextData || {};
+    if (!categoryElementId || !categoryName || !menuId) return { success: false, error: "categoryElementId, categoryName, and menuId are required" };
+    const { admin, shop: resolvedShop } = await getShopifyAdminForShop(args, shop);
+    if (!resolvedShop || !admin) return { success: false, error: "shop and admin are required" };
+    const nested = await buildNestedMenuItems(session, categoryElementId);
+    const menuItems = nested.success ? (nested.menuItems || []) : [];
+    const updateMenuMutation = `mutation menuUpdate($id: ID!, $title: String!, $items: [MenuItemUpdateInput!]!) {
+      menuUpdate(id: $id, title: $title, items: $items) { menu { id handle title items { id title type resourceId } } userErrors { field message } } }`;
+    const updateResponse = await admin.graphql(updateMenuMutation, { variables: { id: menuId, title: categoryName, items: menuItems } });
+    const updateApiResponse = updateResponse instanceof Response ? await updateResponse.json() : updateResponse;
+    if (updateApiResponse.errors && updateApiResponse.errors.length > 0)
+      return { success: false, error: "Shopify GraphQL errors", details: updateApiResponse.errors };
+    const userErrors = updateApiResponse.data?.menuUpdate?.userErrors || [];
+    if (userErrors.length > 0) {
+      const menuNotFoundError = userErrors.find(e => e.message && e.message.toLowerCase().includes('menu does not exist'));
+      if (menuNotFoundError) {
+        const createResult = await createShopifyMenuForCategoryLogic(args, session, { categoryElementId, categoryName, shop });
+        if (createResult.success) return createResult;
+        return { success: false, error: "Failed to create menu after update failed", details: createResult.error };
+      }
+      return { success: false, error: "User errors updating menu", details: userErrors };
+    }
+    const updatedMenu = updateApiResponse.data?.menuUpdate?.menu;
+    if (!updatedMenu) return { success: false, error: "Menu update succeeded but no menu returned" };
+    await session.run(
+      `MATCH (c:ShopifyProductCategory) WHERE elementId(c) = $elementId SET c.menuId = $menuId, c.menuHandle = $menuHandle, c.updatedAt = datetime()`,
+      { elementId: categoryElementId, menuId: updatedMenu.id, menuHandle: updatedMenu.handle }
+    );
+    return { success: true, menu: updatedMenu, menuId: updatedMenu.id, menuHandle: updatedMenu.handle };
+  };
+
+  const BATCH_CHUNK_SIZE = 50;
+  const PAYLOAD_SIZE_LIMIT = 900 * 1024;
+  const MAX_HTTP_RETRIES = 3;
+  const RETRY_DELAYS = [1000, 2000, 4000];
+
+  const ensureProductGid = (id) => {
+    if (!id) return null;
+    const s = String(id);
+    return s.startsWith('gid://') ? s : `gid://shopify/Product/${s}`;
+  };
+
+  // Build full ShopifyProduct props from webhook payload (same keys as shopifyProductBeforeFetchData)
+  const propsFromWebhookPayload = (payload) => {
+    const variants = payload.variants || [];
+    const now = new Date().toISOString();
+    const id = ensureProductGid(payload.admin_graphql_api_id || payload.id);
+    return {
+      id,
+      title: payload.title || '',
+      handle: payload.handle || '',
+      descriptionHtml: payload.body_html || payload.description_html || '',
+      vendor: payload.vendor || '',
+      productType: payload.product_type || '',
+      status: (payload.status || 'draft').toUpperCase(),
+      tags: Array.isArray(payload.tags) ? payload.tags : [],
+      createdAt: payload.created_at || now,
+      updatedAt: payload.updated_at || now,
+      publishedAt: payload.published_at || null,
+      onlineStoreUrl: payload.online_store_url || payload.onlineStoreUrl || null,
+      totalInventory: payload.total_inventory ?? 0,
+      tracksInventory: payload.tracks_inventory ?? false,
+      variantsCount: variants.length || 0,
+      variants: JSON.stringify(variants),
+      media: JSON.stringify(payload.media || []),
+      metafields: JSON.stringify(payload.metafields || []),
+      collections: JSON.stringify(payload.collections || []),
+      options: JSON.stringify(payload.options || []),
+      category: payload.category ? JSON.stringify(payload.category) : null,
+      syncStatus: 'complete'
+    };
+  };
+
+  const batchGetProductTags = async (admin, shopifyIds) => {
+    const result = new Map();
+    const ids = shopifyIds.filter(Boolean);
+    for (let i = 0; i < ids.length; i += BATCH_CHUNK_SIZE) {
+      const chunk = ids.slice(i, i + BATCH_CHUNK_SIZE);
+      const queryParts = [];
+      const variables = {};
+      chunk.forEach((id, idx) => {
+        const varName = `id${idx}`;
+        variables[varName] = ensureProductGid(id);
+        queryParts.push(`p${idx}: product(id: $${varName}) { id tags }`);
+      });
+      const query = `query batchGetProductTags(${chunk.map((_, idx) => `$id${idx}: ID!`).join(', ')}) { ${queryParts.join(' ') } }`;
+      for (let attempt = 0; attempt <= MAX_HTTP_RETRIES; attempt++) {
+        try {
+          const response = await admin.graphql(query, { variables });
+          const apiResponse = response instanceof Response ? await response.json() : response;
+          if (apiResponse.errors && apiResponse.errors.length > 0) {
+            throw new Error(JSON.stringify(apiResponse.errors));
+          }
+          const data = apiResponse.data || {};
+          chunk.forEach((id, idx) => {
+            const product = data[`p${idx}`];
+            if (product) result.set(id, product.tags || []);
+          });
+          break;
+        } catch (e) {
+          const status = e?.status || e?.response?.status;
+          const isRetryable = status === 429 || (status >= 500 && status < 600);
+          if (isRetryable && attempt < MAX_HTTP_RETRIES) {
+            await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt]));
+          } else throw e;
+        }
+      }
+    }
+    return result;
+  };
+
+  const batchUpdateProductTags = async (admin, updates) => {
+    const successList = [];
+    const failedList = [];
+    if (updates.length > 2000) {
+      for (const u of updates) failedList.push({ ...u, error: 'Bulk operation not implemented; max 2000 products' });
+      return { success: successList, failed: failedList };
+    }
+    let i = 0;
+    while (i < updates.length) {
+      let chunkSize = BATCH_CHUNK_SIZE;
+      let chunk = updates.slice(i, i + chunkSize);
+      let mutationParts = [];
+      let variables = {};
+      const buildChunk = (c) => {
+        mutationParts = [];
+        variables = {};
+        c.forEach((u, idx) => {
+          const varName = `input${idx}`;
+          variables[varName] = { id: ensureProductGid(u.shopifyId), tags: u.tags || [] };
+          mutationParts.push(`m${idx}: productSet(synchronous: true, input: $${varName}) { product { id tags } userErrors { field message } }`);
+        });
+      };
+      buildChunk(chunk);
+      let payloadSize = JSON.stringify({ query: '', variables }).length;
+      while (payloadSize > PAYLOAD_SIZE_LIMIT && chunk.length > 1) {
+        chunkSize = Math.max(1, Math.floor(chunkSize / 2));
+        chunk = updates.slice(i, i + chunkSize);
+        buildChunk(chunk);
+        payloadSize = JSON.stringify({ query: '', variables }).length;
+      }
+      const mutation = `mutation batchUpdateProductTags(${chunk.map((_, idx) => `$input${idx}: ProductSetInput!`).join(', ')}) { ${mutationParts.join(' ')} }`;
+      for (let attempt = 0; attempt <= MAX_HTTP_RETRIES; attempt++) {
+        try {
+          const response = await admin.graphql(mutation, { variables });
+          const apiResponse = response instanceof Response ? await response.json() : response;
+          if (apiResponse.errors && apiResponse.errors.length > 0) {
+            for (const u of chunk) failedList.push({ ...u, error: JSON.stringify(apiResponse.errors).substring(0, 500) });
+            break;
+          }
+          const data = apiResponse.data || {};
+          chunk.forEach((u, idx) => {
+            const payload = data[`m${idx}`];
+            const userErrors = payload?.userErrors || [];
+            if (userErrors.length > 0) {
+              failedList.push({ ...u, error: userErrors.map(e => e.message).join('; ').substring(0, 500) });
+            } else if (payload?.product) {
+              successList.push(u);
+            } else {
+              failedList.push({ ...u, error: 'No product in response' });
+            }
+          });
+          break;
+        } catch (e) {
+          const status = e?.status || e?.response?.status;
+          const isRetryable = status === 429 || (status >= 500 && status < 600);
+          if (isRetryable && attempt < MAX_HTTP_RETRIES) {
+            await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt]));
+          } else {
+            for (const u of chunk) failedList.push({ ...u, error: (e?.message || String(e)).substring(0, 500) });
+            break;
+          }
+        }
+      }
+      i += chunk.length;
+    }
+    return { success: successList, failed: failedList };
+  };
+
+  const updateTopLevelCategoryMenuLogic = async (args, session, contextData) => {
+    const { categoryElementId, shop } = contextData || {};
+    if (!categoryElementId) return { success: false, error: "categoryElementId is required" };
+    const topLevelResult = await session.run(
+      `MATCH (category:ShopifyProductCategory) WHERE elementId(category) = $categoryElementId
+       OPTIONAL MATCH path = (category)-[:ProductCategory*]->(topLevel:ShopifyProductCategory) WHERE NOT EXISTS((topLevel)-[:ProductCategory]->())
+       WITH topLevel, category ORDER BY length(path) DESC LIMIT 1
+       WITH COALESCE(topLevel, category) as node
+       RETURN elementId(node) as topLevelId, node.name as topLevelName, node.menuId as menuId, node.id as shopifyId,
+              NOT EXISTS((node)-[:ProductCategory]->()) as isTopLevel`,
+      { categoryElementId }
+    );
+    if (topLevelResult.records.length === 0) return { success: false, error: "Could not find category" };
+    const topLevel = topLevelResult.records[0];
+    const topLevelId = topLevel.get('topLevelId');
+    const topLevelName = topLevel.get('topLevelName');
+    const topLevelMenuId = topLevel.get('menuId');
+    const topLevelShopifyId = topLevel.get('shopifyId');
+    const isTopLevel = topLevel.get('isTopLevel') ?? true;
+    if (!topLevelShopifyId) return { success: false, error: "Top-level category does not have Shopify ID" };
+    if (!isTopLevel) {
+      if (topLevelMenuId) {
+        const deleteResult = await deleteShopifyMenuLogic(args, session, { menuId: topLevelMenuId, categoryElementId: topLevelId, shop });
+        if (deleteResult.success) return { success: true, action: "deleted", message: `Deleted menu for category "${topLevelName}" that is no longer top-level`, topLevelId };
+        return { success: false, error: "Failed to delete menu", details: deleteResult.error };
+      }
+      return { success: true, action: "skipped", message: "Category is no longer top-level and has no menu to delete", topLevelId };
+    }
+    if (topLevelMenuId) {
+      const updateResult = await updateShopifyMenuForCategoryLogic(args, session, { categoryElementId: topLevelId, categoryName: topLevelName, menuId: topLevelMenuId, shop });
+      if (updateResult.success) return { success: true, action: "updated", message: `Updated menu for top-level category "${topLevelName}"`, topLevelId };
+      return { success: false, error: "Failed to update menu", details: updateResult.error };
+    }
+    const createResult = await createShopifyMenuForCategoryLogic(args, session, { categoryElementId: topLevelId, categoryName: topLevelName, shop });
+    if (createResult.success) return { success: true, action: "created", message: `Created menu for top-level category "${topLevelName}"`, topLevelId };
+    return { success: false, error: "Failed to create menu", details: createResult.error };
+  };
+
+  return {
+    success: true,
+    data: {
+      getRedisConnection,
+      createShopifyQueue,
+      addShopifyJob,
+      createJobId,
+      runWithSession,
+      DEFAULT_JOB_OPTIONS,
+      getShopifyAdminForShop,
+      ensureProductGid,
+      propsFromWebhookPayload,
+      batchGetProductTags,
+      batchUpdateProductTags,
+      buildNestedMenuItems,
+      buildNestedMenuItemsBatch,
+      deleteShopifyMenuLogic,
+      createShopifyMenuForCategoryLogic,
+      updateShopifyMenuForCategoryLogic,
+      updateTopLevelCategoryMenuLogic
+    }
+  };
+} catch (error) {
+  console.error("Error in shopifyQueueHelpers:", error);
+  return {
+    success: false,
+    error: error.message
+  };
+}
+'''
+        key: shopifyQueueHelpers
+      }
+    }
+  ]
+  edges: []
+}

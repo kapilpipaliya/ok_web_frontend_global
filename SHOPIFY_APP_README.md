@@ -85,7 +85,7 @@ When a merchant loads the embedded app, Shopify sends a request with query param
 If the shop hasn't been authorized yet, redirect to OAuth:
 
 ```javascript
-const shopify = args.getShopifyClient();
+const shopify = await args.getShopifyClient();
 const authUrl = await shopify.auth.begin({
   shop: "example.myshopify.com",
   callbackPath: "/api/shopify/auth",
@@ -229,7 +229,7 @@ return {
 
 ```javascript
 // In a server function
-const shopify = args.getShopifyClient();
+const shopify = await args.getShopifyClient();
 const sessionStore = args.getNeo4jSessionStore();
 
 // Get session
@@ -264,7 +264,7 @@ Returns the configured Shopify API object. This is a singleton instance with Neo
 
 **Usage**:
 ```javascript
-const shopify = args.getShopifyClient();
+const shopify = await args.getShopifyClient();
 ```
 
 ### `getNeo4jSessionStore()`

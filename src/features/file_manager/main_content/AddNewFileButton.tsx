@@ -1,8 +1,8 @@
 import { FileUploader } from "~/components/styled/FileUploader";
 import { useToast } from "~/components/styled/modal/Toast";
+import { postAPI } from "~/lib/api/general/postApi";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { uploadFile } from "~/lib/api/uploadFile";
 import { evalExpression } from "~/lib/expression_eval";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
@@ -12,6 +12,7 @@ import { parentDirectory } from "~/lib/meta/file/File";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { UNCATEGORIZED_ID } from "../sidebar/getFilesData";
 import { getFolderFormSchema } from "./folderFormSchema";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -34,7 +35,9 @@ export function AddNewFileButton() {
       throw new Error("No file provided");
     }
     try {
-      const data = await uploadFile(file, API.file.uploadFileUrl);
+      const formData = new FormData();
+      formData.append("file", file);
+      const data = await postAPI(API.file.uploadFileUrl, formData);
       return data;
     } catch (error) {
       console.error("Upload error:", error);
@@ -46,6 +49,15 @@ export function AddNewFileButton() {
     const currentItem = fileManagerStore.selectedItem;
     if (!currentItem) {
       return;
+    }
+    // When Uncategorized is selected, do not create a ParentFolder edge (file stays uncategorized)
+    if (currentItem.id === UNCATEGORIZED_ID) {
+      try {
+        fileManagerStore.gridStore?.[0].fetchTableData();
+      } catch {
+        // no-op
+      }
+      return true;
     }
     const folder: Vertex =
       currentItem.L[0] === "Folder"
@@ -122,7 +134,6 @@ export function AddNewFileButton() {
       });
     } catch (error) {
       console.error("Error in file upload process:", error);
-      showErrorToast("Failed to upload file");
     }
   };
 

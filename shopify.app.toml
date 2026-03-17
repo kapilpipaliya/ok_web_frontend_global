@@ -25,6 +25,19 @@ uri = "/webhooks/products/update"
 topics = ["products/delete"]
 uri = "/webhooks/products/delete"
 
+# Order lifecycle webhooks
+[[webhooks.subscriptions]]
+topics = ["orders/create"]
+uri = "/webhooks/orders/create"
+
+[[webhooks.subscriptions]]
+topics = ["orders/updated"]
+uri = "/webhooks/orders/update"
+
+[[webhooks.subscriptions]]
+topics = ["orders/cancelled"]
+uri = "/webhooks/orders/delete"
+
 # Mandatory compliance webhooks (required for App Store)
 [[webhooks.subscriptions]]
 compliance_topics = ["customers/data_request"]

@@ -1,0 +1,1218 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''// Memoized signals are defined first to ensure all dependent functions can use them.
+const [memoizedConfig, setMemoizedConfig] = args.createSignal(null);
+const [memoizedLoadFromSetting, setMemoizedLoadFromSetting] = args.createSignal(false);
+const [isSettingsModalOpen, setIsSettingsModalOpen] = args.createSignal(false);
+const [settingsModalInitialConfig, setSettingsModalInitialConfig] = args.createSignal(null);
+const [settings, setSettings] = args.createSignal(null);
+const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+const [configLoading, setConfigLoading] = args.createSignal(true);
+const [selectedSidebarItem, setSelectedSidebarItem] = args.createSignal(null);
+// Store selected rows per category (keyed by category ID or 'uncategorized' or null)
+const [selectedRowsByCategory, setSelectedRowsByCategory] = args.createStore({});
+// Sidebar width state (default 240px)
+const [sidebarWidth, setSidebarWidth] = args.createSignal(240);
+// Rows to remove from table after move-to-category (parent-owned state, Table reacts via createEffect)
+const [rowsToRemove, setRowsToRemove] = args.createSignal(null);
+
+// Basic context/prop accessors
+const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
+const getConfigFunction = () => args.contextData.props?.configFunction;
+
+// Helper to get cached config (and trigger memo evaluation if needed)
+const getCachedConfig = () => {
+  const cached = memoizedConfig();
+  if (cached !== null) {
+    return { config: cached, loadFromSetting: memoizedLoadFromSetting() };
+  }
+  updateMemoizedConfig();
+  return { config: memoizedConfig(), loadFromSetting: memoizedLoadFromSetting() };
+};
+
+// Get props from context or evaluated config (optimized - single config evaluation per render)
+const prop = (p) => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config[p];
+  }
+  return args.contextData.props[p];
+};
+
+// Common function to extract error message from response
+// Returns error message string or null if no error
+// Optionally shows toast notification if showToast is true
+const extractError = (result, showToast = false, defaultMessage = null) => {
+  if (!result) return defaultMessage;
+
+  // Check top-level error
+  if (result.error) {
+    if (showToast) {
+      args.showErrorToast?.(result.error);
+    }
+    return result.error;
+  }
+
+  // Check result-level error
+  if (result.result?.error) {
+    if (showToast) {
+      args.showErrorToast?.(result.result.error);
+    }
+    return result.result.error;
+  }
+
+  // Check success: false with message
+  if (result.result && result.result.success === false) {
+    const errorMessage = result.result.message || result.result.error || defaultMessage;
+    if (errorMessage && showToast) {
+      args.showErrorToast?.(errorMessage);
+    }
+    return errorMessage;
+  }
+
+  return null;
+};
+
+// Functions invoked by "get*" which must be defined before their usages
+const getGenericSettingsFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async () => {
+    try {
+      const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+        tableVertexLabel,
+        key: `${tableVertexLabel}_settings`
+      });
+
+      // Check for errors and show toast
+      const errorMessage = extractError(result, true, "Failed to load settings");
+      if (errorMessage) {
+        return { success: false, data: { setting: null } };
+      }
+
+      // Return successful result
+      if (result?.result?.success && result.result.data?.setting) {
+        return result.result;
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+      args.showErrorToast?.(error?.message || "Failed to load settings");
+    }
+    return { success: false, data: { setting: null } };
+  };
+};
+const getGenericDataFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async (filters = {}) => {
+    try {
+      const sidebarItem = selectedSidebarItem();
+      const sidebarConfig = getSidebarConfig();
+
+      // Get config to check user scoping settings and hooks
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+      // Get config to check if local filters/sort are enabled
+      const enableLocalFilters = config?.enableLocalFilters === true;
+      const enableLocalSort = config?.enableLocalSort === true;
+
+      // Build filter parameters
+      // Skip filters/sort if local filtering/sorting is enabled
+      const filterParams = {
+        tableVertexLabel,
+        search: enableLocalFilters ? undefined : filters.search,
+        filters: enableLocalFilters ? undefined : filters.filters,
+        sort: enableLocalSort ? undefined : filters.sort,
+        enableUserScoping: enableUserScopingForContent
+      };
+
+      // Add sidebar filtering if item is selected
+      if (sidebarItem && sidebarConfig) {
+        const rootKeys = sidebarConfig.rootKeys || {};
+        const rootKey = rootKeys.key;
+
+        // If root key or 'uncategorized' is selected, show items without any category relationship
+        if (sidebarItem.P?.key === rootKey || sidebarItem.P?.key === 'uncategorized') {
+          filterParams.showUnassigned = true;
+          filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+          filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+        } else {
+          // Filter by selected category
+          filterParams.categoryId = sidebarItem.id;
+          filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+          filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+        }
+      }
+
+      // Pass hooks to server function - hooks will be executed server-side
+      filterParams.hooks = config?.hooks;
+
+      const result = await args.fns.executeYTOFunction("getUserContent", filterParams);
+
+      // Check for errors and show toast
+      const errorMessage = extractError(result, true, "Failed to load data");
+      if (errorMessage) {
+        return { data: [] };
+      }
+
+      // Return successful result
+      if (result?.result?.success && result.result.data) {
+        return { data: Array.isArray(result.result.data) ? result.result.data : [] };
+      }
+
+      return { data: [] };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    args.showErrorToast?.("Failed to load data");
+    return { data: [] };
+  }
+  };
+};
+
+// Background refresh: fetch only rows that are no longer queued (no loader, no full reload)
+const refreshQueuedRows = async (elementIds) => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel || !Array.isArray(elementIds) || elementIds.length === 0) return { success: true, data: [] };
+  try {
+    const result = await args.fns.executeYTOFunction("getUserContent", { tableVertexLabel, elementIds, onlyNotQueued: true });
+    if (result?.result?.success && result.result.data) return { success: true, data: result.result.data };
+  } catch (e) { console.error("refreshQueuedRows:", e); }
+  return { success: true, data: [] };
+};
+
+// Helper function to get sidebar config (needed by updateSidebarCategoryCount)
+// This is a simplified version that will be replaced by the full getSidebarConfig later
+const getSidebarConfigForCount = () => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config?.sidebar;
+  }
+  return args.contextData.props?.sidebar || config?.sidebar;
+};
+
+// Update sidebar category count after adding/deleting items
+// Note: This uses getSidebarConfigForCount which will be replaced by getSidebarConfig
+// when it's defined later. This ensures the function is available when getGenericSaveFunction is called.
+const updateSidebarCategoryCount = (categoryId, increment = 1) => {
+  if (!categoryId) return;
+
+  const sidebarConfig = getSidebarConfigForCount();
+  if (!sidebarConfig) return;
+
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+
+  // Check if it's uncategorized
+  if (categoryId === 'uncategorized' || categoryId === rootKey) {
+    // For uncategorized, update the uncategorized vertex directly if it exists
+    const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+    if (uncategorizedVertex) {
+      const currentCount = uncategorizedVertex.P?.contentCount ?? 0;
+      const newCount = Math.max(0, currentCount + increment);
+      args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+        contentCount: newCount
+      });
+    }
+    return;
+  }
+
+  // For regular categories, update the count directly
+  const categoryVertex = args.graph?.vertexes?.[categoryId];
+  if (categoryVertex) {
+    const currentCount = categoryVertex.P?.contentCount ?? 0;
+    const newCount = Math.max(0, currentCount + increment);
+    args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+      contentCount: newCount
+    });
+  }
+};
+
+const getGenericSaveFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async ({ mode, data, originalRow }) => {
+    let uniqueKeys = [];
+    const config = evaluateConfig();
+    uniqueKeys = config?.uniqueKeys || [];
+    try {
+      let apiData;
+      if (mode === "delete") {
+        if (originalRow && (originalRow.L || originalRow.id)) {
+          apiData = {
+            vertex: originalRow,
+            relationships: {}
+          };
+        } else {
+          apiData = {
+            vertex: {
+              id: originalRow?.id,
+              L: originalRow?.L || [],
+              P: originalRow?.P || originalRow || {},
+              IN: originalRow?.IN || {},
+              OUT: originalRow?.OUT || {}
+            },
+            relationships: {}
+          };
+        }
+      } else {
+        apiData = data;
+      }
+
+      // Get config to check user scoping settings and hooks
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+      const result = await args.fns.executeYTOFunction("mutateUserContent", {
+        tableVertexLabel,
+        operation: mode === "add" ? "create" : mode === "edit" ? "update" : "delete",
+        data: apiData,
+        elementId: originalRow?.id,
+        uniqueKeys: uniqueKeys,
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks
+      });
+
+      // If adding a new item and sidebar item is selected, add relationship FROM sidebar item TO new content
+      if (mode === "add" && result?.result?.success && result.result.data) {
+        const sidebarItem = selectedSidebarItem();
+        const sidebarConfig = getSidebarConfig();
+
+        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
+          const rootKeys = sidebarConfig.rootKeys || {};
+          const rootKey = rootKeys.key;
+
+          // Don't add relationship if root key or 'uncategorized' is selected
+          if (sidebarItem.P?.key !== rootKey && sidebarItem.P?.key !== 'uncategorized') {
+            // Get config to check user scoping settings
+            const { config } = getCachedConfig();
+            const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+            const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+            // Create relationship: Category -[toParentEdgeType]-> ContentItem
+            try {
+              const newContentId = result.result.data.id;
+              await args.fns.executeYTOFunction("createSidebarContentRelationship", {
+                categoryId: sidebarItem.id,
+                contentId: newContentId,
+                relationshipType: sidebarConfig.toParentEdgeType,
+                categoryLabel: sidebarConfig.parentVertexLabel,
+                contentLabel: tableVertexLabel,
+                enableUserScopingForSidebar: enableUserScopingForSidebar,
+                enableUserScopingForContent: enableUserScopingForContent,
+                hooks: config?.hooks
+              });
+
+              // Update category count - increment by 1
+              updateSidebarCategoryCount(sidebarItem.id, 1);
+            } catch (relError) {
+              console.error("Error creating sidebar relationship:", relError);
+              // Don't fail the whole operation if relationship creation fails
+            }
+          } else {
+            // For uncategorized items, update the uncategorized vertex directly if it exists
+            updateSidebarCategoryCount('uncategorized', 1);
+          }
+        }
+      }
+
+      // If deleting an item, decrement the category count
+      if (mode === "delete" && result?.result?.success && originalRow) {
+        const sidebarItem = selectedSidebarItem();
+        const sidebarConfig = getSidebarConfig();
+
+        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
+          const rootKeys = sidebarConfig.rootKeys || {};
+          const rootKey = rootKeys.key;
+
+          // Use the currently selected sidebar item to determine which category to decrement
+          if (sidebarItem.P?.key === rootKey || sidebarItem.P?.key === 'uncategorized') {
+            // If uncategorized is selected, decrement uncategorized count
+            updateSidebarCategoryCount('uncategorized', -1);
+          } else if (sidebarItem.id) {
+            // Decrement the selected category's count
+            updateSidebarCategoryCount(sidebarItem.id, -1);
+          }
+        }
+      }
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to save");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, data: result.result.data };
+      }
+
+      return { success: false, message: "Failed to save" };
+    } catch (error) {
+      console.error("Error saving:", error);
+      return { success: false, message: error.message || "Failed to save" };
+    }
+  };
+};
+const getGenericSaveSettingsFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async (configText) => {
+    try {
+      const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
+        tableVertexLabel,
+        key: `${tableVertexLabel}_settings`,
+        config: configText
+      });
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to save settings");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, message: result.result.message || "Settings saved successfully" };
+      }
+
+      return { success: false, message: "Failed to save settings" };
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      return { success: false, message: error?.message || "Failed to save settings" };
+    }
+  };
+};
+const getGenericImportFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async ({ data }) => {
+    try {
+      // Get config to check user scoping settings and hooks
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+      const result = await args.fns.executeYTOFunction("importUserContent", {
+        tableVertexLabel,
+        data,
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks
+      });
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to import data");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, message: result.result.message };
+      }
+
+      return { success: false, message: "Failed to import data" };
+    } catch (error) {
+      console.error("Error importing data:", error);
+      return { success: false, message: error.message || "Failed to import data" };
+    }
+  };
+};
+const getGenericExportFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async ({ data, columns }) => {
+    try {
+      const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+      // Get config to check user scoping settings and hooks
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+      const result = await args.fns.executeYTOFunction("exportUserContent", {
+        tableVertexLabel,
+        format: "csv",
+        data: data,
+        columns: sanitizedColumns,
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks
+      });
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to export data");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return {
+          success: true,
+          data: result.result.data,
+          tableVertexLabel: result.result.tableVertexLabel,
+          filename: result.result.filename
+        };
+      }
+
+      return { success: false, message: "Failed to export data" };
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      return { success: false, message: error.message || "Failed to export data" };
+    }
+  };
+};
+
+// Functions that may depend on previous definitions
+const getDataFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting && args.contextData.props?.dataFunction != null) {
+    return args.contextData.props.dataFunction;
+  }
+  if (loadFromSetting) {
+    return getGenericDataFunction();
+  }
+  return prop('dataFunction');
+};
+const getSettingsFunction = () => {
+  const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting) {
+    return getGenericSettingsFunction();
+  }
+  return prop('settingsFunction');
+};
+const getFormConfig = () => {
+  const formConfig = prop('formConfig');
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting && formConfig && !formConfig.saveFunction) {
+    // Add generic save function to formConfig when loadFromSetting is true
+    return {
+      ...formConfig,
+      saveFunction: getGenericSaveFunction()
+    };
+  }
+  return formConfig;
+};
+const getSaveSettingsFunction = () => {
+  const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting) {
+    return getGenericSaveSettingsFunction();
+  }
+  return prop('saveSettingsFunction');
+};
+const getImportFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericImportFunction();
+  }
+  return prop('importFunction');
+};
+const getExportFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericExportFunction();
+  }
+  return prop('exportFunction');
+};
+
+// Core config evaluation and memo update functions
+const evaluateConfig = () => {
+  const cached = evaluatedConfig();
+  if (cached !== null) return cached;
+
+  const loadFromSetting = getLoadFromSetting();
+  const currentSettings = settings();
+  let config = null;
+
+  // If loadFromSetting is true, only use settings (no props fallback)
+  if (loadFromSetting) {
+    if (currentSettings && typeof currentSettings === 'string') {
+      try {
+        const configFunction = new Function(currentSettings);
+        config = configFunction();
+        if (config && typeof config === 'object') {
+          setEvaluatedConfig(config);
+          return config;
+        }
+      } catch (error) {
+        console.error("Error evaluating settings function body:", error);
+      }
+    }
+    // If loadFromSetting is true but no settings, return empty config
+    config = {};
+    setEvaluatedConfig(config);
+    return config;
+  }
+
+  // If settings exist and it's a string (function body), evaluate it
+  if (currentSettings && typeof currentSettings === 'string') {
+    try {
+      const configFunction = new Function(currentSettings);
+      const evaluated = configFunction();
+      if (evaluated && typeof evaluated === 'object') {
+        setEvaluatedConfig(evaluated);
+        return evaluated;
+      }
+    } catch (error) {
+      console.error("Error evaluating settings function body:", error);
+    }
+  }
+
+  // Fallback to configFunction
+  const configFn = getConfigFunction();
+  if (configFn) {
+    try {
+      const evaluated = configFn();
+      if (evaluated && typeof evaluated === 'object') {
+        setEvaluatedConfig(evaluated);
+        return evaluated;
+      }
+    } catch (error) {
+      console.error("Error evaluating config function:", error);
+    }
+  }
+
+  // Fallback to props
+  config = {
+    columns: args.contextData.props?.columns || [],
+    formConfig: args.contextData.props?.formConfig,
+    uniqueKeys: [],
+    hooks: args.contextData.props?.hooks,
+    usePolarisUI: args.contextData.props?.usePolarisUI,
+    enableUserScopingForSidebar: args.contextData.props?.enableUserScopingForSidebar,
+    enableUserScopingForContent: args.contextData.props?.enableUserScopingForContent,
+    enableLocalFilters: args.contextData.props?.enableLocalFilters,
+    enableLocalSort: args.contextData.props?.enableLocalSort,
+    sidebar: args.contextData.props?.sidebar
+  };
+  setEvaluatedConfig(config);
+  return config;
+};
+const updateMemoizedConfig = () => {
+  const config = evaluateConfig();
+  const loadFromSetting = getLoadFromSetting();
+  setMemoizedConfig(config);
+  setMemoizedLoadFromSetting(loadFromSetting);
+};
+
+// Fetch data from server
+const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
+  const dataFn = getDataFunction();
+  if (!dataFn) return;
+
+  // Capture the category item at the time of fetch
+  const categoryItemForFetch = selectedSidebarItem();
+
+  setLoading(true);
+  try {
+    const result = await dataFn({
+      search: searchTerm,
+      filters: columnFilters,
+      sort: sortConfig
+    });
+    if (result?.data) {
+      // Pass both data and the category item that was used for fetching
+      callback(result.data, categoryItemForFetch);
+    }
+  } catch (error) {
+    console.error("Error fetching table data:", error);
+    args.showErrorToast?.("Failed to load table data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+// Handle import
+const handleImport = async (dataToImport, callback) => {
+  const importFn = getImportFunction();
+  if (!importFn) {
+    args.showErrorToast?.("Import function not configured");
+    return;
+  }
+  if (!dataToImport) {
+    args.showErrorToast?.("Please provide data to import");
+    return;
+  }
+  try {
+    setLoading(true);
+    const result = await importFn({ data: dataToImport });
+    if (result?.success) {
+      args.showSuccessToast?.(result.message || "Import completed successfully");
+      // Refresh data
+      callback?.();
+    } else {
+      args.showErrorToast?.(result?.message || result?.error || "Failed to import data");
+    }
+  } catch (error) {
+    console.error("Error importing:", error);
+    args.showErrorToast?.(error?.message || "Failed to import data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Handle export (all data)
+const handleExport = async (data = null) => {
+  const exportFn = getExportFunction();
+  if (!exportFn) {
+    args.showErrorToast?.("Export function not configured");
+    return;
+  }
+  try {
+    setLoading(true);
+    const columns = prop('columns');
+    const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+    const result = await exportFn({ data, columns: sanitizedColumns }); // null means export all data
+    if (result?.success && result?.data) {
+      // Fix line endings: replace '\n' with real newlines for CSV/text exports
+      let exportData = result.data;
+      if (
+        typeof exportData === "string" &&
+        (result.contentType === "text/csv" || result.contentType === "text/plain" || !result.contentType)
+      ) {
+        exportData = exportData.replace(/\\n/g, "\n");
+      }
+      const blob = new Blob([exportData], { type: result.contentType || "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename || "export.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      args.showSuccessToast?.("Export completed successfully");
+    } else {
+      args.showErrorToast?.(result?.message || "Failed to export data");
+    }
+  } catch (error) {
+    console.error("Error exporting:", error);
+    args.showErrorToast?.("Failed to export data");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Settings management functions
+
+// Load settings - accepts options: { updateState: boolean } (default true)
+// When updateState: false, fetches config without updating state and returns config text
+const loadSettings = async (options = {}) => {
+  const updateState = options.updateState !== false;
+  const settingsFn = getSettingsFunction();
+  if (!settingsFn) return null;
+  try {
+    const result = await settingsFn();
+
+    // Handle error cases (result from settingsFn is already processed, check success flag)
+    if (result && result.success === false) {
+      if (result.message) {
+        args.showErrorToast?.(result.message);
+      }
+      return null;
+    }
+
+    if (result?.success && result?.data?.setting) {
+      const settingData = result.data.setting.P || {};
+      // Get the raw config text (function body) - don't evaluate it
+      const configText = settingData.config;
+      if (typeof configText === 'string') {
+        if (updateState) {
+          setSettings(configText);
+          setEvaluatedConfig(null); // Clear evaluation cache
+          setMemoizedConfig(null); // Clear memoized cache
+        }
+        return configText;
+      }
+    }
+  } catch (error) {
+    console.error("Error loading settings:", error);
+    args.showErrorToast?.(error?.message || "Failed to load settings");
+  }
+  return null;
+};
+
+// Initialize settings on mount
+const initializeSettings = async () => {
+  setConfigLoading(true);
+  try {
+    const settingsFn = getSettingsFunction();
+    if (settingsFn) {
+      await loadSettings();
+      // Initialize memoized config after loading settings
+      updateMemoizedConfig();
+    } else {
+      // Initialize memoized config even without settings
+      updateMemoizedConfig();
+    }
+  } finally {
+    setConfigLoading(false);
+  }
+};
+
+// Handle opening settings modal - load config without updating state to avoid table loading spinner
+const handleOpenSettings = async () => {
+  const configText = await loadSettings({ updateState: false });
+  setSettingsModalInitialConfig(configText);
+  setIsSettingsModalOpen(true);
+};
+
+// Handle saving settings
+const handleSaveSettings = async (configText, callback) => {
+  const saveFn = getSaveSettingsFunction();
+  if (!saveFn) {
+    args.showErrorToast?.("Save settings function not configured");
+    return;
+  }
+  try {
+    setLoading(true);
+    // Save the raw function body text, not the evaluated config
+    const result = await saveFn(configText);
+    if (result?.success) {
+      args.showSuccessToast?.(result.message || "Settings saved successfully");
+      setIsSettingsModalOpen(false);
+      setSettings(configText); // Store the raw text
+      setEvaluatedConfig(null); // Clear evaluation cache
+      setMemoizedConfig(null); // Clear memoized cache
+      // Reload data to apply new settings
+      callback?.();
+    } else {
+      args.showErrorToast?.(result?.message || "Failed to save settings");
+    }
+  } catch (error) {
+    console.error("Error saving settings:", error);
+    args.showErrorToast?.("Failed to save settings");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Sidebar config
+const getSidebarConfig = () => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config?.sidebar;
+  }
+  return args.contextData.props?.sidebar || config?.sidebar;
+};
+
+// Check if sidebar is enabled
+const hasSidebar = () => {
+  const sidebarConfig = getSidebarConfig();
+  return sidebarConfig && (sidebarConfig.enabled !== false);
+};
+
+// Check if Polaris UI should be used (table-level config)
+const getUsePolarisUI = () => {
+  const { config } = getCachedConfig();
+  return config?.usePolarisUI === true;
+};
+
+// Get category key for selected rows storage
+const getCategoryKey = (item) => {
+  const sidebarConfig = getSidebarConfig();
+  if (!item) {
+    // No sidebar or no item selected - use 'no-sidebar' key
+    return sidebarConfig ? null : 'no-sidebar';
+  }
+  if (!sidebarConfig) {
+    return 'no-sidebar';
+  }
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+
+  // Use 'uncategorized' for uncategorized items, otherwise use item ID
+  if (item.P?.key === rootKey || item.P?.key === 'uncategorized' || item.id === 'uncategorized') {
+    return 'uncategorized';
+  }
+  return item.id || 'no-sidebar';
+};
+
+// Get selected rows for current category
+const getSelectedRows = () => {
+  const item = selectedSidebarItem();
+  const categoryKey = getCategoryKey(item);
+  if (categoryKey === null) return new Set();
+  return selectedRowsByCategory[categoryKey] || new Set();
+};
+
+// Set selected rows for current category
+const setSelectedRows = (newSelected) => {
+  const item = selectedSidebarItem();
+  const categoryKey = getCategoryKey(item);
+  if (categoryKey === null) return;
+  setSelectedRowsByCategory(categoryKey, newSelected);
+};
+
+// Clear selected rows for current category
+const clearSelectedRows = () => {
+  setSelectedRows(new Set());
+};
+
+// Handle sidebar item selection
+const handleSidebarItemSelect = (item) => {
+  setSelectedSidebarItem(item);
+  // Persist selected category in URL so reload restores the same category (vertex id only)
+  if (item?.id != null && args.setSearchParams) {
+    const current = args.searchParams || {};
+    args.setSearchParams({ ...current, sidebarCategory: item.id }, { replace: true });
+  }
+};
+
+// Handle moving items to category
+const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel || !sidebarConfig) {
+    return { success: false, message: "Missing configuration" };
+  }
+
+  const { config } = getCachedConfig();
+  const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+  const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+  const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
+
+  try {
+    setLoading(true);
+    // Get source category ID from selected sidebar item (vertex id only; backend passes "uncategorized" for root)
+    const currentSelected = selectedSidebarItem();
+    const sourceCategoryId = currentSelected?.id ?? null;
+
+    // Guard: don't allow moving into the same active category (compare by id; null means uncategorized)
+    const normalizeCategoryId = (id) => (id === null || id === undefined ? 'uncategorized' : id);
+    if (normalizeCategoryId(sourceCategoryId) === normalizeCategoryId(categoryId)) {
+      const label = prop('label') || 'Item';
+      const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
+      const msg = `${plural} are already in this category`;
+      args.showWarningToast?.(msg);
+      return { success: false, message: msg };
+    }
+
+    const contentLabelDisplay = prop('label') || 'Item';
+    const contextData = {
+      contentIds: contentIds,
+      categoryId: categoryId,
+      relationshipType: sidebarConfig.toParentEdgeType,
+      categoryLabel: sidebarConfig.parentVertexLabel,
+      contentLabel: tableVertexLabel,
+      contentLabelDisplay: contentLabelDisplay,
+      enableUserScopingForSidebar: enableUserScopingForSidebar,
+      enableUserScopingForContent: enableUserScopingForContent,
+      sourceCategoryId: sourceCategoryId,
+      hooks: config?.hooks
+    };
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "moveItemsToCategory",
+      contextData: contextData
+    });
+
+    // Check for errors and show toast
+    const errorMessage = extractError(result, true, "Failed to move items");
+    if (errorMessage) {
+      return { success: false, message: errorMessage };
+    }
+
+    // Clear table selection after move (moved items are gone from current view; avoids stale selection and draggable issues)
+    clearSelectedRows();
+
+    // Trigger table to remove moved rows (parent state, Table reacts - no reload needed)
+    if (result?.result?.success && contentIds?.length) {
+      setRowsToRemove(contentIds);
+    }
+
+    // Process graph data if available
+    if (result?.result?.success && result.result.data) {
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+    }
+
+    return result?.result || { success: false, message: "Failed to move items" };
+  } catch (error) {
+    console.error("Error moving items:", error);
+    const errorMessage = error.message || "Failed to move items";
+    args.showErrorToast?.(errorMessage);
+    return { success: false, message: errorMessage };
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Exported API
+return {
+  prop,
+  getTableVertexLabel,
+  getLoadFromSetting,
+  getConfigFunction,
+  getSettingsFunction,
+  getFormConfig,
+  getSaveSettingsFunction,
+  evaluateConfig,
+  setEvaluatedConfig,
+  getCachedConfig,
+  updateMemoizedConfig,
+  fetchData,
+  isSettingsModalOpen,
+  setIsSettingsModalOpen,
+  settingsModalInitialConfig,
+  setSettingsModalInitialConfig,
+  settings,
+  setSettings,
+  loading,
+  setLoading,
+  configLoading,
+  setConfigLoading,
+  loadSettings,
+  initializeSettings,
+  handleOpenSettings,
+  handleSaveSettings,
+  getGenericDataFunction,
+  refreshQueuedRows,
+  getGenericSaveFunction,
+  getGenericImportFunction,
+  getGenericExportFunction,
+  getImportFunction,
+  getExportFunction,
+  handleImport,
+  handleExport,
+  getSidebarConfig,
+  hasSidebar,
+  getUsePolarisUI,
+  selectedSidebarItem,
+  setSelectedSidebarItem,
+  handleSidebarItemSelect,
+  handleMoveItemsToCategory,
+  rowsToRemove,
+  setRowsToRemove,
+  getSelectedRows,
+  setSelectedRows,
+  clearSelectedRows,
+  sidebarWidth,
+  setSidebarWidth,
+  extractError
+}
+
+'''
+        key: DynamicPage
+        props:
+          '''
+return {
+  onMount: async () => {
+    await args.fns.initializeSettings();
+  }
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+  z-index: 1000;
+}`;
+'''
+        displayOrder: 0
+        componentName: Html
+        key: config_loading_overlay
+        props:
+          '''
+const configLoading = args.fns.configLoading();
+return {
+  as: "div",
+  hide: !configLoading
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "large",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  height: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: dynamic_page_wrapper
+        props:
+          '''
+const hasSidebar = args.fns.hasSidebar();
+return {
+  as: "div",
+  hide: !hasSidebar
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Sidebar
+        key: sidebar_component
+        props:
+          '''
+const tableVertexLabel = args.fns.getTableVertexLabel();
+// Relationship type is "User" + tableVertexLabel (e.g., "UserBook", "UserAudioVideo")
+const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
+
+// Get config to check user scoping settings and hooks
+const { config } = args.fns.getCachedConfig();
+const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+
+return {
+  onItemSelect: args.fns.handleSidebarItemSelect,
+  tableVertexLabel: tableVertexLabel,
+  relationshipType: relationshipType,
+  enableUserScoping: enableUserScopingForSidebar,
+  onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
+  sidebarWidth: args.fns.sidebarWidth,
+  setSidebarWidth: args.fns.setSidebarWidth,
+  fetchRoot: args.fns.fetchRoot,
+  hooks: config?.sidebar?.hooks,
+  initialCategoryId: args.searchParams?.sidebarCategory,
+  contentLabel: args.fns.prop('label')
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        slotName: main
+        displayOrder: 1
+        fns: ""
+        componentName: Table
+        key: unique_1
+        props:
+          '''
+return {
+  selectedSidebarItem: args.fns.selectedSidebarItem,
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: args.fns.rowsToRemove,
+  setRowsToRemove: args.fns.setRowsToRemove
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: dynamic_page_no_sidebar_wrapper
+        props:
+          '''
+const hasSidebar = args.fns.hasSidebar();
+const configLoading = args.fns.configLoading();
+return {
+  as: "div",
+  hide: hasSidebar || configLoading
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns: ""
+        componentName: Table
+        key: unique_2
+        props:
+          '''
+return {
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: args.fns.rowsToRemove,
+  setRowsToRemove: args.fns.setRowsToRemove
+}'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+  ]
+}

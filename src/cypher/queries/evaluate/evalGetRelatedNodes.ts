@@ -6,6 +6,7 @@ import { processResult } from "../../conversion/processResult";
 import { getDBSessionForSubdomain } from "../../session/getSessionForSubdomain";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
 import { mongoToCypher } from "./mongoToCypher";
+import type { MongoFilter } from "./mongoToCypher";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function evalGetRelatedNodes(
@@ -43,7 +44,6 @@ export async function evalGetRelatedNodes(
       context,
       "n",
       relationType === "parent" || relationType === "child" ? "r" : "",
-      relationType === "parent",
     );
   } catch (error) {
     console.error(
@@ -130,7 +130,7 @@ RETURN n`;
       if (newLabel) {
         query = `MATCH (n:${newLabel})`;
         const { params: filterParams, query: whereClause } =
-          mongoToCypher(filter);
+          mongoToCypher(filter as MongoFilter);
         if (whereClause) {
           query += ` WHERE ${whereClause}`;
           params = { ...params, ...filterParams };

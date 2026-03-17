@@ -5,6 +5,8 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 
 import { HomeIconButton } from "../../../../components/styled/buttons/HomeIconButton";
+import { ExportOpenedButton } from "../right/ExportOpenedButton";
+import { ImportOpenedButton } from "../right/ImportOpenedButton";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
 import { As } from "~/components/As";
@@ -29,6 +31,8 @@ const RightSection = () => {
 }\`;`}
     >
       <ToggleButtons />
+      <ImportOpenedButton />
+      <ExportOpenedButton />
       <SaveAllButton />
       <SelectThemeButton />
       <UserDropdownMenuDisplay />

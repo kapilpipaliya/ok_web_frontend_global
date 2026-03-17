@@ -62,9 +62,9 @@ export default function App() {
             const navigate = useNavigate();
 
             const isExcludedFromLoader = () =>
-              location.pathname.startsWith("/app") &&
+              (location.pathname === "/app" || location.pathname === "/orders" || location.pathname === "/products") &&
               (isServer ||
-                window.location.hostname === "decodeproduct.decodecommerce.com");
+                window.location.hostname === "decodeproduct.decodecommerce.com" || window.location.hostname === "decodeorder.decodecommerce.com");
 
             // Set up Capacitor deep linking listener
             onMount(() => {

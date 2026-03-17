@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 import { join } from "path";
-import type { Node, Session } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
@@ -29,16 +29,25 @@ export interface ExportStats {
 async function fetchEntities(
   dbSession: Session,
   entityType: "Component" | "Page" | "Theme" | "Function",
-  skipKeys: string[] = [],
+  options: { skipKeys?: string[]; includeKeys?: string[] } = {},
 ): Promise<Record<string, ExportedSchema>> {
+  const { skipKeys = [], includeKeys = [] } = options;
+  const useInclude = includeKeys.length > 0;
   const result = await dbSession.run(
-    `
+    useInclude
+      ? `
+    MATCH (entity:${entityType})
+    WHERE entity.key IN $includeKeys
+    RETURN entity
+    ORDER BY entity.key
+  `
+      : `
     MATCH (entity:${entityType})
     WHERE NOT entity.key IN $skipKeys
     RETURN entity
     ORDER BY entity.key
   `,
-    { skipKeys },
+    useInclude ? { includeKeys } : { skipKeys },
   );
 
   const entities: Record<string, ExportedSchema> = {};
@@ -126,12 +135,50 @@ async function exportEntityGroup({
   }
 }
 
+function parseExportQueryParams(request: Request): {
+  components: string[];
+  pages: string[];
+  functions: string[];
+  filterOnly: boolean;
+} {
+  const url = new URL(request.url);
+  const componentsParam = url.searchParams.get("components")?.trim() ?? "";
+  const pagesParam = url.searchParams.get("pages")?.trim() ?? "";
+  const functionsParam = url.searchParams.get("functions")?.trim() ?? "";
+  const componentKeys =
+    componentsParam.length > 0
+      ? componentsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      : [];
+  const pageKeys =
+    pagesParam.length > 0
+      ? pagesParam.split(",").map((k) => k.trim()).filter(Boolean)
+      : [];
+  const functionKeys =
+    functionsParam.length > 0
+      ? functionsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      : [];
+  return {
+    components: componentKeys,
+    pages: pageKeys,
+    functions: functionKeys,
+    filterOnly:
+      componentKeys.length > 0 || pageKeys.length > 0 || functionKeys.length > 0,
+  };
+}
+
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     // Validate user and permissions
     const user = await validateUserAndPermissions(request, dbSession);
+
+    const {
+      components: includeComponentKeys,
+      pages: includePageKeys,
+      functions: includeFunctionKeys,
+      filterOnly,
+    } = parseExportQueryParams(request);
 
     // Create export directory path
     const exportBasePath = join(process.cwd(), "src", "page_schema");
@@ -148,49 +195,68 @@ export async function GET({ request }: APIEvent) {
       totalEdges: 0,
     };
 
+    // When any query param is set, export only the types that have params set
+    const exportComponents = !filterOnly || includeComponentKeys.length > 0;
+    const exportPages = !filterOnly || includePageKeys.length > 0;
+    const exportFunctions = !filterOnly || includeFunctionKeys.length > 0;
+
     // ---- COMPONENTS ----
-    const components = await fetchEntities(dbSession, "Component");
-    await exportEntityGroup({
-      entities: components,
-      basePath: exportBasePath,
-      subDomain,
-      folderName: "components",
-      statsArray: stats.exportedComponents,
-      stats,
-    });
+    if (exportComponents) {
+      const components = await fetchEntities(dbSession, "Component", {
+        ...(includeComponentKeys.length > 0 ? { includeKeys: includeComponentKeys } : {}),
+      });
+      await exportEntityGroup({
+        entities: components,
+        basePath: exportBasePath,
+        subDomain,
+        folderName: "components",
+        statsArray: stats.exportedComponents,
+        stats,
+      });
+    }
 
     // ---- PAGES ----
-    const pages = await fetchEntities(dbSession, "Page");
-    await exportEntityGroup({
-      entities: pages,
-      basePath: exportBasePath,
-      subDomain,
-      folderName: "pages",
-      statsArray: stats.exportedPages,
-      stats,
-    });
+    if (exportPages) {
+      const pages = await fetchEntities(dbSession, "Page", {
+        ...(includePageKeys.length > 0 ? { includeKeys: includePageKeys } : {}),
+      });
+      await exportEntityGroup({
+        entities: pages,
+        basePath: exportBasePath,
+        subDomain,
+        folderName: "pages",
+        statsArray: stats.exportedPages,
+        stats,
+      });
+    }
 
-    // ---- THEMES ----
-    const themes = await fetchEntities(dbSession, "Theme", ["Default"]);
-    await exportEntityGroup({
-      entities: themes,
-      basePath: exportBasePath,
-      subDomain,
-      folderName: "themes",
-      statsArray: stats.exportedThemes,
-      stats,
-    });
+    if (!filterOnly) {
+      // ---- THEMES ----
+      const themes = await fetchEntities(dbSession, "Theme", { skipKeys: ["Default"] });
+      await exportEntityGroup({
+        entities: themes,
+        basePath: exportBasePath,
+        subDomain,
+        folderName: "themes",
+        statsArray: stats.exportedThemes,
+        stats,
+      });
+    }
 
     // ---- FUNCTIONS ----
-    const functions = await fetchEntities(dbSession, "Function");
-    await exportEntityGroup({
-      entities: functions,
-      basePath: exportBasePath,
-      subDomain,
-      folderName: "functions",
-      statsArray: stats.exportedFunctions,
-      stats,
-    });
+    if (exportFunctions) {
+      const functions = await fetchEntities(dbSession, "Function", {
+        ...(includeFunctionKeys.length > 0 ? { includeKeys: includeFunctionKeys } : {}),
+      });
+      await exportEntityGroup({
+        entities: functions,
+        basePath: exportBasePath,
+        subDomain,
+        folderName: "functions",
+        statsArray: stats.exportedFunctions,
+        stats,
+      });
+    }
 
     // ---- Log activity ----
     const tx = dbSession.beginTransaction();
@@ -201,7 +267,9 @@ export async function GET({ request }: APIEvent) {
         "Schema",
         subDomain,
         user.P.email,
-        `Exported schema types for subdomain ${subDomain}`,
+        filterOnly
+          ? `Exported selected components/pages/functions for subdomain ${subDomain}`
+          : `Exported schema types for subdomain ${subDomain}`,
       );
       await tx.commit();
     } catch (err) {
@@ -211,7 +279,9 @@ export async function GET({ request }: APIEvent) {
 
     return {
       success: true,
-      message: "Export completed for Components, Pages, Themes, Functions.",
+      message: filterOnly
+        ? "Export completed for selected Components, Pages, and/or Functions."
+        : "Export completed for Components, Pages, Themes, Functions.",
       exportPath: join(exportBasePath, subDomain),
       details: stats,
     };

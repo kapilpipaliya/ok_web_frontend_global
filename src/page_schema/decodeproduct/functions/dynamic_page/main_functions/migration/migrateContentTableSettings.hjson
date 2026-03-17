@@ -473,6 +473,42 @@ const settingsConfigs = [
 };`
   },
   {
+    key: 'ShopifyOrderLineItem_settings_default',
+    tableVertexLabel: 'ShopifyOrderLineItem',
+    icon: '📋',
+    name: 'ShopifyOrderLineItem',
+    config: `return {
+  title: "Orders (Line Items)",
+  label: "Line Item",
+  icon: "carbon:document",
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  showActions: false,
+  showEditButton: false,
+  rowClickable: false,
+  columns: [
+    { key: "orderName", label: "Order", type: "text", width: "120px", valueAccessor: (row) => row.P?.orderName },
+    { key: "orderCreatedAt", label: "Order Date", type: "date", width: "140px", valueAccessor: (row) => row.P?.orderCreatedAt },
+    { key: "productTitle", label: "Product Title", type: "text", width: "200px", valueAccessor: (row) => row.P?.productTitle },
+    { key: "variantTitle", label: "Variant", type: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle },
+    { key: "sku", label: "SKU", type: "text", width: "120px", valueAccessor: (row) => row.P?.sku },
+    { key: "quantity", label: "Qty", type: "number", width: "70px", valueAccessor: (row) => row.P?.quantity },
+    { key: "properties", label: "Properties", type: "text", width: "200px", valueAccessor: (row) => row.P?.properties },
+    { key: "fulfillmentStatus", label: "Status", type: "badge", width: "100px", valueAccessor: (row) => row.P?.fulfillmentStatus, badgeToneMap: { FULFILLED: ["Fulfilled", "success"], UNFULFILLED: ["Unfulfilled", "warning"], PARTIALLY_FULFILLED: ["Partial", "info"] } }
+  ],
+  rowHeight: 40,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: { enabled: false },
+  groupBy: "orderName"
+};`
+  },
+  {
     key: 'ShopifyShop_settings_default',
     tableVertexLabel: 'ShopifyShop',
     icon: '🏪',

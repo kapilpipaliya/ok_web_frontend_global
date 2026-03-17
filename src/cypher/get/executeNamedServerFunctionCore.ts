@@ -290,7 +290,9 @@ export async function executeNamedServerFunctionCore(
         rawRequest = req;
         try {
           const urlObj = new URL(req.url);
-          if (urlObj.hostname === "decodeproduct.decodecommerce.com" && req.headers.get("authorization")) {
+          const isDecodeProduct = urlObj.hostname === "decodeproduct.decodecommerce.com";
+          const isDecodeOrder = urlObj.hostname === "decodeorder.decodecommerce.com";
+          if ((isDecodeProduct || isDecodeOrder) && req.headers.get("authorization")) {
             // For decodeproduct.decodecommerce.com, get shop from Shopify authentication
             try {
               const shopify = await getShopify(rawSubDomain!, fallbackSessionData!.dbSession);

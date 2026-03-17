@@ -4,14 +4,17 @@ import { isValidResponse } from "./isValidResponse";
 // must use this function in try catch block
 export async function postAPI(
   url: string,
-  data: object,
-  action: "DELETE" | "POST" = "POST",
+  data: object | FormData,
+  action: "DELETE" | "POST" | "PUT" = "POST",
 ): Promise<Record<string, unknown>> {
+  const isFormData = data instanceof FormData;
   const response = await fetch(url, {
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    body: isFormData ? data : JSON.stringify(data),
+    headers: isFormData
+      ? {}
+      : {
+          "Content-Type": "application/json",
+        },
     method: action,
   });
 

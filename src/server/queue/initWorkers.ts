@@ -36,36 +36,36 @@ export async function initSubdomainWorkersUI() {
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
   try {
     // Initialize workers on current node
-  const localResult = await initSubdomainWorkers();
+    const localResult = await initSubdomainWorkers();
 
-  // Broadcast to other cluster nodes
-  try {
-    await initializeWorkersIfNeeded();
+    // Broadcast to other cluster nodes
+    try {
+      await initializeWorkersIfNeeded();
 
-    const broadcastResult = await broadcastStartWorkers(
-      subDomain,
-      undefined,
-      10000,
-    );
-
-    if (broadcastResult.totalNodes > 0) {
-      console.log(
-        `[Workers] Init broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
+      const broadcastResult = await broadcastStartWorkers(
+        subDomain,
+        undefined,
+        10000,
       );
 
-      if (broadcastResult.errors.size > 0) {
-        console.warn(
-          "[Workers] Some nodes failed to init workers:",
-          Array.from(broadcastResult.errors.entries()),
+      if (broadcastResult.totalNodes > 0) {
+        console.log(
+          `[Workers] Init broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
         );
-      }
-    }
-  } catch (error) {
-    console.error("[Workers] Error broadcasting worker init:", error);
-    // Continue - local init succeeded
-  }
 
-  return localResult;
+        if (broadcastResult.errors.size > 0) {
+          console.warn(
+            "[Workers] Some nodes failed to init workers:",
+            Array.from(broadcastResult.errors.entries()),
+          );
+        }
+      }
+    } catch (error) {
+      console.error("[Workers] Error broadcasting worker init:", error);
+      // Continue - local init succeeded
+    }
+
+    return localResult;
   } finally {
     await dbSession.close();
   }
@@ -81,35 +81,35 @@ export async function stopWorkers() {
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
   try {
     // Stop workers on current node
-  await closeAllWorkers();
-  console.log("[Workers] Stopped all workers for current subdomain");
+    await closeAllWorkers();
+    console.log("[Workers] Stopped all workers for current subdomain");
 
-  // Broadcast to other cluster nodes
-  try {
-    await initializeWorkersIfNeeded();
+    // Broadcast to other cluster nodes
+    try {
+      await initializeWorkersIfNeeded();
 
-    const broadcastResult = await broadcastStopWorkers(
-      subDomain,
-      undefined,
-      10000,
-    );
-
-    if (broadcastResult.totalNodes > 0) {
-      console.log(
-        `[Workers] Stop broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
+      const broadcastResult = await broadcastStopWorkers(
+        subDomain,
+        undefined,
+        10000,
       );
 
-      if (broadcastResult.errors.size > 0) {
-        console.warn(
-          "[Workers] Some nodes failed to stop workers:",
-          Array.from(broadcastResult.errors.entries()),
+      if (broadcastResult.totalNodes > 0) {
+        console.log(
+          `[Workers] Stop broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
         );
+
+        if (broadcastResult.errors.size > 0) {
+          console.warn(
+            "[Workers] Some nodes failed to stop workers:",
+            Array.from(broadcastResult.errors.entries()),
+          );
+        }
       }
+    } catch (error) {
+      console.error("[Workers] Error broadcasting worker stop:", error);
+      // Continue - local stop succeeded
     }
-  } catch (error) {
-    console.error("[Workers] Error broadcasting worker stop:", error);
-    // Continue - local stop succeeded
-  }
   } finally {
     await dbSession.close();
   }
@@ -201,22 +201,22 @@ export async function startWorkerForSubdomainCore(
       database: subDomain,
     });
 
-      try {
-        // Handle database-defined subdomain workers
-        // Look up the function in the target subdomain's DB (where worker functions are defined)
-        const workerResult = await executeNamedServerFunction(
-          {
-            functionName: workerKey,
-            contextData: {
-              action: "start",
-            },
+    try {
+      // Handle database-defined subdomain workers
+      // Look up the function in the target subdomain's DB (where worker functions are defined)
+      const workerResult = await executeNamedServerFunction(
+        {
+          functionName: workerKey,
+          contextData: {
+            action: "start",
           },
-          {
-            dbSession: subdomainDbSession,
-            subDomain: subDomain,
-            functionLookupSession: subdomainDbSession,
-          },
-        );
+        },
+        {
+          dbSession: subdomainDbSession,
+          subDomain: subDomain,
+          functionLookupSession: subdomainDbSession,
+        },
+      );
 
       if (workerResult.error) {
         console.error(
@@ -277,38 +277,38 @@ export async function startWorker(workerKey: string) {
       // Start worker on current node
       const localResult = await startWorkerForSubdomainCore(subDomain, workerKey);
 
-    if (!localResult.success) {
-      return localResult;
-    }
+      if (!localResult.success) {
+        return localResult;
+      }
 
-    // Broadcast to other cluster nodes
-    try {
-      await initializeWorkersIfNeeded();
+      // Broadcast to other cluster nodes
+      try {
+        await initializeWorkersIfNeeded();
 
-      const broadcastResult = await broadcastStartWorkers(
-        subDomain,
-        workerKey,
-        10000,
-      );
-
-      if (broadcastResult.totalNodes > 0) {
-        console.log(
-          `[Workers] Start worker broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
+        const broadcastResult = await broadcastStartWorkers(
+          subDomain,
+          workerKey,
+          10000,
         );
 
-        if (broadcastResult.errors.size > 0) {
-          console.warn(
-            "[Workers] Some nodes failed to start worker:",
-            Array.from(broadcastResult.errors.entries()),
+        if (broadcastResult.totalNodes > 0) {
+          console.log(
+            `[Workers] Start worker broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
           );
-        }
-      }
-    } catch (error) {
-      console.error("[Workers] Error broadcasting worker start:", error);
-      // Continue - local start succeeded
-    }
 
-    return localResult;
+          if (broadcastResult.errors.size > 0) {
+            console.warn(
+              "[Workers] Some nodes failed to start worker:",
+              Array.from(broadcastResult.errors.entries()),
+            );
+          }
+        }
+      } catch (error) {
+        console.error("[Workers] Error broadcasting worker start:", error);
+        // Continue - local start succeeded
+      }
+
+      return localResult;
     } finally {
       await dbSession.close();
     }
@@ -329,67 +329,67 @@ export async function stopWorker(workerKey: string) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
   try {
     const subdomainWorkers = workerState.activeWorkers.get(subDomain);
-  const worker = subdomainWorkers?.get(workerKey);
+    const worker = subdomainWorkers?.get(workerKey);
 
-  if (!worker) {
-    return {
-      success: false,
-      error: `Worker not found or not running in subdomain: ${subDomain}`,
-    };
-  }
-
-  try {
-    console.log(
-      `[Workers] Stopping worker: ${workerKey} for subdomain: ${subDomain}`,
-    );
-    await worker.stop();
-    subdomainWorkers!.delete(workerKey);
-
-    // Clean up the start promise tracking for this worker
-    const workerStartKey = `${subDomain}:${workerKey}`;
-    workerState.workerStartPromises.delete(workerStartKey);
-
-    // If no more workers in this subdomain, remove the subdomain entry
-    if (subdomainWorkers!.size === 0) {
-      workerState.activeWorkers.delete(subDomain);
+    if (!worker) {
+      return {
+        success: false,
+        error: `Worker not found or not running in subdomain: ${subDomain}`,
+      };
     }
 
-    console.log(
-      `[Workers] Successfully stopped: ${workerKey} for subdomain: ${subDomain}`,
-    );
-
-    // Broadcast to other cluster nodes
     try {
-      await initializeWorkersIfNeeded();
+      console.log(
+        `[Workers] Stopping worker: ${workerKey} for subdomain: ${subDomain}`,
+      );
+      await worker.stop();
+      subdomainWorkers!.delete(workerKey);
 
-      const broadcastResult = await broadcastStopWorkers(
-        subDomain,
-        workerKey,
-        10000,
+      // Clean up the start promise tracking for this worker
+      const workerStartKey = `${subDomain}:${workerKey}`;
+      workerState.workerStartPromises.delete(workerStartKey);
+
+      // If no more workers in this subdomain, remove the subdomain entry
+      if (subdomainWorkers!.size === 0) {
+        workerState.activeWorkers.delete(subDomain);
+      }
+
+      console.log(
+        `[Workers] Successfully stopped: ${workerKey} for subdomain: ${subDomain}`,
       );
 
-      if (broadcastResult.totalNodes > 0) {
-        console.log(
-          `[Workers] Stop worker broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
+      // Broadcast to other cluster nodes
+      try {
+        await initializeWorkersIfNeeded();
+
+        const broadcastResult = await broadcastStopWorkers(
+          subDomain,
+          workerKey,
+          10000,
         );
 
-        if (broadcastResult.errors.size > 0) {
-          console.warn(
-            "[Workers] Some nodes failed to stop worker:",
-            Array.from(broadcastResult.errors.entries()),
+        if (broadcastResult.totalNodes > 0) {
+          console.log(
+            `[Workers] Stop worker broadcast: ${broadcastResult.respondedNodes}/${broadcastResult.totalNodes} nodes responded in ${broadcastResult.duration}ms`,
           );
-        }
-      }
-    } catch (error) {
-      console.error("[Workers] Error broadcasting worker stop:", error);
-      // Continue - local stop succeeded
-    }
 
-    return { success: true };
-  } catch (error: any) {
-    console.error(`[Workers] Error stopping ${workerKey}:`, error);
-    return { success: false, error: error.message };
-  }
+          if (broadcastResult.errors.size > 0) {
+            console.warn(
+              "[Workers] Some nodes failed to stop worker:",
+              Array.from(broadcastResult.errors.entries()),
+            );
+          }
+        }
+      } catch (error) {
+        console.error("[Workers] Error broadcasting worker stop:", error);
+        // Continue - local stop succeeded
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      console.error(`[Workers] Error stopping ${workerKey}:`, error);
+      return { success: false, error: error.message };
+    }
   } finally {
     await dbSession.close();
   }
@@ -405,20 +405,20 @@ export async function getWorkerStatus() {
   try {
     const workers = await getWorkerList();
 
-  // Get active workers count for this subdomain
-  const subdomainWorkers = workerState.activeWorkers.get(subDomain);
-  const activeWorkersCount = subdomainWorkers?.size || 0;
+    // Get active workers count for this subdomain
+    const subdomainWorkers = workerState.activeWorkers.get(subDomain);
+    const activeWorkersCount = subdomainWorkers?.size || 0;
 
-  // Check if any workers are running for this subdomain
-  const initialized = activeWorkersCount > 0;
+    // Check if any workers are running for this subdomain
+    const initialized = activeWorkersCount > 0;
 
-  return {
-    initialized,
-    enabled: true,
-    totalWorkers: workers.length,
-    activeWorkers: activeWorkersCount,
-    workers,
-  };
+    return {
+      initialized,
+      enabled: true,
+      totalWorkers: workers.length,
+      activeWorkers: activeWorkersCount,
+      workers,
+    };
   } finally {
     await dbSession.close();
   }

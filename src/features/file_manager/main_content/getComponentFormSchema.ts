@@ -283,7 +283,7 @@ export const getComponentFormSchema = (
                     props: (options: ComponentFormFunctionArgumentType) => ({
                       hide: !options.contextData.modalState[0]?.showModal,
                       style: {
-                        "z-index": options.zIndex,
+                        "z-index": options.zIndex + 1,
                       },
                     }),
                   },
@@ -310,7 +310,7 @@ export const getComponentFormSchema = (
                         event.stopPropagation();
                       },
                       style: {
-                        "z-index": options.zIndex + 1,
+                        "z-index": options.zIndex + 2,
                       },
                       beforeMount: () => {
                         // Create focus trap

@@ -149,6 +149,18 @@ const handleListKeyDown = (e) => {
       e.preventDefault();
       onSpaceKey(current);
     }
+    return;
+  }
+  if (key === "ArrowLeft" || key === "ArrowRight") {
+    const onExpandCollapse = args.contextData.props?.onExpandCollapse;
+    if (onExpandCollapse && current >= 0) {
+      const items = getItems();
+      const row = items[current];
+      if (row?._isParent === true) {
+        e.preventDefault();
+        onExpandCollapse(current, key === "ArrowLeft" ? "collapse" : "expand");
+      }
+    }
   }
 };
 

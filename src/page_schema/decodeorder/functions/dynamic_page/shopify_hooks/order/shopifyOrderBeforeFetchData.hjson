@@ -1,0 +1,17 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Runs before fetching order line items. Ensures shop is present; no Neo4j sync for orders.
+        body:
+          '''const { tableVertexLabel, shop } = args.contextData;
+if (tableVertexLabel !== 'ShopifyOrderLineItem') return;
+if (!shop) console.warn('shopifyOrderBeforeFetchData: shop not in contextData');'''
+        key: shopifyOrderBeforeFetchData
+      }
+    }
+  ]
+  edges: []
+}

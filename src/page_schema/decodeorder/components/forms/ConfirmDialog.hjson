@@ -1,0 +1,767 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ConfirmDialog
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.md};
+  animation: fadeIn ${args.theme.var.animation.fast} ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.sm};
+    align-items: flex-end;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const isOpen = args.contextData.props?.isOpen || false;
+const onCancel = args.contextData.props?.onCancel;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget && onCancel) onCancel();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn ${args.theme.var.animation.normal} ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    animation: slideUp ${args.theme.var.animation.normal} ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => {
+    e.stopPropagation();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "header"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+const variant = args.contextData.props?.variant || "danger";
+
+const iconConfig = {
+  danger: args.theme.var.color.error,
+  warning: args.theme.var.color.warning,
+  primary: args.theme.var.color.primary
+};
+
+const iconColor = iconConfig[variant] || iconConfig.danger;
+
+return `._id {
+  color: ${iconColor};
+  margin-bottom: ${args.theme.var.spacing.sm};
+  display: block;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const variant = args.contextData.props?.variant || "danger";
+
+const iconConfig = {
+  danger: {
+    icon: "carbon:warning-filled",
+    color: args.theme.var.color.error
+  },
+  warning: {
+    icon: "carbon:warning-alt-filled",
+    color: args.theme.var.color.warning
+  },
+  primary: {
+    icon: "carbon:help-filled",
+    color: args.theme.var.color.primary
+  }
+};
+
+const config = iconConfig[variant] || iconConfig.danger;
+
+return {
+  as: "icon",
+  icon: config.icon,
+  width: 24,
+  height: 24
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  line-height: 1.4;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const title = args.contextData.props?.title || "Confirm Action";
+
+return {
+  as: "h2",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  padding-top: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.md};
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-line;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const message = args.contextData.props?.message || "Are you sure you want to proceed?";
+
+return {
+  as: "p",
+  text: message
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.xl} ${args.theme.var.spacing.xl};
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column-reverse;
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "footer"
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  min-height: ${args.theme.var.touch.button};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 500;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  flex: 1;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.border_dark_200};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+    font-size: ${args.theme.var.fontSize.md};
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cancelText = args.contextData.props?.cancelText || "Cancel";
+const onCancel = args.contextData.props?.onCancel;
+const loading = args.contextData.props?.loading || false;
+const usePolaris = args.contextData.props?.getUsePolarisUI === true;
+
+return {
+  as: "button",
+  type: "button",
+  text: cancelText,
+  disabled: loading,
+  onClick: () => {
+    if (onCancel && !loading) onCancel();
+  },
+  hide: usePolaris
+};
+'''
+      }
+    }
+    {
+      id: "10_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cancelText = args.contextData.props?.cancelText || "Cancel";
+const onCancel = args.contextData.props?.onCancel;
+const loading = args.contextData.props?.loading || false;
+
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: cancelText,
+  disabled: loading,
+  onClick: () => {
+    if (onCancel && !loading) onCancel();
+  },
+  hide: args.contextData.props?.getUsePolarisUI !== true
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+const variant = args.contextData.props?.variant || "danger";
+
+const variantStyles = {
+  danger: {
+    background: args.theme.var.color.error,
+    backgroundHover: args.theme.var.color.error_dark_200,
+    text: args.theme.var.color.error_text,
+    focus: args.theme.var.color.error_light_200
+  },
+  warning: {
+    background: args.theme.var.color.warning,
+    backgroundHover: args.theme.var.color.warning_dark_200,
+    text: args.theme.var.color.warning_text,
+    focus: args.theme.var.color.warning_light_200
+  },
+  primary: {
+    background: args.theme.var.color.primary,
+    backgroundHover: args.theme.var.color.primary_dark_200,
+    text: args.theme.var.color.primary_text,
+    focus: args.theme.var.color.primary_light_200
+  }
+};
+
+const style = variantStyles[variant] || variantStyles.danger;
+
+return `._id {
+  min-height: ${args.theme.var.touch.button};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.md};
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${style.background};
+  color: ${style.text};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  flex: 1;
+
+  &:hover:not(:disabled) {
+    background: ${style.backgroundHover};
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px ${style.focus};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+    font-size: ${args.theme.var.fontSize.md};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const confirmText = args.contextData.props?.confirmText || "Confirm";
+const onConfirm = args.contextData.props?.onConfirm;
+const loading = args.contextData.props?.loading || false;
+const usePolaris = args.contextData.props?.getUsePolarisUI === true;
+const variant = args.contextData.props?.variant || "danger";
+
+return {
+  as: "button",
+  type: "button",
+  text: loading ? "Please wait..." : confirmText,
+  disabled: loading,
+  onClick: async () => {
+    if (onConfirm && !loading) await onConfirm();
+  },
+  hide: usePolaris
+};
+'''
+      }
+    }
+    {
+      id: "11_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const confirmText = args.contextData.props?.confirmText || "Confirm";
+const onConfirm = args.contextData.props?.onConfirm;
+const loading = args.contextData.props?.loading || false;
+const variant = args.contextData.props?.variant || "danger";
+
+const polarisVariant = variant === "danger" ? "primary" : variant === "warning" ? "primary" : "primary";
+const polarisTone = variant === "danger" ? "critical" : undefined;
+
+return {
+  as: "s-button",
+  "attr:variant": polarisVariant,
+  "attr:tone": polarisTone,
+  text: loading ? "Please wait..." : confirmText,
+  disabled: loading,
+  onClick: async () => {
+    if (onConfirm && !loading) await onConfirm();
+  },
+  hide: args.contextData.props?.getUsePolarisUI !== true
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onCancel
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onConfirm
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: cancelText
+        defValue: Cancel
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: message
+        defValue: Are you sure you want to proceed?
+      }
+    }
+    {
+      id: "16"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loading
+        defValue: false
+      }
+    }
+    {
+      id: "17"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: title
+        defValue: Confirm Action
+      }
+    }
+    {
+      id: "18"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: isOpen
+        defValue: false
+      }
+    }
+    {
+      id: "19"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: variant
+        defValue: danger
+      }
+    }
+    {
+      id: "20"
+      L: ComponentVariantOption
+      P: {
+        description: Primary colored confirmation button
+        value: primary
+        key: primary
+      }
+    }
+    {
+      id: "21"
+      L: ComponentVariantOption
+      P: {
+        description: Warning colored confirmation button
+        value: warning
+        key: warning
+      }
+    }
+    {
+      id: "22"
+      L: ComponentVariantOption
+      P: {
+        description: Red confirmation button for destructive actions
+        value: danger
+        key: danger
+      }
+    }
+    {
+      id: "23"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: confirmText
+        defValue: Confirm
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "18"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "19"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "23"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e18a
+      T: Attr
+      S: "9"
+      E: "10_polaris"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e19a
+      T: Attr
+      S: "9"
+      E: "11_polaris"
+    }
+    {
+      id: e20
+      T: ComponentVariantOption
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e21
+      T: ComponentVariantOption
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e22
+      T: ComponentVariantOption
+      S: "19"
+      E: "22"
+    }
+  ]
+}

@@ -4,9 +4,9 @@ import { domToPng } from "modern-screenshot";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
+import { postAPI } from "~/lib/api/general/postApi";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { uploadFile } from "~/lib/api/uploadFile";
 import { evalExpression } from "~/lib/expression_eval";
 import { getToEdge } from "~/lib/graph/get/sync/edge/getToEdge";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
@@ -130,13 +130,16 @@ export async function capturePreview(
         vertexes: [graph.vertexes[formStoreVertex().P.formDataId!]!],
       }) || [];
 
+    const formData = new FormData();
+    formData.append("file", file);
+
     let previewData;
     if (existingPreview.length > 0) {
       // Update existing preview
       const preview = existingPreview[existingPreview.length - 1];
-      previewData = await uploadFile(
-        file,
+      previewData = await postAPI(
         `${API.file.replaceFileUrl}?fileId=${preview.id}`,
+        formData,
         "PUT",
       );
       if (previewData?.graph) {
@@ -144,7 +147,7 @@ export async function capturePreview(
       }
     } else {
       // Create new preview
-      previewData = await uploadFile(file, API.file.uploadFileUrl);
+      previewData = await postAPI(API.file.uploadFileUrl, formData);
       if (previewData?.graph) {
         setGraphData(graph, setGraph, previewData.graph);
       }

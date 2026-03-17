@@ -18,6 +18,76 @@ import { runMigration } from "~/lib/schema/runMigration";
 import { saveMigrationRequestForAllShops } from "~/lib/shopify/shopMigrationRequest";
 import { ensureShopDatabaseAndMigrate } from "~/lib/shopify/shopifyHelpers";
 import type { Session, Transaction } from "neo4j-driver";
+import type { WebsiteSchemas } from "~/page_schema/loader";
+
+function parseImportQueryParams(request: Request): {
+  components: string[];
+  pages: string[];
+  functions: string[];
+  filterOnly: boolean;
+} {
+  const url = new URL(request.url);
+  const componentsParam = url.searchParams.get("components")?.trim() ?? "";
+  const pagesParam = url.searchParams.get("pages")?.trim() ?? "";
+  const functionsParam = url.searchParams.get("functions")?.trim() ?? "";
+  const componentKeys =
+    componentsParam.length > 0
+      ? componentsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      : [];
+  const pageKeys =
+    pagesParam.length > 0
+      ? pagesParam.split(",").map((k) => k.trim()).filter(Boolean)
+      : [];
+  const functionKeys =
+    functionsParam.length > 0
+      ? functionsParam.split(",").map((k) => k.trim()).filter(Boolean)
+      : [];
+  return {
+    components: componentKeys,
+    pages: pageKeys,
+    functions: functionKeys,
+    filterOnly:
+      componentKeys.length > 0 || pageKeys.length > 0 || functionKeys.length > 0,
+  };
+}
+
+function filterWebsiteSchemasByParams(
+  websiteSchemas: WebsiteSchemas,
+  includeComponentKeys: string[],
+  includePageKeys: string[],
+  includeFunctionKeys: string[],
+): WebsiteSchemas {
+  const filtered: WebsiteSchemas = {};
+
+  if (includeComponentKeys.length > 0 && websiteSchemas.components) {
+    filtered.components = {};
+    for (const key of includeComponentKeys) {
+      if (websiteSchemas.components[key]) {
+        filtered.components[key] = websiteSchemas.components[key];
+      }
+    }
+  }
+
+  if (includePageKeys.length > 0 && websiteSchemas.pages) {
+    filtered.pages = {};
+    for (const key of includePageKeys) {
+      if (websiteSchemas.pages[key]) {
+        filtered.pages[key] = websiteSchemas.pages[key];
+      }
+    }
+  }
+
+  if (includeFunctionKeys.length > 0 && websiteSchemas.functions) {
+    filtered.functions = {};
+    for (const key of includeFunctionKeys) {
+      if (websiteSchemas.functions[key]) {
+        filtered.functions[key] = websiteSchemas.functions[key];
+      }
+    }
+  }
+
+  return filtered;
+}
 
 async function validateUserAndPermissions(
   request: Request,
@@ -46,8 +116,25 @@ export async function GET({ request }: APIEvent) {
     // Use subdomain as website name
     const websiteName = subDomain;
 
+    const {
+      components: includeComponentKeys,
+      pages: includePageKeys,
+      functions: includeFunctionKeys,
+      filterOnly,
+    } = parseImportQueryParams(request);
+
     // Load schemas for the specific website
-    const websiteSchemas = getWebsiteSchemasSync(websiteName);
+    let websiteSchemas = getWebsiteSchemasSync(websiteName);
+
+    // When query params are set, import only the requested types (from file system)
+    if (filterOnly) {
+      websiteSchemas = filterWebsiteSchemasByParams(
+        websiteSchemas,
+        includeComponentKeys,
+        includePageKeys,
+        includeFunctionKeys,
+      );
+    }
 
     if (
       !(

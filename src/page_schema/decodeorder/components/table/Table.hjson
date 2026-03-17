@@ -1,0 +1,4664 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        dynamicComponent: TomSelect
+        fns:
+          '''
+
+const getColumns = () => {
+  const base = args.fns.prop('columns') || [];
+  const groupBy = getGroupByConfig();
+  if (groupBy) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
+  return base;
+};
+
+const getRowHeight = () => args.fns.prop('rowHeight') || 36;
+const getTitle = () => args.fns.prop('title');
+const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder') || "Search...";
+const getAdditionalFilters = () => args.fns.prop('additionalFilters') || [];
+const getCustomActions = () => args.fns.prop('customActions') || [];
+const getBatchActions = () => args.fns.prop('batchActions') || [];
+const getShowRowNumber = () => args.fns.prop('showRowNumber') || false;
+const getHideColumns = () => args.fns.prop('hideColumns') || [];
+
+const getUniqueKeys = () => args.fns.prop('uniqueKeys') || [];
+const getShowAddButton = () => args.fns.prop('showAddButton') ?? true;
+const getShowEditButton = () => args.fns.prop('showEditButton') ?? true;
+const getShowSelection = () => args.fns.prop('showSelection');
+const getShowActions = () => args.fns.prop('showActions');
+const getResizableColumns = () => args.fns.prop('resizableColumns') ?? true;
+const getHideExportButtons = () => args.fns.prop('hideExportButtons') ?? false;
+const getHideImportButtons = () => args.fns.prop('hideImportButtons') ?? false;
+const getHideSettingsButton = () => args.fns.prop('hideSettingsButton') ?? false;
+const getIcon = () => args.fns.prop('icon');
+const getLabel = () => args.fns.prop('label');
+const getAddButtonLabel = () => {
+  const label = getLabel();
+  return label ? `Add new ${label}` : "Add New Item";
+};
+const getOnEdit = () => args.fns.prop('onEdit');
+const getOnAfterAdd = () => args.fns.prop('onAfterAdd');
+const getOnAfterEdit = () => args.fns.prop('onAfterEdit');
+const getOnAdd = () => args.fns.prop('onAdd');
+const getOnDelete = () => args.fns.prop('onDelete');
+const getOnAfterDelete = () => args.fns.prop('onAfterDelete');
+const getRowClickable = () => args.fns.prop('rowClickable') === true;
+const getOnRowClick = () => args.fns.prop('onRowClick');
+
+const [data, setData] = args.createSignal([]);
+const [filteredData, setFilteredData] = args.createSignal([]);
+
+const getGroupByConfig = () => args.fns.prop('groupBy') || null;
+const [collapsedKeys, setCollapsedKeys] = args.createStore({});
+const toggleExpanded = (key) => {
+  if (collapsedKeys[key]) {
+    setCollapsedKeys(key, undefined);
+  } else {
+    setCollapsedKeys(key, true);
+  }
+};
+const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
+  if (!filtered || filtered.length === 0) return [];
+  const getKey = (row) => {
+    const val = row?.P?.[groupByKey] ?? row?.[groupByKey];
+    return val != null ? String(val) : '';
+  };
+  const groups = new Map();
+  const keyOrder = [];
+  for (const row of filtered) {
+    const k = getKey(row);
+    if (!groups.has(k)) {
+      groups.set(k, []);
+      keyOrder.push(k);
+    }
+    groups.get(k).push(row);
+  }
+  const result = [];
+  for (const key of keyOrder) {
+    const rows = groups.get(key) || [];
+    const first = rows[0];
+    const parentRow = {
+      id: 'group-' + key,
+      _isParent: true,
+      _parentKey: key,
+      P: first?.P ? { ...first.P } : { [groupByKey]: key }
+    };
+    result.push(parentRow);
+    if (!collapsedObj[key]) {
+      for (const r of rows) {
+        result.push({ ...r, _isParent: false, _parentKey: key });
+      }
+    }
+  }
+  return result;
+};
+const getDisplayData = () => {
+  const g = getGroupByConfig();
+  const filtered = filteredData() || [];
+  if (!g) return filtered;
+  const key = typeof g === 'string' ? g : (g.key || '');
+  if (!key) return filtered;
+  return buildDisplayData(filtered, key, collapsedKeys);
+};
+
+const [searchTerm, setSearchTerm] = args.createSignal("");
+const [columnFilters, setColumnFilters] = args.createStore({});
+const [sortConfig, setSortConfig] = args.createStore({ column: null, direction: null });
+// Get selected rows functions from props (always provided by parent)
+const getSelectedRows = () => {
+  const propFn = args.contextData.props?.getSelectedRows;
+  if (!propFn) {
+    console.warn("getSelectedRows not provided to Table component");
+    return new Set();
+  }
+  return propFn();
+};
+
+// Selection filtered to current display data - avoids stale selection (e.g. after move or category switch)
+const getEffectiveSelectedRows = () => {
+  const selected = getSelectedRows();
+  const displayed = getDisplayData();
+  const currentIds = new Set((displayed || []).map(r => r?.id).filter(Boolean));
+  if (currentIds.size === 0) return new Set();
+  return new Set([...selected].filter(id => currentIds.has(id)));
+};
+const setSelectedRows = (newSelected) => {
+  const propFn = args.contextData.props?.setSelectedRows;
+  if (!propFn) {
+    console.warn("setSelectedRows not provided to Table component");
+    return;
+  }
+  propFn(newSelected);
+};
+const clearSelectedRows = () => {
+  const propFn = args.contextData.props?.clearSelectedRows;
+  if (!propFn) {
+    console.warn("clearSelectedRows not provided to Table component");
+    return;
+  }
+  propFn();
+};
+const [isModalOpen, setIsModalOpen] = args.createSignal(false);
+const [modalMode, setModalMode] = args.createSignal("add"); // "add" or "edit"
+const [editingRow, setEditingRow] = args.createSignal(null);
+const [formData, setFormData] = args.createStore({});
+const [isImportModalOpen, setIsImportModalOpen] = args.createSignal(false);
+const [importData, setImportData] = args.createSignal("");
+const [columnWidths, setColumnWidths] = args.createStore({});
+const [isResizing, setIsResizing] = args.createSignal(false);
+const pollRef = { id: null };
+const rowRefs = {};
+const setRowRef = (index, el) => {
+  if (el) rowRefs[index] = el;
+  else delete rowRefs[index];
+};
+const getRowRef = (index) => rowRefs[index];
+
+// Initialize from query parameters
+const initializeFromQueryParams = () => {
+  const searchParams = args.searchParams || {};
+  if (searchParams.search) {
+    setSearchTerm(searchParams.search);
+  }
+  if (searchParams.filters) {
+    try {
+      const filters = JSON.parse(searchParams.filters);
+      setColumnFilters(filters);
+      // Apply filters after restoring from URL
+      // Use setTimeout to ensure store update is complete
+      setTimeout(() => {
+        applyLocalFilters();
+      }, 0);
+    } catch (e) {
+      console.error("Error parsing filters from query:", e);
+    }
+  }
+  if (searchParams.sort) {
+    try {
+      const sort = JSON.parse(searchParams.sort);
+      setSortConfig(sort);
+    } catch (e) {
+      console.error("Error parsing sort from query:", e);
+    }
+  }
+};
+
+// Update query parameters
+const updateQueryParams = () => {
+  const params = {};
+  // Handle searchTerm
+  if (searchTerm()) {
+    params.search = searchTerm();
+  } else {
+    // Clear search param if searchTerm is empty
+    params.search = undefined;
+  }
+  // Handle filters
+  const filters = Object.keys(columnFilters).length > 0 ? JSON.stringify(columnFilters) : null;
+  if (filters) {
+    params.filters = filters;
+  } else {
+    // Clear filters param if no filters
+    params.filters = undefined;
+  }
+  // Handle sort
+  const sort = sortConfig.column ? JSON.stringify(sortConfig) : null;
+  if (sort) {
+    params.sort = sort;
+  } else {
+    // Clear sort param if no sort
+    params.sort = undefined;
+  }
+  args.setSearchParams?.(params, { replace: true });
+};
+
+
+
+// Apply local filters (for table header row filters)
+const applyLocalFilters = () => {
+  const dataSource = data();
+  let filtered = [...dataSource];
+
+  // Apply search term
+  if (searchTerm()) {
+    const term = searchTerm().toLowerCase();
+    const columns = getColumns().filter(col => !shouldHideColumn(col));
+
+    filtered = filtered.filter(row => {
+      // Only check values for visible columns, not keys
+      for (const col of columns) {
+        // Skip special/row number columns
+        if (col.key === "__rowNumber" || col.type === "rowNumber") {
+          continue;
+        }
+        const cellValue = getCellValue(row, col);
+        if (
+          cellValue !== null &&
+          cellValue !== undefined &&
+          String(cellValue).toLowerCase().includes(term)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
+  // Apply column filters
+  const columns = getColumns();
+  filtered = filtered.filter(row => {
+    for (const col of columns) {
+      const filterValue = columnFilters[col.key];
+      if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
+        // Skip rowNumber filter - it's calculated, not a property
+        if (col.key === "__rowNumber" || col.type === "rowNumber") {
+          continue;
+        }
+        const cellValue = getCellValue(row, col);
+        if (col.type === "text") {
+          // Support both single value and array (for multiple select filters)
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0) {
+              return true; // No filter applied
+            }
+            // Check if cell value matches any of the selected filter values
+            const cellValueStr = String(cellValue || "").toLowerCase();
+            const matches = filterValue.some(fv => 
+              cellValueStr.includes(String(fv).toLowerCase())
+            );
+            if (!matches) {
+              return false;
+            }
+          } else {
+            // Single value filter
+            if (!String(cellValue || "").toLowerCase().includes(String(filterValue).toLowerCase())) {
+              return false;
+            }
+          }
+        } else if (col.type === "select") {
+          // Support both single value and array (multiple select)
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0 || !filterValue.includes(cellValue)) {
+              return false;
+            }
+          } else {
+            if (cellValue !== filterValue) {
+              return false;
+            }
+          }
+        } else if (col.type === "checkbox") {
+          if (cellValue !== filterValue) {
+            return false;
+          }
+        } else if (col.type === "date" || col.type === "isoDateTime") {
+          // Date filtering logic
+          const filterDate = new Date(filterValue);
+          const cellDate = new Date(cellValue);
+          if (isNaN(filterDate.getTime()) || isNaN(cellDate.getTime())) {
+            return false;
+          }
+          // Simple date comparison - can be enhanced
+          if (Math.abs(cellDate - filterDate) > 86400000) { // More than 1 day difference
+            return false;
+          }
+        } else if (col.type === "badge") {
+          // Badge columns: partial match on raw value or display label (e.g. "Act" matches "Active")
+          const cellVal = cellValue != null ? String(cellValue) : "";
+          const cellKey = col.badgeKeyCase === "lower" ? cellVal.toLowerCase() : cellVal;
+          const cellLabel = (col.badgeToneMap && col.badgeToneMap[cellValue] && Array.isArray(col.badgeToneMap[cellValue])) ? col.badgeToneMap[cellValue][0] : cellVal;
+          const cellLabelNorm = col.badgeKeyCase === "lower" ? String(cellLabel).toLowerCase() : cellLabel;
+          const matchOne = (fv) => {
+            const fk = col.badgeKeyCase === "lower" ? String(fv).toLowerCase() : String(fv);
+            if (!fk) return true;
+            return cellKey.includes(fk) || cellLabelNorm.includes(fk);
+          };
+          if (Array.isArray(filterValue)) {
+            if (filterValue.length === 0) return true;
+            if (!filterValue.some(matchOne)) return false;
+          } else {
+            if (!matchOne(filterValue)) return false;
+          }
+        }
+      }
+    }
+    return true;
+  });
+
+  // Apply sorting
+  if (sortConfig.column) {
+    const sortColumn = columns.find(col => col.key === sortConfig.column);
+    if (sortColumn) {
+      filtered.sort((a, b) => {
+        const aVal = getCellValue(a, sortColumn);
+        const bVal = getCellValue(b, sortColumn);
+        if (aVal === bVal) return 0;
+        const comparison = aVal > bVal ? 1 : -1;
+        return sortConfig.direction === "asc" ? comparison : -comparison;
+      });
+    }
+  }
+
+  setFilteredData(filtered);
+};
+
+// Update category contentCount based on fetched data length when local filters are enabled
+const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
+  // Use the category item passed from fetchData, not the currently selected item
+  // This ensures we update the count for the category that was actually fetched
+  if (!categoryItem) return;
+  
+  const config = args.fns.evaluateConfig?.() || {};
+  const sidebarConfig = config?.sidebar;
+  if (!sidebarConfig) return;
+  
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+  
+  // Determine category ID from the category item that was used for fetching
+  const isUncategorized = categoryItem.P?.key === rootKey || categoryItem.P?.key === 'uncategorized' || categoryItem.id === 'uncategorized';
+  const categoryId = isUncategorized ? 'uncategorized' : categoryItem.id;
+  
+  if (!categoryId) return;
+  
+  // Get current count from graph
+  let currentCount = 0;
+  if (isUncategorized) {
+    const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+    currentCount = uncategorizedVertex?.P?.contentCount ?? 0;
+  } else {
+    const categoryVertex = args.graph?.vertexes?.[categoryId];
+    currentCount = categoryVertex?.P?.contentCount ?? 0;
+  }
+  
+  // Update count if different - use fetched data length (before filtering)
+  const fetchedLength = fetchedData?.length ?? 0;
+  if (currentCount !== fetchedLength) {
+    if (isUncategorized) {
+      const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+      if (uncategorizedVertex) {
+        args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+          contentCount: fetchedLength
+        });
+      }
+    } else {
+      const categoryVertex = args.graph?.vertexes?.[categoryId];
+      if (categoryVertex) {
+        args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+          contentCount: fetchedLength
+        });
+      }
+    }
+  }
+};
+
+const debouncedSetSearchTerm = args.debounce(value => {
+  setSearchTerm(value);
+  
+  // Check if local filters are enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  
+  if (enableLocalFilters) {
+    // Apply local filters only
+    applyLocalFilters();
+  } else {
+    // Server-side search - trigger search
+    handleSearch();
+  }
+  updateQueryParams();
+}, 500);
+
+// Get cell value from row
+const getCellValue = (row, column) => {
+  if (column.valueAccessor) {
+    return column.valueAccessor(row);
+  }
+  if (column.key.includes(".")) {
+    const keys = column.key.split(".");
+    let value = row;
+    for (const key of keys) {
+      value = value?.[key];
+      if (value === undefined) return null;
+    }
+    return value;
+  }
+  if (row.P) {
+    return row.P[column.key];
+  }
+  return row[column.key];
+};
+
+// Render cell content based on column type
+const renderCellContent = (row, column, rowIndex) => {
+  if (column.type === 'expand' || column.key === '__expand') {
+    const parentKey = row._parentKey;
+    const isParent = row._isParent === true;
+    const isExpanded = parentKey != null && !collapsedKeys[parentKey];
+    return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
+  }
+  const value = getCellValue(row, column);
+
+  if (column.type === "rowNumber") {
+    return rowIndex + 1;
+  }
+
+  if (column.render) {
+    return column.render(value, row, column);
+  }
+
+  if (column.type === "checkbox") {
+    return value ? "✓" : "";
+  }
+
+  if (column.type === "image" || column.type === "imagePreview") {
+    const imageUrl = value || column.defaultImage;
+    return imageUrl ? { type: "image", url: imageUrl, alt: column.alt || "" } : "";
+  }
+
+  if (column.type === "youtubeLink") {
+    const videoId = value || column.videoIdAccessor?.(row);
+    if (!videoId) return "";
+    return { type: "youtubeLink", videoId };
+  }
+
+  if (column.type === "downloadLink") {
+    const url = value || column.urlAccessor?.(row);
+    const icon = column.icon || "carbon:download";
+    if (!url) return "";
+    return { type: "downloadLink", url, icon };
+  }
+
+  if (column.type === "duration") {
+    if (!value) return "";
+    const seconds = typeof value === "number" ? value : parseInt(value);
+    if (isNaN(seconds)) return value;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${minutes}:${String(secs).padStart(2, "0")}`;
+  }
+
+  if (column.type === "date") {
+    if (!value) return "";
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+    return date.toLocaleDateString();
+  }
+
+  if (column.type === "isoDateTime") {
+    if (!value) return "";
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+    return date.toLocaleString();
+  }
+
+  if (column.type === "join") {
+    if (!value || !Array.isArray(value)) return "";
+    const separator = column.separator || ", ";
+    const displayKey = column.displayKey || "name";
+    return value.map(item => {
+      if (typeof item === "string") return item;
+      if (item.P) return item.P[displayKey] || item.P.name || "";
+      return item[displayKey] || item.name || "";
+    }).join(separator);
+  }
+
+  if (column.type === "actions") {
+    return { type: "actions", row, column };
+  }
+
+  if (column.type === "badge") {
+    const map = column.badgeToneMap || {};
+    const v = (value || "").toString();
+    const key = (column.badgeKeyCase === "lower" ? v.toLowerCase() : v);
+    const entry = map[key];
+    const [text, tone] = Array.isArray(entry) ? entry : [v || "", "neutral"];
+    return { type: "badge", text, tone };
+  }
+
+  // Default: return as string
+  return value !== null && value !== undefined ? String(value) : "";
+};
+
+// Handle sort
+const handleSort = (column) => {
+  // Don't allow sorting for rowNumber columns
+  if (column.type === "rowNumber" || column.key === "__rowNumber") return;
+  if (column.sortable === false) return;
+
+  // If clicking the same column that's already sorted
+  if (sortConfig.column === column.key) {
+    // If currently ascending, switch to descending
+    if (sortConfig.direction === "asc") {
+      setSortConfig({ column: column.key, direction: "desc" });
+    } 
+    // If currently descending, clear the sort
+    else if (sortConfig.direction === "desc") {
+      setSortConfig({ column: null, direction: null });
+    }
+  } else {
+    // New column, start with ascending
+    setSortConfig({ column: column.key, direction: "asc" });
+  }
+
+  // Check if local sort is enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalSort = config?.enableLocalSort === true;
+  
+  if (enableLocalSort) {
+    // Apply local sort only
+    applyLocalFilters();
+  } else {
+    // Server-side sort - trigger search
+    handleSearch();
+  }
+  updateQueryParams();
+};
+
+// Get unique values for a column
+const getUniqueColumnValues = (column) => {
+  const allData = data();
+  const uniqueValues = new Set();
+
+  allData.forEach(row => {
+    const value = getCellValue(row, column);
+    if (value !== null && value !== undefined && value !== "") {
+      uniqueValues.add(String(value));
+    }
+  });
+
+  return Array.from(uniqueValues).sort();
+};
+
+// Common function to create select filter component props
+const getSelectFilterProps = (columnKey, filterValue, options) => {
+  // Normalize filterValue to array for multiple select
+  // Ensure values match option values exactly
+  // If "_All_VALUES_" is present, don't include it in the display value
+  let normalizedValue = Array.isArray(filterValue) 
+    ? filterValue.filter(v => v !== null && v !== undefined && v !== "" && v !== "_All_VALUES_")
+    : (filterValue && filterValue !== "_All_VALUES_" ? [filterValue] : []);
+  
+  // If filter is cleared (undefined), pass empty array to clear TomSelect
+  // TomSelect needs empty array for multiple mode to show as cleared
+  const displayValue = filterValue === undefined ? [] : normalizedValue;
+  
+  // Check if filter is currently empty
+  const isFilterEmpty = filterValue === undefined || 
+    (Array.isArray(filterValue) && filterValue.length === 0) ||
+    filterValue === null || filterValue === "";
+
+  return {
+    componentName: "TomSelect",
+    value: displayValue,
+    onChange: (newValue) => {
+      // If "All" is selected
+      if (Array.isArray(newValue) && newValue.includes("_All_VALUES_")) {
+        // clear all filters
+        handleColumnFilterChange(columnKey, ["_All_VALUES_"]);
+      } else {
+        handleColumnFilterChange(columnKey, newValue);
+      }
+    },
+    options: options,
+    search: options.length > 10, // Enable search if many options
+    multiple: true
+  };
+};
+
+// Handle column filter change
+const handleColumnFilterChange = (columnKey, value) => {
+  // Handle array values (multiple select)
+  let filterValue;
+  setColumnFilters(columnKey, value ? JSON.parse(JSON.stringify(value)) : value);
+  if (Array.isArray(value)) {
+    // If "_All_VALUES_" is selected, clear all filters for this column
+    if (value.includes("_All_VALUES_")) {
+      filterValue = undefined;
+    } else {
+      // Remove "_All_VALUES_" if present and filter out empty values
+      const filtered = value.filter(v => v !== "_All_VALUES_" && v !== "" && v !== null && v !== undefined);
+      filterValue = filtered.length === 0 ? undefined : filtered;
+    }
+  } else {
+    // Single value - clear if "All" or empty
+    filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
+  }
+
+  if (filterValue === undefined) {
+    // Remove the filter key from columnFilters
+    setColumnFilters(columnKey, undefined);
+  }
+
+  // Check if local filters are enabled
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  
+  if (enableLocalFilters) {
+    // Apply local filters only
+    applyLocalFilters();
+  } else {
+    // Server-side filters - trigger search
+    handleSearch();
+  }
+  updateQueryParams();
+};
+
+// Background poll: fetch only queued row ids and merge updates (no full reload, no loader)
+const pollQueuedRows = async () => {
+  const config = args.fns.evaluateConfig?.() || {};
+  const intervalMs = config?.refetchIntervalWhenQueued;
+  const currentData = data();
+  const queuedIds = (Array.isArray(currentData) ? currentData : [])
+    .filter(r => (r.P?.syncStatus) === 'queued')
+    .map(r => r.id)
+    .filter(id => id !== undefined && id !== null);
+  if (queuedIds.length === 0 || !intervalMs) return;
+  const refresh = args.fns.refreshQueuedRows;
+  if (!refresh || typeof refresh !== 'function') return;
+  try {
+    const result = await refresh(queuedIds);
+    const updated = result?.data;
+    if (Array.isArray(updated) && updated.length > 0) {
+      const updatedMap = new Map(updated.map(row => [row.id, row]));
+      const newData = currentData.map(row => updatedMap.get(row.id) || row);
+      setData(newData);
+      applyLocalFilters();
+      const stillQueued = newData.some(r => (r.P?.syncStatus) === 'queued');
+      if (stillQueued && pollRef.id === null) {
+        pollRef.id = setTimeout(() => {
+          pollRef.id = null;
+          pollQueuedRows();
+        }, intervalMs);
+      }
+    } else {
+      if (pollRef.id === null) {
+        pollRef.id = setTimeout(() => {
+          pollRef.id = null;
+          pollQueuedRows();
+        }, intervalMs);
+      }
+    }
+  } catch (e) {
+    console.error("pollQueuedRows:", e);
+    if (pollRef.id === null) {
+      pollRef.id = setTimeout(() => {
+        pollRef.id = null;
+        pollQueuedRows();
+      }, intervalMs);
+    }
+  }
+};
+
+// Start background poll when any row has syncStatus 'queued'. Pass optional data array to check; if omitted, uses current data().
+const startPollIfQueued = (dataToCheck) => {
+  const rows = dataToCheck !== undefined ? dataToCheck : data();
+  if (pollRef.id) {
+    clearTimeout(pollRef.id);
+    pollRef.id = null;
+  }
+  const config = args.fns.evaluateConfig?.() || {};
+  const intervalMs = config?.refetchIntervalWhenQueued;
+  const refresh = args.fns.refreshQueuedRows;
+  const hasQueued = Array.isArray(rows) && rows.some(r => (r.P?.syncStatus) === 'queued');
+  if (intervalMs && refresh && typeof refresh === 'function' && hasQueued) {
+    pollRef.id = setTimeout(() => {
+      pollRef.id = null;
+      pollQueuedRows();
+    }, intervalMs);
+  }
+};
+
+// Handle search
+const handleSearch = () => {
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  const enableLocalSort = config?.enableLocalSort === true;
+  
+  // If local filters/sort are enabled, fetch all data and apply locally
+  // Otherwise, pass filters/sort to server
+  args.fns.fetchData(
+    enableLocalFilters ? undefined : searchTerm(), 
+    enableLocalFilters ? undefined : columnFilters, 
+    enableLocalSort ? undefined : sortConfig, 
+    (data, categoryItem) => {
+      setData(data);
+      
+      // Update category count with fetched data length if local filters are enabled
+      // Pass the categoryItem that was used for fetching, not the currently selected item
+      if (enableLocalFilters) {
+        updateCategoryCountFromFetchedData(data, categoryItem);
+      }
+      
+      // Always apply local filters if enabled, or if server didn't filter
+      if (enableLocalFilters || enableLocalSort) {
+        applyLocalFilters();
+      } else {
+        // Server already filtered, just set filtered data to match data
+        setFilteredData(data);
+      }
+      
+      startPollIfQueued(data);
+    }
+  );
+};
+
+// Handle row selection (using vertex IDs)
+const toggleRowSelection = (vertexId) => {
+  const currentSelected = getSelectedRows();
+  const newSelected = new Set(currentSelected);
+  if (newSelected.has(vertexId)) {
+    newSelected.delete(vertexId);
+  } else {
+    newSelected.add(vertexId);
+  }
+  setSelectedRows(newSelected);
+};
+
+const selectAllRows = () => {
+  const displayed = getDisplayData();
+  const allVertexIds = new Set((displayed || []).map(row => row.id).filter(id => id !== undefined && id !== null));
+  setSelectedRows(allVertexIds);
+};
+
+const clearSelection = () => {
+  clearSelectedRows();
+};
+
+// Keyboard: active row by id (null = none); index derived from data so no createEffect needed
+const [activeRowId, setActiveRowId] = args.createSignal(null);
+const getActiveRowIndex = () => {
+  const id = activeRowId();
+  if (id == null) return -1;
+  const displayed = getDisplayData();
+  const idx = (displayed && displayed.findIndex((r) => r && r.id === id)) ?? -1;
+  return idx >= 0 ? idx : -1;
+};
+
+// Handle add/edit
+const handleAdd = async () => {
+  const onAdd = getOnAdd();
+  
+  // If onAdd function is provided, call it instead of opening modal
+  if (onAdd && typeof onAdd === 'function') {
+    try {
+      await onAdd();
+      return;
+    } catch (error) {
+      console.error("Error in onAdd function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute add action");
+      return;
+    }
+  }
+  
+  // Default behavior: open add modal
+  setModalMode("add");
+  setEditingRow(null);
+  setFormData(null);
+  setIsModalOpen(true);
+};
+
+const handleEdit = async (row) => {
+  const onEdit = getOnEdit();
+  
+  // If onEdit function is provided, call it instead of opening modal
+  if (onEdit && typeof onEdit === 'function') {
+    try {
+      await onEdit(row, args);
+      return;
+    } catch (error) {
+      console.error("Error in onEdit function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute edit action");
+      return;
+    }
+  }
+  
+  // Default behavior: open edit modal
+  setModalMode("edit");
+  setEditingRow(row);
+  // Set form data directly from row vertex
+  setFormData(row);
+  setIsModalOpen(true);
+};
+
+const handleViewRow = (row) => {
+  setModalMode("view");
+  setEditingRow(row);
+  setFormData(row);
+  setIsModalOpen(true);
+};
+
+const handleSave = async (formDataToSave) => {
+  const formConfig = args.fns.getFormConfig();
+  if (!formConfig?.saveFunction) {
+    args.showErrorToast?.("Save function not configured");
+    return;
+  }
+
+  try {
+    args.fns.setLoading(true);
+    const result = await formConfig.saveFunction({
+      mode: modalMode(),
+      data: formDataToSave,
+      originalRow: editingRow()
+    });
+
+    if (result?.success) {
+      args.showSuccessToast?.(
+        modalMode() === "add" ? "Item added successfully" : "Item updated successfully"
+      );
+      setIsModalOpen(false);
+      // Optimistic update
+      if (modalMode() === "add") {
+        setData([...data(), result.data]);
+        
+        // Check if onAfterAdd function is provided
+        const onAfterAdd = getOnAfterAdd();
+        if (onAfterAdd && typeof onAfterAdd === 'function') {
+          try {
+            await onAfterAdd(result, args);
+          } catch (error) {
+            console.error("Error in onAfterAdd function:", error);
+            args.showErrorToast?.(error?.message || "Failed to execute after add action");
+          }
+        }
+      } else {
+        const updated = data().map(row => 
+          row.id === editingRow()?.id ? result.data : row
+        );
+        setData(updated);
+        
+        // Check if onAfterEdit function is provided
+        const onAfterEdit = getOnAfterEdit();
+        if (onAfterEdit && typeof onAfterEdit === 'function') {
+          try {
+            await onAfterEdit(result, args);
+          } catch (error) {
+            console.error("Error in onAfterEdit function:", error);
+            args.showErrorToast?.(error?.message || "Failed to execute after edit action");
+          }
+        }
+      }
+      applyLocalFilters();
+      startPollIfQueued();
+      return true;
+    } else {
+      const errorMsg = result?.message || result?.error || "Failed to save";
+      args.showErrorToast?.(errorMsg);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error saving:", error);
+    const errorMsg = error?.message || error?.error || "Failed to save item";
+    args.showErrorToast?.(errorMsg);
+    return false;
+  } finally {
+    args.fns.setLoading(false);
+  }
+};
+
+// Handle delete
+const handleDelete = async (row) => {
+  const onDelete = getOnDelete();
+  
+  // If onDelete function is provided, call it instead of default delete
+  if (onDelete && typeof onDelete === 'function') {
+    try {
+      await onDelete(row);
+      return;
+    } catch (error) {
+      console.error("Error in onDelete function:", error);
+      args.showErrorToast?.(error?.message || "Failed to execute delete action");
+      return;
+    }
+  }
+  
+  // Default behavior: use formConfig saveFunction
+  const formConfig = args.fns.getFormConfig();
+  if (!formConfig?.saveFunction) {
+    args.showErrorToast?.("Delete function not configured");
+    return;
+  }
+
+  // Use rbConfirm if available
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm || args.fns?.rbConfirm;
+  if (rbConfirm) {
+    const confirmed = await rbConfirm({
+      title: "Delete Item",
+      message: "Are you sure you want to delete this item? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+    if (!confirmed) {
+      return;
+    }
+  } else {
+    // Fallback to browser confirm
+    if (!confirm("Are you sure you want to delete this item?")) {
+      return;
+    }
+  }
+
+  try {
+    args.fns.setLoading(true);
+    // For delete, pass the row as vertex in the new data format
+    const deleteData = {
+      vertex: row,
+      relationships: {}
+    };
+    const result = await formConfig.saveFunction({
+      mode: "delete",
+      data: deleteData,
+      originalRow: row
+    });
+
+    if (result?.success) {
+      const label = getLabel();
+      args.showSuccessToast?.(label ? `${label} deleted successfully` : "Item deleted successfully");
+      // Remove from data
+      const updated = data().filter(item => item.id !== row.id);
+      setData(updated);
+      applyLocalFilters(updated);
+      
+      // Check if onAfterDelete function is provided
+      const onAfterDelete = getOnAfterDelete();
+      if (onAfterDelete && typeof onAfterDelete === 'function') {
+        try {
+          await onAfterDelete(result, row, args);
+        } catch (error) {
+          console.error("Error in onAfterDelete function:", error);
+          args.showErrorToast?.(error?.message || "Failed to execute after delete action");
+        }
+      }
+    } else {
+      const errorMsg = result?.message || result?.error || "Failed to delete";
+      args.showErrorToast?.(errorMsg);
+    }
+  } catch (error) {
+    console.error("Error deleting:", error);
+    const errorMsg = error?.message || error?.error || "Failed to delete item";
+    args.showErrorToast?.(errorMsg);
+  } finally {
+    args.fns.setLoading(false);
+  }
+};
+
+
+
+
+
+// Check if column should be hidden
+const shouldHideColumn = (column) => {
+  const hideColumns = getHideColumns();
+  if (typeof hideColumns === "function") {
+    return hideColumns(column);
+  }
+  return hideColumns.includes(column.key);
+};
+
+// Get column width (from state, config, or defaults)
+const getColumnWidth = (columnKey) => {
+  const storedWidth = columnWidths[columnKey];
+  if (storedWidth) {
+    return storedWidth;
+  }
+  const configWidths = args.fns.prop('columnWidths');
+  if (configWidths && configWidths[columnKey]) {
+    return configWidths[columnKey];
+  }
+  if (columnKey === "__selection" || columnKey === "__rowNumber") {
+    return "36px";
+  }
+  if (columnKey === "__actions") {
+    return "120px";
+  }
+  const columns = getColumns();
+  const column = columns.find(col => col.key === columnKey);
+  return column?.width || "100px";
+};
+
+// Get grid template columns
+const getGridTemplateColumns = () => {
+  const columns = getColumns();
+  const showRowNumber = getShowRowNumber();
+  const showSelection = getShowSelection();
+  const showActions = getShowActions();
+  let template = "";
+
+  // Add selection column if enabled
+  if (showSelection) {
+    template += `${getColumnWidth("__selection")} `;
+  }
+
+  // Add actions column if enabled and form config exists
+  if (showActions && args.fns.getFormConfig()) {
+    template += `${getColumnWidth("__actions")} `;
+  }
+
+  if (showRowNumber) {
+    template += `${getColumnWidth("__rowNumber")} `;
+  }
+
+  columns.forEach(col => {
+    if (!shouldHideColumn(col)) {
+      template += `${getColumnWidth(col.key)} `;
+    }
+  });
+
+  return template.trim();
+};
+
+// Create resize handler for a column
+const createResizeHandler = (columnKey) => {
+  return (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Get current width
+    const currentWidth = getColumnWidth(columnKey);
+    let startWidth = 50;
+    if (currentWidth && currentWidth !== "1fr") {
+      const match = currentWidth.match(/(\d+)px/);
+      if (match) {
+        startWidth = parseInt(match[1]);
+      }
+    }
+
+    const startX = e.clientX || e.touches?.[0]?.clientX || 0;
+
+    const minWidth = (columnKey === "__selection" || columnKey === "__rowNumber") ? 36 : 50;
+    const handleMouseMove = (moveEvent) => {
+      const clientX = moveEvent.clientX || moveEvent.touches?.[0]?.clientX || startX;
+      const deltaX = clientX - startX;
+      const newWidth = Math.max(minWidth, startWidth + deltaX);
+      setColumnWidths({ ...columnWidths, [columnKey]: `${newWidth}px` });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleMouseMove);
+      document.removeEventListener('touchend', handleMouseUp);
+      setIsResizing(false);
+    };
+
+    setIsResizing(true);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleMouseMove);
+    document.addEventListener('touchend', handleMouseUp);
+  };
+};
+// Watch for sidebar selection changes and refresh table
+const selectedSidebarItem = args.fns.selectedSidebarItem;
+args.createEffect(() => {
+  const item = selectedSidebarItem?.();
+  setActiveRowId(null);
+  // When sidebar selection changes, refresh table data
+  if (item) {
+    handleSearch();
+  }
+});
+
+// React to parent's rowsToRemove signal (parent-owned state, no reload after move-to-category)
+const rowsToRemove = args.contextData.props?.rowsToRemove;
+const setRowsToRemove = args.contextData.props?.setRowsToRemove;
+if (rowsToRemove && setRowsToRemove) {
+  args.createEffect(() => {
+    const idsToRemove = rowsToRemove?.();
+    if (!idsToRemove || !Array.isArray(idsToRemove) || idsToRemove.length === 0) return;
+    const idSet = new Set(idsToRemove);
+    const updated = data().filter(row => !idSet.has(row.id));
+    setData(updated);
+    applyLocalFilters(updated);
+    setRowsToRemove(null);
+  });
+}
+
+// Drag and drop functionality using @atlaskit/pragmatic-drag-and-drop
+const tableDraggableCleanups = new Map();
+const tableDraggableElements = new Map(); // Store elements by rowId
+
+// Read current rowId from element's data attribute (row re-renders update it when sidebar/data changes)
+const getRowIdFromElement = (element) => {
+  const id = element?.getAttribute?.('data-row-id');
+  return id != null && id !== '' ? id : undefined;
+};
+
+// Helper to check if a row can be dragged
+const canDragRow = (rowId) => {
+  if (!rowId) return false;
+  const selected = getEffectiveSelectedRows();
+  if (!selected.has(rowId)) return false;
+  return selected.size > 0;
+};
+
+// Initialize draggable for table row - rowId read from element data-row-id
+const initTableDraggable = (element) => {
+  if (!element || !args.draggable) return;
+  
+  // Clean up existing draggable for this element if any
+  const existingCleanup = tableDraggableCleanups.get(element);
+  if (existingCleanup) {
+    existingCleanup();
+  }
+  
+  const cleanup = args.draggable({
+    element,
+    getInitialData: () => {
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) {
+        return { type: 'table-items', itemIds: [], count: 0 };
+      }
+      
+      const selected = getEffectiveSelectedRows();
+      const itemIds = Array.from(selected).filter(id => id !== undefined && id !== null);
+      
+      return {
+        type: 'table-items',
+        itemIds,
+        count: itemIds.length
+      };
+    },
+    onGenerateDragPreview: ({ nativeSetDragImage }) => {
+      // Provide a stable custom preview (pragmatic disables default preview in some setups)
+      if (!args.setCustomNativeDragPreview || !nativeSetDragImage) return;
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) return;
+
+      const selected = getEffectiveSelectedRows();
+      const count = selected.size;
+
+      if (!count) return;
+
+      return args.setCustomNativeDragPreview({
+        nativeSetDragImage,
+        getOffset: args.pointerOutsideOfPreview
+          ? args.pointerOutsideOfPreview({ x: "8px", y: "8px" })
+          : undefined,
+        render: ({ container }) => {
+          container.style.boxSizing = "border-box";
+          container.style.display = "flex";
+          container.style.alignItems = "center";
+          container.style.gap = "10px";
+          container.style.padding = "10px 12px";
+          container.style.borderRadius = "10px";
+          container.style.border = `1px solid ${args.theme?.var?.color?.border ?? "rgba(0,0,0,0.2)"}`;
+          container.style.background = `${args.theme?.var?.color?.background_light_200 ?? "#fff"}`;
+          container.style.color = `${args.theme?.var?.color?.text ?? "#111"}`;
+          container.style.boxShadow = "0 10px 28px rgba(0,0,0,0.18)";
+          container.style.pointerEvents = "none";
+          container.style.fontSize = "14px";
+          container.style.fontWeight = "600";
+          container.style.maxWidth = "320px";
+
+          const badge = document.createElement("div");
+          badge.style.flex = "0 0 auto";
+          badge.style.padding = "2px 8px";
+          badge.style.borderRadius = "9999px";
+          badge.style.background = `${args.theme?.var?.color?.primary ?? "#4f46e5"}`;
+          badge.style.color = `${args.theme?.var?.color?.primary_text ?? "#fff"}`;
+          badge.style.fontSize = "12px";
+          badge.style.fontWeight = "700";
+          badge.textContent = String(count);
+
+          const text = document.createElement("div");
+          text.style.minWidth = "0";
+          text.style.whiteSpace = "nowrap";
+          text.style.overflow = "hidden";
+          text.style.textOverflow = "ellipsis";
+          text.textContent = count === 1 ? "Move 1 item" : `Move ${count} items`;
+
+          container.appendChild(badge);
+          container.appendChild(text);
+        }
+      });
+    },
+    onDragStart: () => {
+      const currentRowId = getRowIdFromElement(element);
+      if (!currentRowId || !canDragRow(currentRowId)) return;
+      if (element) element.style.opacity = "0.5";
+    },
+    onDrop: () => {
+      if (element) element.style.opacity = "1";
+    }
+  });
+  
+  tableDraggableCleanups.set(element, cleanup);
+  const rowId = getRowIdFromElement(element);
+  if (rowId) tableDraggableElements.set(rowId, element);
+  return cleanup;
+};
+
+// Cleanup table draggable for a specific element
+const cleanupTableDraggable = (element) => {
+  if (element) {
+    const cleanup = tableDraggableCleanups.get(element);
+    if (cleanup) {
+      cleanup();
+      tableDraggableCleanups.delete(element);
+    }
+    // Remove from elements map
+    tableDraggableElements.forEach((el, rowId) => {
+      if (el === element) {
+        tableDraggableElements.delete(rowId);
+      }
+    });
+  } else {
+    // Cleanup all draggables
+    tableDraggableCleanups.forEach((cleanup) => cleanup());
+    tableDraggableCleanups.clear();
+    tableDraggableElements.clear();
+  }
+};
+
+const getSelectedItems = () => {
+  const selected = getEffectiveSelectedRows();
+  const filtered = filteredData();
+  const selectedIds = Array.from(selected);
+  return (filtered || []).filter(row => selectedIds.includes(row.id));
+};
+
+const hasActiveFilters = () => {
+  const filters = columnFilters;
+  const keys = Object.keys(filters);
+  for (const k of keys) {
+    const v = filters[k];
+    if (v !== undefined && v !== null && v !== "") {
+      if (Array.isArray(v)) {
+        if (v.length > 0 && !(v.length === 1 && v[0] === "_All_VALUES_")) return true;
+      } else return true;
+    }
+  }
+  return false;
+};
+
+return {
+  getColumns,
+  getRowHeight,
+  getTitle,
+  getSearchPlaceholder,
+  getAdditionalFilters,
+  getCustomActions,
+  getBatchActions,
+  getShowRowNumber,
+  getHideColumns,
+  getShowAddButton,
+  getShowEditButton,
+  getShowSelection,
+  getShowActions,
+  getResizableColumns,
+  getHideExportButtons,
+  getHideImportButtons,
+  getHideSettingsButton,
+  getIcon,
+  hasActiveFilters,
+  getLabel,
+  getAddButtonLabel,
+  getOnEdit,
+  getOnAfterAdd,
+  getOnAfterEdit,
+  getOnAdd,
+  getOnDelete,
+  getOnAfterDelete,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true,
+  getColumnWidth,
+  createResizeHandler,
+  columnWidths,
+  setColumnWidths,
+  isResizing,
+  isImportModalOpen,
+  setIsImportModalOpen,
+  importData,
+  setImportData,
+  data,
+  setData,
+  filteredData,
+  setFilteredData,
+  searchTerm,
+  setSearchTerm,
+  debouncedSetSearchTerm,
+  columnFilters,
+  setColumnFilters,
+  sortConfig,
+  setSortConfig,
+  getSelectedRows,
+  getEffectiveSelectedRows,
+  setSelectedRows,
+  clearSelectedRows,
+  isModalOpen,
+  setIsModalOpen,
+  modalMode,
+  setModalMode,
+  editingRow,
+  setEditingRow,
+  formData,
+  setFormData,
+  initializeFromQueryParams,
+  updateQueryParams,
+  applyLocalFilters,
+  getCellValue,
+  getUniqueColumnValues,
+  handleSort,
+  handleColumnFilterChange,
+  handleSearch,
+  toggleRowSelection,
+  selectAllRows,
+  clearSelection,
+  activeRowId,
+  activeRowIndex: getActiveRowIndex,
+  setActiveRowIndex: (rowIndex) => setActiveRowId(getDisplayData()?.[rowIndex]?.id ?? null),
+  setActiveRowId,
+  handleAdd,
+  handleEdit,
+  handleViewRow,
+  getRowClickable,
+  getOnRowClick,
+  shouldHideColumn,
+  getGridTemplateColumns,
+  renderCellContent,
+  handleSave,
+  handleDelete,
+  initTableDraggable,
+  cleanupTableDraggable,
+  getSelectedItems,
+  getSelectFilterProps,
+  setRowRef,
+  getRowRef,
+  getDisplayData,
+  getGroupByConfig,
+  toggleExpanded,
+  collapsedKeys,
+  setCollapsedKeys
+};
+'''
+        key: Table
+        props:
+          '''return {
+  onMount: async () => {
+    args.fns.initializeFromQueryParams();
+    // If sidebar is configured, don't fetch on mount
+    const hasSidebar = args.fns.hasSidebar?.();
+    if (!hasSidebar) {
+      args.fns.handleSearch();
+    }
+  }
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        slotName: header
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${args.theme.var.spacing.md};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const title = args.fns.getTitle();
+const displayTitle = title;
+return {
+  as: "div",
+  hide: !displayTitle
+};
+'''
+      }
+    }
+    {
+      id: "7a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const icon = args.fns.getIcon();
+return {
+  as: "icon",
+  icon: icon,
+  width: 24,
+  height: 24,
+  hide: !icon
+};
+'''
+      }
+    }
+    {
+      id: "7b"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const title = args.fns.getTitle();
+const displayTitle = title;
+return {
+  as: "span",
+  text: displayTitle,
+  hide: !displayTitle
+};
+'''
+      }
+    }
+    {
+      id: "7c"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: true
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const customActions = args.fns.getCustomActions?.() || [];
+const hasCustomActions = Array.isArray(customActions) ? customActions.length > 0 : !!customActions;
+return {
+  as: "div",
+  hide: !hasCustomActions
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        slotName: customActions
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-wrap: wrap;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        slotName: additionalFilters
+        displayOrder: 1
+        componentName: Slot
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const showAddButton = args.fns.getShowAddButton();
+const formConfig = args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !showAddButton || !formConfig
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleAdd,
+  text: "Add",
+  leftIcon: "carbon:add",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "11_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:icon": "plus",
+  text: "Add",
+  onClick: args.fns.handleAdd,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+const hasImport = !!args.fns.getImportFunction();
+const hasExport = !!args.fns.getExportFunction();
+const hideImportButtons = args.fns.getHideImportButtons();
+const hideExportButtons = args.fns.getHideExportButtons();
+
+return {
+  as: "div",
+  hide: (!hasImport && !hasExport) || (hideImportButtons && hideExportButtons)
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.fns.setIsImportModalOpen(true),
+  text: "Import",
+  leftIcon: "carbon:upload",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "14_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "upload",
+  text: "Import",
+  onClick: () => args.fns.setIsImportModalOpen(true),
+  disabled: args.fns.loading(),
+  hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleExport,
+  text: "Export All",
+  leftIcon: "carbon:download",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "13_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "download",
+  text: "Export All",
+  onClick: args.fns.handleExport,
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => args.fns.handleExport(args.fns.filteredData()),
+  text: "Export Filtered",
+  leftIcon: "carbon:filter",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "15_polaris"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "filter",
+  text: "Export Filtered",
+  onClick: () => args.fns.handleExport(args.fns.filteredData()),
+  disabled: args.fns.loading(),
+  hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex: 1;
+  min-width: 200px;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+return {
+  placeholder: args.fns.getSearchPlaceholder(),
+  value: args.fns.searchTerm(),
+  onInput: (e) => {
+    args.fns.debouncedSetSearchTerm(e.target.value);
+  },
+  leftIcon: "carbon:search",
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "19_polaris"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-search-field",
+  label: "Search",
+  "attr:labelAccessibilityVisibility": "exclusive",
+  placeholder: args.fns.getSearchPlaceholder(),
+  value: args.fns.searchTerm(),
+  onInput: (e) => args.fns.debouncedSetSearchTerm(e?.target?.value ?? ''),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: args.fns.handleSearch,
+  text: "Search",
+  leftIcon: "carbon:search",
+  hide: true,
+  disabled: args.fns.loading()
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: args.fns.handleOpenSettings,
+  text: "Settings",
+  leftIcon: "carbon:settings",
+  disabled: args.fns.loading(),
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "21_polaris"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:icon": "settings",
+  text: "Settings",
+  onClick: args.fns.handleOpenSettings,
+  disabled: args.fns.loading(),
+  hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''
+const isResizing = args.fns.isResizing();
+
+return [`._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-template-rows: auto auto 1fr;
+
+  user-select: ${isResizing ? "none" : "auto"};
+  /* prevents flexbox from forcing the item to exceed its container. */
+  min-height: 0;
+}`];
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''
+const usePolaris = args.fns.getUsePolarisUI?.() === true
+return `._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-column: 1 / -1;
+  grid-row: 1;
+  background: ${usePolaris ? "#f7f7f7" : args.theme.var.color.background_light_100};
+  border-top: 1px solid ${args.theme.var.color.border};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return {
+  as: "div",
+  hide: !showSelection,
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.text};
+  flex-shrink: 0;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const selected = args.fns.getEffectiveSelectedRows();
+const filtered = args.fns.filteredData();
+const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
+
+return {
+  as: usePolaris ? "s-checkbox" : "input",
+  type: usePolaris ? undefined : "checkbox",
+  "attr:checked": usePolaris && allSelected ? true : undefined,
+  "attr:accessibilityLabel": usePolaris ? "Select all rows" : undefined,
+  checked: usePolaris ? undefined : allSelected,
+  onChange: usePolaris ? (e) => {
+    const checked = e.target?.checked ?? e.detail?.checked ?? !allSelected;
+    if (checked) args.fns.selectAllRows();
+    else args.fns.clearSelection();
+  } : () => {
+    if (allSelected) args.fns.clearSelection();
+    else args.fns.selectAllRows();
+  },
+  hide: !showSelection
+};
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+const resizableColumns = args.fns.getResizableColumns();
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
+  }
+
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const resizableColumns = args.fns.getResizableColumns();
+
+const resizeHandler = args.fns.createResizeHandler("__selection");
+
+return {
+  as: "div",
+  hide: !resizableColumns || !showSelection,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: default;
+  user-select: none;
+  position: relative;
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "27a"
+      L: Attr
+      P: {
+        css:
+          '''
+const sortConfig = args.fns.sortConfig;
+const column = { key: "__actions", label: "Actions" };
+
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  text: "Actions",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const resizableColumns = args.fns.getResizableColumns();
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
+  }
+
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const resizableColumns = args.fns.getResizableColumns();
+
+const resizeHandler = args.fns.createResizeHandler("__actions");
+
+return {
+  as: "div",
+  hide: !resizableColumns || !hasFormConfig || !showActions,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.key !== "__rowNumber") ? "pointer" : "default"};
+  user-select: none;
+  position: relative;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.fns.sortConfig;
+const shouldHide = args.fns.shouldHideColumn(column);
+const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+
+return {
+  as: "div",
+  hide: shouldHide,
+  onClick: () => {
+    if (!isRowNumber && column.sortable !== false) {
+      args.fns.handleSort(column);
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''
+const sortConfig = args.fns.sortConfig;
+const column = args.contextData.column;
+
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.fns.sortConfig;
+const isSorted = sortConfig.column === column.key;
+
+return {
+  as: "div",
+  text: column.label || column.key,
+  hide: column.type === "rowNumber"
+};
+'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''
+const sortConfig = args.fns.sortConfig;
+const column = args.contextData.column;
+const isSorted = sortConfig.column === column.key;
+const direction = sortConfig.direction;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  opacity: ${isSorted ? 1 : 0.3};
+  transition: opacity 0.2s ease;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const sortConfig = args.fns.sortConfig;
+const isSorted = sortConfig.column === column.key;
+const direction = sortConfig.direction;
+const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+
+return {
+  as: "icon",
+  icon: direction === "asc" ? "carbon:chevron-up" : "carbon:chevron-down",
+  width: 16,
+  height: 16,
+  hide: !isSorted || column.sortable === false || isRowNumber
+};
+'''
+      }
+    }
+    {
+      id: "32a"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 2px;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.fns.columnFilters;
+const filterValue = columnFilters[column.key];
+const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
+const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+
+return {
+  as: "icon",
+  icon: "carbon:filter",
+  width: 14,
+  height: 14,
+  hide: !hasFilter || isRowNumber,
+  title: "Filter applied"
+};
+'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const resizableColumns = args.fns.getResizableColumns();
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 20;
+  touch-action: none;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+  border-left: 1px solid ${args.theme.var.color.border_light_400};
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: ${args.theme.var.color.primary_light_200};
+      opacity: 0.6;
+      border-left-color: ${args.theme.var.color.primary_light_300};
+    }
+  }
+
+  &:active {
+    background: ${args.theme.var.color.primary_light_200};
+    opacity: 0.8;
+    border-left-color: ${args.theme.var.color.primary_light_300};
+  }
+
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const resizableColumns = args.fns.getResizableColumns();
+const shouldHide = args.fns.shouldHideColumn(column);
+
+// Determine column key for resize
+const getColumnKey = () => {
+  if (column.key === "__rowNumber" || column.type === "rowNumber") {
+    return "__rowNumber";
+  }
+  return column.key;
+};
+
+const columnKey = getColumnKey();
+const resizeHandler = args.fns.createResizeHandler(columnKey);
+
+return {
+  as: "div",
+  hide: !resizableColumns || shouldHide,
+  onMouseDown: resizeHandler,
+  onTouchStart: resizeHandler
+};
+'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-column: 1 / -1;
+  grid-row: 2;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+
+return {
+  as: "div",
+  hide: !showSelection
+};
+'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+
+return {
+  as: "div",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return {
+  as: "div",
+  hide: shouldHide || column.filterable === false
+};
+'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.fns.columnFilters;
+// Preserve array values from URL - don't default to empty string for select filters
+const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (column.type === "select" || column.filterType === "select" ? [] : "");
+
+return `._id {
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const columnFilters = args.fns.columnFilters;
+// Access store reactively - ensure we get the current value
+const getFilterValue = () => {
+  const value = columnFilters[column.key];
+  if (value !== undefined) {
+    return value;
+  }
+  // Default to empty array for select filters, empty string for others
+  return (column.type === "select" || column.filterType === "select") ? [] : "";
+};
+const filterValue = getFilterValue();
+
+// Skip filter for rowNumber
+if (column.key === "__rowNumber" || column.type === "rowNumber") {
+  return { as: "div", hide: true };
+}
+
+// Skip filter for preview / image columns
+if (column.key === "preview" || column.type === "imagePreview" || column.type === "image") {
+  return { as: "div", hide: true };
+}
+
+// Render appropriate filter component based on column type
+if (column.type === "select" && column.options) {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
+  return args.fns.getSelectFilterProps(
+    column.key,
+    filterValue,
+    [{ value: "_All_VALUES_", label: "All" }, ...column.options]
+  );
+}
+
+if (column.type === "checkbox") {
+  // const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  const usePolaris = false;
+  const isChecked = filterValue === true || filterValue === "true";
+  return {
+    componentName: "Html",
+    as: usePolaris ? "s-checkbox" : "input",
+    type: usePolaris ? undefined : "checkbox",
+    "attr:checked": usePolaris && isChecked ? true : undefined,
+    "attr:accessibilityLabel": usePolaris ? `Filter ${column.label || column.key}` : undefined,
+    checked: usePolaris ? undefined : isChecked,
+    onChange: (e) => {
+      const checked = usePolaris ? (e.target?.checked ?? e.detail?.checked ?? !isChecked) : e.target.checked;
+      args.fns.handleColumnFilterChange(column.key, checked);
+    },
+    css: usePolaris ? undefined : "return `._id { pointer-events: auto; cursor: pointer; width: 1rem; height: 1rem; accent-color: ${args.theme?.var?.color?.text ?? 'inherit'}; flex-shrink: 0; }`;"
+  };
+}
+
+if (column.type === "date" || column.type === "isoDateTime") {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: filterValue || "",
+      onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+    };
+  }
+  return {
+    componentName: "TextInput",
+    type: "date",
+    value: filterValue || "",
+    onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
+  };
+}
+
+// Badge columns: show select from badgeToneMap when available, so filter works by raw value
+if (column.type === "badge" && column.badgeToneMap) {
+  const options = [{ value: "_All_VALUES_", label: "All" }, ...Object.entries(column.badgeToneMap).map(([val, arr]) => ({ value: val, label: Array.isArray(arr) ? arr[0] : String(arr) }))];
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
+  return args.fns.getSelectFilterProps(column.key, filterValue, options);
+}
+
+// Determine filter type (default: "select" for text columns)
+const filterType = column.filterType || (column.type === "text" || !column.type ? "select" : "text");
+
+// If filterType is "select", show select with unique values
+if (filterType === "select") {
+  const usePolaris = args.fns.getUsePolarisUI?.() === true;
+  if (usePolaris) {
+    const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
+    return {
+      componentName: "Html",
+      as: "s-search-field",
+      "attr:label": column.label || "Filter",
+      "attr:labelAccessibilityVisibility": "exclusive",
+      value: displayValue,
+      onInput: (e) => {
+        const v = e?.target?.value ?? e?.detail?.value ?? "";
+        const arr = v ? v.split(",").map(s => s.trim()).filter(Boolean) : undefined;
+        args.fns.handleColumnFilterChange(column.key, arr && arr.length ? arr : undefined);
+      }
+    };
+  }
+  const uniqueValues = args.fns.getUniqueColumnValues(column);
+  const options = [{ value: "_All_VALUES_", label: "All" }, ...uniqueValues.map(val => ({ value: val, label: val }))];
+  return args.fns.getSelectFilterProps(
+    column.key,
+    filterValue,
+    options
+  );
+}
+
+// Default: text input (applies filter immediately on change)
+const usePolaris = args.fns.getUsePolarisUI?.() === true;
+if (usePolaris) {
+  return {
+    componentName: "Html",
+    as: "s-search-field",
+    "attr:label": column.label || "Filter",
+    "attr:labelAccessibilityVisibility": "exclusive",
+    value: filterValue || "",
+    onInput: (e) => args.fns.handleColumnFilterChange(column.key, e?.target?.value ?? e?.detail?.value ?? "")
+  };
+}
+return {
+  componentName: "TextInput",
+  type: "text",
+  value: filterValue || "",
+  onChange: (e) => args.fns.handleColumnFilterChange(column.key, e.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+`;
+'''
+        displayOrder: 3
+        componentName: VirtualList
+        props:
+          '''
+const isLoading = args.fns.loading();
+return {
+  items: args.fns.getDisplayData(),
+  itemHeight: args.fns.getRowHeight(),
+  containerClass: "table-body-list",
+  hide: isLoading,
+  tabIndex: 0,
+  role: "listbox",
+  "attr:aria-label": "Table rows; use arrow keys to move, Left/Right to collapse/expand group, Space to toggle selection",
+  getActiveIndex: () => args.fns.activeRowIndex?.(),
+  setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
+  getItemRef: (index) => args.fns.getRowRef?.(index),
+  onSpaceKey: (index) => {
+    if (!args.fns.getShowSelection?.()) return;
+    const displayData = args.fns.getDisplayData();
+    const row = displayData[index];
+    if (row?.id) args.fns.toggleRowSelection?.(row.id);
+  },
+  onExpandCollapse: (index, action) => {
+    const displayData = args.fns.getDisplayData?.() ?? [];
+    const row = displayData[index];
+    if (row?._isParent !== true || row._parentKey == null) return;
+    const parentKey = row._parentKey;
+    const setCollapsedKeysFn = args.fns.setCollapsedKeys;
+    if (!setCollapsedKeysFn) return;
+    if (action === "collapse") {
+      setCollapsedKeysFn(parentKey, true);
+    } else {
+      setCollapsedKeysFn(parentKey, undefined);
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "40a"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+}
+`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const isLoading = args.fns.loading();
+return {
+  as: "div",
+  hide: !isLoading
+};
+'''
+      }
+    }
+    {
+      id: "40b"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        slotName: children
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[rowIndex];
+const selectedRows = args.fns.getEffectiveSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
+const isActive = args.fns.activeRowId?.() === rowData?.id;
+
+return [
+`._id {
+  position: absolute;
+  top: ${virtualItem.start}px;
+  left: 0;
+  width: 100%;
+  height: ${virtualItem.size}px;
+}`,
+`._id {
+  display: grid;
+  grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-column: 1 / -1;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${isSelected ? args.theme.var.color.secondary_light_200 : "transparent"};
+  transition: background 0.2s ease;
+  ${isActive ? `outline: 2px solid ${args.theme.var.color.primary}; outline-offset: -2px;` : ""}
+
+  &:hover {
+    background: ${isSelected ? args.theme.var.color.secondary_light_200 : args.theme.var.color.secondary_light_100};
+  }
+}`];
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[rowIndex];
+
+const showSelection = args.fns.getShowSelection();
+const rowClickable = args.fns.getRowClickable?.();
+const onRowClick = args.fns.getOnRowClick?.();
+
+const selected = args.fns.getEffectiveSelectedRows();
+const hasSelection = selected.size > 0;
+
+const handleRowClick = (e) => {
+  if (onRowClick && typeof onRowClick === "function") {
+    onRowClick(rowData, args);
+  } else if (rowClickable) {
+    args.fns.handleEdit?.(rowData);
+  } else {
+    args.fns.handleViewRow?.(rowData);
+  }
+};
+
+const isRowClickable = rowClickable || (typeof onRowClick === "function");
+const cursorStyle = isRowClickable ? "cursor: pointer;" : (hasSelection ? "cursor: move;" : undefined);
+
+return {
+  as: "div",
+  role: "option",
+  tabIndex: -1,
+  "attr:aria-selected": args.fns.activeRowId?.() === rowData?.id,
+  "data-row-id": rowData?.id ?? undefined,
+  ref: (el) => {
+    args.fns.setRowRef?.(rowIndex, el ?? null);
+    if (el && args.fns.initTableDraggable) {
+      args.fns.initTableDraggable(el);
+    }
+  },
+  onCleanup: () => {
+    const el = args.fns.getRowRef?.(rowIndex) ?? args.ref?.();
+    args.fns.setRowRef?.(rowIndex, null);
+    if (args.fns.cleanupTableDraggable && el) {
+      args.fns.cleanupTableDraggable(el);
+    }
+  },
+  onClick: (e) => {
+    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    if (isRowClickable) handleRowClick(e);
+  },
+  style: cursorStyle
+};
+'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[rowIndex];
+const selectedRows = args.fns.getEffectiveSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}`;
+'''
+        displayOrder: 0.5
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[rowIndex];
+
+return {
+  as: "div",
+  hide: !showSelection,
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''
+// s-checkbox has issue so always use native checkbox
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
+if (usePolaris) return '';
+return `._id {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.text};
+  flex-shrink: 0;
+}
+`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showSelection = args.fns.getShowSelection();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[rowIndex];
+const selectedRows = args.fns.getEffectiveSelectedRows();
+const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
+
+// const usePolaris = args.fns.getUsePolarisUI?.() === true;
+const usePolaris = false;
+
+return {
+  as: usePolaris ? "s-checkbox" : "input",
+  type: usePolaris ? undefined : "checkbox",
+  "attr:checked": usePolaris && isSelected ? true : undefined,
+  "attr:accessibilityLabel": usePolaris ? "Select row" : undefined,
+  checked: usePolaris ? undefined : isSelected,
+  onChange: (e) => {
+    e.stopPropagation();
+    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
+  },
+  onClick: (e) => e.stopPropagation(),
+  hide: !showSelection
+};
+'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        displayOrder: 0.6
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+
+return {
+  as: "div",
+  hide: !hasFormConfig || !showActions
+};
+'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: IconButton
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+
+return {
+  icon: "carbon:edit",
+  variant: "ghost",
+  size: "sm",
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.handleEdit(rowData);
+  },
+  ariaLabel: "Edit",
+  title: "Edit",
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || (() => {
+    const editLink = args.fns.prop('editLink');
+    if (!editLink) return false;
+    const hasHref = editLink?.getHref?.(rowData);
+    const hasOnClick = typeof (editLink?.getOnClick ?? editLink?.onClick) === "function";
+    return !!(hasHref || hasOnClick);
+  })()
+};
+'''
+      }
+    }
+    {
+      id: "45a"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+const editLink = args.fns.prop('editLink');
+const getHrefFn = editLink?.getHref;
+const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
+const defaultStyle = "color: " + (args.theme?.var?.color?.primary ?? "inherit") + "; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;";
+const styleVal = editLink?.style;
+const editLinkStyle = typeof styleVal === "function" ? styleVal(rowData) : (styleVal ?? defaultStyle);
+const onClickFn = editLink?.getOnClick ?? editLink?.onClick;
+const hasCustomOnClick = typeof onClickFn === "function";
+const editLinkIcon = editLink?.icon;
+const showIconLink = !!editLinkIcon;
+
+return {
+  as: "a",
+  href: editHref ?? "#",
+  target: editLink?.target ?? "_top",
+  rel: editLink?.rel ?? "noopener noreferrer",
+  text: editLink?.label ?? "Edit",
+  onClick: (e) => {
+    e.stopPropagation();
+    if (hasCustomOnClick) {
+      e.preventDefault();
+      onClickFn(rowData, e);
+    } else if (!editHref) {
+      e.preventDefault();
+    }
+  },
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || (!editHref && !hasCustomOnClick) || showIconLink,
+  style: editLinkStyle
+};
+'''
+      }
+    }
+    {
+      id: "45b"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: IconButton
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+const editLink = args.fns.prop('editLink');
+const getHrefFn = editLink?.getHref;
+const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
+const onClickFn = editLink?.getOnClick ?? editLink?.onClick;
+const hasCustomOnClick = typeof onClickFn === "function";
+const editLinkIcon = editLink?.icon;
+
+return {
+  icon: editLinkIcon,
+  href: editHref ?? "#",
+  target: editLink?.target ?? "_top",
+  size: "sm",
+  variant: "ghost",
+  title: editLink?.label ?? "Edit",
+  ariaLabel: editLink?.label ?? "Edit",
+  onClick: (e) => {
+    e.stopPropagation();
+    if (hasCustomOnClick) {
+      e.preventDefault();
+      onClickFn(rowData, e);
+    } else if (!editHref) {
+      e.preventDefault();
+    }
+  },
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || !editLinkIcon || (!editHref && !hasCustomOnClick)
+};
+'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: IconButton
+        props:
+          '''
+const showActions = args.fns.getShowActions();
+const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+
+return {
+  icon: "carbon:trash-can",
+  variant: "danger",
+  size: "sm",
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.handleDelete(rowData);
+  },
+  ariaLabel: "Delete",
+  title: "Delete",
+  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton()
+};
+'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        contextName: column
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const showRowNumber = args.fns.getShowRowNumber();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+
+return {
+  data: showRowNumber 
+    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    : columns
+};
+'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css:
+          '''
+const column = args.contextData.column;
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+const shouldHide = args.fns.shouldHideColumn(column);
+
+return {
+  as: "div",
+  hide: shouldHide
+};
+'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        slotName: cell
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const column = args.contextData.column;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowIndex = virtualItem.index;
+const rowData = args.fns.getDisplayData()[virtualItem.index];
+const cellContent = args.fns.renderCellContent(rowData, column, rowIndex);
+
+// Handle different content types
+if (typeof cellContent === "object" && cellContent !== null) {
+  if (cellContent.type === "expand") {
+    const isParent = cellContent.isParent === true;
+    const isExpanded = cellContent.isExpanded === true;
+    const onToggle = cellContent.onToggle;
+    if (!isParent) return { as: "div", style: "width: 16px; flex-shrink: 0;" };
+    return {
+      as: "button",
+      type: "button",
+      style: "display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: none; background: transparent; cursor: pointer; border-radius: 4px; color: " + args.theme.var.color.text + ";",
+      "attr:aria-label": isExpanded ? "Collapse" : "Expand",
+      onClick: (e) => { e.stopPropagation(); onToggle?.(); },
+      text: isExpanded ? "▼" : "▶"
+    };
+  }
+  if (cellContent.type === "image") {
+    return {
+      as: "img",
+      src: cellContent.url,
+      alt: cellContent.alt,
+      style: "max-width: 100px; max-height: 50px; object-fit: cover; border-radius: 4px;"
+    };
+  }
+  if (cellContent.type === "youtubeLink") {
+    return {
+      as: "a",
+      href: `https://www.youtube.com/watch?v=${cellContent.videoId}`,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: "Watch",
+      style: "color: " + args.theme.var.color.primary + "; text-decoration: none;"
+    };
+  }
+  if (cellContent.type === "downloadLink") {
+    return {
+      as: "a",
+      href: cellContent.url,
+      download: true,
+      style: "color: " + args.theme.var.color.primary + "; text-decoration: none; display: flex; align-items: center; gap: 4px;"
+    };
+  }
+  if (cellContent.type === "actions") {
+    const showEditButton = args.fns.getShowEditButton();
+    const formConfig = args.fns.getFormConfig();
+    const row = cellContent.row;
+
+    return {
+      as: "div",
+      style: "display: flex; gap: 8px; align-items: center;"
+    };
+  }
+  if (cellContent.type === "badge") {
+    const text = (cellContent.text ?? "").toString().trim();
+    if (!text) {
+      return { as: "div", text: "", hide: true };
+    }
+    const usePolaris = args.fns.getUsePolarisUI?.() === true;
+    const tone = cellContent.tone || "neutral";
+    const title = column.badgeTitleAccessor ? column.badgeTitleAccessor(rowData) : undefined;
+    if (usePolaris) {
+      return {
+        as: "s-badge",
+        "attr:tone": tone,
+        text,
+        title
+      };
+    }
+    const t = args.theme.var.color;
+    const br = args.theme.var.borderRadius.full;
+    const fs = args.theme.var.fontSize.xs;
+    const tones = {
+      success: { bg: t.success_light_200, fg: t.success_dark_300 },
+      info: { bg: t.info_light_200, fg: t.info_dark_300 },
+      warning: { bg: t.warning_light_200, fg: t.warning_dark_300 },
+      critical: { bg: t.error_light_200, fg: t.error_dark_300 },
+      caution: { bg: t.warning_light_200, fg: t.warning_dark_300 },
+      neutral: { bg: t.background_light_300, fg: t.text }
+    };
+    const { bg, fg } = tones[tone] || tones.neutral;
+    const style = `display: inline-flex; align-items: center; padding: 2px 8px; border-radius: ${br}; font-size: ${fs}; font-weight: 500; background: ${bg}; color: ${fg}; white-space: nowrap;`;
+    return {
+      as: "span",
+      text,
+      style,
+      title
+    };
+  }
+}
+
+// Add edit button if actions column and edit is enabled
+if (column.type === "actions" && args.fns.getShowEditButton() && args.fns.getFormConfig()) {
+  return {
+    as: "div",
+    style: "display: flex; gap: 8px; align-items: center;"
+  };
+}
+
+// Default text rendering
+const cellTitle = column.titleAccessor ? column.titleAccessor(rowData) : undefined;
+return {
+  as: "div",
+  text: typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : "",
+  title: cellTitle
+};
+'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        slotName: footer
+        displayOrder: 5
+        componentName: Slot
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: TableModal
+        props:
+          '''
+return {
+  isOpen: args.fns.isModalOpen(),
+  onClose: () => args.fns.setIsModalOpen(false),
+  mode: args.fns.modalMode(),
+  formConfig: args.fns.getFormConfig(),
+  initialVertex: args.fns.formData,
+  onSave: args.fns.handleSave,
+  label: args.fns.getLabel()
+};
+'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}`;
+'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.isImportModalOpen(),
+  onClick: () => args.fns.setIsImportModalOpen(false)
+};
+'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.xl};
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.isImportModalOpen(),
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: "Import Data"
+};
+'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border-left: 3px solid ${args.theme.var.color.info};
+  padding: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Data Format: Paste CSV or JSON data. For CSV, first row should be headers. For JSON, provide an array of objects."
+};
+'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.sm};
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Sample CSV header:"
+};
+'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''
+const columns = args.fns.getColumns();
+const getSampleCSVHeader = () => {
+  if (!columns || columns.length === 0) return "";
+  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  return headers.join(",");
+};
+
+const sampleHeader = getSampleCSVHeader();
+
+return `._id {
+  margin-top: ${args.theme.var.spacing.xs};
+  background: rgba(0,0,0,0.1);
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-family: monospace;
+  font-size: ${args.theme.var.fontSize.xs};
+  word-break: break-all;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const columns = args.fns.getColumns();
+const getSampleCSVHeader = () => {
+  if (!columns || columns.length === 0) return "";
+  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  return headers.join(",");
+};
+
+return {
+  as: "code",
+  text: getSampleCSVHeader()
+};
+'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TextArea
+        props:
+          '''
+return {
+  value: args.fns.importData(),
+  onChange: (e) => args.fns.setImportData(e.target.value),
+  placeholder: "Paste your data here (CSV or JSON format)...",
+  rows: 10,
+  style: "font-family: monospace; font-size: 12px;"
+};
+'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  justify-content: flex-end;
+  margin-top: ${args.theme.var.spacing.md};
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  onClick: () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+  },
+  text: "Cancel",
+  disabled: args.fns.loading(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "61_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Cancel",
+  onClick: () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+  },
+  disabled: args.fns.loading(),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  onClick: () => args.fns.handleImport(args.fns.importData().trim(), () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+    args.fns.handleSearch();
+  }),
+  text: "Import",
+  disabled: args.fns.loading() || !args.fns.importData().trim(),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "62_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  text: "Import",
+  onClick: () => args.fns.handleImport(args.fns.importData().trim(), () => {
+    args.fns.setIsImportModalOpen(false);
+    args.fns.setImportData("");
+    args.fns.handleSearch();
+  }),
+  disabled: args.fns.loading() || !args.fns.importData().trim(),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: TableSettingsModal
+        props:
+          '''
+const evaluateConfig = args.fns.evaluateConfig;
+const config = evaluateConfig();
+const getConfigFunction = args.fns.getConfigFunction;
+
+// Get initial config as function body string (from settingsModalInitialConfig, settings, or configFunction)
+let initialConfig = "";
+try {
+  const modalConfig = args.fns.settingsModalInitialConfig?.();
+  const currentSettings = modalConfig ?? args.fns.settings();
+  // If settings exist and it's a string (raw function body), use it
+  if (currentSettings && typeof currentSettings === 'string') {
+    initialConfig = currentSettings;
+  } else {
+    // Fallback to configFunction
+    const configFn = getConfigFunction();
+    if (configFn) {
+      // Get the function as string to extract its body
+      const fnString = configFn.toString();
+      // Extract function body (everything between { and })
+      const match = fnString.match(/\{([\s\S]*)\}/);
+      if (match && match[1]) {
+        initialConfig = match[1].trim();
+      } else {
+        // Fallback: call function and convert to return statement
+        const configObj = configFn();
+        if (configObj) {
+          initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
+        }
+      }
+    } else {
+      // Use current effective config as function body
+      const configObj = {
+        columns: config.columns || [],
+        formConfig: config.formConfig || {},
+        uniqueKeys: config.uniqueKeys || []
+      };
+      initialConfig = `return ${JSON.stringify(configObj, null, 2)};`;
+    }
+  }
+} catch (e) {
+  console.error("Error getting initial config:", e);
+  initialConfig = "return {};";
+}
+
+return {
+  isOpen: args.fns.isSettingsModalOpen(),
+  onClose: () => {
+    args.fns.setSettingsModalInitialConfig?.(null);
+    args.fns.setIsSettingsModalOpen(false);
+  },
+  initialConfig: initialConfig,
+  onSave: args.fns.handleSaveSettings,
+  tableVertexLabel: args.fns.getTableVertexLabel()
+};
+'''
+      }
+    }
+    {
+      id: "64"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "65"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showEditButton
+        defValue: true
+      }
+    }
+    {
+      id: "66"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: settingsFunction
+      }
+    }
+    {
+      id: "67"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showAddButton
+        defValue: true
+      }
+    }
+    {
+      id: "68"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: saveSettingsFunction
+      }
+    }
+    {
+      id: "69"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: batchActions
+        defValue: []
+      }
+    }
+    {
+      id: "70"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showSelection
+        defValue: true
+      }
+    }
+    {
+      id: "71"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: tableVertexLabel
+      }
+    }
+    {
+      id: "72"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showActions
+        defValue: true
+      }
+    }
+    {
+      id: "73"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: rowHeight
+        defValue: 50
+      }
+    }
+    {
+      id: "74"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: exportFunction
+      }
+    }
+    {
+      id: "75"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: additionalFilters
+        defValue: []
+      }
+    }
+    {
+      id: "76"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: dataFunction
+      }
+    }
+    {
+      id: "77"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: customActions
+        defValue: []
+      }
+    }
+    {
+      id: "78"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: searchPlaceholder
+        defValue: Search...
+      }
+    }
+    {
+      id: "79"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loadFromSetting
+        defValue: false
+      }
+    }
+    {
+      id: "80"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: columns
+        defValue: []
+      }
+    }
+    {
+      id: "81"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: configFunction
+      }
+    }
+    {
+      id: "82"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: showRowNumber
+        defValue: false
+      }
+    }
+    {
+      id: "83"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: importFunction
+      }
+    }
+    {
+      id: "84"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: hideColumns
+        defValue: []
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "63"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "64"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "65"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "66"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "67"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "68"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "69"
+    }
+    {
+      id: e9
+      T: ComponentVariant
+      S: "1"
+      E: "70"
+    }
+    {
+      id: e10
+      T: ComponentVariant
+      S: "1"
+      E: "71"
+    }
+    {
+      id: e11
+      T: ComponentVariant
+      S: "1"
+      E: "72"
+    }
+    {
+      id: e12
+      T: ComponentVariant
+      S: "1"
+      E: "73"
+    }
+    {
+      id: e13
+      T: ComponentVariant
+      S: "1"
+      E: "74"
+    }
+    {
+      id: e14
+      T: ComponentVariant
+      S: "1"
+      E: "75"
+    }
+    {
+      id: e15
+      T: ComponentVariant
+      S: "1"
+      E: "76"
+    }
+    {
+      id: e16
+      T: ComponentVariant
+      S: "1"
+      E: "77"
+    }
+    {
+      id: e17
+      T: ComponentVariant
+      S: "1"
+      E: "78"
+    }
+    {
+      id: e18
+      T: ComponentVariant
+      S: "1"
+      E: "79"
+    }
+    {
+      id: e19
+      T: ComponentVariant
+      S: "1"
+      E: "80"
+    }
+    {
+      id: e20
+      T: ComponentVariant
+      S: "1"
+      E: "81"
+    }
+    {
+      id: e21
+      T: ComponentVariant
+      S: "1"
+      E: "82"
+    }
+    {
+      id: e22
+      T: ComponentVariant
+      S: "1"
+      E: "83"
+    }
+    {
+      id: e23
+      T: ComponentVariant
+      S: "1"
+      E: "84"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "1"
+      E: "51"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "1"
+      E: "52"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "1"
+      E: "63"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "3"
+      E: "22"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "3"
+      E: "50"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "5"
+      E: "16"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e34a
+      T: Attr
+      S: "7"
+      E: "7a"
+    }
+    {
+      id: e34b
+      T: Attr
+      S: "7"
+      E: "7b"
+    }
+    {
+      id: e34c
+      T: Attr
+      S: "7"
+      E: "7c"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e39_polaris
+      T: Attr
+      S: "10"
+      E: "11_polaris"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e40_polaris
+      T: Attr
+      S: "12"
+      E: "13_polaris"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "12"
+      E: "15"
+    }
+    {
+      id: e42_polaris
+      T: Attr
+      S: "12"
+      E: "15_polaris"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "16"
+      E: "10"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "16"
+      E: "12"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "16"
+      E: "21"
+    }
+    {
+      id: e45_polaris
+      T: Attr
+      S: "16"
+      E: "21_polaris"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e46_polaris
+      T: Attr
+      S: "18"
+      E: "19_polaris"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "22"
+      E: "34"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "22"
+      E: "40"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "23"
+      E: "27"
+    }
+    {
+      id: e52a
+      T: Attr
+      S: "27"
+      E: "27a"
+    }
+    {
+      id: e52b
+      T: Attr
+      S: "27"
+      E: "28"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "23"
+      E: "29"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "24"
+      E: "26"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "30"
+      E: "31"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "30"
+      E: "32"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "30"
+      E: "33"
+    }
+    {
+      id: e59a
+      T: Attr
+      S: "30"
+      E: "32a"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "34"
+      E: "36"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "34"
+      E: "37"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "37"
+      E: "38"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "38"
+      E: "39"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "40"
+      E: "41"
+    }
+    {
+      id: e66a
+      T: Attr
+      S: "22"
+      E: "40a"
+    }
+    {
+      id: e66b
+      T: Attr
+      S: "40a"
+      E: "40b"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "41"
+      E: "42"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "41"
+      E: "44"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "41"
+      E: "47"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "42"
+      E: "43"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "44"
+      E: "45"
+    }
+    {
+      id: e71a
+      T: Attr
+      S: "44"
+      E: "45a"
+    }
+    {
+      id: e71b
+      T: Attr
+      S: "44"
+      E: "45b"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "44"
+      E: "46"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "47"
+      E: "48"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "48"
+      E: "49"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "52"
+      E: "53"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "53"
+      E: "54"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "53"
+      E: "55"
+    }
+    {
+      id: e78
+      T: Attr
+      S: "53"
+      E: "59"
+    }
+    {
+      id: e79
+      T: Attr
+      S: "53"
+      E: "60"
+    }
+    {
+      id: e80
+      T: Attr
+      S: "55"
+      E: "56"
+    }
+    {
+      id: e81
+      T: Attr
+      S: "55"
+      E: "57"
+    }
+    {
+      id: e82
+      T: Attr
+      S: "55"
+      E: "58"
+    }
+    {
+      id: e83
+      T: Attr
+      S: "60"
+      E: "61"
+    }
+    {
+      id: e83_polaris
+      T: Attr
+      S: "60"
+      E: "61_polaris"
+    }
+    {
+      id: e84
+      T: Attr
+      S: "60"
+      E: "62"
+    }
+    {
+      id: e84_polaris
+      T: Attr
+      S: "60"
+      E: "62_polaris"
+    }
+  ]
+}

@@ -779,10 +779,21 @@ payload {
     "shopifyAppUrl": "https://decodeproduct.decodecommerce.com/",
     "shopifyScopes": "read_products,write_content,write_metaobjects,write_online_store_navigation,write_products"
 }
-
+{
+    "shopifyAPIKey": "ce06108efb1b49fe4e2b07d321635271",
+    "shopifyAPISecret": "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",
+    "shopifyAppUrl": "https://decodeorder.decodecommerce.com/",
+    "shopifyScopes": "write_products,read_assigned_fulfillment_orders,read_draft_orders,read_orders"
+}
 
 
 SHOPIFY_API_KEY=ce06108efb1b49fe4e2b07d321635271
 SHOPIFY_API_SECRET=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
 SHOPIFY_APP_URL=https://decodeproduct.decodecommerce.com/
 
+
+
+
+
+Scripts:
+npx tsx scripts/copyDecodeproductToDecodeorder.ts

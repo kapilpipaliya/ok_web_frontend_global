@@ -223,7 +223,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                         options.contextData.modalState as ModalStateStore
                       )[0]?.showModal,
                       style: {
-                        "z-index": options.zIndex,
+                        "z-index": options.zIndex + 1,
                       },
                     }),
                   },
@@ -239,7 +239,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                     open: true,
                     props: (options: FunctionArgumentType) => ({
                       style: {
-                        "z-index": options.zIndex + 1,
+                        "z-index": options.zIndex + 2,
                       },
                     }),
                   },

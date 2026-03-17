@@ -1,0 +1,358 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: VirtualList
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+// Get props from context reactively
+const getItems = () => args.contextData.props?.items || [];
+const getItemHeight = () => args.contextData.props?.itemHeight || 90;
+const getOverscan = () => args.contextData.props?.overscan || 5;
+const getOnScrollCallback = () => args.contextData.props?.onScroll;
+
+// Virtualization state
+const [scrollTop, setScrollTop] = args.createSignal(0);
+const [scrollElement, setScrollElement] = args.createSignal(null);
+
+// Calculate visible range
+const getVisibleRange = () => {
+  const el = scrollElement();
+  const scroll = scrollTop();
+  const items = getItems();
+  const itemHeight = getItemHeight();
+  const overscan = getOverscan();
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+
+  // Use default container height if element not yet available
+  const containerHeight = el?.clientHeight || 600;
+
+  const startIndex = Math.max(0, Math.floor(scroll / height) - overscan);
+  const endIndex = Math.min(
+    items.length - 1,
+    Math.ceil((scroll + containerHeight) / height) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+// Get virtual items to render
+const getVirtualItems = () => {
+  const { start, end } = getVisibleRange();
+  const virtualItems = [];
+  const itemHeight = getItemHeight();
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+
+  for (let i = start; i <= end; i++) {
+    virtualItems.push({
+      index: i,
+      start: i * height,
+      size: height
+    });
+  }
+
+  return virtualItems;
+};
+
+// Total height of all items
+const getTotalSize = () => {
+  const items = getItems();
+  const itemHeight = getItemHeight();
+  const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+  return items.length * height;
+};
+
+// Handle scroll
+const handleScroll = (e) => {
+  setScrollTop(e.target.scrollTop);
+
+  // Call custom onScroll callback if provided
+  const onScrollCallback = getOnScrollCallback();
+  if (onScrollCallback) {
+    onScrollCallback(e);
+  }
+};
+
+// Optional keyboard nav: when getActiveIndex/setActiveIndex/getItemRef are provided, handle Arrow keys and Space
+const getActiveIndex = () => args.contextData.props?.getActiveIndex?.() ?? -1;
+const setActiveIndex = (n) => args.contextData.props?.setActiveIndex?.(n);
+const getItemCount = () => (getItems()?.length ?? 0);
+const getItemRef = (index) => args.contextData.props?.getItemRef?.(index);
+const getScrollToItemHeight = () => {
+  const h = getItemHeight();
+  return typeof h === 'function' ? h() : h;
+};
+
+const focusRowAtIndex = (index) => {
+  if (index < 0) return;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const rowEl = getItemRef(index);
+      if (rowEl && typeof rowEl.focus === 'function') rowEl.focus();
+    });
+  });
+};
+
+const scrollToIndexAndFocus = (nextIndex) => {
+  if (nextIndex < 0) return;
+  const container = scrollElement();
+  const rowHeight = getScrollToItemHeight();
+  if (container && typeof rowHeight === 'number') {
+    const scroll = scrollTop();
+    const rowTop = nextIndex * rowHeight;
+    const rowBottom = rowTop + rowHeight;
+    const viewTop = scroll;
+    const viewBottom = scroll + container.clientHeight;
+    const isVisible = rowTop >= viewTop && rowBottom <= viewBottom;
+    if (!isVisible) {
+      const targetScroll = nextIndex * rowHeight;
+      const maxScroll = container.scrollHeight - container.clientHeight;
+      container.scrollTop = Math.max(0, Math.min(targetScroll, maxScroll));
+    }
+  }
+  focusRowAtIndex(nextIndex);
+};
+
+const handleListKeyDown = (e) => {
+  const key = e.key;
+  const len = getItemCount();
+  const current = getActiveIndex();
+
+  if (key === "ArrowDown") {
+    e.preventDefault();
+    const nextIndex = len === 0 ? -1 : Math.min(current + 1, len - 1);
+    setActiveIndex(nextIndex);
+    if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
+    focusRowAtIndex(nextIndex);
+    return;
+  }
+  if (key === "ArrowUp") {
+    e.preventDefault();
+    const nextIndex = Math.max(-1, current - 1);
+    setActiveIndex(nextIndex);
+    if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
+    focusRowAtIndex(nextIndex);
+    return;
+  }
+  if (key === " " || key === "Spacebar") {
+    const onSpaceKey = args.contextData.props?.onSpaceKey;
+    if (onSpaceKey && current >= 0) {
+      e.preventDefault();
+      onSpaceKey(current);
+    }
+    return;
+  }
+  if (key === "ArrowLeft" || key === "ArrowRight") {
+    const onExpandCollapse = args.contextData.props?.onExpandCollapse;
+    if (onExpandCollapse && current >= 0) {
+      const items = getItems();
+      const row = items[current];
+      if (row?._isParent === true) {
+        e.preventDefault();
+        onExpandCollapse(current, key === "ArrowLeft" ? "collapse" : "expand");
+      }
+    }
+  }
+};
+
+const useListKeyNav = () =>
+  typeof args.contextData.props?.setActiveIndex === 'function' &&
+  typeof args.contextData.props?.getItemRef === 'function';
+
+return {
+  scrollTop,
+  setScrollTop,
+  scrollElement,
+  setScrollElement,
+  getVisibleRange,
+  getVirtualItems,
+  getTotalSize,
+  handleScroll,
+  getItems,
+  handleListKeyDown,
+  useListKeyNav
+};
+'''
+        componentName: Html
+        props:
+          '''
+const containerClass = args.contextData.props?.class || "";
+const tabIndex = args.contextData.props?.tabIndex;
+const externalOnKeyDown = args.contextData.props?.onKeyDown;
+const role = args.contextData.props?.role;
+const ariaLabel = args.contextData.props?.["attr:aria-label"];
+const useKeyNav = args.fns.useListKeyNav?.();
+
+const onKeyDown = useKeyNav ? args.fns.handleListKeyDown : externalOnKeyDown;
+
+return {
+  as: "div",
+  class: containerClass,
+  ref: args.fns.setScrollElement,
+  onScroll: args.fns.handleScroll,
+  //...(tabIndex !== undefined && { tabIndex }),
+  ...(onKeyDown && { onKeyDown }),
+  ...(role && { role }),
+  ...(ariaLabel && { "attr:aria-label": ariaLabel })
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: relative;
+  width: 100%;
+  height: ${args.fns.getTotalSize()}px;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        contextName: virtualItem
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  data: args.fns.getVirtualItems()
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        slot: children
+        componentName: Slot
+      }
+    }
+    {
+      id: "6"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: containerClass
+        defValue: ""
+      }
+    }
+    {
+      id: "7"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: itemHeight
+        defValue: 90
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: number
+        key: overscan
+        defValue: 5
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onScroll
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: array
+        key: items
+        defValue: []
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+  ]
+}

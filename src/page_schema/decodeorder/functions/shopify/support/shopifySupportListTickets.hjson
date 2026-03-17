@@ -1,0 +1,62 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: shopifySupportListTickets
+        description: Lists Shopify support tickets for a shop, ordered by unread count and recency.
+        body:
+          '''
+// List Shopify support tickets.
+// shop is automatically available via args.shop (extracted from request query params or Shopify auth)
+// Expected args.contextData:
+// - limit: number (optional, default 100, max 200)
+
+const shop = args.shop;
+let { limit } = args.contextData || {};
+
+if (!shop || typeof shop !== "string") {
+  return {
+    success: false,
+    message: "Shop identifier is required."
+  };
+}
+
+const limitInt = Math.min(Math.max(0, Math.floor(Number(limit)) || 100), 200);
+
+const query = `
+  MATCH (t:Support)
+  WHERE t.source = 'shopify' AND t.shop = $shop
+  OPTIONAL MATCH (t)-[:SupportSupportStatus]->(status:SupportStatus)
+  WITH t, status
+  ORDER BY coalesce(t.unreadForShop, 0) DESC, coalesce(t.lastMessageAt, t.createdAt, datetime()) DESC
+  LIMIT ${limitInt}
+  RETURN t, status
+`;
+
+const result = await args.session.run(query, {
+  shop
+});
+
+// Populate graph structure
+args.processResult(result.records, args.context, ["t", "status"]);
+
+const nodes = args.context.nodes || {};
+const tickets = Object.values(nodes).filter(
+  (v) => Array.isArray(v.L) && v.L.includes("Support")
+);
+
+return {
+  success: true,
+  message: `Found ${tickets.length} support ticket${tickets.length === 1 ? "" : "s"}.`,
+  data: {
+    tickets
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

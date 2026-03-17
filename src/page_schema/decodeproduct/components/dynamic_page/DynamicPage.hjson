@@ -470,6 +470,9 @@ const getGenericExportFunction = () => {
 // Functions that may depend on previous definitions
 const getDataFunction = () => {
   const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting && args.contextData.props?.dataFunction != null) {
+    return args.contextData.props.dataFunction;
+  }
   if (loadFromSetting) {
     return getGenericDataFunction();
   }

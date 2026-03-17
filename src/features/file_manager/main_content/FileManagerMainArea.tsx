@@ -5,7 +5,10 @@ import { evalExpression } from "~/lib/expression_eval";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { useFileManagerStore } from "../FileManagerContext";
-import { getFilesData } from "../sidebar/getFilesData";
+import {
+  getFilesData,
+  UNCATEGORIZED_ID,
+} from "../sidebar/getFilesData";
 import { AddNewFileButton } from "./AddNewFileButton";
 import { getEditFileOrFolderSchema } from "./fileFormEditSchema";
 import { getComponentFormSchema } from "./getComponentFormSchema";
@@ -33,6 +36,9 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   };
 
   const breadcrumb = createMemo(() => {
+    if (props.item.id === UNCATEGORIZED_ID) {
+      return [props.item];
+    }
     const breadcrumbItems: Vertex[] = [];
     let currentItem: null | Vertex = props.item;
 

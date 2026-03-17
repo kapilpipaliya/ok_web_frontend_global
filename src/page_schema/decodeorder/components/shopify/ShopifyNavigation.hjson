@@ -1,0 +1,222 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        title: ShopifyNavigation
+        key: ShopifyNavigation
+      }
+    }
+    {
+      id: "2"
+      L: File
+      P: {
+        originalFileName: preview.png
+        fileName: preview.png
+        fileSize: 10927
+        subDomain: decodeproduct
+        filePath: /root/UploadFiles/decodeproduct/2026/02/18/preview.png
+        checksum: f43b96b8f635f0e5f7ebe55393cc7990941fb8b04814ab504f76735ae10fe5c0
+        mimeType: image/png
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  as: "s-app-nav"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_2
+        props:
+          '''return {
+  as: "s-link",
+  href: "/app",
+  text: "Products"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "s-link",
+  href: "/support",
+  text: "Support"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: unique_faq
+        props:
+          '''return {
+  as: "s-link",
+  href: "/faq",
+  text: "FAQ"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: unique_docs
+        props:
+          '''return {
+  as: "s-link",
+  href: "/docs",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        key: unique_tutorial
+        props:
+          '''return {
+  as: "s-link",
+  href: "/tutorial",
+  text: "Tutorial",
+  hide: true
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        key: unique_changelog
+        props:
+          '''return {
+  as: "s-link",
+  href: "/changelog",
+  text: "Changelog",
+  hide: true
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        key: unique_4
+        props:
+          '''return {
+  as: "s-link",
+  href: "/billing",
+  text: "Billing"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        key: unique_5
+        props:
+          '''return {
+  as: "s-link",
+  href: "/privacy",
+  text: "Privacy"
+}'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: ComponentPreview
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "11"
+    }
+  ]
+}

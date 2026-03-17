@@ -19,6 +19,7 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { UNCATEGORIZED_ID } from "../sidebar/getFilesData";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 const folderFormSchema = {
@@ -102,6 +103,10 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
       const currentItem = fileManagerStore.selectedItem;
       if (!currentItem) {
         showErrorToast("No parent folder selected");
+        return;
+      }
+      if (currentItem.id === UNCATEGORIZED_ID) {
+        showErrorToast("Select a category folder to create a new folder in");
         return;
       }
 
@@ -256,7 +261,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
                         options.contextData.modalState as ModalStateStore
                       )[0]?.showModal,
                       style: {
-                        "z-index": options.zIndex,
+                        "z-index": options.zIndex + 1,
                       },
                     }),
                   },
@@ -280,7 +285,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
                     open: true,
                     props: (options: FunctionArgumentType) => ({
                       style: {
-                        "z-index": options.zIndex + 1,
+                        "z-index": options.zIndex + 2,
                       },
                     }),
                   },

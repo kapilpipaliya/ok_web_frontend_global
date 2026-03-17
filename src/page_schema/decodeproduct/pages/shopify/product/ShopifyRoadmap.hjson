@@ -6,8 +6,8 @@
       P: {
         fns: return { enabled: () => true }
         title: ShopifyRoadmap
-        url: /roadmap
         key: ShopifyRoadmap
+        url: /roadmap
         props:
           '''return {
   isNoPermissionCheck: true
@@ -109,7 +109,9 @@
         displayOrder: 1
         textType: markdown
         componentName: Html
-        text: - Integrate AI to automatically categorize uncategorized products into the appropriate categories.
+        text:
+          '''- Integrate AI to automatically categorize uncategorized products into the appropriate categories.
+- Add support for dark theme.'''
         key: unique_5
         props:
           '''return {
