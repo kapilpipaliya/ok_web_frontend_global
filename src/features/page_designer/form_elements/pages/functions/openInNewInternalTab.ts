@@ -24,19 +24,21 @@ export function openInNewInternalTab(
   if (!child) {
     return;
   }
+  const label = Array.isArray(child.L) ? child.L[0] : child.L;
+
   // Check if form with same label and dataId already exists
   const exists =
     child.id !== "new" &&
     layoutStore.openedFormIds.some((formId) => {
       const form = graph.vertexes[formId].P as OpenFormInfo;
-      return form.label === child.L[0] && form.dataId === child.id;
+      return form.label === label && form.dataId === child.id;
     });
 
   if (exists) {
     // Find the existing form and activate it
     const openFormId = layoutStore.openedFormIds.find((formId) => {
       const form = graph.vertexes[formId].P as OpenFormInfo;
-      return form.label === child.L[0] && form.dataId === child.id;
+      return form.label === label && form.dataId === child.id;
     });
     if (openFormId) {
       const existingForm = graph.vertexes[openFormId].P as OpenFormInfo;
@@ -46,16 +48,18 @@ export function openInNewInternalTab(
       });
     }
   } else {
+    const formId = uuidv7();
     const newOpenVertex = newVertex<OpenFormInfo>(uuidv7(), ["OpenForm"], {
       dataId: child.id,
       formDataId: child.P.formDataId,
-      formId: uuidv7(),
-      label: child.L[0],
+      formId,
+      label,
       mainPanel: layoutStore.mainPanel[0],
       parentId: child.P.parentId,
       txnId: child.P.txnId,
     });
     addNewVertex(0, newOpenVertex, graph, setGraph);
+
     // Note: cloneProperties is false because we don't want to clone the properties of the form. It cause re-render of the form.
     mergeVertexProperties<PageLayoutObject>(
       0,

@@ -33,6 +33,19 @@ export function SettingTabs() {
   const formStoreVertex = () =>
     graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
+  // Active form is Function when the open tab's label is "Function" (so we hide attributes)
+  const isActiveFormFunction = () => {
+    const formId = layoutStore().formId;
+    if (!formId) return false;
+    const openFormId = layoutStore().openedFormIds?.find(
+      (id) => graph.vertexes[id]?.P?.formId === formId,
+    );
+    const label = openFormId
+      ? (graph.vertexes[openFormId]?.P?.label as string)
+      : graph.vertexes[formStoreVertex()?.P?.formDataId]?.L?.[0];
+    return label === "Function";
+  };
+
   return (
     <As
       as="div"
@@ -58,7 +71,12 @@ export function SettingTabs() {
         >
           <FormConfig />
 
-          <Show keyed when={formStoreVertex()?.id}>
+          <Show
+            keyed
+            when={
+              formStoreVertex()?.id && !isActiveFormFunction()
+            }
+          >
             <DesignerFormIdContext.Provider value={formStoreVertex().id}>
               <FormContext.Provider value={formStoreVertex().id}>
                 <Show

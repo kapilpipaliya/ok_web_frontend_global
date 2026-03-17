@@ -5,13 +5,16 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
 
 import {
+  DesignerFormIdContext,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { FunctionEditor } from "../../settings/properties/FunctionEditor";
 import { IFramePreview } from "../IFramePreview";
 import { PageTabBar } from "./PageTabBar";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -125,75 +128,146 @@ export function PageViewComponent(props: { mainPanel: Id }) {
               graph.vertexes[openedFormId].P.formId
             ] as Vertex<FormStoreObject>;
 
+          const openFormLabel = () =>
+            (graph.vertexes[openedFormId].P.label as string) || "";
+          const isFunctionForm = () => openFormLabel() === "Function";
+          const formDataId = () =>
+            formStoreVertex()?.P.formDataId as Id;
+
           return (
             <Show when={formStoreVertex()?.id}>
-              <For each={formStoreVertex()?.P.openedViews}>
-                {(openedViewId, index) => {
-                  const isHighlighted = () =>
-                    highlightedViewId() === openedViewId;
-
-                  // Create a reference to scroll to the highlighted view
-                  let viewRef: HTMLDivElement | undefined;
-
-                  createEffect(() => {
-                    if (isHighlighted() && viewRef) {
-                      viewRef.scrollIntoView({
-                        behavior: "smooth",
-                        block: "nearest",
-                      });
-                      // When a view is highlighted, also scroll its parent container to the top
-                      // to ensure the view is fully visible
-                      if (viewRef?.parentElement?.parentElement) {
-                        viewRef.parentElement.parentElement.scrollTop = 0;
-                      }
+              <Show
+                when={!isFunctionForm()}
+                fallback={
+                  <As
+                    as="div"
+                    css={
+                      isActive() ? "" : "return `._id {display: none;}`;"
                     }
-                  });
-
-                  return (
+                  >
+                    <PageTabBar
+                      formStoreId={graph.vertexes[openedFormId].P.formId}
+                      handleRefresh={handleRefresh}
+                      onClose={() => {}}
+                      openIndex={0}
+                      previewsLength={1}
+                    />
                     <As
                       as="div"
-                      css={isActive() ? "" : "return `._id {display: none;}`;"}
-                      ref={viewRef}
+                      css={`return \`._id {
+                        padding: 12px;
+                        overflow: auto;
+                        height: 100%;
+                      }\`;`}
                     >
-                      <PageTabBar
-                        formStoreId={graph.vertexes[openedFormId].P.formId}
-                        handleRefresh={handleRefresh}
-                        onClose={() => handleClose(openedFormId, openedViewId)}
-                        openIndex={index()}
-                        previewsLength={formStoreVertex()?.P.openedViews.length}
-                      />
-                      <ResizableContainer
-                        view={openedViewId}
+                      <DesignerFormIdContext.Provider
+                        value={graph.vertexes[openedFormId].P.formId}
+                      >
+                        <FunctionEditor
+                          keyName="body"
+                          label="Function body"
+                          language="javascript"
+                          returnType="object"
+                          setPropertyValue={(meta, value) => {
+                            const key = (meta.P?.key as string) ?? "body";
+                            const dataVertex =
+                              graph.vertexes[formDataId()] as Vertex;
+                            const formStore = formStoreVertex();
+                            if (!dataVertex || !formStore) return;
+
+                            // Use transaction-aware helper so Save button picks up changes
+                            setValueGlobal(
+                              graph,
+                              setGraph,
+                              formStore.P.txnId,
+                              { P: { key } } as unknown as Vertex,
+                              dataVertex,
+                              value,
+                              false,
+                            );
+                          }}
+                          vertexId={formDataId()}
+                        />
+                      </DesignerFormIdContext.Provider>
+                    </As>
+                  </As>
+                }
+              >
+                <For each={formStoreVertex()?.P.openedViews}>
+                  {(openedViewId, index) => {
+                    const isHighlighted = () =>
+                      highlightedViewId() === openedViewId;
+
+                    // Create a reference to scroll to the highlighted view
+                    let viewRef: HTMLDivElement | undefined;
+
+                    createEffect(() => {
+                      if (isHighlighted() && viewRef) {
+                        viewRef.scrollIntoView({
+                          behavior: "smooth",
+                          block: "nearest",
+                        });
+                        // When a view is highlighted, also scroll its parent container to the top
+                        // to ensure the view is fully visible
+                        if (viewRef?.parentElement?.parentElement) {
+                          viewRef.parentElement.parentElement.scrollTop = 0;
+                        }
+                      }
+                    });
+
+                    return (
+                      <As
+                        as="div"
                         css={
-                          isHighlighted()
-                            ? [
-                                `return \`._id {
+                          isActive()
+                            ? ""
+                            : "return `._id {display: none;}`;"
+                        }
+                        ref={viewRef}
+                      >
+                        <PageTabBar
+                          formStoreId={
+                            graph.vertexes[openedFormId].P.formId
+                          }
+                          handleRefresh={handleRefresh}
+                          onClose={() =>
+                            handleClose(openedFormId, openedViewId)
+                          }
+                          openIndex={index()}
+                          previewsLength={
+                            formStoreVertex()?.P.openedViews.length
+                          }
+                        />
+                        <ResizableContainer
+                          view={openedViewId}
+                          css={
+                            isHighlighted()
+                              ? [
+                                  `return \`._id {
                           border: 3px solid \${args.theme.var.color.primary};
                           animation: borderPulse 1.5s infinite alternate;
                         }\`;`,
-                                `return \`@keyframes borderPulse {
+                                  `return \`@keyframes borderPulse {
                             from { border-color: \${args.theme.var.color.primary_light_300}; }
                             to { border-color: \${args.theme.var.color.primary}; }
                           }\`;`,
-                              ]
-                            : ""
-                        }
-                      >
-                        <Show when={isPreview()}>
-                          <IFramePreview
-                            formStoreId={graph.vertexes[openedFormId].P.formId}
-                          />
-                        </Show>
-                        {/* <PageView
-                                  isDesignMode={true}
-                                  isNoPermissionCheck={true}
-                                  metaVertex={graph.vertexes[vertex()?.P.formDataId!]}
-                                /> */}
-                      </ResizableContainer>
-                    </As>
-                  );
-                }}
-              </For>
+                                ]
+                              : ""
+                          }
+                        >
+                          <Show when={isPreview()}>
+                            <IFramePreview
+                              formStoreId={
+                                graph.vertexes[openedFormId].P.formId
+                              }
+                            />
+                          </Show>
+                        </ResizableContainer>
+                      </As>
+                    );
+                  }}
+                </For>
+              </Show>
             </Show>
           );
         }}
