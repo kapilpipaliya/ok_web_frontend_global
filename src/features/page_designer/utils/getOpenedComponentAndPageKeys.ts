@@ -6,10 +6,11 @@ import type { PageLayoutObject } from "../context/LayoutContext";
 export interface OpenedSchemaKeys {
   components: string[];
   pages: string[];
+  functions: string[];
 }
 
 /**
- * Returns the component and page keys for all currently opened designer tabs.
+ * Returns the component, page, and function keys for all currently opened designer tabs.
  */
 export function getOpenedComponentAndPageKeys(
   graph: GraphInterface,
@@ -17,6 +18,7 @@ export function getOpenedComponentAndPageKeys(
 ): OpenedSchemaKeys {
   const components: string[] = [];
   const pages: string[] = [];
+  const functions: string[] = [];
   for (const openedFormId of layoutStore.openedFormIds) {
     const openVertex = graph.vertexes[openedFormId];
     if (!openVertex?.P) continue;
@@ -32,7 +34,13 @@ export function getOpenedComponentAndPageKeys(
       components.push(key);
     } else if (label === "Page") {
       pages.push(key);
+    } else if (label === "Function") {
+      functions.push(key);
     }
   }
-  return { components: [...new Set(components)], pages: [...new Set(pages)] };
+  return {
+    components: [...new Set(components)],
+    pages: [...new Set(pages)],
+    functions: [...new Set(functions)],
+  };
 }

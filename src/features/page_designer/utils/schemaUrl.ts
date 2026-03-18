@@ -7,6 +7,7 @@ export function buildSchemaQueryParams(keys: OpenedSchemaKeys): URLSearchParams 
   const params = new URLSearchParams();
   if (keys.components.length > 0) params.set("components", keys.components.join(","));
   if (keys.pages.length > 0) params.set("pages", keys.pages.join(","));
+  if (keys.functions.length > 0) params.set("functions", keys.functions.join(","));
   return params;
 }
 

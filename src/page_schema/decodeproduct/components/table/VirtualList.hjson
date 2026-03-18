@@ -14,8 +14,12 @@
         displayOrder: 1
         fns:
           '''
-// Get props from context reactively
-const getItems = () => args.contextData.props?.items || [];
+// Get props from context reactively. Prefer getItems (function) so parent can pass a getter and subscription stays in VirtualList (avoids parent re-render on expand/collapse).
+const getItems = () => {
+  const getter = args.contextData.props?.getItems;
+  if (typeof getter === 'function') return getter() || [];
+  return args.contextData.props?.items || [];
+};
 const getItemHeight = () => args.contextData.props?.itemHeight || 90;
 const getOverscan = () => args.contextData.props?.overscan || 5;
 const getOnScrollCallback = () => args.contextData.props?.onScroll;
@@ -24,7 +28,7 @@ const getOnScrollCallback = () => args.contextData.props?.onScroll;
 const [scrollTop, setScrollTop] = args.createSignal(0);
 const [scrollElement, setScrollElement] = args.createSignal(null);
 
-// Calculate visible range
+// Calculate visible range from items (parent passes final display list)
 const getVisibleRange = () => {
   const el = scrollElement();
   const scroll = scrollTop();
@@ -45,20 +49,39 @@ const getVisibleRange = () => {
   return { start: startIndex, end: endIndex };
 };
 
-// Get virtual items to render
+// Cache virtual item objects by stable key so Solid For reuses same refs and does not remove/add all rows on expand/collapse
+let virtualItemCache = {};
+const getStableKey = (item, index) => {
+  const id = item?.id ?? (item?.P && item?.id);
+  if (id != null) return String(id);
+  return 'i-' + index;
+};
+// Get virtual items to render (index, start, size); reuse cached object refs by key so list does not remount
 const getVirtualItems = () => {
   const { start, end } = getVisibleRange();
+  const items = getItems();
   const virtualItems = [];
   const itemHeight = getItemHeight();
   const height = typeof itemHeight === 'function' ? itemHeight() : itemHeight;
+  const usedKeys = new Set();
 
   for (let i = start; i <= end; i++) {
-    virtualItems.push({
-      index: i,
-      start: i * height,
-      size: height
-    });
+    const key = getStableKey(items[i], i);
+    usedKeys.add(key);
+    let v = virtualItemCache[key];
+    if (v) {
+      v.index = i;
+      v.start = i * height;
+      v.size = height;
+      v.rowData = items[i];
+    } else {
+      v = { index: i, start: i * height, size: height, rowData: items[i] };
+      virtualItemCache[key] = v;
+    }
+    virtualItems.push(v);
   }
+  // Drop cache entries no longer in use to avoid unbounded growth
+  Object.keys(virtualItemCache).forEach(k => { if (!usedKeys.has(k)) delete virtualItemCache[k]; });
 
   return virtualItems;
 };
@@ -159,6 +182,7 @@ const handleListKeyDown = (e) => {
       if (row?._isParent === true) {
         e.preventDefault();
         onExpandCollapse(current, key === "ArrowLeft" ? "collapse" : "expand");
+        requestAnimationFrame(() => requestAnimationFrame(() => focusRowAtIndex(current)));
       }
     }
   }

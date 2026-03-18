@@ -60,6 +60,8 @@ const toggleExpanded = (key) => {
     setCollapsedKeys(key, true);
   }
 };
+// Cache row objects by id so same row keeps same ref; cells then don't re-render when only expand/collapse changes
+let displayRowCache = {};
 const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
   if (!filtered || filtered.length === 0) return [];
   const getKey = (row) => {
@@ -77,22 +79,39 @@ const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
     groups.get(k).push(row);
   }
   const result = [];
+  const usedIds = new Set();
   for (const key of keyOrder) {
     const rows = groups.get(key) || [];
     const first = rows[0];
-    const parentRow = {
-      id: 'group-' + key,
-      _isParent: true,
-      _parentKey: key,
-      P: first?.P ? { ...first.P } : { [groupByKey]: key }
-    };
+    const parentId = 'group-' + key;
+    usedIds.add(parentId);
+    let parentRow = displayRowCache[parentId];
+    if (parentRow) {
+      parentRow._isParent = true;
+      parentRow._parentKey = key;
+      parentRow.P = first?.P ? { ...first.P } : { [groupByKey]: key };
+    } else {
+      parentRow = { id: parentId, _isParent: true, _parentKey: key, P: first?.P ? { ...first.P } : { [groupByKey]: key } };
+      displayRowCache[parentId] = parentRow;
+    }
     result.push(parentRow);
     if (!collapsedObj[key]) {
       for (const r of rows) {
-        result.push({ ...r, _isParent: false, _parentKey: key });
+        const id = r?.id ?? r?.P?.id;
+        const rowId = id != null ? String(id) : 'row-' + key + '-' + result.length;
+        usedIds.add(rowId);
+        let childRow = displayRowCache[rowId];
+        if (childRow) {
+          Object.assign(childRow, { ...r, _isParent: false, _parentKey: key });
+        } else {
+          childRow = { ...r, _isParent: false, _parentKey: key };
+          displayRowCache[rowId] = childRow;
+        }
+        result.push(childRow);
       }
     }
   }
+  Object.keys(displayRowCache).forEach(k => { if (!usedIds.has(k)) delete displayRowCache[k]; });
   return result;
 };
 const getDisplayData = () => {
@@ -1375,7 +1394,6 @@ return {
   getDisplayData,
   getGroupByConfig,
   toggleExpanded,
-  collapsedKeys,
   setCollapsedKeys
 };
 '''
@@ -2076,7 +2094,7 @@ return `._id {
         props:
           '''
 const showSelection = args.fns.getShowSelection();
-const selected = args.fns.getEffectiveSelectedRows();
+const selected = args.fns.getSelectedRows();
 const filtered = args.fns.filteredData();
 const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
 // const usePolaris = args.fns.getUsePolarisUI?.() === true;
@@ -2835,7 +2853,7 @@ return `._id {
           '''
 const isLoading = args.fns.loading();
 return {
-  items: args.fns.getDisplayData(),
+  getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
   containerClass: "table-body-list",
   hide: isLoading,
@@ -2921,8 +2939,8 @@ return {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[rowIndex];
-const selectedRows = args.fns.getEffectiveSelectedRows();
+const rowData = virtualItem.rowData;
+const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 const isActive = args.fns.activeRowId?.() === rowData?.id;
 
@@ -2955,13 +2973,13 @@ return [
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[rowIndex];
+const rowData = virtualItem.rowData;
 
 const showSelection = args.fns.getShowSelection();
 const rowClickable = args.fns.getRowClickable?.();
 const onRowClick = args.fns.getOnRowClick?.();
 
-const selected = args.fns.getEffectiveSelectedRows();
+const selected = args.fns.getSelectedRows();
 const hasSelection = selected.size > 0;
 
 const handleRowClick = (e) => {
@@ -3015,8 +3033,8 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[rowIndex];
-const selectedRows = args.fns.getEffectiveSelectedRows();
+const rowData = virtualItem.rowData;
+const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return `._id {
@@ -3035,7 +3053,7 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[rowIndex];
+const rowData = virtualItem.rowData;
 
 return {
   as: "div",
@@ -3077,8 +3095,8 @@ const showSelection = args.fns.getShowSelection();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[rowIndex];
-const selectedRows = args.fns.getEffectiveSelectedRows();
+const rowData = virtualItem.rowData;
+const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 // const usePolaris = args.fns.getUsePolarisUI?.() === true;
@@ -3127,7 +3145,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 
 return {
   as: "div",
@@ -3148,7 +3166,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 
 return {
   icon: "carbon:edit",
@@ -3183,7 +3201,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 const editLink = args.fns.prop('editLink');
 const getHrefFn = editLink?.getHref;
 const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
@@ -3228,7 +3246,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 const editLink = args.fns.prop('editLink');
 const getHrefFn = editLink?.getHref;
 const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
@@ -3270,7 +3288,7 @@ const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 
 return {
   icon: "carbon:trash-can",
@@ -3302,7 +3320,7 @@ const showRowNumber = args.fns.getShowRowNumber();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 
 return {
   data: showRowNumber 
@@ -3335,7 +3353,7 @@ const column = args.contextData.column;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return {
@@ -3358,7 +3376,7 @@ const column = args.contextData.column;
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowIndex = virtualItem.index;
-const rowData = args.fns.getDisplayData()[virtualItem.index];
+const rowData = virtualItem.rowData;
 const cellContent = args.fns.renderCellContent(rowData, column, rowIndex);
 
 // Handle different content types

@@ -20,8 +20,8 @@ export function ImportOpenedButton() {
 
   const openedKeys = () => getOpenedComponentAndPageKeys(graph, layoutStore());
   const hasOpened = () => {
-    const { components, pages } = openedKeys();
-    return components.length > 0 || pages.length > 0;
+    const { components, pages, functions } = openedKeys();
+    return components.length > 0 || pages.length > 0 || functions.length > 0;
   };
 
   const handleImportOpened = () => {
@@ -41,8 +41,8 @@ export function ImportOpenedButton() {
       size={22}
       title={
         hasOpened()
-          ? "Import opened components and pages from file (new tab)"
-          : "No opened components or pages to import"
+          ? "Import opened components, pages, and functions from file (new tab)"
+          : "No opened components, pages, or functions to import"
       }
       tooltipGroup="right-buttons"
     />

@@ -17,8 +17,8 @@ export function ExportOpenedButton() {
 
   const openedKeys = () => getOpenedComponentAndPageKeys(graph, layoutStore());
   const hasOpened = () => {
-    const { components, pages } = openedKeys();
-    return components.length > 0 || pages.length > 0;
+    const { components, pages, functions } = openedKeys();
+    return components.length > 0 || pages.length > 0 || functions.length > 0;
   };
 
   const handleExportOpened = () => {
@@ -37,8 +37,8 @@ export function ExportOpenedButton() {
       size={22}
       title={
         hasOpened()
-          ? "Export opened components and pages (new tab)"
-          : "No opened components or pages to export"
+          ? "Export opened components, pages, and functions (new tab)"
+          : "No opened components, pages, or functions to export"
       }
       tooltipGroup="right-buttons"
     />
