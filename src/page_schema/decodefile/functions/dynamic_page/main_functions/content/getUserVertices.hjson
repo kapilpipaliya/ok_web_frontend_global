@@ -1,0 +1,120 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user's vertices of a specific label with optional search and relationship filtering
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: []
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { label, userUuid, search = "", limit = 100, relationshipType, enableUserScoping, hooks } = args.contextData;
+
+if (!label) {
+  return {
+    success: false,
+    message: "Label is required",
+    data: []
+  };
+}
+
+// Use provided userUuid or current user's uuid (only if scoping is enabled)
+const targetUserUuid = enableUserScoping ? (userUuid || user.P.uuid) : null;
+
+// Execute beforeGetUserVertices hooks
+await args.executeHooks(hooks?.beforeGetUserVertices, {
+  label,
+  userUuid: targetUserUuid,
+  search,
+  limit,
+  relationshipType,
+  enableUserScoping
+});
+
+// Build query
+let query;
+let params = { limit };
+
+if (!enableUserScoping) {
+  // No user scoping - fetch all vertices of the label
+  query = `
+    MATCH (v:${label})
+  `;
+} else {
+  // User scoping enabled - filter by user relationship
+  params.userUuid = targetUserUuid;
+  
+  if (relationshipType) {
+    // Query with specific relationship type
+    query = `
+      MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(v:${label})
+    `;
+  } else {
+    // Auto-detect relationship: User + Label (e.g., UserBook, UserAudioVideo)
+    const autoRelationship = `User${label}`;
+    query = `
+      MATCH (u:User {uuid: $userUuid})-[:${autoRelationship}]->(v:${label})
+    `;
+  }
+}
+
+// Add search filter if provided
+if (search && search.trim()) {
+  const searchTerm = search.trim().toLowerCase();
+  query += `
+    WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.title, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.description, '')) CONTAINS $searchTerm
+  `;
+  params.searchTerm = searchTerm;
+}
+
+query += `
+  RETURN v
+  ORDER BY COALESCE(v.name, v.title, '') ASC
+  LIMIT $limit
+`;
+
+const result = await args.session.run(query, params);
+
+// Use processResult to populate graph structure
+const vertices = args.processResult(result.records, args.context, 'v');
+
+const resultData = {
+  success: true,
+  data: vertices,
+  message: `Found ${vertices.length} ${label} vertices`
+};
+
+// Execute afterGetUserVertices hooks
+await args.executeHooks(hooks?.afterGetUserVertices, {
+  label,
+  userUuid: targetUserUuid,
+  search,
+  limit,
+  relationshipType,
+  enableUserScoping,
+  result: resultData
+});
+
+return resultData;
+'''
+        key: getUserVertices
+      }
+    }
+  ]
+  edges: []
+}

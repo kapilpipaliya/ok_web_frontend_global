@@ -785,6 +785,12 @@ payload {
     "shopifyAppUrl": "https://decodeorder.decodecommerce.com/",
     "shopifyScopes": "write_products,read_assigned_fulfillment_orders,read_draft_orders,read_orders"
 }
+{
+    "shopifyAPIKey": "291267024271c375884894e181015422",
+    "shopifyAPISecret": "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",
+    "shopifyAppUrl": "https://decodefile.decodecommerce.com/",
+    "shopifyScopes": "read_files,write_files,read_themes"
+}
 
 
 SHOPIFY_API_KEY=ce06108efb1b49fe4e2b07d321635271

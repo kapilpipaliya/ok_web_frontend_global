@@ -1,0 +1,132 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: updates a file in Shopify when a ShopifyFile is updated, or syncs from webhook.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyFileAfterUpdate';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { tableVertexLabel, operation, elementId, data: vertexPayload, result, shop, fromWebhook, payload } = jobData;
+
+  if (fromWebhook && payload) {
+    const h = await args.executeNamedServerFunction(
+      { functionName: 'shopifyQueueHelpers', contextData: {} },
+      { functionLookupSubDomain: 'decodefile' }
+    );
+    if (!h?.result?.success) return;
+    const propsFromWebhookPayloadForFile = h.result.data.propsFromWebhookPayloadForFile;
+    const props = propsFromWebhookPayloadForFile(payload);
+    const id = props.id;
+    if (!id) return;
+    await dbSession.run(
+      `MERGE (f:ShopifyFile { id: $id })
+       ON CREATE SET f.createdAt = datetime(), f.updatedAt = datetime()
+       SET f += $props, f.updatedAt = datetime()`,
+      { id, props }
+    );
+    console.log(`processShopifyFileAfterUpdate (webhook): synced file ${id} for ${shop}`);
+    return;
+  }
+
+  if (tableVertexLabel !== 'ShopifyFile' || operation !== 'update') return;
+  const vertex = vertexPayload?.vertex;
+  const formData = vertex?.P || {};
+  const shopifyFileId = formData.id;
+  if (!shopifyFileId) {
+    console.log("processShopifyFileAfterUpdate: File doesn't have Shopify ID, skipping");
+    if (elementId) await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'complete', f.updatedAt = datetime()`, { elementId });
+    return;
+  }
+
+  const shopify = await args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyFileAfterUpdate: unauthenticated.admin failed", authError);
+    const errMsg = (authError?.message || String(authError)).substring(0, 2000);
+    if (elementId) await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'failed', f.syncError = $syncError, f.updatedAt = datetime()`, { elementId, syncError: errMsg });
+    return;
+  }
+  if (!admin) {
+    if (elementId) await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'failed', f.syncError = $syncError, f.updatedAt = datetime()`, { elementId, syncError: 'Shopify admin client unavailable' });
+    return;
+  }
+
+  const alt = formData.alt != null ? String(formData.alt) : null;
+  const fileUpdateMutation = `mutation fileUpdate($files: [FileUpdateInput!]!) {
+    fileUpdate(files: $files) {
+      files { id fileStatus alt }
+      userErrors { field message code }
+    }
+  }`;
+  const variables = { files: [{ id: shopifyFileId, alt }] };
+
+  try {
+    const response = await admin.graphql(fileUpdateMutation, { variables });
+    const apiResponse = response instanceof Response ? await response.json() : response;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      const errMsg = JSON.stringify(apiResponse.errors).substring(0, 2000);
+      if (elementId) await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'failed', f.syncError = $syncError, f.updatedAt = datetime()`, { elementId, syncError: errMsg });
+      return;
+    }
+    const userErrors = apiResponse.data?.fileUpdate?.userErrors || [];
+    if (userErrors.length > 0) {
+      const errMsg = userErrors.map(e => e.message).join('; ').substring(0, 2000);
+      if (elementId) await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'failed', f.syncError = $syncError, f.updatedAt = datetime()`, { elementId, syncError: errMsg });
+      return;
+    }
+    if (elementId) {
+      await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'complete', f.updatedAt = datetime()`, { elementId });
+      if (result?.data?.P) result.data.P.syncStatus = 'complete';
+      console.log(`✅ Updated file in Shopify: ${shopifyFileId}`);
+    }
+  } catch (error) {
+    console.error("processShopifyFileAfterUpdate: Error", error);
+    const errMsg = error?.message || String(error);
+    if (elementId) await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'failed', f.syncError = $syncError, f.updatedAt = datetime()`, { elementId, syncError: errMsg.substring(0, 2000) });
+  }
+};
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) {
+  console.error('Shopify queue helpers init failed', helpers.result?.error);
+  throw new Error('Shopify queue helpers initialization failed');
+}
+const runWithSession = helpers.result.data.runWithSession;
+
+if (args.contextData?.action === 'start') {
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyFileAfterUpdate: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyFileAfterUpdate: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyFileAfterUpdate: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+'''
+        key: processShopifyFileAfterUpdate
+      }
+    }
+  ]
+  edges: []
+}

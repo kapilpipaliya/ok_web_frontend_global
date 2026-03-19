@@ -1,0 +1,91 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: syncs file from webhook or marks new ShopifyFile as complete when created in app (file creation in Shopify requires staged upload).
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyFileAfterCreate';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { tableVertexLabel, operation, elementId, data: vertexPayload, result, shop, fromWebhook, payload } = jobData;
+
+  if (fromWebhook && payload) {
+    const h = await args.executeNamedServerFunction(
+      { functionName: 'shopifyQueueHelpers', contextData: {} },
+      { functionLookupSubDomain: 'decodefile' }
+    );
+    if (!h?.result?.success) return;
+    const propsFromWebhookPayloadForFile = h.result.data.propsFromWebhookPayloadForFile;
+    const props = propsFromWebhookPayloadForFile(payload);
+    const id = props.id;
+    if (!id) return;
+    await dbSession.run(
+      `MERGE (f:ShopifyFile { id: $id })
+       ON CREATE SET f.createdAt = datetime(), f.updatedAt = datetime()
+       SET f += $props, f.updatedAt = datetime()`,
+      { id, props }
+    );
+    console.log(`processShopifyFileAfterCreate (webhook): synced file ${id} for ${shop}`);
+    return;
+  }
+
+  if (tableVertexLabel !== 'ShopifyFile' || operation !== 'create') return;
+
+  const vertex = vertexPayload?.vertex;
+  const formData = vertex?.P || {};
+  if (formData.id) {
+    console.log("processShopifyFileAfterCreate: File already has Shopify ID, skipping");
+    if (elementId) await dbSession.run(`MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'complete', f.updatedAt = datetime()`, { elementId });
+    return;
+  }
+
+  // Creating a file in Shopify requires staged upload (fileCreate with stagedUploadPath). No staged upload in form - mark complete so UI does not stay "Syncing".
+  if (elementId) {
+    await dbSession.run(
+      `MATCH (f:ShopifyFile) WHERE elementId(f) = $elementId SET f.syncStatus = 'complete', f.updatedAt = datetime()`,
+      { elementId }
+    );
+    console.log("processShopifyFileAfterCreate: No Shopify ID or staged upload; marked sync complete. Upload files via Shopify admin or use webhooks to sync.");
+  }
+};
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) {
+  console.error('Shopify queue helpers init failed', helpers.result?.error);
+  throw new Error('Shopify queue helpers initialization failed');
+}
+const runWithSession = helpers.result.data.runWithSession;
+
+if (args.contextData?.action === 'start') {
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyFileAfterCreate: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyFileAfterCreate: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyFileAfterCreate: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+'''
+        key: processShopifyFileAfterCreate
+      }
+    }
+  ]
+  edges: []
+}

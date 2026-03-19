@@ -10,6 +10,7 @@ import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
 import { isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
+import { isAppSubdomain } from "~/lib/appSubdomain";
 import { ThemeProvider } from "./lib/theme/ThemeProvider";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
@@ -62,9 +63,8 @@ export default function App() {
             const navigate = useNavigate();
 
             const isExcludedFromLoader = () =>
-              (location.pathname === "/app" || location.pathname === "/orders" || location.pathname === "/products") &&
-              (isServer ||
-                window.location.hostname === "decodeproduct.decodecommerce.com" || window.location.hostname === "decodeorder.decodecommerce.com");
+              (location.pathname === "/app" || location.pathname === "/orders" || location.pathname === "/products" || location.pathname === "/files") &&
+              (isServer || isAppSubdomain(window.location.hostname));
 
             // Set up Capacitor deep linking listener
             onMount(() => {

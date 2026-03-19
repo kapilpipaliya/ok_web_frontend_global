@@ -60,7 +60,6 @@ try {
     contextData: {
       searchParams: params,
     },
-    migrationSubDomain: "decodeproduct",
     appSubDomain: args.rawSubDomain,
   });
   dbSession = result.dbSession;

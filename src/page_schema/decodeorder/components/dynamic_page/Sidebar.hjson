@@ -422,8 +422,7 @@ const refreshQueuedSidebarItems = async (elementIds) => {
   try {
     const result = await args.executeNamedServerFunction({
       functionName: "getUserContent",
-      contextData: { tableVertexLabel: parentVertexLabel, elementIds, onlyNotQueued: true },
-      functionLookupSubDomain: "decodeproduct"
+      contextData: { tableVertexLabel: parentVertexLabel, elementIds, onlyNotQueued: true }
     });
     if (result?.result?.success && Array.isArray(result.result.data) && result.result.data.length > 0) {
       for (const v of result.result.data) {

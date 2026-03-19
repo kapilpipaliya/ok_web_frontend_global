@@ -9,19 +9,6 @@
       }
     }
     {
-      id: "2"
-      L: File
-      P: {
-        originalFileName: preview.png
-        fileName: preview.png
-        fileSize: 10927
-        subDomain: decodeproduct
-        filePath: /root/UploadFiles/decodeproduct/2026/02/18/preview.png
-        checksum: f43b96b8f635f0e5f7ebe55393cc7990941fb8b04814ab504f76735ae10fe5c0
-        mimeType: image/png
-      }
-    }
-    {
       id: "3"
       L: Attr
       P: {
@@ -158,12 +145,6 @@
     }
   ]
   edges: [
-    {
-      id: e1
-      T: ComponentPreview
-      S: "1"
-      E: "2"
-    }
     {
       id: e2
       T: Attr

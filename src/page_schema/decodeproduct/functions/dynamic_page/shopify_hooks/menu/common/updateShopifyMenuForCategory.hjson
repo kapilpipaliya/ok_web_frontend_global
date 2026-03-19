@@ -42,7 +42,7 @@ try {
     contextData: {
       parentElementId: categoryElementId
     }
-  }, { functionLookupSubDomain: 'decodeproduct' });
+  });
   
   const menuItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
 
@@ -110,7 +110,7 @@ try {
           categoryName: categoryName,
           shop: args.contextData?.shop
         }
-      }, { functionLookupSubDomain: 'decodeproduct' });
+      });
 
       if (createResult.result?.success) {
         return {

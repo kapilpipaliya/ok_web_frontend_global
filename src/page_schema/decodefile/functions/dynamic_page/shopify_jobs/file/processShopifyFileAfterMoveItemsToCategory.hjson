@@ -1,0 +1,63 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: marks file sync complete when files are moved to a category (relationship is DB-only).
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyFileAfterMoveItemsToCategory';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { contentLabel, contentIds, shop } = jobData;
+  if (contentLabel !== 'ShopifyFile') return;
+
+  if (contentIds && Array.isArray(contentIds) && contentIds.length > 0) {
+    await dbSession.run(
+      `UNWIND $contentIds as elementId
+       MATCH (f:ShopifyFile) WHERE elementId(f) = elementId
+       SET f.syncStatus = 'complete', f.updatedAt = datetime()`,
+      { contentIds }
+    );
+    console.log(`✅ Moved ${contentIds.length} file(s) to category (sync complete)`);
+  }
+};
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) {
+  console.error('Shopify queue helpers init failed', helpers.result?.error);
+  throw new Error('Shopify queue helpers initialization failed');
+}
+const runWithSession = helpers.result.data.runWithSession;
+
+if (args.contextData?.action === 'start') {
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyFileAfterMoveItemsToCategory: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyFileAfterMoveItemsToCategory: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyFileAfterMoveItemsToCategory: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+'''
+        key: processShopifyFileAfterMoveItemsToCategory
+      }
+    }
+  ]
+  edges: []
+}

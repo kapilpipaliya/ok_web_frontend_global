@@ -14,22 +14,26 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const SOURCE = path.join(ROOT, "src/page_schema/decodeproduct");
-const DEST = path.join(ROOT, "src/page_schema/decodeorder");
+const DEST = path.join(ROOT, "src/page_schema/decodefile");
 
 const SKIP_DIRS = [
   "functions/dynamic_page/shopify_hooks/category",
+  "functions/dynamic_page/shopify_hooks/product",
   "functions/dynamic_page/shopify_hooks/menu",
   "functions/dynamic_page/shopify_jobs/product",
   "functions/dynamic_page/shopify_jobs/category",
   "functions/dynamic_page/shopify_jobs/menu",
   "pages/shopify/blog",
   "pages/shopify/product",
+  "functions/dynamic_page/main_functions/migration",
+  
 ];
 
 /** Paths relative to decodeproduct – these files are not copied. */
 const SKIP_FILES = [
   "functions/dynamic_page/shopify_jobs/product/processShopifyProductAfterUpdate.hjson",
   "components/shopify/ShopifyLayout.hjson",
+  "components/shopify/ShopifyNavigation.hjson",
   "functions/dynamic_page/shopify_hooks/product/shopifyProductAfterCreateRelationship.hjson",
   "functions/dynamic_page/shopify_hooks/product/shopifyProductAfterMoveItemsToCategory.hjson",
   "functions/dynamic_page/shopify_hooks/product/shopifyProductBeforeFetchData.hjson",

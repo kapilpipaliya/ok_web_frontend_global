@@ -1,0 +1,55 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Enqueues background job when a ShopifyFile is added to a category (relationship only in DB; no Shopify API for file categories).
+        body:
+          '''
+const { contentLabel, contentId, categoryId, categoryLabel } = args.contextData;
+
+if (contentLabel !== 'ShopifyFile') return;
+if (!categoryId || categoryId === 'uncategorized') return;
+
+const shop = args.contextData.shop;
+if (!shop) { console.log('shopifyFileAfterCreateRelationship: shop not available in contextData'); return; }
+
+try {
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'shopifyQueueHelpers', contextData: {} },
+    { functionLookupSubDomain: 'decodefile' }
+  );
+  if (!helpers.result?.success) return;
+  const queueName = 'processShopifyFileAfterCreateRelationship';
+  const queue = helpers.result.data.createShopifyQueue(args, queueName);
+  const job = await helpers.result.data.addShopifyJob(queue, queueName, {
+    shop,
+    contentLabel,
+    contentId,
+    categoryId,
+    categoryLabel
+  });
+  await queue.close();
+  const jobId = job?.id;
+  if (contentId && jobId) {
+    await args.session.run(
+      `MATCH (n:ShopifyFile) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
+      { elementId: contentId, status: 'queued', jobId }
+    );
+  }
+  const r = args.contextData?.result;
+  if (r?.data?.P && typeof r.data.P === 'object') {
+    r.data.P.syncStatus = 'queued';
+    if (jobId) r.data.P.syncJobId = jobId;
+  }
+} catch (error) {
+  console.error("shopifyFileAfterCreateRelationship: Failed to enqueue job", error);
+}
+'''
+        key: shopifyFileAfterCreateRelationship
+      }
+    }
+  ]
+  edges: []
+}

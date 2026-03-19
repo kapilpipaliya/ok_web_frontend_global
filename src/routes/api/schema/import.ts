@@ -203,7 +203,6 @@ export async function GET({ request }: APIEvent) {
             {
               dryRun: false,
               contextData: {},
-              migrationSubDomain: "decodeproduct",
               appSubDomain: appSessionData.subDomain,
             },
           );

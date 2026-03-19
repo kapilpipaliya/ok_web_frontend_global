@@ -1,0 +1,330 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Syncs Shopify files with database when fetching. Fetches files from Shopify and creates/updates/deletes ShopifyFile vertices accordingly.
+        body:
+          '''
+const { tableVertexLabel, showUnassigned, categoryId, parentVertexLabel, toParentEdgeType, enableUserScoping } = args.contextData;
+
+if (tableVertexLabel !== 'ShopifyFile') return;
+
+const isUncategorized = showUnassigned || categoryId === 'uncategorized';
+
+let existingCategoryFiles = [];
+let categoryFileIds = new Set();
+if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
+  try {
+    const fetchResult = await args.executeNamedServerFunction({
+      functionName: "getUserContent",
+      contextData: {
+        tableVertexLabel: 'ShopifyFile',
+        categoryId: categoryId,
+        parentVertexLabel: parentVertexLabel,
+        toParentEdgeType: toParentEdgeType,
+        enableUserScoping: enableUserScoping,
+        hooks: null
+      }
+    }, { functionLookupSubDomain: 'decodefile' });
+    if (fetchResult?.result?.success && fetchResult.result.data) {
+      existingCategoryFiles = fetchResult.result.data;
+      for (const file of existingCategoryFiles) {
+        const shopifyId = file.P?.id || file.id;
+        if (shopifyId) categoryFileIds.add(shopifyId);
+      }
+    }
+  } catch (error) {
+    console.error("shopifyFileBeforeFetchData: Error fetching existing category files:", error);
+  }
+}
+
+const shop = args.contextData.shop;
+if (!shop) {
+  console.warn("shopifyFileBeforeFetchData: Shop domain is missing, skipping sync");
+  return;
+}
+
+const shopify = await args.getShopifyClient();
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (authError) {
+  console.error("shopifyFileBeforeFetchData: Shopify unauthenticated.admin failed", authError);
+  return;
+}
+if (!admin) return;
+
+const previewFragment = `preview { image { url width height altText } }`;
+const fileErrorsFragment = `fileErrors { code message details }`;
+
+const fileFields = `
+  __typename
+  id
+  alt
+  createdAt
+  updatedAt
+  fileStatus
+  ... on GenericFile {
+    originalFileSize
+    url
+    mimeType
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on MediaImage {
+    mediaContentType
+    mimeType
+    status
+    image { url width height altText }
+    originalSource { url }
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on Video {
+    mediaContentType
+    filename
+    duration
+    status
+    originalSource { url }
+    sources { url }
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on ExternalVideo {
+    mediaContentType
+    host
+    embedUrl
+    originUrl
+    status
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on Model3d {
+    mediaContentType
+    filename
+    status
+    originalSource { url }
+    sources { url }
+    boundingBox { size { x y z } }
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+`;
+
+let allShopifyFiles = [];
+let hasNextPage = true;
+let cursor = null;
+
+if (isUncategorized) {
+  while (hasNextPage) {
+    const query = cursor
+      ? `query { files(first: 250, after: "${cursor}") { edges { cursor node { ${fileFields} } } pageInfo { hasNextPage } } }`
+      : `query { files(first: 250) { edges { cursor node { ${fileFields} } } pageInfo { hasNextPage } } }`;
+    try {
+      const response = await admin.graphql(query);
+      const apiResponse = response instanceof Response ? await response.json() : response;
+      if (apiResponse.errors && apiResponse.errors.length > 0) {
+        console.error("shopifyFileBeforeFetchData: GraphQL errors:", apiResponse.errors);
+        break;
+      }
+      const edges = apiResponse.data?.files?.edges || [];
+      const pageInfo = apiResponse.data?.files?.pageInfo || {};
+      for (const edge of edges) {
+        const node = edge.node;
+        if (node && node.id) {
+          allShopifyFiles.push(node);
+        }
+        if (edge.cursor) cursor = edge.cursor;
+      }
+      hasNextPage = pageInfo.hasNextPage === true;
+      await new Promise(r => setTimeout(r, 200));
+    } catch (error) {
+      console.error("shopifyFileBeforeFetchData: Error fetching files", error);
+      break;
+    }
+  }
+} else if (categoryFileIds.size > 0) {
+  const idsArray = Array.from(categoryFileIds);
+  const batchSize = 50;
+  const nodeFields = `
+    __typename
+    ... on GenericFile {
+      id
+      alt
+      createdAt
+      updatedAt
+      fileStatus
+      originalFileSize
+      url
+      mimeType
+      ${previewFragment}
+      ${fileErrorsFragment}
+    }
+    ... on MediaImage {
+      id
+      alt
+      createdAt
+      updatedAt
+      fileStatus
+      mediaContentType
+      mimeType
+      status
+      image { url width height altText }
+      originalSource { url }
+      ${previewFragment}
+      ${fileErrorsFragment}
+    }
+    ... on Video {
+      id
+      alt
+      createdAt
+      updatedAt
+      fileStatus
+      mediaContentType
+      filename
+      duration
+      status
+      originalSource { url }
+      sources { url }
+      ${previewFragment}
+      ${fileErrorsFragment}
+    }
+    ... on ExternalVideo {
+      id
+      alt
+      createdAt
+      updatedAt
+      fileStatus
+      mediaContentType
+      host
+      embedUrl
+      originUrl
+      status
+      ${previewFragment}
+      ${fileErrorsFragment}
+    }
+    ... on Model3d {
+      id
+      alt
+      createdAt
+      updatedAt
+      fileStatus
+      mediaContentType
+      filename
+      status
+      originalSource { url }
+      sources { url }
+      boundingBox { size { x y z } }
+      ${previewFragment}
+      ${fileErrorsFragment}
+    }
+  `;
+  for (let i = 0; i < idsArray.length; i += batchSize) {
+    const batch = idsArray.slice(i, i + batchSize);
+    const idsStr = batch.map(id => `"${id}"`).join(", ");
+    const query = `query { nodes(ids: [${idsStr}]) { ${nodeFields} } }`;
+    try {
+      const response = await admin.graphql(query);
+      const apiResponse = response instanceof Response ? await response.json() : response;
+      if (apiResponse.errors && apiResponse.errors.length > 0) continue;
+      const nodes = apiResponse.data?.nodes || [];
+      for (const node of nodes) {
+        if (node && node.id) allShopifyFiles.push(node);
+      }
+      await new Promise(r => setTimeout(r, 200));
+    } catch (error) {
+      console.error("shopifyFileBeforeFetchData: Error fetching batch", error);
+    }
+  }
+}
+
+const existingFiles = new Map();
+const filesWithoutId = [];
+
+if (isUncategorized) {
+  const r = await args.session.run(
+    `MATCH (f:ShopifyFile) RETURN elementId(f) as elementId, f.id as id`,
+    {}
+  );
+  for (const rec of r.records) {
+    const id = rec.get('id');
+    const elementId = rec.get('elementId');
+    if (id) existingFiles.set(id, elementId);
+    else if (elementId) filesWithoutId.push(elementId);
+  }
+} else if (existingCategoryFiles.length > 0) {
+  for (const file of existingCategoryFiles) {
+    const shopifyId = file.P?.id;
+    const elementId = file.id;
+    if (shopifyId && elementId) existingFiles.set(shopifyId, elementId);
+    else if (elementId) filesWithoutId.push(elementId);
+  }
+}
+
+const shopifyFileIds = new Set(allShopifyFiles.map(f => f.id));
+const toDelete = [];
+for (const [id, dbId] of existingFiles) {
+  if (!shopifyFileIds.has(id)) toDelete.push(dbId);
+}
+toDelete.push(...filesWithoutId);
+
+if (toDelete.length > 0) {
+  await args.session.run(
+    `MATCH (f:ShopifyFile) WHERE elementId(f) IN $ids DETACH DELETE f`,
+    { ids: toDelete }
+  );
+}
+
+const toUpdate = [];
+const toCreate = [];
+for (const node of allShopifyFiles) {
+  const id = node.id;
+  const fileType = node.__typename || (id && id.startsWith('gid://') ? id.split('/')[2] : null) || 'GenericFile';
+  const preview = node.preview || (node.image ? { image: { url: node.image?.url } } : null);
+  const size = node.originalFileSize ?? node.originalUploadSize ?? 0;
+  const props = {
+    id,
+    fileType,
+    alt: node.alt || null,
+    createdAt: node.createdAt || new Date().toISOString(),
+    updatedAt: node.updatedAt || new Date().toISOString(),
+    fileStatus: node.fileStatus || 'UPLOADED',
+    originalFileSize: typeof size === 'number' ? size : parseInt(size, 10) || 0,
+    preview: preview ? JSON.stringify(preview) : null,
+    mediaContentType: node.mediaContentType || null,
+    syncStatus: 'complete',
+    fileData: JSON.stringify(node)
+  };
+  const existingDbId = existingFiles.get(id);
+  if (existingDbId) toUpdate.push({ elementId: existingDbId, props });
+  else toCreate.push({ props });
+}
+
+if (toUpdate.length > 0) {
+  await args.session.run(
+    `UNWIND $items as item
+     MATCH (f:ShopifyFile) WHERE elementId(f) = item.elementId
+     SET f += item.props, f.updatedAt = datetime()`,
+    { items: toUpdate }
+  );
+}
+if (toCreate.length > 0) {
+  await args.session.run(
+    `UNWIND $items as item
+     CREATE (f:ShopifyFile)
+     SET f = item.props, f.createdAt = datetime(), f.updatedAt = datetime()`,
+    { items: toCreate }
+  );
+}
+
+console.log(`✅ File sync complete: Created ${toCreate.length}, Updated ${toUpdate.length}, Deleted ${toDelete.length}`);
+'''
+        key: shopifyFileBeforeFetchData
+      }
+    }
+  ]
+  edges: []
+}

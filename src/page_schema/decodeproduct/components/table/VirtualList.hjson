@@ -153,6 +153,12 @@ const handleListKeyDown = (e) => {
   if (key === "ArrowDown") {
     e.preventDefault();
     const nextIndex = len === 0 ? -1 : Math.min(current + 1, len - 1);
+    if (e.shiftKey) {
+      const onShiftArrow = args.contextData.props?.onShiftArrow;
+      if (onShiftArrow && nextIndex >= 0) onShiftArrow(current, nextIndex);
+    } else {
+      args.contextData.props?.clearSelectionAnchor?.();
+    }
     setActiveIndex(nextIndex);
     if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
     focusRowAtIndex(nextIndex);
@@ -161,6 +167,12 @@ const handleListKeyDown = (e) => {
   if (key === "ArrowUp") {
     e.preventDefault();
     const nextIndex = Math.max(-1, current - 1);
+    if (e.shiftKey) {
+      const onShiftArrow = args.contextData.props?.onShiftArrow;
+      if (onShiftArrow && nextIndex >= 0) onShiftArrow(current, nextIndex);
+    } else {
+      args.contextData.props?.clearSelectionAnchor?.();
+    }
     setActiveIndex(nextIndex);
     if (nextIndex >= 0) scrollToIndexAndFocus(nextIndex);
     focusRowAtIndex(nextIndex);

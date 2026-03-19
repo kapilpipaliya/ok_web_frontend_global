@@ -4,40 +4,40 @@
       id: "1"
       L: Function
       P: {
-        description: Enqueues background job to delete a product in Shopify when a ShopifyProduct is deleted.
+        description: Enqueues background job to delete a file in Shopify when a ShopifyFile is deleted.
         body:
           '''
 const { tableVertexLabel, operation, elementId, result, fromWebhook, payload } = args.contextData;
 
 const shop = args.contextData.shop;
-if (!shop) { console.log('shopifyProductAfterDelete: shop not available in contextData'); return; }
+if (!shop) { console.log('shopifyFileAfterDelete: shop not available in contextData'); return; }
 
 const helpers = await args.executeNamedServerFunction(
   { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: 'decodeproduct' }
+  { functionLookupSubDomain: 'decodefile' }
 );
 if (!helpers.result?.success) return;
 
-const queueName = 'processShopifyProductAfterDelete';
+const queueName = 'processShopifyFileAfterDelete';
 
 if (fromWebhook && payload) {
   try {
     const queue = helpers.result.data.createShopifyQueue(args, queueName);
     await helpers.result.data.addShopifyJob(queue, queueName, { shop, payload, fromWebhook: true });
     await queue.close();
-    console.log('shopifyProductAfterDelete: webhook job enqueued for', shop);
+    console.log('shopifyFileAfterDelete: webhook job enqueued for', shop);
   } catch (error) {
-    console.error('shopifyProductAfterDelete: Failed to enqueue webhook job', error);
+    console.error('shopifyFileAfterDelete: Failed to enqueue webhook job', error);
     throw error;
   }
   return;
 }
 
-if (tableVertexLabel !== 'ShopifyProduct' || operation !== 'delete') return;
+if (tableVertexLabel !== 'ShopifyFile' || operation !== 'delete') return;
 
 const deletedData = result?.data;
-const productData = deletedData?.P || {};
-if (!productData.id) return;
+const fileData = deletedData?.P || {};
+if (!fileData.id) return;
 
 try {
   const queue = helpers.result.data.createShopifyQueue(args, queueName);
@@ -52,15 +52,15 @@ try {
   const jobId = job?.id;
   if (elementId && jobId) {
     await args.session.run(
-      `MATCH (n:ShopifyProduct) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
+      `MATCH (n:ShopifyFile) WHERE elementId(n) = $elementId SET n.syncStatus = $status, n.syncJobId = $jobId, n.updatedAt = datetime()`,
       { elementId, status: 'queued', jobId }
     );
   }
 } catch (error) {
-  console.error("shopifyProductAfterDelete: Failed to enqueue job", error);
+  console.error("shopifyFileAfterDelete: Failed to enqueue job", error);
 }
 '''
-        key: shopifyProductAfterDelete
+        key: shopifyFileAfterDelete
       }
     }
   ]

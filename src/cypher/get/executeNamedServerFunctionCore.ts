@@ -7,6 +7,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Session } from "neo4j-driver";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getDriver } from "~/cypher/core/driver";
+import { isAppSubdomain } from "~/lib/appSubdomain";
 import {
   getUserFromSession,
   getSessionUser,
@@ -290,10 +291,8 @@ export async function executeNamedServerFunctionCore(
         rawRequest = req;
         try {
           const urlObj = new URL(req.url);
-          const isDecodeProduct = urlObj.hostname === "decodeproduct.decodecommerce.com";
-          const isDecodeOrder = urlObj.hostname === "decodeorder.decodecommerce.com";
-          if ((isDecodeProduct || isDecodeOrder) && req.headers.get("authorization")) {
-            // For decodeproduct.decodecommerce.com, get shop from Shopify authentication
+          if (isAppSubdomain(urlObj.hostname) && req.headers.get("authorization")) {
+            // For app subdomains, get shop from Shopify authentication
             try {
               const shopify = await getShopify(rawSubDomain!, fallbackSessionData!.dbSession);
               const result = await shopify.authenticate.admin(req);

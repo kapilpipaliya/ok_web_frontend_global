@@ -790,6 +790,32 @@ const clearSelection = () => {
   clearSelectedRows();
 };
 
+// Shift+Arrow: anchor index for range selection (null when not extending)
+const [selectionAnchorIndex, setSelectionAnchorIndex] = args.createSignal(null);
+const clearSelectionAnchor = () => setSelectionAnchorIndex(null);
+const selectRange = (fromIndex, toIndex) => {
+  const displayed = getDisplayData();
+  if (!displayed || displayed.length === 0) return;
+  const lo = Math.max(0, Math.min(fromIndex, toIndex));
+  const hi = Math.min(displayed.length - 1, Math.max(fromIndex, toIndex));
+  const ids = [];
+  for (let i = lo; i <= hi; i++) {
+    const r = displayed[i];
+    if (r?.id) ids.push(r.id);
+  }
+  setSelectedRows(new Set(ids));
+};
+const handleShiftArrow = (currentIndex, nextIndex) => {
+  if (!getShowSelection()) return;
+  let anchor = selectionAnchorIndex();
+  if (anchor == null) {
+    anchor = currentIndex;
+    setSelectionAnchorIndex(anchor);
+  }
+  selectRange(anchor, nextIndex);
+  setActiveRowId(getDisplayData()?.[nextIndex]?.id ?? null);
+};
+
 // Keyboard: active row by id (null = none); index derived from data so no createEffect needed
 const [activeRowId, setActiveRowId] = args.createSignal(null);
 const getActiveRowIndex = () => {
@@ -1371,6 +1397,8 @@ return {
   toggleRowSelection,
   selectAllRows,
   clearSelection,
+  clearSelectionAnchor,
+  handleShiftArrow,
   activeRowId,
   activeRowIndex: getActiveRowIndex,
   setActiveRowIndex: (rowIndex) => setActiveRowId(getDisplayData()?.[rowIndex]?.id ?? null),
@@ -2859,7 +2887,7 @@ return {
   hide: isLoading,
   tabIndex: 0,
   role: "listbox",
-  "attr:aria-label": "Table rows; use arrow keys to move, Left/Right to collapse/expand group, Space to toggle selection",
+  "attr:aria-label": "Table rows; Arrow keys to move, Shift+Arrow Up/Down to select range, Left/Right to collapse/expand group, Space to toggle selection",
   getActiveIndex: () => args.fns.activeRowIndex?.(),
   setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
   getItemRef: (index) => args.fns.getRowRef?.(index),
@@ -2881,7 +2909,9 @@ return {
     } else {
       setCollapsedKeysFn(parentKey, undefined);
     }
-  }
+  },
+  onShiftArrow: (currentIndex, nextIndex) => args.fns.handleShiftArrow?.(currentIndex, nextIndex),
+  clearSelectionAnchor: () => args.fns.clearSelectionAnchor?.()
 };
 '''
       }

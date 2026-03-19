@@ -113,13 +113,7 @@ export async function ensureShopDatabaseAndMigrate(
   options: {
     dryRun?: boolean;
     contextData?: Record<string, any>;
-    /**
-     * Optional: database (subdomain) to use for discovering the migration function.
-     * The migration function will be *executed* against the shop database, but
-     * its key can be looked up from a different database (e.g. a global/admin DB).
-     */
-    migrationSubDomain?: string;
-    /** App subdomain from request so shop DB is namespaced per subdomain app. */
+    /** App subdomain from request so shop DB is namespaced per subdomain app; also used for migration function lookup. */
     appSubDomain?: string;
   } = {},
 ): Promise<{ dbSession: Session; subDomain: string }> {
@@ -183,7 +177,7 @@ export async function ensureShopDatabaseAndMigrate(
         shop,
         ...options.contextData,
       },
-      migrationSubDomain: options.migrationSubDomain,
+      appSubDomain: options.appSubDomain,
     });
 
     if (!migrationResult.success) {

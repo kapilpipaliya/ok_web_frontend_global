@@ -8,11 +8,10 @@ export interface MigrationOptions {
   dryRun?: boolean;
   contextData?: Record<string, any>;
   /**
-   * Optional: database (subdomain) to use for discovering the migration function.
-   * If provided, the migration function key will be looked up in this database,
-   * but executed against the target database (subDomain passed to runMigration).
+   * Optional: app subdomain; when provided, used for discovering the migration function
+   * (lookup in this database, execution is still against the target database subDomain).
    */
-  migrationSubDomain?: string;
+  appSubDomain?: string;
 }
 
 export interface MigrationResult {
@@ -43,7 +42,7 @@ export async function runMigration(
     functionName,
     dryRun = false,
     contextData = {},
-    migrationSubDomain,
+    appSubDomain,
   } = options;
 
   // Define functionLookupSession at the highest scope so it's available throughout the function
@@ -54,7 +53,7 @@ export async function runMigration(
 
   try {
     // Determine the database to use for function lookup
-    const lookupDb = migrationSubDomain || subDomain;
+    const lookupDb = appSubDomain || subDomain;
     console.log(
       `[Schema Migrate] Using subdomain for function lookup: ${lookupDb}, target: ${subDomain}`,
     );

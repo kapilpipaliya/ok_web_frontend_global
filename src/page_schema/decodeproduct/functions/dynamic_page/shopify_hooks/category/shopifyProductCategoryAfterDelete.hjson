@@ -20,8 +20,7 @@ if (!shop) { console.log('shopifyProductCategoryAfterDelete: shop not available 
 
 try {
   const helpers = await args.executeNamedServerFunction(
-    { functionName: 'shopifyQueueHelpers', contextData: {} },
-    { functionLookupSubDomain: 'decodeproduct' }
+    { functionName: 'shopifyQueueHelpers', contextData: {} }
   );
   if (!helpers.result?.success) return;
   const queueName = 'processShopifyProductCategoryAfterDelete';

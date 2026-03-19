@@ -1,0 +1,111 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background job: deletes a file in Shopify when a ShopifyFile is deleted, or removes from DB when from webhook.
+        body:
+          '''
+const QUEUE_NAME = 'processShopifyFileAfterDelete';
+
+const doJob = async (args, jobData, dbSession) => {
+  const { tableVertexLabel, operation, elementId, result, shop, fromWebhook, payload } = jobData;
+
+  if (fromWebhook && payload) {
+    const h = await args.executeNamedServerFunction(
+      { functionName: 'shopifyQueueHelpers', contextData: {} },
+      { functionLookupSubDomain: 'decodefile' }
+    );
+    if (!h?.result?.success) return;
+    const id = h.result.data.ensureFileGid(payload.admin_graphql_api_id || payload.id);
+    if (!id) return;
+    await dbSession.run(`MATCH (f:ShopifyFile { id: $id }) DETACH DELETE f`, { id });
+    console.log(`processShopifyFileAfterDelete (webhook): removed file ${id} for ${shop}`);
+    return;
+  }
+
+  if (tableVertexLabel !== 'ShopifyFile' || operation !== 'delete') return;
+
+  const deletedData = result?.data;
+  const fileData = deletedData?.P || {};
+  const shopifyFileId = fileData.id;
+
+  if (!shopifyFileId) {
+    console.log("processShopifyFileAfterDelete: File doesn't have Shopify ID, skipping");
+    return;
+  }
+
+  const shopify = await args.getShopifyClient();
+  let admin;
+  try {
+    const authResult = await shopify.unauthenticated.admin(shop);
+    admin = authResult.admin;
+  } catch (authError) {
+    console.error("processShopifyFileAfterDelete: unauthenticated.admin failed", authError);
+    return;
+  }
+  if (!admin) return;
+
+  try {
+    const deleteFileMutation = `mutation fileDelete($fileIds: [ID!]!) {
+      fileDelete(fileIds: $fileIds) {
+        deletedFileIds
+        userErrors { field message code }
+      }
+    }`;
+    const response = await admin.graphql(deleteFileMutation, { variables: { fileIds: [shopifyFileId] } });
+    const apiResponse = response instanceof Response ? await response.json() : response;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error("processShopifyFileAfterDelete: GraphQL errors:", apiResponse.errors);
+      return;
+    }
+    const userErrors = apiResponse.data?.fileDelete?.userErrors || [];
+    if (userErrors.length > 0) {
+      console.error("processShopifyFileAfterDelete: User errors:", userErrors);
+      return;
+    }
+    const deletedFileIds = apiResponse.data?.fileDelete?.deletedFileIds || [];
+    if (deletedFileIds.length > 0) console.log(`✅ Deleted file in Shopify: ${deletedFileIds[0]}`);
+  } catch (error) {
+    console.error("processShopifyFileAfterDelete: Error", error);
+  }
+};
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: 'shopifyQueueHelpers', contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+if (!helpers.result?.success) {
+  console.error('Shopify queue helpers init failed', helpers.result?.error);
+  throw new Error('Shopify queue helpers initialization failed');
+}
+const runWithSession = helpers.result.data.runWithSession;
+
+if (args.contextData?.action === 'start') {
+  const { Worker } = args.bullmq;
+  const connection = helpers.result.data.getRedisConnection();
+  if (!connection || !connection.host) throw new Error('Invalid Redis connection for Shopify jobs');
+  let workerInstance;
+  try {
+    workerInstance = new Worker(QUEUE_NAME, async (job) => {
+      await runWithSession(args, job.data.shop, async (dbSession) => {
+        await doJob(args, job.data, dbSession);
+      });
+    }, { connection, concurrency: 2, lockDuration: 120000 });
+    workerInstance.on('failed', (job, err) => console.error('processShopifyFileAfterDelete: Job failed', job?.id, err?.message));
+    workerInstance.on('error', (err) => console.error('processShopifyFileAfterDelete: Worker error', err?.message));
+    return { stop: async (force = false) => { if (workerInstance) await workerInstance.close(force); } };
+  } catch (error) {
+    console.error('processShopifyFileAfterDelete: Failed to create worker', error);
+    if (workerInstance) { try { await workerInstance.close(); } catch (e) {} }
+    throw error;
+  }
+}
+'''
+        key: processShopifyFileAfterDelete
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,112 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Fetches user content settings (column and form configuration) for Books or AudioVideo
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { tableVertexLabel, key } = args.contextData;
+
+if (!tableVertexLabel) {
+  return {
+    success: false,
+    message: "Invalid tableVertexLabel. Must not be empty."
+  };
+}
+
+// Build setting key
+const settingKey = key || `${tableVertexLabel}_settings`;
+
+// Query for user's content setting using (User)-[UserSetting]->(Setting) with key in Setting
+const query = `
+  MATCH (u:User {uuid: $userUuid})-[:UserSetting]->(s:Setting {key: $settingKey})
+  RETURN s
+  LIMIT 1
+`;
+
+const result = await args.session.run(query, {
+  userUuid: user.P.uuid,
+  settingKey: settingKey
+});
+
+if (result.records.length === 0) {
+  // No user setting found, try to get default setting
+  const defaultKey = `${tableVertexLabel}_settings_default`;
+  let defaultResult = await args.session.run(
+    `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
+    { defaultKey }
+  );
+
+  // If no default exists, run migration to create default settings (so hooks and full config are available)
+  if (defaultResult.records.length === 0 && args.executeNamedServerFunction) {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: 'migrateContentTableSettings',
+        contextData: { dryRun: false }
+      });
+      defaultResult = await args.session.run(
+        `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
+        { defaultKey }
+      );
+    } catch (migrateError) {
+      console.error('getUserContentSetting: migrateContentTableSettings failed', migrateError);
+    }
+  }
+
+  if (defaultResult.records.length > 0) {
+    const defaultVertices = args.processResult(defaultResult.records, args.context, 's');
+    const defaultVertex = defaultVertices[0];
+    return {
+      success: true,
+      data: {
+        setting: defaultVertex,
+        isDefault: true
+      },
+      message: "Using default configuration."
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      setting: null,
+      isDefault: true
+    },
+    message: "No custom settings found. Using default configuration."
+  };
+}
+
+// Use processResult to populate graph structure
+const settingVertices = args.processResult(result.records, args.context, 's');
+const settingVertex = settingVertices[0];
+
+return {
+  success: true,
+  data: {
+    setting: settingVertex,
+    isDefault: false
+  },
+  message: "Settings loaded successfully"
+};
+'''
+        key: getUserContentSetting
+      }
+    }
+  ]
+  edges: []
+}

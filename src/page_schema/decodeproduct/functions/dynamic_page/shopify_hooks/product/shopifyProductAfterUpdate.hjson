@@ -13,8 +13,7 @@ const shop = args.contextData.shop;
 if (!shop) { console.log('shopifyProductAfterUpdate: shop not available in contextData'); return; }
 
 const helpers = await args.executeNamedServerFunction(
-  { functionName: 'shopifyQueueHelpers', contextData: {} },
-  { functionLookupSubDomain: 'decodeproduct' }
+  { functionName: 'shopifyQueueHelpers', contextData: {} }
 );
 if (!helpers.result?.success) return;
 

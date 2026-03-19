@@ -43,7 +43,7 @@ try {
     contextData: {
       parentElementId: categoryElementId
     }
-  }, { functionLookupSubDomain: 'decodeproduct' });
+  });
   
   const menuItems = nestedResult.result?.success ? (nestedResult.result.menuItems || []) : [];
   
