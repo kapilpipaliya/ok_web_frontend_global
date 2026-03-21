@@ -4,10 +4,21 @@
       id: "1"
       L: Function
       P: {
-        description: Syncs Shopify orders/line items before fetching order line-item data.
+        description: Syncs Shopify orders and line items before fetching order or line-item tables. Skips Shopify API when loading line items filtered by a single orderId (Neo4j only).
         body:
           '''const { tableVertexLabel, filters = {}, sort = {}, shop: contextShop } = args.contextData;
-if (tableVertexLabel !== 'ShopifyOrderLineItem') return;
+const isOrderTable = tableVertexLabel === "ShopifyOrder";
+const isLineTable = tableVertexLabel === "ShopifyOrderLineItem";
+if (!isOrderTable && !isLineTable) return;
+
+const hasOrderIdFilter =
+  filters &&
+  filters.orderId != null &&
+  String(filters.orderId).length > 0;
+if (isLineTable && hasOrderIdFilter) {
+  console.log("[shopifyOrderBeforeFetchData] skip Shopify sync (single-order line items from graph)");
+  return;
+}
 
 const shop = contextShop || args.shop;
 if (!shop) {
@@ -24,7 +35,7 @@ const fulfillmentStatusFromRemaining = (remainingQuantity, quantity) => {
   return "UNFULFILLED";
 };
 
-// Build map lineItemId -> total remainingQuantity from order.fulfillmentOrders[].lineItems[].
+// Sum FulfillmentOrderLineItem.remainingQuantity per LineItem id (LineItem.fulfillableQuantity / fulfillmentStatus are deprecated).
 const getRemainingByLineItemId = (order) => {
   const map = {};
   const fos = order.fulfillmentOrders?.edges || [];
@@ -65,7 +76,37 @@ if (dateFrom) queryString = queryString ? queryString + " AND created_at:>=" + d
 if (dateTo) queryString = queryString ? queryString + " AND created_at:<=" + dateTo : "created_at:<=" + dateTo;
 console.log("[shopifyOrderBeforeFetchData] queryString:", queryString || "(none)");
 
-const ordersQuery = `
+const LINE_ITEMS_FIRST = 250;
+const FULFILLMENT_ORDERS_FIRST = 250;
+const FULFILLMENT_LINE_ITEMS_FIRST = 250;
+
+const LINE_ITEM_NODE_FIELDS = `
+                id
+                name
+                title
+                quantity
+                sku
+                vendor
+                originalUnitPriceSet { shopMoney { amount currencyCode } }
+                discountedUnitPriceSet { shopMoney { amount currencyCode } }
+                originalTotalSet { shopMoney { amount currencyCode } }
+                discountedTotalSet { shopMoney { amount currencyCode } }
+                variant {
+                  id
+                  title
+                  sku
+                }
+                product {
+                  id
+                  title
+                }
+                customAttributes {
+                  key
+                  value
+                }`;
+
+const ordersQuery =
+  `
   query getOrders($first: Int!, $query: String, $sortKey: OrderSortKeys, $reverse: Boolean) {
     orders(first: $first, query: $query, sortKey: $sortKey, reverse: $reverse) {
       edges {
@@ -74,27 +115,53 @@ const ordersQuery = `
           name
           createdAt
           updatedAt
-          lineItems(first: 50) {
+          displayFulfillmentStatus
+          displayFinancialStatus
+          email
+          phone
+          processedAt
+          cancelledAt
+          closed
+          note
+          tags
+          subtotalPriceSet { shopMoney { amount currencyCode } }
+          totalPriceSet { shopMoney { amount currencyCode } }
+          totalTaxSet { shopMoney { amount currencyCode } }
+          totalShippingPriceSet { shopMoney { amount currencyCode } }
+          taxesIncluded
+          fullyPaid
+          test
+          lineItems(first: ` +
+  LINE_ITEMS_FIRST +
+  `) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
             edges {
-              node {
-                id
-                title
-                quantity
-                sku
-                variant {
-                  title
-                }
-                customAttributes {
-                  key
-                  value
-                }
+              node {` +
+  LINE_ITEM_NODE_FIELDS +
+  `
               }
             }
           }
-          fulfillmentOrders(first: 10) {
+          fulfillmentOrders(first: ` +
+  FULFILLMENT_ORDERS_FIRST +
+  `) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
             edges {
               node {
-                lineItems(first: 100) {
+                id
+                lineItems(first: ` +
+  FULFILLMENT_LINE_ITEMS_FIRST +
+  `) {
+                  pageInfo {
+                    hasNextPage
+                    endCursor
+                  }
                   edges {
                     node {
                       remainingQuantity
@@ -114,9 +181,195 @@ const ordersQuery = `
         endCursor
       }
     }
+  }`.trim();
+
+const orderLineItemsPageQuery =
+  `
+  query OrderLineItemsPage($orderId: ID!, $first: Int!, $after: String) {
+    order(id: $orderId) {
+      lineItems(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {` +
+  LINE_ITEM_NODE_FIELDS +
+  `
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const orderFulfillmentOrdersPageQuery =
+  `
+  query OrderFulfillmentOrdersPage($orderId: ID!, $first: Int!, $after: String) {
+    order(id: $orderId) {
+      fulfillmentOrders(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            lineItems(first: ` +
+  FULFILLMENT_LINE_ITEMS_FIRST +
+  `) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              edges {
+                node {
+                  remainingQuantity
+                  lineItem {
+                    id
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const fulfillmentOrderLineItemsPageQuery =
+  `
+  query FulfillmentOrderLineItemsPage($id: ID!, $first: Int!, $after: String) {
+    node(id: $id) {
+      ... on FulfillmentOrder {
+        lineItems(first: $first, after: $after) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          edges {
+            node {
+              remainingQuantity
+              lineItem {
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const fetchAllFulfillmentOrderLineItemEdges = async (adminClient, foGid, initialLineItems) => {
+  const edgesOut = [];
+  const conn = initialLineItems || {};
+  for (const e of conn.edges || []) edgesOut.push(e);
+  let hasNext = conn.pageInfo?.hasNextPage === true;
+  let cursor = conn.pageInfo?.endCursor || null;
+  while (hasNext && cursor) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(fulfillmentOrderLineItemsPageQuery, {
+      variables: { id: foGid, first: FULFILLMENT_LINE_ITEMS_FIRST, after: cursor }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      console.error(
+        "[shopifyOrderBeforeFetchData] fulfillmentOrder lineItems pagination error:",
+        foGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.node?.lineItems;
+    if (!page) break;
+    for (const e of page.edges || []) edgesOut.push(e);
+    hasNext = page.pageInfo?.hasNextPage === true;
+    cursor = page.pageInfo?.endCursor || null;
+    if (hasNext && !cursor) {
+      console.warn("[shopifyOrderBeforeFetchData] FO lineItems hasNextPage but no endCursor", foGid);
+      break;
+    }
   }
-`.trim();
-const sortKey = sort.column === "orderName" ? "ORDER_NUMBER" : "CREATED_AT";
+  return edgesOut;
+};
+
+const fetchAllFulfillmentOrdersForOrder = async (adminClient, orderGid, initialFulfillmentOrders) => {
+  const foEdges = [];
+  const conn = initialFulfillmentOrders || {};
+  for (const e of conn.edges || []) foEdges.push(e);
+  let hasNext = conn.pageInfo?.hasNextPage === true;
+  let cursor = conn.pageInfo?.endCursor || null;
+  while (hasNext && cursor) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(orderFulfillmentOrdersPageQuery, {
+      variables: { orderId: orderGid, first: FULFILLMENT_ORDERS_FIRST, after: cursor }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      console.error(
+        "[shopifyOrderBeforeFetchData] order fulfillmentOrders pagination error:",
+        orderGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.order?.fulfillmentOrders;
+    if (!page) break;
+    for (const e of page.edges || []) foEdges.push(e);
+    hasNext = page.pageInfo?.hasNextPage === true;
+    cursor = page.pageInfo?.endCursor || null;
+    if (hasNext && !cursor) {
+      console.warn("[shopifyOrderBeforeFetchData] fulfillmentOrders hasNextPage but no endCursor", orderGid);
+      break;
+    }
+  }
+  for (const fe of foEdges) {
+    const n = fe?.node;
+    if (!n?.id || !n.lineItems) continue;
+    const allLiEdges = await fetchAllFulfillmentOrderLineItemEdges(adminClient, n.id, n.lineItems);
+    n.lineItems = { edges: allLiEdges };
+  }
+  return { edges: foEdges };
+};
+
+const fetchAllLineItemNodes = async (adminClient, orderGid, initialLineItems) => {
+  const nodes = [];
+  const conn = initialLineItems || {};
+  for (const e of conn.edges || []) {
+    if (e?.node) nodes.push(e.node);
+  }
+  let hasNext = conn.pageInfo?.hasNextPage === true;
+  let cursor = conn.pageInfo?.endCursor || null;
+  while (hasNext && cursor) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(orderLineItemsPageQuery, {
+      variables: { orderId: orderGid, first: LINE_ITEMS_FIRST, after: cursor }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      console.error(
+        "[shopifyOrderBeforeFetchData] order lineItems pagination error:",
+        orderGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.order?.lineItems;
+    if (!page) break;
+    for (const e of page.edges || []) {
+      if (e?.node) nodes.push(e.node);
+    }
+    hasNext = page.pageInfo?.hasNextPage === true;
+    cursor = page.pageInfo?.endCursor || null;
+    if (hasNext && !cursor) {
+      console.warn("[shopifyOrderBeforeFetchData] lineItems hasNextPage but no endCursor", orderGid);
+      break;
+    }
+  }
+  return nodes;
+};
+const sortCol = sort && sort.column;
+const sortKey =
+  sortCol === "orderName" || sortCol === "name" ? "ORDER_NUMBER" : "CREATED_AT";
 const reverse = sort.direction === "desc";
 
 let allOrders = [];
@@ -151,39 +404,157 @@ while (hasNextPage) {
 }
 console.log("[shopifyOrderBeforeFetchData] fetched orders:", allOrders.length, "total from API");
 
+const money = (set) => {
+  const m = set?.shopMoney;
+  return { amount: m?.amount ?? "", currency: m?.currencyCode ?? "" };
+};
+
 const session = args.session;
 for (const order of allOrders) {
   const orderId = order.id || "";
   const orderName = order.name || "";
   const orderCreatedAt = order.createdAt || "";
   const orderUpdatedAt = order.updatedAt || orderCreatedAt;
+  const tagsArr = order.tags;
+  const tagsStr = Array.isArray(tagsArr) ? tagsArr.join(", ") : tagsArr || "";
+  const sub = money(order.subtotalPriceSet);
+  const tot = money(order.totalPriceSet);
+  const tax = money(order.totalTaxSet);
+  const ship = money(order.totalShippingPriceSet);
+  let lineNodes;
+  if (orderId && admin) {
+    lineNodes = await fetchAllLineItemNodes(admin, orderId, order.lineItems);
+    order.fulfillmentOrders = await fetchAllFulfillmentOrdersForOrder(
+      admin,
+      orderId,
+      order.fulfillmentOrders
+    );
+  } else {
+    lineNodes = order.lineItems?.edges?.map((e) => e.node) || [];
+  }
   const remainingByLineId = getRemainingByLineItemId(order);
   await session.run(
-    "MERGE (o:ShopifyOrder { id: $id }) SET o.name = $name, o.createdAt = $createdAt, o.updatedAt = $updatedAt",
-    { id: orderId, name: orderName, createdAt: orderCreatedAt, updatedAt: orderUpdatedAt }
+    `MERGE (o:ShopifyOrder { id: $id })
+     SET o.name = $name,
+         o.createdAt = $createdAt,
+         o.updatedAt = $updatedAt,
+         o.displayFulfillmentStatus = $displayFulfillmentStatus,
+         o.displayFinancialStatus = $displayFinancialStatus,
+         o.email = $email,
+         o.phone = $phone,
+         o.processedAt = $processedAt,
+         o.cancelledAt = $cancelledAt,
+         o.closed = $closed,
+         o.note = $note,
+         o.tags = $tags,
+         o.subtotalAmount = $subtotalAmount,
+         o.subtotalCurrency = $subtotalCurrency,
+         o.totalPriceAmount = $totalPriceAmount,
+         o.totalPriceCurrency = $totalPriceCurrency,
+         o.totalTaxAmount = $totalTaxAmount,
+         o.totalShippingAmount = $totalShippingAmount,
+         o.taxesIncluded = $taxesIncluded,
+         o.fullyPaid = $fullyPaid,
+         o.testOrder = $testOrder,
+         o.lineItemsCount = $lineItemsCount`,
+    {
+      id: orderId,
+      name: orderName,
+      createdAt: orderCreatedAt,
+      updatedAt: orderUpdatedAt,
+      displayFulfillmentStatus: order.displayFulfillmentStatus || "",
+      displayFinancialStatus: order.displayFinancialStatus || "",
+      email: order.email || "",
+      phone: order.phone || "",
+      processedAt: order.processedAt || "",
+      cancelledAt: order.cancelledAt || "",
+      closed: order.closed === true,
+      note: order.note || "",
+      tags: tagsStr,
+      subtotalAmount: sub.amount,
+      subtotalCurrency: sub.currency,
+      totalPriceAmount: tot.amount,
+      totalPriceCurrency: tot.currency,
+      totalTaxAmount: tax.amount,
+      totalShippingAmount: ship.amount,
+      taxesIncluded: order.taxesIncluded === true,
+      fullyPaid: order.fullyPaid === true,
+      testOrder: order.test === true,
+      lineItemsCount: lineNodes.length
+    }
   );
-  const nodes = order.lineItems?.edges?.map((e) => e.node) || [];
-  for (let idx = 0; idx < nodes.length; idx++) {
-    const node = nodes[idx];
+  for (let idx = 0; idx < lineNodes.length; idx++) {
+    const node = lineNodes[idx];
     const lineItemId = node.id || orderId + "-" + idx;
     const attrs = node.customAttributes || [];
     const propertiesText = attrs.map((a) => (a.key || "") + ": " + (a.value || "")).filter(Boolean).join(" | ");
     const variantTitle = node.variant && node.variant.title ? node.variant.title : "";
-    const remaining = remainingByLineId[node.id] ?? node.quantity ?? 0;
-    const fulfillmentStatus = fulfillmentStatusFromRemaining(remaining, node.quantity);
+    const variantSku = node.variant?.sku || "";
+    const variantId = node.variant?.id || "";
+    const productId = node.product?.id || "";
+    const ou = money(node.originalUnitPriceSet);
+    const du = money(node.discountedUnitPriceSet);
+    const ot = money(node.originalTotalSet);
+    const dt = money(node.discountedTotalSet);
+    const qty = node.quantity ?? 0;
+    const remainingFromFo = remainingByLineId[node.id];
+    const remainingQuantity =
+      remainingFromFo !== undefined && remainingFromFo !== null
+        ? Number(remainingFromFo) || 0
+        : qty;
+    const fulfillmentStatus = fulfillmentStatusFromRemaining(remainingQuantity, qty);
     await session.run(
-      "MERGE (o:ShopifyOrder { id: $orderId }) MERGE (li:ShopifyOrderLineItem { id: $lineItemId }) SET li.orderId = $orderId, li.orderName = $orderName, li.orderCreatedAt = $orderCreatedAt, li.productTitle = $productTitle, li.variantTitle = $variantTitle, li.sku = $sku, li.quantity = $quantity, li.properties = $properties, li.fulfillmentStatus = $fulfillmentStatus MERGE (o)-[:HAS_LINE_ITEM]->(li)",
+      `MERGE (o:ShopifyOrder { id: $orderId })
+       MERGE (li:ShopifyOrderLineItem { id: $lineItemId })
+       SET li.orderId = $orderId,
+           li.orderName = $orderName,
+           li.orderCreatedAt = $orderCreatedAt,
+           li.lineItemName = $lineItemName,
+           li.productTitle = $productTitle,
+           li.productGraphId = $productGraphId,
+           li.variantGraphId = $variantGraphId,
+           li.variantTitle = $variantTitle,
+           li.variantSku = $variantSku,
+           li.sku = $sku,
+           li.vendor = $vendor,
+           li.quantity = $quantity,
+           li.remainingQuantity = $remainingQuantity,
+           li.properties = $properties,
+           li.fulfillmentStatus = $fulfillmentStatus,
+           li.originalUnitAmount = $originalUnitAmount,
+           li.originalUnitCurrency = $originalUnitCurrency,
+           li.discountedUnitAmount = $discountedUnitAmount,
+           li.discountedUnitCurrency = $discountedUnitCurrency,
+           li.originalTotalAmount = $originalTotalAmount,
+           li.originalTotalCurrency = $originalTotalCurrency,
+           li.discountedTotalAmount = $discountedTotalAmount,
+           li.discountedTotalCurrency = $discountedTotalCurrency
+       MERGE (o)-[:HAS_LINE_ITEM]->(li)`,
       {
         orderId,
         lineItemId,
         orderName,
         orderCreatedAt,
+        lineItemName: node.name || node.title || "",
         productTitle: node.title || "",
+        productGraphId: productId,
+        variantGraphId: variantId,
         variantTitle,
+        variantSku,
         sku: node.sku || "",
-        quantity: node.quantity ?? 0,
+        vendor: node.vendor || "",
+        quantity: qty,
+        remainingQuantity,
         properties: propertiesText,
-        fulfillmentStatus
+        fulfillmentStatus,
+        originalUnitAmount: ou.amount,
+        originalUnitCurrency: ou.currency,
+        discountedUnitAmount: du.amount,
+        discountedUnitCurrency: du.currency,
+        originalTotalAmount: ot.amount,
+        originalTotalCurrency: ot.currency,
+        discountedTotalAmount: dt.amount,
+        discountedTotalCurrency: dt.currency
       }
     );
   }

@@ -8,31 +8,75 @@
         fns:
           '''
 
+const isNestedLinesTable = () => args.contextData.props?.nestedLinesMode === true;
+
+const getRowExpansionConfig = () => {
+  if (isNestedLinesTable()) return null;
+  const cfg = args.fns.evaluateConfig?.() || {};
+  const re = cfg.rowExpansion;
+  if (re && typeof re === 'object' && re.childVertexLabel) return re;
+  return null;
+};
+
 const getColumns = () => {
+  if (isNestedLinesTable()) {
+    return args.contextData.props?.nestedTableColumns || [];
+  }
   const base = args.fns.prop('columns') || [];
   const groupBy = getGroupByConfig();
   if (groupBy) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
+  if (getRowExpansionConfig()) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
   return base;
 };
 
-const getRowHeight = () => args.fns.prop('rowHeight') || 36;
-const getTitle = () => args.fns.prop('title');
+const getRowHeight = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.nestedRowHeight ?? 36;
+  return args.fns.prop('rowHeight') || 36;
+};
+const getTitle = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
+  return args.fns.prop('title');
+};
 const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder') || "Search...";
 const getAdditionalFilters = () => args.fns.prop('additionalFilters') || [];
 const getCustomActions = () => args.fns.prop('customActions') || [];
 const getBatchActions = () => args.fns.prop('batchActions') || [];
-const getShowRowNumber = () => args.fns.prop('showRowNumber') || false;
+const getShowRowNumber = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showRowNumber !== false;
+  return args.fns.prop('showRowNumber') || false;
+};
 const getHideColumns = () => args.fns.prop('hideColumns') || [];
 
 const getUniqueKeys = () => args.fns.prop('uniqueKeys') || [];
-const getShowAddButton = () => args.fns.prop('showAddButton') ?? true;
-const getShowEditButton = () => args.fns.prop('showEditButton') ?? true;
-const getShowSelection = () => args.fns.prop('showSelection');
-const getShowActions = () => args.fns.prop('showActions');
+const getShowAddButton = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showAddButton ?? false;
+  return args.fns.prop('showAddButton') ?? true;
+};
+const getShowEditButton = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showEditButton ?? false;
+  return args.fns.prop('showEditButton') ?? true;
+};
+const getShowSelection = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showSelection ?? false;
+  return args.fns.prop('showSelection');
+};
+const getShowActions = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.showActions ?? false;
+  return args.fns.prop('showActions');
+};
 const getResizableColumns = () => args.fns.prop('resizableColumns') ?? true;
-const getHideExportButtons = () => args.fns.prop('hideExportButtons') ?? false;
-const getHideImportButtons = () => args.fns.prop('hideImportButtons') ?? false;
-const getHideSettingsButton = () => args.fns.prop('hideSettingsButton') ?? false;
+const getHideExportButtons = () => {
+  if (isNestedLinesTable()) return true;
+  return args.fns.prop('hideExportButtons') ?? false;
+};
+const getHideImportButtons = () => {
+  if (isNestedLinesTable()) return true;
+  return args.fns.prop('hideImportButtons') ?? false;
+};
+const getHideSettingsButton = () => {
+  if (isNestedLinesTable()) return true;
+  return args.fns.prop('hideSettingsButton') ?? false;
+};
 const getIcon = () => args.fns.prop('icon');
 const getLabel = () => args.fns.prop('label');
 const getAddButtonLabel = () => {
@@ -60,6 +104,57 @@ const toggleExpanded = (key) => {
     setCollapsedKeys(key, true);
   }
 };
+
+const [expansionOpen, setExpansionOpen] = args.createStore({});
+const [expansionRows, setExpansionRows] = args.createStore({});
+const [expansionLoading, setExpansionLoading] = args.createStore({});
+const isExpansionOpen = (rowId) => !!expansionOpen[String(rowId)];
+
+const toggleRowExpansion = async (row) => {
+  const re = getRowExpansionConfig();
+  if (!re || !row?.id) return;
+  const id = String(row.id);
+  if (expansionOpen[id]) {
+    setExpansionOpen(id, undefined);
+    return;
+  }
+  setExpansionOpen(id, true);
+  const skipFetch = expansionRows[id] != null && re.refetchOnExpand !== true;
+  if (skipFetch) return;
+  setExpansionLoading(id, true);
+  try {
+    const childLabel = re.childVertexLabel;
+    const idField = re.parentIdField || 'id';
+    const parentVal =
+      typeof re.getNestedParentFilterValue === 'function'
+        ? re.getNestedParentFilterValue(row)
+        : (row.P?.[idField] ?? row[idField] ?? row.id);
+    const filterKey = re.childParentFilterKey || 'orderId';
+    const filters = { [filterKey]: parentVal };
+    const sort = re.nestedSort || null;
+    const hooks = re.nestedHooks;
+    const fetchFn = args.fns.fetchUserContentRows;
+    const rows = typeof fetchFn === 'function' ? await fetchFn({
+      tableVertexLabel: childLabel,
+      filters,
+      sort,
+      hooks
+    }) : [];
+    setExpansionRows(id, Array.isArray(rows) ? rows : []);
+  } finally {
+    setExpansionLoading(id, false);
+  }
+};
+
+const getVirtualRowHeight = (index, row) => {
+  const base = getRowHeight();
+  if (isNestedLinesTable()) return base;
+  const re = getRowExpansionConfig();
+  if (!re || !row?.id) return base;
+  if (isExpansionOpen(row.id)) return base + (re.expansionPanelHeight || 280);
+  return base;
+};
+
 // Cache row objects by id so same row keeps same ref; cells then don't re-render when only expand/collapse changes
 let displayRowCache = {};
 const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
@@ -333,7 +428,7 @@ const applyLocalFilters = () => {
       // Only check values for visible columns, not keys
       for (const col of columns) {
         // Skip special/row number columns
-        if (col.key === "__rowNumber" || col.type === "rowNumber" || col.type === "iconAction") {
+        if (col.type === "rowNumber" || col.type === "iconAction" || col.type === "expand") {
           continue;
         }
         const cellValue = getCellValue(row, col);
@@ -356,7 +451,7 @@ const applyLocalFilters = () => {
       const filterValue = columnFilters[col.key];
       if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
         // Skip rowNumber filter - it's calculated, not a property
-        if (col.key === "__rowNumber" || col.type === "rowNumber" || col.type === "iconAction") {
+        if (col.type === "rowNumber" || col.type === "iconAction" || col.type === "expand") {
           continue;
         }
         const cellValue = getCellValue(row, col);
@@ -535,11 +630,26 @@ const getCellValue = (row, column) => {
 
 // Render cell content based on column type
 const renderCellContent = (row, column, rowIndex) => {
-  if (column.type === 'expand' || column.key === '__expand') {
-    const parentKey = row._parentKey;
-    const isParent = row._isParent === true;
-    const isExpanded = parentKey != null && !collapsedKeys[parentKey];
-    return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
+  if (column.type === 'expand') {
+    const gb = getGroupByConfig();
+    if (gb) {
+      const parentKey = row._parentKey;
+      const isParent = row._isParent === true;
+      const isExpanded = parentKey != null && !collapsedKeys[parentKey];
+      return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
+    }
+    const re = getRowExpansionConfig();
+    if (re && row?.id) {
+      const rowId = String(row.id);
+      return {
+        type: 'expand',
+        isParent: true,
+        isExpanded: isExpansionOpen(rowId),
+        parentKey: rowId,
+        onToggle: () => toggleRowExpansion(row)
+      };
+    }
+    return { type: 'expand', isParent: false, isExpanded: false, parentKey: null, onToggle: () => {} };
   }
   const value = getCellValue(row, column);
 
@@ -644,7 +754,7 @@ const renderCellContent = (row, column, rowIndex) => {
 // Handle sort
 const handleSort = (column) => {
   // Don't allow sorting for rowNumber columns
-  if (column.type === "rowNumber" || column.key === "__rowNumber" || column.type === "iconAction") return;
+  if (column.type === "rowNumber" || column.type === "iconAction") return;
   if (column.sortable === false) return;
 
   // If clicking the same column that's already sorted
@@ -832,6 +942,20 @@ const startPollIfQueued = (dataToCheck) => {
 
 // Handle search
 const handleSearch = () => {
+  if (isNestedLinesTable()) {
+    const getRows = args.contextData.props?.getNestedLineRows;
+    const rows = typeof getRows === 'function' ? getRows() : [];
+    setData(rows);
+    const config = args.fns.evaluateConfig?.() || {};
+    const enableLocalFilters = config?.enableLocalFilters === true;
+    const enableLocalSort = config?.enableLocalSort === true;
+    if (enableLocalFilters || enableLocalSort) {
+      applyLocalFilters();
+    } else {
+      setFilteredData(rows);
+    }
+    return;
+  }
   const config = args.fns.evaluateConfig?.() || {};
   const enableLocalFilters = config?.enableLocalFilters === true;
   const enableLocalSort = config?.enableLocalSort === true;
@@ -1456,7 +1580,10 @@ return {
   getOnAdd,
   getOnDelete,
   getOnAfterDelete,
-  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true,
+  getUsePolarisUI: () => {
+    if (isNestedLinesTable()) return args.contextData.props?.usePolarisUI === true;
+    return args.fns.getUsePolarisUI?.() === true;
+  },
   getColumnWidth,
   createResizeHandler,
   columnWidths,
@@ -1524,6 +1651,13 @@ return {
   getRowRef,
   getDisplayData,
   getGroupByConfig,
+  getRowExpansionConfig,
+  getVirtualRowHeight,
+  toggleRowExpansion,
+  isExpansionOpen,
+  expansionRows,
+  expansionLoading,
+  isNestedLinesTable,
   toggleExpanded,
   setCollapsedKeys,
   iconActionActiveKey,
@@ -1535,6 +1669,19 @@ return {
         props:
           '''return {
   onMount: async () => {
+    if (args.fns.isNestedLinesTable?.()) {
+      args.fns.handleSearch();
+      if (typeof args.createEffect === "function") {
+        args.createEffect(() => {
+          const getRows = args.contextData.props?.getNestedLineRows;
+          const getLoading = args.contextData.props?.getNestedLinesLoading;
+          if (typeof getRows === "function") getRows();
+          if (typeof getLoading === "function") getLoading();
+          args.fns.handleSearch();
+        });
+      }
+      return;
+    }
     args.fns.initializeFromQueryParams();
     // If sidebar is configured, don't fetch on mount
     const hasSidebar = args.fns.hasSidebar?.();
@@ -1551,7 +1698,16 @@ return {
       P: {
         css:
           '''
-return `._id {
+return args.contextData.props?.nestedLinesMode === true
+  ? `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}`
+  : `._id {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 48px);
@@ -2468,7 +2624,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
-  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.key !== "__rowNumber" && column.type !== "iconAction") ? "pointer" : "default"};
+  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.type !== "iconAction" && column.type !== "expand") ? "pointer" : "default"};
   user-select: none;
   position: relative;
 }`;
@@ -2480,13 +2636,14 @@ return `._id {
 const column = args.contextData.column;
 const sortConfig = args.fns.sortConfig;
 const shouldHide = args.fns.shouldHideColumn(column);
-const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+const isRowNumber = column.type === "rowNumber";
+const isExpandColumn = column.type === "expand";
 
 return {
   as: "div",
   hide: shouldHide,
   onClick: () => {
-    if (!isRowNumber && column.sortable !== false) {
+    if (!isRowNumber && !isExpandColumn && column.sortable !== false) {
       args.fns.handleSort(column);
     }
   }
@@ -2518,8 +2675,10 @@ const isSorted = sortConfig.column === column.key;
 
 return {
   as: "div",
-  text: column.type === "iconAction" ? "" : (column.label || column.key),
-  hide: column.type === "rowNumber" || column.type === "iconAction"
+  text: column.type === "iconAction" || column.type === "expand"
+    ? ""
+    : (column.label || column.key),
+  hide: column.type === "rowNumber" || column.type === "iconAction" || column.type === "expand"
 };
 '''
       }
@@ -2550,14 +2709,15 @@ const column = args.contextData.column;
 const sortConfig = args.fns.sortConfig;
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
-const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+const isRowNumber = column.type === "rowNumber";
+const isExpandColumn = column.type === "expand";
 
 return {
   as: "icon",
   icon: direction === "asc" ? "carbon:chevron-up" : "carbon:chevron-down",
   width: 16,
   height: 16,
-  hide: !isSorted || column.sortable === false || isRowNumber || column.type === "iconAction"
+  hide: !isSorted || column.sortable === false || isRowNumber || column.type === "iconAction" || isExpandColumn
 };
 '''
       }
@@ -2585,14 +2745,15 @@ const column = args.contextData.column;
 const columnFilters = args.fns.columnFilters;
 const filterValue = columnFilters[column.key];
 const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
-const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+const isRowNumber = column.type === "rowNumber";
+const isExpandColumn = column.type === "expand";
 
 return {
   as: "icon",
   icon: "carbon:filter",
   width: 14,
   height: 14,
-  hide: !hasFilter || isRowNumber || column.type === "iconAction",
+  hide: !hasFilter || isRowNumber || column.type === "iconAction" || isExpandColumn,
   title: "Filter applied"
 };
 '''
@@ -2646,8 +2807,8 @@ const shouldHide = args.fns.shouldHideColumn(column);
 
 // Determine column key for resize
 const getColumnKey = () => {
-  if (column.key === "__rowNumber" || column.type === "rowNumber") {
-    return "__rowNumber";
+  if (column.type === "rowNumber") {
+    return column.key;
   }
   return column.key;
 };
@@ -2821,7 +2982,7 @@ const getFilterValue = () => {
 const filterValue = getFilterValue();
 
 // Skip filter for rowNumber
-if (column.key === "__rowNumber" || column.type === "rowNumber") {
+if (column.type === "rowNumber") {
   return { as: "div", hide: true };
 }
 
@@ -2832,6 +2993,11 @@ if (column.key === "preview" || column.type === "imagePreview" || column.type ==
 
 // Skip filter for iconAction column
 if (column.type === "iconAction") {
+  return { as: "div", hide: true };
+}
+
+// Skip filter for expand column
+if (column.type === "expand") {
   return { as: "div", hide: true };
 }
 
@@ -2994,6 +3160,8 @@ const isLoading = args.fns.loading();
 return {
   getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
+  getItemHeightAt: args.fns.getVirtualRowHeight,
+  rowHasExpansion: (row) => !!(args.fns.getRowExpansionConfig?.() && row?.id),
   containerClass: "table-body-list",
   hide: isLoading,
   tabIndex: 0,
@@ -3011,14 +3179,22 @@ return {
   onExpandCollapse: (index, action) => {
     const displayData = args.fns.getDisplayData?.() ?? [];
     const row = displayData[index];
-    if (row?._isParent !== true || row._parentKey == null) return;
-    const parentKey = row._parentKey;
-    const setCollapsedKeysFn = args.fns.setCollapsedKeys;
-    if (!setCollapsedKeysFn) return;
-    if (action === "collapse") {
-      setCollapsedKeysFn(parentKey, true);
-    } else {
-      setCollapsedKeysFn(parentKey, undefined);
+    if (row?._isParent === true && row._parentKey != null) {
+      const parentKey = row._parentKey;
+      const setCollapsedKeysFn = args.fns.setCollapsedKeys;
+      if (!setCollapsedKeysFn) return;
+      if (action === "collapse") {
+        setCollapsedKeysFn(parentKey, true);
+      } else {
+        setCollapsedKeysFn(parentKey, undefined);
+      }
+      return;
+    }
+    const re = args.fns.getRowExpansionConfig?.();
+    if (re && row?.id) {
+      const open = args.fns.isExpansionOpen?.(row.id);
+      if (action === "collapse" && open) args.fns.toggleRowExpansion?.(row);
+      if (action === "expand" && !open) args.fns.toggleRowExpansion?.(row);
     }
   },
   onShiftArrow: (currentIndex, nextIndex) => args.fns.handleShiftArrow?.(currentIndex, nextIndex),
@@ -3084,6 +3260,10 @@ const rowData = virtualItem.rowData;
 const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 const isActive = args.fns.activeRowId?.() === rowData?.id;
+const re = args.fns.getRowExpansionConfig?.();
+const rh = args.fns.getRowHeight();
+const panel = re && rowData?.id && args.fns.isExpansionOpen?.(rowData.id) ? (re.expansionPanelHeight || 280) : 0;
+const gridRows = panel > 0 ? `${rh}px minmax(0, ${panel}px)` : `${rh}px`;
 
 return [
 `._id {
@@ -3096,6 +3276,7 @@ return [
 `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
+  grid-template-rows: ${gridRows};
   grid-column: 1 / -1;
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${isSelected ? args.theme.var.color.secondary_light_200 : "transparent"};
@@ -3165,6 +3346,141 @@ return {
       }
     }
     {
+      id: "41exp"
+      L: Attr
+      P: {
+        displayOrder: 5
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = virtualItem.rowData;
+const re = args.fns.getRowExpansionConfig?.();
+const rid = rowData?.id;
+const open = re && rid && args.fns.isExpansionOpen?.(rid);
+const t = args.theme.var.color;
+return `._id {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  overflow: auto;
+  background: ${t.background_light_100};
+  border-top: 1px solid ${t.border};
+  padding: ${args.theme.var.spacing.sm};
+  min-height: 0;
+  max-height: 100%;
+  display: ${open ? 'block' : 'none'};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: 'div', hide: true };
+const rowData = virtualItem.rowData;
+const rid = rowData?.id;
+const re = args.fns.getRowExpansionConfig?.();
+if (!re || !rid) return { as: 'div', hide: true };
+const sid = String(rid);
+const open = args.fns.isExpansionOpen?.(sid);
+return {
+  as: 'div',
+  hide: !open,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "41exp_st"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return {};
+const rowData = virtualItem.rowData;
+const rid = rowData?.id;
+const re = args.fns.getRowExpansionConfig?.();
+const open = re && rid && args.fns.isExpansionOpen?.(String(rid));
+const t = args.theme.var.color;
+return `._id {
+  padding: ${args.theme.var.spacing.sm} 0;
+  color: ${t.text};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: 'div', hide: true };
+const rowData = virtualItem.rowData;
+const rid = rowData?.id;
+const re = args.fns.getRowExpansionConfig?.();
+if (!re || !rid) return { as: 'div', hide: true };
+const sid = String(rid);
+const open = args.fns.isExpansionOpen?.(sid);
+if (!open) return { as: 'div', hide: true };
+const loading = !!args.fns.expansionLoading?.[sid];
+const rows = args.fns.expansionRows?.[sid];
+const hasRows = Array.isArray(rows) && rows.length > 0;
+const show = loading || !hasRows;
+return {
+  as: 'div',
+  text: loading ? (re.nestedLoadingText || 'Loading…') : (re.emptyNestedText || 'No line items'),
+  hide: !show,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+      }
+    }
+    {
+      id: "41exp_nest"
+      L: Attr
+      P: {
+        displayOrder: 2
+        fns: ""
+        componentName: Table
+        key: nested_order_lines_table
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { hide: true };
+const rowData = virtualItem.rowData;
+const rid = rowData?.id;
+const re = args.fns.getRowExpansionConfig?.();
+if (!re || !rid) return { hide: true };
+const sid = String(rid);
+const open = args.fns.isExpansionOpen?.(sid);
+if (!open) return { hide: true };
+const loading = !!args.fns.expansionLoading?.[sid];
+const rows = args.fns.expansionRows?.[sid];
+const hasRows = Array.isArray(rows) && rows.length > 0;
+const outerArgs = args;
+return {
+  hide: loading || !hasRows,
+  nestedLinesMode: true,
+  nestedParentRowId: sid,
+  nestedTableTitle: re.nestedTitle || 'Line items',
+  nestedTableColumns: re.nestedColumns || [],
+  nestedRowHeight: re.nestedRowHeight || 36,
+  showRowNumber: re.nestedShowRowNumber !== false,
+  usePolarisUI: re.usePolarisUI !== false,
+  loadFromSetting: false,
+  getNestedLineRows: () => {
+    const r = outerArgs.fns.expansionRows?.[sid];
+    return Array.isArray(r) ? r : [];
+  },
+  getNestedLinesLoading: () => !!outerArgs.fns.expansionLoading?.[sid],
+  getSelectedRows: () => new Set(),
+  setSelectedRows: () => {},
+  clearSelectedRows: () => {}
+};
+'''
+      }
+    }
+    {
       id: "42"
       L: Attr
       P: {
@@ -3179,6 +3495,7 @@ const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 
 return `._id {
+  grid-row: 1;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   display: flex;
   align-items: center;
@@ -3272,6 +3589,7 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 
 return `._id {
+  grid-row: 1;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   display: flex;
   align-items: center;
@@ -3481,6 +3799,7 @@ const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
 
 return `._id {
+  grid-row: 1;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   display: flex;
   align-items: center;
@@ -3865,7 +4184,7 @@ return {
 const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  const headers = columns.filter(col => col.type !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 
@@ -3888,7 +4207,7 @@ return `._id {
 const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  const headers = columns.filter(col => col.type !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 
@@ -4743,6 +5062,24 @@ return {
       T: Attr
       S: "41"
       E: "42"
+    }
+    {
+      id: e67exp
+      T: Attr
+      S: "41"
+      E: "41exp"
+    }
+    {
+      id: e67exp_st
+      T: Attr
+      S: "41exp"
+      E: "41exp_st"
+    }
+    {
+      id: e67exp_nest
+      T: Attr
+      S: "41exp"
+      E: "41exp_nest"
     }
     {
       id: e68

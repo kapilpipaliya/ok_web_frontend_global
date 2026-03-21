@@ -31,8 +31,8 @@
         props:
           '''return {
   as: "s-link",
-  href: "/app",
-  text: "Products"
+  href: "/orders",
+  text: "Orders"
 }'''
       }
     }

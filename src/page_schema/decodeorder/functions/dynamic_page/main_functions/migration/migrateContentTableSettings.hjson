@@ -473,12 +473,118 @@ const settingsConfigs = [
 };`
   },
   {
+    key: 'ShopifyOrder_settings_default',
+    tableVertexLabel: 'ShopifyOrder',
+    icon: '📦',
+    name: 'ShopifyOrder',
+    config: `return {
+  title: "Orders",
+  label: "Order",
+  icon: "carbon:shopping-cart",
+  hideImportButtons: true,
+  hideExportButtons: true,
+  hideSettingsButton: false,
+  showActions: false,
+  showEditButton: false,
+  rowClickable: false,
+  columns: [
+    { key: "name", label: "Order", type: "text", width: "120px", valueAccessor: (row) => row.P?.name },
+    { key: "createdAt", label: "Created", type: "date", width: "130px", valueAccessor: (row) => row.P?.createdAt },
+    { key: "processedAt", label: "Processed", type: "date", width: "130px", valueAccessor: (row) => row.P?.processedAt },
+    { key: "displayFulfillmentStatus", label: "Fulfillment", type: "badge", width: "120px", valueAccessor: (row) => row.P?.displayFulfillmentStatus, badgeKeyCase: "lower", badgeToneMap: { fulfilled: ["Fulfilled", "success"], unfulfilled: ["Unfulfilled", "warning"], partial: ["Partial", "info"], restocked: ["Restocked", "neutral"], pending_fulfillment: ["Pending", "warning"], scheduled: ["Scheduled", "info"], on_hold: ["On hold", "caution"] } },
+    { key: "displayFinancialStatus", label: "Payment", type: "badge", width: "120px", valueAccessor: (row) => row.P?.displayFinancialStatus, badgeKeyCase: "lower", badgeToneMap: { paid: ["Paid", "success"], pending: ["Pending", "warning"], authorized: ["Authorized", "info"], partially_paid: ["Partial", "info"], refunded: ["Refunded", "neutral"], voided: ["Voided", "critical"], partially_refunded: ["Part ref", "caution"] } },
+    { key: "total", label: "Total", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.totalPriceAmount; const c = row.P?.totalPriceCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "subtotalAmount", label: "Subtotal", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.subtotalAmount; const c = row.P?.subtotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalTaxAmount", label: "Tax", type: "text", width: "90px", valueAccessor: (row) => row.P?.totalTaxAmount },
+    { key: "totalShippingAmount", label: "Shipping", type: "text", width: "90px", valueAccessor: (row) => row.P?.totalShippingAmount },
+    { key: "lineItemsCount", label: "Lines", type: "number", width: "70px", valueAccessor: (row) => row.P?.lineItemsCount },
+    { key: "email", label: "Email", type: "text", width: "200px", valueAccessor: (row) => row.P?.email },
+    { key: "phone", label: "Phone", type: "text", width: "120px", valueAccessor: (row) => row.P?.phone },
+    { key: "tags", label: "Tags", type: "text", width: "180px", valueAccessor: (row) => row.P?.tags },
+    { key: "fullyPaid", label: "Paid", type: "badge", width: "80px", valueAccessor: (row) => (row.P?.fullyPaid ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "warning"] } },
+    { key: "testOrder", label: "Test", type: "badge", width: "70px", valueAccessor: (row) => (row.P?.testOrder ? "test" : "live"), badgeKeyCase: "lower", badgeToneMap: { test: ["Test", "warning"], live: ["Live", "success"] } },
+    { key: "closed", label: "Closed", type: "badge", width: "80px", valueAccessor: (row) => (row.P?.closed ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "neutral"], no: ["No", "info"] } },
+    { key: "cancelledAt", label: "Cancelled", type: "date", width: "120px", valueAccessor: (row) => row.P?.cancelledAt },
+    { key: "note", label: "Note", type: "text", width: "220px", valueAccessor: (row) => row.P?.note }
+  ],
+  rowHeight: 44,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __expand: "32px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  rowExpansion: {
+    childVertexLabel: "ShopifyOrderLineItem",
+    childParentFilterKey: "orderId",
+    parentIdField: "id",
+    expansionPanelHeight: 380,
+    nestedTitle: "Line items",
+    emptyNestedText: "No line items for this order.",
+    nestedLoadingText: "Loading line items…",
+    nestedSort: { column: "productTitle", direction: "asc" },
+    nestedColumns: [
+      { key: "orderName", label: "Order", type: "text", width: "100px", valueAccessor: (row) => row.P?.orderName },
+      { key: "lineItemName", label: "Line name", type: "text", width: "160px", valueAccessor: (row) => row.P?.lineItemName },
+      { key: "productTitle", label: "Product", type: "text", width: "160px", valueAccessor: (row) => row.P?.productTitle },
+      { key: "productGraphId", label: "Product ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId, overflowEllipsis: true },
+      { key: "variantTitle", label: "Variant", type: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle },
+      { key: "variantGraphId", label: "Variant ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId, overflowEllipsis: true },
+      { key: "sku", label: "SKU", type: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
+      { key: "variantSku", label: "Var. SKU", type: "text", width: "100px", valueAccessor: (row) => row.P?.variantSku },
+      { key: "vendor", label: "Vendor", type: "text", width: "110px", valueAccessor: (row) => row.P?.vendor },
+      { key: "quantity", label: "Qty", type: "number", width: "56px", valueAccessor: (row) => row.P?.quantity },
+      { key: "remainingQuantity", label: "Remaining", type: "number", width: "90px", valueAccessor: (row) => row.P?.remainingQuantity },
+      { key: "originalUnitAmount", label: "Orig. unit", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.originalUnitAmount; const c = row.P?.originalUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "discountedUnitAmount", label: "Disc. unit", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.discountedUnitAmount; const c = row.P?.discountedUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "originalTotalAmount", label: "Orig. total", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.originalTotalAmount; const c = row.P?.originalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "discountedTotalAmount", label: "Disc. total", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.discountedTotalAmount; const c = row.P?.discountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "properties", label: "Properties", type: "text", width: "200px", valueAccessor: (row) => row.P?.properties },
+      { key: "fulfillmentStatus", label: "Fulfillment", type: "badge", width: "110px", valueAccessor: (row) => row.P?.fulfillmentStatus, badgeToneMap: { FULFILLED: ["Fulfilled", "success"], UNFULFILLED: ["Unfulfilled", "warning"], PARTIALLY_FULFILLED: ["Partial", "info"] } },
+      { key: "orderCreatedAt", label: "Order date", type: "date", width: "120px", valueAccessor: (row) => row.P?.orderCreatedAt }
+    ]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyOrderCategory",
+    toParentEdgeType: "OrderCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    beforeFetchData: "shopifyOrderBeforeFetchData"
+  }
+};`
+  },
+  {
     key: 'ShopifyOrderLineItem_settings_default',
     tableVertexLabel: 'ShopifyOrderLineItem',
     icon: '📋',
     name: 'ShopifyOrderLineItem',
     config: `return {
-  title: "Orders (Line Items)",
+  title: "Order line items",
   label: "Line Item",
   icon: "carbon:document",
   hideImportButtons: true,
@@ -488,11 +594,21 @@ const settingsConfigs = [
   rowClickable: false,
   columns: [
     { key: "orderName", label: "Order", type: "text", width: "120px", valueAccessor: (row) => row.P?.orderName },
-    { key: "orderCreatedAt", label: "Order Date", type: "date", width: "140px", valueAccessor: (row) => row.P?.orderCreatedAt },
-    { key: "productTitle", label: "Product Title", type: "text", width: "200px", valueAccessor: (row) => row.P?.productTitle },
+    { key: "orderCreatedAt", label: "Order date", type: "date", width: "140px", valueAccessor: (row) => row.P?.orderCreatedAt },
+    { key: "lineItemName", label: "Line name", type: "text", width: "160px", valueAccessor: (row) => row.P?.lineItemName },
+    { key: "productTitle", label: "Product", type: "text", width: "200px", valueAccessor: (row) => row.P?.productTitle },
+    { key: "productGraphId", label: "Product ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId },
     { key: "variantTitle", label: "Variant", type: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle },
-    { key: "sku", label: "SKU", type: "text", width: "120px", valueAccessor: (row) => row.P?.sku },
+    { key: "variantGraphId", label: "Variant ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId },
+    { key: "sku", label: "SKU", type: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
+    { key: "variantSku", label: "Var. SKU", type: "text", width: "100px", valueAccessor: (row) => row.P?.variantSku },
+    { key: "vendor", label: "Vendor", type: "text", width: "110px", valueAccessor: (row) => row.P?.vendor },
     { key: "quantity", label: "Qty", type: "number", width: "70px", valueAccessor: (row) => row.P?.quantity },
+    { key: "remainingQuantity", label: "Remaining", type: "number", width: "90px", valueAccessor: (row) => row.P?.remainingQuantity },
+    { key: "originalUnitAmount", label: "Orig. unit", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.originalUnitAmount; const c = row.P?.originalUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedUnitAmount", label: "Disc. unit", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.discountedUnitAmount; const c = row.P?.discountedUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "originalTotalAmount", label: "Orig. total", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.originalTotalAmount; const c = row.P?.originalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedTotalAmount", label: "Disc. total", type: "text", width: "100px", valueAccessor: (row) => { const a = row.P?.discountedTotalAmount; const c = row.P?.discountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
     { key: "properties", label: "Properties", type: "text", width: "200px", valueAccessor: (row) => row.P?.properties },
     { key: "fulfillmentStatus", label: "Status", type: "badge", width: "100px", valueAccessor: (row) => row.P?.fulfillmentStatus, badgeToneMap: { FULFILLED: ["Fulfilled", "success"], UNFULFILLED: ["Unfulfilled", "warning"], PARTIALLY_FULFILLED: ["Partial", "info"] } }
   ],
@@ -532,7 +648,6 @@ const settingsConfigs = [
       ]
     }
   },
-  groupBy: "orderName",
   hooks: {
     beforeFetchData: "shopifyOrderBeforeFetchData"
   }

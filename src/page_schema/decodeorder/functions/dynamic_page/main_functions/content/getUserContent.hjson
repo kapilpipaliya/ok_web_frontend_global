@@ -83,7 +83,18 @@ if (search && search.trim()) {
     toLower(COALESCE(c.title, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.subTitle, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.event, '')) CONTAINS $searchTerm OR
-    toLower(COALESCE(c.language, '')) CONTAINS $searchTerm
+    toLower(COALESCE(c.language, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.orderName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.productTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.lineItemName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.variantTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.sku, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.vendor, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.email, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.displayFinancialStatus, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.displayFulfillmentStatus, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.tags, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.note, '')) CONTAINS $searchTerm
   )`);
   queryParams.searchTerm = searchTerm;
 }

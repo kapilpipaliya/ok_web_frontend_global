@@ -333,7 +333,7 @@ const applyLocalFilters = () => {
       // Only check values for visible columns, not keys
       for (const col of columns) {
         // Skip special/row number columns
-        if (col.key === "__rowNumber" || col.type === "rowNumber" || col.type === "iconAction") {
+        if (col.type === "rowNumber" || col.type === "iconAction" || col.type === "expand") {
           continue;
         }
         const cellValue = getCellValue(row, col);
@@ -356,7 +356,7 @@ const applyLocalFilters = () => {
       const filterValue = columnFilters[col.key];
       if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
         // Skip rowNumber filter - it's calculated, not a property
-        if (col.key === "__rowNumber" || col.type === "rowNumber" || col.type === "iconAction") {
+        if (col.type === "rowNumber" || col.type === "iconAction" || col.type === "expand") {
           continue;
         }
         const cellValue = getCellValue(row, col);
@@ -455,6 +455,13 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   const config = args.fns.evaluateConfig?.() || {};
   const sidebarConfig = config?.sidebar;
   if (!sidebarConfig) return;
+
+  // Distinct sidebar counts: re-query server counts (DynamicPage) instead of using fetched row length.
+  if (sidebarConfig.countDistinctBy) {
+    const rec = args.fns.recalculateSidebarContentCounts;
+    if (typeof rec === "function") void rec();
+    return;
+  }
   
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
@@ -644,7 +651,7 @@ const renderCellContent = (row, column, rowIndex) => {
 // Handle sort
 const handleSort = (column) => {
   // Don't allow sorting for rowNumber columns
-  if (column.type === "rowNumber" || column.key === "__rowNumber" || column.type === "iconAction") return;
+  if (column.type === "rowNumber" || column.type === "iconAction") return;
   if (column.sortable === false) return;
 
   // If clicking the same column that's already sorted
@@ -2468,7 +2475,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
-  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.key !== "__rowNumber" && column.type !== "iconAction") ? "pointer" : "default"};
+  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.type !== "iconAction") ? "pointer" : "default"};
   user-select: none;
   position: relative;
 }`;
@@ -2480,7 +2487,7 @@ return `._id {
 const column = args.contextData.column;
 const sortConfig = args.fns.sortConfig;
 const shouldHide = args.fns.shouldHideColumn(column);
-const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+const isRowNumber = column.type === "rowNumber";
 
 return {
   as: "div",
@@ -2550,7 +2557,7 @@ const column = args.contextData.column;
 const sortConfig = args.fns.sortConfig;
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
-const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+const isRowNumber = column.type === "rowNumber";
 
 return {
   as: "icon",
@@ -2585,7 +2592,7 @@ const column = args.contextData.column;
 const columnFilters = args.fns.columnFilters;
 const filterValue = columnFilters[column.key];
 const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
-const isRowNumber = column.type === "rowNumber" || column.key === "__rowNumber";
+const isRowNumber = column.type === "rowNumber";
 
 return {
   as: "icon",
@@ -2646,8 +2653,8 @@ const shouldHide = args.fns.shouldHideColumn(column);
 
 // Determine column key for resize
 const getColumnKey = () => {
-  if (column.key === "__rowNumber" || column.type === "rowNumber") {
-    return "__rowNumber";
+  if (column.type === "rowNumber") {
+    return column.key;
   }
   return column.key;
 };
@@ -2821,7 +2828,7 @@ const getFilterValue = () => {
 const filterValue = getFilterValue();
 
 // Skip filter for rowNumber
-if (column.key === "__rowNumber" || column.type === "rowNumber") {
+if (column.type === "rowNumber") {
   return { as: "div", hide: true };
 }
 
@@ -2832,6 +2839,11 @@ if (column.key === "preview" || column.type === "imagePreview" || column.type ==
 
 // Skip filter for iconAction column
 if (column.type === "iconAction") {
+  return { as: "div", hide: true };
+}
+
+// Skip filter for expand column
+if (column.type === "expand") {
   return { as: "div", hide: true };
 }
 
@@ -3865,7 +3877,7 @@ return {
 const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  const headers = columns.filter(col => col.type !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 
@@ -3888,7 +3900,7 @@ return `._id {
 const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.map(col => col.key).filter(key => key !== "__rowNumber");
+  const headers = columns.filter(col => col.type !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 

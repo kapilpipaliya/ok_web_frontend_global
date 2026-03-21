@@ -188,6 +188,32 @@ const refreshQueuedRows = async (elementIds) => {
   return { success: true, data: [] };
 };
 
+// Ad-hoc fetch for another vertex label (e.g. nested line items). Skips sidebar/category scoping.
+const fetchUserContentRows = async (params = {}) => {
+  const { tableVertexLabel, search, filters, sort, hooks } = params;
+  if (!tableVertexLabel) return [];
+  const { config } = getCachedConfig();
+  const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+  try {
+    const result = await args.fns.executeYTOFunction("getUserContent", {
+      tableVertexLabel,
+      search,
+      filters,
+      sort,
+      enableUserScoping: enableUserScopingForContent,
+      hooks: hooks !== undefined ? hooks : config?.hooks
+    });
+    const errorMessage = extractError(result, false, null);
+    if (errorMessage) return [];
+    if (result?.result?.success && Array.isArray(result.result.data)) {
+      return result.result.data;
+    }
+  } catch (e) {
+    console.error("fetchUserContentRows:", e);
+  }
+  return [];
+};
+
 // Helper function to get sidebar config (needed by updateSidebarCategoryCount)
 // This is a simplified version that will be replaced by the full getSidebarConfig later
 const getSidebarConfigForCount = () => {
@@ -970,6 +996,7 @@ return {
   handleOpenSettings,
   handleSaveSettings,
   getGenericDataFunction,
+  fetchUserContentRows,
   refreshQueuedRows,
   getGenericSaveFunction,
   getGenericImportFunction,

@@ -20,7 +20,7 @@
         key: "",
         props:
           '''return {
-  tableVertexLabel: "ShopifyOrderLineItem",
+  tableVertexLabel: "ShopifyOrder",
   loadFromSetting: true,
   hide: !args.fns.isInIframe()
 };'''
