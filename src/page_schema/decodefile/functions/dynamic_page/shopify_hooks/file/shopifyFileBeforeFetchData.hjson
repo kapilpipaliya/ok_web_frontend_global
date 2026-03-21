@@ -79,7 +79,7 @@ const fileFields = `
     mimeType
     status
     image { url width height altText }
-    originalSource { url }
+    originalSource { imageSourceUrl: url }
     ${previewFragment}
     ${fileErrorsFragment}
   }
@@ -88,7 +88,7 @@ const fileFields = `
     filename
     duration
     status
-    originalSource { url }
+    originalSource { videoSourceUrl: url }
     sources { url }
     ${previewFragment}
     ${fileErrorsFragment}
@@ -106,7 +106,81 @@ const fileFields = `
     mediaContentType
     filename
     status
-    originalSource { url }
+    originalSource { model3dSourceUrl: url }
+    sources { url }
+    boundingBox { size { x y z } }
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+`;
+
+const nodeFields = `
+  __typename
+  ... on GenericFile {
+    id
+    alt
+    createdAt
+    updatedAt
+    fileStatus
+    originalFileSize
+    url
+    mimeType
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on MediaImage {
+    id
+    alt
+    createdAt
+    updatedAt
+    fileStatus
+    mediaContentType
+    mimeType
+    status
+    image { url width height altText }
+    originalSource { imageSourceUrl: url }
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on Video {
+    id
+    alt
+    createdAt
+    updatedAt
+    fileStatus
+    mediaContentType
+    filename
+    duration
+    status
+    originalSource { videoSourceUrl: url }
+    sources { url }
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on ExternalVideo {
+    id
+    alt
+    createdAt
+    updatedAt
+    fileStatus
+    mediaContentType
+    host
+    embedUrl
+    originUrl
+    status
+    ${previewFragment}
+    ${fileErrorsFragment}
+  }
+  ... on Model3d {
+    id
+    alt
+    createdAt
+    updatedAt
+    fileStatus
+    mediaContentType
+    filename
+    status
+    originalSource { model3dSourceUrl: url }
     sources { url }
     boundingBox { size { x y z } }
     ${previewFragment}
@@ -121,8 +195,8 @@ let cursor = null;
 if (isUncategorized) {
   while (hasNextPage) {
     const query = cursor
-      ? `query { files(first: 250, after: "${cursor}") { edges { cursor node { ${fileFields} } } pageInfo { hasNextPage } } }`
-      : `query { files(first: 250) { edges { cursor node { ${fileFields} } } pageInfo { hasNextPage } } }`;
+      ? `query { files(first: 250, after: "${cursor}") { edges { node { ${fileFields} } } pageInfo { hasNextPage endCursor } } }`
+      : `query { files(first: 250) { edges { node { ${fileFields} } } pageInfo { hasNextPage endCursor } } }`;
     try {
       const response = await admin.graphql(query);
       const apiResponse = response instanceof Response ? await response.json() : response;
@@ -137,9 +211,9 @@ if (isUncategorized) {
         if (node && node.id) {
           allShopifyFiles.push(node);
         }
-        if (edge.cursor) cursor = edge.cursor;
       }
       hasNextPage = pageInfo.hasNextPage === true;
+      if (pageInfo.endCursor) cursor = pageInfo.endCursor;
       await new Promise(r => setTimeout(r, 200));
     } catch (error) {
       console.error("shopifyFileBeforeFetchData: Error fetching files", error);
@@ -149,79 +223,6 @@ if (isUncategorized) {
 } else if (categoryFileIds.size > 0) {
   const idsArray = Array.from(categoryFileIds);
   const batchSize = 50;
-  const nodeFields = `
-    __typename
-    ... on GenericFile {
-      id
-      alt
-      createdAt
-      updatedAt
-      fileStatus
-      originalFileSize
-      url
-      mimeType
-      ${previewFragment}
-      ${fileErrorsFragment}
-    }
-    ... on MediaImage {
-      id
-      alt
-      createdAt
-      updatedAt
-      fileStatus
-      mediaContentType
-      mimeType
-      status
-      image { url width height altText }
-      originalSource { url }
-      ${previewFragment}
-      ${fileErrorsFragment}
-    }
-    ... on Video {
-      id
-      alt
-      createdAt
-      updatedAt
-      fileStatus
-      mediaContentType
-      filename
-      duration
-      status
-      originalSource { url }
-      sources { url }
-      ${previewFragment}
-      ${fileErrorsFragment}
-    }
-    ... on ExternalVideo {
-      id
-      alt
-      createdAt
-      updatedAt
-      fileStatus
-      mediaContentType
-      host
-      embedUrl
-      originUrl
-      status
-      ${previewFragment}
-      ${fileErrorsFragment}
-    }
-    ... on Model3d {
-      id
-      alt
-      createdAt
-      updatedAt
-      fileStatus
-      mediaContentType
-      filename
-      status
-      originalSource { url }
-      sources { url }
-      boundingBox { size { x y z } }
-      ${previewFragment}
-      ${fileErrorsFragment}
-    }
-  `;
   for (let i = 0; i < idsArray.length; i += batchSize) {
     const batch = idsArray.slice(i, i + batchSize);
     const idsStr = batch.map(id => `"${id}"`).join(", ");
@@ -278,6 +279,19 @@ if (toDelete.length > 0) {
   );
 }
 
+const nameFromUrl = (url) => {
+  if (!url || typeof url !== 'string') return null;
+  try {
+    const path = new URL(url).pathname;
+    const seg = path.split('/').filter(Boolean).pop();
+    return seg && seg.length > 0 ? seg : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+const nonEmpty = (v) => (v != null && String(v).trim() !== '' ? String(v).trim() : null);
+
 const toUpdate = [];
 const toCreate = [];
 for (const node of allShopifyFiles) {
@@ -285,6 +299,25 @@ for (const node of allShopifyFiles) {
   const fileType = node.__typename || (id && id.startsWith('gid://') ? id.split('/')[2] : null) || 'GenericFile';
   const preview = node.preview || (node.image ? { image: { url: node.image?.url } } : null);
   const size = node.originalFileSize ?? node.originalUploadSize ?? 0;
+  const orig = node.originalSource || {};
+  const originalSourceUrl = orig.imageSourceUrl ?? orig.videoSourceUrl ?? orig.model3dSourceUrl ?? orig.url ?? node.url ?? null;
+  const img = (preview?.image || node.image) || {};
+  const imageUrl = img.url ?? null;
+  const imageWidth = img.width != null ? img.width : null;
+  const imageHeight = img.height != null ? img.height : null;
+  const imageAltText = img.altText ?? null;
+  const sources = node.sources;
+  const sourcesJson = Array.isArray(sources) ? JSON.stringify(sources.map(s => (typeof s === 'string' ? s : s?.url))) : null;
+  const fileErrors = node.fileErrors;
+  const fileErrorsJson = Array.isArray(fileErrors) && fileErrors.length > 0 ? JSON.stringify(fileErrors) : null;
+  const bbox = node.boundingBox;
+  const boundingBoxJson = bbox && typeof bbox === 'object' ? JSON.stringify(bbox) : null;
+  const filenameDisplay = nonEmpty(node.filename) ?? nameFromUrl(node.url) ?? nameFromUrl(originalSourceUrl) ?? nonEmpty(node.alt) ?? nameFromUrl(node.originUrl) ?? (id ? id.split('/').pop() : null) ?? null;
+  const keysAlreadyInProps = ['id', '__typename', 'alt', 'createdAt', 'updatedAt', 'fileStatus', 'originalFileSize', 'preview', 'mediaContentType', 'image', 'originalSource', 'sources', 'fileErrors', 'boundingBox', 'embedUrl', 'originUrl', 'host', 'filename', 'duration', 'status', 'url', 'mimeType'];
+  const fileDataObj = {};
+  for (const k of Object.keys(node)) {
+    if (!keysAlreadyInProps.includes(k)) fileDataObj[k] = node[k];
+  }
   const props = {
     id,
     fileType,
@@ -296,7 +329,23 @@ for (const node of allShopifyFiles) {
     preview: preview ? JSON.stringify(preview) : null,
     mediaContentType: node.mediaContentType || null,
     syncStatus: 'complete',
-    fileData: JSON.stringify(node)
+    originalSourceUrl: originalSourceUrl != null ? String(originalSourceUrl) : null,
+    imageUrl,
+    imageWidth,
+    imageHeight,
+    imageAltText,
+    sourcesJson,
+    fileErrorsJson,
+    boundingBoxJson,
+    embedUrl: node.embedUrl ?? null,
+    originUrl: node.originUrl ?? null,
+    host: node.host ?? null,
+    filename: filenameDisplay,
+    duration: node.duration != null ? (typeof node.duration === 'number' ? node.duration : parseInt(node.duration, 10)) : null,
+    status: node.status ?? null,
+    url: node.url ?? null,
+    mimeType: node.mimeType ?? null,
+    fileData: Object.keys(fileDataObj).length > 0 ? JSON.stringify(fileDataObj) : null
   };
   const existingDbId = existingFiles.get(id);
   if (existingDbId) toUpdate.push({ elementId: existingDbId, props });

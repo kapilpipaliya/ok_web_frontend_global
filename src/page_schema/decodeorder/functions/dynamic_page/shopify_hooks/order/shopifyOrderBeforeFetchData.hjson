@@ -4,11 +4,191 @@
       id: "1"
       L: Function
       P: {
-        description: Runs before fetching order line items. Ensures shop is present; no Neo4j sync for orders.
+        description: Syncs Shopify orders/line items before fetching order line-item data.
         body:
-          '''const { tableVertexLabel, shop } = args.contextData;
+          '''const { tableVertexLabel, filters = {}, sort = {}, shop: contextShop } = args.contextData;
 if (tableVertexLabel !== 'ShopifyOrderLineItem') return;
-if (!shop) console.warn('shopifyOrderBeforeFetchData: shop not in contextData');'''
+
+const shop = contextShop || args.shop;
+if (!shop) {
+  console.warn("shopifyOrderBeforeFetchData: shop is required");
+  return;
+}
+
+// Derive fulfillment status from FulfillmentOrderLineItem.remainingQuantity.
+const fulfillmentStatusFromRemaining = (remainingQuantity, quantity) => {
+  const remaining = Number(remainingQuantity) || 0;
+  const qty = Number(quantity) || 0;
+  if (remaining <= 0) return "FULFILLED";
+  if (qty > 0 && remaining < qty) return "PARTIALLY_FULFILLED";
+  return "UNFULFILLED";
+};
+
+// Build map lineItemId -> total remainingQuantity from order.fulfillmentOrders[].lineItems[].
+const getRemainingByLineItemId = (order) => {
+  const map = {};
+  const fos = order.fulfillmentOrders?.edges || [];
+  for (const foEdge of fos) {
+    const items = foEdge.node?.lineItems?.edges || [];
+    for (const edge of items) {
+      const node = edge.node;
+      const id = node?.lineItem?.id;
+      if (id) map[id] = (map[id] || 0) + (node.remainingQuantity ?? 0);
+    }
+  }
+  return map;
+};
+
+console.log("[shopifyOrderBeforeFetchData] contextData:", { shop, filters, sort });
+
+const shopify = await args.getShopifyClient();
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (e) {
+  console.log("[shopifyOrderBeforeFetchData] Shopify admin auth failed:", e?.message || e);
+  return;
+}
+if (!admin) {
+  console.log("[shopifyOrderBeforeFetchData] no admin client for shop:", shop);
+  return;
+}
+
+const statusFilter = filters.status || "ALL";
+let queryString = "";
+if (statusFilter === "UNFULFILLED") queryString = "fulfillment_status:unfulfilled";
+else if (statusFilter === "OPEN") queryString = "status:open";
+const dateFrom = filters.dateFrom || null;
+const dateTo = filters.dateTo || null;
+if (dateFrom) queryString = queryString ? queryString + " AND created_at:>=" + dateFrom : "created_at:>=" + dateFrom;
+if (dateTo) queryString = queryString ? queryString + " AND created_at:<=" + dateTo : "created_at:<=" + dateTo;
+console.log("[shopifyOrderBeforeFetchData] queryString:", queryString || "(none)");
+
+const ordersQuery = `
+  query getOrders($first: Int!, $query: String, $sortKey: OrderSortKeys, $reverse: Boolean) {
+    orders(first: $first, query: $query, sortKey: $sortKey, reverse: $reverse) {
+      edges {
+        node {
+          id
+          name
+          createdAt
+          updatedAt
+          lineItems(first: 50) {
+            edges {
+              node {
+                id
+                title
+                quantity
+                sku
+                variant {
+                  title
+                }
+                customAttributes {
+                  key
+                  value
+                }
+              }
+            }
+          }
+          fulfillmentOrders(first: 10) {
+            edges {
+              node {
+                lineItems(first: 100) {
+                  edges {
+                    node {
+                      remainingQuantity
+                      lineItem {
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`.trim();
+const sortKey = sort.column === "orderName" ? "ORDER_NUMBER" : "CREATED_AT";
+const reverse = sort.direction === "desc";
+
+let allOrders = [];
+let cursor = null;
+let hasNextPage = true;
+while (hasNextPage) {
+  const variables = { first: 50, query: queryString || null, sortKey, reverse };
+  if (cursor) variables.after = cursor;
+  if (!cursor) {
+    console.log("[shopifyOrderBeforeFetchData] query (copy for manual test):\n", ordersQuery);
+    console.log("[shopifyOrderBeforeFetchData] variables:", JSON.stringify(variables, null, 2));
+  }
+  const response = await admin.graphql(ordersQuery, { variables });
+  const apiResponse = response instanceof Response ? await response.json() : response;
+  if (!cursor) {
+    console.log("[shopifyOrderBeforeFetchData] first page response:", {
+      errors: apiResponse.errors,
+      edgesCount: apiResponse.data?.orders?.edges?.length ?? 0,
+      hasNextPage: apiResponse.data?.orders?.pageInfo?.hasNextPage
+    });
+  }
+  if (apiResponse.errors && apiResponse.errors.length > 0) {
+    console.error("[shopifyOrderBeforeFetchData] GraphQL error:", apiResponse.errors[0].message || "unknown");
+    return;
+  }
+  const edges = apiResponse.data?.orders?.edges || [];
+  allOrders = allOrders.concat(edges.map((e) => e.node));
+  hasNextPage = apiResponse.data?.orders?.pageInfo?.hasNextPage === true;
+  cursor = apiResponse.data?.orders?.pageInfo?.endCursor || null;
+  if (!cursor) break;
+  await new Promise((r) => setTimeout(r, 200));
+}
+console.log("[shopifyOrderBeforeFetchData] fetched orders:", allOrders.length, "total from API");
+
+const session = args.session;
+for (const order of allOrders) {
+  const orderId = order.id || "";
+  const orderName = order.name || "";
+  const orderCreatedAt = order.createdAt || "";
+  const orderUpdatedAt = order.updatedAt || orderCreatedAt;
+  const remainingByLineId = getRemainingByLineItemId(order);
+  await session.run(
+    "MERGE (o:ShopifyOrder { id: $id }) SET o.name = $name, o.createdAt = $createdAt, o.updatedAt = $updatedAt",
+    { id: orderId, name: orderName, createdAt: orderCreatedAt, updatedAt: orderUpdatedAt }
+  );
+  const nodes = order.lineItems?.edges?.map((e) => e.node) || [];
+  for (let idx = 0; idx < nodes.length; idx++) {
+    const node = nodes[idx];
+    const lineItemId = node.id || orderId + "-" + idx;
+    const attrs = node.customAttributes || [];
+    const propertiesText = attrs.map((a) => (a.key || "") + ": " + (a.value || "")).filter(Boolean).join(" | ");
+    const variantTitle = node.variant && node.variant.title ? node.variant.title : "";
+    const remaining = remainingByLineId[node.id] ?? node.quantity ?? 0;
+    const fulfillmentStatus = fulfillmentStatusFromRemaining(remaining, node.quantity);
+    await session.run(
+      "MERGE (o:ShopifyOrder { id: $orderId }) MERGE (li:ShopifyOrderLineItem { id: $lineItemId }) SET li.orderId = $orderId, li.orderName = $orderName, li.orderCreatedAt = $orderCreatedAt, li.productTitle = $productTitle, li.variantTitle = $variantTitle, li.sku = $sku, li.quantity = $quantity, li.properties = $properties, li.fulfillmentStatus = $fulfillmentStatus MERGE (o)-[:HAS_LINE_ITEM]->(li)",
+      {
+        orderId,
+        lineItemId,
+        orderName,
+        orderCreatedAt,
+        productTitle: node.title || "",
+        variantTitle,
+        sku: node.sku || "",
+        quantity: node.quantity ?? 0,
+        properties: propertiesText,
+        fulfillmentStatus
+      }
+    );
+  }
+}
+'''
         key: shopifyOrderBeforeFetchData
       }
     }

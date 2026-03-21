@@ -168,6 +168,89 @@ const [isImportModalOpen, setIsImportModalOpen] = args.createSignal(false);
 const [importData, setImportData] = args.createSignal("");
 const [columnWidths, setColumnWidths] = args.createStore({});
 const [isResizing, setIsResizing] = args.createSignal(false);
+let iconActionResetTimer = null;
+const [iconActionActiveKey, setIconActionActiveKey] = args.createSignal(null);
+const getIconActionRowKey = (row, rowIndex) => {
+  if (!row && rowIndex == null) return null;
+  const id = row?.id ?? row?.P?.id;
+  if (id != null) return String(id);
+  if (rowIndex != null && rowIndex >= 0) return "idx-" + rowIndex;
+  return null;
+};
+const writeTextToClipboard = async (text) => {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    await navigator.clipboard.writeText(text);
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
+};
+const scheduleIconActionReset = (ms) => {
+  if (iconActionResetTimer) clearTimeout(iconActionResetTimer);
+  if (ms == null || ms <= 0) return;
+  iconActionResetTimer = setTimeout(() => {
+    setIconActionActiveKey(null);
+    iconActionResetTimer = null;
+  }, ms);
+};
+const handleIconAction = async (column, row, rowIndex) => {
+  const cfg = column.iconAction || {};
+  const action = cfg.action || "clipboard";
+  const rowKey = getIconActionRowKey(row, rowIndex);
+  const stateKey = column.key + ":" + (rowKey != null ? rowKey : "idx-" + rowIndex);
+  const getPayloadText = () => {
+    if (typeof cfg.textAccessor === "function") return cfg.textAccessor(row);
+    return getCellValue(row, column);
+  };
+  try {
+    if (action === "clipboard") {
+      const text = getPayloadText();
+      if ((text === null || text === undefined || text === "") && !cfg.allowEmpty) return;
+      await writeTextToClipboard(String(text));
+      if (cfg.showFeedback !== false) {
+        setIconActionActiveKey(stateKey);
+        scheduleIconActionReset(cfg.activeDurationMs ?? 3000);
+      }
+      return;
+    }
+    if (action === "openUrl") {
+      const url = getPayloadText();
+      if (!url) return;
+      const w = typeof window !== "undefined" ? window : null;
+      if (w) w.open(String(url), cfg.openUrlTarget || "_blank", cfg.openUrlWindowFeatures || "noopener,noreferrer");
+      if (cfg.activeDurationMs) {
+        setIconActionActiveKey(stateKey);
+        scheduleIconActionReset(cfg.activeDurationMs);
+      }
+      return;
+    }
+    if (action === "custom" && typeof cfg.onClick === "function") {
+      await cfg.onClick(row, column, rowIndex, {
+        getPayloadText,
+        copyToClipboard: writeTextToClipboard,
+        setFeedbackActive: () => {
+          setIconActionActiveKey(stateKey);
+          scheduleIconActionReset(cfg.activeDurationMs ?? 3000);
+        },
+        clearFeedback: () => {
+          if (iconActionResetTimer) clearTimeout(iconActionResetTimer);
+          iconActionResetTimer = null;
+          setIconActionActiveKey(null);
+        }
+      });
+      return;
+    }
+  } catch (e) {
+    console.warn("iconAction failed", e);
+  }
+};
 const pollRef = { id: null };
 const rowRefs = {};
 const setRowRef = (index, el) => {
@@ -250,7 +333,7 @@ const applyLocalFilters = () => {
       // Only check values for visible columns, not keys
       for (const col of columns) {
         // Skip special/row number columns
-        if (col.key === "__rowNumber" || col.type === "rowNumber") {
+        if (col.key === "__rowNumber" || col.type === "rowNumber" || col.type === "iconAction") {
           continue;
         }
         const cellValue = getCellValue(row, col);
@@ -273,7 +356,7 @@ const applyLocalFilters = () => {
       const filterValue = columnFilters[col.key];
       if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
         // Skip rowNumber filter - it's calculated, not a property
-        if (col.key === "__rowNumber" || col.type === "rowNumber") {
+        if (col.key === "__rowNumber" || col.type === "rowNumber" || col.type === "iconAction") {
           continue;
         }
         const cellValue = getCellValue(row, col);
@@ -490,6 +573,19 @@ const renderCellContent = (row, column, rowIndex) => {
     return { type: "downloadLink", url, icon };
   }
 
+  if (column.type === "iconAction") {
+    const cfg = column.iconAction || {};
+    const action = cfg.action || "clipboard";
+    const payload = typeof cfg.textAccessor === "function" ? cfg.textAccessor(row) : (value ?? getCellValue(row, column));
+    if ((action === "clipboard" || action === "openUrl") && (payload === null || payload === undefined || payload === "") && !cfg.allowEmpty) {
+      return "";
+    }
+    if (action === "custom" && typeof cfg.onClick !== "function") {
+      return "";
+    }
+    return { type: "iconAction", actionColumn: column };
+  }
+
   if (column.type === "duration") {
     if (!value) return "";
     const seconds = typeof value === "number" ? value : parseInt(value);
@@ -548,7 +644,7 @@ const renderCellContent = (row, column, rowIndex) => {
 // Handle sort
 const handleSort = (column) => {
   // Don't allow sorting for rowNumber columns
-  if (column.type === "rowNumber" || column.key === "__rowNumber") return;
+  if (column.type === "rowNumber" || column.key === "__rowNumber" || column.type === "iconAction") return;
   if (column.sortable === false) return;
 
   // If clicking the same column that's already sorted
@@ -1132,6 +1228,13 @@ const createResizeHandler = (columnKey) => {
       document.removeEventListener('touchmove', handleMouseMove);
       document.removeEventListener('touchend', handleMouseUp);
       setIsResizing(false);
+      // Prevent the click from this gesture from bubbling and triggering column sort
+      const preventResizeClick = (clickEvent) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        document.removeEventListener('click', preventResizeClick, true);
+      };
+      document.addEventListener('click', preventResizeClick, true);
     };
 
     setIsResizing(true);
@@ -1422,7 +1525,10 @@ return {
   getDisplayData,
   getGroupByConfig,
   toggleExpanded,
-  setCollapsedKeys
+  setCollapsedKeys,
+  iconActionActiveKey,
+  handleIconAction,
+  getIconActionRowKey
 };
 '''
         key: Table
@@ -1448,7 +1554,7 @@ return {
 return `._id {
   display: flex;
   flex-direction: column;
-  height: calc(100vh);
+  height: calc(100vh - 48px);
 }`;
 '''
         displayOrder: 1
@@ -2362,7 +2468,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
-  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.key !== "__rowNumber") ? "pointer" : "default"};
+  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.key !== "__rowNumber" && column.type !== "iconAction") ? "pointer" : "default"};
   user-select: none;
   position: relative;
 }`;
@@ -2412,8 +2518,8 @@ const isSorted = sortConfig.column === column.key;
 
 return {
   as: "div",
-  text: column.label || column.key,
-  hide: column.type === "rowNumber"
+  text: column.type === "iconAction" ? "" : (column.label || column.key),
+  hide: column.type === "rowNumber" || column.type === "iconAction"
 };
 '''
       }
@@ -2451,7 +2557,7 @@ return {
   icon: direction === "asc" ? "carbon:chevron-up" : "carbon:chevron-down",
   width: 16,
   height: 16,
-  hide: !isSorted || column.sortable === false || isRowNumber
+  hide: !isSorted || column.sortable === false || isRowNumber || column.type === "iconAction"
 };
 '''
       }
@@ -2486,7 +2592,7 @@ return {
   icon: "carbon:filter",
   width: 14,
   height: 14,
-  hide: !hasFilter || isRowNumber,
+  hide: !hasFilter || isRowNumber || column.type === "iconAction",
   title: "Filter applied"
 };
 '''
@@ -2721,6 +2827,11 @@ if (column.key === "__rowNumber" || column.type === "rowNumber") {
 
 // Skip filter for preview / image columns
 if (column.key === "preview" || column.type === "imagePreview" || column.type === "image") {
+  return { as: "div", hide: true };
+}
+
+// Skip filter for iconAction column
+if (column.type === "iconAction") {
   return { as: "div", hide: true };
 }
 
@@ -3451,6 +3562,52 @@ if (typeof cellContent === "object" && cellContent !== null) {
       style: "color: " + args.theme.var.color.primary + "; text-decoration: none; display: flex; align-items: center; gap: 4px;"
     };
   }
+  if (cellContent.type === "iconAction") {
+    const col = cellContent.actionColumn;
+    const cfg = col.iconAction || {};
+    const rowKey = args.fns.getIconActionRowKey(rowData, rowIndex);
+    const stateKey = col.key + ":" + (rowKey != null ? rowKey : "idx-" + rowIndex);
+    const isActive = args.fns.iconActionActiveKey() === stateKey;
+    const isCarbonStr = (s) => typeof s === "string" && s.trim().length > 0 && !/\s/.test(s) && s.includes(":");
+    const iconIdle = cfg.icon;
+    const iconBusy = cfg.activeIcon;
+    const useIconButton = isCarbonStr(iconIdle) || isCarbonStr(iconBusy);
+    const title = isActive ? (cfg.activeTitle ?? "") : (cfg.title ?? "");
+    const ariaLabel = title || col.label || col.key || "Action";
+    const onAct = (e) => {
+      e.stopPropagation();
+      args.fns.handleIconAction(col, rowData, rowIndex);
+    };
+    if (useIconButton) {
+      const iconName = isActive && isCarbonStr(iconBusy) ? iconBusy : (isCarbonStr(iconIdle) ? iconIdle : "carbon:link");
+      return {
+        componentName: "IconButton",
+        icon: iconName,
+        variant: cfg.variant ?? "ghost",
+        size: cfg.size ?? "sm",
+        title: title || ariaLabel,
+        ariaLabel: ariaLabel,
+        onClick: onAct
+      };
+    }
+    const t = args.theme.var.color;
+    const br = args.theme.var.borderRadius.md;
+    const border = t.border_light_400;
+    const bg = isActive ? (cfg.activeButtonBg || t.success_light_200) : (cfg.buttonBg || t.background);
+    const fg = isActive ? (cfg.activeButtonFg || t.success_dark_300) : (cfg.buttonFg || t.primary);
+    const style = typeof cfg.htmlButtonStyle === "string" ? cfg.htmlButtonStyle : ("min-width: 32px; height: 32px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid " + border + "; border-radius: " + br + "; background: " + bg + "; color: " + fg + "; cursor: pointer; flex-shrink: 0; font-size: 1rem; line-height: 1;");
+    const fallbackText = isActive ? (cfg.activeIconText ?? cfg.iconText ?? "✓") : (cfg.iconText ?? "·");
+    return {
+      componentName: "Html",
+      as: "button",
+      type: "button",
+      title: title || ariaLabel,
+      "attr:aria-label": ariaLabel,
+      text: fallbackText,
+      style,
+      onClick: onAct
+    };
+  }
   if (cellContent.type === "actions") {
     const showEditButton = args.fns.getShowEditButton();
     const formConfig = args.fns.getFormConfig();
@@ -3509,11 +3666,16 @@ if (column.type === "actions" && args.fns.getShowEditButton() && args.fns.getFor
 
 // Default text rendering
 const cellTitle = column.titleAccessor ? column.titleAccessor(rowData) : undefined;
-return {
+const textStr = typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : "";
+const out = {
   as: "div",
-  text: typeof cellContent === "string" || typeof cellContent === "number" ? String(cellContent) : "",
+  text: textStr,
   title: cellTitle
 };
+if (column.overflowEllipsis) {
+  out.style = "min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+}
+return out;
 '''
       }
     }

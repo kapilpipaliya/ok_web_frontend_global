@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
- * Copies every file from src/page_schema/decodeproduct to src/page_schema/decodeorder
- * with the same folder structure.
+ * Copies every file from src/page_schema/decodeproduct to multiple destination
+ * directories (decodeorder, decodefile, etc.) with the same folder structure.
  * Skips:
  *   - Directories listed in SKIP_DIRS (and everything inside them)
  *   - Individual files listed in SKIP_FILES (paths relative to decodeproduct)
@@ -14,7 +14,9 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const SOURCE = path.join(ROOT, "src/page_schema/decodeproduct");
-const DEST = path.join(ROOT, "src/page_schema/decodefile");
+
+/** Destination directory names under src/page_schema (each gets a full copy). */
+const DEST_NAMES = ["decodeorder", "decodefile"];
 
 const SKIP_DIRS = [
   "functions/dynamic_page/shopify_hooks/category",
@@ -33,6 +35,7 @@ const SKIP_DIRS = [
 const SKIP_FILES = [
   "functions/dynamic_page/shopify_jobs/product/processShopifyProductAfterUpdate.hjson",
   "components/shopify/ShopifyLayout.hjson",
+  "components/shopify/ShopifyAuth.hjson",
   "components/shopify/ShopifyNavigation.hjson",
   "functions/dynamic_page/shopify_hooks/product/shopifyProductAfterCreateRelationship.hjson",
   "functions/dynamic_page/shopify_hooks/product/shopifyProductAfterMoveItemsToCategory.hjson",
@@ -73,27 +76,41 @@ function main() {
     process.exit(1);
   }
 
-  let copied = 0;
-  let skipped = 0;
+  const destRoots = DEST_NAMES.map((name) =>
+    path.join(ROOT, "src/page_schema", name)
+  );
 
-  for (const relativePath of walkDir(SOURCE)) {
+  let totalCopied = 0;
+  let skipped = 0;
+  const relativePaths = [...walkDir(SOURCE)];
+
+  for (const relativePath of relativePaths) {
     if (shouldSkip(relativePath)) {
       skipped++;
       console.log("Skip:", relativePath);
       continue;
     }
     const srcFile = path.join(SOURCE, relativePath);
-    const destFile = path.join(DEST, relativePath);
-    const destDir = path.dirname(destFile);
-    if (!fs.existsSync(destDir)) {
-      fs.mkdirSync(destDir, { recursive: true });
+    for (const destRoot of destRoots) {
+      const destFile = path.join(destRoot, relativePath);
+      const destDir = path.dirname(destFile);
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      fs.copyFileSync(srcFile, destFile);
+      totalCopied++;
+      console.log("Copy:", relativePath, "->", path.relative(ROOT, destRoot));
     }
-    fs.copyFileSync(srcFile, destFile);
-    copied++;
-    console.log("Copy:", relativePath);
   }
 
-  console.log("\nDone. Copied:", copied, "Skipped:", skipped);
+  console.log(
+    "\nDone. Total copies:",
+    totalCopied,
+    "Files skipped:",
+    skipped,
+    "Destinations:",
+    DEST_NAMES.join(", ")
+  );
 }
 
 main();

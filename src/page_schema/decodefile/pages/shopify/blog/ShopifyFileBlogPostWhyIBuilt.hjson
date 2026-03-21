@@ -1,0 +1,2318 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Why I Built Decode Files Organizer — And How It Saves You Hours Inside Shopify
+        url: /blogs/why-i-built-decode-files-organizer
+        key: ShopifyFileBlogPostWhyIBuilt
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.5rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Why I Built Decode Files Organizer — And How It Saves You Hours Inside Shopify"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Managing files inside Shopify should be simple."
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "But as your file library grows, reality looks different:"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Categories become messy"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Finding files gets harder"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Files end up in the wrong categories"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Updating structure takes hours"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Bulk editing becomes frustrating"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "That's exactly why I built Decode Files Organizer."
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 2rem;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This app was created to solve a very specific operational problem: organizing files efficiently using a clean, structured system — without wasting time."
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css: return `._id { margin-top: 2rem; }`;
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "The Problem: File Management Becomes Complex at Scale"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When a store has:"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "100+ files"
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Multiple categories"
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Seasonal categories"
+}'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Many file categories"
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Managing everything manually inside the default admin becomes inefficient."
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Common pain points:"
+}'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "No clear hierarchical file structure"
+}'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "No way in Shopify to tag or group files"
+}'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Losing track of which file is where"
+}'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Time lost switching between screens"
+}'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Risk of human error when reorganizing categories"
+}'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "If you restructure your store even once, you understand how time-consuming it can be."
+}'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css: return `._id { margin-top: 2rem; }`;
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Why I Built This Extension"
+}'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "I wanted:"
+}'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "ol"
+}'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "A single table view of all files"
+}'''
+      }
+    }
+    {
+      id: "36"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "The ability to group files into structured categories"
+}'''
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Categories saved in the app so your structure is always there when you need it"
+}'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "A single place to organize files (Shopify doesn't support file tags, so we store categories in the app)"
+}'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "A faster way to reorganize files as the business evolves"
+}'''
+      }
+    }
+    {
+      id: "40"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Instead of hunting for files in Shopify admin, I wanted one place to organize them — stored in the app."
+}'''
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "So I built it."
+}'''
+      }
+    }
+    {
+      id: "42"
+      L: Attr
+      P: {
+        css: return `._id { margin-top: 2rem; }`;
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "43"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "How Decode Files Organizer Saves You Time"
+}'''
+      }
+    }
+    {
+      id: "44"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "1. Centralized File Management"
+}'''
+      }
+    }
+    {
+      id: "45"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "You can:"
+}'''
+      }
+    }
+    {
+      id: "46"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "47"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "View files in one structured table"
+}'''
+      }
+    }
+    {
+      id: "48"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Search and filter instantly"
+}'''
+      }
+    }
+    {
+      id: "49"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Move files between categories quickly"
+}'''
+      }
+    }
+    {
+      id: "50"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "No more jumping between multiple admin screens."
+}'''
+      }
+    }
+    {
+      id: "51"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "2. Categories Stored in the App"
+}'''
+      }
+    }
+    {
+      id: "52"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Shopify doesn't let you tag files. So we store your file categories in the app — when you move a file to a category, that's saved in our system. Open the app anytime and your organization is there."
+}'''
+      }
+    }
+    {
+      id: "53"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "54"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "No Shopify tags or menus to update"
+}'''
+      }
+    }
+    {
+      id: "55"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Your structure lives in the app"
+}'''
+      }
+    }
+    {
+      id: "56"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Same organization every time you open it"
+}'''
+      }
+    }
+    {
+      id: "57"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "No manual cleanup — we just store which category each file is in"
+}'''
+      }
+    }
+    {
+      id: "58"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "One place to organize, no Shopify-side changes needed."
+}'''
+      }
+    }
+    {
+      id: "59"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "3. True Nested Category Structure"
+}'''
+      }
+    }
+    {
+      id: "60"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Instead of a flat file list, you can build:"
+}'''
+      }
+    }
+    {
+      id: "61"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 12
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "62"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Parent categories"
+}'''
+      }
+    }
+    {
+      id: "63"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Subcategories"
+}'''
+      }
+    }
+    {
+      id: "64"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Nested category trees"
+}'''
+      }
+    }
+    {
+      id: "65"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 13
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Your file structure in the app becomes logical and scalable."
+}'''
+      }
+    }
+    {
+      id: "66"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 14
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This is especially useful for:"
+}'''
+      }
+    }
+    {
+      id: "67"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 15
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "68"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Fashion stores"
+}'''
+      }
+    }
+    {
+      id: "69"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Electronics stores"
+}'''
+      }
+    }
+    {
+      id: "70"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Large inventory shops"
+}'''
+      }
+    }
+    {
+      id: "71"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "B2B catalogs"
+}'''
+      }
+    }
+    {
+      id: "72"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 16
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "4. Faster Store Restructuring"
+}'''
+      }
+    }
+    {
+      id: "73"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 17
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Business changes. Seasons change. Inventory changes."
+}'''
+      }
+    }
+    {
+      id: "74"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 18
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "With this system, restructuring your file library takes minutes — not hours."
+}'''
+      }
+    }
+    {
+      id: "75"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 19
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "You can reorganize entire sections without losing your structure — it all lives in the app."
+}'''
+      }
+    }
+    {
+      id: "76"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 1rem 0 0.5rem 0;
+}`;'''
+        displayOrder: 20
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "5. Reduced Human Error"
+}'''
+      }
+    }
+    {
+      id: "77"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 21
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Manual category management often causes:"
+}'''
+      }
+    }
+    {
+      id: "78"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 22
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "79"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Files in the wrong category"
+}'''
+      }
+    }
+    {
+      id: "80"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Incorrect file placements"
+}'''
+      }
+    }
+    {
+      id: "81"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Orphaned categories"
+}'''
+      }
+    }
+    {
+      id: "82"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Lost or inconsistent category structure"
+}'''
+      }
+    }
+    {
+      id: "83"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}`;'''
+        displayOrder: 23
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Keeping categories in the app ensures consistency whenever you open it."
+}'''
+      }
+    }
+    {
+      id: "84"
+      L: Attr
+      P: {
+        css: return `._id { margin-top: 2rem; }`;
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "85"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Who Is This App Built For?"
+}'''
+      }
+    }
+    {
+      id: "86"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "87"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Store owners with growing file libraries"
+}'''
+      }
+    }
+    {
+      id: "88"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Merchandising managers"
+}'''
+      }
+    }
+    {
+      id: "89"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Shopify agencies"
+}'''
+      }
+    }
+    {
+      id: "90"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Businesses managing 100+ files"
+}'''
+      }
+    }
+    {
+      id: "91"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.25rem 0; }`;
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Anyone who wants clean file organization"
+}'''
+      }
+    }
+    {
+      id: "92"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "If you care about structured organization and operational efficiency, this app was built for you."
+}'''
+      }
+    }
+    {
+      id: "93"
+      L: Attr
+      P: {
+        css: return `._id { margin-top: 2rem; }`;
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "94"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "The Core Philosophy Behind the App"
+}'''
+      }
+    }
+    {
+      id: "95"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Ecommerce growth creates complexity. Complexity requires structure. Structure requires automation."
+}'''
+      }
+    }
+    {
+      id: "96"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Decode Files Organizer was built to bring: Clarity, Control, Speed, and Scalability back into file management."
+}'''
+      }
+    }
+    {
+      id: "97"
+      L: Attr
+      P: {
+        css: return `._id { margin-top: 2rem; }`;
+        displayOrder: 12
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "98"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Final Thoughts"
+}'''
+      }
+    }
+    {
+      id: "99"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "I didn't build this app to add features. I built it to remove friction."
+}'''
+      }
+    }
+    {
+      id: "100"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "If you've ever spent hours reorganizing files or fixing category mistakes, you already know the value of a better system."
+}'''
+      }
+    }
+    {
+      id: "101"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "This extension exists to save you time — every single week. And over a year, those saved hours compound into real operational advantage."
+}'''
+      }
+    }
+    {
+      id: "102"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "102"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "31"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "42"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
+      E: "84"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "2"
+      E: "93"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "2"
+      E: "97"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "6"
+      E: "11"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "14"
+      E: "17"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "14"
+      E: "22"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "14"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "14"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "14"
+      E: "30"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e29
+      T: Attr
+      S: "17"
+      E: "20"
+    }
+    {
+      id: e30
+      T: Attr
+      S: "17"
+      E: "21"
+    }
+    {
+      id: e31
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+    {
+      id: e32
+      T: Attr
+      S: "24"
+      E: "26"
+    }
+    {
+      id: e33
+      T: Attr
+      S: "24"
+      E: "27"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "24"
+      E: "28"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "24"
+      E: "29"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "31"
+      E: "32"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "31"
+      E: "33"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "31"
+      E: "34"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "31"
+      E: "40"
+    }
+    {
+      id: e40
+      T: Attr
+      S: "31"
+      E: "41"
+    }
+    {
+      id: e41
+      T: Attr
+      S: "34"
+      E: "35"
+    }
+    {
+      id: e42
+      T: Attr
+      S: "34"
+      E: "36"
+    }
+    {
+      id: e43
+      T: Attr
+      S: "34"
+      E: "37"
+    }
+    {
+      id: e44
+      T: Attr
+      S: "34"
+      E: "38"
+    }
+    {
+      id: e45
+      T: Attr
+      S: "34"
+      E: "39"
+    }
+    {
+      id: e46
+      T: Attr
+      S: "42"
+      E: "43"
+    }
+    {
+      id: e47
+      T: Attr
+      S: "42"
+      E: "44"
+    }
+    {
+      id: e48
+      T: Attr
+      S: "42"
+      E: "45"
+    }
+    {
+      id: e49
+      T: Attr
+      S: "42"
+      E: "46"
+    }
+    {
+      id: e50
+      T: Attr
+      S: "42"
+      E: "50"
+    }
+    {
+      id: e51
+      T: Attr
+      S: "42"
+      E: "51"
+    }
+    {
+      id: e52
+      T: Attr
+      S: "42"
+      E: "52"
+    }
+    {
+      id: e53
+      T: Attr
+      S: "42"
+      E: "53"
+    }
+    {
+      id: e54
+      T: Attr
+      S: "42"
+      E: "58"
+    }
+    {
+      id: e55
+      T: Attr
+      S: "42"
+      E: "59"
+    }
+    {
+      id: e56
+      T: Attr
+      S: "42"
+      E: "60"
+    }
+    {
+      id: e57
+      T: Attr
+      S: "42"
+      E: "61"
+    }
+    {
+      id: e58
+      T: Attr
+      S: "42"
+      E: "65"
+    }
+    {
+      id: e59
+      T: Attr
+      S: "42"
+      E: "66"
+    }
+    {
+      id: e60
+      T: Attr
+      S: "42"
+      E: "67"
+    }
+    {
+      id: e61
+      T: Attr
+      S: "42"
+      E: "72"
+    }
+    {
+      id: e62
+      T: Attr
+      S: "42"
+      E: "73"
+    }
+    {
+      id: e63
+      T: Attr
+      S: "42"
+      E: "74"
+    }
+    {
+      id: e64
+      T: Attr
+      S: "42"
+      E: "75"
+    }
+    {
+      id: e65
+      T: Attr
+      S: "42"
+      E: "76"
+    }
+    {
+      id: e66
+      T: Attr
+      S: "42"
+      E: "77"
+    }
+    {
+      id: e67
+      T: Attr
+      S: "42"
+      E: "78"
+    }
+    {
+      id: e68
+      T: Attr
+      S: "42"
+      E: "83"
+    }
+    {
+      id: e69
+      T: Attr
+      S: "46"
+      E: "47"
+    }
+    {
+      id: e70
+      T: Attr
+      S: "46"
+      E: "48"
+    }
+    {
+      id: e71
+      T: Attr
+      S: "46"
+      E: "49"
+    }
+    {
+      id: e72
+      T: Attr
+      S: "53"
+      E: "54"
+    }
+    {
+      id: e73
+      T: Attr
+      S: "53"
+      E: "55"
+    }
+    {
+      id: e74
+      T: Attr
+      S: "53"
+      E: "56"
+    }
+    {
+      id: e75
+      T: Attr
+      S: "53"
+      E: "57"
+    }
+    {
+      id: e76
+      T: Attr
+      S: "61"
+      E: "62"
+    }
+    {
+      id: e77
+      T: Attr
+      S: "61"
+      E: "63"
+    }
+    {
+      id: e78
+      T: Attr
+      S: "61"
+      E: "64"
+    }
+    {
+      id: e79
+      T: Attr
+      S: "67"
+      E: "68"
+    }
+    {
+      id: e80
+      T: Attr
+      S: "67"
+      E: "69"
+    }
+    {
+      id: e81
+      T: Attr
+      S: "67"
+      E: "70"
+    }
+    {
+      id: e82
+      T: Attr
+      S: "67"
+      E: "71"
+    }
+    {
+      id: e83
+      T: Attr
+      S: "78"
+      E: "79"
+    }
+    {
+      id: e84
+      T: Attr
+      S: "78"
+      E: "80"
+    }
+    {
+      id: e85
+      T: Attr
+      S: "78"
+      E: "81"
+    }
+    {
+      id: e86
+      T: Attr
+      S: "78"
+      E: "82"
+    }
+    {
+      id: e87
+      T: Attr
+      S: "84"
+      E: "85"
+    }
+    {
+      id: e88
+      T: Attr
+      S: "84"
+      E: "86"
+    }
+    {
+      id: e89
+      T: Attr
+      S: "84"
+      E: "92"
+    }
+    {
+      id: e90
+      T: Attr
+      S: "86"
+      E: "87"
+    }
+    {
+      id: e91
+      T: Attr
+      S: "86"
+      E: "88"
+    }
+    {
+      id: e92
+      T: Attr
+      S: "86"
+      E: "89"
+    }
+    {
+      id: e93
+      T: Attr
+      S: "86"
+      E: "90"
+    }
+    {
+      id: e94
+      T: Attr
+      S: "86"
+      E: "91"
+    }
+    {
+      id: e95
+      T: Attr
+      S: "93"
+      E: "94"
+    }
+    {
+      id: e96
+      T: Attr
+      S: "93"
+      E: "95"
+    }
+    {
+      id: e97
+      T: Attr
+      S: "93"
+      E: "96"
+    }
+    {
+      id: e98
+      T: Attr
+      S: "97"
+      E: "98"
+    }
+    {
+      id: e99
+      T: Attr
+      S: "97"
+      E: "99"
+    }
+    {
+      id: e100
+      T: Attr
+      S: "97"
+      E: "100"
+    }
+    {
+      id: e101
+      T: Attr
+      S: "97"
+      E: "101"
+    }
+  ]
+}

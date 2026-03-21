@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { Navigator } from "@solidjs/router";
 
 import { formSubmit } from "~/components/form/functions/formSubmit";
-import { capturePreview } from "~/lib/playwright/capturePreview";
+// import { capturePreview } from "~/lib/playwright/capturePreview"; // preview after save commented
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -46,12 +46,12 @@ export const saveAndCaptureForm = async (
 
   // If form saved successfully, capture preview
   if (!formSubmitError) {
-    const previewResult = await capturePreview(
-      formStoreVertex,
-      graph,
-      setGraph,
-      showErrorToast,
-    );
+    // const previewResult = await capturePreview(
+    //   formStoreVertex,
+    //   graph,
+    //   setGraph,
+    //   showErrorToast,
+    // );
 
     // Update URL if needed and form was saved successfully
     if (updateUrl) {
@@ -69,7 +69,8 @@ export const saveAndCaptureForm = async (
       }
     }
 
-    return previewResult;
+    // return previewResult;
+    return true;
   }
 
   return false;

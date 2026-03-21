@@ -178,7 +178,7 @@ return {
         props:
           '''return {
   as: "section",
-  hide: args.fns.isInIframe()
+  hide: args.fns.isInIframe() || args.location?.pathname === "/products"
 }'''
       }
     }

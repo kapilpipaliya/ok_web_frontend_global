@@ -1,0 +1,594 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Tutorial - Decode Files Organizer
+        url: /tutorial
+        key: ShopifyFileTutorial
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Tutorial"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: Follow these steps to get the most out of the **Decode Files Organizer** app.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "1"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.35rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "Install the app"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: Install **Decode Files Organizer** from the [Shopify App Store](https://apps.shopify.com/). Authorize the app when prompted.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "2"
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.35rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "Explore the files table"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Open the Files page from the app menu. Your Shopify files are listed in the table. Click a row to open the file in Shopify admin. Use the sidebar to filter by category."
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  gap: 1rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "3"
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.35rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h3",
+  text: "Add categories and organize files"
+}'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Use the sidebar to add file categories and subcategories. Select a category to see only its files. Move files between categories using the table actions. Your file library stays organized by category."
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-top: 1.5rem;
+}`;'''
+        displayOrder: 4
+        textType: markdown
+        componentName: Html
+        text: For more help, see [Documentation](/docs), [FAQ](/faq), or contact us via [Support](/support).
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "23"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "12"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "17"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "22"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+  ]
+}

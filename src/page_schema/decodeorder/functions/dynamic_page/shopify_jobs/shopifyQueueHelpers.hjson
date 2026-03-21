@@ -252,6 +252,27 @@ try {
     };
   };
 
+  const ensureFileGid = (id) => {
+    if (!id) return null;
+    const s = String(id);
+    return s.startsWith('gid://') ? s : `gid://shopify/GenericFile/${s}`;
+  };
+
+  const propsFromWebhookPayloadForFile = (payload) => {
+    const now = new Date().toISOString();
+    const id = ensureFileGid(payload.admin_graphql_api_id || payload.id);
+    return {
+      id,
+      alt: payload.alt || null,
+      createdAt: payload.created_at || now,
+      updatedAt: payload.updated_at || now,
+      fileStatus: payload.file_status || 'UPLOADED',
+      originalFileSize: payload.size || 0,
+      preview: payload.preview ? JSON.stringify(payload.preview) : null,
+      syncStatus: 'complete'
+    };
+  };
+
   const batchGetProductTags = async (admin, shopifyIds) => {
     const result = new Map();
     const ids = shopifyIds.filter(Boolean);
@@ -408,6 +429,8 @@ try {
       getShopifyAdminForShop,
       ensureProductGid,
       propsFromWebhookPayload,
+      ensureFileGid,
+      propsFromWebhookPayloadForFile,
       batchGetProductTags,
       batchUpdateProductTags,
       buildNestedMenuItems,

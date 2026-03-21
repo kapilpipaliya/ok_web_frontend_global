@@ -111,7 +111,8 @@
         componentName: Html
         text:
           '''- Integrate AI to automatically categorize uncategorized products into the appropriate categories.
-- Add support for dark theme.'''
+- Add support for dark theme.
+- Add Translation feature to allow users to view the app and site in multiple languages.'''
         key: unique_5
         props:
           '''return {

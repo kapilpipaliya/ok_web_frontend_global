@@ -1,0 +1,306 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Documentation - Decode Files Organizer
+        url: /docs
+        key: ShopifyFileDocumentation
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''This guide explains how to use the **Decode Files Organizer** app in plain language. You don't need any technical knowledge—just follow along.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting around the app"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: In the Shopify admin main sidebar you'll see a menu **Decode Files Organizer** with links: [Files](/files), [Support](/support), [FAQ](/faq), [Documentation](/docs), [Billing](/billing), and [Privacy](/privacy). Click any link to go to that section.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text:
+          '''[Files](/files) is where you see and manage your file list by category. [Support](/support) is where you send a message to our team or see replies. [FAQ](/faq), [Documentation](/docs), and [Tutorial](/tutorial) are help pages you can read anytime. [Billing](/billing) and [Privacy](/privacy) are for your subscription and our privacy policy. You can bookmark or share a page if you want to come back to it later.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting started"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''First, go to the Shopify App Store and install the **Decode Files Organizer** app. After you authorize it, open the app from your Shopify admin. Your files will sync from Shopify into the app. Use the sidebar to add categories and assign files to them. Click a file row to open it in Shopify admin.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+  ]
+}

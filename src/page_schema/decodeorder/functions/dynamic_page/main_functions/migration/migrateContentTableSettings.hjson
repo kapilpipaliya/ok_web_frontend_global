@@ -498,14 +498,44 @@ const settingsConfigs = [
   ],
   rowHeight: 40,
   showRowNumber: true,
-  showSelection: false,
+  showSelection: true,
   resizableColumns: true,
-  columnWidths: { __rowNumber: "36px" },
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
   enableLocalFilters: true,
   enableLocalSort: true,
   usePolarisUI: true,
-  sidebar: { enabled: false },
-  groupBy: "orderName"
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyOrderCategory",
+    toParentEdgeType: "OrderCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  },
+  groupBy: "orderName",
+  hooks: {
+    beforeFetchData: "shopifyOrderBeforeFetchData"
+  }
 };`
   },
   {

@@ -249,6 +249,10 @@ const toggleExample = () => {
 const getDetailedExample = () => {
   return `return {
   // Table columns configuration
+  // type "iconAction": configurable icon button — column.iconAction: { action: "clipboard"|"openUrl"|"custom", textAccessor(row),
+  //   icon, activeIcon (carbon: ids), iconText, activeIconText, title, activeTitle, activeDurationMs, variant, size,
+  //   showFeedback, allowEmpty, openUrlTarget, openUrlWindowFeatures, htmlButtonStyle, buttonBg, activeButtonBg, buttonFg, activeButtonFg,
+  //   onClick(row, column, rowIndex, helpers) for action "custom" — helpers: getPayloadText, copyToClipboard, setFeedbackActive, clearFeedback }
   columns: [
     {
       key: "name",
@@ -323,6 +327,24 @@ const getDetailedExample = () => {
       filterable: false,
       editable: false,
       width: "100px"
+    },
+    {
+      key: "__copyLink",
+      label: "",
+      type: "iconAction",
+      sortable: false,
+      filterable: false,
+      editable: false,
+      width: "52px",
+      iconAction: {
+        action: "clipboard",
+        icon: "carbon:link",
+        activeIcon: "carbon:checkmark",
+        title: "Copy link",
+        activeTitle: "Copied",
+        activeDurationMs: 3000,
+        textAccessor: (row) => row.P?.imageUrl || row.P?.originUrl || ""
+      }
     }
   ],
 

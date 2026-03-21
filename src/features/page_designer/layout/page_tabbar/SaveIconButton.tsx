@@ -6,7 +6,7 @@ import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
-import { capturePreview } from "~/lib/playwright/capturePreview";
+// import { capturePreview } from "~/lib/playwright/capturePreview"; // preview after save commented
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -46,9 +46,9 @@ export function SaveIconButton(props: { formStoreId: string }) {
       )();
 
       // If form saved successfully, capture preview
-      if (!formSubmitError) {
-        await capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
-      }
+      // if (!formSubmitError) {
+      //   await capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
+      // }
 
       return !formSubmitError;
     } finally {

@@ -22,15 +22,7 @@
           '''return {
   tableVertexLabel: "ShopifyOrderLineItem",
   loadFromSetting: true,
-  hide: !args.fns.isInIframe(),
-  dataFunction: async (filters) => {
-    const r = await args.fns.executeYTOFunction("getShopifyOrdersWithLineItems", {
-      filters: filters.filters || {},
-      sort: filters.sort || {}
-    });
-    if (r?.result?.success && Array.isArray(r.result.data)) return { data: r.result.data };
-    return { data: [] };
-  }
+  hide: !args.fns.isInIframe()
 };'''
       }
     },
