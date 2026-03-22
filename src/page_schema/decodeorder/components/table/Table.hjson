@@ -56,6 +56,8 @@ const getColumns = () => {
   if (isNestedLinesTable()) {
     return args.contextData.props?.nestedTableColumns || [];
   }
+  // Do not pass contextData.props here: merged props often include columns: [] which
+  // would override loadFromSetting config (empty array is !== undefined).
   const base = args.fns.prop('columns') || [];
   const groupBy = getGroupByConfig();
   if (groupBy) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
@@ -65,71 +67,71 @@ const getColumns = () => {
 
 const getRowHeight = () => {
   if (isNestedLinesTable()) return args.contextData.props?.nestedRowHeight ?? 36;
-  return args.fns.prop('rowHeight') || 36;
+  return args.fns.prop('rowHeight', args.contextData.props) || 36;
 };
 const getTitle = () => {
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
-  return args.fns.prop('title');
+  return args.fns.prop('title', args.contextData.props);
 };
-const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder') || "Search...";
-const getAdditionalFilters = () => args.fns.prop('additionalFilters') || [];
-const getCustomActions = () => args.fns.prop('customActions') || [];
-const getBatchActions = () => args.fns.prop('batchActions') || [];
+const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder', args.contextData.props) || "Search...";
+const getAdditionalFilters = () => args.fns.prop('additionalFilters', args.contextData.props) || [];
+const getCustomActions = () => args.fns.prop('customActions', args.contextData.props) || [];
+const getBatchActions = () => args.fns.prop('batchActions', args.contextData.props) || [];
 const getShowRowNumber = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showRowNumber !== false;
-  return args.fns.prop('showRowNumber') || false;
+  return args.fns.prop('showRowNumber', args.contextData.props) || false;
 };
-const getHideColumns = () => args.fns.prop('hideColumns') || [];
+const getHideColumns = () => args.fns.prop('hideColumns', args.contextData.props) || [];
 
-const getUniqueKeys = () => args.fns.prop('uniqueKeys') || [];
+const getUniqueKeys = () => args.fns.prop('uniqueKeys', args.contextData.props) || [];
 const getShowAddButton = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showAddButton ?? false;
-  return args.fns.prop('showAddButton') ?? true;
+  return args.fns.prop('showAddButton', args.contextData.props) ?? true;
 };
 const getShowEditButton = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showEditButton ?? false;
-  return args.fns.prop('showEditButton') ?? true;
+  return args.fns.prop('showEditButton', args.contextData.props) ?? true;
 };
 const getShowSelection = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showSelection ?? false;
-  return args.fns.prop('showSelection');
+  return args.fns.prop('showSelection', args.contextData.props);
 };
 const getShowActions = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showActions ?? false;
-  return args.fns.prop('showActions');
+  return args.fns.prop('showActions', args.contextData.props);
 };
-const getResizableColumns = () => args.fns.prop('resizableColumns') ?? true;
+const getResizableColumns = () => args.fns.prop('resizableColumns', args.contextData.props) ?? true;
 const getHideExportButtons = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideExportButtons') ?? false;
+  return args.fns.prop('hideExportButtons', args.contextData.props) ?? false;
 };
 const getHideImportButtons = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideImportButtons') ?? false;
+  return args.fns.prop('hideImportButtons', args.contextData.props) ?? false;
 };
 const getHideSettingsButton = () => {
   if (isNestedLinesTable()) return true;
-  return args.fns.prop('hideSettingsButton') ?? false;
+  return args.fns.prop('hideSettingsButton', args.contextData.props) ?? false;
 };
-const getIcon = () => args.fns.prop('icon');
-const getLabel = () => args.fns.prop('label');
+const getIcon = () => args.fns.prop('icon', args.contextData.props);
+const getLabel = () => args.fns.prop('label', args.contextData.props);
 const getAddButtonLabel = () => {
   const label = getLabel();
   return label ? `Add new ${label}` : "Add New Item";
 };
-const getOnEdit = () => args.fns.prop('onEdit');
-const getOnAfterAdd = () => args.fns.prop('onAfterAdd');
-const getOnAfterEdit = () => args.fns.prop('onAfterEdit');
-const getOnAdd = () => args.fns.prop('onAdd');
-const getOnDelete = () => args.fns.prop('onDelete');
-const getOnAfterDelete = () => args.fns.prop('onAfterDelete');
-const getRowClickable = () => args.fns.prop('rowClickable') === true;
-const getOnRowClick = () => args.fns.prop('onRowClick');
+const getOnEdit = () => args.fns.prop('onEdit', args.contextData.props);
+const getOnAfterAdd = () => args.fns.prop('onAfterAdd', args.contextData.props);
+const getOnAfterEdit = () => args.fns.prop('onAfterEdit', args.contextData.props);
+const getOnAdd = () => args.fns.prop('onAdd', args.contextData.props);
+const getOnDelete = () => args.fns.prop('onDelete', args.contextData.props);
+const getOnAfterDelete = () => args.fns.prop('onAfterDelete', args.contextData.props);
+const getRowClickable = () => args.fns.prop('rowClickable', args.contextData.props) === true;
+const getOnRowClick = () => args.fns.prop('onRowClick', args.contextData.props);
 
 const [data, setData] = args.createSignal([]);
 const [filteredData, setFilteredData] = args.createSignal([]);
 
-const getGroupByConfig = () => args.fns.prop('groupBy') || null;
+const getGroupByConfig = () => args.fns.prop('groupBy', args.contextData.props) || null;
 const [collapsedKeys, setCollapsedKeys] = args.createStore({});
 const toggleExpanded = (key) => {
   if (collapsedKeys[key]) {
@@ -1311,7 +1313,7 @@ const getColumnWidth = (columnKey) => {
   if (storedWidth) {
     return storedWidth;
   }
-  const configWidths = args.fns.prop('columnWidths');
+  const configWidths = args.fns.prop('columnWidths', args.contextData.props);
   if (configWidths && configWidths[columnKey]) {
     return configWidths[columnKey];
   }
@@ -3413,6 +3415,7 @@ return `._id {
   min-height: 0;
   max-height: 100%;
   display: ${isRowExpansionOpen ? 'block' : 'none'};
+  cursor: default;
 }`;
 '''
         componentName: Html
@@ -3522,7 +3525,9 @@ return {
   getNestedLinesLoading: () => !!outerArgs.fns.expansionLoading?.[expansionRowKey],
   getSelectedRows: () => new Set(),
   setSelectedRows: () => {},
-  clearSelectedRows: () => {}
+  clearSelectedRows: () => {},
+  rowClickable: rowExpansion.rowClickable ?? false,
+  onRowClick: rowExpansion.onRowClick ?? function () {}
 };
 '''
       }
@@ -3685,7 +3690,7 @@ return {
   ariaLabel: "Edit",
   title: "Edit",
   hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || (() => {
-    const editLink = args.fns.prop('editLink');
+    const editLink = args.fns.prop('editLink', args.contextData.props);
     if (!editLink) return false;
     const hasHref = editLink?.getHref?.(rowData);
     const hasOnClick = typeof (editLink?.getOnClick ?? editLink?.onClick) === "function";
@@ -3708,7 +3713,7 @@ const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
-const editLink = args.fns.prop('editLink');
+const editLink = args.fns.prop('editLink', args.contextData.props);
 const getHrefFn = editLink?.getHref;
 const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
 const defaultStyle = "color: " + (args.theme?.var?.color?.primary ?? "inherit") + "; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;";
@@ -3753,7 +3758,7 @@ const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
-const editLink = args.fns.prop('editLink');
+const editLink = args.fns.prop('editLink', args.contextData.props);
 const getHrefFn = editLink?.getHref;
 const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
 const onClickFn = editLink?.getOnClick ?? editLink?.onClick;

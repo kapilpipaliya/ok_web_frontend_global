@@ -26,52 +26,16 @@ if (!shop) {
   return;
 }
 
-// Derive fulfillment status from FulfillmentOrderLineItem.remainingQuantity.
-const fulfillmentStatusFromRemaining = (remainingQuantity, quantity) => {
-  const remaining = Number(remainingQuantity) || 0;
-  const qty = Number(quantity) || 0;
+// Map unfulfilled units + sellable line qty → stored fulfillmentStatus (matches nestedSplit.matchStatuses in table config).
+const fulfillmentStatusFromRemaining = (remainingUnfulfilledUnits, sellableLineQuantity) => {
+  const remaining = Number(remainingUnfulfilledUnits) || 0;
+  const qty = Number(sellableLineQuantity) || 0;
   if (remaining <= 0) return "FULFILLED";
   if (qty > 0 && remaining < qty) return "PARTIALLY_FULFILLED";
   return "UNFULFILLED";
 };
 
-// Sum FulfillmentOrderLineItem.remainingQuantity per LineItem id (same line split across multiple FOs adds up).
-// No fulfillmentOrders → empty map → caller uses order line quantity as remaining (nothing allocated to FO yet).
-const getRemainingByLineItemId = (order) => {
-  const map = {};
-  const fos = order.fulfillmentOrders?.edges || [];
-  for (const foEdge of fos) {
-    const items = foEdge.node?.lineItems?.edges || [];
-    for (const edge of items) {
-      const node = edge.node;
-      const id = node?.lineItem?.id;
-      if (id) map[id] = (map[id] || 0) + (Number(node.remainingQuantity) || 0);
-    }
-  }
-  return map;
-};
-
-const logFoPartialCoverage = (orderId, orderName, lineNodes, remainingByLineId, foEdgeCount) => {
-  if (foEdgeCount <= 0 || !lineNodes?.length) return;
-  let linesWithFoAggregate = 0;
-  let linesDefaultingToQty = 0;
-  for (const node of lineNodes) {
-    const id = node.id;
-    if (!id) continue;
-    const agg = remainingByLineId[id];
-    if (agg !== undefined && agg !== null) linesWithFoAggregate++;
-    else linesDefaultingToQty++;
-  }
-  if (linesDefaultingToQty > 0) {
-    console.log("[shopifyOrderBeforeFetchData] FO partial coverage: some line items not in FO aggregate (using order qty as remaining)", {
-      orderId,
-      orderName,
-      fulfillmentOrderCount: foEdgeCount,
-      lineItemsWithFoRemainingSum: linesWithFoAggregate,
-      lineItemsMissingFromFoMap: linesDefaultingToQty
-    });
-  }
-};
+// Per-line remaining + fulfillmentStatus use only LineItem.unfulfilledQuantity / currentQuantity from GraphQL (no FulfillmentOrder aggregation).
 
 console.log("[shopifyOrderBeforeFetchData] contextData:", { shop, filters, sort });
 
@@ -99,11 +63,9 @@ if (dateFrom) queryString = queryString ? queryString + " AND created_at:>=" + d
 if (dateTo) queryString = queryString ? queryString + " AND created_at:<=" + dateTo : "created_at:<=" + dateTo;
 console.log("[shopifyOrderBeforeFetchData] queryString:", queryString || "(none)");
 
-// Bulk orders query must stay under Shopify single-query cost limit (~1000); line items + FOs are loaded per order.
+// Bulk orders query must stay under Shopify single-query cost limit (~1000); line items are loaded per order.
 const BULK_LINE_ITEMS_FIRST = 50;
 const LINE_ITEMS_FIRST = 250;
-const FULFILLMENT_ORDERS_FIRST = 250;
-const FULFILLMENT_LINE_ITEMS_FIRST = 250;
 const ORDERS_PAGE_SIZE = 25;
 
 const LINE_ITEM_NODE_FIELDS = `
@@ -111,6 +73,8 @@ const LINE_ITEM_NODE_FIELDS = `
                 name
                 title
                 quantity
+                currentQuantity
+                unfulfilledQuantity
                 sku
                 vendor
                 originalUnitPriceSet { shopMoney { amount currencyCode } }
@@ -121,10 +85,18 @@ const LINE_ITEM_NODE_FIELDS = `
                   id
                   title
                   sku
+                  image {
+                    url
+                    altText
+                  }
                 }
                 product {
                   id
                   title
+                  featuredImage {
+                    url
+                    altText
+                  }
                 }
                 customAttributes {
                   key
@@ -198,160 +170,6 @@ const orderLineItemsPageQuery =
       }
     }
   }`.trim();
-
-const orderFulfillmentOrdersPageQuery =
-  `
-  query OrderFulfillmentOrdersPage($orderId: ID!, $first: Int!, $after: String) {
-    order(id: $orderId) {
-      fulfillmentOrders(first: $first, after: $after) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        edges {
-          node {
-            id
-            lineItems(first: ` +
-  FULFILLMENT_LINE_ITEMS_FIRST +
-  `) {
-              pageInfo {
-                hasNextPage
-                endCursor
-              }
-              edges {
-                node {
-                  remainingQuantity
-                  lineItem {
-                    id
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }`.trim();
-
-const fulfillmentOrderLineItemsPageQuery =
-  `
-  query FulfillmentOrderLineItemsPage($id: ID!, $first: Int!, $after: String) {
-    node(id: $id) {
-      ... on FulfillmentOrder {
-        lineItems(first: $first, after: $after) {
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
-          edges {
-            node {
-              remainingQuantity
-              lineItem {
-                id
-              }
-            }
-          }
-        }
-      }
-    }
-  }`.trim();
-
-const fetchAllFulfillmentOrderLineItemEdges = async (adminClient, foGid, initialLineItems) => {
-  const edgesOut = [];
-  let nextAfter;
-  if (initialLineItems?.edges?.length > 0) {
-    for (const e of initialLineItems.edges) edgesOut.push(e);
-    if (initialLineItems.pageInfo?.hasNextPage === true && initialLineItems.pageInfo.endCursor) {
-      nextAfter = initialLineItems.pageInfo.endCursor;
-    } else {
-      nextAfter = false;
-    }
-  } else {
-    nextAfter = null;
-  }
-  while (nextAfter !== false) {
-    await new Promise((r) => setTimeout(r, 150));
-    const resp = await adminClient.graphql(fulfillmentOrderLineItemsPageQuery, {
-      variables: { id: foGid, first: FULFILLMENT_LINE_ITEMS_FIRST, after: nextAfter }
-    });
-    const json = resp instanceof Response ? await resp.json() : resp;
-    if (json.errors && json.errors.length > 0) {
-      console.error(
-        "[shopifyOrderBeforeFetchData] fulfillmentOrder lineItems pagination error:",
-        foGid,
-        json.errors[0]?.message || json.errors[0]
-      );
-      break;
-    }
-    const page = json.data?.node?.lineItems;
-    if (!page) break;
-    for (const e of page.edges || []) edgesOut.push(e);
-    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
-      nextAfter = page.pageInfo.endCursor;
-    } else {
-      nextAfter = false;
-    }
-    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
-      console.warn("[shopifyOrderBeforeFetchData] FO lineItems hasNextPage but no endCursor", foGid);
-      nextAfter = false;
-    }
-  }
-  return edgesOut;
-};
-
-const fetchAllFulfillmentOrdersForOrder = async (adminClient, orderGid, initialFulfillmentOrders) => {
-  const foEdges = [];
-  let fetchErrored = false;
-  let nextAfter;
-  if (initialFulfillmentOrders?.edges?.length > 0) {
-    for (const e of initialFulfillmentOrders.edges) foEdges.push(e);
-    if (initialFulfillmentOrders.pageInfo?.hasNextPage === true && initialFulfillmentOrders.pageInfo.endCursor) {
-      nextAfter = initialFulfillmentOrders.pageInfo.endCursor;
-    } else {
-      nextAfter = false;
-    }
-  } else {
-    nextAfter = null;
-  }
-  while (nextAfter !== false) {
-    await new Promise((r) => setTimeout(r, 150));
-    const resp = await adminClient.graphql(orderFulfillmentOrdersPageQuery, {
-      variables: { orderId: orderGid, first: FULFILLMENT_ORDERS_FIRST, after: nextAfter }
-    });
-    const json = resp instanceof Response ? await resp.json() : resp;
-    if (json.errors && json.errors.length > 0) {
-      fetchErrored = true;
-      console.error(
-        "[shopifyOrderBeforeFetchData] order fulfillmentOrders pagination error:",
-        orderGid,
-        json.errors[0]?.message || json.errors[0]
-      );
-      break;
-    }
-    const page = json.data?.order?.fulfillmentOrders;
-    if (!page) {
-      fetchErrored = true;
-      break;
-    }
-    for (const e of page.edges || []) foEdges.push(e);
-    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
-      nextAfter = page.pageInfo.endCursor;
-    } else {
-      nextAfter = false;
-    }
-    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
-      console.warn("[shopifyOrderBeforeFetchData] fulfillmentOrders hasNextPage but no endCursor", orderGid);
-      nextAfter = false;
-    }
-  }
-  for (const fe of foEdges) {
-    const n = fe?.node;
-    if (!n?.id) continue;
-    const allLiEdges = await fetchAllFulfillmentOrderLineItemEdges(adminClient, n.id, n.lineItems);
-    n.lineItems = { edges: allLiEdges };
-  }
-  return { edges: foEdges, fetchErrored };
-};
 
 const fetchAllLineItemNodes = async (adminClient, orderGid, initialLineItems) => {
   const nodes = [];
@@ -460,14 +278,10 @@ for (const order of allOrders) {
   const ship = money(order.totalShippingPriceSet);
   let lineNodes;
   let lineItemsFetchErrored = false;
-  let fulfillmentOrdersFetchErrored = false;
   if (orderId && admin) {
     const lineRes = await fetchAllLineItemNodes(admin, orderId, order.lineItems);
     lineNodes = lineRes.nodes;
     lineItemsFetchErrored = lineRes.fetchErrored;
-    const foRes = await fetchAllFulfillmentOrdersForOrder(admin, orderId, order.fulfillmentOrders);
-    order.fulfillmentOrders = { edges: foRes.edges };
-    fulfillmentOrdersFetchErrored = foRes.fetchErrored;
   } else {
     lineNodes = order.lineItems?.edges?.map((e) => e.node) || [];
   }
@@ -487,26 +301,6 @@ for (const order of allOrders) {
       pageCap: LINE_ITEMS_FIRST
     });
   }
-  const remainingByLineId = getRemainingByLineItemId(order);
-  const foEdgeCount = order.fulfillmentOrders?.edges?.length ?? 0;
-  if (fulfillmentOrdersFetchErrored) {
-    console.warn("[shopifyOrderBeforeFetchData] fulfillment orders may be incomplete (pagination error)", {
-      shop,
-      orderId,
-      orderName,
-      fulfillmentOrderCount: foEdgeCount
-    });
-  }
-  if (foEdgeCount >= FULFILLMENT_ORDERS_FIRST) {
-    console.log("[shopifyOrderBeforeFetchData] metric: orderFulfillmentOrderCountAtOrAbovePageCap", {
-      shop,
-      orderId,
-      orderName,
-      fulfillmentOrderCount: foEdgeCount,
-      pageCap: FULFILLMENT_ORDERS_FIRST
-    });
-  }
-  logFoPartialCoverage(orderId, orderName, lineNodes, remainingByLineId, foEdgeCount);
   await session.run(
     `MERGE (o:ShopifyOrder { id: $id })
      SET o.name = $name,
@@ -566,18 +360,20 @@ for (const order of allOrders) {
     const variantSku = node.variant?.sku || "";
     const variantId = node.variant?.id || "";
     const productId = node.product?.id || "";
+    const lineImageUrl =
+      (node.variant && node.variant.image && node.variant.image.url) ||
+      (node.product && node.product.featuredImage && node.product.featuredImage.url) ||
+      "";
     const ou = money(node.originalUnitPriceSet);
     const du = money(node.discountedUnitPriceSet);
     const ot = money(node.originalTotalSet);
     const dt = money(node.discountedTotalSet);
-    const qty = node.quantity ?? 0;
-    const remainingFromFo = remainingByLineId[node.id];
-    // Not in FO map: no FOs yet, or line not on any FO row (see logFoPartialCoverage); use full line qty.
-    const remainingQuantity =
-      remainingFromFo !== undefined && remainingFromFo !== null
-        ? Number(remainingFromFo) || 0
-        : qty;
-    const fulfillmentStatus = fulfillmentStatusFromRemaining(remainingQuantity, qty);
+    const sellableLineQuantity =
+      node.currentQuantity != null && node.currentQuantity !== undefined
+        ? Number(node.currentQuantity)
+        : Number(node.quantity ?? 0);
+    const remainingQuantity = Number(node.unfulfilledQuantity) || 0;
+    const fulfillmentStatus = fulfillmentStatusFromRemaining(remainingQuantity, sellableLineQuantity);
     await session.run(
       `MERGE (o:ShopifyOrder { id: $orderId })
        MERGE (li:ShopifyOrderLineItem { id: $lineItemId })
@@ -603,7 +399,8 @@ for (const order of allOrders) {
            li.originalTotalAmount = $originalTotalAmount,
            li.originalTotalCurrency = $originalTotalCurrency,
            li.discountedTotalAmount = $discountedTotalAmount,
-           li.discountedTotalCurrency = $discountedTotalCurrency
+           li.discountedTotalCurrency = $discountedTotalCurrency,
+           li.lineImageUrl = $lineImageUrl
        MERGE (o)-[:HAS_LINE_ITEM]->(li)`,
       {
         orderId,
@@ -618,7 +415,7 @@ for (const order of allOrders) {
         variantSku,
         sku: node.sku || "",
         vendor: node.vendor || "",
-        quantity: qty,
+        quantity: sellableLineQuantity,
         remainingQuantity,
         properties: propertiesText,
         fulfillmentStatus,
@@ -629,7 +426,8 @@ for (const order of allOrders) {
         originalTotalAmount: ot.amount,
         originalTotalCurrency: ot.currency,
         discountedTotalAmount: dt.amount,
-        discountedTotalCurrency: dt.currency
+        discountedTotalCurrency: dt.currency,
+        lineImageUrl
       }
     );
   }

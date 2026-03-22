@@ -546,11 +546,12 @@ const settingsConfigs = [
     expansionPanelMaxHeight: 520,
     expandAccordionMaxWidth: 768,
     expandOneRowAtATime: false,
-    nestedTitle: "Line items",
-    emptyNestedText: "No line items for this order.",
-    nestedLoadingText: "Loading line items…",
+    nestedTitle: "Products",
+    emptyNestedText: "No products for this order.",
+    nestedLoadingText: "Loading products…",
     nestedSort: { column: "productTitle", direction: "asc" },
     nestedColumns: [
+      { key: "lineImageUrl", label: "Image", type: "image", width: "56px", valueAccessor: (row) => row.P?.lineImageUrl || "" },
       { key: "orderName", label: "Order", type: "text", width: "100px", valueAccessor: (row) => row.P?.orderName },
       {
         key: "lineItemName",
@@ -603,7 +604,46 @@ const settingsConfigs = [
           };
         }
       },
-      { key: "productTitle", label: "Product", type: "text", width: "160px", valueAccessor: (row) => row.P?.productTitle },
+      {
+        key: "productTitle",
+        label: "Product",
+        type: "text",
+        width: "160px",
+        valueAccessor: (row) => row.P?.productTitle,
+        overflowEllipsis: true,
+        render: (value, row) => {
+          const productGraphId = row?.P?.productGraphId;
+          const shopifyNumericSuffix = /([0-9]+)$/;
+          const productNumericMatch =
+            productGraphId != null
+              ? String(productGraphId).match(shopifyNumericSuffix)
+              : null;
+          const displayLabel =
+            value != null && value !== "" ? String(value) : "—";
+          if (!productNumericMatch) {
+            return displayLabel;
+          }
+          let shopifyAdminOrigin =
+            typeof window !== "undefined" &&
+            window.shopify &&
+            window.shopify.origin
+              ? String(window.shopify.origin)
+              : "";
+          if (shopifyAdminOrigin.endsWith("/")) {
+            shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+          }
+          if (!shopifyAdminOrigin) {
+            return displayLabel;
+          }
+          const productAdminId = productNumericMatch[1];
+          const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+          return {
+            type: "textLink",
+            text: displayLabel,
+            href: productAdminUrl
+          };
+        }
+      },
       { key: "productGraphId", label: "Product ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId, overflowEllipsis: true },
       { key: "variantTitle", label: "Variant", type: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
       { key: "variantGraphId", label: "Variant ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId, overflowEllipsis: true },
@@ -611,7 +651,21 @@ const settingsConfigs = [
       { key: "variantSku", label: "Var. SKU", type: "text", width: "100px", valueAccessor: (row) => row.P?.variantSku },
       { key: "vendor", label: "Vendor", type: "text", width: "110px", valueAccessor: (row) => row.P?.vendor },
       { key: "quantity", label: "Qty", type: "number", width: "100px", valueAccessor: (row) => row.P?.quantity },
-      { key: "remainingQuantity", label: "Remaining", type: "number", width: "90px", valueAccessor: (row) => row.P?.remainingQuantity },
+      { key: "remainingQuantity", label: "To fulfill", type: "number", width: "90px", valueAccessor: (row) => row.P?.remainingQuantity },
+      {
+        key: "unitPriceTimesQty",
+        label: "Unit × qty",
+        type: "text",
+        width: "120px",
+        valueAccessor: (row) => {
+          const a = row.P?.discountedUnitAmount;
+          const c = row.P?.discountedUnitCurrency || row.P?.originalUnitCurrency || "";
+          const q = row.P?.quantity;
+          const u = a != null && a !== "" ? String(a) + (c ? " " + c : "") : "";
+          if (u && q != null && q !== "") return u + " × " + String(q);
+          return u || (q != null ? String(q) : "");
+        }
+      },
       { key: "originalUnitAmount", label: "Orig. unit", type: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalUnitAmount; const c = row.P?.originalUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
       { key: "discountedUnitAmount", label: "Disc. unit", type: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.discountedUnitAmount; const c = row.P?.discountedUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
       { key: "originalTotalAmount", label: "Orig. total", type: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalTotalAmount; const c = row.P?.originalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
@@ -669,6 +723,7 @@ const settingsConfigs = [
   showEditButton: false,
   rowClickable: false,
   columns: [
+    { key: "lineImageUrl", label: "Image", type: "image", width: "56px", valueAccessor: (row) => row.P?.lineImageUrl || "" },
     { key: "orderName", label: "Order", type: "text", width: "120px", valueAccessor: (row) => row.P?.orderName },
     { key: "orderCreatedAt", label: "Order date", type: "date", width: "140px", valueAccessor: (row) => row.P?.orderCreatedAt },
     {
@@ -722,7 +777,46 @@ const settingsConfigs = [
         };
       }
     },
-    { key: "productTitle", label: "Product", type: "text", width: "200px", valueAccessor: (row) => row.P?.productTitle },
+    {
+      key: "productTitle",
+      label: "Product",
+      type: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.productTitle,
+      overflowEllipsis: true,
+      render: (value, row) => {
+        const productGraphId = row?.P?.productGraphId;
+        const shopifyNumericSuffix = /([0-9]+)$/;
+        const productNumericMatch =
+          productGraphId != null
+            ? String(productGraphId).match(shopifyNumericSuffix)
+            : null;
+        const displayLabel =
+          value != null && value !== "" ? String(value) : "—";
+        if (!productNumericMatch) {
+          return displayLabel;
+        }
+        let shopifyAdminOrigin =
+          typeof window !== "undefined" &&
+          window.shopify &&
+          window.shopify.origin
+            ? String(window.shopify.origin)
+            : "";
+        if (shopifyAdminOrigin.endsWith("/")) {
+          shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+        }
+        if (!shopifyAdminOrigin) {
+          return displayLabel;
+        }
+        const productAdminId = productNumericMatch[1];
+        const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+        return {
+          type: "textLink",
+          text: displayLabel,
+          href: productAdminUrl
+        };
+      }
+    },
     { key: "productGraphId", label: "Product ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId },
     { key: "variantTitle", label: "Variant", type: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
     { key: "variantGraphId", label: "Variant ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId },
@@ -845,9 +939,9 @@ const settingsConfigs = [
     expansionPanelMaxHeight: 480,
     expandAccordionMaxWidth: 768,
     expandOneRowAtATime: false,
-    nestedTitle: "Draft line items",
-    emptyNestedText: "No line items on this draft.",
-    nestedLoadingText: "Loading line items…",
+    nestedTitle: "Products",
+    emptyNestedText: "No Products on this draft.",
+    nestedLoadingText: "Loading Products…",
     nestedSort: { column: "productTitle", direction: "asc" },
     nestedColumns: [
       { key: "draftOrderName", label: "Draft", type: "text", width: "100px", valueAccessor: (row) => row.P?.draftOrderName },
@@ -902,7 +996,46 @@ const settingsConfigs = [
           };
         }
       },
-      { key: "productTitle", label: "Product", type: "text", width: "180px", valueAccessor: (row) => row.P?.productTitle, overflowEllipsis: true },
+      {
+        key: "productTitle",
+        label: "Product",
+        type: "text",
+        width: "180px",
+        valueAccessor: (row) => row.P?.productTitle,
+        overflowEllipsis: true,
+        render: (value, row) => {
+          const productGraphId = row?.P?.productGraphId;
+          const shopifyNumericSuffix = /([0-9]+)$/;
+          const productNumericMatch =
+            productGraphId != null
+              ? String(productGraphId).match(shopifyNumericSuffix)
+              : null;
+          const displayLabel =
+            value != null && value !== "" ? String(value) : "—";
+          if (!productNumericMatch) {
+            return displayLabel;
+          }
+          let shopifyAdminOrigin =
+            typeof window !== "undefined" &&
+            window.shopify &&
+            window.shopify.origin
+              ? String(window.shopify.origin)
+              : "";
+          if (shopifyAdminOrigin.endsWith("/")) {
+            shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+          }
+          if (!shopifyAdminOrigin) {
+            return displayLabel;
+          }
+          const productAdminId = productNumericMatch[1];
+          const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+          return {
+            type: "textLink",
+            text: displayLabel,
+            href: productAdminUrl
+          };
+        }
+      },
       { key: "variantTitle", label: "Variant", type: "text", width: "140px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
       { key: "sku", label: "SKU", type: "text", width: "120px", valueAccessor: (row) => row.P?.sku },
       { key: "quantity", label: "Qty", type: "number", width: "80px", valueAccessor: (row) => row.P?.quantity },
@@ -1011,7 +1144,46 @@ const settingsConfigs = [
         };
       }
     },
-    { key: "productTitle", label: "Product", type: "text", width: "200px", valueAccessor: (row) => row.P?.productTitle },
+    {
+      key: "productTitle",
+      label: "Product",
+      type: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.productTitle,
+      overflowEllipsis: true,
+      render: (value, row) => {
+        const productGraphId = row?.P?.productGraphId;
+        const shopifyNumericSuffix = /([0-9]+)$/;
+        const productNumericMatch =
+          productGraphId != null
+            ? String(productGraphId).match(shopifyNumericSuffix)
+            : null;
+        const displayLabel =
+          value != null && value !== "" ? String(value) : "—";
+        if (!productNumericMatch) {
+          return displayLabel;
+        }
+        let shopifyAdminOrigin =
+          typeof window !== "undefined" &&
+          window.shopify &&
+          window.shopify.origin
+            ? String(window.shopify.origin)
+            : "";
+        if (shopifyAdminOrigin.endsWith("/")) {
+          shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+        }
+        if (!shopifyAdminOrigin) {
+          return displayLabel;
+        }
+        const productAdminId = productNumericMatch[1];
+        const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+        return {
+          type: "textLink",
+          text: displayLabel,
+          href: productAdminUrl
+        };
+      }
+    },
     { key: "variantTitle", label: "Variant", type: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle },
     { key: "sku", label: "SKU", type: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
     { key: "quantity", label: "Qty", type: "number", width: "70px", valueAccessor: (row) => row.P?.quantity },

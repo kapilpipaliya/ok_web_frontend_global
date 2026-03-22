@@ -37,13 +37,16 @@ const getCachedConfig = () => {
   return { config: memoizedConfig(), loadFromSetting: memoizedLoadFromSetting() };
 };
 
-// Get props from context or evaluated config (optimized - single config evaluation per render)
-const prop = (p) => {
+const prop = (key, localProps) => {
   const { config, loadFromSetting } = getCachedConfig();
-  if (loadFromSetting) {
-    return config[p];
+  const fromProps = localProps?.[key];
+  if (fromProps !== undefined) {
+    return fromProps;
   }
-  return args.contextData.props[p];
+  if (loadFromSetting) {
+    return config?.[key];
+  }
+  return args.contextData.props[key];
 };
 
 // Common function to extract error message from response
@@ -1131,7 +1134,7 @@ return {
   fetchRoot: args.fns.fetchRoot,
   hooks: config?.sidebar?.hooks,
   initialCategoryId: args.searchParams?.sidebarCategory,
-  contentLabel: args.fns.prop('label')
+  contentLabel: args.fns.prop('label', args.contextData.props)
 };
 '''
       }
