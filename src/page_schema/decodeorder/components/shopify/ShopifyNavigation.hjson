@@ -37,10 +37,25 @@
       }
     }
     {
-      id: "5"
+      id: "12"
       L: Attr
       P: {
         displayOrder: 2
+        componentName: Html
+        key: unique_draft_orders
+        props:
+          '''return {
+  as: "s-link",
+  href: "/draft-orders",
+  text: "Draft orders"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
         componentName: Html
         key: unique_3
         props:
@@ -55,7 +70,7 @@
       id: "6"
       L: Attr
       P: {
-        displayOrder: 3
+        displayOrder: 4
         componentName: Html
         key: unique_faq
         props:
@@ -70,7 +85,7 @@
       id: "7"
       L: Attr
       P: {
-        displayOrder: 4
+        displayOrder: 5
         componentName: Html
         key: unique_docs
         props:
@@ -85,7 +100,7 @@
       id: "8"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 6
         componentName: Html
         key: unique_tutorial
         props:
@@ -101,7 +116,7 @@
       id: "9"
       L: Attr
       P: {
-        displayOrder: 6
+        displayOrder: 7
         componentName: Html
         key: unique_changelog
         props:
@@ -117,7 +132,7 @@
       id: "10"
       L: Attr
       P: {
-        displayOrder: 7
+        displayOrder: 8
         componentName: Html
         key: unique_4
         props:
@@ -132,7 +147,7 @@
       id: "11"
       L: Attr
       P: {
-        displayOrder: 8
+        displayOrder: 9
         componentName: Html
         key: unique_5
         props:
@@ -156,6 +171,12 @@
       T: Attr
       S: "3"
       E: "4"
+    }
+    {
+      id: e_draft_orders
+      T: Attr
+      S: "3"
+      E: "12"
     }
     {
       id: e4

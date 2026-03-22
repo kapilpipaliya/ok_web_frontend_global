@@ -35,7 +35,8 @@ const fulfillmentStatusFromRemaining = (remainingQuantity, quantity) => {
   return "UNFULFILLED";
 };
 
-// Sum FulfillmentOrderLineItem.remainingQuantity per LineItem id (LineItem.fulfillableQuantity / fulfillmentStatus are deprecated).
+// Sum FulfillmentOrderLineItem.remainingQuantity per LineItem id (same line split across multiple FOs adds up).
+// No fulfillmentOrders → empty map → caller uses order line quantity as remaining (nothing allocated to FO yet).
 const getRemainingByLineItemId = (order) => {
   const map = {};
   const fos = order.fulfillmentOrders?.edges || [];
@@ -44,10 +45,32 @@ const getRemainingByLineItemId = (order) => {
     for (const edge of items) {
       const node = edge.node;
       const id = node?.lineItem?.id;
-      if (id) map[id] = (map[id] || 0) + (node.remainingQuantity ?? 0);
+      if (id) map[id] = (map[id] || 0) + (Number(node.remainingQuantity) || 0);
     }
   }
   return map;
+};
+
+const logFoPartialCoverage = (orderId, orderName, lineNodes, remainingByLineId, foEdgeCount) => {
+  if (foEdgeCount <= 0 || !lineNodes?.length) return;
+  let linesWithFoAggregate = 0;
+  let linesDefaultingToQty = 0;
+  for (const node of lineNodes) {
+    const id = node.id;
+    if (!id) continue;
+    const agg = remainingByLineId[id];
+    if (agg !== undefined && agg !== null) linesWithFoAggregate++;
+    else linesDefaultingToQty++;
+  }
+  if (linesDefaultingToQty > 0) {
+    console.log("[shopifyOrderBeforeFetchData] FO partial coverage: some line items not in FO aggregate (using order qty as remaining)", {
+      orderId,
+      orderName,
+      fulfillmentOrderCount: foEdgeCount,
+      lineItemsWithFoRemainingSum: linesWithFoAggregate,
+      lineItemsMissingFromFoMap: linesDefaultingToQty
+    });
+  }
 };
 
 console.log("[shopifyOrderBeforeFetchData] contextData:", { shop, filters, sort });
@@ -76,9 +99,12 @@ if (dateFrom) queryString = queryString ? queryString + " AND created_at:>=" + d
 if (dateTo) queryString = queryString ? queryString + " AND created_at:<=" + dateTo : "created_at:<=" + dateTo;
 console.log("[shopifyOrderBeforeFetchData] queryString:", queryString || "(none)");
 
+// Bulk orders query must stay under Shopify single-query cost limit (~1000); line items + FOs are loaded per order.
+const BULK_LINE_ITEMS_FIRST = 50;
 const LINE_ITEMS_FIRST = 250;
 const FULFILLMENT_ORDERS_FIRST = 250;
 const FULFILLMENT_LINE_ITEMS_FIRST = 250;
+const ORDERS_PAGE_SIZE = 25;
 
 const LINE_ITEM_NODE_FIELDS = `
                 id
@@ -132,7 +158,7 @@ const ordersQuery =
           fullyPaid
           test
           lineItems(first: ` +
-  LINE_ITEMS_FIRST +
+  BULK_LINE_ITEMS_FIRST +
   `) {
             pageInfo {
               hasNextPage
@@ -142,35 +168,6 @@ const ordersQuery =
               node {` +
   LINE_ITEM_NODE_FIELDS +
   `
-              }
-            }
-          }
-          fulfillmentOrders(first: ` +
-  FULFILLMENT_ORDERS_FIRST +
-  `) {
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
-            edges {
-              node {
-                id
-                lineItems(first: ` +
-  FULFILLMENT_LINE_ITEMS_FIRST +
-  `) {
-                  pageInfo {
-                    hasNextPage
-                    endCursor
-                  }
-                  edges {
-                    node {
-                      remainingQuantity
-                      lineItem {
-                        id
-                      }
-                    }
-                  }
-                }
               }
             }
           }
@@ -261,14 +258,21 @@ const fulfillmentOrderLineItemsPageQuery =
 
 const fetchAllFulfillmentOrderLineItemEdges = async (adminClient, foGid, initialLineItems) => {
   const edgesOut = [];
-  const conn = initialLineItems || {};
-  for (const e of conn.edges || []) edgesOut.push(e);
-  let hasNext = conn.pageInfo?.hasNextPage === true;
-  let cursor = conn.pageInfo?.endCursor || null;
-  while (hasNext && cursor) {
+  let nextAfter;
+  if (initialLineItems?.edges?.length > 0) {
+    for (const e of initialLineItems.edges) edgesOut.push(e);
+    if (initialLineItems.pageInfo?.hasNextPage === true && initialLineItems.pageInfo.endCursor) {
+      nextAfter = initialLineItems.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else {
+    nextAfter = null;
+  }
+  while (nextAfter !== false) {
     await new Promise((r) => setTimeout(r, 150));
     const resp = await adminClient.graphql(fulfillmentOrderLineItemsPageQuery, {
-      variables: { id: foGid, first: FULFILLMENT_LINE_ITEMS_FIRST, after: cursor }
+      variables: { id: foGid, first: FULFILLMENT_LINE_ITEMS_FIRST, after: nextAfter }
     });
     const json = resp instanceof Response ? await resp.json() : resp;
     if (json.errors && json.errors.length > 0) {
@@ -282,11 +286,14 @@ const fetchAllFulfillmentOrderLineItemEdges = async (adminClient, foGid, initial
     const page = json.data?.node?.lineItems;
     if (!page) break;
     for (const e of page.edges || []) edgesOut.push(e);
-    hasNext = page.pageInfo?.hasNextPage === true;
-    cursor = page.pageInfo?.endCursor || null;
-    if (hasNext && !cursor) {
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
       console.warn("[shopifyOrderBeforeFetchData] FO lineItems hasNextPage but no endCursor", foGid);
-      break;
+      nextAfter = false;
     }
   }
   return edgesOut;
@@ -294,17 +301,26 @@ const fetchAllFulfillmentOrderLineItemEdges = async (adminClient, foGid, initial
 
 const fetchAllFulfillmentOrdersForOrder = async (adminClient, orderGid, initialFulfillmentOrders) => {
   const foEdges = [];
-  const conn = initialFulfillmentOrders || {};
-  for (const e of conn.edges || []) foEdges.push(e);
-  let hasNext = conn.pageInfo?.hasNextPage === true;
-  let cursor = conn.pageInfo?.endCursor || null;
-  while (hasNext && cursor) {
+  let fetchErrored = false;
+  let nextAfter;
+  if (initialFulfillmentOrders?.edges?.length > 0) {
+    for (const e of initialFulfillmentOrders.edges) foEdges.push(e);
+    if (initialFulfillmentOrders.pageInfo?.hasNextPage === true && initialFulfillmentOrders.pageInfo.endCursor) {
+      nextAfter = initialFulfillmentOrders.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else {
+    nextAfter = null;
+  }
+  while (nextAfter !== false) {
     await new Promise((r) => setTimeout(r, 150));
     const resp = await adminClient.graphql(orderFulfillmentOrdersPageQuery, {
-      variables: { orderId: orderGid, first: FULFILLMENT_ORDERS_FIRST, after: cursor }
+      variables: { orderId: orderGid, first: FULFILLMENT_ORDERS_FIRST, after: nextAfter }
     });
     const json = resp instanceof Response ? await resp.json() : resp;
     if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
       console.error(
         "[shopifyOrderBeforeFetchData] order fulfillmentOrders pagination error:",
         orderGid,
@@ -313,39 +329,54 @@ const fetchAllFulfillmentOrdersForOrder = async (adminClient, orderGid, initialF
       break;
     }
     const page = json.data?.order?.fulfillmentOrders;
-    if (!page) break;
-    for (const e of page.edges || []) foEdges.push(e);
-    hasNext = page.pageInfo?.hasNextPage === true;
-    cursor = page.pageInfo?.endCursor || null;
-    if (hasNext && !cursor) {
-      console.warn("[shopifyOrderBeforeFetchData] fulfillmentOrders hasNextPage but no endCursor", orderGid);
+    if (!page) {
+      fetchErrored = true;
       break;
+    }
+    for (const e of page.edges || []) foEdges.push(e);
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
+      console.warn("[shopifyOrderBeforeFetchData] fulfillmentOrders hasNextPage but no endCursor", orderGid);
+      nextAfter = false;
     }
   }
   for (const fe of foEdges) {
     const n = fe?.node;
-    if (!n?.id || !n.lineItems) continue;
+    if (!n?.id) continue;
     const allLiEdges = await fetchAllFulfillmentOrderLineItemEdges(adminClient, n.id, n.lineItems);
     n.lineItems = { edges: allLiEdges };
   }
-  return { edges: foEdges };
+  return { edges: foEdges, fetchErrored };
 };
 
 const fetchAllLineItemNodes = async (adminClient, orderGid, initialLineItems) => {
   const nodes = [];
-  const conn = initialLineItems || {};
-  for (const e of conn.edges || []) {
-    if (e?.node) nodes.push(e.node);
+  let fetchErrored = false;
+  let nextAfter;
+  if (initialLineItems?.edges?.length > 0) {
+    for (const e of initialLineItems.edges) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (initialLineItems.pageInfo?.hasNextPage === true && initialLineItems.pageInfo.endCursor) {
+      nextAfter = initialLineItems.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else {
+    nextAfter = null;
   }
-  let hasNext = conn.pageInfo?.hasNextPage === true;
-  let cursor = conn.pageInfo?.endCursor || null;
-  while (hasNext && cursor) {
+  while (nextAfter !== false) {
     await new Promise((r) => setTimeout(r, 150));
     const resp = await adminClient.graphql(orderLineItemsPageQuery, {
-      variables: { orderId: orderGid, first: LINE_ITEMS_FIRST, after: cursor }
+      variables: { orderId: orderGid, first: LINE_ITEMS_FIRST, after: nextAfter }
     });
     const json = resp instanceof Response ? await resp.json() : resp;
     if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
       console.error(
         "[shopifyOrderBeforeFetchData] order lineItems pagination error:",
         orderGid,
@@ -354,18 +385,24 @@ const fetchAllLineItemNodes = async (adminClient, orderGid, initialLineItems) =>
       break;
     }
     const page = json.data?.order?.lineItems;
-    if (!page) break;
+    if (!page) {
+      fetchErrored = true;
+      break;
+    }
     for (const e of page.edges || []) {
       if (e?.node) nodes.push(e.node);
     }
-    hasNext = page.pageInfo?.hasNextPage === true;
-    cursor = page.pageInfo?.endCursor || null;
-    if (hasNext && !cursor) {
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
       console.warn("[shopifyOrderBeforeFetchData] lineItems hasNextPage but no endCursor", orderGid);
-      break;
+      nextAfter = false;
     }
   }
-  return nodes;
+  return { nodes, fetchErrored };
 };
 const sortCol = sort && sort.column;
 const sortKey =
@@ -376,7 +413,7 @@ let allOrders = [];
 let cursor = null;
 let hasNextPage = true;
 while (hasNextPage) {
-  const variables = { first: 50, query: queryString || null, sortKey, reverse };
+  const variables = { first: ORDERS_PAGE_SIZE, query: queryString || null, sortKey, reverse };
   if (cursor) variables.after = cursor;
   if (!cursor) {
     console.log("[shopifyOrderBeforeFetchData] query (copy for manual test):\n", ordersQuery);
@@ -422,17 +459,54 @@ for (const order of allOrders) {
   const tax = money(order.totalTaxSet);
   const ship = money(order.totalShippingPriceSet);
   let lineNodes;
+  let lineItemsFetchErrored = false;
+  let fulfillmentOrdersFetchErrored = false;
   if (orderId && admin) {
-    lineNodes = await fetchAllLineItemNodes(admin, orderId, order.lineItems);
-    order.fulfillmentOrders = await fetchAllFulfillmentOrdersForOrder(
-      admin,
-      orderId,
-      order.fulfillmentOrders
-    );
+    const lineRes = await fetchAllLineItemNodes(admin, orderId, order.lineItems);
+    lineNodes = lineRes.nodes;
+    lineItemsFetchErrored = lineRes.fetchErrored;
+    const foRes = await fetchAllFulfillmentOrdersForOrder(admin, orderId, order.fulfillmentOrders);
+    order.fulfillmentOrders = { edges: foRes.edges };
+    fulfillmentOrdersFetchErrored = foRes.fetchErrored;
   } else {
     lineNodes = order.lineItems?.edges?.map((e) => e.node) || [];
   }
+  if (lineItemsFetchErrored) {
+    console.warn("[shopifyOrderBeforeFetchData] line items list may be incomplete (pagination error)", {
+      shop,
+      orderId,
+      orderName
+    });
+  }
+  if (lineNodes.length >= LINE_ITEMS_FIRST) {
+    console.log("[shopifyOrderBeforeFetchData] metric: orderLineItemsCountAtOrAbovePageCap", {
+      shop,
+      orderId,
+      orderName,
+      lineItemsCount: lineNodes.length,
+      pageCap: LINE_ITEMS_FIRST
+    });
+  }
   const remainingByLineId = getRemainingByLineItemId(order);
+  const foEdgeCount = order.fulfillmentOrders?.edges?.length ?? 0;
+  if (fulfillmentOrdersFetchErrored) {
+    console.warn("[shopifyOrderBeforeFetchData] fulfillment orders may be incomplete (pagination error)", {
+      shop,
+      orderId,
+      orderName,
+      fulfillmentOrderCount: foEdgeCount
+    });
+  }
+  if (foEdgeCount >= FULFILLMENT_ORDERS_FIRST) {
+    console.log("[shopifyOrderBeforeFetchData] metric: orderFulfillmentOrderCountAtOrAbovePageCap", {
+      shop,
+      orderId,
+      orderName,
+      fulfillmentOrderCount: foEdgeCount,
+      pageCap: FULFILLMENT_ORDERS_FIRST
+    });
+  }
+  logFoPartialCoverage(orderId, orderName, lineNodes, remainingByLineId, foEdgeCount);
   await session.run(
     `MERGE (o:ShopifyOrder { id: $id })
      SET o.name = $name,
@@ -498,6 +572,7 @@ for (const order of allOrders) {
     const dt = money(node.discountedTotalSet);
     const qty = node.quantity ?? 0;
     const remainingFromFo = remainingByLineId[node.id];
+    // Not in FO map: no FOs yet, or line not on any FO row (see logFoPartialCoverage); use full line qty.
     const remainingQuantity =
       remainingFromFo !== undefined && remainingFromFo !== null
         ? Number(remainingFromFo) || 0

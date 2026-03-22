@@ -1,0 +1,373 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Syncs Shopify draft orders and draft line items before DynamicPage fetch. Skips Shopify API when loading line items filtered by a single draftOrderId (Neo4j only).
+        body:
+          '''const { tableVertexLabel, filters = {}, sort = {}, shop: contextShop } = args.contextData;
+const isDraftOrderTable = tableVertexLabel === "ShopifyDraftOrder";
+const isDraftLineTable = tableVertexLabel === "ShopifyDraftOrderLineItem";
+if (!isDraftOrderTable && !isDraftLineTable) return;
+
+const hasDraftOrderIdFilter =
+  filters &&
+  filters.draftOrderId != null &&
+  String(filters.draftOrderId).length > 0;
+if (isDraftLineTable && hasDraftOrderIdFilter) {
+  console.log("[shopifyDraftOrderBeforeFetchData] skip Shopify sync (single-draft line items from graph)");
+  return;
+}
+
+const shop = contextShop || args.shop;
+if (!shop) {
+  console.warn("shopifyDraftOrderBeforeFetchData: shop is required");
+  return;
+}
+
+console.log("[shopifyDraftOrderBeforeFetchData] contextData:", { shop, filters, sort });
+
+const shopify = await args.getShopifyClient();
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (e) {
+  console.log("[shopifyDraftOrderBeforeFetchData] Shopify admin auth failed:", e?.message || e);
+  return;
+}
+if (!admin) {
+  console.log("[shopifyDraftOrderBeforeFetchData] no admin client for shop:", shop);
+  return;
+}
+
+const statusFilter = filters.status || "ALL";
+let queryString = "";
+if (statusFilter === "OPEN") queryString = "status:open";
+else if (statusFilter === "INVOICE_SENT") queryString = "status:invoice_sent";
+else if (statusFilter === "COMPLETED") queryString = "status:completed";
+const dateFrom = filters.dateFrom || null;
+const dateTo = filters.dateTo || null;
+if (dateFrom) queryString = queryString ? queryString + " AND created_at:>=" + dateFrom : "created_at:>=" + dateFrom;
+if (dateTo) queryString = queryString ? queryString + " AND created_at:<=" + dateTo : "created_at:<=" + dateTo;
+console.log("[shopifyDraftOrderBeforeFetchData] queryString:", queryString || "(none)");
+
+const BULK_LINE_ITEMS_FIRST = 50;
+const LINE_ITEMS_FIRST = 250;
+const DRAFT_ORDERS_PAGE_SIZE = 25;
+
+const DRAFT_LINE_ITEM_FIELDS = `
+                id
+                name
+                title
+                quantity
+                sku
+                originalUnitPriceSet { shopMoney { amount currencyCode } }
+                approximateDiscountedUnitPriceSet { shopMoney { amount currencyCode } }
+                originalTotalSet { shopMoney { amount currencyCode } }
+                discountedTotalSet { shopMoney { amount currencyCode } }
+                variant {
+                  id
+                  title
+                  sku
+                }
+                product {
+                  id
+                  title
+                }`;
+
+const draftOrdersQuery =
+  `
+  query getDraftOrders($first: Int!, $after: String, $query: String, $sortKey: DraftOrderSortKeys, $reverse: Boolean) {
+    draftOrders(first: $first, after: $after, query: $query, sortKey: $sortKey, reverse: $reverse) {
+      edges {
+        node {
+          id
+          name
+          createdAt
+          updatedAt
+          status
+          subtotalPriceSet { shopMoney { amount currencyCode } }
+          totalPriceSet { shopMoney { amount currencyCode } }
+          totalTaxSet { shopMoney { amount currencyCode } }
+          totalShippingPriceSet { shopMoney { amount currencyCode } }
+          taxesIncluded
+          customer {
+            id
+            email
+            displayName
+          }
+          lineItems(first: ` +
+  BULK_LINE_ITEMS_FIRST +
+  `) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {` +
+  DRAFT_LINE_ITEM_FIELDS +
+  `
+              }
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }`.trim();
+
+const draftOrderLineItemsPageQuery =
+  `
+  query DraftOrderLineItemsPage($draftOrderId: ID!, $first: Int!, $after: String) {
+    draftOrder(id: $draftOrderId) {
+      lineItems(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {` +
+  DRAFT_LINE_ITEM_FIELDS +
+  `
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const fetchAllDraftLineItemNodes = async (adminClient, draftOrderGid, initialLineItems) => {
+  const nodes = [];
+  let fetchErrored = false;
+  let nextAfter;
+  if (initialLineItems?.edges?.length > 0) {
+    for (const e of initialLineItems.edges) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (initialLineItems.pageInfo?.hasNextPage === true && initialLineItems.pageInfo.endCursor) {
+      nextAfter = initialLineItems.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else {
+    nextAfter = null;
+  }
+  while (nextAfter !== false) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(draftOrderLineItemsPageQuery, {
+      variables: { draftOrderId: draftOrderGid, first: LINE_ITEMS_FIRST, after: nextAfter }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
+      console.error(
+        "[shopifyDraftOrderBeforeFetchData] draftOrder lineItems pagination error:",
+        draftOrderGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.draftOrder?.lineItems;
+    if (!page) {
+      fetchErrored = true;
+      break;
+    }
+    for (const e of page.edges || []) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
+      console.warn("[shopifyDraftOrderBeforeFetchData] lineItems hasNextPage but no endCursor", draftOrderGid);
+      nextAfter = false;
+    }
+  }
+  return { nodes, fetchErrored };
+};
+
+const sortCol = sort && sort.column;
+const sortKey =
+  sortCol === "name" || sortCol === "draftName" || sortCol === "orderName" ? "NUMBER" : "UPDATED_AT";
+const reverse = sort.direction === "desc";
+
+let allDrafts = [];
+let cursor = null;
+let hasNextPage = true;
+while (hasNextPage) {
+  const variables = {
+    first: DRAFT_ORDERS_PAGE_SIZE,
+    after: cursor || null,
+    query: queryString || null,
+    sortKey,
+    reverse
+  };
+  const response = await admin.graphql(draftOrdersQuery, { variables });
+  const apiResponse = response instanceof Response ? await response.json() : response;
+  if (apiResponse.errors && apiResponse.errors.length > 0) {
+    console.error("[shopifyDraftOrderBeforeFetchData] GraphQL error:", apiResponse.errors[0].message || "unknown");
+    return;
+  }
+  const edges = apiResponse.data?.draftOrders?.edges || [];
+  allDrafts = allDrafts.concat(edges.map((e) => e.node));
+  hasNextPage = apiResponse.data?.draftOrders?.pageInfo?.hasNextPage === true;
+  cursor = apiResponse.data?.draftOrders?.pageInfo?.endCursor || null;
+  if (!cursor) break;
+  await new Promise((r) => setTimeout(r, 200));
+}
+console.log("[shopifyDraftOrderBeforeFetchData] fetched draft orders:", allDrafts.length, "total from API");
+
+const money = (set) => {
+  const m = set?.shopMoney;
+  return { amount: m?.amount ?? "", currency: m?.currencyCode ?? "" };
+};
+
+const session = args.session;
+for (const draft of allDrafts) {
+  const draftOrderId = draft.id || "";
+  const draftName = draft.name || "";
+  const draftCreatedAt = draft.createdAt || "";
+  const draftUpdatedAt = draft.updatedAt || draftCreatedAt;
+  const customer = draft.customer || {};
+  const customerEmail = draft.email || customer.email || "";
+  const customerDisplayName = customer.displayName || "";
+  const customerGraphId = customer.id || "";
+  const sub = money(draft.subtotalPriceSet);
+  const tot = money(draft.totalPriceSet);
+  const tax = money(draft.totalTaxSet);
+  const ship = money(draft.totalShippingPriceSet);
+  let lineNodes;
+  let lineItemsFetchErrored = false;
+  if (draftOrderId && admin) {
+    const lineRes = await fetchAllDraftLineItemNodes(admin, draftOrderId, draft.lineItems);
+    lineNodes = lineRes.nodes;
+    lineItemsFetchErrored = lineRes.fetchErrored;
+  } else {
+    lineNodes = draft.lineItems?.edges?.map((e) => e.node) || [];
+  }
+  if (lineItemsFetchErrored) {
+    console.warn("[shopifyDraftOrderBeforeFetchData] draft line items list may be incomplete (pagination error)", {
+      shop,
+      draftOrderId,
+      draftName
+    });
+  }
+  if (lineNodes.length >= LINE_ITEMS_FIRST) {
+    console.log("[shopifyDraftOrderBeforeFetchData] metric: draftLineItemsCountAtOrAbovePageCap", {
+      shop,
+      draftOrderId,
+      draftName,
+      lineItemsCount: lineNodes.length,
+      pageCap: LINE_ITEMS_FIRST
+    });
+  }
+  await session.run(
+    `MERGE (d:ShopifyDraftOrder { id: $id })
+     SET d.name = $name,
+         d.createdAt = $createdAt,
+         d.updatedAt = $updatedAt,
+         d.status = $status,
+         d.email = $email,
+         d.customerDisplayName = $customerDisplayName,
+         d.customerGraphId = $customerGraphId,
+         d.subtotalAmount = $subtotalAmount,
+         d.subtotalCurrency = $subtotalCurrency,
+         d.totalPriceAmount = $totalPriceAmount,
+         d.totalPriceCurrency = $totalPriceCurrency,
+         d.totalTaxAmount = $totalTaxAmount,
+         d.totalShippingAmount = $totalShippingAmount,
+         d.taxesIncluded = $taxesIncluded,
+         d.lineItemsCount = $lineItemsCount`,
+    {
+      id: draftOrderId,
+      name: draftName,
+      createdAt: draftCreatedAt,
+      updatedAt: draftUpdatedAt,
+      status: draft.status || "",
+      email: customerEmail,
+      customerDisplayName,
+      customerGraphId,
+      subtotalAmount: sub.amount,
+      subtotalCurrency: sub.currency,
+      totalPriceAmount: tot.amount,
+      totalPriceCurrency: tot.currency,
+      totalTaxAmount: tax.amount,
+      totalShippingAmount: ship.amount,
+      taxesIncluded: draft.taxesIncluded === true,
+      lineItemsCount: lineNodes.length
+    }
+  );
+  for (let idx = 0; idx < lineNodes.length; idx++) {
+    const node = lineNodes[idx];
+    const lineItemId = node.id || draftOrderId + "-" + idx;
+    const variantTitle = node.variant && node.variant.title ? node.variant.title : "";
+    const variantSku = node.variant?.sku || "";
+    const variantId = node.variant?.id || "";
+    const productId = node.product?.id || "";
+    const ou = money(node.originalUnitPriceSet);
+    const du = money(node.approximateDiscountedUnitPriceSet);
+    const ot = money(node.originalTotalSet);
+    const dt = money(node.discountedTotalSet);
+    const qty = node.quantity ?? 0;
+    await session.run(
+      `MERGE (d:ShopifyDraftOrder { id: $draftOrderId })
+       MERGE (li:ShopifyDraftOrderLineItem { id: $lineItemId })
+       SET li.draftOrderId = $draftOrderId,
+           li.draftOrderName = $draftOrderName,
+           li.draftOrderCreatedAt = $draftOrderCreatedAt,
+           li.lineItemName = $lineItemName,
+           li.productTitle = $productTitle,
+           li.productGraphId = $productGraphId,
+           li.variantGraphId = $variantGraphId,
+           li.variantTitle = $variantTitle,
+           li.variantSku = $variantSku,
+           li.sku = $sku,
+           li.quantity = $quantity,
+           li.remainingQuantity = $quantity,
+           li.originalUnitAmount = $originalUnitAmount,
+           li.originalUnitCurrency = $originalUnitCurrency,
+           li.discountedUnitAmount = $discountedUnitAmount,
+           li.discountedUnitCurrency = $discountedUnitCurrency,
+           li.originalTotalAmount = $originalTotalAmount,
+           li.originalTotalCurrency = $originalTotalCurrency,
+           li.discountedTotalAmount = $discountedTotalAmount,
+           li.discountedTotalCurrency = $discountedTotalCurrency
+       MERGE (d)-[:HAS_DRAFT_LINE_ITEM]->(li)`,
+      {
+        draftOrderId,
+        lineItemId,
+        draftOrderName: draftName,
+        draftOrderCreatedAt: draftCreatedAt,
+        lineItemName: node.name || node.title || "",
+        productTitle: node.title || "",
+        productGraphId: productId,
+        variantGraphId: variantId,
+        variantTitle,
+        variantSku,
+        sku: node.sku || "",
+        quantity: qty,
+        originalUnitAmount: ou.amount,
+        originalUnitCurrency: ou.currency,
+        discountedUnitAmount: du.amount,
+        discountedUnitCurrency: du.currency,
+        originalTotalAmount: ot.amount,
+        originalTotalCurrency: ot.currency,
+        discountedTotalAmount: dt.amount,
+        discountedTotalCurrency: dt.currency
+      }
+    );
+  }
+}
+'''
+        key: shopifyDraftOrderBeforeFetchData
+      }
+    }
+  ]
+  edges: []
+}

@@ -803,3 +803,12 @@ SHOPIFY_APP_URL=https://decodeproduct.decodecommerce.com/
 
 Scripts:
 npx tsx scripts/copyDecodeproductToDecodeorder.ts
+
+
+
+Stop loading all orders in one job — The hook pages with first: 50 but loops until hasNextPage is false, so large shops still pull the full catalog every fetch. Prefer capped pages, “since updated_at” (if you can persist a cursor/watermark), or Shopify webhooks (orders/updated, fulfillments/update) and use this job as backfill/repair.
+Loading/error — If GraphQL fails mid-loop, surface partial sync vs hard fail in logs/UI so merchants aren’t staring at stale data without knowing.
+Data & Neo4j
+Indexes — Ensure ShopifyOrder(id), ShopifyOrderLineItem(id), ShopifyOrderLineItem(orderId) (and any filter/sort fields you query often) are indexed for getUserContent patterns.
+Cleanup — Optional job to remove line items no longer on the order (after refunds/edits) so the DB doesn’t drift.
+

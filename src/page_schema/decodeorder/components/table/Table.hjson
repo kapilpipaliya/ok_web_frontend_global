@@ -12,10 +12,44 @@ const isNestedLinesTable = () => args.contextData.props?.nestedLinesMode === tru
 
 const getRowExpansionConfig = () => {
   if (isNestedLinesTable()) return null;
-  const cfg = args.fns.evaluateConfig?.() || {};
-  const re = cfg.rowExpansion;
-  if (re && typeof re === 'object' && re.childVertexLabel) return re;
+  const tableConfig = args.fns.evaluateConfig?.() || {};
+  const rowExpansion = tableConfig.rowExpansion;
+  if (rowExpansion && typeof rowExpansion === 'object' && rowExpansion.childVertexLabel) return rowExpansion;
   return null;
+};
+
+// rowExpansion.expansionPanelHeight; optional expansionPanelMaxHeight caps height. Default 280 when unset.
+const parsePositiveNumber = (rawValue) => {
+  if (typeof rawValue === 'number' && !Number.isNaN(rawValue) && rawValue > 0) return rawValue;
+  if (typeof rawValue === 'string' && rawValue.trim() !== '') {
+    const parsedNumber = parseFloat(String(rawValue).replace(/px$/i, '').trim());
+    if (!Number.isNaN(parsedNumber) && parsedNumber > 0) return parsedNumber;
+  }
+  return null;
+};
+
+const getExpansionPanelHeight = (rowExpansion) => {
+  if (!rowExpansion || typeof rowExpansion !== 'object') return 280;
+  let panelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelHeight);
+  if (panelHeightPx == null) panelHeightPx = 280;
+  const maxPanelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelMaxHeight);
+  if (maxPanelHeightPx != null && panelHeightPx > maxPanelHeightPx) panelHeightPx = maxPanelHeightPx;
+  return panelHeightPx;
+};
+
+const shouldExpandOneRowAtATime = (rowExpansion) => {
+  if (!rowExpansion || typeof rowExpansion !== 'object') return false;
+  if (rowExpansion.expandOneRowAtATime === true) return true;
+  const accordionMaxWidthPx = rowExpansion.expandAccordionMaxWidth;
+  if (
+    typeof accordionMaxWidthPx === 'number' &&
+    accordionMaxWidthPx > 0 &&
+    typeof window !== 'undefined' &&
+    window.innerWidth <= accordionMaxWidthPx
+  ) {
+    return true;
+  }
+  return false;
 };
 
 const getColumns = () => {
@@ -111,28 +145,31 @@ const [expansionLoading, setExpansionLoading] = args.createStore({});
 const isExpansionOpen = (rowId) => !!expansionOpen[String(rowId)];
 
 const toggleRowExpansion = async (row) => {
-  const re = getRowExpansionConfig();
-  if (!re || !row?.id) return;
+  const rowExpansion = getRowExpansionConfig();
+  if (!rowExpansion || !row?.id) return;
   const id = String(row.id);
   if (expansionOpen[id]) {
     setExpansionOpen(id, undefined);
     return;
   }
+  if (shouldExpandOneRowAtATime(rowExpansion)) {
+    for (const expandedRowId of Object.keys(expansionOpen)) setExpansionOpen(expandedRowId, undefined);
+  }
   setExpansionOpen(id, true);
-  const skipFetch = expansionRows[id] != null && re.refetchOnExpand !== true;
+  const skipFetch = expansionRows[id] != null && rowExpansion.refetchOnExpand !== true;
   if (skipFetch) return;
   setExpansionLoading(id, true);
   try {
-    const childLabel = re.childVertexLabel;
-    const idField = re.parentIdField || 'id';
+    const childLabel = rowExpansion.childVertexLabel;
+    const idField = rowExpansion.parentIdField || 'id';
     const parentVal =
-      typeof re.getNestedParentFilterValue === 'function'
-        ? re.getNestedParentFilterValue(row)
+      typeof rowExpansion.getNestedParentFilterValue === 'function'
+        ? rowExpansion.getNestedParentFilterValue(row)
         : (row.P?.[idField] ?? row[idField] ?? row.id);
-    const filterKey = re.childParentFilterKey || 'orderId';
+    const filterKey = rowExpansion.childParentFilterKey || 'orderId';
     const filters = { [filterKey]: parentVal };
-    const sort = re.nestedSort || null;
-    const hooks = re.nestedHooks;
+    const sort = rowExpansion.nestedSort || null;
+    const hooks = rowExpansion.nestedHooks;
     const fetchFn = args.fns.fetchUserContentRows;
     const rows = typeof fetchFn === 'function' ? await fetchFn({
       tableVertexLabel: childLabel,
@@ -149,9 +186,9 @@ const toggleRowExpansion = async (row) => {
 const getVirtualRowHeight = (index, row) => {
   const base = getRowHeight();
   if (isNestedLinesTable()) return base;
-  const re = getRowExpansionConfig();
-  if (!re || !row?.id) return base;
-  if (isExpansionOpen(row.id)) return base + (re.expansionPanelHeight || 280);
+  const rowExpansion = getRowExpansionConfig();
+  if (!rowExpansion || !row?.id) return base;
+  if (isExpansionOpen(row.id)) return base + getExpansionPanelHeight(rowExpansion);
   return base;
 };
 
@@ -638,8 +675,8 @@ const renderCellContent = (row, column, rowIndex) => {
       const isExpanded = parentKey != null && !collapsedKeys[parentKey];
       return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
     }
-    const re = getRowExpansionConfig();
-    if (re && row?.id) {
+    const rowExpansion = getRowExpansionConfig();
+    if (rowExpansion && row?.id) {
       const rowId = String(row.id);
       return {
         type: 'expand',
@@ -1652,6 +1689,7 @@ return {
   getDisplayData,
   getGroupByConfig,
   getRowExpansionConfig,
+  getExpansionPanelHeight,
   getVirtualRowHeight,
   toggleRowExpansion,
   isExpansionOpen,
@@ -3190,11 +3228,11 @@ return {
       }
       return;
     }
-    const re = args.fns.getRowExpansionConfig?.();
-    if (re && row?.id) {
-      const open = args.fns.isExpansionOpen?.(row.id);
-      if (action === "collapse" && open) args.fns.toggleRowExpansion?.(row);
-      if (action === "expand" && !open) args.fns.toggleRowExpansion?.(row);
+    const rowExpansion = args.fns.getRowExpansionConfig?.();
+    if (rowExpansion && row?.id) {
+      const isRowExpanded = args.fns.isExpansionOpen?.(row.id);
+      if (action === "collapse" && isRowExpanded) args.fns.toggleRowExpansion?.(row);
+      if (action === "expand" && !isRowExpanded) args.fns.toggleRowExpansion?.(row);
     }
   },
   onShiftArrow: (currentIndex, nextIndex) => args.fns.handleShiftArrow?.(currentIndex, nextIndex),
@@ -3260,10 +3298,16 @@ const rowData = virtualItem.rowData;
 const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 const isActive = args.fns.activeRowId?.() === rowData?.id;
-const re = args.fns.getRowExpansionConfig?.();
-const rh = args.fns.getRowHeight();
-const panel = re && rowData?.id && args.fns.isExpansionOpen?.(rowData.id) ? (re.expansionPanelHeight || 280) : 0;
-const gridRows = panel > 0 ? `${rh}px minmax(0, ${panel}px)` : `${rh}px`;
+const rowExpansion = args.fns.getRowExpansionConfig?.();
+const rowHeightPx = args.fns.getRowHeight();
+const expansionPanelHeightPx =
+  rowExpansion && rowData?.id && args.fns.isExpansionOpen?.(rowData.id)
+    ? args.fns.getExpansionPanelHeight(rowExpansion)
+    : 0;
+const gridRows =
+  expansionPanelHeightPx > 0
+    ? `${rowHeightPx}px minmax(0, ${expansionPanelHeightPx}px)`
+    : `${rowHeightPx}px`;
 
 return [
 `._id {
@@ -3336,9 +3380,9 @@ return {
       args.fns.cleanupTableDraggable(el);
     }
   },
-  onClick: (e) => {
+  onClick: (event) => {
     args.fns.setActiveRowId?.(rowData?.id ?? null);
-    if (isRowClickable) handleRowClick(e);
+    if (isRowClickable) handleRowClick(event);
   },
   style: cursorStyle
 };
@@ -3355,9 +3399,9 @@ return {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
-const re = args.fns.getRowExpansionConfig?.();
-const rid = rowData?.id;
-const open = re && rid && args.fns.isExpansionOpen?.(rid);
+const rowExpansion = args.fns.getRowExpansionConfig?.();
+const rowId = rowData?.id;
+const isRowExpansionOpen = rowExpansion && rowId && args.fns.isExpansionOpen?.(rowId);
 const t = args.theme.var.color;
 return `._id {
   grid-row: 2;
@@ -3368,7 +3412,7 @@ return `._id {
   padding: ${args.theme.var.spacing.sm};
   min-height: 0;
   max-height: 100%;
-  display: ${open ? 'block' : 'none'};
+  display: ${isRowExpansionOpen ? 'block' : 'none'};
 }`;
 '''
         componentName: Html
@@ -3377,14 +3421,14 @@ return `._id {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
-const rid = rowData?.id;
-const re = args.fns.getRowExpansionConfig?.();
-if (!re || !rid) return { as: 'div', hide: true };
-const sid = String(rid);
-const open = args.fns.isExpansionOpen?.(sid);
+const rowId = rowData?.id;
+const rowExpansion = args.fns.getRowExpansionConfig?.();
+if (!rowExpansion || !rowId) return { as: 'div', hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 return {
   as: 'div',
-  hide: !open,
+  hide: !isRowExpansionOpen,
   onClick: (e) => e.stopPropagation()
 };
 '''
@@ -3400,9 +3444,10 @@ return {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
-const rid = rowData?.id;
-const re = args.fns.getRowExpansionConfig?.();
-const open = re && rid && args.fns.isExpansionOpen?.(String(rid));
+const rowId = rowData?.id;
+const rowExpansion = args.fns.getRowExpansionConfig?.();
+const isRowExpansionOpen =
+  rowExpansion && rowId && args.fns.isExpansionOpen?.(String(rowId));
 const t = args.theme.var.color;
 return `._id {
   padding: ${args.theme.var.spacing.sm} 0;
@@ -3416,19 +3461,21 @@ return `._id {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
-const rid = rowData?.id;
-const re = args.fns.getRowExpansionConfig?.();
-if (!re || !rid) return { as: 'div', hide: true };
-const sid = String(rid);
-const open = args.fns.isExpansionOpen?.(sid);
-if (!open) return { as: 'div', hide: true };
-const loading = !!args.fns.expansionLoading?.[sid];
-const rows = args.fns.expansionRows?.[sid];
+const rowId = rowData?.id;
+const rowExpansion = args.fns.getRowExpansionConfig?.();
+if (!rowExpansion || !rowId) return { as: 'div', hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+if (!isRowExpansionOpen) return { as: 'div', hide: true };
+const loading = !!args.fns.expansionLoading?.[expansionRowKey];
+const rows = args.fns.expansionRows?.[expansionRowKey];
 const hasRows = Array.isArray(rows) && rows.length > 0;
 const show = loading || !hasRows;
 return {
   as: 'div',
-  text: loading ? (re.nestedLoadingText || 'Loading…') : (re.emptyNestedText || 'No line items'),
+  text: loading
+    ? (rowExpansion.nestedLoadingText || 'Loading…')
+    : (rowExpansion.emptyNestedText || 'No line items'),
   hide: !show,
   onClick: (e) => e.stopPropagation()
 };
@@ -3448,31 +3495,31 @@ return {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { hide: true };
 const rowData = virtualItem.rowData;
-const rid = rowData?.id;
-const re = args.fns.getRowExpansionConfig?.();
-if (!re || !rid) return { hide: true };
-const sid = String(rid);
-const open = args.fns.isExpansionOpen?.(sid);
-if (!open) return { hide: true };
-const loading = !!args.fns.expansionLoading?.[sid];
-const rows = args.fns.expansionRows?.[sid];
+const rowId = rowData?.id;
+const rowExpansion = args.fns.getRowExpansionConfig?.();
+if (!rowExpansion || !rowId) return { hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+if (!isRowExpansionOpen) return { hide: true };
+const loading = !!args.fns.expansionLoading?.[expansionRowKey];
+const rows = args.fns.expansionRows?.[expansionRowKey];
 const hasRows = Array.isArray(rows) && rows.length > 0;
 const outerArgs = args;
 return {
   hide: loading || !hasRows,
   nestedLinesMode: true,
-  nestedParentRowId: sid,
-  nestedTableTitle: re.nestedTitle || 'Line items',
-  nestedTableColumns: re.nestedColumns || [],
-  nestedRowHeight: re.nestedRowHeight || 36,
-  showRowNumber: re.nestedShowRowNumber !== false,
-  usePolarisUI: re.usePolarisUI !== false,
+  nestedParentRowId: expansionRowKey,
+  nestedTableTitle: rowExpansion.nestedTitle || 'Line items',
+  nestedTableColumns: rowExpansion.nestedColumns || [],
+  nestedRowHeight: rowExpansion.nestedRowHeight || 36,
+  showRowNumber: rowExpansion.nestedShowRowNumber !== false,
+  usePolarisUI: rowExpansion.usePolarisUI !== false,
   loadFromSetting: false,
   getNestedLineRows: () => {
-    const r = outerArgs.fns.expansionRows?.[sid];
-    return Array.isArray(r) ? r : [];
+    const nestedLineRows = outerArgs.fns.expansionRows?.[expansionRowKey];
+    return Array.isArray(nestedLineRows) ? nestedLineRows : [];
   },
-  getNestedLinesLoading: () => !!outerArgs.fns.expansionLoading?.[sid],
+  getNestedLinesLoading: () => !!outerArgs.fns.expansionLoading?.[expansionRowKey],
   getSelectedRows: () => new Set(),
   setSelectedRows: () => {},
   clearSelectedRows: () => {}
@@ -3797,12 +3844,15 @@ return {
           '''
 const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
+const isExpandColumn = column.type === "expand";
 
 return `._id {
   grid-row: 1;
   padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
   display: flex;
-  align-items: center;
+  align-items: ${isExpandColumn ? "stretch" : "center"};
+  justify-content: ${isExpandColumn ? "stretch" : "flex-start"};
+  min-width: 0;
 }`;
 '''
         displayOrder: 1
@@ -3846,12 +3896,22 @@ if (typeof cellContent === "object" && cellContent !== null) {
     const isExpanded = cellContent.isExpanded === true;
     const onToggle = cellContent.onToggle;
     if (!isParent) return { as: "div", style: "width: 16px; flex-shrink: 0;" };
+    const spacingSm = args.theme.var.spacing.sm;
+    const spacingMd = args.theme.var.spacing.md;
+    const textColor = args.theme.var.color.text;
     return {
       as: "button",
       type: "button",
-      style: "display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: none; background: transparent; cursor: pointer; border-radius: 4px; color: " + args.theme.var.color.text + ";",
-      "attr:aria-label": isExpanded ? "Collapse" : "Expand",
-      onClick: (e) => { e.stopPropagation(); onToggle?.(); },
+      style: `display: flex; align-items: center; justify-content: center; flex: 1 1 auto; align-self: stretch; width: calc(100% + 2 * ${spacingMd}); box-sizing: border-box; margin: calc(-1 * ${spacingSm}) calc(-1 * ${spacingMd}); padding: ${spacingSm} ${spacingMd}; min-height: 2.75rem; border: none; background: transparent; cursor: pointer; border-radius: 4px; color: ${textColor};`,
+      "attr:aria-label": isExpanded ? "Collapse row" : "Expand row",
+      "attr:aria-expanded": isExpanded ? "true" : "false",
+      onClick: (e) => {
+        e.stopPropagation();
+        onToggle?.();
+      },
+      onMouseDown: (e) => {
+        e.stopPropagation();
+      },
       text: isExpanded ? "▼" : "▶"
     };
   }
@@ -3879,6 +3939,41 @@ if (typeof cellContent === "object" && cellContent !== null) {
       href: cellContent.url,
       download: true,
       style: "color: " + args.theme.var.color.primary + "; text-decoration: none; display: flex; align-items: center; gap: 4px;"
+    };
+  }
+  if (cellContent.type === "textLink") {
+    const displayText = (cellContent.text ?? "").toString();
+    const hrefCandidate = cellContent.href;
+    const resolvedHref =
+      hrefCandidate != null && hrefCandidate !== "" ? String(hrefCandidate) : "";
+    const themeColors = args.theme.var.color;
+    const useEllipsis = column.overflowEllipsis === true;
+    const ellipsisStyle =
+      "min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+    if (!resolvedHref) {
+      return {
+        as: "span",
+        text: displayText,
+        title: cellContent.title,
+        style: useEllipsis ? ellipsisStyle : undefined
+      };
+    }
+    const linkStyle =
+      "color: " +
+      themeColors.primary +
+      "; text-decoration: underline; cursor: pointer; " +
+      (useEllipsis ? ellipsisStyle : "");
+    return {
+      as: "a",
+      href: resolvedHref,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: displayText,
+      title: cellContent.title,
+      style: linkStyle,
+      onClick: (event) => {
+        event.stopPropagation();
+      }
     };
   }
   if (cellContent.type === "iconAction") {

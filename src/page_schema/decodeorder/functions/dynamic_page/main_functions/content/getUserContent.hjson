@@ -94,7 +94,10 @@ if (search && search.trim()) {
     toLower(COALESCE(c.displayFinancialStatus, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.displayFulfillmentStatus, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.tags, '')) CONTAINS $searchTerm OR
-    toLower(COALESCE(c.note, '')) CONTAINS $searchTerm
+    toLower(COALESCE(c.note, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.customerDisplayName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.status, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.draftOrderName, '')) CONTAINS $searchTerm
   )`);
   queryParams.searchTerm = searchTerm;
 }

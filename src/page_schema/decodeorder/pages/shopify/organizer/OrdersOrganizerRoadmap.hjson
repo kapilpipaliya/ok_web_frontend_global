@@ -1,0 +1,122 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: "return { enabled: () => true }"
+        title: Roadmap - Decode Orders Organizer
+        key: OrdersOrganizerRoadmap
+        url: /roadmap
+        props: "return { isNoPermissionCheck: true }"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          "return `._id { max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || \"2rem\"}; color: ${args.theme.var.color.text}; } @media (max-width: 768px) { ._id { padding: ${args.theme.var.spacing?.md || \"1rem\"}; } }`;"
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 2rem; font-weight: 700; color: ${args.theme.var.color.text}; margin: 0 0 0.5rem 0; }`;"
+        displayOrder: 1
+        componentName: Html
+        key: unique_2
+        props: "return { as: \"h1\", text: \"Roadmap\" }"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css: "return `._id { margin-bottom: 1.5rem; }`;"
+        displayOrder: 3
+        componentName: Html
+        key: unique_4
+        props: "return { as: \"section\" }"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${args.theme.var.color.muted}; margin: 0 0 1rem 0; }`;"
+        displayOrder: 1
+        componentName: Html
+        key: unique_3
+        props: "return { as: \"p\", text: \"Planned directions (not commitments). Priorities can change based on merchant feedback.\" }"
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${args.theme.var.color.muted}; margin: 0; }`;"
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        key: unique_5
+        text:
+          "- Smarter **bulk actions** for categorized orders and drafts.\n- Optional **exports** aligned with visible columns.\n- **Performance** tuning for very large shops.\n- Deeper **Polaris** alignment and accessibility polish.\n- Ideas from **[Support](/support)** tickets."
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "7"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+  ]
+}

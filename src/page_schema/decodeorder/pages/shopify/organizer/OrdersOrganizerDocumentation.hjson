@@ -1,0 +1,103 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: "return { enabled: () => true }"
+        title: Documentation - Decode Orders Organizer
+        key: OrdersOrganizerDocumentation
+        url: /docs
+        props: "return { isNoPermissionCheck: true }"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          "return `._id { max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || \"2rem\"}; color: ${args.theme.var.color.text}; } @media (max-width: 768px) { ._id { padding: ${args.theme.var.spacing?.md || \"1rem\"}; } }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 2rem; font-weight: 700; color: ${args.theme.var.color.text}; margin: 0 0 1rem 0; } @media (max-width: 768px) { ._id { font-size: 1.75rem; } }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h1\", text: \"Documentation\" }"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 0.9375rem; line-height: 1.65; color: ${args.theme.var.color.muted}; margin-bottom: 1.5rem; }`;"
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: "How to use **Decode Orders Organizer** in Shopify admin—no technical background required."
+        props: "return { as: \"p\" }"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 0.9375rem; line-height: 1.65; color: ${args.theme.var.color.text}; margin: 0; }`;"
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text:
+          "## Orders workspace\n\nUse **Orders** in the app nav for your live Shopify orders. You get a sortable table, search and filters, and a **category** sidebar to group and triage orders. Expand a row to see **line items**, quantities, and key fields without leaving the list.\n\n## Draft orders workspace\n\n**Draft orders** uses the same ideas for Shopify draft orders: categories, table controls, and expandable lines so you can review bundles and edits before they become real orders.\n\n## Categories\n\nBuild nested **categories** in the sidebar for either workspace. Assign orders or drafts to categories to mirror how your team thinks about fulfillment, channels, or priority. Details depend on how your shop uses the organizer—see **Settings** on each page for options that apply there.\n\n## Settings\n\nEach table exposes **Settings** (columns, expansion behavior, and related options). Tune what you see so the main grid stays scannable while expansion carries the detail.\n\n## Help\n\nQuestions? See **[FAQ](/faq)** or open **[Support](/support)**."
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "6"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+  ]
+}

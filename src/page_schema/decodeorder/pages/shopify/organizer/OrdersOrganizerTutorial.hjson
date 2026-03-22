@@ -1,0 +1,102 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: "return { enabled: () => true }"
+        title: Tutorial - Decode Orders Organizer
+        key: OrdersOrganizerTutorial
+        url: /tutorial
+        props: "return { isNoPermissionCheck: true }"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          "return `._id { max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || \"2rem\"}; color: ${args.theme.var.color.text}; } @media (max-width: 768px) { ._id { padding: ${args.theme.var.spacing?.md || \"1rem\"}; } }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 2rem; font-weight: 700; color: ${args.theme.var.color.text}; margin: 0 0 0.5rem 0; }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h1\", text: \"Tutorial\" }"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${args.theme.var.color.muted}; margin-bottom: 1.25rem; }`;"
+        displayOrder: 2
+        componentName: Html
+        props:
+          "return { as: \"p\", text: \"Quick walkthrough for orders and draft orders—text only, inside Shopify admin.\" }"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 0.9375rem; line-height: 1.65; color: ${args.theme.var.color.text}; margin: 0; }`;"
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text:
+          "### 1. Open the app\n\nFrom Shopify admin, open **Decode Orders Organizer**.\n\n### 2. Choose a workspace\n\n- **Orders** — production orders.\n- **Draft orders** — drafts you are building or reviewing.\n\n### 3. Use the category sidebar\n\nPick or create categories to organize rows. Expand the tree to nest groups the way your team works.\n\n### 4. Scan the table, then expand\n\nUse sort, search, and filters on the grid. Click a row’s expand control to reveal **line items** and extra fields.\n\n### 5. Adjust Settings\n\nUse **Settings** on that page to show or hide columns and tune expansion. Orders and drafts can be configured separately.\n\n### Next steps\n\nRead **[Documentation](/docs)** or **[FAQ](/faq)**; contact **[Support](/support)** if you are stuck."
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "6"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "6"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+  ]
+}
