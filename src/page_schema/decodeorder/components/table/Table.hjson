@@ -128,27 +128,63 @@ const getOnAfterDelete = () => args.fns.prop('onAfterDelete', args.contextData.p
 const getRowClickable = () => args.fns.prop('rowClickable', args.contextData.props) === true;
 const getOnRowClick = () => args.fns.prop('onRowClick', args.contextData.props);
 
-const [data, setData] = args.createSignal([]);
-const [filteredData, setFilteredData] = args.createSignal([]);
+const propsTableStateVertexId = args.contextData.props?.tableStateVertexId;
+let tableStateVertexId = propsTableStateVertexId;
+let ownTableStateVertex = false;
+if (!tableStateVertexId) {
+  tableStateVertexId = args.generateNewVertexId();
+  ownTableStateVertex = true;
+  args.addNewVertex(0, {
+    id: tableStateVertexId,
+    L: ["TableUiState"],
+    P: {
+      data: [],
+      filteredData: [],
+      collapsedKeys: [],
+      expansionOpen: [],
+      expansionRows: [],
+      expansionLoading: [],
+      // Parent id → child line-item vertex ids (from main fetch); resolve bodies via args.graph.vertexes[id].
+      expansionPrefetchIdsByParentId: null,
+      activeRowId: null,
+      searchTerm: "",
+      columnFilters: {},
+      sortConfig: { column: null, direction: null },
+      isModalOpen: false,
+      modalMode: "add", // "add" or "edit"
+      editingRow: null,
+      formData: null,
+      isImportModalOpen: false,
+      importData: "",
+      columnWidths: {},
+      isResizing: false,
+      iconActionActiveKey: null,
+      selectionAnchorIndex: null
+    },
+    IN: {},
+    OUT: {}
+  }, args.graph, args.setGraph);
+}
+
+const patchTableP = (partial) => {
+  args.mergeVertexProperties(0, tableStateVertexId, args.graph, args.setGraph, partial);
+};
+const tableP = () => args.graph.vertexes[tableStateVertexId]?.P;
 
 const getGroupByConfig = () => args.fns.prop('groupBy', args.contextData.props) || null;
-const [collapsedKeys, setCollapsedKeys] = args.createStore({});
 const toggleExpanded = (key) => {
-  if (collapsedKeys[key]) {
-    setCollapsedKeys(key, undefined);
-  } else {
-    setCollapsedKeys(key, true);
-  }
+  const sk = String(key);
+  const p = tableP();
+  const cur = Array.isArray(p?.collapsedKeys) ? p.collapsedKeys : [];
+  const idx = cur.indexOf(sk);
+  const next = idx >= 0 ? cur.filter((k) => k !== sk) : [...cur, sk];
+  patchTableP({ collapsedKeys: next });
 };
 
-const [expansionOpen, setExpansionOpen] = args.createStore({});
-const [expansionRows, setExpansionRows] = args.createStore({});
-const [expansionLoading, setExpansionLoading] = args.createStore({});
-const isExpansionOpen = (rowId) => !!expansionOpen[String(rowId)];
-// Parent id → child line-item vertex ids (from main fetch); resolve bodies via args.graph.vertexes[id].
-const [expansionPrefetchIdsByParentId, setExpansionPrefetchIdsByParentId] = args.createSignal(null);
-// Declared before toggleRowExpansion so expand/collapse can set keyboard-focus active row (expand control uses stopPropagation).
-const [activeRowId, setActiveRowId] = args.createSignal(null);
+const isExpansionOpen = (rowId) => {
+  const open = tableP()?.expansionOpen;
+  return Array.isArray(open) && open.includes(String(rowId));
+};
 
 const buildExpansionPrefetchIdMapFromGraph = (relatedVertexIds, rowExpansion, parentRows) => {
   if (!rowExpansion || !rowExpansion.childVertexLabel || !Array.isArray(relatedVertexIds)) return null;
@@ -213,47 +249,49 @@ const sortExpansionPrefetchRows = (rows, nestedSort, nestedColumns) => {
 };
 
 const clearExpansionStoresForDataReload = () => {
-  const expansionOpenRowIds = Object.keys(expansionOpen);
-  for (let i = 0; i < expansionOpenRowIds.length; i++) setExpansionOpen(expansionOpenRowIds[i], undefined);
-  const cachedExpansionRowIds = Object.keys(expansionRows);
-  for (let j = 0; j < cachedExpansionRowIds.length; j++) setExpansionRows(cachedExpansionRowIds[j], undefined);
-  const expansionLoadingRowIds = Object.keys(expansionLoading);
-  for (let loadingIdx = 0; loadingIdx < expansionLoadingRowIds.length; loadingIdx++) {
-    setExpansionLoading(expansionLoadingRowIds[loadingIdx], undefined);
-  }
+  patchTableP({ expansionOpen: [], expansionRows: [], expansionLoading: [] });
 };
 
 const toggleRowExpansion = async (row) => {
   const rowExpansion = getRowExpansionConfig();
   if (!rowExpansion || !row?.id) return;
   const id = String(row.id);
-  // setActiveRowId(row.id);
-  if (expansionOpen[id]) {
-    setExpansionOpen(id, undefined);
+  let p0 = tableP();
+  let open = Array.isArray(p0?.expansionOpen) ? [...p0.expansionOpen] : [];
+  const oidx = open.indexOf(id);
+  if (oidx >= 0) {
+    open.splice(oidx, 1);
+    patchTableP({ expansionOpen: open });
     return;
   }
   if (shouldExpandOneRowAtATime(rowExpansion)) {
-    for (const expandedRowId of Object.keys(expansionOpen)) setExpansionOpen(expandedRowId, undefined);
+    open = [];
   }
-  setExpansionOpen(id, true);
+  open.push(id);
+  patchTableP({ expansionOpen: open });
+  p0 = tableP();
   const idField = rowExpansion.parentIdField || 'id';
   const parentVal =
     typeof rowExpansion.getNestedParentFilterValue === 'function'
       ? rowExpansion.getNestedParentFilterValue(row)
       : (row.P?.[idField] ?? row[idField] ?? row.id);
-  const prefetchMap = expansionPrefetchIdsByParentId();
+  const prefetchMap = p0?.expansionPrefetchIdsByParentId;
   if (prefetchMap != null) {
     const bucketIds = prefetchMap[String(parentVal)] ?? [];
     const rows = lineItemVerticesFromIds(bucketIds);
-    setExpansionRows(
-      id,
-      sortExpansionPrefetchRows(rows, rowExpansion.nestedSort, rowExpansion.nestedColumns)
-    );
+    const sortedRows = sortExpansionPrefetchRows(rows, rowExpansion.nestedSort, rowExpansion.nestedColumns);
+    const erList = Array.isArray(p0?.expansionRows) ? p0.expansionRows.filter((e) => e && e.id !== id) : [];
+    erList.push({ id, rows: sortedRows });
+    patchTableP({ expansionRows: erList });
     return;
   }
-  const skipFetch = expansionRows[id] != null && rowExpansion.refetchOnExpand !== true;
+  const erArr = Array.isArray(p0?.expansionRows) ? p0.expansionRows : [];
+  const existing = erArr.find((e) => e && e.id === id);
+  const skipFetch = existing?.rows != null && rowExpansion.refetchOnExpand !== true;
   if (skipFetch) return;
-  setExpansionLoading(id, true);
+  let loading = Array.isArray(p0?.expansionLoading) ? [...p0.expansionLoading] : [];
+  if (!loading.includes(id)) loading.push(id);
+  patchTableP({ expansionLoading: loading });
   try {
     const childLabel = rowExpansion.childVertexLabel;
     const filterKey = rowExpansion.childParentFilterKey || 'orderId';
@@ -261,15 +299,23 @@ const toggleRowExpansion = async (row) => {
     const sort = rowExpansion.nestedSort || null;
     const hooks = rowExpansion.nestedHooks;
     const fetchFn = args.fns.fetchUserContentRows;
-    const rows = typeof fetchFn === 'function' ? await fetchFn({
+    const fetchedRows = typeof fetchFn === 'function' ? await fetchFn({
       tableVertexLabel: childLabel,
       filters,
       sort,
       hooks
     }) : [];
-    setExpansionRows(id, Array.isArray(rows) ? rows : []);
-  } finally {
-    setExpansionLoading(id, false);
+    const p1 = tableP();
+    const erPrev = Array.isArray(p1?.expansionRows) ? [...p1.expansionRows] : [];
+    const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
+    const erNext = erPrev.filter((e) => !e || e.id !== id);
+    erNext.push({ id, rows: Array.isArray(fetchedRows) ? fetchedRows : [] });
+    const loadNext = loadPrev.filter((lid) => lid !== id);
+    patchTableP({ expansionRows: erNext, expansionLoading: loadNext });
+  } catch (e) {
+    const p1 = tableP();
+    const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
+    patchTableP({ expansionLoading: loadPrev.filter((lid) => lid !== id) });
   }
 };
 
@@ -284,8 +330,9 @@ const getVirtualRowHeight = (index, row) => {
 
 // Cache row objects by id so same row keeps same ref; cells then don't re-render when only expand/collapse changes
 let displayRowCache = {};
-const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
+const buildDisplayData = (filtered, groupByKey, collapsedList) => {
   if (!filtered || filtered.length === 0) return [];
+  const collapsed = Array.isArray(collapsedList) ? collapsedList : [];
   const getKey = (row) => {
     const val = row?.P?.[groupByKey] ?? row?.[groupByKey];
     return val != null ? String(val) : '';
@@ -317,7 +364,7 @@ const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
       displayRowCache[parentId] = parentRow;
     }
     result.push(parentRow);
-    if (!collapsedObj[key]) {
+    if (!collapsed.includes(key)) {
       for (const r of rows) {
         const id = r?.id ?? r?.P?.id;
         const rowId = id != null ? String(id) : 'row-' + key + '-' + result.length;
@@ -338,16 +385,13 @@ const buildDisplayData = (filtered, groupByKey, collapsedObj) => {
 };
 const getDisplayData = () => {
   const g = getGroupByConfig();
-  const filtered = filteredData() || [];
+  const filtered = tableP()?.filteredData ?? [];
   if (!g) return filtered;
   const key = typeof g === 'string' ? g : (g.key || '');
   if (!key) return filtered;
-  return buildDisplayData(filtered, key, collapsedKeys);
+  return buildDisplayData(filtered, key, tableP()?.collapsedKeys ?? []);
 };
 
-const [searchTerm, setSearchTerm] = args.createSignal("");
-const [columnFilters, setColumnFilters] = args.createStore({});
-const [sortConfig, setSortConfig] = args.createStore({ column: null, direction: null });
 // Get selected rows functions from props (always provided by parent)
 const getSelectedRows = () => {
   const propFn = args.contextData.props?.getSelectedRows;
@@ -382,16 +426,11 @@ const clearSelectedRows = () => {
   }
   propFn();
 };
-const [isModalOpen, setIsModalOpen] = args.createSignal(false);
-const [modalMode, setModalMode] = args.createSignal("add"); // "add" or "edit"
-const [editingRow, setEditingRow] = args.createSignal(null);
-const [formData, setFormData] = args.createStore({});
-const [isImportModalOpen, setIsImportModalOpen] = args.createSignal(false);
-const [importData, setImportData] = args.createSignal("");
-const [columnWidths, setColumnWidths] = args.createStore({});
-const [isResizing, setIsResizing] = args.createSignal(false);
+const setIsResizing = (v) => patchTableP({ isResizing: v });
 let iconActionResetTimer = null;
-const [iconActionActiveKey, setIconActionActiveKey] = args.createSignal(null);
+const iconActionActiveKey = () => tableP()?.iconActionActiveKey ?? null;
+const setIconActionActiveKey = (v) => patchTableP({ iconActionActiveKey: v });
+const activeRowId = () => tableP()?.activeRowId ?? null;
 const getIconActionRowKey = (row, rowIndex) => {
   if (!row && rowIndex == null) return null;
   const id = row?.id ?? row?.P?.id;
@@ -485,12 +524,12 @@ const getRowRef = (index) => rowRefs[index];
 const initializeFromQueryParams = () => {
   const searchParams = args.searchParams || {};
   if (searchParams.search) {
-    setSearchTerm(searchParams.search);
+    patchTableP({ searchTerm: searchParams.search });
   }
   if (searchParams.filters) {
     try {
       const filters = JSON.parse(searchParams.filters);
-      setColumnFilters(filters);
+      args.setGraph("vertexes", tableStateVertexId, "P", { columnFilters: filters });
       // Apply filters after restoring from URL
       // Use setTimeout to ensure store update is complete
       setTimeout(() => {
@@ -503,7 +542,7 @@ const initializeFromQueryParams = () => {
   if (searchParams.sort) {
     try {
       const sort = JSON.parse(searchParams.sort);
-      setSortConfig(sort);
+      patchTableP({ sortConfig: sort });
     } catch (e) {
       console.error("Error parsing sort from query:", e);
     }
@@ -514,14 +553,16 @@ const initializeFromQueryParams = () => {
 const updateQueryParams = () => {
   const params = {};
   // Handle searchTerm
-  if (searchTerm()) {
-    params.search = searchTerm();
+  const st = tableP()?.searchTerm ?? "";
+  if (st) {
+    params.search = st;
   } else {
     // Clear search param if searchTerm is empty
     params.search = undefined;
   }
   // Handle filters
-  const filters = Object.keys(columnFilters).length > 0 ? JSON.stringify(columnFilters) : null;
+  const cf = tableP()?.columnFilters ?? {};
+  const filters = Object.keys(cf).length > 0 ? JSON.stringify(cf) : null;
   if (filters) {
     params.filters = filters;
   } else {
@@ -529,7 +570,8 @@ const updateQueryParams = () => {
     params.filters = undefined;
   }
   // Handle sort
-  const sort = sortConfig.column ? JSON.stringify(sortConfig) : null;
+  const sc = tableP()?.sortConfig ?? { column: null, direction: null };
+  const sort = sc.column ? JSON.stringify(sc) : null;
   if (sort) {
     params.sort = sort;
   } else {
@@ -543,12 +585,13 @@ const updateQueryParams = () => {
 
 // Apply local filters (for table header row filters)
 const applyLocalFilters = () => {
-  const dataSource = data();
+  const dataSource = tableP()?.data ?? [];
   let filtered = [...dataSource];
 
   // Apply search term
-  if (searchTerm()) {
-    const term = searchTerm().toLowerCase();
+  const st = tableP()?.searchTerm ?? "";
+  if (st) {
+    const term = st.toLowerCase();
     const columns = getColumns().filter(col => !shouldHideColumn(col));
 
     filtered = filtered.filter(row => {
@@ -575,7 +618,7 @@ const applyLocalFilters = () => {
   const columns = getColumns();
   filtered = filtered.filter(row => {
     for (const col of columns) {
-      const filterValue = columnFilters[col.key];
+      const filterValue = (tableP()?.columnFilters ?? {})[col.key];
       if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
         // Skip rowNumber filter - it's calculated, not a property
         if (col.type === "rowNumber" || col.type === "iconAction" || col.type === "expand") {
@@ -652,20 +695,21 @@ const applyLocalFilters = () => {
   });
 
   // Apply sorting
-  if (sortConfig.column) {
-    const sortColumn = columns.find(col => col.key === sortConfig.column);
+  const sortCfg = tableP()?.sortConfig ?? { column: null, direction: null };
+  if (sortCfg.column) {
+    const sortColumn = columns.find(col => col.key === sortCfg.column);
     if (sortColumn) {
       filtered.sort((a, b) => {
         const aVal = getCellValue(a, sortColumn);
         const bVal = getCellValue(b, sortColumn);
         if (aVal === bVal) return 0;
         const comparison = aVal > bVal ? 1 : -1;
-        return sortConfig.direction === "asc" ? comparison : -comparison;
+        return sortCfg.direction === "asc" ? comparison : -comparison;
       });
     }
   }
 
-  setFilteredData(filtered);
+  patchTableP({ filteredData: filtered });
 };
 
 // Update category contentCount based on fetched data length when local filters are enabled
@@ -719,7 +763,7 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
 };
 
 const debouncedSetSearchTerm = args.debounce(value => {
-  setSearchTerm(value);
+  patchTableP({ searchTerm: value });
   
   // Check if local filters are enabled
   const config = args.fns.evaluateConfig?.() || {};
@@ -762,7 +806,9 @@ const renderCellContent = (row, column, rowIndex) => {
     if (gb) {
       const parentKey = row._parentKey;
       const isParent = row._isParent === true;
-      const isExpanded = parentKey != null && !collapsedKeys[parentKey];
+      const p = tableP();
+      const ck = Array.isArray(p?.collapsedKeys) ? p.collapsedKeys : [];
+      const isExpanded = parentKey != null && !ck.includes(String(parentKey));
       return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
     }
     const rowExpansion = getRowExpansionConfig();
@@ -884,19 +930,20 @@ const handleSort = (column) => {
   if (column.type === "rowNumber" || column.type === "iconAction") return;
   if (column.sortable === false) return;
 
+  const sortConfig = tableP()?.sortConfig ?? { column: null, direction: null };
   // If clicking the same column that's already sorted
   if (sortConfig.column === column.key) {
     // If currently ascending, switch to descending
     if (sortConfig.direction === "asc") {
-      setSortConfig({ column: column.key, direction: "desc" });
+      patchTableP({ sortConfig: { column: column.key, direction: "desc" } });
     } 
     // If currently descending, clear the sort
     else if (sortConfig.direction === "desc") {
-      setSortConfig({ column: null, direction: null });
+      patchTableP({ sortConfig: { column: null, direction: null } });
     }
   } else {
     // New column, start with ascending
-    setSortConfig({ column: column.key, direction: "asc" });
+    patchTableP({ sortConfig: { column: column.key, direction: "asc" } });
   }
 
   // Check if local sort is enabled
@@ -915,7 +962,7 @@ const handleSort = (column) => {
 
 // Get unique values for a column
 const getUniqueColumnValues = (column) => {
-  const allData = data();
+  const allData = tableP()?.data ?? [];
   const uniqueValues = new Set();
 
   allData.forEach(row => {
@@ -966,9 +1013,7 @@ const getSelectFilterProps = (columnKey, filterValue, options) => {
 
 // Handle column filter change
 const handleColumnFilterChange = (columnKey, value) => {
-  // Handle array values (multiple select)
   let filterValue;
-  setColumnFilters(columnKey, value ? JSON.parse(JSON.stringify(value)) : value);
   if (Array.isArray(value)) {
     // If "_All_VALUES_" is selected, clear all filters for this column
     if (value.includes("_All_VALUES_")) {
@@ -983,10 +1028,14 @@ const handleColumnFilterChange = (columnKey, value) => {
     filterValue = value === "_All_VALUES_" || value === "" || value === null || value === undefined ? undefined : value;
   }
 
-  if (filterValue === undefined) {
-    // Remove the filter key from columnFilters
-    setColumnFilters(columnKey, undefined);
-  }
+  args.setGraph(
+    "vertexes",
+    tableStateVertexId,
+    "P",
+    "columnFilters",
+    columnKey,
+    filterValue === undefined ? undefined : JSON.parse(JSON.stringify(filterValue)),
+  );
 
   // Check if local filters are enabled
   const config = args.fns.evaluateConfig?.() || {};
@@ -1006,7 +1055,7 @@ const handleColumnFilterChange = (columnKey, value) => {
 const pollQueuedRows = async () => {
   const config = args.fns.evaluateConfig?.() || {};
   const intervalMs = config?.refetchIntervalWhenQueued;
-  const currentData = data();
+  const currentData = tableP()?.data ?? [];
   const queuedIds = (Array.isArray(currentData) ? currentData : [])
     .filter(r => (r.P?.syncStatus) === 'queued')
     .map(r => r.id)
@@ -1020,7 +1069,7 @@ const pollQueuedRows = async () => {
     if (Array.isArray(updated) && updated.length > 0) {
       const updatedMap = new Map(updated.map(row => [row.id, row]));
       const newData = currentData.map(row => updatedMap.get(row.id) || row);
-      setData(newData);
+      patchTableP({ data: newData });
       applyLocalFilters();
       const stillQueued = newData.some(r => (r.P?.syncStatus) === 'queued');
       if (stillQueued && pollRef.id === null) {
@@ -1050,7 +1099,7 @@ const pollQueuedRows = async () => {
 
 // Start background poll when any row has syncStatus 'queued'. Pass optional data array to check; if omitted, uses current data().
 const startPollIfQueued = (dataToCheck) => {
-  const rows = dataToCheck !== undefined ? dataToCheck : data();
+  const rows = dataToCheck !== undefined ? dataToCheck : (tableP()?.data ?? []);
   if (pollRef.id) {
     clearTimeout(pollRef.id);
     pollRef.id = null;
@@ -1072,14 +1121,14 @@ const handleSearch = () => {
   if (isNestedLinesTable()) {
     const getRows = args.contextData.props?.getNestedLineRows;
     const rows = typeof getRows === 'function' ? getRows() : [];
-    setData(rows);
+    patchTableP({ data: rows });
     const config = args.fns.evaluateConfig?.() || {};
     const enableLocalFilters = config?.enableLocalFilters === true;
     const enableLocalSort = config?.enableLocalSort === true;
     if (enableLocalFilters || enableLocalSort) {
       applyLocalFilters();
     } else {
-      setFilteredData(rows);
+      patchTableP({ filteredData: rows });
     }
     return;
   }
@@ -1090,25 +1139,25 @@ const handleSearch = () => {
   // If local filters/sort are enabled, fetch all data and apply locally
   // Otherwise, pass filters/sort to server
   args.fns.fetchData(
-    enableLocalFilters ? undefined : searchTerm(), 
-    enableLocalFilters ? undefined : columnFilters, 
-    enableLocalSort ? undefined : sortConfig, 
-    (data, categoryItem, relatedVertexIds) => {
+    enableLocalFilters ? undefined : (tableP()?.searchTerm ?? ""), 
+    enableLocalFilters ? undefined : (tableP()?.columnFilters ?? {}), 
+    enableLocalSort ? undefined : (tableP()?.sortConfig ?? { column: null, direction: null }), 
+    (fetchedRows, categoryItem, relatedVertexIds) => {
       clearExpansionStoresForDataReload();
       const rowExpansion = (args.fns.evaluateConfig?.() || {}).rowExpansion;
       if (rowExpansion && rowExpansion.childVertexLabel && Array.isArray(relatedVertexIds)) {
-        setExpansionPrefetchIdsByParentId(
-          buildExpansionPrefetchIdMapFromGraph(relatedVertexIds, rowExpansion, data)
-        );
+        patchTableP({
+          expansionPrefetchIdsByParentId: buildExpansionPrefetchIdMapFromGraph(relatedVertexIds, rowExpansion, fetchedRows)
+        });
       } else {
-        setExpansionPrefetchIdsByParentId(null);
+        patchTableP({ expansionPrefetchIdsByParentId: null });
       }
-      setData(data);
+      patchTableP({ data: fetchedRows });
       
       // Update category count with fetched data length if local filters are enabled
       // Pass the categoryItem that was used for fetching, not the currently selected item
       if (enableLocalFilters) {
-        updateCategoryCountFromFetchedData(data, categoryItem);
+        updateCategoryCountFromFetchedData(fetchedRows, categoryItem);
       }
       
       // Always apply local filters if enabled, or if server didn't filter
@@ -1116,10 +1165,10 @@ const handleSearch = () => {
         applyLocalFilters();
       } else {
         // Server already filtered, just set filtered data to match data
-        setFilteredData(data);
+        patchTableP({ filteredData: fetchedRows });
       }
       
-      startPollIfQueued(data);
+      startPollIfQueued(fetchedRows);
     }
   );
 };
@@ -1147,8 +1196,9 @@ const clearSelection = () => {
 };
 
 // Shift+Arrow: anchor index for range selection (null when not extending)
-const [selectionAnchorIndex, setSelectionAnchorIndex] = args.createSignal(null);
-const clearSelectionAnchor = () => setSelectionAnchorIndex(null);
+const selectionAnchorIndex = () => tableP()?.selectionAnchorIndex ?? null;
+const setSelectionAnchorIndex = (v) => patchTableP({ selectionAnchorIndex: v });
+const clearSelectionAnchor = () => patchTableP({ selectionAnchorIndex: null });
 const selectRange = (fromIndex, toIndex) => {
   const displayed = getDisplayData();
   if (!displayed || displayed.length === 0) return;
@@ -1169,7 +1219,7 @@ const handleShiftArrow = (currentIndex, nextIndex) => {
     setSelectionAnchorIndex(anchor);
   }
   selectRange(anchor, nextIndex);
-  setActiveRowId(getDisplayData()?.[nextIndex]?.id ?? null);
+  patchTableP({ activeRowId: getDisplayData()?.[nextIndex]?.id ?? null });
 };
 
 const getActiveRowIndex = () => {
@@ -1197,10 +1247,7 @@ const handleAdd = async () => {
   }
   
   // Default behavior: open add modal
-  setModalMode("add");
-  setEditingRow(null);
-  setFormData(null);
-  setIsModalOpen(true);
+  patchTableP({ modalMode: "add", editingRow: null, formData: null, isModalOpen: true });
 };
 
 const handleEdit = async (row) => {
@@ -1219,18 +1266,11 @@ const handleEdit = async (row) => {
   }
   
   // Default behavior: open edit modal
-  setModalMode("edit");
-  setEditingRow(row);
-  // Set form data directly from row vertex
-  setFormData(row);
-  setIsModalOpen(true);
+  patchTableP({ modalMode: "edit", editingRow: row, formData: row, isModalOpen: true });
 };
 
 const handleViewRow = (row) => {
-  setModalMode("view");
-  setEditingRow(row);
-  setFormData(row);
-  setIsModalOpen(true);
+  patchTableP({ modalMode: "view", editingRow: row, formData: row, isModalOpen: true });
 };
 
 const handleSave = async (formDataToSave) => {
@@ -1241,21 +1281,23 @@ const handleSave = async (formDataToSave) => {
   }
 
   try {
-    args.fns.setLoading(true);
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: true });
+    const mode = tableP()?.modalMode ?? "add";
+    const originalRow = tableP()?.editingRow ?? null;
     const result = await formConfig.saveFunction({
-      mode: modalMode(),
+      mode,
       data: formDataToSave,
-      originalRow: editingRow()
+      originalRow
     });
 
     if (result?.success) {
       args.showSuccessToast?.(
-        modalMode() === "add" ? "Item added successfully" : "Item updated successfully"
+        mode === "add" ? "Item added successfully" : "Item updated successfully"
       );
-      setIsModalOpen(false);
+      patchTableP({ isModalOpen: false });
       // Optimistic update
-      if (modalMode() === "add") {
-        setData([...data(), result.data]);
+      if (mode === "add") {
+        patchTableP({ data: [...(tableP()?.data ?? []), result.data] });
         
         // Check if onAfterAdd function is provided
         const onAfterAdd = getOnAfterAdd();
@@ -1268,10 +1310,10 @@ const handleSave = async (formDataToSave) => {
           }
         }
       } else {
-        const updated = data().map(row => 
-          row.id === editingRow()?.id ? result.data : row
+        const updated = (tableP()?.data ?? []).map(row => 
+          row.id === originalRow?.id ? result.data : row
         );
-        setData(updated);
+        patchTableP({ data: updated });
         
         // Check if onAfterEdit function is provided
         const onAfterEdit = getOnAfterEdit();
@@ -1298,7 +1340,7 @@ const handleSave = async (formDataToSave) => {
     args.showErrorToast?.(errorMsg);
     return false;
   } finally {
-    args.fns.setLoading(false);
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: false });
   }
 };
 
@@ -1346,7 +1388,7 @@ const handleDelete = async (row) => {
   }
 
   try {
-    args.fns.setLoading(true);
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: true });
     // For delete, pass the row as vertex in the new data format
     const deleteData = {
       vertex: row,
@@ -1362,9 +1404,9 @@ const handleDelete = async (row) => {
       const label = getLabel();
       args.showSuccessToast?.(label ? `${label} deleted successfully` : "Item deleted successfully");
       // Remove from data
-      const updated = data().filter(item => item.id !== row.id);
-      setData(updated);
-      applyLocalFilters(updated);
+      const updated = (tableP()?.data ?? []).filter(item => item.id !== row.id);
+      patchTableP({ data: updated });
+      applyLocalFilters();
       
       // Check if onAfterDelete function is provided
       const onAfterDelete = getOnAfterDelete();
@@ -1385,7 +1427,7 @@ const handleDelete = async (row) => {
     const errorMsg = error?.message || error?.error || "Failed to delete item";
     args.showErrorToast?.(errorMsg);
   } finally {
-    args.fns.setLoading(false);
+    args.mergeVertexProperties(0, args.fns.pageStateVertexId, args.graph, args.setGraph, { loading: false });
   }
 };
 
@@ -1404,7 +1446,7 @@ const shouldHideColumn = (column) => {
 
 // Get column width (from state, config, or defaults)
 const getColumnWidth = (columnKey) => {
-  const storedWidth = columnWidths[columnKey];
+  const storedWidth = (tableP()?.columnWidths ?? {})[columnKey];
   if (storedWidth) {
     return storedWidth;
   }
@@ -1477,7 +1519,7 @@ const createResizeHandler = (columnKey) => {
       const clientX = moveEvent.clientX || moveEvent.touches?.[0]?.clientX || startX;
       const deltaX = clientX - startX;
       const newWidth = Math.max(minWidth, startWidth + deltaX);
-      setColumnWidths({ ...columnWidths, [columnKey]: `${newWidth}px` });
+      args.setGraph("vertexes", tableStateVertexId, "P", "columnWidths", columnKey, `${newWidth}px`);
     };
 
     const handleMouseUp = () => {
@@ -1506,7 +1548,7 @@ const createResizeHandler = (columnKey) => {
 const selectedSidebarItem = args.fns.selectedSidebarItem;
 args.createEffect(() => {
   const item = selectedSidebarItem?.();
-  setActiveRowId(null);
+  patchTableP({ activeRowId: null });
   // When sidebar selection changes, refresh table data
   if (item) {
     handleSearch();
@@ -1521,9 +1563,9 @@ if (rowsToRemove && setRowsToRemove) {
     const idsToRemove = rowsToRemove?.();
     if (!idsToRemove || !Array.isArray(idsToRemove) || idsToRemove.length === 0) return;
     const idSet = new Set(idsToRemove);
-    const updated = data().filter(row => !idSet.has(row.id));
-    setData(updated);
-    applyLocalFilters(updated);
+    const updated = (tableP()?.data ?? []).filter(row => !idSet.has(row.id));
+    patchTableP({ data: updated });
+    applyLocalFilters();
     setRowsToRemove(null);
   });
 }
@@ -1667,13 +1709,13 @@ const cleanupTableDraggable = (element) => {
 
 const getSelectedItems = () => {
   const selected = getEffectiveSelectedRows();
-  const filtered = filteredData();
+  const filtered = tableP()?.filteredData ?? [];
   const selectedIds = Array.from(selected);
   return (filtered || []).filter(row => selectedIds.includes(row.id));
 };
 
 const hasActiveFilters = () => {
-  const filters = columnFilters;
+  const filters = tableP()?.columnFilters ?? {};
   const keys = Object.keys(filters);
   for (const k of keys) {
     const v = filters[k];
@@ -1687,6 +1729,7 @@ const hasActiveFilters = () => {
 };
 
 return {
+  tableStateVertexId,
   getColumns,
   getRowHeight,
   getTitle,
@@ -1720,36 +1763,11 @@ return {
   },
   getColumnWidth,
   createResizeHandler,
-  columnWidths,
-  setColumnWidths,
-  isResizing,
-  isImportModalOpen,
-  setIsImportModalOpen,
-  importData,
-  setImportData,
-  data,
-  setData,
-  filteredData,
-  setFilteredData,
-  searchTerm,
-  setSearchTerm,
   debouncedSetSearchTerm,
-  columnFilters,
-  setColumnFilters,
-  sortConfig,
-  setSortConfig,
   getSelectedRows,
   getEffectiveSelectedRows,
   setSelectedRows,
   clearSelectedRows,
-  isModalOpen,
-  setIsModalOpen,
-  modalMode,
-  setModalMode,
-  editingRow,
-  setEditingRow,
-  formData,
-  setFormData,
   initializeFromQueryParams,
   updateQueryParams,
   applyLocalFilters,
@@ -1765,8 +1783,7 @@ return {
   handleShiftArrow,
   activeRowId,
   activeRowIndex: getActiveRowIndex,
-  setActiveRowIndex: (rowIndex) => setActiveRowId(getDisplayData()?.[rowIndex]?.id ?? null),
-  setActiveRowId,
+  setActiveRowIndex: (rowIndex) => patchTableP({ activeRowId: getDisplayData()?.[rowIndex]?.id ?? null }),
   handleAdd,
   handleEdit,
   handleViewRow,
@@ -1790,11 +1807,19 @@ return {
   getVirtualRowHeight,
   toggleRowExpansion,
   isExpansionOpen,
-  expansionRows,
-  expansionLoading,
   isNestedLinesTable,
   toggleExpanded,
-  setCollapsedKeys,
+  setCollapsedKeys: (key, val) => {
+    const sk = String(key);
+    const p = tableP();
+    const cur = Array.isArray(p?.collapsedKeys) ? [...p.collapsedKeys] : [];
+    if (val === undefined || val === false) {
+      patchTableP({ collapsedKeys: cur.filter((k) => k !== sk) });
+    } else {
+      if (!cur.includes(sk)) cur.push(sk);
+      patchTableP({ collapsedKeys: cur });
+    }
+  },
   iconActionActiveKey,
   handleIconAction,
   getIconActionRowKey
@@ -1823,6 +1848,9 @@ return {
     if (!hasSidebar) {
       args.fns.handleSearch();
     }
+  },
+  onCleanup: () => {
+    args.deleteVertex(0, args.fns.tableStateVertexId, args.graph, args.setGraph);
   }
 }'''
       }
@@ -2176,10 +2204,10 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: () => args.fns.setIsImportModalOpen(true),
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
   text: "Import",
   leftIcon: "carbon:upload",
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() === true
 };
 '''
@@ -2198,8 +2226,8 @@ return {
   "attr:variant": "secondary",
   "attr:icon": "upload",
   text: "Import",
-  onClick: () => args.fns.setIsImportModalOpen(true),
-  disabled: args.fns.loading(),
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: true }),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getImportFunction() || args.fns.getHideImportButtons() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -2218,7 +2246,7 @@ return {
   onClick: args.fns.handleExport,
   text: "Export All",
   leftIcon: "carbon:download",
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
 };
 '''
@@ -2238,7 +2266,7 @@ return {
   "attr:icon": "download",
   text: "Export All",
   onClick: args.fns.handleExport,
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -2254,10 +2282,10 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: () => args.fns.handleExport(args.fns.filteredData()),
+  onClick: () => args.fns.handleExport(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.filteredData ?? []),
   text: "Export Filtered",
   leftIcon: "carbon:filter",
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() === true
 };
 '''
@@ -2276,8 +2304,8 @@ return {
   "attr:variant": "secondary",
   "attr:icon": "filter",
   text: "Export Filtered",
-  onClick: () => args.fns.handleExport(args.fns.filteredData()),
-  disabled: args.fns.loading(),
+  onClick: () => args.fns.handleExport(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.filteredData ?? []),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -2317,7 +2345,7 @@ return {
           '''
 return {
   placeholder: args.fns.getSearchPlaceholder(),
-  value: args.fns.searchTerm(),
+  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
   onInput: (e) => {
     args.fns.debouncedSetSearchTerm(e.target.value);
   },
@@ -2347,7 +2375,7 @@ return {
   label: "Search",
   "attr:labelAccessibilityVisibility": "exclusive",
   placeholder: args.fns.getSearchPlaceholder(),
-  value: args.fns.searchTerm(),
+  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.searchTerm ?? "",
   onInput: (e) => args.fns.debouncedSetSearchTerm(e?.target?.value ?? ''),
   hide: args.fns.getUsePolarisUI?.() !== true
 };
@@ -2368,7 +2396,7 @@ return {
   text: "Search",
   leftIcon: "carbon:search",
   hide: true,
-  disabled: args.fns.loading()
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true
 };
 '''
       }
@@ -2386,7 +2414,7 @@ return {
   onClick: args.fns.handleOpenSettings,
   text: "Settings",
   leftIcon: "carbon:settings",
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() === true
 };
 '''
@@ -2406,7 +2434,7 @@ return {
   "attr:icon": "settings",
   text: "Settings",
   onClick: args.fns.handleOpenSettings,
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getSettingsFunction() || args.fns.getHideSettingsButton() || args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -2418,7 +2446,7 @@ return {
       P: {
         css:
           '''
-const isResizing = args.fns.isResizing();
+const isResizing = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
 
 return [`._id {
   display: grid;
@@ -2520,7 +2548,7 @@ return `._id {
           '''
 const showSelection = args.fns.getShowSelection();
 const selected = args.fns.getSelectedRows();
-const filtered = args.fns.filteredData();
+const filtered = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.filteredData ?? [];
 const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
 // const usePolaris = args.fns.getUsePolarisUI?.() === true;
 const usePolaris = false;
@@ -2641,7 +2669,6 @@ return {
       P: {
         css:
           '''
-const sortConfig = args.fns.sortConfig;
 const column = { key: "__actions", label: "Actions" };
 
 return `._id {
@@ -2769,7 +2796,6 @@ return `._id {
         props:
           '''
 const column = args.contextData.column;
-const sortConfig = args.fns.sortConfig;
 const shouldHide = args.fns.shouldHideColumn(column);
 const isRowNumber = column.type === "rowNumber";
 const isExpandColumn = column.type === "expand";
@@ -2792,7 +2818,6 @@ return {
       P: {
         css:
           '''
-const sortConfig = args.fns.sortConfig;
 const column = args.contextData.column;
 
 return `._id {
@@ -2805,7 +2830,7 @@ return `._id {
         props:
           '''
 const column = args.contextData.column;
-const sortConfig = args.fns.sortConfig;
+const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const isSorted = sortConfig.column === column.key;
 
 return {
@@ -2824,7 +2849,7 @@ return {
       P: {
         css:
           '''
-const sortConfig = args.fns.sortConfig;
+const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const column = args.contextData.column;
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
@@ -2841,7 +2866,7 @@ return `._id {
         props:
           '''
 const column = args.contextData.column;
-const sortConfig = args.fns.sortConfig;
+const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
 const isRowNumber = column.type === "rowNumber";
@@ -2877,7 +2902,7 @@ return `._id {
         props:
           '''
 const column = args.contextData.column;
-const columnFilters = args.fns.columnFilters;
+const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 const filterValue = columnFilters[column.key];
 const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
 const isRowNumber = column.type === "rowNumber";
@@ -3091,7 +3116,7 @@ return {
         css:
           '''
 const column = args.contextData.column;
-const columnFilters = args.fns.columnFilters;
+const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 // Preserve array values from URL - don't default to empty string for select filters
 const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (column.type === "select" || column.filterType === "select" ? [] : "");
 
@@ -3104,7 +3129,7 @@ return `._id {
         props:
           '''
 const column = args.contextData.column;
-const columnFilters = args.fns.columnFilters;
+const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 // Access store reactively - ensure we get the current value
 const getFilterValue = () => {
   const value = columnFilters[column.key];
@@ -3291,7 +3316,7 @@ return `._id {
         componentName: VirtualList
         props:
           '''
-const isLoading = args.fns.loading();
+const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
 return {
   getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
@@ -3358,7 +3383,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const isLoading = args.fns.loading();
+const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
 return {
   as: "div",
   hide: !isLoading
@@ -3478,7 +3503,7 @@ return {
     }
   },
   onClick: (event) => {
-    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
     if (isRowClickable) handleRowClick(event);
   },
   style: cursorStyle
@@ -3565,8 +3590,29 @@ if (!rowExpansion || !rowId) return { as: 'div', hide: true };
 const expansionRowKey = String(rowId);
 const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 if (!isRowExpansionOpen) return { as: 'div', hide: true };
-const loading = !!args.fns.expansionLoading?.[expansionRowKey];
-const rows = args.fns.expansionRows?.[expansionRowKey];
+const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
+let rows;
+const expRows = expP?.expansionRows;
+if (Array.isArray(expRows)) {
+  for (let i = 0; i < expRows.length; i++) {
+    const e = expRows[i];
+    if (e && e.id != null && String(e.id) === expansionRowKey && e.rows !== undefined) {
+      rows = e.rows;
+      break;
+    }
+  }
+}
+let loading = false;
+const expLoading = expP?.expansionLoading;
+if (Array.isArray(expLoading)) {
+  for (let i = 0; i < expLoading.length; i++) {
+    const lid = expLoading[i];
+    if (lid != null && lid !== '' && String(lid) === expansionRowKey) {
+      loading = true;
+      break;
+    }
+  }
+}
 const hasRows = Array.isArray(rows) && rows.length > 0;
 const show = loading || !hasRows;
 return {
@@ -3599,10 +3645,32 @@ if (!rowExpansion || !rowId) return { hide: true };
 const expansionRowKey = String(rowId);
 const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 if (!isRowExpansionOpen) return { hide: true };
-const loading = !!args.fns.expansionLoading?.[expansionRowKey];
-const rows = args.fns.expansionRows?.[expansionRowKey];
+const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
+let rows;
+const expRows = expP?.expansionRows;
+if (Array.isArray(expRows)) {
+  for (let i = 0; i < expRows.length; i++) {
+    const e = expRows[i];
+    if (e && e.id != null && String(e.id) === expansionRowKey && e.rows !== undefined) {
+      rows = e.rows;
+      break;
+    }
+  }
+}
+let loading = false;
+const expLoading = expP?.expansionLoading;
+if (Array.isArray(expLoading)) {
+  for (let i = 0; i < expLoading.length; i++) {
+    const lid = expLoading[i];
+    if (lid != null && lid !== '' && String(lid) === expansionRowKey) {
+      loading = true;
+      break;
+    }
+  }
+}
 const hasRows = Array.isArray(rows) && rows.length > 0;
 const outerArgs = args;
+const tableVid = outerArgs.fns.tableStateVertexId;
 return {
   hide: loading || !hasRows,
   nestedLinesMode: true,
@@ -3614,10 +3682,25 @@ return {
   usePolarisUI: rowExpansion.usePolarisUI !== false,
   loadFromSetting: false,
   getNestedLineRows: () => {
-    const nestedLineRows = outerArgs.fns.expansionRows?.[expansionRowKey];
-    return Array.isArray(nestedLineRows) ? nestedLineRows : [];
+    const rawRows = outerArgs.graph.vertexes[tableVid]?.P?.expansionRows;
+    if (!Array.isArray(rawRows)) return [];
+    for (let i = 0; i < rawRows.length; i++) {
+      const e = rawRows[i];
+      if (e && e.id != null && String(e.id) === expansionRowKey && e.rows !== undefined) {
+        return Array.isArray(e.rows) ? e.rows : [];
+      }
+    }
+    return [];
   },
-  getNestedLinesLoading: () => !!outerArgs.fns.expansionLoading?.[expansionRowKey],
+  getNestedLinesLoading: () => {
+    const ids = outerArgs.graph.vertexes[tableVid]?.P?.expansionLoading;
+    if (!Array.isArray(ids)) return false;
+    for (let i = 0; i < ids.length; i++) {
+      const lid = ids[i];
+      if (lid != null && lid !== '' && String(lid) === expansionRowKey) return true;
+    }
+    return false;
+  },
   getSelectedRows: () => new Set(),
   setSelectedRows: () => {},
   clearSelectedRows: () => {},
@@ -3665,7 +3748,7 @@ return {
   hide: !showSelection,
   onClick: (e) => {
     e.stopPropagation();
-    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
     if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
   }
 };
@@ -3715,7 +3798,7 @@ return {
   checked: usePolaris ? undefined : isSelected,
   onChange: (e) => {
     e.stopPropagation();
-    args.fns.setActiveRowId?.(rowData?.id ?? null);
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
     if (rowData?.id) args.fns.toggleRowSelection(rowData.id);
   },
   onClick: (e) => e.stopPropagation(),
@@ -4211,11 +4294,11 @@ return out;
         props:
           '''
 return {
-  isOpen: args.fns.isModalOpen(),
-  onClose: () => args.fns.setIsModalOpen(false),
-  mode: args.fns.modalMode(),
+  isOpen: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isModalOpen === true,
+  onClose: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isModalOpen: false }),
+  mode: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.modalMode ?? "add",
   formConfig: args.fns.getFormConfig(),
-  initialVertex: args.fns.formData,
+  initialVertex: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.formData ?? null,
   onSave: args.fns.handleSave,
   label: args.fns.getLabel()
 };
@@ -4247,8 +4330,8 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: !args.fns.isImportModalOpen(),
-  onClick: () => args.fns.setIsImportModalOpen(false)
+  hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
+  onClick: () => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false })
 };
 '''
       }
@@ -4276,7 +4359,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: !args.fns.isImportModalOpen(),
+  hide: !args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isImportModalOpen,
   onClick: (e) => e.stopPropagation()
 };
 '''
@@ -4422,8 +4505,8 @@ return {
         props:
           '''
 return {
-  value: args.fns.importData(),
-  onChange: (e) => args.fns.setImportData(e.target.value),
+  value: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "",
+  onChange: (e) => args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { importData: e.target.value }),
   placeholder: "Paste your data here (CSV or JSON format)...",
   rows: 10,
   style: "font-family: monospace; font-size: 12px;"
@@ -4465,11 +4548,10 @@ return {
 return {
   variant: "secondary",
   onClick: () => {
-    args.fns.setIsImportModalOpen(false);
-    args.fns.setImportData("");
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
   },
   text: "Cancel",
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: args.fns.getUsePolarisUI?.() === true
 };
 '''
@@ -4488,10 +4570,9 @@ return {
   "attr:variant": "secondary",
   text: "Cancel",
   onClick: () => {
-    args.fns.setIsImportModalOpen(false);
-    args.fns.setImportData("");
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
   },
-  disabled: args.fns.loading(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -4507,13 +4588,12 @@ return {
           '''
 return {
   variant: "primary",
-  onClick: () => args.fns.handleImport(args.fns.importData().trim(), () => {
-    args.fns.setIsImportModalOpen(false);
-    args.fns.setImportData("");
+  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
     args.fns.handleSearch();
   }),
   text: "Import",
-  disabled: args.fns.loading() || !args.fns.importData().trim(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
   hide: args.fns.getUsePolarisUI?.() === true
 };
 '''
@@ -4531,12 +4611,11 @@ return {
   as: "s-button",
   "attr:variant": "primary",
   text: "Import",
-  onClick: () => args.fns.handleImport(args.fns.importData().trim(), () => {
-    args.fns.setIsImportModalOpen(false);
-    args.fns.setImportData("");
+  onClick: () => args.fns.handleImport((args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(), () => {
+    args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { isImportModalOpen: false, importData: "" });
     args.fns.handleSearch();
   }),
-  disabled: args.fns.loading() || !args.fns.importData().trim(),
+  disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true || !(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.importData ?? "").trim(),
   hide: args.fns.getUsePolarisUI?.() !== true
 };
 '''
@@ -4553,12 +4632,14 @@ return {
 const evaluateConfig = args.fns.evaluateConfig;
 const config = evaluateConfig();
 const getConfigFunction = args.fns.getConfigFunction;
+const vid = args.fns.pageStateVertexId;
+const pageDp = () => args.graph.vertexes[vid]?.P;
 
 // Get initial config as function body string (from settingsModalInitialConfig, settings, or configFunction)
 let initialConfig = "";
 try {
-  const modalConfig = args.fns.settingsModalInitialConfig?.();
-  const currentSettings = modalConfig ?? args.fns.settings();
+  const modalConfig = pageDp()?.settingsModalInitialConfig ?? null;
+  const currentSettings = modalConfig ?? pageDp()?.settings;
   // If settings exist and it's a string (raw function body), use it
   if (currentSettings && typeof currentSettings === 'string') {
     initialConfig = currentSettings;
@@ -4595,10 +4676,12 @@ try {
 }
 
 return {
-  isOpen: args.fns.isSettingsModalOpen(),
+  isOpen: pageDp()?.isSettingsModalOpen === true,
   onClose: () => {
-    args.fns.setSettingsModalInitialConfig?.(null);
-    args.fns.setIsSettingsModalOpen(false);
+    args.mergeVertexProperties(0, vid, args.graph, args.setGraph, {
+      settingsModalInitialConfig: null,
+      isSettingsModalOpen: false
+    });
   },
   initialConfig: initialConfig,
   onSave: args.fns.handleSaveSettings,

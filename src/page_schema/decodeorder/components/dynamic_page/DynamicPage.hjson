@@ -5,22 +5,38 @@
       L: Component
       P: {
         fns:
-          '''// Memoized signals are defined first to ensure all dependent functions can use them.
-const [memoizedConfig, setMemoizedConfig] = args.createSignal(null);
-const [memoizedLoadFromSetting, setMemoizedLoadFromSetting] = args.createSignal(false);
-const [isSettingsModalOpen, setIsSettingsModalOpen] = args.createSignal(false);
-const [settingsModalInitialConfig, setSettingsModalInitialConfig] = args.createSignal(null);
-const [settings, setSettings] = args.createSignal(null);
-const [evaluatedConfig, setEvaluatedConfig] = args.createSignal(null);
-const [loading, setLoading] = args.createSignal(false);
-const [configLoading, setConfigLoading] = args.createSignal(true);
-const [selectedSidebarItem, setSelectedSidebarItem] = args.createSignal(null);
-// Store selected rows per category (keyed by category ID or 'uncategorized' or null)
-const [selectedRowsByCategory, setSelectedRowsByCategory] = args.createStore({});
-// Sidebar width state (default 240px)
-const [sidebarWidth, setSidebarWidth] = args.createSignal(240);
-// Rows to remove from table after move-to-category (parent-owned state, Table reacts via createEffect)
-const [rowsToRemove, setRowsToRemove] = args.createSignal(null);
+          '''const pageStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+args.addNewVertex(0, {
+  id: pageStateVertexId,
+  L: ["DynamicPageUiState"],
+  P: {
+    memoizedConfig: null,
+    memoizedLoadFromSetting: false,
+    isSettingsModalOpen: false,
+    settingsModalInitialConfig: null,
+    settings: null,
+    evaluatedConfig: null,
+    loading: false,
+    configLoading: true,
+    selectedSidebarCategoryId: null,
+    selectedRowsByCategory: {},
+    sidebarWidth: 240,
+    rowsToRemoveVertexIds: null
+  },
+  IN: {},
+  OUT: {}
+}, args.graph, args.setGraph);
+
+const patchPageP = (partial) => {
+  args.mergeVertexProperties(0, pageStateVertexId, args.graph, args.setGraph, partial);
+};
+const pageP = () => args.graph.vertexes[pageStateVertexId]?.P;
+
+const selectedSidebarItem = () => {
+  const id = pageP()?.selectedSidebarCategoryId;
+  if (id == null) return null;
+  return args.graph.vertexes[id] ?? null;
+};
 
 // Basic context/prop accessors
 const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
@@ -29,12 +45,14 @@ const getConfigFunction = () => args.contextData.props?.configFunction;
 
 // Helper to get cached config (and trigger memo evaluation if needed)
 const getCachedConfig = () => {
-  const cached = memoizedConfig();
-  if (cached !== null) {
-    return { config: cached, loadFromSetting: memoizedLoadFromSetting() };
+  const p = pageP();
+  const cached = p?.memoizedConfig;
+  if (cached !== null && cached !== undefined) {
+    return { config: cached, loadFromSetting: p?.memoizedLoadFromSetting === true };
   }
   updateMemoizedConfig();
-  return { config: memoizedConfig(), loadFromSetting: memoizedLoadFromSetting() };
+  const p2 = pageP();
+  return { config: p2?.memoizedConfig ?? null, loadFromSetting: p2?.memoizedLoadFromSetting === true };
 };
 
 const prop = (key, localProps) => {
@@ -571,11 +589,11 @@ const getExportFunction = () => {
 
 // Core config evaluation and memo update functions
 const evaluateConfig = () => {
-  const cached = evaluatedConfig();
-  if (cached !== null) return cached;
+  const cached = pageP()?.evaluatedConfig;
+  if (cached != null) return cached;
 
   const loadFromSetting = getLoadFromSetting();
-  const currentSettings = settings();
+  const currentSettings = pageP()?.settings;
   let config = null;
 
   // If loadFromSetting is true, only use settings (no props fallback)
@@ -585,7 +603,7 @@ const evaluateConfig = () => {
         const configFunction = new Function(currentSettings);
         config = configFunction();
         if (config && typeof config === 'object') {
-          setEvaluatedConfig(config);
+          patchPageP({ evaluatedConfig: config });
           return config;
         }
       } catch (error) {
@@ -594,7 +612,7 @@ const evaluateConfig = () => {
     }
     // If loadFromSetting is true but no settings, return empty config
     config = {};
-    setEvaluatedConfig(config);
+    patchPageP({ evaluatedConfig: config });
     return config;
   }
 
@@ -604,7 +622,7 @@ const evaluateConfig = () => {
       const configFunction = new Function(currentSettings);
       const evaluated = configFunction();
       if (evaluated && typeof evaluated === 'object') {
-        setEvaluatedConfig(evaluated);
+        patchPageP({ evaluatedConfig: evaluated });
         return evaluated;
       }
     } catch (error) {
@@ -618,7 +636,7 @@ const evaluateConfig = () => {
     try {
       const evaluated = configFn();
       if (evaluated && typeof evaluated === 'object') {
-        setEvaluatedConfig(evaluated);
+        patchPageP({ evaluatedConfig: evaluated });
         return evaluated;
       }
     } catch (error) {
@@ -639,14 +657,13 @@ const evaluateConfig = () => {
     enableLocalSort: args.contextData.props?.enableLocalSort,
     sidebar: args.contextData.props?.sidebar
   };
-  setEvaluatedConfig(config);
+  patchPageP({ evaluatedConfig: config });
   return config;
 };
 const updateMemoizedConfig = () => {
   const config = evaluateConfig();
   const loadFromSetting = getLoadFromSetting();
-  setMemoizedConfig(config);
-  setMemoizedLoadFromSetting(loadFromSetting);
+  patchPageP({ memoizedConfig: config, memoizedLoadFromSetting: loadFromSetting });
 };
 
 // Fetch data from server
@@ -657,7 +674,7 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
   // Capture the category item at the time of fetch
   const categoryItemForFetch = selectedSidebarItem();
 
-  setLoading(true);
+  patchPageP({ loading: true });
   try {
     const result = await dataFn({
       search: searchTerm,
@@ -671,7 +688,7 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
     console.error("Error fetching table data:", error);
     args.showErrorToast?.("Failed to load table data");
   } finally {
-    setLoading(false);
+    patchPageP({ loading: false });
   }
 };
 
@@ -688,7 +705,7 @@ const handleImport = async (dataToImport, callback) => {
     return;
   }
   try {
-    setLoading(true);
+    patchPageP({ loading: true });
     const result = await importFn({ data: dataToImport });
     if (result?.success) {
       args.showSuccessToast?.(result.message || "Import completed successfully");
@@ -701,7 +718,7 @@ const handleImport = async (dataToImport, callback) => {
     console.error("Error importing:", error);
     args.showErrorToast?.(error?.message || "Failed to import data");
   } finally {
-    setLoading(false);
+    patchPageP({ loading: false });
   }
 };
 
@@ -713,7 +730,7 @@ const handleExport = async (data = null) => {
     return;
   }
   try {
-    setLoading(true);
+    patchPageP({ loading: true });
     const columns = prop('columns');
     const sanitizedColumns = JSON.parse(JSON.stringify(columns));
     const result = await exportFn({ data, columns: sanitizedColumns }); // null means export all data
@@ -743,7 +760,7 @@ const handleExport = async (data = null) => {
     console.error("Error exporting:", error);
     args.showErrorToast?.("Failed to export data");
   } finally {
-    setLoading(false);
+    patchPageP({ loading: false });
   }
 };
 
@@ -772,9 +789,7 @@ const loadSettings = async (options = {}) => {
       const configText = settingData.config;
       if (typeof configText === 'string') {
         if (updateState) {
-          setSettings(configText);
-          setEvaluatedConfig(null); // Clear evaluation cache
-          setMemoizedConfig(null); // Clear memoized cache
+          patchPageP({ settings: configText, evaluatedConfig: null, memoizedConfig: null });
         }
         return configText;
       }
@@ -788,7 +803,7 @@ const loadSettings = async (options = {}) => {
 
 // Initialize settings on mount
 const initializeSettings = async () => {
-  setConfigLoading(true);
+  patchPageP({ configLoading: true });
   try {
     const settingsFn = getSettingsFunction();
     if (settingsFn) {
@@ -800,15 +815,14 @@ const initializeSettings = async () => {
       updateMemoizedConfig();
     }
   } finally {
-    setConfigLoading(false);
+    patchPageP({ configLoading: false });
   }
 };
 
 // Handle opening settings modal - load config without updating state to avoid table loading spinner
 const handleOpenSettings = async () => {
   const configText = await loadSettings({ updateState: false });
-  setSettingsModalInitialConfig(configText);
-  setIsSettingsModalOpen(true);
+  patchPageP({ settingsModalInitialConfig: configText, isSettingsModalOpen: true });
 };
 
 // Handle saving settings
@@ -819,15 +833,17 @@ const handleSaveSettings = async (configText, callback) => {
     return;
   }
   try {
-    setLoading(true);
+    patchPageP({ loading: true });
     // Save the raw function body text, not the evaluated config
     const result = await saveFn(configText);
     if (result?.success) {
       args.showSuccessToast?.(result.message || "Settings saved successfully");
-      setIsSettingsModalOpen(false);
-      setSettings(configText); // Store the raw text
-      setEvaluatedConfig(null); // Clear evaluation cache
-      setMemoizedConfig(null); // Clear memoized cache
+      patchPageP({
+        isSettingsModalOpen: false,
+        settings: configText,
+        evaluatedConfig: null,
+        memoizedConfig: null
+      });
       // Reload data to apply new settings
       callback?.();
     } else {
@@ -837,7 +853,7 @@ const handleSaveSettings = async (configText, callback) => {
     console.error("Error saving settings:", error);
     args.showErrorToast?.("Failed to save settings");
   } finally {
-    setLoading(false);
+    patchPageP({ loading: false });
   }
 };
 
@@ -887,7 +903,9 @@ const getSelectedRows = () => {
   const item = selectedSidebarItem();
   const categoryKey = getCategoryKey(item);
   if (categoryKey === null) return new Set();
-  return selectedRowsByCategory[categoryKey] || new Set();
+  const raw = pageP()?.selectedRowsByCategory?.[categoryKey];
+  if (!raw) return new Set();
+  return new Set(Array.isArray(raw) ? raw : []);
 };
 
 // Set selected rows for current category
@@ -895,7 +913,9 @@ const setSelectedRows = (newSelected) => {
   const item = selectedSidebarItem();
   const categoryKey = getCategoryKey(item);
   if (categoryKey === null) return;
-  setSelectedRowsByCategory(categoryKey, newSelected);
+  const next = { ...(pageP()?.selectedRowsByCategory ?? {}) };
+  next[categoryKey] = Array.from(newSelected);
+  patchPageP({ selectedRowsByCategory: next });
 };
 
 // Clear selected rows for current category
@@ -905,7 +925,7 @@ const clearSelectedRows = () => {
 
 // Handle sidebar item selection
 const handleSidebarItemSelect = (item) => {
-  setSelectedSidebarItem(item);
+  patchPageP({ selectedSidebarCategoryId: item?.id ?? null });
   // Persist selected category in URL so reload restores the same category (vertex id only)
   if (item?.id != null && args.setSearchParams) {
     const current = args.searchParams || {};
@@ -927,7 +947,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
 
   try {
-    setLoading(true);
+    patchPageP({ loading: true });
     // Get source category ID from selected sidebar item (vertex id only; backend passes "uncategorized" for root)
     const currentSelected = selectedSidebarItem();
     const sourceCategoryId = currentSelected?.id ?? null;
@@ -972,7 +992,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
 
     // Trigger table to remove moved rows (parent state, Table reacts - no reload needed)
     if (result?.result?.success && contentIds?.length) {
-      setRowsToRemove(contentIds);
+      patchPageP({ rowsToRemoveVertexIds: contentIds });
     }
 
     // Process graph data if available
@@ -989,7 +1009,7 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
     args.showErrorToast?.(errorMessage);
     return { success: false, message: errorMessage };
   } finally {
-    setLoading(false);
+    patchPageP({ loading: false });
   }
 };
 
@@ -1003,20 +1023,10 @@ return {
   getFormConfig,
   getSaveSettingsFunction,
   evaluateConfig,
-  setEvaluatedConfig,
   getCachedConfig,
   updateMemoizedConfig,
   fetchData,
-  isSettingsModalOpen,
-  setIsSettingsModalOpen,
-  settingsModalInitialConfig,
-  setSettingsModalInitialConfig,
-  settings,
-  setSettings,
-  loading,
-  setLoading,
-  configLoading,
-  setConfigLoading,
+  pageStateVertexId,
   loadSettings,
   initializeSettings,
   handleOpenSettings,
@@ -1035,16 +1045,11 @@ return {
   hasSidebar,
   getUsePolarisUI,
   selectedSidebarItem,
-  setSelectedSidebarItem,
   handleSidebarItemSelect,
   handleMoveItemsToCategory,
-  rowsToRemove,
-  setRowsToRemove,
   getSelectedRows,
   setSelectedRows,
   clearSelectedRows,
-  sidebarWidth,
-  setSidebarWidth,
   extractError
 }
 
@@ -1055,6 +1060,9 @@ return {
 return {
   onMount: async () => {
     await args.fns.initializeSettings();
+  },
+  onCleanup: () => {
+    args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
   }
 }'''
       }
@@ -1083,7 +1091,8 @@ return `._id {
         key: config_loading_overlay
         props:
           '''
-const configLoading = args.fns.configLoading();
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 return {
   as: "div",
   hide: !configLoading
@@ -1146,14 +1155,15 @@ const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
 const { config } = args.fns.getCachedConfig();
 const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
 
+const vid = args.fns.pageStateVertexId;
 return {
   onItemSelect: args.fns.handleSidebarItemSelect,
   tableVertexLabel: tableVertexLabel,
   relationshipType: relationshipType,
   enableUserScoping: enableUserScopingForSidebar,
   onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
-  sidebarWidth: args.fns.sidebarWidth,
-  setSidebarWidth: args.fns.setSidebarWidth,
+  sidebarWidth: () => args.graph.vertexes[vid]?.P?.sidebarWidth ?? 240,
+  setSidebarWidth: (w) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { sidebarWidth: w }),
   fetchRoot: args.fns.fetchRoot,
   hooks: config?.sidebar?.hooks,
   initialCategoryId: args.searchParams?.sidebarCategory,
@@ -1173,13 +1183,14 @@ return {
         key: unique_1
         props:
           '''
+const vid = args.fns.pageStateVertexId;
 return {
   selectedSidebarItem: args.fns.selectedSidebarItem,
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
   clearSelectedRows: args.fns.clearSelectedRows,
-  rowsToRemove: args.fns.rowsToRemove,
-  setRowsToRemove: args.fns.setRowsToRemove
+  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids })
 }'''
       }
     }
@@ -1193,7 +1204,8 @@ return {
         props:
           '''
 const hasSidebar = args.fns.hasSidebar();
-const configLoading = args.fns.configLoading();
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 return {
   as: "div",
   hide: hasSidebar || configLoading
@@ -1211,12 +1223,13 @@ return {
         key: unique_2
         props:
           '''
+const vid = args.fns.pageStateVertexId;
 return {
   getSelectedRows: args.fns.getSelectedRows,
   setSelectedRows: args.fns.setSelectedRows,
   clearSelectedRows: args.fns.clearSelectedRows,
-  rowsToRemove: args.fns.rowsToRemove,
-  setRowsToRemove: args.fns.setRowsToRemove
+  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids })
 }'''
       }
     }
