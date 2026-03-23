@@ -145,11 +145,14 @@ const [expansionOpen, setExpansionOpen] = args.createStore({});
 const [expansionRows, setExpansionRows] = args.createStore({});
 const [expansionLoading, setExpansionLoading] = args.createStore({});
 const isExpansionOpen = (rowId) => !!expansionOpen[String(rowId)];
+// Declared before toggleRowExpansion so expand/collapse can set keyboard-focus active row (expand control uses stopPropagation).
+const [activeRowId, setActiveRowId] = args.createSignal(null);
 
 const toggleRowExpansion = async (row) => {
   const rowExpansion = getRowExpansionConfig();
   if (!rowExpansion || !row?.id) return;
   const id = String(row.id);
+  // setActiveRowId(row.id);
   if (expansionOpen[id]) {
     setExpansionOpen(id, undefined);
     return;
@@ -1075,8 +1078,6 @@ const handleShiftArrow = (currentIndex, nextIndex) => {
   setActiveRowId(getDisplayData()?.[nextIndex]?.id ?? null);
 };
 
-// Keyboard: active row by id (null = none); index derived from data so no createEffect needed
-const [activeRowId, setActiveRowId] = args.createSignal(null);
 const getActiveRowIndex = () => {
   const id = activeRowId();
   if (id == null) return -1;
