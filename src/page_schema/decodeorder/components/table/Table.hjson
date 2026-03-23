@@ -145,8 +145,83 @@ const [expansionOpen, setExpansionOpen] = args.createStore({});
 const [expansionRows, setExpansionRows] = args.createStore({});
 const [expansionLoading, setExpansionLoading] = args.createStore({});
 const isExpansionOpen = (rowId) => !!expansionOpen[String(rowId)];
+// Parent id → child line-item vertex ids (from main fetch); resolve bodies via args.graph.vertexes[id].
+const [expansionPrefetchIdsByParentId, setExpansionPrefetchIdsByParentId] = args.createSignal(null);
 // Declared before toggleRowExpansion so expand/collapse can set keyboard-focus active row (expand control uses stopPropagation).
 const [activeRowId, setActiveRowId] = args.createSignal(null);
+
+const buildExpansionPrefetchIdMapFromGraph = (relatedVertexIds, rowExpansion, parentRows) => {
+  if (!rowExpansion || !rowExpansion.childVertexLabel || !Array.isArray(relatedVertexIds)) return null;
+  const childLabel = rowExpansion.childVertexLabel;
+  const filterKey = rowExpansion.childParentFilterKey || 'orderId';
+  const idField = rowExpansion.parentIdField || 'id';
+  const idsByParentKey = {};
+  for (const lineItemVertexId of relatedVertexIds) {
+    if (lineItemVertexId == null || lineItemVertexId === '') continue;
+    const lineItemVertex = args.graph?.vertexes?.[lineItemVertexId];
+    if (!lineItemVertex?.L?.includes(childLabel)) continue;
+    const parentFilterValue = lineItemVertex.P?.[filterKey];
+    if (parentFilterValue == null) continue;
+    const parentKey = String(parentFilterValue);
+    if (!idsByParentKey[parentKey]) idsByParentKey[parentKey] = [];
+    if (!idsByParentKey[parentKey].includes(lineItemVertexId)) idsByParentKey[parentKey].push(lineItemVertexId);
+  }
+  if (Array.isArray(parentRows)) {
+    for (const row of parentRows) {
+      const parentVal =
+        typeof rowExpansion.getNestedParentFilterValue === 'function'
+          ? rowExpansion.getNestedParentFilterValue(row)
+          : (row.P?.[idField] ?? row[idField] ?? row.id);
+      if (parentVal == null) continue;
+      const parentKey = String(parentVal);
+      if (idsByParentKey[parentKey] === undefined) idsByParentKey[parentKey] = [];
+    }
+  }
+  return idsByParentKey;
+};
+
+const lineItemVerticesFromIds = (ids) => {
+  if (!Array.isArray(ids)) return [];
+  const out = [];
+  for (const vertexId of ids) {
+    const vertex = args.graph?.vertexes?.[vertexId];
+    if (vertex) out.push(vertex);
+  }
+  return out;
+};
+
+const getNestedSortValue = (row, columnKey, nestedColumns) => {
+  const nestedColumn = Array.isArray(nestedColumns) ? nestedColumns.find((column) => column.key === columnKey) : null;
+  if (nestedColumn?.valueAccessor) return nestedColumn.valueAccessor(row);
+  return row?.P?.[columnKey];
+};
+
+const sortExpansionPrefetchRows = (rows, nestedSort, nestedColumns) => {
+  if (!Array.isArray(rows) || rows.length < 2) return rows ? rows.slice() : [];
+  if (!nestedSort?.column) return rows.slice();
+  const sortColumnKey = nestedSort.column;
+  const directionSign = nestedSort.direction === 'desc' ? -1 : 1;
+  const sorted = rows.slice();
+  sorted.sort((a, b) => {
+    const aVal = getNestedSortValue(a, sortColumnKey, nestedColumns);
+    const bVal = getNestedSortValue(b, sortColumnKey, nestedColumns);
+    if (aVal === bVal) return 0;
+    const comparison = aVal > bVal ? 1 : -1;
+    return comparison * directionSign;
+  });
+  return sorted;
+};
+
+const clearExpansionStoresForDataReload = () => {
+  const expansionOpenRowIds = Object.keys(expansionOpen);
+  for (let i = 0; i < expansionOpenRowIds.length; i++) setExpansionOpen(expansionOpenRowIds[i], undefined);
+  const cachedExpansionRowIds = Object.keys(expansionRows);
+  for (let j = 0; j < cachedExpansionRowIds.length; j++) setExpansionRows(cachedExpansionRowIds[j], undefined);
+  const expansionLoadingRowIds = Object.keys(expansionLoading);
+  for (let loadingIdx = 0; loadingIdx < expansionLoadingRowIds.length; loadingIdx++) {
+    setExpansionLoading(expansionLoadingRowIds[loadingIdx], undefined);
+  }
+};
 
 const toggleRowExpansion = async (row) => {
   const rowExpansion = getRowExpansionConfig();
@@ -161,16 +236,26 @@ const toggleRowExpansion = async (row) => {
     for (const expandedRowId of Object.keys(expansionOpen)) setExpansionOpen(expandedRowId, undefined);
   }
   setExpansionOpen(id, true);
+  const idField = rowExpansion.parentIdField || 'id';
+  const parentVal =
+    typeof rowExpansion.getNestedParentFilterValue === 'function'
+      ? rowExpansion.getNestedParentFilterValue(row)
+      : (row.P?.[idField] ?? row[idField] ?? row.id);
+  const prefetchMap = expansionPrefetchIdsByParentId();
+  if (prefetchMap != null) {
+    const bucketIds = prefetchMap[String(parentVal)] ?? [];
+    const rows = lineItemVerticesFromIds(bucketIds);
+    setExpansionRows(
+      id,
+      sortExpansionPrefetchRows(rows, rowExpansion.nestedSort, rowExpansion.nestedColumns)
+    );
+    return;
+  }
   const skipFetch = expansionRows[id] != null && rowExpansion.refetchOnExpand !== true;
   if (skipFetch) return;
   setExpansionLoading(id, true);
   try {
     const childLabel = rowExpansion.childVertexLabel;
-    const idField = rowExpansion.parentIdField || 'id';
-    const parentVal =
-      typeof rowExpansion.getNestedParentFilterValue === 'function'
-        ? rowExpansion.getNestedParentFilterValue(row)
-        : (row.P?.[idField] ?? row[idField] ?? row.id);
     const filterKey = rowExpansion.childParentFilterKey || 'orderId';
     const filters = { [filterKey]: parentVal };
     const sort = rowExpansion.nestedSort || null;
@@ -1008,7 +1093,16 @@ const handleSearch = () => {
     enableLocalFilters ? undefined : searchTerm(), 
     enableLocalFilters ? undefined : columnFilters, 
     enableLocalSort ? undefined : sortConfig, 
-    (data, categoryItem) => {
+    (data, categoryItem, relatedVertexIds) => {
+      clearExpansionStoresForDataReload();
+      const rowExpansion = (args.fns.evaluateConfig?.() || {}).rowExpansion;
+      if (rowExpansion && rowExpansion.childVertexLabel && Array.isArray(relatedVertexIds)) {
+        setExpansionPrefetchIdsByParentId(
+          buildExpansionPrefetchIdMapFromGraph(relatedVertexIds, rowExpansion, data)
+        );
+      } else {
+        setExpansionPrefetchIdsByParentId(null);
+      }
       setData(data);
       
       // Update category count with fetched data length if local filters are enabled

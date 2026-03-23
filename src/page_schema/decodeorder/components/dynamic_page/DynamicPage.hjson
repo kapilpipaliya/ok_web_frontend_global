@@ -180,21 +180,24 @@ const getGenericDataFunction = () => {
       // Check for errors and show toast
       const errorMessage = extractError(result, true, "Failed to load data");
       if (errorMessage) {
-        return { data: [], relatedVertices: [] };
+        return { data: [], relatedVertexIds: [] };
       }
 
-      // Return successful result
+      // Return successful result — only related vertex ids (full vertices live in args.graph after applyServerGraphToLocalGraph)
       if (result?.result?.success && result.result.data) {
         const data = Array.isArray(result.result.data) ? result.result.data : [];
-        const relatedVertices = Array.isArray(result.result.relatedVertices) ? result.result.relatedVertices : [];
-        return { data, relatedVertices };
+        const relatedVerticesRaw = Array.isArray(result.result.relatedVertices) ? result.result.relatedVertices : [];
+        const relatedVertexIds = relatedVerticesRaw
+          .map((relatedVertex) => relatedVertex?.id)
+          .filter((vertexId) => vertexId != null && vertexId !== "");
+        return { data, relatedVertexIds };
       }
 
-      return { data: [], relatedVertices: [] };
+      return { data: [], relatedVertexIds: [] };
   } catch (error) {
     console.error("Error fetching data:", error);
     args.showErrorToast?.("Failed to load data");
-    return { data: [], relatedVertices: [] };
+    return { data: [], relatedVertexIds: [] };
   }
   };
 };
@@ -662,7 +665,7 @@ const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
       sort: sortConfig
     });
     if (result?.data) {
-      callback(result.data, categoryItemForFetch, result.relatedVertices || []);
+      callback(result.data, categoryItemForFetch, result.relatedVertexIds || []);
     }
   } catch (error) {
     console.error("Error fetching table data:", error);
