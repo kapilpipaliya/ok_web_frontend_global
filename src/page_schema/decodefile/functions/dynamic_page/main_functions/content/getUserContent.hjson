@@ -36,6 +36,13 @@ const {
   onlyNotQueued
 } = args.contextData;
 
+const getGraphPayload = (nodes, rels) => ({
+  vertexes: nodes || {},
+  edges: rels || {},
+  deleted_vertexes: Array.isArray(args.context?.deletedVertexes) ? args.context.deletedVertexes : [],
+  deleted_edges: Array.isArray(args.context?.deletedEdges) ? args.context.deletedEdges : []
+});
+
 if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   return {
     success: false,
@@ -56,11 +63,13 @@ if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0
   const queryResult = await args.session.run(query, { elementIds });
   args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
   const nodes = args.context.nodes || {};
+  const rels = args.context.relationships || {};
   const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
   return {
     success: true,
     data: items,
     relatedVertices: Object.values(nodes).filter(v => !v.L || !v.L.includes(tableVertexLabel)),
+    graph: getGraphPayload(nodes, rels),
     message: `Found ${items.length} row(s) no longer queued`
   };
 }
@@ -83,7 +92,21 @@ if (search && search.trim()) {
     toLower(COALESCE(c.title, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.subTitle, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.event, '')) CONTAINS $searchTerm OR
-    toLower(COALESCE(c.language, '')) CONTAINS $searchTerm
+    toLower(COALESCE(c.language, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.orderName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.productTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.lineItemName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.variantTitle, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.sku, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.vendor, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.email, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.displayFinancialStatus, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.displayFulfillmentStatus, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.tags, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.note, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.customerDisplayName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.status, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.draftOrderName, '')) CONTAINS $searchTerm
   )`);
   queryParams.searchTerm = searchTerm;
 }
@@ -211,12 +234,14 @@ if (!args.context.nodes) args.context.nodes = {};
 if (!args.context.relationships) args.context.relationships = {};
 args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
 const nodes = args.context.nodes || {};
+const rels = args.context.relationships || {};
 const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
 
 const result = {
   success: true,
   data: items,
   relatedVertices: Object.values(nodes).filter(v => !v.L || !v.L.includes(vertexLabel)),
+  graph: getGraphPayload(nodes, rels),
   message: `Found ${items.length} ${tableVertexLabel} item${items.length !== 1 ? 's' : ''}`
 };
 

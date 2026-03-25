@@ -1592,7 +1592,7 @@ return `._id {
         componentName: Html
         props:
           '''
-const isResizing = args.fns.isResizing;
+const isResizing = () => args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
 
 return {
   as: "div",
