@@ -1,0 +1,344 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''const isInIframe = args.atom(null);
+const executeYTOFunction = async (functionName, contextData = {}) => {
+  return await args.executeNamedServerFunction({
+    functionName,
+    contextData: {
+      ...contextData,
+    }
+  });
+};
+
+return {
+  executeYTOFunction,
+  isInIframe
+}'''
+        title: ShopifyLayout
+        key: ShopifyLayout
+        props:
+          '''return {
+  onMount: () => args.fns.isInIframe(window.self !== window.top)
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: meta
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  name: "shopify-api-key",
+  content: "ce06108efb1b49fe4e2b07d321635271"
+}'''
+      }
+    }
+    {
+      id: "meta_desc"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "description",
+  content: "Decode Orders Organizer helps you organize your Shopify order catalog in nested categories. View orders by category. Available in the Shopify App Store."
+}'''
+      }
+    }
+    {
+      id: "meta_keywords"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "keywords",
+  content: "Shopify app, order organizer, nested categories, order catalog, organize Shopify orders, Shopify admin app"
+}'''
+      }
+    }
+    {
+      id: "meta_robots"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "robots",
+  content: "index, follow"
+}'''
+      }
+    }
+    {
+      id: "meta_og_type"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:type",
+  content: "website"
+}'''
+      }
+    }
+    {
+      id: "meta_og_title"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:title",
+  content: "Decode Orders Organizer – Shopify app to organize orders in nested categories"
+}'''
+      }
+    }
+    {
+      id: "meta_og_desc"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:description",
+  content: "Decode Orders Organizer helps you organize your Shopify order catalog in nested categories. View orders by category. Available in the Shopify App Store."
+}'''
+      }
+    }
+    {
+      id: "meta_og_url"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:url",
+  content: "https://decodeorder.decodecommerce.com" + (args.location?.pathname || "/")
+}'''
+      }
+    }
+    {
+      id: "link_canonical"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "link",
+  rel: "canonical",
+  href: "https://decodeorder.decodecommerce.com" + (args.location?.pathname || "/")
+}'''
+      }
+    }
+    {
+      id: "meta_og_image"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  property: "og:image",
+  content: "https://decodeorder.decodecommerce.com/api/file/download/decode-orders-organizer-og.png"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        as: script
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  src: "https://cdn.shopify.com/shopifycloud/polaris.js"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: ConfirmProvider
+        props:
+          '''
+return {
+  getUsePolarisUI: () => true
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: ShopifyNavigation
+        key: unique_3
+        props:
+          '''return {
+  hide: !args.fns.isInIframe()
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: ShopifyAuth
+        key: unique_1
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: 2children
+        key: unique_2
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e_meta_desc
+      T: Attr
+      S: "1"
+      E: "meta_desc"
+    }
+    {
+      id: e_meta_keywords
+      T: Attr
+      S: "1"
+      E: "meta_keywords"
+    }
+    {
+      id: e_meta_robots
+      T: Attr
+      S: "1"
+      E: "meta_robots"
+    }
+    {
+      id: e_meta_og_type
+      T: Attr
+      S: "1"
+      E: "meta_og_type"
+    }
+    {
+      id: e_meta_og_title
+      T: Attr
+      S: "1"
+      E: "meta_og_title"
+    }
+    {
+      id: e_meta_og_desc
+      T: Attr
+      S: "1"
+      E: "meta_og_desc"
+    }
+    {
+      id: e_meta_og_url
+      T: Attr
+      S: "1"
+      E: "meta_og_url"
+    }
+    {
+      id: e_link_canonical
+      T: Attr
+      S: "1"
+      E: "link_canonical"
+    }
+    {
+      id: e_meta_og_image
+      T: Attr
+      S: "1"
+      E: "meta_og_image"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "1"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+  ]
+}

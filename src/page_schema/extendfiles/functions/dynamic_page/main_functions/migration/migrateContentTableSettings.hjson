@@ -1,0 +1,233 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Migrates or creates default table configuration settings for NetSuite custom record files (NetSuiteCustomRecordExtendFile). Updates existing settings if they already exist.
+        body:
+          '''
+/**
+ * Migration: Content Table Settings
+ *
+ * This migration creates or updates default table configuration settings
+ * for Book and AudioVideo content types.
+ *
+ * Parameters (via args.contextData):
+ * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
+ *
+ * Returns:
+ * - Statistics about the migration
+ */
+
+const { dryRun = false } = args.contextData;
+
+console.log(`🚀 Starting content table settings migration (dryRun: ${dryRun})`);
+
+// Define settings configurations
+const settingsConfigs = [
+  {
+    key: 'NetSuiteCustomRecordExtendFile_settings_default',
+    tableVertexLabel: 'NetSuiteCustomRecordExtendFile',
+    icon: '🧾',
+    name: 'NetSuiteCustomRecordExtendFile',
+    config: `return {
+  title: "eXtendFiles records",
+  label: "Record",
+  icon: "carbon:document",
+  hideImportButtons: true,
+  hideExportButtons: true,
+  hideSettingsButton: false,
+  showActions: false,
+  showEditButton: false,
+  rowClickable: false,
+  showRowNumber: true,
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      type: "imagePreview",
+      width: "88px",
+      sortable: false,
+      valueAccessor: (row) => row.P?.previewImageUrl || row.P?.fileUrl || null
+    },
+    { key: "fileName", label: "File name", type: "text", width: "200px", valueAccessor: (row) => row.P?.fileName || row.P?.name, overflowEllipsis: true },
+    { key: "folderName", label: "Folder", type: "text", width: "200px", valueAccessor: (row) => row.P?.folderName, overflowEllipsis: true },
+    { key: "mimeType", label: "MIME", type: "text", width: "120px", valueAccessor: (row) => { const v = row.P?.mimeType; if (v == null || v === "") return ""; const s = String(v); return s === "undefined" || s === "null" ? "" : s; }, overflowEllipsis: true },
+    { key: "fileSize", label: "Size (bytes)", type: "text", width: "100px", valueAccessor: (row) => row.P?.fileSize },
+    { key: "id", label: "Internal ID", type: "text", width: "110px", valueAccessor: (row) => row.P?.id },
+    { key: "approved", label: "Approved", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.approved ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "rejected", label: "Rejected", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.rejected ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "critical"], no: ["No", "neutral"] } },
+    { key: "privateUrl", label: "Private URL", type: "badge", width: "100px", valueAccessor: (row) => (row.P?.privateUrl ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "approvalId", label: "Approval UUID", type: "text", width: "200px", valueAccessor: (row) => row.P?.approvalId, overflowEllipsis: true },
+    { key: "originalTransaction", label: "Orig. trans.", type: "text", width: "110px", valueAccessor: (row) => row.P?.originalTransaction },
+    { key: "soPref", label: "SO pref", type: "text", width: "100px", valueAccessor: (row) => row.P?.soPref },
+    { key: "created", label: "Created", type: "text", width: "120px", valueAccessor: (row) => row.P?.created },
+    { key: "lastModified", label: "Last modified", type: "text", width: "120px", valueAccessor: (row) => row.P?.lastModified },
+    { key: "scriptId", label: "Script ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.scriptId, overflowEllipsis: true },
+    { key: "isInactive", label: "Inactive", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.isInactive ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "neutral"], no: ["No", "success"] } },
+    { key: "recordType", label: "Record type", type: "text", width: "200px", valueAccessor: (row) => row.P?.recordType, overflowEllipsis: true },
+    { key: "extraJson", label: "Extra fields", type: "text", width: "240px", valueAccessor: (row) => row.P?.extraJson || row.P?.rawJson || "", overflowEllipsis: true }
+  ],
+  rowHeight: 80,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "NetSuiteCustomRecordExtendFileCategory",
+    toParentEdgeType: "NetSuiteCustomRecordExtendFileCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, maxLength: 255, colSpan: 2 }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: { beforeFetchData: "netsuiteCustomRecordExtendFilesBeforeFetchData" }
+};`
+  },
+];
+
+// Helper function to process a single setting
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+
+  console.log(`\n${icon} Processing ${name} settings...`);
+
+  // Check if setting exists
+  const checkResult = await args.session.run(
+    `MATCH (s:Setting {key: $key}) RETURN s`,
+    { key }
+  );
+
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      // Update existing
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`✅ Updated existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      // Create new
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'table_config',
+          tableVertexLabel: $tableVertexLabel,
+          config: $config,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`✅ Created new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  } else {
+    // Dry run - just report
+    if (exists) {
+      console.log(`📋 Would update existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      console.log(`📋 Would create new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  }
+}
+
+// Process all settings
+const stats = {
+  bookSettingsCreated: 0,
+  bookSettingsUpdated: 0,
+  audioVideoSettingsCreated: 0,
+  audioVideoSettingsUpdated: 0,
+  categorySettingsCreated: 0,
+  categorySettingsUpdated: 0,
+  shopifyProductSettingsCreated: 0,
+  shopifyProductSettingsUpdated: 0,
+  shopifyProductCategorySettingsCreated: 0,
+  shopifyProductCategorySettingsUpdated: 0,
+  shopifyShopSettingsCreated: 0,
+  shopifyShopSettingsUpdated: 0
+};
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const setting = settingsConfigs[i];
+  const result = await processSetting(setting);
+
+  // Update stats based on setting type
+  if (setting.tableVertexLabel === 'Book') {
+    stats.bookSettingsCreated += result.created;
+    stats.bookSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'AudioVideo') {
+    stats.audioVideoSettingsCreated += result.created;
+    stats.audioVideoSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'Category') {
+    stats.categorySettingsCreated += result.created;
+    stats.categorySettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyProduct') {
+    stats.shopifyProductSettingsCreated += result.created;
+    stats.shopifyProductSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyProductCategory') {
+    stats.shopifyProductCategorySettingsCreated += result.created;
+    stats.shopifyProductCategorySettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyShop') {
+    stats.shopifyShopSettingsCreated += result.created;
+    stats.shopifyShopSettingsUpdated += result.updated;
+  }
+}
+
+// ==========================================
+// Summary
+// ==========================================
+console.log('\n📊 Migration Summary:');
+console.log('==========================================');
+console.log(`Book settings - Created: ${stats.bookSettingsCreated}, Updated: ${stats.bookSettingsUpdated}`);
+console.log(`AudioVideo settings - Created: ${stats.audioVideoSettingsCreated}, Updated: ${stats.audioVideoSettingsUpdated}`);
+console.log(`Category settings - Created: ${stats.categorySettingsCreated}, Updated: ${stats.categorySettingsUpdated}`);
+console.log(`ShopifyProduct settings - Created: ${stats.shopifyProductSettingsCreated}, Updated: ${stats.shopifyProductSettingsUpdated}`);
+console.log(`ShopifyProductCategory settings - Created: ${stats.shopifyProductCategorySettingsCreated}, Updated: ${stats.shopifyProductCategorySettingsUpdated}`);
+console.log(`ShopifyShop settings - Created: ${stats.shopifyShopSettingsCreated}, Updated: ${stats.shopifyShopSettingsUpdated}`);
+console.log('==========================================');
+
+return {
+  success: true,
+  message: dryRun
+    ? "Dry run completed - no changes made"
+    : "Content table settings migration completed successfully",
+  data: {
+    ...stats,
+    dryRun
+  }
+};
+'''
+        key: migrateContentTableSettings
+      }
+    }
+  ]
+  edges: []
+}
