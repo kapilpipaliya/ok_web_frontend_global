@@ -1,0 +1,40 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        fns: "return { enabled: () => true }",
+        title: "NetSuite Custom Records",
+        key: "DecodeNetSuiteCustomRecords",
+        url: "/netsuite-custom-records",
+        props: "return { isNoPermissionCheck: true };"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DynamicPage",
+        key: "",
+        props:
+          '''return {
+  tableVertexLabel: "NetSuiteCustomRecordExtendFile",
+  loadFromSetting: true
+};'''
+      }
+    },
+    {
+      id: "3",
+      L: "PageLayout",
+      P: {
+        componentName: "ShopifyLayout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "PageLayout", S: "1", E: "3" }
+  ]
+}

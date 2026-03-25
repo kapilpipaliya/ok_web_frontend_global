@@ -10,12 +10,15 @@
 
 const isNestedLinesTable = () => args.contextData.props?.nestedLinesMode === true;
 
-const getRowExpansionConfig = () => {
-  if (isNestedLinesTable()) return null;
+const getRowExpansionConfigs = () => {
+  if (isNestedLinesTable()) return [];
   const tableConfig = args.fns.evaluateConfig?.() || {};
-  const rowExpansion = tableConfig.rowExpansion;
-  if (rowExpansion && typeof rowExpansion === 'object' && rowExpansion.childVertexLabel) return rowExpansion;
-  return null;
+  const rawExpansion = tableConfig.rowExpansion;
+  if (Array.isArray(rawExpansion)) {
+    return rawExpansion.filter((cfg) => cfg && typeof cfg === 'object');
+  }
+  if (rawExpansion && typeof rawExpansion === 'object') return [rawExpansion];
+  return [];
 };
 
 // rowExpansion.expansionPanelHeight; optional expansionPanelMaxHeight caps height. Default 280 when unset.
@@ -28,13 +31,20 @@ const parsePositiveNumber = (rawValue) => {
   return null;
 };
 
-const getExpansionPanelHeight = (rowExpansion) => {
-  if (!rowExpansion || typeof rowExpansion !== 'object') return 280;
-  let panelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelHeight);
-  if (panelHeightPx == null) panelHeightPx = 280;
-  const maxPanelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelMaxHeight);
-  if (maxPanelHeightPx != null && panelHeightPx > maxPanelHeightPx) panelHeightPx = maxPanelHeightPx;
-  return panelHeightPx;
+const getExpansionPanelHeight = (rowExpansions) => {
+  const list = Array.isArray(rowExpansions) ? rowExpansions : [];
+  if (list.length === 0) return 280;
+  let totalHeight = 0;
+  for (let i = 0; i < list.length; i++) {
+    const rowExpansion = list[i];
+    if (!rowExpansion || typeof rowExpansion !== 'object') continue;
+    let panelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelHeight);
+    if (panelHeightPx == null) panelHeightPx = 280;
+    const maxPanelHeightPx = parsePositiveNumber(rowExpansion.expansionPanelMaxHeight);
+    if (maxPanelHeightPx != null && panelHeightPx > maxPanelHeightPx) panelHeightPx = maxPanelHeightPx;
+    totalHeight += panelHeightPx;
+  }
+  return totalHeight > 0 ? totalHeight : 280;
 };
 
 const shouldExpandOneRowAtATime = (rowExpansion) => {
@@ -61,7 +71,7 @@ const getColumns = () => {
   const base = args.fns.prop('columns') || [];
   const groupBy = getGroupByConfig();
   if (groupBy) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
-  if (getRowExpansionConfig()) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
+  if (getRowExpansionConfigs().length > 0) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
   return base;
 };
 
@@ -79,6 +89,12 @@ const getCustomActions = () => args.fns.prop('customActions', args.contextData.p
 const getBatchActions = () => args.fns.prop('batchActions', args.contextData.props) || [];
 const getShowRowNumber = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showRowNumber !== false;
+  // When loadFromSetting (DynamicPage), do not pass contextData.props: Table ComponentVariant
+  // defValue is showRowNumber: false, so merged props would override saved config (same as getColumns).
+  const loadFromSetting = args.fns.getLoadFromSetting?.() === true;
+  if (loadFromSetting) {
+    return args.fns.prop('showRowNumber') || false;
+  }
   return args.fns.prop('showRowNumber', args.contextData.props) || false;
 };
 const getHideColumns = () => args.fns.prop('hideColumns', args.contextData.props) || [];
@@ -132,7 +148,7 @@ const propsTableStateVertexId = args.contextData.props?.tableStateVertexId;
 let tableStateVertexId = propsTableStateVertexId;
 let ownTableStateVertex = false;
 if (!tableStateVertexId) {
-  tableStateVertexId = args.generateNewVertexId();
+  tableStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
   ownTableStateVertex = true;
   args.addNewVertex(0, {
     id: tableStateVertexId,
@@ -253,8 +269,8 @@ const clearExpansionStoresForDataReload = () => {
 };
 
 const toggleRowExpansion = async (row) => {
-  const rowExpansion = getRowExpansionConfig();
-  if (!rowExpansion || !row?.id) return;
+  const rowExpansions = getRowExpansionConfigs();
+  if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !row?.id) return;
   const id = String(row.id);
   let p0 = tableP();
   let open = Array.isArray(p0?.expansionOpen) ? [...p0.expansionOpen] : [];
@@ -264,67 +280,73 @@ const toggleRowExpansion = async (row) => {
     patchTableP({ expansionOpen: open });
     return;
   }
-  if (shouldExpandOneRowAtATime(rowExpansion)) {
+  if (shouldExpandOneRowAtATime(rowExpansions[0])) {
     open = [];
   }
   open.push(id);
   patchTableP({ expansionOpen: open });
   p0 = tableP();
-  const idField = rowExpansion.parentIdField || 'id';
-  const parentVal =
-    typeof rowExpansion.getNestedParentFilterValue === 'function'
-      ? rowExpansion.getNestedParentFilterValue(row)
-      : (row.P?.[idField] ?? row[idField] ?? row.id);
-  const prefetchMap = p0?.expansionPrefetchIdsByParentId;
-  if (prefetchMap != null) {
-    const bucketIds = prefetchMap[String(parentVal)] ?? [];
-    const rows = lineItemVerticesFromIds(bucketIds);
-    const sortedRows = sortExpansionPrefetchRows(rows, rowExpansion.nestedSort, rowExpansion.nestedColumns);
-    const erList = Array.isArray(p0?.expansionRows) ? p0.expansionRows.filter((e) => e && e.id !== id) : [];
-    erList.push({ id, rows: sortedRows });
-    patchTableP({ expansionRows: erList });
-    return;
-  }
-  const erArr = Array.isArray(p0?.expansionRows) ? p0.expansionRows : [];
-  const existing = erArr.find((e) => e && e.id === id);
-  const skipFetch = existing?.rows != null && rowExpansion.refetchOnExpand !== true;
-  if (skipFetch) return;
-  let loading = Array.isArray(p0?.expansionLoading) ? [...p0.expansionLoading] : [];
-  if (!loading.includes(id)) loading.push(id);
-  patchTableP({ expansionLoading: loading });
-  try {
-    const childLabel = rowExpansion.childVertexLabel;
-    const filterKey = rowExpansion.childParentFilterKey || 'orderId';
-    const filters = { [filterKey]: parentVal };
-    const sort = rowExpansion.nestedSort || null;
-    const hooks = rowExpansion.nestedHooks;
-    const fetchFn = args.fns.fetchUserContentRows;
-    const fetchedRows = typeof fetchFn === 'function' ? await fetchFn({
-      tableVertexLabel: childLabel,
-      filters,
-      sort,
-      hooks
-    }) : [];
-    const p1 = tableP();
-    const erPrev = Array.isArray(p1?.expansionRows) ? [...p1.expansionRows] : [];
-    const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
-    const erNext = erPrev.filter((e) => !e || e.id !== id);
-    erNext.push({ id, rows: Array.isArray(fetchedRows) ? fetchedRows : [] });
-    const loadNext = loadPrev.filter((lid) => lid !== id);
-    patchTableP({ expansionRows: erNext, expansionLoading: loadNext });
-  } catch (e) {
-    const p1 = tableP();
-    const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
-    patchTableP({ expansionLoading: loadPrev.filter((lid) => lid !== id) });
+  for (let idx = 0; idx < rowExpansions.length; idx++) {
+    const rowExpansion = rowExpansions[idx];
+    if (!rowExpansion?.childVertexLabel) continue;
+    const expansionKey = "exp_" + idx;
+    const idField = rowExpansion.parentIdField || 'id';
+    const parentVal =
+      typeof rowExpansion.getNestedParentFilterValue === 'function'
+        ? rowExpansion.getNestedParentFilterValue(row)
+        : (row.P?.[idField] ?? row[idField] ?? row.id);
+    const loadingKey = id + "::" + expansionKey;
+    const prefetchMap = p0?.expansionPrefetchIdsByParentId;
+    if (prefetchMap != null) {
+      const bucketIds = prefetchMap[String(parentVal)] ?? [];
+      const rows = lineItemVerticesFromIds(bucketIds);
+      const sortedRows = sortExpansionPrefetchRows(rows, rowExpansion.nestedSort, rowExpansion.nestedColumns);
+      const erList = Array.isArray(p0?.expansionRows) ? p0.expansionRows.filter((e) => !(e && e.id === id && String(e.key || "") === expansionKey)) : [];
+      erList.push({ id, key: expansionKey, rows: sortedRows });
+      patchTableP({ expansionRows: erList });
+      continue;
+    }
+    const erArr = Array.isArray(p0?.expansionRows) ? p0.expansionRows : [];
+    const existing = erArr.find((e) => e && e.id === id && String(e.key || "") === expansionKey);
+    const skipFetch = existing?.rows != null && rowExpansion.refetchOnExpand !== true;
+    if (skipFetch) continue;
+    let loading = Array.isArray(p0?.expansionLoading) ? [...p0.expansionLoading] : [];
+    if (!loading.includes(loadingKey)) loading.push(loadingKey);
+    patchTableP({ expansionLoading: loading });
+    try {
+      const childLabel = rowExpansion.childVertexLabel;
+      const filterKey = rowExpansion.childParentFilterKey || 'orderId';
+      const filters = { [filterKey]: parentVal };
+      const sort = rowExpansion.nestedSort || null;
+      const hooks = rowExpansion.nestedHooks;
+      const fetchFn = args.fns.fetchUserContentRows;
+      const fetchedRows = typeof fetchFn === 'function' ? await fetchFn({
+        tableVertexLabel: childLabel,
+        filters,
+        sort,
+        hooks
+      }) : [];
+      const p1 = tableP();
+      const erPrev = Array.isArray(p1?.expansionRows) ? [...p1.expansionRows] : [];
+      const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
+      const erNext = erPrev.filter((e) => !(e && e.id === id && String(e.key || "") === expansionKey));
+      erNext.push({ id, key: expansionKey, rows: Array.isArray(fetchedRows) ? fetchedRows : [] });
+      const loadNext = loadPrev.filter((lid) => lid !== loadingKey);
+      patchTableP({ expansionRows: erNext, expansionLoading: loadNext });
+    } catch (e) {
+      const p1 = tableP();
+      const loadPrev = Array.isArray(p1?.expansionLoading) ? p1.expansionLoading : [];
+      patchTableP({ expansionLoading: loadPrev.filter((lid) => lid !== loadingKey) });
+    }
   }
 };
 
 const getVirtualRowHeight = (index, row) => {
   const base = getRowHeight();
   if (isNestedLinesTable()) return base;
-  const rowExpansion = getRowExpansionConfig();
-  if (!rowExpansion || !row?.id) return base;
-  if (isExpansionOpen(row.id)) return base + getExpansionPanelHeight(rowExpansion);
+  const rowExpansions = getRowExpansionConfigs();
+  if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !row?.id) return base;
+  if (isExpansionOpen(row.id)) return base + getExpansionPanelHeight(rowExpansions);
   return base;
 };
 
@@ -811,8 +833,8 @@ const renderCellContent = (row, column, rowIndex) => {
       const isExpanded = parentKey != null && !ck.includes(String(parentKey));
       return { type: 'expand', isParent, isExpanded, parentKey, onToggle: () => toggleExpanded(parentKey) };
     }
-    const rowExpansion = getRowExpansionConfig();
-    if (rowExpansion && row?.id) {
+    const rowExpansions = getRowExpansionConfigs();
+    if (Array.isArray(rowExpansions) && rowExpansions.length > 0 && row?.id) {
       const rowId = String(row.id);
       return {
         type: 'expand',
@@ -1144,7 +1166,8 @@ const handleSearch = () => {
     enableLocalSort ? undefined : (tableP()?.sortConfig ?? { column: null, direction: null }), 
     (fetchedRows, categoryItem, relatedVertexIds) => {
       clearExpansionStoresForDataReload();
-      const rowExpansion = (args.fns.evaluateConfig?.() || {}).rowExpansion;
+      const rowExpansionRaw = (args.fns.evaluateConfig?.() || {}).rowExpansion;
+      const rowExpansion = Array.isArray(rowExpansionRaw) ? rowExpansionRaw.find((cfg) => cfg?.childVertexLabel) : rowExpansionRaw;
       if (rowExpansion && rowExpansion.childVertexLabel && Array.isArray(relatedVertexIds)) {
         patchTableP({
           expansionPrefetchIdsByParentId: buildExpansionPrefetchIdMapFromGraph(relatedVertexIds, rowExpansion, fetchedRows)
@@ -1728,6 +1751,58 @@ const hasActiveFilters = () => {
   return false;
 };
 
+// --- Table scroll layout (wide columns + virtualization) ---
+// - Body scrolls in one viewport-sized box (40wrap): overflow:auto so vertical and horizontal scrollbars stay visible.
+// - Header/filter strips wrap the same grid width; overflow-x:hidden hides scrollbars there; scrollLeft is synced from body on scroll.
+// - tableBodyVScrollEl and tableBodyHScrollEl both point at 40wrap after mount (same element for VirtualList + scrollLeft sync).
+const [tableBodyVScrollEl, setTableBodyVScrollEl] = args.createSignal(null);
+let tableHeaderHScrollEl = null;
+let tableFilterHScrollEl = null;
+let tableBodyHScrollEl = null;
+
+const syncTableHorizontalScroll = (sourceEl) => {
+  if (!sourceEl) return;
+  const sl = sourceEl.scrollLeft;
+  // Copy scrollLeft to the other strips; skip sourceEl so we do not fight the user's scroll or loop.
+  if (tableHeaderHScrollEl && tableHeaderHScrollEl !== sourceEl && tableHeaderHScrollEl.scrollLeft !== sl) {
+    tableHeaderHScrollEl.scrollLeft = sl;
+  }
+  if (tableFilterHScrollEl && tableFilterHScrollEl !== sourceEl && tableFilterHScrollEl.scrollLeft !== sl) {
+    tableFilterHScrollEl.scrollLeft = sl;
+  }
+  if (tableBodyHScrollEl && tableBodyHScrollEl !== sourceEl && tableBodyHScrollEl.scrollLeft !== sl) {
+    tableBodyHScrollEl.scrollLeft = sl;
+  }
+};
+
+const handleTableHorizontalScroll = (e) => {
+  syncTableHorizontalScroll(e.currentTarget);
+};
+
+// Approximate min width of the table grid so the body horizontal scroll region gets scrollWidth (virtual rows are position:absolute and do not expand it).
+const getTableBodyMinWidthPx = () => {
+  const template = getGridTemplateColumns();
+  const parts = template.trim().split(/\s+/).filter(Boolean);
+  let sum = 0;
+  for (const p of parts) {
+    const px = p.match(/^(\d+(?:\.\d+)?)px$/i);
+    if (px) {
+      sum += parseFloat(px[1]);
+      continue;
+    }
+    if (/\d*\.?\d+fr/.test(p)) {
+      sum += 120;
+      continue;
+    }
+    if (/minmax/i.test(p)) {
+      sum += 80;
+      continue;
+    }
+    sum += 100;
+  }
+  return Math.max(sum, 200);
+};
+
 return {
   tableStateVertexId,
   getColumns,
@@ -1802,7 +1877,7 @@ return {
   getRowRef,
   getDisplayData,
   getGroupByConfig,
-  getRowExpansionConfig,
+  getRowExpansionConfigs,
   getExpansionPanelHeight,
   getVirtualRowHeight,
   toggleRowExpansion,
@@ -1822,7 +1897,21 @@ return {
   },
   iconActionActiveKey,
   handleIconAction,
-  getIconActionRowKey
+  getIconActionRowKey,
+  setTableBodyVScrollEl,
+  getTableBodyVScrollEl: () => tableBodyVScrollEl(),
+  setTableHeaderHScrollEl: (el) => {
+    tableHeaderHScrollEl = el;
+  },
+  setTableFilterHScrollEl: (el) => {
+    tableFilterHScrollEl = el;
+  },
+  setTableBodyHScrollEl: (el) => {
+    tableBodyHScrollEl = el;
+  },
+  handleTableHorizontalScroll,
+  getScrollContainerElementForVirtualList: () => tableBodyVScrollEl(),
+  getTableBodyMinWidthPx
 };
 '''
         key: Table
@@ -1874,6 +1963,8 @@ return args.contextData.props?.nestedLinesMode === true
   display: flex;
   flex-direction: column;
   height: calc(100vh - 48px);
+  /* min-height:0 lets flex children (e.g. table body) shrink so overflow/scroll works */
+  min-height: 0;
 }`;
 '''
         displayOrder: 1
@@ -1906,6 +1997,8 @@ return `._id {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.sm};
+  /* Toolbar keeps natural height; flex row below (table) gets remaining space */
+  flex-shrink: 0;
 }`;
 '''
         displayOrder: 2
@@ -2449,13 +2542,14 @@ return {
 const isResizing = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.isResizing === true;
 
 return [`._id {
-  display: grid;
-  grid-template-columns: ${args.fns.getGridTemplateColumns()};
-  grid-template-rows: auto auto 1fr;
-
-  user-select: ${isResizing ? "none" : "auto"};
-  /* prevents flexbox from forcing the item to exceed its container. */
+  display: flex;
+  flex-direction: column;
+  /* flex-basis:0 so this column fills remaining height under toolbar; min-height:0 enables overflow in children */
+  flex: 1 1 0;
   min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  user-select: ${isResizing ? "none" : "auto"};
 }`];
 '''
         displayOrder: 4
@@ -2464,6 +2558,62 @@ return [`._id {
           '''
 return {
   as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "22h"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  /* No native horizontal scrollbar; scrollLeft is synced from body (40wrap) on scroll */
+  overflow-x: hidden;
+  overflow-y: hidden;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => {
+    args.fns.setTableHeaderHScrollEl(el);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "22f"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  min-width: 0;
+  width: 100%;
+  /* Same as header strip: hidden overflow + scrollLeft sync from body */
+  overflow-x: hidden;
+  overflow-y: hidden;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => {
+    args.fns.setTableFilterHScrollEl(el);
+  }
 };
 '''
       }
@@ -2478,8 +2628,8 @@ const usePolaris = args.fns.getUsePolarisUI?.() === true
 return `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
-  grid-column: 1 / -1;
-  grid-row: 1;
+  min-width: min-content;
+  width: 100%;
   background: ${usePolaris ? "#f7f7f7" : args.theme.var.color.background_light_100};
   border-top: 1px solid ${args.theme.var.color.border};
   border-bottom: 1px solid ${args.theme.var.color.border};
@@ -2994,8 +3144,8 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
-  grid-column: 1 / -1;
-  grid-row: 2;
+  min-width: min-content;
+  width: 100%;
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
@@ -3299,20 +3449,53 @@ return {
       }
     }
     {
+      id: "40wrap"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  /* Fills column under header+filter; overflow:auto on one box keeps H+V scrollbars in the visible corner */
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  ref: (el) => {
+    // Same node for VirtualList scroll metrics (vertical) and scrollLeft sync to header/filter (horizontal)
+    args.fns.setTableBodyVScrollEl(el);
+    args.fns.setTableBodyHScrollEl(el);
+  },
+  onScroll: (e) => args.fns.handleTableHorizontalScroll(e)
+};
+'''
+      }
+    }
+    {
       id: "40"
       L: Attr
       P: {
         css:
           '''
 return `._id {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-`;
+  /* Content-sized height (spacer) so parent 40wrap can scroll vertically */
+  flex: 0 0 auto;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}`;
 '''
-        displayOrder: 3
+        displayOrder: 1
         componentName: VirtualList
         props:
           '''
@@ -3321,12 +3504,14 @@ return {
   getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
   getItemHeightAt: args.fns.getVirtualRowHeight,
-  rowHasExpansion: (row) => !!(args.fns.getRowExpansionConfig?.() && row?.id),
+  rowHasExpansion: (row) => ((args.fns.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
   containerClass: "table-body-list",
   hide: isLoading,
   tabIndex: 0,
   role: "listbox",
   "attr:aria-label": "Table rows; Arrow keys to move, Shift+Arrow Up/Down to select range, Left/Right to collapse/expand group, Space to toggle selection",
+  // VirtualList reads scrollTop from 40wrap (parent), not the list root div
+  getScrollContainerElement: () => args.fns.getScrollContainerElementForVirtualList(),
   getActiveIndex: () => args.fns.activeRowIndex?.(),
   setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
   getItemRef: (index) => args.fns.getRowRef?.(index),
@@ -3350,15 +3535,17 @@ return {
       }
       return;
     }
-    const rowExpansion = args.fns.getRowExpansionConfig?.();
-    if (rowExpansion && row?.id) {
+    const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+    if (Array.isArray(rowExpansions) && rowExpansions.length > 0 && row?.id) {
       const isRowExpanded = args.fns.isExpansionOpen?.(row.id);
       if (action === "collapse" && isRowExpanded) args.fns.toggleRowExpansion?.(row);
       if (action === "expand" && !isRowExpanded) args.fns.toggleRowExpansion?.(row);
     }
   },
   onShiftArrow: (currentIndex, nextIndex) => args.fns.handleShiftArrow?.(currentIndex, nextIndex),
-  clearSelectionAnchor: () => args.fns.clearSelectionAnchor?.()
+  clearSelectionAnchor: () => args.fns.clearSelectionAnchor?.(),
+  // Ensures body scrollWidth matches column grid (absolute rows do not expand it)
+  contentMinWidthPx: args.fns.getTableBodyMinWidthPx()
 };
 '''
       }
@@ -3370,16 +3557,18 @@ return {
         css:
           '''
 return `._id {
-  grid-column: 1 / -1;
-  grid-row: 3;
+  /* Loading overlay on top of the body scroll area (40wrap) */
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: ${args.theme.var.color.background};
+  z-index: 2;
 }
 `;
 '''
-        displayOrder: 3
+        displayOrder: 2
         componentName: Html
         props:
           '''
@@ -3420,11 +3609,11 @@ const rowData = virtualItem.rowData;
 const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 const isActive = args.fns.activeRowId?.() === rowData?.id;
-const rowExpansion = args.fns.getRowExpansionConfig?.();
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const rowHeightPx = args.fns.getRowHeight();
 const expansionPanelHeightPx =
-  rowExpansion && rowData?.id && args.fns.isExpansionOpen?.(rowData.id)
-    ? args.fns.getExpansionPanelHeight(rowExpansion)
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowData?.id && args.fns.isExpansionOpen?.(rowData.id)
+    ? args.fns.getExpansionPanelHeight(rowExpansions)
     : 0;
 const gridRows =
   expansionPanelHeightPx > 0
@@ -3434,10 +3623,14 @@ const gridRows =
 return [
 `._id {
   position: absolute;
-  top: ${virtualItem.start}px;
+  top: 0;
   left: 0;
   width: 100%;
   height: ${virtualItem.size}px;
+  transform: translate3d(0, ${virtualItem.start}px, 0);
+  will-change: transform;
+  contain: layout paint style;
+  backface-visibility: hidden;
 }`,
 `._id {
   display: grid;
@@ -3521,9 +3714,10 @@ return {
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
-const rowExpansion = args.fns.getRowExpansionConfig?.();
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const rowId = rowData?.id;
-const isRowExpansionOpen = rowExpansion && rowId && args.fns.isExpansionOpen?.(rowId);
+const isRowExpansionOpen =
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(rowId);
 const t = args.theme.var.color;
 return `._id {
   grid-row: 2;
@@ -3545,8 +3739,8 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansion = args.fns.getRowExpansionConfig?.();
-if (!rowExpansion || !rowId) return { as: 'div', hide: true };
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !rowId) return { as: 'div', hide: true };
 const expansionRowKey = String(rowId);
 const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 return {
@@ -3568,9 +3762,9 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansion = args.fns.getRowExpansionConfig?.();
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const isRowExpansionOpen =
-  rowExpansion && rowId && args.fns.isExpansionOpen?.(String(rowId));
+  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(String(rowId));
 const t = args.theme.var.color;
 return `._id {
   padding: ${args.theme.var.spacing.sm} 0;
@@ -3585,9 +3779,11 @@ const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { as: 'div', hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansion = args.fns.getRowExpansionConfig?.();
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+const rowExpansion = Array.isArray(rowExpansions) && rowExpansions.length > 0 ? rowExpansions[0] : null;
 if (!rowExpansion || !rowId) return { as: 'div', hide: true };
 const expansionRowKey = String(rowId);
+const expansionKey = "exp_0";
 const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 if (!isRowExpansionOpen) return { as: 'div', hide: true };
 const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
@@ -3596,7 +3792,7 @@ const expRows = expP?.expansionRows;
 if (Array.isArray(expRows)) {
   for (let i = 0; i < expRows.length; i++) {
     const e = expRows[i];
-    if (e && e.id != null && String(e.id) === expansionRowKey && e.rows !== undefined) {
+    if (e && e.id != null && String(e.id) === expansionRowKey && String(e.key || "") === expansionKey && e.rows !== undefined) {
       rows = e.rows;
       break;
     }
@@ -3607,7 +3803,7 @@ const expLoading = expP?.expansionLoading;
 if (Array.isArray(expLoading)) {
   for (let i = 0; i < expLoading.length; i++) {
     const lid = expLoading[i];
-    if (lid != null && lid !== '' && String(lid) === expansionRowKey) {
+    if (lid != null && lid !== '' && String(lid) === expansionRowKey + "::" + expansionKey) {
       loading = true;
       break;
     }
@@ -3630,77 +3826,100 @@ return {
       id: "41exp_nest"
       L: Attr
       P: {
+        contextName: expansionTable
+        loop: true
         displayOrder: 2
-        fns: ""
+        componentName: Html
+        props:
+          '''
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { as: "div", hide: true };
+const rowData = virtualItem.rowData;
+const rowId = rowData?.id;
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
+if (!rowId || !Array.isArray(rowExpansions) || rowExpansions.length === 0) return { as: "div", hide: true };
+const expansionRowKey = String(rowId);
+const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+return {
+  as: "div",
+  hide: !isRowExpansionOpen,
+  data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
+};
+'''
+      }
+    }
+    {
+      id: "41exp_ret_table"
+      L: Attr
+      P: {
+        displayOrder: 2.5
         componentName: Table
-        key: nested_order_lines_table
+        key: nested_order_returns_table
         props:
           '''
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return { hide: true };
 const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
-const rowExpansion = args.fns.getRowExpansionConfig?.();
-if (!rowExpansion || !rowId) return { hide: true };
+const rowExpansion = args.contextData.expansionTable || {};
+if (!rowId || !rowExpansion || typeof rowExpansion !== "object") return { hide: true };
 const expansionRowKey = String(rowId);
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
-if (!isRowExpansionOpen) return { hide: true };
-const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
-let rows;
-const expRows = expP?.expansionRows;
-if (Array.isArray(expRows)) {
-  for (let i = 0; i < expRows.length; i++) {
-    const e = expRows[i];
-    if (e && e.id != null && String(e.id) === expansionRowKey && e.rows !== undefined) {
-      rows = e.rows;
-      break;
-    }
-  }
-}
-let loading = false;
-const expLoading = expP?.expansionLoading;
-if (Array.isArray(expLoading)) {
-  for (let i = 0; i < expLoading.length; i++) {
-    const lid = expLoading[i];
-    if (lid != null && lid !== '' && String(lid) === expansionRowKey) {
-      loading = true;
-      break;
-    }
-  }
-}
-const hasRows = Array.isArray(rows) && rows.length > 0;
 const outerArgs = args;
 const tableVid = outerArgs.fns.tableStateVertexId;
+const expansionIndex = rowExpansion._expansionIndex != null ? Number(rowExpansion._expansionIndex) : 0;
+const expansionKey = "exp_" + expansionIndex;
+let rows = [];
+let loading = false;
+
+if (rowExpansion.childVertexLabel) {
+  const expP = args.graph.vertexes[tableVid]?.P;
+  const expRows = expP?.expansionRows;
+  if (Array.isArray(expRows)) {
+    for (let i = 0; i < expRows.length; i++) {
+      const e = expRows[i];
+      if (
+        e &&
+        e.id != null &&
+        String(e.id) === expansionRowKey &&
+        e.key != null &&
+        String(e.key) === expansionKey
+      ) {
+        rows = Array.isArray(e.rows) ? e.rows : [];
+        break;
+      }
+    }
+  }
+  const expLoading = expP?.expansionLoading;
+  if (Array.isArray(expLoading)) {
+    for (let i = 0; i < expLoading.length; i++) {
+      const lid = expLoading[i];
+      if (lid != null && String(lid) === expansionRowKey + "::" + expansionKey) {
+        loading = true;
+        break;
+      }
+    }
+  }
+} else if (typeof rowExpansion.getNestedRows === "function") {
+  try {
+    const computedRows = rowExpansion.getNestedRows(rowData, args);
+    rows = Array.isArray(computedRows) ? computedRows : [];
+  } catch (e) {
+    rows = [];
+  }
+}
+
+if (loading || !Array.isArray(rows) || rows.length === 0) return { hide: true };
 return {
-  hide: loading || !hasRows,
+  hide: false,
   nestedLinesMode: true,
-  nestedParentRowId: expansionRowKey,
-  nestedTableTitle: rowExpansion.nestedTitle || 'Line items',
+  nestedTableTitle: rowExpansion.nestedTitle || 'Nested',
   nestedTableColumns: rowExpansion.nestedColumns || [],
   nestedRowHeight: rowExpansion.nestedRowHeight || 36,
   showRowNumber: rowExpansion.nestedShowRowNumber !== false,
   usePolarisUI: rowExpansion.usePolarisUI !== false,
   loadFromSetting: false,
-  getNestedLineRows: () => {
-    const rawRows = outerArgs.graph.vertexes[tableVid]?.P?.expansionRows;
-    if (!Array.isArray(rawRows)) return [];
-    for (let i = 0; i < rawRows.length; i++) {
-      const e = rawRows[i];
-      if (e && e.id != null && String(e.id) === expansionRowKey && e.rows !== undefined) {
-        return Array.isArray(e.rows) ? e.rows : [];
-      }
-    }
-    return [];
-  },
-  getNestedLinesLoading: () => {
-    const ids = outerArgs.graph.vertexes[tableVid]?.P?.expansionLoading;
-    if (!Array.isArray(ids)) return false;
-    for (let i = 0; i < ids.length; i++) {
-      const lid = ids[i];
-      if (lid != null && lid !== '' && String(lid) === expansionRowKey) return true;
-    }
-    return false;
-  },
+  getNestedLineRows: () => rows,
+  getNestedLinesLoading: () => loading,
   getSelectedRows: () => new Set(),
   setSelectedRows: () => {},
   clearSelectedRows: () => {},
@@ -5201,18 +5420,36 @@ return {
       id: e48
       T: Attr
       S: "22"
+      E: "22h"
+    }
+    {
+      id: e48h
+      T: Attr
+      S: "22h"
       E: "23"
     }
     {
       id: e49
       T: Attr
       S: "22"
+      E: "22f"
+    }
+    {
+      id: e48f
+      T: Attr
+      S: "22f"
       E: "34"
     }
     {
       id: e50
       T: Attr
       S: "22"
+      E: "40wrap"
+    }
+    {
+      id: e40wrap_vl
+      T: Attr
+      S: "40wrap"
       E: "40"
     }
     {
@@ -5326,7 +5563,7 @@ return {
     {
       id: e66a
       T: Attr
-      S: "22"
+      S: "40wrap"
       E: "40a"
     }
     {
@@ -5358,6 +5595,12 @@ return {
       T: Attr
       S: "41exp"
       E: "41exp_nest"
+    }
+    {
+      id: e67exp_ret_table
+      T: Attr
+      S: "41exp_nest"
+      E: "41exp_ret_table"
     }
     {
       id: e68

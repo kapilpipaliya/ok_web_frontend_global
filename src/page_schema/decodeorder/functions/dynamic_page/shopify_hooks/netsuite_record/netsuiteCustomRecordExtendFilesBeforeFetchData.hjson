@@ -1,0 +1,242 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: netsuiteCustomRecordExtendFilesBeforeFetchData
+        description: Sync NetSuite customrecord_extend_files_aut records into Neo4j before DynamicPage fetch
+        body:
+          '''return;
+const { tableVertexLabel, filters = {} } = args.contextData || {};
+if (tableVertexLabel !== "NetSuiteCustomRecordExtendFile") return;
+
+const oauthResult = await args.session.run(
+  `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
+   RETURN n
+   LIMIT 1`
+);
+
+if (!oauthResult.records.length) {
+  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] NetSuite OAuth is not connected.");
+  return;
+}
+
+const oauthNode = oauthResult.records[0].get("n");
+const oauthData = args.convertNodeToJson(oauthNode);
+const accountId = String(oauthData?.P?.accountId || "").trim();
+const accessTokenEncrypted = oauthData?.P?.accessTokenEncrypted;
+
+if (!accountId || !accessTokenEncrypted) {
+  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] Missing NetSuite account/token.");
+  return;
+}
+
+let accessToken = "";
+try {
+  accessToken = args.decryptToken(accessTokenEncrypted);
+} catch (error) {
+  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] Unable to decrypt NetSuite access token.");
+  return;
+}
+
+if (!accessToken) {
+  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] Empty NetSuite access token.");
+  return;
+}
+
+const baseUrl = `https://${accountId}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql`;
+const escaped = (value) => String(value || "").replace(/'/g, "''");
+const nameLike = String(filters?.name || "").trim();
+const whereClause = nameLike
+  ? ` WHERE LOWER(name) LIKE LOWER('%${escaped(nameLike)}%')`
+  : "";
+const suiteQl = `SELECT * FROM customrecord_extend_files_aut${whereClause}`;
+
+const headers = {
+  Authorization: `Bearer ${accessToken}`,
+  "Content-Type": "application/json",
+  Accept: "application/json",
+  Prefer: "transient"
+};
+
+let offset = 0;
+const limit = 1000;
+let hasMore = true;
+let total = 0;
+const session = args.session;
+
+const BATCH_SIZE = 150;
+const pendingRows = [];
+const flagTrue = (v) => {
+  const s = String(v ?? "").toLowerCase();
+  return s === "t" || s === "true" || s === "1" || s === "yes";
+};
+
+const runMergeChunk = async (rows) => {
+  if (!rows || rows.length === 0) return;
+  await session.run(
+    `UNWIND $rows AS row
+     MERGE (n:NetSuiteCustomRecordExtendFile {id: row.id})
+     SET n += row.props`,
+    { rows }
+  );
+};
+
+const queueRow = async (id, props) => {
+  pendingRows.push({ id, props });
+  total++;
+  if (pendingRows.length >= BATCH_SIZE) {
+    await runMergeChunk(pendingRows.splice(0, BATCH_SIZE));
+  }
+};
+
+/** SuiteQL row keys fully mapped onto vertex props — remainder goes into extraJson only */
+const MAPPED_ROW_KEYS = new Set([
+  "id",
+  "internalid",
+  "name",
+  "isinactive",
+  "lastmodified",
+  "lastmodifieddate",
+  "lastmodifiedbydate",
+  "custrecord_extfile_filename",
+  "custrecord_extfile_foldername",
+  "custrecord_extend_preview_image",
+  "custrecord_extfile_link",
+  "custrecord_extend_preview_file_format",
+  "custrecord_extfile_type_system",
+  "custrecord_extfile_file_size",
+  "custrecord_extfile_approval_id",
+  "custrecord_extfile_approved",
+  "custrecord_extfile_rejected",
+  "custrecord_extend_files_private_url",
+  "custrecord_extend_files_original_transac",
+  "custrecord_extfile_so_pref",
+  "created",
+  "lastmodifiedby",
+  "owner",
+  "scriptid",
+  "custrecord_extend_files_thumbnail_error"
+]);
+
+const str = (v) => {
+  if (v == null) return "";
+  const s = String(v).trim();
+  if (s === "" || s === "undefined" || s === "null") return "";
+  return s;
+};
+
+const buildExtraJson = (row) => {
+  const extra = {};
+  for (const k of Object.keys(row)) {
+    if (!MAPPED_ROW_KEYS.has(k)) {
+      extra[k] = row[k];
+    }
+  }
+  const keys = Object.keys(extra);
+  return keys.length ? JSON.stringify(extra) : "";
+};
+
+while (hasMore) {
+  const url = `${baseUrl}?limit=${limit}&offset=${offset}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ q: suiteQl })
+  });
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    await runMergeChunk(pendingRows.splice(0, pendingRows.length));
+    console.warn(
+      "[netsuiteCustomRecordExtendFilesBeforeFetchData] SuiteQL request failed:",
+      payload?.oerrorDetails?.[0]?.detail || payload?.error || response.status
+    );
+    return;
+  }
+
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  for (let i = 0; i < items.length; i++) {
+    const row = items[i] || {};
+    const sourceId = row.id ?? row.internalid ?? `${offset + i + 1}`;
+    const id = String(sourceId);
+    const name = str(row.name);
+    const isInactive = flagTrue(row.isinactive);
+    const lastModified = str(
+      row.lastmodified || row.lastmodifieddate || row.lastmodifiedbydate || ""
+    );
+
+    const fileName = str(row.custrecord_extfile_filename);
+    const folderName = str(row.custrecord_extfile_foldername);
+    const previewImageUrl = str(row.custrecord_extend_preview_image);
+    const fileLink = str(row.custrecord_extfile_link);
+    const fileUrl = fileLink || previewImageUrl;
+    const mimeFromPreview = str(row.custrecord_extend_preview_file_format);
+    const mimeFromSystem = str(row.custrecord_extfile_type_system);
+    const mimeType = mimeFromPreview || mimeFromSystem;
+    const fileSize = str(row.custrecord_extfile_file_size);
+    const approvalId = str(row.custrecord_extfile_approval_id);
+    const approved = flagTrue(row.custrecord_extfile_approved);
+    const rejected = flagTrue(row.custrecord_extfile_rejected);
+    const privateUrl = flagTrue(row.custrecord_extend_files_private_url);
+    const originalTransaction = str(row.custrecord_extend_files_original_transac);
+    const soPref = str(row.custrecord_extfile_so_pref);
+    const created = str(row.created);
+    const lastModifiedBy = str(row.lastmodifiedby);
+    const owner = str(row.owner);
+    const scriptId = str(row.scriptid);
+    const thumbnailError = str(row.custrecord_extend_files_thumbnail_error);
+
+    const extraJson = buildExtraJson(row);
+
+    const props = {
+      id,
+      name: name || fileName,
+      fileName,
+      folderName,
+      previewImageUrl,
+      fileUrl,
+      mimeType,
+      fileSize,
+      approvalId,
+      approved,
+      rejected,
+      privateUrl,
+      originalTransaction,
+      soPref,
+      created,
+      lastModifiedBy,
+      owner,
+      scriptId,
+      thumbnailError,
+      isInactive,
+      lastModified,
+      recordType: "customrecord_extend_files_aut",
+      extraJson,
+      updatedAt: new Date().toISOString()
+    };
+
+    await queueRow(id, props);
+  }
+
+  hasMore = payload?.hasMore === true;
+  if (!hasMore) break;
+  offset += limit;
+}
+
+await runMergeChunk(pendingRows.splice(0, pendingRows.length));
+
+console.log("[netsuiteCustomRecordExtendFilesBeforeFetchData] synced rows:", total);
+'''
+      }
+    }
+  ]
+  edges: []
+}

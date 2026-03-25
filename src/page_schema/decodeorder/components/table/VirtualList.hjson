@@ -128,9 +128,10 @@ const getVirtualItems = () => {
 // Total height of all items
 const getTotalSize = () => getOffsetsAndTotal().total;
 
-// Handle scroll
+// Scroll handler: currentTarget is correct when the listener is attached to a parent scrollport (e.g. table 40wrap).
 const handleScroll = (e) => {
-  setScrollTop(e.target.scrollTop);
+  const t = e.currentTarget ?? e.target;
+  setScrollTop(t.scrollTop);
 
   // Call custom onScroll callback if provided
   const onScrollCallback = getOnScrollCallback();
@@ -242,6 +243,21 @@ const useListKeyNav = () =>
   typeof args.contextData.props?.setActiveIndex === 'function' &&
   typeof args.contextData.props?.getItemRef === 'function';
 
+// Table passes getScrollContainerElement (40wrap): attach scroll listener there so scrollTop matches virtualization.
+// When unset, the list uses its own root ref + onScroll (default VirtualList behavior).
+args.createEffect(() => {
+  const getter = args.contextData.props?.getScrollContainerElement;
+  if (typeof getter !== "function") return;
+  const el = getter();
+  if (!el) return;
+  setScrollElement(el);
+  const handler = (e) => handleScroll(e);
+  el.addEventListener("scroll", handler, { passive: true });
+  args.onCleanup(() => {
+    el.removeEventListener("scroll", handler);
+  });
+});
+
 return {
   scrollTop,
   setScrollTop,
@@ -267,16 +283,23 @@ const ariaLabel = args.contextData.props?.["attr:aria-label"];
 const useKeyNav = args.fns.useListKeyNav?.();
 
 const onKeyDown = useKeyNav ? args.fns.handleListKeyDown : externalOnKeyDown;
+const extScroll = args.contextData.props?.getScrollContainerElement;
+const useExternalVerticalScroll = typeof extScroll === "function";
+// Table: min width so the scrollport gets horizontal overflow (absolute rows do not widen the flow).
+const mw = args.contextData.props?.contentMinWidthPx;
+const minWStyle =
+  typeof mw === "number" && mw > 0 ? `min-width: ${mw}px;width:100%;box-sizing:border-box;` : undefined;
 
 return {
   as: "div",
   class: containerClass,
-  ref: args.fns.setScrollElement,
-  onScroll: args.fns.handleScroll,
+  ref: useExternalVerticalScroll ? undefined : args.fns.setScrollElement,
+  onScroll: useExternalVerticalScroll ? undefined : args.fns.handleScroll,
   //...(tabIndex !== undefined && { tabIndex }),
   ...(onKeyDown && { onKeyDown }),
   ...(role && { role }),
-  ...(ariaLabel && { "attr:aria-label": ariaLabel })
+  ...(ariaLabel && { "attr:aria-label": ariaLabel }),
+  ...(minWStyle ? { style: minWStyle } : {})
 };
 '''
       }
@@ -297,8 +320,12 @@ return `._id {
         componentName: Html
         props:
           '''
+// Inner height spacer: optional min-width from parent so total scroll width includes wide grids.
+const mw = args.contextData.props?.contentMinWidthPx;
+const spacerMin = typeof mw === "number" && mw > 0 ? `min-width: ${mw}px;` : "";
 return {
-  as: "div"
+  as: "div",
+  ...(spacerMin ? { style: spacerMin } : {})
 };
 '''
       }
@@ -352,7 +379,7 @@ return {
       P: {
         type: number
         key: overscan
-        defValue: 5
+        defValue: 15
       }
     }
     {

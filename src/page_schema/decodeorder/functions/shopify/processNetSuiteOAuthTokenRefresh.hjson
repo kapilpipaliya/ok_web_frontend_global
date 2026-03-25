@@ -1,0 +1,322 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: processNetSuiteOAuthTokenRefresh
+        description: Background worker (BullMQ) — repeatable job refreshes NetSuite OAuth access tokens per shop DB using the stored refresh token
+        body:
+          '''
+if (args.contextData?.action !== "start") {
+  return;
+}
+
+const clientId = (process.env.NETSUITE_CLIENT_ID || "").trim();
+const clientSecret = (process.env.NETSUITE_CLIENT_SECRET || "").trim();
+
+if (!clientId || !clientSecret) {
+  console.warn(
+    "[processNetSuiteOAuthTokenRefresh] Skipping: NETSUITE_CLIENT_ID and NETSUITE_CLIENT_SECRET must be set."
+  );
+  return {
+    stop: async () => {}
+  };
+}
+
+const intervalMs = Number(args.contextData?.intervalMs) > 0
+  ? Number(args.contextData.intervalMs)
+  : 5 * 60 * 1000;
+
+const refreshSkewMs = Number(args.contextData?.refreshSkewMs) > 0
+  ? Number(args.contextData.refreshSkewMs)
+  : 120 * 1000;
+
+const QUEUE_NAME = "processNetSuiteOAuthTokenRefresh";
+const REPEATABLE_JOB_ID = "netsuite-oauth-refresh-repeatable";
+
+const helpers = await args.executeNamedServerFunction(
+  { functionName: "shopifyQueueHelpers", contextData: {} },
+  { functionLookupSubDomain: args.subDomain }
+);
+
+if (!helpers.result?.success) {
+  console.error("[processNetSuiteOAuthTokenRefresh] shopifyQueueHelpers init failed", helpers.result?.error);
+  throw new Error("shopifyQueueHelpers initialization failed");
+}
+
+const h = helpers.result.data;
+const connection = h.getRedisConnection();
+
+if (!connection || !connection.host) {
+  throw new Error("Invalid Redis connection for NetSuite token refresh worker");
+}
+
+const { Worker, Queue } = args.bullmq;
+const tokenQueue = new Queue(QUEUE_NAME, { connection });
+
+await tokenQueue.add(
+  "netsuite-oauth-refresh",
+  { scheduledRun: true, description: "NetSuite OAuth access token refresh check" },
+  {
+    repeat: { every: intervalMs },
+    jobId: REPEATABLE_JOB_ID
+  }
+);
+
+await new Promise((r) => setTimeout(r, 100));
+
+await tokenQueue.add(
+  "netsuite-oauth-refresh",
+  { bootstrap: true },
+  { removeOnComplete: 20, removeOnFail: 5 }
+);
+
+const appSubDomain = args.rawSubDomain;
+
+const parseExpiresMs = (p) => {
+  const raw = p?.expiresAt;
+  if (raw == null || raw === "") return 0;
+  if (typeof raw === "object" && raw != null && typeof raw.toString === "function") {
+    const t = new Date(raw.toString()).getTime();
+    return Number.isNaN(t) ? 0 : t;
+  }
+  const t = new Date(raw).getTime();
+  return Number.isNaN(t) ? 0 : t;
+};
+
+const refreshTokensInSession = async (shopLabel, dbSession) => {
+  const oauthResult = await dbSession.run(
+    `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
+     RETURN n
+     LIMIT 1`
+  );
+
+  if (!oauthResult.records.length) {
+    return { skipped: true, reason: "no_connection" };
+  }
+
+  const oauthNode = oauthResult.records[0].get("n");
+  const oauthData = args.convertNodeToJson(oauthNode);
+  const P = oauthData?.P || {};
+
+  const accountId = String(P.accountId || "").trim();
+  const refreshEnc = P.refreshTokenEncrypted;
+
+  if (!accountId) {
+    console.warn(
+      `[processNetSuiteOAuthTokenRefresh] ${shopLabel || "session"}: missing accountId on OAuthConnection`
+    );
+    return { skipped: true, reason: "no_account" };
+  }
+
+  if (!refreshEnc) {
+    console.warn(
+      `[processNetSuiteOAuthTokenRefresh] ${shopLabel || "session"}: no refresh token; reconnect NetSuite OAuth.`
+    );
+    return { skipped: true, reason: "no_refresh_token" };
+  }
+
+  let refreshToken;
+  try {
+    refreshToken = args.decryptToken(refreshEnc);
+  } catch (e) {
+    console.warn(
+      `[processNetSuiteOAuthTokenRefresh] ${shopLabel || "session"}: decrypt refresh token failed`
+    );
+    return { skipped: true, reason: "decrypt_refresh_failed" };
+  }
+
+  if (!refreshToken) {
+    return { skipped: true, reason: "empty_refresh_token" };
+  }
+
+  const expiresMs = parseExpiresMs(P);
+  const now = Date.now();
+  if (expiresMs > 0 && expiresMs > now + refreshSkewMs) {
+    return { skipped: true, reason: "still_valid" };
+  }
+
+  const tokenHost = `${accountId}.suitetalk.api.netsuite.com`;
+  const tokenUrl = `https://${tokenHost}/services/rest/auth/oauth2/v1/token`;
+
+  const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+  const payload = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken
+  });
+
+  const tokenResponse = await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${authHeader}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json"
+    },
+    body: payload.toString()
+  });
+
+  let tokenJson;
+  try {
+    tokenJson = await tokenResponse.json();
+  } catch (err) {
+    tokenJson = null;
+  }
+
+  if (!tokenResponse.ok || !tokenJson?.access_token) {
+    const msg =
+      tokenJson?.error_description ||
+      tokenJson?.error ||
+      `HTTP ${tokenResponse.status}`;
+    console.warn(
+      `[processNetSuiteOAuthTokenRefresh] ${shopLabel || "session"}: refresh failed:`,
+      msg
+    );
+    return { success: false, error: msg };
+  }
+
+  const accessToken = tokenJson.access_token;
+  const newRefresh = tokenJson.refresh_token || null;
+  const tokenType = tokenJson.token_type || P.tokenType || "Bearer";
+  const scope = tokenJson.scope != null ? tokenJson.scope : P.scope;
+  const expiresIn = Number(tokenJson.expires_in || 0);
+  const expiresAtIso =
+    expiresIn > 0 ? new Date(Date.now() + expiresIn * 1000).toISOString() : null;
+
+  const encryptedAccessToken = args.encryptToken(accessToken);
+  const encryptedRefreshToken = newRefresh
+    ? args.encryptToken(newRefresh)
+    : refreshEnc;
+
+  const nowIso = new Date().toISOString();
+
+  await dbSession.run(
+    `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
+     SET n.updatedAt = datetime($nowIso),
+         n.tokenType = $tokenType,
+         n.scope = $scope,
+         n.expiresAt = CASE WHEN $expiresAtIso IS NULL THEN null ELSE datetime($expiresAtIso) END,
+         n.accessTokenEncrypted = $encryptedAccessToken,
+         n.refreshTokenEncrypted = $encryptedRefreshToken`,
+    {
+      nowIso,
+      tokenType,
+      scope,
+      expiresAtIso,
+      encryptedAccessToken,
+      encryptedRefreshToken
+    }
+  );
+
+  console.log(
+    `[processNetSuiteOAuthTokenRefresh] ${shopLabel || "session"}: access token refreshed`
+  );
+  return { success: true };
+};
+
+const runCycle = async (mainSession) => {
+  if (!mainSession) {
+    console.warn("[processNetSuiteOAuthTokenRefresh] No db session for job");
+    return;
+  }
+
+  let shops = [];
+  try {
+    const shopsResult = await mainSession.run(
+      `MATCH (s:ShopifyShop) RETURN s.shop AS shop`
+    );
+    shops = shopsResult.records
+      .map((rec) => rec.get("shop"))
+      .filter((s) => s != null && String(s).trim() !== "");
+  } catch (e) {
+    console.warn("[processNetSuiteOAuthTokenRefresh] Could not list ShopifyShop:", e?.message || e);
+  }
+
+  const driver = args.getDriver();
+
+  for (const shop of shops) {
+    const shopStr = String(shop).trim();
+    let dbName;
+    try {
+      dbName = args.getDatabaseNameForShop(shopStr, appSubDomain);
+    } catch (e) {
+      console.warn("[processNetSuiteOAuthTokenRefresh] getDatabaseNameForShop failed:", shopStr, e);
+      continue;
+    }
+
+    const shopSession = driver.session({ database: dbName });
+    try {
+      await refreshTokensInSession(shopStr, shopSession);
+    } finally {
+      await shopSession.close();
+    }
+  }
+
+  if (shops.length === 0) {
+    await refreshTokensInSession("default_db", mainSession);
+  }
+};
+
+let workerInstance;
+
+try {
+  workerInstance = new Worker(
+    QUEUE_NAME,
+    async () => {
+      const mainSession = await args.getSession();
+      try {
+        await runCycle(mainSession);
+      } finally {
+        await mainSession.close();
+      }
+    },
+    { connection, concurrency: 1, lockDuration: 120000 }
+  );
+
+  workerInstance.on("failed", (job, err) =>
+    console.error("[processNetSuiteOAuthTokenRefresh] Job failed", job?.id, err?.message)
+  );
+  workerInstance.on("error", (err) =>
+    console.error("[processNetSuiteOAuthTokenRefresh] Worker error", err?.message)
+  );
+
+  return {
+    stop: async (force = false) => {
+      try {
+        const repeatables = await tokenQueue.getRepeatableJobs(0, 200, true);
+        for (const r of repeatables || []) {
+          if (r.key) {
+            try {
+              await tokenQueue.removeRepeatableByKey(r.key);
+            } catch (e) {
+              console.warn("[processNetSuiteOAuthTokenRefresh] removeRepeatableByKey:", e?.message);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[processNetSuiteOAuthTokenRefresh] cleanup repeatables:", e?.message);
+      }
+      if (workerInstance) {
+        await workerInstance.close(force);
+      }
+      await tokenQueue.close(force);
+    }
+  };
+} catch (error) {
+  console.error("[processNetSuiteOAuthTokenRefresh] Failed to create worker", error);
+  if (workerInstance) {
+    try {
+      await workerInstance.close();
+    } catch (e) {}
+  }
+  try {
+    await tokenQueue.close();
+  } catch (e) {}
+  throw error;
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

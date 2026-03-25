@@ -53,28 +53,369 @@ if (dateFrom) queryString = queryString ? queryString + " AND created_at:>=" + d
 if (dateTo) queryString = queryString ? queryString + " AND created_at:<=" + dateTo : "created_at:<=" + dateTo;
 console.log("[shopifyDraftOrderBeforeFetchData] queryString:", queryString || "(none)");
 
-const BULK_LINE_ITEMS_FIRST = 50;
+const BULK_LINE_ITEMS_FIRST = 20;
 const LINE_ITEMS_FIRST = 250;
 const DRAFT_ORDERS_PAGE_SIZE = 25;
 
+const MAILING_ADDRESS_FIELDS = `
+                  name
+                  firstName
+                  lastName
+                  company
+                  address1
+                  address2
+                  city
+                  province
+                  country
+                  zip
+                  phone
+                  formatted`;
+
+const DRAFT_ORDER_NODE_FIELDS = `
+          id
+          legacyResourceId
+          name
+          status
+          createdAt
+          updatedAt
+          completedAt
+          defaultCursor
+          acceptAutomaticDiscounts
+          allowDiscountCodesInCheckout
+          allVariantPricesOverridden
+          anyVariantPricesOverridden
+          currencyCode
+          presentmentCurrencyCode
+          email
+          phone
+          note2
+          poNumber
+          invoiceEmailTemplateSubject
+          invoiceSentAt
+          invoiceUrl
+          taxesIncluded
+          taxExempt
+          ready
+          hasTimelineComment
+          visibleToCustomer
+          totalQuantityOfLineItems
+          totalWeight
+          transformerFingerprint
+          reserveInventoryUntil
+          discountCodes
+          tags
+          billingAddressMatchesShippingAddress
+          appliedDiscount {
+            title
+            description
+            value
+            valueType
+            amountSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+              presentmentMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          billingAddress {` +
+  MAILING_ADDRESS_FIELDS +
+  `
+          }
+          shippingAddress {` +
+  MAILING_ADDRESS_FIELDS +
+  `
+          }
+          customer {
+            id
+            displayName
+            email
+            phone
+          }
+          order {
+            id
+            name
+          }
+          paymentTerms {
+            id
+          }
+          purchasingEntity {
+            __typename
+            ... on Customer {
+              id
+              displayName
+              email
+            }
+            ... on PurchasingCompany {
+              company {
+                id
+                name
+              }
+              location {
+                id
+                name
+              }
+            }
+          }
+          platformDiscounts {
+            id
+            title
+            summary
+            shortSummary
+            code
+            automaticDiscount
+            bxgyDiscount
+            presentationLevel
+            totalAmountPriceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+              presentmentMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          warnings {
+            __typename
+            errorCode
+            field
+            message
+            ... on DraftOrderDiscountNotAppliedWarning {
+              discountCode
+              discountTitle
+            }
+          }
+          shippingLine {
+            title
+            discountedPriceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+              presentmentMoney {
+                amount
+                currencyCode
+              }
+            }
+            originalPriceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+              presentmentMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          lineItemsSubtotalPrice {
+            shopMoney {
+              amount
+              currencyCode
+            }
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+          }
+          subtotalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalLineItemsPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalDiscountsSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalTaxSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalShippingPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+            presentmentMoney {
+              amount
+              currencyCode
+            }
+          }
+          taxLines {
+            title
+            rate
+            ratePercentage
+            source
+            channelLiable
+            priceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+              presentmentMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          customAttributes {
+            key
+            value
+          }
+          events(first: 5) {
+            edges {
+              node {
+                id
+                createdAt
+                action
+                message
+              }
+            }
+          }
+          localizedFields(first: 10) {
+            edges {
+              node {
+                title
+                purpose
+                key
+                countryCode
+                value
+              }
+            }
+          }
+          metafields(first: 20) {
+            edges {
+              node {
+                namespace
+                key
+                type
+                value
+              }
+            }
+          }`;
+
 const DRAFT_LINE_ITEM_FIELDS = `
                 id
+                uuid
                 name
                 title
                 quantity
                 sku
+                custom
+                taxable
+                requiresShipping
+                isGiftCard
+                vendor
                 originalUnitPriceSet { shopMoney { amount currencyCode } }
                 approximateDiscountedUnitPriceSet { shopMoney { amount currencyCode } }
                 originalTotalSet { shopMoney { amount currencyCode } }
                 discountedTotalSet { shopMoney { amount currencyCode } }
+                totalDiscountSet { shopMoney { amount currencyCode } }
+                originalUnitPriceWithCurrency { amount currencyCode }
+                priceOverride { amount currencyCode }
+                image {
+                  url
+                  altText
+                }
+                weight {
+                  value
+                  unit
+                }
+                appliedDiscount {
+                  description
+                  title
+                  value
+                  valueType
+                  amountSet { shopMoney { amount currencyCode } }
+                }
+                fulfillmentService {
+                  id
+                  serviceName
+                  handle
+                }
+                taxLines {
+                  title
+                  rate
+                  ratePercentage
+                  source
+                  channelLiable
+                  priceSet { shopMoney { amount currencyCode } }
+                }
+                customAttributes {
+                  key
+                  value
+                }
+                customAttributesV2 {
+                  key
+                  value
+                }
+                components {
+                  id
+                  uuid
+                  name
+                  title
+                  quantity
+                  sku
+                  custom
+                }
                 variant {
                   id
                   title
                   sku
+                  image {
+                    url
+                    altText
+                  }
                 }
                 product {
                   id
                   title
+                  featuredImage {
+                    url
+                    altText
+                  }
                 }`;
 
 const draftOrdersQuery =
@@ -82,22 +423,9 @@ const draftOrdersQuery =
   query getDraftOrders($first: Int!, $after: String, $query: String, $sortKey: DraftOrderSortKeys, $reverse: Boolean) {
     draftOrders(first: $first, after: $after, query: $query, sortKey: $sortKey, reverse: $reverse) {
       edges {
-        node {
-          id
-          name
-          createdAt
-          updatedAt
-          status
-          subtotalPriceSet { shopMoney { amount currencyCode } }
-          totalPriceSet { shopMoney { amount currencyCode } }
-          totalTaxSet { shopMoney { amount currencyCode } }
-          totalShippingPriceSet { shopMoney { amount currencyCode } }
-          taxesIncluded
-          customer {
-            id
-            email
-            displayName
-          }
+        node {` +
+  DRAFT_ORDER_NODE_FIELDS +
+  `
           lineItems(first: ` +
   BULK_LINE_ITEMS_FIRST +
   `) {
@@ -227,6 +555,24 @@ const money = (set) => {
   const m = set?.shopMoney;
   return { amount: m?.amount ?? "", currency: m?.currencyCode ?? "" };
 };
+const moneyPresent = (set) => {
+  const m = set?.presentmentMoney;
+  return { amount: m?.amount ?? "", currency: m?.currencyCode ?? "" };
+};
+const moneyV2 = (m) => {
+  if (!m) return { amount: "", currency: "" };
+  return { amount: m.amount ?? "", currency: m.currencyCode ?? "" };
+};
+const jstr = (v) => {
+  try {
+    return v == null ? "" : JSON.stringify(v);
+  } catch (e) {
+    return "";
+  }
+};
+
+const strJoin = (arr) =>
+  Array.isArray(arr) ? arr.filter((x) => x != null && x !== "").join(", ") : "";
 
 const session = args.session;
 for (const draft of allDrafts) {
@@ -238,10 +584,27 @@ for (const draft of allDrafts) {
   const customerEmail = draft.email || customer.email || "";
   const customerDisplayName = customer.displayName || "";
   const customerGraphId = customer.id || "";
+  const customerPhone = customer.phone || "";
+  const tagsStr = Array.isArray(draft.tags) ? draft.tags.join(", ") : "";
   const sub = money(draft.subtotalPriceSet);
   const tot = money(draft.totalPriceSet);
   const tax = money(draft.totalTaxSet);
   const ship = money(draft.totalShippingPriceSet);
+  const m = (set) => money(set);
+  const lineItemsSub = m(draft.lineItemsSubtotalPrice);
+  const totalLineItems = m(draft.totalLineItemsPriceSet);
+  const totalDisc = m(draft.totalDiscountsSet);
+  const appliedDisc = m(draft.appliedDiscount?.amountSet);
+  const shippingLineDiscounted = m(draft.shippingLine?.discountedPriceSet);
+  const subP = moneyPresent(draft.subtotalPriceSet);
+  const totP = moneyPresent(draft.totalPriceSet);
+  const taxP = moneyPresent(draft.totalTaxSet);
+  const shipP = moneyPresent(draft.totalShippingPriceSet);
+  const lineItemsSubP = moneyPresent(draft.lineItemsSubtotalPrice);
+  const totalLineItemsP = moneyPresent(draft.totalLineItemsPriceSet);
+  const totalDiscP = moneyPresent(draft.totalDiscountsSet);
+  const appliedDiscP = moneyPresent(draft.appliedDiscount?.amountSet);
+  const shippingLineDiscountedP = moneyPresent(draft.shippingLine?.discountedPriceSet);
   let lineNodes;
   let lineItemsFetchErrored = false;
   if (draftOrderId && admin) {
@@ -267,42 +630,111 @@ for (const draft of allDrafts) {
       pageCap: LINE_ITEMS_FIRST
     });
   }
-  await session.run(
-    `MERGE (d:ShopifyDraftOrder { id: $id })
-     SET d.name = $name,
-         d.createdAt = $createdAt,
-         d.updatedAt = $updatedAt,
-         d.status = $status,
-         d.email = $email,
-         d.customerDisplayName = $customerDisplayName,
-         d.customerGraphId = $customerGraphId,
-         d.subtotalAmount = $subtotalAmount,
-         d.subtotalCurrency = $subtotalCurrency,
-         d.totalPriceAmount = $totalPriceAmount,
-         d.totalPriceCurrency = $totalPriceCurrency,
-         d.totalTaxAmount = $totalTaxAmount,
-         d.totalShippingAmount = $totalShippingAmount,
-         d.taxesIncluded = $taxesIncluded,
-         d.lineItemsCount = $lineItemsCount`,
-    {
-      id: draftOrderId,
-      name: draftName,
-      createdAt: draftCreatedAt,
-      updatedAt: draftUpdatedAt,
-      status: draft.status || "",
-      email: customerEmail,
-      customerDisplayName,
-      customerGraphId,
-      subtotalAmount: sub.amount,
-      subtotalCurrency: sub.currency,
-      totalPriceAmount: tot.amount,
-      totalPriceCurrency: tot.currency,
-      totalTaxAmount: tax.amount,
-      totalShippingAmount: ship.amount,
-      taxesIncluded: draft.taxesIncluded === true,
-      lineItemsCount: lineNodes.length
-    }
-  );
+  const draftProps = {
+    id: draftOrderId,
+    name: draftName,
+    createdAt: draftCreatedAt,
+    updatedAt: draftUpdatedAt,
+    completedAt: draft.completedAt || "",
+    status: draft.status ? String(draft.status) : "",
+    legacyResourceId: draft.legacyResourceId != null ? String(draft.legacyResourceId) : "",
+    defaultCursor: draft.defaultCursor || "",
+    acceptAutomaticDiscounts: draft.acceptAutomaticDiscounts === true,
+    allowDiscountCodesInCheckout: draft.allowDiscountCodesInCheckout === true,
+    allVariantPricesOverridden: draft.allVariantPricesOverridden === true,
+    anyVariantPricesOverridden: draft.anyVariantPricesOverridden === true,
+    currencyCode: draft.currencyCode ? String(draft.currencyCode) : "",
+    presentmentCurrencyCode: draft.presentmentCurrencyCode ? String(draft.presentmentCurrencyCode) : "",
+    email: customerEmail,
+    phone: draft.phone || customerPhone || "",
+    note2: draft.note2 || "",
+    poNumber: draft.poNumber || "",
+    invoiceEmailTemplateSubject: draft.invoiceEmailTemplateSubject || "",
+    invoiceSentAt: draft.invoiceSentAt || "",
+    invoiceUrl: draft.invoiceUrl ? String(draft.invoiceUrl) : "",
+    taxesIncluded: draft.taxesIncluded === true,
+    taxExempt: draft.taxExempt === true,
+    ready: draft.ready === true,
+    hasTimelineComment: draft.hasTimelineComment === true,
+    visibleToCustomer: draft.visibleToCustomer === true,
+    totalQuantityOfLineItems:
+      draft.totalQuantityOfLineItems != null ? Number(draft.totalQuantityOfLineItems) : 0,
+    totalWeight: draft.totalWeight != null ? String(draft.totalWeight) : "",
+    transformerFingerprint: draft.transformerFingerprint || "",
+    reserveInventoryUntil: draft.reserveInventoryUntil || "",
+    discountCodes: strJoin(draft.discountCodes),
+    tags: tagsStr,
+    billingAddressMatchesShippingAddress: draft.billingAddressMatchesShippingAddress === true,
+    customerDisplayName,
+    customerGraphId,
+    customerPhone,
+    convertedOrderId: draft.order?.id || "",
+    convertedOrderName: draft.order?.name || "",
+    paymentTermsId: draft.paymentTerms?.id || "",
+    appliedDiscountTitle: draft.appliedDiscount?.title || "",
+    appliedDiscountDescription: draft.appliedDiscount?.description || "",
+    appliedDiscountValue:
+      draft.appliedDiscount?.value != null ? String(draft.appliedDiscount.value) : "",
+    appliedDiscountValueType: draft.appliedDiscount?.valueType
+      ? String(draft.appliedDiscount.valueType)
+      : "",
+    appliedDiscountAmount: appliedDisc.amount,
+    appliedDiscountCurrency: appliedDisc.currency,
+    appliedDiscountPresentmentAmount: appliedDiscP.amount,
+    appliedDiscountPresentmentCurrency: appliedDiscP.currency,
+    shippingLineTitle: draft.shippingLine?.title || "",
+    shippingLineDiscountedAmount: shippingLineDiscounted.amount,
+    shippingLineDiscountedCurrency: shippingLineDiscounted.currency,
+    shippingLineDiscountedPresentmentAmount: shippingLineDiscountedP.amount,
+    shippingLineDiscountedPresentmentCurrency: shippingLineDiscountedP.currency,
+    lineItemsSubtotalAmount: lineItemsSub.amount,
+    lineItemsSubtotalCurrency: lineItemsSub.currency,
+    lineItemsSubtotalPresentmentAmount: lineItemsSubP.amount,
+    lineItemsSubtotalPresentmentCurrency: lineItemsSubP.currency,
+    subtotalAmount: sub.amount,
+    subtotalCurrency: sub.currency,
+    subtotalPresentmentAmount: subP.amount,
+    subtotalPresentmentCurrency: subP.currency,
+    totalLineItemsPriceAmount: totalLineItems.amount,
+    totalLineItemsPriceCurrency: totalLineItems.currency,
+    totalLineItemsPricePresentmentAmount: totalLineItemsP.amount,
+    totalLineItemsPricePresentmentCurrency: totalLineItemsP.currency,
+    totalDiscountsAmount: totalDisc.amount,
+    totalDiscountsCurrency: totalDisc.currency,
+    totalDiscountsPresentmentAmount: totalDiscP.amount,
+    totalDiscountsPresentmentCurrency: totalDiscP.currency,
+    totalPriceAmount: tot.amount,
+    totalPriceCurrency: tot.currency,
+    totalPricePresentmentAmount: totP.amount,
+    totalPricePresentmentCurrency: totP.currency,
+    totalTaxAmount: tax.amount,
+    totalTaxCurrency: tax.currency,
+    totalTaxPresentmentAmount: taxP.amount,
+    totalTaxPresentmentCurrency: taxP.currency,
+    totalShippingAmount: ship.amount,
+    totalShippingCurrency: ship.currency,
+    totalShippingPresentmentAmount: shipP.amount,
+    totalShippingPresentmentCurrency: shipP.currency,
+    lineItemsCount: lineNodes.length,
+    billingAddressJson: jstr(draft.billingAddress),
+    shippingAddressJson: jstr(draft.shippingAddress),
+    customAttributesJson: jstr(draft.customAttributes),
+    taxLinesJson: jstr(draft.taxLines),
+    platformDiscountsJson: jstr(draft.platformDiscounts),
+    warningsJson: jstr(draft.warnings),
+    shippingLineJson: jstr(draft.shippingLine),
+    eventsJson: jstr(draft.events),
+    localizedFieldsJson: jstr(draft.localizedFields),
+    metafieldsJson: jstr(draft.metafields),
+    purchasingEntityJson: jstr(draft.purchasingEntity),
+    customerJson: jstr(draft.customer)
+  };
+
+  await session.run(`MERGE (d:ShopifyDraftOrder { id: $id })
+   SET d += $props`, {
+    id: draftOrderId,
+    props: draftProps
+  });
   for (let idx = 0; idx < lineNodes.length; idx++) {
     const node = lineNodes[idx];
     const lineItemId = node.id || draftOrderId + "-" + idx;
@@ -314,14 +746,26 @@ for (const draft of allDrafts) {
     const du = money(node.approximateDiscountedUnitPriceSet);
     const ot = money(node.originalTotalSet);
     const dt = money(node.discountedTotalSet);
+    const tdisc = money(node.totalDiscountSet);
+    const ouc = moneyV2(node.originalUnitPriceWithCurrency);
+    const po = moneyV2(node.priceOverride);
     const qty = node.quantity ?? 0;
+    const lineImageUrl =
+      node.image?.url ||
+      node.variant?.image?.url ||
+      node.product?.featuredImage?.url ||
+      "";
+    const productTitle = node.product?.title || node.title || node.name || "";
+    const fulfillmentServiceName = node.fulfillmentService?.serviceName || "";
     await session.run(
       `MERGE (d:ShopifyDraftOrder { id: $draftOrderId })
        MERGE (li:ShopifyDraftOrderLineItem { id: $lineItemId })
        SET li.draftOrderId = $draftOrderId,
            li.draftOrderName = $draftOrderName,
            li.draftOrderCreatedAt = $draftOrderCreatedAt,
+           li.lineItemUuid = $lineItemUuid,
            li.lineItemName = $lineItemName,
+           li.lineItemTitle = $lineItemTitle,
            li.productTitle = $productTitle,
            li.productGraphId = $productGraphId,
            li.variantGraphId = $variantGraphId,
@@ -337,15 +781,36 @@ for (const draft of allDrafts) {
            li.originalTotalAmount = $originalTotalAmount,
            li.originalTotalCurrency = $originalTotalCurrency,
            li.discountedTotalAmount = $discountedTotalAmount,
-           li.discountedTotalCurrency = $discountedTotalCurrency
+           li.discountedTotalCurrency = $discountedTotalCurrency,
+           li.totalDiscountAmount = $totalDiscountAmount,
+           li.totalDiscountCurrency = $totalDiscountCurrency,
+           li.originalUnitPriceWithCurrencyAmount = $originalUnitPriceWithCurrencyAmount,
+           li.originalUnitPriceWithCurrencyCurrency = $originalUnitPriceWithCurrencyCurrency,
+           li.priceOverrideAmount = $priceOverrideAmount,
+           li.priceOverrideCurrency = $priceOverrideCurrency,
+           li.lineImageUrl = $lineImageUrl,
+           li.custom = $custom,
+           li.taxable = $taxable,
+           li.requiresShipping = $requiresShipping,
+           li.isGiftCard = $isGiftCard,
+           li.vendor = $vendor,
+           li.fulfillmentServiceName = $fulfillmentServiceName,
+           li.appliedDiscountJson = $appliedDiscountJson,
+           li.componentsJson = $componentsJson,
+           li.customAttributesJson = $customAttributesJson,
+           li.customAttributesV2Json = $customAttributesV2Json,
+           li.taxLinesJson = $taxLinesJson,
+           li.weightJson = $weightJson
        MERGE (d)-[:HAS_DRAFT_LINE_ITEM]->(li)`,
       {
         draftOrderId,
         lineItemId,
         draftOrderName: draftName,
         draftOrderCreatedAt: draftCreatedAt,
+        lineItemUuid: node.uuid || "",
         lineItemName: node.name || node.title || "",
-        productTitle: node.title || "",
+        lineItemTitle: node.title || "",
+        productTitle,
         productGraphId: productId,
         variantGraphId: variantId,
         variantTitle,
@@ -359,7 +824,26 @@ for (const draft of allDrafts) {
         originalTotalAmount: ot.amount,
         originalTotalCurrency: ot.currency,
         discountedTotalAmount: dt.amount,
-        discountedTotalCurrency: dt.currency
+        discountedTotalCurrency: dt.currency,
+        totalDiscountAmount: tdisc.amount,
+        totalDiscountCurrency: tdisc.currency,
+        originalUnitPriceWithCurrencyAmount: ouc.amount,
+        originalUnitPriceWithCurrencyCurrency: ouc.currency,
+        priceOverrideAmount: po.amount,
+        priceOverrideCurrency: po.currency,
+        lineImageUrl,
+        custom: node.custom === true,
+        taxable: node.taxable === true,
+        requiresShipping: node.requiresShipping === true,
+        isGiftCard: node.isGiftCard === true,
+        vendor: node.vendor || "",
+        fulfillmentServiceName,
+        appliedDiscountJson: jstr(node.appliedDiscount),
+        componentsJson: jstr(node.components),
+        customAttributesJson: jstr(node.customAttributes),
+        customAttributesV2Json: jstr(node.customAttributesV2),
+        taxLinesJson: jstr(node.taxLines),
+        weightJson: jstr(node.weight)
       }
     );
   }

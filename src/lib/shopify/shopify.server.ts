@@ -33,7 +33,7 @@ function createShopifyAppInstance(
   return shopifyApp({
     apiKey: credentials.apiKey,
     apiSecretKey: credentials.apiSecretKey,
-    apiVersion: ApiVersion.October25,
+    apiVersion: ApiVersion.April26,
     scopes: credentials.shopifyScopes
       .split(",")
       .map((s) => s.trim())

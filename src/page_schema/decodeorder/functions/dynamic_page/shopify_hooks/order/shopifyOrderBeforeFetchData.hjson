@@ -4,9 +4,17 @@
       id: "1"
       L: Function
       P: {
-        description: Syncs Shopify orders and line items before fetching order or line-item tables. Skips Shopify API when loading line items filtered by a single orderId (Neo4j only).
+        description: Syncs Shopify orders, line items, and per-order returns (return line items, refunds on the return, reverse fulfillment orders, exchange line items) before fetching order or line-item tables. Skips Shopify API when loading line items filtered by a single orderId (Neo4j only). ShopifyReturn and ShopifyReturnLineItem tables read graph data populated by this sync (no separate returns hook).
         body:
           '''const { tableVertexLabel, filters = {}, sort = {}, shop: contextShop } = args.contextData;
+const isReturnTable = tableVertexLabel === "ShopifyReturn";
+const isReturnLineTable = tableVertexLabel === "ShopifyReturnLineItem";
+if (isReturnTable || isReturnLineTable) {
+  console.log(
+    "[shopifyOrderBeforeFetchData] skip Shopify sync (returns are synced when the orders table runs)"
+  );
+  return;
+}
 const isOrderTable = tableVertexLabel === "ShopifyOrder";
 const isLineTable = tableVertexLabel === "ShopifyOrderLineItem";
 if (!isOrderTable && !isLineTable) return;
@@ -64,9 +72,576 @@ if (dateTo) queryString = queryString ? queryString + " AND created_at:<=" + dat
 console.log("[shopifyOrderBeforeFetchData] queryString:", queryString || "(none)");
 
 // Bulk orders query must stay under Shopify single-query cost limit (~1000); line items are loaded per order.
-const BULK_LINE_ITEMS_FIRST = 50;
+const BULK_LINE_ITEMS_FIRST = 15;
 const LINE_ITEMS_FIRST = 250;
-const ORDERS_PAGE_SIZE = 25;
+const ORDERS_PAGE_SIZE = 20;
+const RETURNS_BULK_FIRST = 30;
+const RETURN_LINES_FIRST = 250;
+const RETURN_REFUNDS_FIRST = 50;
+const RETURN_RFO_FIRST = 25;
+const RETURN_EXCHANGE_FIRST = 50;
+
+const MAILING_ADDRESS_FIELDS = `
+                  name
+                  firstName
+                  lastName
+                  company
+                  #address1
+                  #address2
+                  city
+                  province
+                  country
+                  #zip
+                  phone
+                  #formatted`;
+
+const ORDER_NODE_FIELDS = `
+          id
+          legacyResourceId
+          name
+          number
+          email
+          phone
+          createdAt
+          updatedAt
+          processedAt
+          closedAt
+          cancelledAt
+          cancelReason
+          confirmationNumber
+          currencyCode
+          presentmentCurrencyCode
+          clientIp
+          customerLocale
+          note
+          poNumber
+          sourceName
+          sourceIdentifier
+          registeredSourceUrl
+          discountCode
+          discountCodes
+          tags
+          test
+          taxesIncluded
+          taxExempt
+          dutiesIncluded
+          estimatedTaxes
+          closed
+          confirmed
+          edited
+          fulfillable
+          refundable
+          restockable
+          requiresShipping
+          unpaid
+          fullyPaid
+          capturable
+          canMarkAsPaid
+          canNotifyCustomer
+          billingAddressMatchesShippingAddress
+          customerAcceptsMarketing
+          displayFulfillmentStatus
+          displayFinancialStatus
+          returnStatus
+          productNetwork
+          hasTimelineComment
+          merchantEditable
+          merchantEditableErrors
+          subtotalLineItemsQuantity
+          currentSubtotalLineItemsQuantity
+          currentTotalWeight
+          totalWeight
+          billingAddress {` +
+  MAILING_ADDRESS_FIELDS +
+  `
+          }
+          shippingAddress {` +
+  MAILING_ADDRESS_FIELDS +
+  `
+          }
+          displayAddress {` +
+  MAILING_ADDRESS_FIELDS +
+  `
+          }
+          cancellation {
+            staffNote
+          }
+          customer {
+            id
+            displayName
+            email
+            phone
+          }
+          customerJourneySummary {
+            ready
+            customerOrderIndex
+            daysToConversion
+            momentsCount {
+              count
+            }
+          }
+          channelInformation {
+            channelDefinition {
+              channelName
+              handle
+            }
+          }
+          app {
+            name
+          }
+          merchantOfRecordApp {
+            name
+          }
+          merchantBusinessEntity {
+            id
+            displayName
+            companyName
+            primary
+          }
+          #orderStaffMember: staffMember {
+            #id
+            #name
+            #email
+          #}
+          alerts {
+            title
+            content
+            severity
+          }
+          additionalFees {
+            id
+            name
+            price {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+            taxLines {
+              title
+              rate
+              priceSet {
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+            }
+          }
+          agreements(first: 5) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+          discountApplications(first: 20) {
+            edges {
+              node {
+                ... on DiscountApplication {
+                  allocationMethod
+                  index
+                  targetSelection
+                  targetType
+                  value {
+                    __typename
+                    ... on MoneyV2 {
+                      amount
+                      currencyCode
+                    }
+                    ... on PricingPercentageValue {
+                      percentage
+                    }
+                  }
+                }
+                ... on DiscountCodeApplication {
+                  code
+                }
+                ... on AutomaticDiscountApplication {
+                  title
+                }
+                ... on ManualDiscountApplication {
+                  title
+                  description
+                }
+                ... on ScriptDiscountApplication {
+                  title
+                }
+              }
+            }
+          }
+          disputes {
+            id
+            initiatedAs
+            status
+          }
+          events(first: 5) {
+            edges {
+              node {
+                id
+                createdAt
+                message
+                action
+              }
+            }
+          }
+          fulfillmentOrders(first: 8) {
+            edges {
+              node {
+                id
+                status
+              }
+            }
+          }
+          fulfillments(first: 15) {
+            id
+            status
+            createdAt
+            trackingInfo(first: 5) {
+              company
+              number
+              url
+            }
+          }
+          fulfillmentsCount {
+            count
+          }
+          nonFulfillableLineItems(first: 8) {
+            edges {
+              node {
+                id
+                name
+                title
+              }
+            }
+          }
+          localizedFields(first: 10) {
+            edges {
+              node {
+                title
+                purpose
+                key
+                countryCode
+                value
+              }
+            }
+          }
+          metafields(first: 20) {
+            edges {
+              node {
+                namespace
+                key
+                type
+                value
+              }
+            }
+          }
+          netPaymentSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          originalTotalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          cartDiscountAmountSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentCartDiscountAmountSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          subtotalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentSubtotalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentTotalPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalTaxSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentTotalTaxSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalShippingPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentShippingPriceSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalDiscountsSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentTotalDiscountsSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalOutstandingSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalReceivedSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalRefundedSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalRefundedShippingSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalTipReceivedSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalCapturableSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          refundDiscrepancySet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          originalTotalAdditionalFeesSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentTotalAdditionalFeesSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          originalTotalDutiesSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          currentTotalDutiesSet {
+            shopMoney {
+              amount
+              currencyCode
+            }
+          }
+          totalCashRoundingAdjustment {
+            paymentSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+            refundSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          paymentCollectionDetails {
+            additionalPaymentCollectionUrl
+          }
+          paymentGatewayNames
+          paymentTerms {
+            id
+          }
+          publication {
+            id
+            name
+          }
+          purchasingEntity {
+            __typename
+            ... on Customer {
+              id
+              displayName
+              email
+            }
+            ... on PurchasingCompany {
+              company {
+                id
+                name
+              }
+              location {
+                id
+                name
+              }
+            }
+          }
+          retailLocation {
+            id
+            name
+          }
+          refunds(first: 5) {
+            id
+            createdAt
+            totalRefundedSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          returns(first: 1) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {
+                id
+                name
+                status
+                createdAt
+                closedAt
+                requestApprovedAt
+                totalQuantity
+                #staffMember {
+                  #id
+                  #name
+                #}
+              }
+            }
+          }
+          risk {
+            recommendation
+            assessments {
+              riskLevel
+            }
+          }
+          shippingLine {
+            title
+            discountedPriceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          shippingLines(first: 10) {
+            edges {
+              node {
+                title
+                code
+                originalPriceSet {
+                  shopMoney {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
+            }
+          }
+          shopifyProtect {
+            status
+          }
+          #statusPageUrl
+          taxLines {
+            title
+            rate
+            ratePercentage
+            source
+            channelLiable
+            priceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          currentTaxLines {
+            title
+            rate
+            ratePercentage
+            source
+            channelLiable
+            priceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          customAttributes {
+            key
+            value
+          }
+          transactions(first: 25) {
+            id
+            status
+            gateway
+            processedAt
+            amountSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+          transactionsCount {
+            count
+          }`;
 
 const LINE_ITEM_NODE_FIELDS = `
                 id
@@ -74,13 +649,113 @@ const LINE_ITEM_NODE_FIELDS = `
                 title
                 quantity
                 currentQuantity
+                refundableQuantity
                 unfulfilledQuantity
+                nonFulfillableQuantity
                 sku
                 vendor
+                variantTitle
+                isGiftCard
+                merchantEditable
+                requiresShipping
+                restockable
+                taxable
                 originalUnitPriceSet { shopMoney { amount currencyCode } }
                 discountedUnitPriceSet { shopMoney { amount currencyCode } }
+                discountedUnitPriceAfterAllDiscountsSet { shopMoney { amount currencyCode } }
                 originalTotalSet { shopMoney { amount currencyCode } }
                 discountedTotalSet { shopMoney { amount currencyCode } }
+                discountedTotalSetWithCodeDiscounts: discountedTotalSet(withCodeDiscounts: true) { shopMoney { amount currencyCode } }
+                totalDiscountSet { shopMoney { amount currencyCode } }
+                unfulfilledOriginalTotalSet { shopMoney { amount currencyCode } }
+                unfulfilledDiscountedTotalSet { shopMoney { amount currencyCode } }
+                image {
+                  url
+                  altText
+                }
+                #contract {
+                  #id
+                  #status
+                #}
+                lineItemGroup {
+                  id
+                  title
+                  quantity
+                  productId
+                  variantId
+                  variantSku
+                  customAttributes {
+                    key
+                    value
+                  }
+                }
+                sellingPlan {
+                  name
+                  sellingPlanId
+                }
+                #staffMember {
+                  #id
+                  #name
+                  #email
+                #}
+                customAttributes {
+                  key
+                  value
+                }
+                discountAllocations {
+                  allocatedAmountSet { shopMoney { amount currencyCode } }
+                  discountApplication {
+                    allocationMethod
+                    index
+                    targetSelection
+                    targetType
+                    value {
+                      __typename
+                      ... on MoneyV2 {
+                        amount
+                        currencyCode
+                      }
+                      ... on PricingPercentageValue {
+                        percentage
+                      }
+                    }
+                    ... on DiscountCodeApplication {
+                      code
+                    }
+                    ... on AutomaticDiscountApplication {
+                      title
+                    }
+                    ... on ManualDiscountApplication {
+                      title
+                      description
+                    }
+                    ... on ScriptDiscountApplication {
+                      title
+                    }
+                  }
+                }
+                duties {
+                  id
+                  countryCodeOfOrigin
+                  harmonizedSystemCode
+                  price {
+                    shopMoney { amount currencyCode }
+                  }
+                  taxLines {
+                    title
+                    rate
+                    ratePercentage
+                    priceSet { shopMoney { amount currencyCode } }
+                  }
+                }
+                taxLines(first: 25) {
+                  title
+                  rate
+                  ratePercentage
+                  source
+                  channelLiable
+                  priceSet { shopMoney { amount currencyCode } }
+                }
                 variant {
                   id
                   title
@@ -97,10 +772,6 @@ const LINE_ITEM_NODE_FIELDS = `
                     url
                     altText
                   }
-                }
-                customAttributes {
-                  key
-                  value
                 }`;
 
 const ordersQuery =
@@ -108,27 +779,9 @@ const ordersQuery =
   query getOrders($first: Int!, $query: String, $sortKey: OrderSortKeys, $reverse: Boolean) {
     orders(first: $first, query: $query, sortKey: $sortKey, reverse: $reverse) {
       edges {
-        node {
-          id
-          name
-          createdAt
-          updatedAt
-          displayFulfillmentStatus
-          displayFinancialStatus
-          email
-          phone
-          processedAt
-          cancelledAt
-          closed
-          note
-          tags
-          subtotalPriceSet { shopMoney { amount currencyCode } }
-          totalPriceSet { shopMoney { amount currencyCode } }
-          totalTaxSet { shopMoney { amount currencyCode } }
-          totalShippingPriceSet { shopMoney { amount currencyCode } }
-          taxesIncluded
-          fullyPaid
-          test
+        node {` +
+  ORDER_NODE_FIELDS +
+  `
           lineItems(first: ` +
   BULK_LINE_ITEMS_FIRST +
   `) {
@@ -222,6 +875,434 @@ const fetchAllLineItemNodes = async (adminClient, orderGid, initialLineItems) =>
   }
   return { nodes, fetchErrored };
 };
+
+const orderReturnsPageQuery =
+  `
+  query OrderReturnsPage($orderId: ID!, $first: Int!, $after: String) {
+    order(id: $orderId) {
+      returns(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            name
+            status
+            createdAt
+            closedAt
+            requestApprovedAt
+            totalQuantity
+            #staffMember {
+              #id
+              #name
+            #}
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const returnLineItemsPageQuery =
+  `
+  query ReturnLineItemsPage($returnId: ID!, $first: Int!, $after: String) {
+    return(id: $returnId) {
+      returnLineItems(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            __typename
+            ... on ReturnLineItem {
+              id
+              quantity
+              processableQuantity
+              processedQuantity
+              refundableQuantity
+              refundedQuantity
+              unprocessedQuantity
+              customerNote
+              returnReasonNote
+              withCodeDiscountedTotalPriceSet {
+                shopMoney {
+                  amount
+                  currencyCode
+                }
+              }
+              fulfillmentLineItem {
+                lineItem {
+                  id
+                  name
+                  title
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const returnRefundsPageQuery =
+  `
+  query ReturnRefundsPage($returnId: ID!, $first: Int!, $after: String) {
+    return(id: $returnId) {
+      refunds(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            createdAt
+            note
+            totalRefundedSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const returnReverseFulfillmentOrdersPageQuery =
+  `
+  query ReturnReverseFulfillmentOrdersPage($returnId: ID!, $first: Int!, $after: String) {
+    return(id: $returnId) {
+      reverseFulfillmentOrders(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            status
+            order {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const returnExchangeLineItemsPageQuery =
+  `
+  query ReturnExchangeLineItemsPage($returnId: ID!, $first: Int!, $after: String) {
+    return(id: $returnId) {
+      exchangeLineItems(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            quantity
+            processableQuantity
+            processedQuantity
+            unprocessedQuantity
+            variantId
+            lineItems {
+              id
+              name
+              title
+            }
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const fetchAllReturnsForOrder = async (adminClient, orderGid, initialReturns) => {
+  const nodes = [];
+  let fetchErrored = false;
+  let nextAfter;
+  const ir = initialReturns || { edges: [], pageInfo: {} };
+  if (ir.edges && ir.edges.length > 0) {
+    for (const e of ir.edges) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (ir.pageInfo?.hasNextPage === true && ir.pageInfo.endCursor) {
+      nextAfter = ir.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else if (ir.pageInfo?.hasNextPage === true && ir.pageInfo.endCursor) {
+    nextAfter = ir.pageInfo.endCursor;
+  } else {
+    nextAfter = null;
+  }
+  while (nextAfter !== false) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(orderReturnsPageQuery, {
+      variables: { orderId: orderGid, first: RETURNS_BULK_FIRST, after: nextAfter === null ? null : nextAfter }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
+      console.error(
+        "[shopifyOrderBeforeFetchData] order returns pagination error:",
+        orderGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.order?.returns;
+    if (!page) {
+      fetchErrored = true;
+      break;
+    }
+    for (const e of page.edges || []) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
+      console.warn("[shopifyOrderBeforeFetchData] returns hasNextPage but no endCursor", orderGid);
+      nextAfter = false;
+    }
+  }
+  return { nodes, fetchErrored };
+};
+
+const fetchAllReturnLineNodes = async (adminClient, returnGid, initialConn) => {
+  const nodes = [];
+  let fetchErrored = false;
+  let nextAfter;
+  if (initialConn == null) {
+    nextAfter = null;
+  } else if (initialConn.edges && initialConn.edges.length > 0) {
+    for (const e of initialConn.edges) {
+      if (e?.node && e.node.__typename === "ReturnLineItem") nodes.push(e.node);
+    }
+    if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+      nextAfter = initialConn.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+    nextAfter = initialConn.pageInfo.endCursor;
+  } else {
+    nextAfter = false;
+  }
+  while (nextAfter !== false) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(returnLineItemsPageQuery, {
+      variables: { returnId: returnGid, first: RETURN_LINES_FIRST, after: nextAfter === null ? null : nextAfter }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
+      console.error(
+        "[shopifyOrderBeforeFetchData] returnLineItems pagination error:",
+        returnGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.return?.returnLineItems;
+    if (!page) {
+      fetchErrored = true;
+      break;
+    }
+    for (const e of page.edges || []) {
+      const n = e?.node;
+      if (n && n.__typename === "ReturnLineItem") nodes.push(n);
+    }
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
+      console.warn("[shopifyOrderBeforeFetchData] returnLineItems hasNextPage but no endCursor", returnGid);
+      nextAfter = false;
+    }
+  }
+  return { nodes, fetchErrored };
+};
+
+const fetchAllReturnRefundsNodes = async (adminClient, returnGid, initialConn) => {
+  const nodes = [];
+  let fetchErrored = false;
+  let nextAfter;
+  if (initialConn == null) {
+    nextAfter = null;
+  } else if (initialConn.edges && initialConn.edges.length > 0) {
+    for (const e of initialConn.edges) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+      nextAfter = initialConn.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+    nextAfter = initialConn.pageInfo.endCursor;
+  } else {
+    nextAfter = false;
+  }
+  while (nextAfter !== false) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(returnRefundsPageQuery, {
+      variables: { returnId: returnGid, first: RETURN_REFUNDS_FIRST, after: nextAfter === null ? null : nextAfter }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
+      console.error(
+        "[shopifyOrderBeforeFetchData] return refunds pagination error:",
+        returnGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.return?.refunds;
+    if (!page) {
+      fetchErrored = true;
+      break;
+    }
+    for (const e of page.edges || []) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
+      console.warn("[shopifyOrderBeforeFetchData] return refunds hasNextPage but no endCursor", returnGid);
+      nextAfter = false;
+    }
+  }
+  return { nodes, fetchErrored };
+};
+
+const fetchAllReturnRfoNodes = async (adminClient, returnGid, initialConn) => {
+  const nodes = [];
+  let fetchErrored = false;
+  let nextAfter;
+  if (initialConn == null) {
+    nextAfter = null;
+  } else if (initialConn.edges && initialConn.edges.length > 0) {
+    for (const e of initialConn.edges) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+      nextAfter = initialConn.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+    nextAfter = initialConn.pageInfo.endCursor;
+  } else {
+    nextAfter = false;
+  }
+  while (nextAfter !== false) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(returnReverseFulfillmentOrdersPageQuery, {
+      variables: { returnId: returnGid, first: RETURN_RFO_FIRST, after: nextAfter === null ? null : nextAfter }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
+      console.error(
+        "[shopifyOrderBeforeFetchData] reverseFulfillmentOrders pagination error:",
+        returnGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.return?.reverseFulfillmentOrders;
+    if (!page) {
+      fetchErrored = true;
+      break;
+    }
+    for (const e of page.edges || []) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
+      console.warn("[shopifyOrderBeforeFetchData] reverseFulfillmentOrders hasNextPage but no endCursor", returnGid);
+      nextAfter = false;
+    }
+  }
+  return { nodes, fetchErrored };
+};
+
+const fetchAllReturnExchangeNodes = async (adminClient, returnGid, initialConn) => {
+  const nodes = [];
+  let fetchErrored = false;
+  let nextAfter;
+  if (initialConn == null) {
+    nextAfter = null;
+  } else if (initialConn.edges && initialConn.edges.length > 0) {
+    for (const e of initialConn.edges) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+      nextAfter = initialConn.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+  } else if (initialConn.pageInfo?.hasNextPage === true && initialConn.pageInfo.endCursor) {
+    nextAfter = initialConn.pageInfo.endCursor;
+  } else {
+    nextAfter = false;
+  }
+  while (nextAfter !== false) {
+    await new Promise((r) => setTimeout(r, 150));
+    const resp = await adminClient.graphql(returnExchangeLineItemsPageQuery, {
+      variables: { returnId: returnGid, first: RETURN_EXCHANGE_FIRST, after: nextAfter === null ? null : nextAfter }
+    });
+    const json = resp instanceof Response ? await resp.json() : resp;
+    if (json.errors && json.errors.length > 0) {
+      fetchErrored = true;
+      console.error(
+        "[shopifyOrderBeforeFetchData] exchangeLineItems pagination error:",
+        returnGid,
+        json.errors[0]?.message || json.errors[0]
+      );
+      break;
+    }
+    const page = json.data?.return?.exchangeLineItems;
+    if (!page) {
+      fetchErrored = true;
+      break;
+    }
+    for (const e of page.edges || []) {
+      if (e?.node) nodes.push(e.node);
+    }
+    if (page.pageInfo?.hasNextPage === true && page.pageInfo.endCursor) {
+      nextAfter = page.pageInfo.endCursor;
+    } else {
+      nextAfter = false;
+    }
+    if (page.pageInfo?.hasNextPage === true && !page.pageInfo.endCursor) {
+      console.warn("[shopifyOrderBeforeFetchData] exchangeLineItems hasNextPage but no endCursor", returnGid);
+      nextAfter = false;
+    }
+  }
+  return { nodes, fetchErrored };
+};
+
 const sortCol = sort && sort.column;
 const sortKey =
   sortCol === "orderName" || sortCol === "name" ? "ORDER_NUMBER" : "CREATED_AT";
@@ -264,6 +1345,17 @@ const money = (set) => {
   return { amount: m?.amount ?? "", currency: m?.currencyCode ?? "" };
 };
 
+const safeJson = (v) => {
+  try {
+    return JSON.stringify(v ?? null);
+  } catch (e) {
+    return "";
+  }
+};
+
+const strJoin = (arr) =>
+  Array.isArray(arr) ? arr.filter((x) => x != null && x !== "").join(", ") : "";
+
 const session = args.session;
 for (const order of allOrders) {
   const orderId = order.id || "";
@@ -276,6 +1368,10 @@ for (const order of allOrders) {
   const tot = money(order.totalPriceSet);
   const tax = money(order.totalTaxSet);
   const ship = money(order.totalShippingPriceSet);
+  const m = (set) => money(set);
+  const cashRound = order.totalCashRoundingAdjustment || {};
+  const cashPay = m(cashRound.paymentSet);
+  const cashRef = m(cashRound.refundSet);
   let lineNodes;
   let lineItemsFetchErrored = false;
   if (orderId && admin) {
@@ -301,56 +1397,246 @@ for (const order of allOrders) {
       pageCap: LINE_ITEMS_FIRST
     });
   }
-  await session.run(
-    `MERGE (o:ShopifyOrder { id: $id })
-     SET o.name = $name,
-         o.createdAt = $createdAt,
-         o.updatedAt = $updatedAt,
-         o.displayFulfillmentStatus = $displayFulfillmentStatus,
-         o.displayFinancialStatus = $displayFinancialStatus,
-         o.email = $email,
-         o.phone = $phone,
-         o.processedAt = $processedAt,
-         o.cancelledAt = $cancelledAt,
-         o.closed = $closed,
-         o.note = $note,
-         o.tags = $tags,
-         o.subtotalAmount = $subtotalAmount,
-         o.subtotalCurrency = $subtotalCurrency,
-         o.totalPriceAmount = $totalPriceAmount,
-         o.totalPriceCurrency = $totalPriceCurrency,
-         o.totalTaxAmount = $totalTaxAmount,
-         o.totalShippingAmount = $totalShippingAmount,
-         o.taxesIncluded = $taxesIncluded,
-         o.fullyPaid = $fullyPaid,
-         o.testOrder = $testOrder,
-         o.lineItemsCount = $lineItemsCount`,
-    {
-      id: orderId,
-      name: orderName,
-      createdAt: orderCreatedAt,
-      updatedAt: orderUpdatedAt,
-      displayFulfillmentStatus: order.displayFulfillmentStatus || "",
-      displayFinancialStatus: order.displayFinancialStatus || "",
-      email: order.email || "",
-      phone: order.phone || "",
-      processedAt: order.processedAt || "",
-      cancelledAt: order.cancelledAt || "",
-      closed: order.closed === true,
-      note: order.note || "",
-      tags: tagsStr,
-      subtotalAmount: sub.amount,
-      subtotalCurrency: sub.currency,
-      totalPriceAmount: tot.amount,
-      totalPriceCurrency: tot.currency,
-      totalTaxAmount: tax.amount,
-      totalShippingAmount: ship.amount,
-      taxesIncluded: order.taxesIncluded === true,
-      fullyPaid: order.fullyPaid === true,
-      testOrder: order.test === true,
-      lineItemsCount: lineNodes.length
+  const fullReturnsPayload = [];
+  const initialReturnsConn = order.returns;
+  const hasReturnHint =
+    (Array.isArray(initialReturnsConn?.edges) && initialReturnsConn.edges.length > 0) ||
+    initialReturnsConn?.pageInfo?.hasNextPage === true;
+  if (orderId && admin && hasReturnHint) {
+    const retRes = await fetchAllReturnsForOrder(admin, orderId, order.returns);
+    if (retRes.fetchErrored) {
+      console.warn("[shopifyOrderBeforeFetchData] returns list may be incomplete for order", orderId, orderName);
     }
-  );
+    for (const ret of retRes.nodes) {
+      const returnGid = ret.id || "";
+      if (!returnGid) continue;
+      const lineRes = await fetchAllReturnLineNodes(admin, returnGid, null);
+      const refundRes = await fetchAllReturnRefundsNodes(admin, returnGid, null);
+      const rfoRes = await fetchAllReturnRfoNodes(admin, returnGid, null);
+      const exchRes = await fetchAllReturnExchangeNodes(admin, returnGid, null);
+      if (lineRes.fetchErrored) {
+        console.warn("[shopifyOrderBeforeFetchData] return line items may be incomplete", returnGid);
+      }
+      if (refundRes.fetchErrored) {
+        console.warn("[shopifyOrderBeforeFetchData] return refunds may be incomplete", returnGid);
+      }
+      if (rfoRes.fetchErrored) {
+        console.warn("[shopifyOrderBeforeFetchData] return reverse fulfillment orders may be incomplete", returnGid);
+      }
+      if (exchRes.fetchErrored) {
+        console.warn("[shopifyOrderBeforeFetchData] return exchange line items may be incomplete", returnGid);
+      }
+      fullReturnsPayload.push({
+        id: ret.id,
+        name: ret.name,
+        status: ret.status,
+        createdAt: ret.createdAt,
+        closedAt: ret.closedAt,
+        requestApprovedAt: ret.requestApprovedAt,
+        totalQuantity: ret.totalQuantity,
+        staffMember: ret.staffMember,
+        returnLineItems: lineRes.nodes,
+        refunds: refundRes.nodes,
+        reverseFulfillmentOrders: rfoRes.nodes,
+        exchangeLineItems: exchRes.nodes
+      });
+    }
+  }
+  const orderProps = {
+    id: orderId,
+    name: orderName,
+    createdAt: orderCreatedAt,
+    updatedAt: orderUpdatedAt,
+    legacyResourceId: order.legacyResourceId != null ? String(order.legacyResourceId) : "",
+    orderNumber: order.number != null ? String(order.number) : "",
+    confirmationNumber: order.confirmationNumber || "",
+    currencyCode: order.currencyCode ? String(order.currencyCode) : "",
+    presentmentCurrencyCode: order.presentmentCurrencyCode ? String(order.presentmentCurrencyCode) : "",
+    clientIp: order.clientIp || "",
+    customerLocale: order.customerLocale || "",
+    poNumber: order.poNumber || "",
+    sourceName: order.sourceName || "",
+    sourceIdentifier: order.sourceIdentifier || "",
+    registeredSourceUrl: order.registeredSourceUrl ? String(order.registeredSourceUrl) : "",
+    discountCode: order.discountCode || "",
+    discountCodes: strJoin(order.discountCodes),
+    statusPageUrl: order.statusPageUrl ? String(order.statusPageUrl) : "",
+    cancelReason: order.cancelReason != null ? String(order.cancelReason) : "",
+    processedAt: order.processedAt || "",
+    cancelledAt: order.cancelledAt || "",
+    closedAt: order.closedAt || "",
+    note: order.note || "",
+    tags: tagsStr,
+    email: order.email || "",
+    phone: order.phone || "",
+    displayFulfillmentStatus: order.displayFulfillmentStatus || "",
+    displayFinancialStatus: order.displayFinancialStatus || "",
+    returnStatus: order.returnStatus != null ? String(order.returnStatus) : "",
+    closed: order.closed === true,
+    confirmed: order.confirmed === true,
+    edited: order.edited === true,
+    fulfillable: order.fulfillable === true,
+    refundable: order.refundable === true,
+    restockable: order.restockable === true,
+    requiresShipping: order.requiresShipping === true,
+    unpaid: order.unpaid === true,
+    fullyPaid: order.fullyPaid === true,
+    capturable: order.capturable === true,
+    canMarkAsPaid: order.canMarkAsPaid === true,
+    canNotifyCustomer: order.canNotifyCustomer === true,
+    billingAddressMatchesShippingAddress: order.billingAddressMatchesShippingAddress === true,
+    customerAcceptsMarketing: order.customerAcceptsMarketing === true,
+    productNetwork: order.productNetwork === true,
+    hasTimelineComment: order.hasTimelineComment === true,
+    merchantEditable: order.merchantEditable === true,
+    merchantEditableErrors: strJoin(order.merchantEditableErrors),
+    taxesIncluded: order.taxesIncluded === true,
+    taxExempt: order.taxExempt === true,
+    dutiesIncluded: order.dutiesIncluded === true,
+    estimatedTaxes: order.estimatedTaxes === true,
+    testOrder: order.test === true,
+    subtotalLineItemsQuantity: order.subtotalLineItemsQuantity != null ? Number(order.subtotalLineItemsQuantity) : 0,
+    currentSubtotalLineItemsQuantity:
+      order.currentSubtotalLineItemsQuantity != null ? Number(order.currentSubtotalLineItemsQuantity) : 0,
+    currentTotalWeight: order.currentTotalWeight != null ? String(order.currentTotalWeight) : "",
+    totalWeight: order.totalWeight != null ? String(order.totalWeight) : "",
+    cancellationStaffNote: order.cancellation?.staffNote || "",
+    customerGraphId: order.customer?.id || "",
+    customerDisplayName: order.customer?.displayName || "",
+    customerEmail: order.customer?.email || "",
+    customerPhone: order.customer?.phone || "",
+    appName: order.app?.name || "",
+    merchantOfRecordAppName: order.merchantOfRecordApp?.name || "",
+    businessEntityId: order.merchantBusinessEntity?.id || "",
+    businessEntityDisplayName: order.merchantBusinessEntity?.displayName || "",
+    businessEntityCompanyName: order.merchantBusinessEntity?.companyName || "",
+    businessEntityPrimary: order.merchantBusinessEntity?.primary === true,
+    orderStaffMemberId: order.orderStaffMember?.id || "",
+    orderStaffMemberName: order.orderStaffMember?.name || "",
+    orderStaffMemberEmail: order.orderStaffMember?.email || "",
+    channelName: order.channelInformation?.channelDefinition?.channelName || "",
+    channelHandle: order.channelInformation?.channelDefinition?.handle || "",
+    fulfillmentsTotalCount: order.fulfillmentsCount?.count != null ? String(order.fulfillmentsCount.count) : "",
+    transactionsTotalCount: order.transactionsCount?.count != null ? String(order.transactionsCount.count) : "",
+    shopifyProtectStatus: order.shopifyProtect?.status != null ? String(order.shopifyProtect.status) : "",
+    riskRecommendation: order.risk?.recommendation != null ? String(order.risk.recommendation) : "",
+    paymentGatewayNames: strJoin(order.paymentGatewayNames),
+    publicationName: order.publication?.name || "",
+    publicationId: order.publication?.id || "",
+    retailLocationName: order.retailLocation?.name || "",
+    retailLocationId: order.retailLocation?.id || "",
+    paymentTermsId: order.paymentTerms?.id || "",
+    additionalPaymentCollectionUrl: order.paymentCollectionDetails?.additionalPaymentCollectionUrl
+      ? String(order.paymentCollectionDetails.additionalPaymentCollectionUrl)
+      : "",
+    journeyReady: order.customerJourneySummary?.ready === true,
+    journeyCustomerOrderIndex:
+      order.customerJourneySummary?.customerOrderIndex != null
+        ? Number(order.customerJourneySummary.customerOrderIndex)
+        : "",
+    journeyDaysToConversion:
+      order.customerJourneySummary?.daysToConversion != null
+        ? Number(order.customerJourneySummary.daysToConversion)
+        : "",
+    journeyMomentsCount:
+      order.customerJourneySummary?.momentsCount?.count != null
+        ? String(order.customerJourneySummary.momentsCount.count)
+        : "",
+    cashRoundingPaymentAmount: cashPay.amount,
+    cashRoundingPaymentCurrency: cashPay.currency,
+    cashRoundingRefundAmount: cashRef.amount,
+    cashRoundingRefundCurrency: cashRef.currency,
+    subtotalAmount: sub.amount,
+    subtotalCurrency: sub.currency,
+    originalTotalPriceAmount: m(order.originalTotalPriceSet).amount,
+    originalTotalPriceCurrency: m(order.originalTotalPriceSet).currency,
+    currentTotalPriceAmount: m(order.currentTotalPriceSet).amount,
+    currentTotalPriceCurrency: m(order.currentTotalPriceSet).currency,
+    totalPriceAmount: tot.amount,
+    totalPriceCurrency: tot.currency,
+    currentSubtotalPriceAmount: m(order.currentSubtotalPriceSet).amount,
+    currentSubtotalPriceCurrency: m(order.currentSubtotalPriceSet).currency,
+    cartDiscountAmount: m(order.cartDiscountAmountSet).amount,
+    cartDiscountCurrency: m(order.cartDiscountAmountSet).currency,
+    currentCartDiscountAmount: m(order.currentCartDiscountAmountSet).amount,
+    currentCartDiscountCurrency: m(order.currentCartDiscountAmountSet).currency,
+    totalDiscountsAmount: m(order.totalDiscountsSet).amount,
+    totalDiscountsCurrency: m(order.totalDiscountsSet).currency,
+    currentTotalDiscountsAmount: m(order.currentTotalDiscountsSet).amount,
+    currentTotalDiscountsCurrency: m(order.currentTotalDiscountsSet).currency,
+    totalTaxAmount: tax.amount,
+    totalTaxCurrency: tax.currency,
+    currentTotalTaxAmount: m(order.currentTotalTaxSet).amount,
+    currentTotalTaxCurrency: m(order.currentTotalTaxSet).currency,
+    totalShippingAmount: ship.amount,
+    totalShippingCurrency: ship.currency,
+    currentShippingPriceAmount: m(order.currentShippingPriceSet).amount,
+    currentShippingPriceCurrency: m(order.currentShippingPriceSet).currency,
+    netPaymentAmount: m(order.netPaymentSet).amount,
+    netPaymentCurrency: m(order.netPaymentSet).currency,
+    totalOutstandingAmount: m(order.totalOutstandingSet).amount,
+    totalOutstandingCurrency: m(order.totalOutstandingSet).currency,
+    totalReceivedAmount: m(order.totalReceivedSet).amount,
+    totalReceivedCurrency: m(order.totalReceivedSet).currency,
+    totalRefundedAmount: m(order.totalRefundedSet).amount,
+    totalRefundedCurrency: m(order.totalRefundedSet).currency,
+    totalRefundedShippingAmount: m(order.totalRefundedShippingSet).amount,
+    totalRefundedShippingCurrency: m(order.totalRefundedShippingSet).currency,
+    totalTipReceivedAmount: m(order.totalTipReceivedSet).amount,
+    totalTipReceivedCurrency: m(order.totalTipReceivedSet).currency,
+    totalCapturableAmount: m(order.totalCapturableSet).amount,
+    totalCapturableCurrency: m(order.totalCapturableSet).currency,
+    refundDiscrepancyAmount: m(order.refundDiscrepancySet).amount,
+    refundDiscrepancyCurrency: m(order.refundDiscrepancySet).currency,
+    originalTotalAdditionalFeesAmount: m(order.originalTotalAdditionalFeesSet).amount,
+    originalTotalAdditionalFeesCurrency: m(order.originalTotalAdditionalFeesSet).currency,
+    currentTotalAdditionalFeesAmount: m(order.currentTotalAdditionalFeesSet).amount,
+    currentTotalAdditionalFeesCurrency: m(order.currentTotalAdditionalFeesSet).currency,
+    originalTotalDutiesAmount: m(order.originalTotalDutiesSet).amount,
+    originalTotalDutiesCurrency: m(order.originalTotalDutiesSet).currency,
+    currentTotalDutiesAmount: m(order.currentTotalDutiesSet).amount,
+    currentTotalDutiesCurrency: m(order.currentTotalDutiesSet).currency,
+    lineItemsCount: lineNodes.length,
+    billingAddressJson: safeJson(order.billingAddress),
+    shippingAddressJson: safeJson(order.shippingAddress),
+    displayAddressJson: safeJson(order.displayAddress),
+    customAttributesJson: safeJson(order.customAttributes),
+    taxLinesJson: safeJson(order.taxLines),
+    currentTaxLinesJson: safeJson(order.currentTaxLines),
+    additionalFeesJson: safeJson(order.additionalFees),
+    agreementsJson: safeJson(order.agreements),
+    discountApplicationsJson: safeJson(order.discountApplications),
+    disputesJson: safeJson(order.disputes),
+    alertsJson: safeJson(order.alerts),
+    eventsJson: safeJson(order.events),
+    fulfillmentOrdersJson: safeJson(order.fulfillmentOrders),
+    fulfillmentsJson: safeJson(order.fulfillments),
+    nonFulfillableLineItemsJson: safeJson(order.nonFulfillableLineItems),
+    localizedFieldsJson: safeJson(order.localizedFields),
+    metafieldsJson: safeJson(order.metafields),
+    refundsJson: safeJson(order.refunds),
+    returnsCount: fullReturnsPayload.length,
+    returnsJson: safeJson(fullReturnsPayload),
+    riskJson: safeJson(order.risk),
+    shippingLineJson: safeJson(order.shippingLine),
+    shippingLinesJson: safeJson(order.shippingLines),
+    transactionsJson: safeJson(order.transactions),
+    customerJson: safeJson(order.customer),
+    customerJourneySummaryJson: safeJson(order.customerJourneySummary),
+    channelInformationJson: safeJson(order.channelInformation),
+    purchasingEntityJson: safeJson(order.purchasingEntity),
+    paymentCollectionDetailsJson: safeJson(order.paymentCollectionDetails),
+    paymentTermsJson: safeJson(order.paymentTerms),
+    publicationJson: safeJson(order.publication),
+    retailLocationJson: safeJson(order.retailLocation),
+    totalCashRoundingAdjustmentJson: safeJson(order.totalCashRoundingAdjustment)
+  };
+
+  await session.run(`MERGE (o:ShopifyOrder { id: $id })
+   SET o += $props`, {
+    id: orderId,
+    props: orderProps
+  });
   for (let idx = 0; idx < lineNodes.length; idx++) {
     const node = lineNodes[idx];
     const lineItemId = node.id || orderId + "-" + idx;
@@ -361,19 +1647,26 @@ for (const order of allOrders) {
     const variantId = node.variant?.id || "";
     const productId = node.product?.id || "";
     const lineImageUrl =
+      (node.image && node.image.url) ||
       (node.variant && node.variant.image && node.variant.image.url) ||
       (node.product && node.product.featuredImage && node.product.featuredImage.url) ||
       "";
     const ou = money(node.originalUnitPriceSet);
     const du = money(node.discountedUnitPriceSet);
+    const dua = money(node.discountedUnitPriceAfterAllDiscountsSet);
     const ot = money(node.originalTotalSet);
     const dt = money(node.discountedTotalSet);
-    const sellableLineQuantity =
+    const dtc = money(node.discountedTotalSetWithCodeDiscounts);
+    const td = money(node.totalDiscountSet);
+    const uot = money(node.unfulfilledOriginalTotalSet);
+    const udt = money(node.unfulfilledDiscountedTotalSet);
+    const quantityOrdered = Number(node.quantity ?? 0);
+    const currentQty =
       node.currentQuantity != null && node.currentQuantity !== undefined
         ? Number(node.currentQuantity)
-        : Number(node.quantity ?? 0);
+        : quantityOrdered;
     const remainingQuantity = Number(node.unfulfilledQuantity) || 0;
-    const fulfillmentStatus = fulfillmentStatusFromRemaining(remainingQuantity, sellableLineQuantity);
+    const fulfillmentStatus = fulfillmentStatusFromRemaining(remainingQuantity, currentQty);
     await session.run(
       `MERGE (o:ShopifyOrder { id: $orderId })
        MERGE (li:ShopifyOrderLineItem { id: $lineItemId })
@@ -389,6 +1682,14 @@ for (const order of allOrders) {
            li.sku = $sku,
            li.vendor = $vendor,
            li.quantity = $quantity,
+           li.currentQuantity = $currentQuantity,
+           li.refundableQuantity = $refundableQuantity,
+           li.nonFulfillableQuantity = $nonFulfillableQuantity,
+           li.isGiftCard = $isGiftCard,
+           li.merchantEditable = $merchantEditable,
+           li.requiresShipping = $requiresShipping,
+           li.restockable = $restockable,
+           li.taxable = $taxable,
            li.remainingQuantity = $remainingQuantity,
            li.properties = $properties,
            li.fulfillmentStatus = $fulfillmentStatus,
@@ -396,10 +1697,31 @@ for (const order of allOrders) {
            li.originalUnitCurrency = $originalUnitCurrency,
            li.discountedUnitAmount = $discountedUnitAmount,
            li.discountedUnitCurrency = $discountedUnitCurrency,
+           li.discountedUnitAfterAllAmount = $discountedUnitAfterAllAmount,
+           li.discountedUnitAfterAllCurrency = $discountedUnitAfterAllCurrency,
            li.originalTotalAmount = $originalTotalAmount,
            li.originalTotalCurrency = $originalTotalCurrency,
            li.discountedTotalAmount = $discountedTotalAmount,
            li.discountedTotalCurrency = $discountedTotalCurrency,
+           li.discountedTotalCodeAmount = $discountedTotalCodeAmount,
+           li.discountedTotalCodeCurrency = $discountedTotalCodeCurrency,
+           li.totalDiscountAmount = $totalDiscountAmount,
+           li.totalDiscountCurrency = $totalDiscountCurrency,
+           li.unfulfilledOriginalTotalAmount = $unfulfilledOriginalTotalAmount,
+           li.unfulfilledOriginalTotalCurrency = $unfulfilledOriginalTotalCurrency,
+           li.unfulfilledDiscountedTotalAmount = $unfulfilledDiscountedTotalAmount,
+           li.unfulfilledDiscountedTotalCurrency = $unfulfilledDiscountedTotalCurrency,
+           li.subscriptionContractId = $subscriptionContractId,
+           li.subscriptionContractStatus = $subscriptionContractStatus,
+           li.staffMemberId = $staffMemberId,
+           li.staffMemberName = $staffMemberName,
+           li.staffMemberEmail = $staffMemberEmail,
+           li.customAttributesJson = $customAttributesJson,
+           li.discountAllocationsJson = $discountAllocationsJson,
+           li.dutiesJson = $dutiesJson,
+           li.taxLinesJson = $taxLinesJson,
+           li.lineItemGroupJson = $lineItemGroupJson,
+           li.sellingPlanJson = $sellingPlanJson,
            li.lineImageUrl = $lineImageUrl
        MERGE (o)-[:HAS_LINE_ITEM]->(li)`,
       {
@@ -415,7 +1737,15 @@ for (const order of allOrders) {
         variantSku,
         sku: node.sku || "",
         vendor: node.vendor || "",
-        quantity: sellableLineQuantity,
+        quantity: quantityOrdered,
+        currentQuantity: currentQty,
+        refundableQuantity: Number(node.refundableQuantity ?? 0),
+        nonFulfillableQuantity: Number(node.nonFulfillableQuantity ?? 0),
+        isGiftCard: node.isGiftCard === true,
+        merchantEditable: node.merchantEditable === true,
+        requiresShipping: node.requiresShipping === true,
+        restockable: node.restockable === true,
+        taxable: node.taxable === true,
         remainingQuantity,
         properties: propertiesText,
         fulfillmentStatus,
@@ -423,13 +1753,95 @@ for (const order of allOrders) {
         originalUnitCurrency: ou.currency,
         discountedUnitAmount: du.amount,
         discountedUnitCurrency: du.currency,
+        discountedUnitAfterAllAmount: dua.amount,
+        discountedUnitAfterAllCurrency: dua.currency,
         originalTotalAmount: ot.amount,
         originalTotalCurrency: ot.currency,
         discountedTotalAmount: dt.amount,
         discountedTotalCurrency: dt.currency,
+        discountedTotalCodeAmount: dtc.amount,
+        discountedTotalCodeCurrency: dtc.currency,
+        totalDiscountAmount: td.amount,
+        totalDiscountCurrency: td.currency,
+        unfulfilledOriginalTotalAmount: uot.amount,
+        unfulfilledOriginalTotalCurrency: uot.currency,
+        unfulfilledDiscountedTotalAmount: udt.amount,
+        unfulfilledDiscountedTotalCurrency: udt.currency,
+        subscriptionContractId: node.contract?.id || "",
+        subscriptionContractStatus: node.contract?.status ? String(node.contract.status) : "",
+        staffMemberId: node.staffMember?.id || "",
+        staffMemberName: node.staffMember?.name || "",
+        staffMemberEmail: node.staffMember?.email || "",
+        customAttributesJson: safeJson(attrs),
+        discountAllocationsJson: safeJson(node.discountAllocations),
+        dutiesJson: safeJson(node.duties),
+        taxLinesJson: safeJson(node.taxLines),
+        lineItemGroupJson: safeJson(node.lineItemGroup),
+        sellingPlanJson: safeJson(node.sellingPlan),
         lineImageUrl
       }
     );
+  }
+  for (let ridx = 0; ridx < fullReturnsPayload.length; ridx++) {
+    const payload = fullReturnsPayload[ridx];
+    const returnId = payload.id || "";
+    if (!returnId) continue;
+    const staff = payload.staffMember || {};
+    const returnProps = {
+      id: returnId,
+      name: payload.name || "",
+      status: payload.status ? String(payload.status) : "",
+      createdAt: payload.createdAt || "",
+      closedAt: payload.closedAt || "",
+      requestApprovedAt: payload.requestApprovedAt || "",
+      totalQuantity: payload.totalQuantity != null ? Number(payload.totalQuantity) : 0,
+      orderId,
+      orderName,
+      staffMemberId: staff.id || "",
+      staffMemberName: staff.name || "",
+      refundsJson: safeJson(payload.refunds),
+      reverseFulfillmentOrdersJson: safeJson(payload.reverseFulfillmentOrders),
+      exchangeLineItemsJson: safeJson(payload.exchangeLineItems),
+      returnLineItemsJson: safeJson(payload.returnLineItems)
+    };
+    await session.run(
+      `MERGE (o:ShopifyOrder { id: $orderId })
+       MERGE (r:ShopifyReturn { id: $returnId })
+       SET r += $props
+       MERGE (o)-[:HAS_RETURN]->(r)`,
+      { orderId, returnId, props: returnProps }
+    );
+    for (let idx = 0; idx < payload.returnLineItems.length; idx++) {
+      const node = payload.returnLineItems[idx];
+      const lineItemId = node.id || returnId + "-line-" + idx;
+      const li = node.fulfillmentLineItem?.lineItem || {};
+      const lineTitle = li.title || li.name || "";
+      const pt = money(node.withCodeDiscountedTotalPriceSet);
+      const lineProps = {
+        id: lineItemId,
+        returnId,
+        returnName: returnProps.name,
+        orderId,
+        orderName,
+        quantity: node.quantity != null ? Number(node.quantity) : 0,
+        processableQuantity: node.processableQuantity != null ? Number(node.processableQuantity) : 0,
+        processedQuantity: node.processedQuantity != null ? Number(node.processedQuantity) : 0,
+        refundableQuantity: node.refundableQuantity != null ? Number(node.refundableQuantity) : 0,
+        refundedQuantity: node.refundedQuantity != null ? Number(node.refundedQuantity) : 0,
+        unprocessedQuantity: node.unprocessedQuantity != null ? Number(node.unprocessedQuantity) : 0,
+        customerNote: node.customerNote || "",
+        returnReasonNote: node.returnReasonNote || "",
+        lineTotalAmount: pt.amount,
+        lineTotalCurrency: pt.currency,
+        lineItemGraphId: li.id || "",
+        lineItemTitle: lineTitle
+      };
+      await session.run(
+        `MERGE (li:ShopifyReturnLineItem { id: $lineItemId })
+         SET li += $lineProps`,
+        { lineItemId, lineProps }
+      );
+    }
   }
 }
 '''

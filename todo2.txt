@@ -812,3 +812,35 @@ Data & Neo4j
 Indexes — Ensure ShopifyOrder(id), ShopifyOrderLineItem(id), ShopifyOrderLineItem(orderId) (and any filter/sort fields you query often) are indexed for getUserContent patterns.
 Cleanup — Optional job to remove line items no longer on the order (after refunds/edits) so the DB doesn’t drift.
 
+Some fields need extra scopes or return null (e.g. orderStaffMember, B2B purchasingEntity, Shopify Protect).
+
+
+
+
+Summary: Table scroll layout (decodeorder Table.hjson + VirtualList.hjson)
+Problem
+Wide tables: the vertical scrollbar sat on the far right of the full grid width, so you had to scroll horizontally to reach it.
+Merging two divs in VirtualList broke virtualization (scroll ref and tall spacer must stay separate).
+Splitting vertical (body) vs horizontal (inner) put the horizontal scrollbar at the bottom of a very tall inner strip, so it was off-screen until you scrolled down the list.
+Approach
+Single body scrollport (40wrap)
+One element with overflow: auto (same viewport-sized box for both axes). That keeps vertical and horizontal scrollbars in the visible corner (standard bottom-right).
+
+Header / filter (22h, 22f)
+overflow-x: hidden so they don’t show horizontal scrollbars. scrollLeft is updated from the body’s scroll event so columns stay aligned.
+
+VirtualList
+
+Outer scroll + inner spacer kept (virtualization needs the scroll element ≠ full-height-only node).
+Table passes getScrollContainerElement → scrollTop is read from 40wrap, not the list’s inner div.
+contentMinWidthPx / getTableBodyMinWidthPx(): approximate width from getGridTemplateColumns() so scrollWidth works (absolute rows don’t expand it).
+Flex
+
+Shell min-height: 0, table column flex: 1 1 0, body list flex: 0 0 auto so the body grows with content height and 40wrap actually overflows vertically.
+Files touched
+Table.hjson: scroll state/sync, 40wrap, header/filter wrappers, VirtualList props, comments.
+VirtualList.hjson: external scroll createEffect, contentMinWidthPx, handleScroll / currentTarget, comments.
+Mental model
+One viewport-sized scroller (40wrap) drives vertical + horizontal scroll and VirtualList scrollTop. Header/filter are masked horizontally but follow scrollLeft from that same scroller.
+
+

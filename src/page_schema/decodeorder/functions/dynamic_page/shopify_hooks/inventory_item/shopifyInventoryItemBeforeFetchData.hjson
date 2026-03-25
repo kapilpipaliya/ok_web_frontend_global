@@ -1,0 +1,198 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Syncs Shopify inventory items (inventoryItems query) into Neo4j before DynamicPage fetch for ShopifyInventoryItem tables. Requires read_products or read_inventory.
+        body:
+          '''const { tableVertexLabel, filters = {}, shop: contextShop } = args.contextData;
+if (tableVertexLabel !== "ShopifyInventoryItem") return;
+
+const shop = contextShop || args.shop;
+if (!shop) {
+  console.warn("[shopifyInventoryItemBeforeFetchData] shop is required");
+  return;
+}
+
+console.log("[shopifyInventoryItemBeforeFetchData] contextData:", { shop, filters });
+
+const shopify = await args.getShopifyClient();
+let admin;
+try {
+  const authResult = await shopify.unauthenticated.admin(shop);
+  admin = authResult.admin;
+} catch (e) {
+  console.log("[shopifyInventoryItemBeforeFetchData] Shopify admin auth failed:", e?.message || e);
+  return;
+}
+if (!admin) {
+  console.log("[shopifyInventoryItemBeforeFetchData] no admin client for shop:", shop);
+  return;
+}
+
+const PAGE_SIZE = 50;
+const inventoryItemsQuery =
+  `
+  query InventoryItemsSync($first: Int!, $after: String, $query: String, $reverse: Boolean) {
+    inventoryItems(first: $first, after: $after, query: $query, reverse: $reverse) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          legacyResourceId
+          sku
+          tracked
+          requiresShipping
+          createdAt
+          updatedAt
+          harmonizedSystemCode
+          countryCodeOfOrigin
+          provinceCodeOfOrigin
+          duplicateSkuCount
+          inventoryHistoryUrl
+          unitCost {
+            amount
+            currencyCode
+          }
+          measurement {
+            weight {
+              value
+              unit
+            }
+          }
+          variants(first: 1) {
+            edges {
+              node {
+                id
+                title
+                product {
+                  id
+                  title
+                }
+              }
+            }
+          }
+          inventoryLevels(first: 50) {
+            edges {
+              node {
+                id
+                location {
+                  id
+                  name
+                }
+                quantities(names: ["available", "incoming", "committed", "on_hand", "reserved"]) {
+                  name
+                  quantity
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }`.trim();
+
+const skuFilter = filters.sku ? String(filters.sku).trim() : "";
+const queryString = skuFilter ? "sku:" + skuFilter.replace(/"/g, "\\\"") : null;
+const reverse = false;
+
+let cursor = null;
+let hasNextPage = true;
+const allNodes = [];
+while (hasNextPage) {
+  const variables = {
+    first: PAGE_SIZE,
+    after: cursor || null,
+    query: queryString,
+    reverse
+  };
+  const response = await admin.graphql(inventoryItemsQuery, { variables });
+  const apiResponse = response instanceof Response ? await response.json() : response;
+  if (apiResponse.errors && apiResponse.errors.length > 0) {
+    console.error(
+      "[shopifyInventoryItemBeforeFetchData] GraphQL error:",
+      apiResponse.errors[0]?.message || apiResponse.errors[0]
+    );
+    return;
+  }
+  const conn = apiResponse.data?.inventoryItems;
+  const edges = conn?.edges || [];
+  for (const e of edges) {
+    if (e?.node) allNodes.push(e.node);
+  }
+  hasNextPage = conn?.pageInfo?.hasNextPage === true;
+  cursor = conn?.pageInfo?.endCursor || null;
+  if (!cursor) break;
+  await new Promise((r) => setTimeout(r, 200));
+}
+
+console.log("[shopifyInventoryItemBeforeFetchData] fetched inventory items:", allNodes.length);
+
+const jstr = (v) => {
+  try {
+    return v == null ? "" : JSON.stringify(v);
+  } catch (e) {
+    return "";
+  }
+};
+
+const session = args.session;
+for (const node of allNodes) {
+  const id = node.id || "";
+  if (!id) continue;
+  const vEdge = node.variants?.edges?.[0];
+  const variant = vEdge?.node || {};
+  const product = variant.product || {};
+  const weight = node.measurement?.weight || {};
+  const uc = node.unitCost || {};
+  const levels = [];
+  for (const le of node.inventoryLevels?.edges || []) {
+    const lvl = le?.node;
+    if (!lvl) continue;
+    levels.push({
+      levelId: lvl.id || "",
+      locationId: lvl.location?.id || "",
+      locationName: lvl.location?.name || "",
+      quantities: lvl.quantities || []
+    });
+  }
+  const props = {
+    id,
+    legacyResourceId: node.legacyResourceId != null ? String(node.legacyResourceId) : "",
+    sku: node.sku || "",
+    tracked: node.tracked === true,
+    requiresShipping: node.requiresShipping === true,
+    createdAt: node.createdAt || "",
+    updatedAt: node.updatedAt || "",
+    harmonizedSystemCode: node.harmonizedSystemCode || "",
+    countryCodeOfOrigin: node.countryCodeOfOrigin ? String(node.countryCodeOfOrigin) : "",
+    provinceCodeOfOrigin: node.provinceCodeOfOrigin || "",
+    duplicateSkuCount:
+      node.duplicateSkuCount != null ? Number(node.duplicateSkuCount) : 0,
+    inventoryHistoryUrl: node.inventoryHistoryUrl ? String(node.inventoryHistoryUrl) : "",
+    locationsCountStored: String(levels.length),
+    unitCostAmount: uc.amount ?? "",
+    unitCostCurrency: uc.currencyCode ? String(uc.currencyCode) : "",
+    weightValue: weight.value != null ? String(weight.value) : "",
+    weightUnit: weight.unit ? String(weight.unit) : "",
+    variantGraphId: variant.id || "",
+    variantTitle: variant.title || "",
+    productGraphId: product.id || "",
+    productTitle: product.title || "",
+    inventoryLevelsJson: jstr(levels)
+  };
+
+  await session.run(`MERGE (n:ShopifyInventoryItem { id: $id })
+   SET n += $props`, { id, props });
+}
+'''
+        key: shopifyInventoryItemBeforeFetchData
+      }
+    }
+  ]
+  edges: []
+}

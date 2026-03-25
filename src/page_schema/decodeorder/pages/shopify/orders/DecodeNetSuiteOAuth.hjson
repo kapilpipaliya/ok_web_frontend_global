@@ -1,0 +1,329 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: "return { enabled: () => true }"
+        title: NetSuite OAuth
+        key: DecodeNetSuiteOAuth
+        url: /netsuite-oauth
+        props: "return { isNoPermissionCheck: true };"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: netsuite_oauth_root
+        css:
+          '''return `._id {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+        fns:
+          '''
+const [isLoading, setIsLoading] = args.createSignal(false);
+const [isConnecting, setIsConnecting] = args.createSignal(false);
+const [isDisconnecting, setIsDisconnecting] = args.createSignal(false);
+const [status, setStatus] = args.createSignal(null);
+const [errorMessage, setErrorMessage] = args.createSignal("");
+
+const getOAuthQuery = () => {
+  const search = args.searchParams || {};
+  return {
+    code: (search.code || "").toString(),
+    state: (search.state || "").toString(),
+    error: (search.error || "").toString(),
+    error_description: (search.error_description || "").toString()
+  };
+};
+
+const loadStatus = async () => {
+  setIsLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "netsuiteGetOAuthStatus",
+      contextData: {}
+    });
+
+    if (result?.error || result?.result?.success === false) {
+      const message = result?.error || result?.result?.message || "Failed to load NetSuite connection status.";
+      setErrorMessage(message);
+      return;
+    }
+
+    setStatus(result?.result || null);
+  } catch (error) {
+    setErrorMessage(error?.message || "Failed to load NetSuite connection status.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const startConnect = async () => {
+  setIsConnecting(true);
+  setErrorMessage("");
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "netsuiteGetOAuthAuthorizationUrl",
+      contextData: {}
+    });
+
+    if (result?.error || result?.result?.success === false) {
+      const message = result?.error || result?.result?.message || "Failed to start NetSuite OAuth flow.";
+      setErrorMessage(message);
+      args.showErrorToast?.(message);
+      return;
+    }
+
+    const authorizationUrl = result?.result?.data?.authorizationUrl;
+    if (!authorizationUrl) {
+      const message = "Authorization URL not returned.";
+      setErrorMessage(message);
+      args.showErrorToast?.(message);
+      return;
+    }
+
+    window.location.href = authorizationUrl;
+  } catch (error) {
+    const message = error?.message || "Failed to start NetSuite OAuth flow.";
+    setErrorMessage(message);
+    args.showErrorToast?.(message);
+  } finally {
+    setIsConnecting(false);
+  }
+};
+
+const disconnect = async () => {
+  setIsDisconnecting(true);
+  setErrorMessage("");
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "netsuiteDisconnectOAuth",
+      contextData: {}
+    });
+
+    if (result?.error || result?.result?.success === false) {
+      const message = result?.error || result?.result?.message || "Failed to disconnect NetSuite OAuth.";
+      setErrorMessage(message);
+      args.showErrorToast?.(message);
+      return;
+    }
+
+    args.showSuccessToast?.("NetSuite OAuth disconnected.");
+    await loadStatus();
+  } catch (error) {
+    const message = error?.message || "Failed to disconnect NetSuite OAuth.";
+    setErrorMessage(message);
+    args.showErrorToast?.(message);
+  } finally {
+    setIsDisconnecting(false);
+  }
+};
+
+const handleCallbackIfPresent = async () => {
+  const q = getOAuthQuery();
+  if (!q.code && !q.error) {
+    return false;
+  }
+
+  setIsLoading(true);
+  setErrorMessage("");
+
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "netsuiteHandleOAuthCallback",
+      contextData: q
+    });
+
+    if (result?.error || result?.result?.success === false) {
+      const message = result?.error || result?.result?.message || "NetSuite OAuth callback failed.";
+      setErrorMessage(message);
+      args.showErrorToast?.(message);
+    } else {
+      args.showSuccessToast?.("NetSuite OAuth connected successfully.");
+    }
+
+    if (args.setSearchParams) {
+      const current = { ...(args.searchParams || {}) };
+      delete current.code;
+      delete current.state;
+      delete current.error;
+      delete current.error_description;
+      args.setSearchParams(current, { replace: true });
+    }
+  } catch (error) {
+    const message = error?.message || "NetSuite OAuth callback failed.";
+    setErrorMessage(message);
+    args.showErrorToast?.(message);
+  } finally {
+    setIsLoading(false);
+  }
+
+  return true;
+};
+
+const initialize = async () => {
+  const handled = await handleCallbackIfPresent();
+  if (handled) {
+    await loadStatus();
+    return;
+  }
+  await loadStatus();
+};
+
+return {
+  isLoading,
+  isConnecting,
+  isDisconnecting,
+  status,
+  errorMessage,
+  startConnect,
+  disconnect,
+  initialize
+};
+'''
+        props:
+          '''return {
+  as: "div",
+  onMount: async () => {
+    await args.fns.initialize?.();
+  },
+  hide: false
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "h1", text: "NetSuite OAuth Integration" };'''
+        css: '''return `._id { font-size: 1.8rem; margin: 0 0 0.5rem 0; }`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''return { as: "p", text: "Connect your NetSuite account to enable server-side NetSuite API integration for this Shopify shop." };'''
+        css: '''return `._id { margin: 0 0 1.5rem 0; color: ${args.theme.var.color.muted}; }`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''const s = args.fns.status?.();
+const connected = !!s?.connected;
+const data = s?.data || {};
+const expires = data.expiresAt ? new Date(data.expiresAt).toLocaleString() : "N/A";
+const statusText = connected
+  ? `Connected to account ${data.accountId || "N/A"} (${data.environment || "N/A"}). Token expires: ${expires}.`
+  : "Not connected.";
+return {
+  as: "p",
+  text: statusText
+};'''
+        css: '''return `._id { margin: 0 0 1rem 0; font-weight: 500; }`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''const error = args.fns.errorMessage?.();
+return {
+  as: "s-banner",
+  "attr:tone": "critical",
+  "attr:heading": "NetSuite OAuth Error",
+  text: error || "",
+  hide: !error
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css: '''return `._id { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const connecting = args.fns.isConnecting?.();
+const loading = args.fns.isLoading?.();
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:disabled": connecting || loading ? true : undefined,
+  text: connecting ? "Connecting..." : "Connect NetSuite",
+  onClick: async () => {
+    await args.fns.startConnect?.();
+  }
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const disconnecting = args.fns.isDisconnecting?.();
+const loading = args.fns.isLoading?.();
+const connected = !!args.fns.status?.()?.connected;
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  "attr:disabled": disconnecting || loading || !connected ? true : undefined,
+  text: disconnecting ? "Disconnecting..." : "Disconnect",
+  onClick: async () => {
+    await args.fns.disconnect?.();
+  }
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e6", T: "Attr", S: "2", E: "7" }
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "e8", T: "Attr", S: "7", E: "9" }
+    { id: "e11", T: "PageLayout", S: "1", E: "12" }
+  ]
+}
