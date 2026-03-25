@@ -1,0 +1,25 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: netsuiteDisconnectOAuth
+        description: Remove persisted NetSuite OAuth connection for current shop
+        body:
+          '''
+await args.session.run(
+  `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
+   DELETE n`
+);
+
+return {
+  success: true,
+  message: "NetSuite OAuth disconnected."
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

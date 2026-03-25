@@ -1,0 +1,49 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: netsuiteGetOAuthStatus
+        description: Get NetSuite OAuth connection status for current shop
+        body:
+          '''
+const integrationKey = "netsuite";
+
+const result = await args.session.run(
+  `MATCH (n:OAuthConnection {integrationKey: $integrationKey})
+   RETURN n
+   LIMIT 1`,
+  { integrationKey }
+);
+
+if (!result.records.length) {
+  return {
+    success: true,
+    connected: false,
+    data: null
+  };
+}
+
+const node = result.records[0].get("n");
+const data = args.convertNodeToJson(node);
+
+return {
+  success: true,
+  connected: true,
+  data: {
+    accountId: data?.P?.accountId || null,
+    environment: data?.P?.environment || null,
+    tokenType: data?.P?.tokenType || null,
+    scope: data?.P?.scope || null,
+    expiresAt: data?.P?.expiresAt || null,
+    createdAt: data?.P?.createdAt || null,
+    updatedAt: data?.P?.updatedAt || null
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

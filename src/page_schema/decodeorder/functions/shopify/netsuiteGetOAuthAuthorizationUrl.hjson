@@ -1,0 +1,72 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: netsuiteGetOAuthAuthorizationUrl
+        description: Build NetSuite OAuth authorization URL and persist state
+        body:
+          '''
+const accountId = "tstdrv1395241" // (process.env.NETSUITE_ACCOUNT_ID || "").trim();
+const clientId = "5a3b5f9a352c602ed76a3a3ce6e25707d73414f4ace7088da646ded63ebb244b" // (process.env.NETSUITE_CLIENT_ID || "").trim();
+const redirectUri = "https://decodeorder.decodecommerce.com/netsuite-oauth" // (process.env.NETSUITE_REDIRECT_URI || "").trim();
+const scope = (process.env.NETSUITE_OAUTH_SCOPE || "rest_webservices").trim();
+const environment = (process.env.NETSUITE_ENV || "production").trim().toLowerCase();
+
+
+if (!accountId || !clientId || !redirectUri) {
+  return {
+    success: false,
+    message: "Missing NetSuite OAuth configuration. Please set NETSUITE_ACCOUNT_ID, NETSUITE_CLIENT_ID, and NETSUITE_REDIRECT_URI."
+  };
+}
+
+const state = args.crypto.randomBytes(24).toString("hex");
+const nowIso = new Date().toISOString();
+const expiresAtIso = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+await args.session.run(
+  `MERGE (s:OAuthState {provider: "netsuite", state: $state})
+   SET s.createdAt = datetime($nowIso),
+       s.expiresAt = datetime($expiresAtIso),
+       s.accountId = $accountId,
+       s.environment = $environment`,
+  {
+    state,
+    nowIso,
+    expiresAtIso,
+    accountId,
+    environment
+  }
+);
+
+const encodedRedirectUri = encodeURIComponent(redirectUri);
+const encodedScope = encodeURIComponent(scope);
+const encodedState = encodeURIComponent(state);
+const baseHost =
+  environment === "sandbox"
+    ? `${accountId}.app.netsuitesandbox.com`
+    : `${accountId}.app.netsuite.com`;
+const authorizationUrl =
+  `https://${baseHost}/app/login/oauth2/authorize.nl` +
+  `?response_type=code&client_id=${encodeURIComponent(clientId)}` +
+  `&redirect_uri=${encodedRedirectUri}` +
+  `&scope=${encodedScope}` +
+  `&state=${encodedState}`;
+
+return {
+  success: true,
+  data: {
+    authorizationUrl,
+    state,
+    environment,
+    accountId
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

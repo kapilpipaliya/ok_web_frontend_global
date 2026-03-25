@@ -1,0 +1,169 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: netsuiteHandleOAuthCallback
+        description: Exchange NetSuite OAuth code for tokens and persist encrypted credentials
+        body:
+          '''
+const accountId = "tstdrv1395241" //(process.env.NETSUITE_ACCOUNT_ID || "").trim();
+const clientId = "5a3b5f9a352c602ed76a3a3ce6e25707d73414f4ace7088da646ded63ebb244b" //(process.env.NETSUITE_CLIENT_ID || "").trim();
+const clientSecret = "a28d23601e47c900c3a044e1c4d76abbfaa89039528fd117c28285402fe1f96c" //(process.env.NETSUITE_CLIENT_SECRET || "").trim();
+const redirectUri = "https://decodeorder.decodecommerce.com/netsuite-oauth" // (process.env.NETSUITE_REDIRECT_URI || "").trim();
+const environment = (process.env.NETSUITE_ENV || "production").trim().toLowerCase();
+
+if (!accountId || !clientId || !clientSecret || !redirectUri) {
+  return {
+    success: false,
+    message:
+      "Missing NetSuite OAuth configuration. Please set NETSUITE_ACCOUNT_ID, NETSUITE_CLIENT_ID, NETSUITE_CLIENT_SECRET, and NETSUITE_REDIRECT_URI."
+  };
+}
+
+const code = (args.contextData?.code || "").trim();
+const state = (args.contextData?.state || "").trim();
+const oauthError = (args.contextData?.error || "").trim();
+const oauthErrorDescription = (args.contextData?.error_description || "").trim();
+
+if (oauthError) {
+  return {
+    success: false,
+    message: oauthErrorDescription || oauthError
+  };
+}
+
+if (!code || !state) {
+  return {
+    success: false,
+    message: "Missing OAuth callback parameters (code/state)."
+  };
+}
+
+const stateResult = await args.session.run(
+  `MATCH (s:OAuthState {provider: "netsuite", state: $state})
+   RETURN s
+   LIMIT 1`,
+  { state }
+);
+
+if (!stateResult.records.length) {
+  return {
+    success: false,
+    message: "Invalid or expired OAuth state."
+  };
+}
+
+const stateNode = stateResult.records[0].get("s");
+const stateJson = args.convertNodeToJson(stateNode);
+const expiresAt = stateJson?.P?.expiresAt ? new Date(stateJson.P.expiresAt).getTime() : 0;
+
+if (!expiresAt || Number.isNaN(expiresAt) || expiresAt < Date.now()) {
+  await args.session.run(
+    `MATCH (s:OAuthState {provider: "netsuite", state: $state}) DELETE s`,
+    { state }
+  );
+  return {
+    success: false,
+    message: "OAuth state expired. Please try connecting again."
+  };
+}
+
+const tokenHost =
+  environment === "sandbox"
+    ? `${accountId}.suitetalk.api.netsuite.com`
+    : `${accountId}.suitetalk.api.netsuite.com`;
+const tokenUrl = `https://${tokenHost}/services/rest/auth/oauth2/v1/token`;
+
+const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+const payload = new URLSearchParams({
+  grant_type: "authorization_code",
+  code,
+  redirect_uri: redirectUri
+});
+
+const tokenResponse = await fetch(tokenUrl, {
+  method: "POST",
+  headers: {
+    Authorization: `Basic ${authHeader}`,
+    "Content-Type": "application/x-www-form-urlencoded",
+    Accept: "application/json"
+  },
+  body: payload.toString()
+});
+
+let tokenJson;
+try {
+  tokenJson = await tokenResponse.json();
+} catch (error) {
+  tokenJson = null;
+}
+
+if (!tokenResponse.ok || !tokenJson?.access_token) {
+  return {
+    success: false,
+    message:
+      tokenJson?.error_description ||
+      tokenJson?.error ||
+      `Token exchange failed with status ${tokenResponse.status}.`
+  };
+}
+
+const accessToken = tokenJson.access_token;
+const refreshToken = tokenJson.refresh_token || null;
+const tokenType = tokenJson.token_type || "Bearer";
+const scope = tokenJson.scope || null;
+const expiresIn = Number(tokenJson.expires_in || 0);
+const now = Date.now();
+const expiresAtIso = expiresIn > 0 ? new Date(now + expiresIn * 1000).toISOString() : null;
+const encryptedAccessToken = args.encryptToken(accessToken);
+const encryptedRefreshToken = refreshToken ? args.encryptToken(refreshToken) : null;
+const nowIso = new Date(now).toISOString();
+
+await args.session.run(
+  `MERGE (n:OAuthConnection {integrationKey: "netsuite"})
+   ON CREATE SET n.createdAt = datetime($nowIso)
+   SET n.updatedAt = datetime($nowIso),
+       n.accountId = $accountId,
+       n.environment = $environment,
+       n.tokenType = $tokenType,
+       n.scope = $scope,
+       n.expiresAt = CASE WHEN $expiresAtIso IS NULL THEN null ELSE datetime($expiresAtIso) END,
+       n.accessTokenEncrypted = $encryptedAccessToken,
+       n.refreshTokenEncrypted = $encryptedRefreshToken`,
+  {
+    nowIso,
+    accountId,
+    environment,
+    tokenType,
+    scope,
+    expiresAtIso,
+    encryptedAccessToken,
+    encryptedRefreshToken
+  }
+);
+
+await args.session.run(
+  `MATCH (s:OAuthState {provider: "netsuite", state: $state}) DELETE s`,
+  { state }
+);
+
+return {
+  success: true,
+  message: "NetSuite OAuth connected successfully.",
+  data: {
+    connected: true,
+    accountId,
+    environment,
+    tokenType,
+    scope,
+    expiresAt: expiresAtIso
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
