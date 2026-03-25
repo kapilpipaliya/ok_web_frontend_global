@@ -1,0 +1,492 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: "return { enabled: () => true }"
+        title: NetSuite integration settings
+        key: ExtendfilesNetSuiteIntegrationSettings
+        url: /settings
+        props: "return { isNoPermissionCheck: true };"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: netsuite_settings_root
+        css:
+          '''return `._id {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+        fns:
+          '''
+const [accountId, setAccountId] = args.createSignal("");
+const [clientId, setClientId] = args.createSignal("");
+const [clientSecret, setClientSecret] = args.createSignal("");
+const [redirectUri, setRedirectUri] = args.createSignal("");
+const [scope, setScope] = args.createSignal("rest_webservices");
+const [environment, setEnvironment] = args.createSignal("production");
+const [hasClientSecret, setHasClientSecret] = args.createSignal(false);
+const [loading, setLoading] = args.createSignal(true);
+const [saving, setSaving] = args.createSignal(false);
+const [formError, setFormError] = args.createSignal("");
+
+const loadSettings = async () => {
+  setLoading(true);
+  setFormError("");
+  try {
+    const res = await args.executeNamedServerFunction({
+      functionName: "getNetSuiteIntegrationSettings",
+      contextData: {}
+    });
+    if (res?.error || res?.result?.success === false) {
+      setFormError(res?.error || res?.result?.message || "Failed to load settings.");
+      return;
+    }
+    const d = res?.result?.data || {};
+    setAccountId(d.accountId || "");
+    setClientId(d.clientId || "");
+    setRedirectUri(d.redirectUri || "");
+    setScope(d.scope || "rest_webservices");
+    setEnvironment(d.environment || "production");
+    setHasClientSecret(!!d.hasClientSecret);
+    setClientSecret("");
+  } catch (e) {
+    setFormError(e?.message || "Failed to load settings.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const saveSettings = async () => {
+  setSaving(true);
+  setFormError("");
+  try {
+    const payload = {
+      accountId: accountId(),
+      clientId: clientId(),
+      redirectUri: redirectUri(),
+      scope: scope(),
+      environment: environment()
+    };
+    const secretTrim = (clientSecret() || "").trim();
+    if (secretTrim) {
+      payload.clientSecret = secretTrim;
+    }
+    const res = await args.executeNamedServerFunction({
+      functionName: "saveNetSuiteIntegrationSettings",
+      contextData: payload
+    });
+    if (res?.error || res?.result?.success === false) {
+      const msg = res?.error || res?.result?.message || "Save failed.";
+      setFormError(msg);
+      args.showErrorToast?.(msg);
+      return;
+    }
+    args.showSuccessToast?.(res?.result?.message || "Saved.");
+    setClientSecret("");
+    await loadSettings();
+  } catch (e) {
+    const msg = e?.message || "Save failed.";
+    setFormError(msg);
+    args.showErrorToast?.(msg);
+  } finally {
+    setSaving(false);
+  }
+};
+
+return {
+  accountId,
+  setAccountId,
+  clientId,
+  setClientId,
+  clientSecret,
+  setClientSecret,
+  redirectUri,
+  setRedirectUri,
+  scope,
+  setScope,
+  environment,
+  setEnvironment,
+  hasClientSecret,
+  loading,
+  saving,
+  formError,
+  loadSettings,
+  saveSettings
+};
+'''
+        props:
+          '''return {
+  as: "div",
+  onMount: async () => {
+    await args.fns.loadSettings?.();
+  }
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h1\", text: \"NetSuite integration\" };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          "return { as: \"p\", text: \"Store NetSuite OAuth application credentials. The client secret is encrypted, never displayed after save, and is only saved when you type a new value.\" };"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.error};
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: args.fns.formError?.() || "",
+  hide: !args.fns.formError?.()
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  hide: args.fns.loading?.()
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; }`;'''
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"label\", text: \"NetSuite account ID\" };"
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  autocomplete: "off",
+  value: args.fns.accountId?.() ?? "",
+  onInput: (e) => args.fns.setAccountId?.(e.target.value)
+};'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }`;'''
+        displayOrder: 3
+        componentName: Html
+        props: "return { as: \"label\", text: \"Integration client ID\" };"
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  autocomplete: "off",
+  value: args.fns.clientId?.() ?? "",
+  onInput: (e) => args.fns.setClientId?.(e.target.value)
+};'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "label",
+  text: args.fns.hasClientSecret?.()
+    ? "Client secret (enter only to set or rotate; never shown after save)"
+    : "Client secret (stored encrypted; never shown after save)"
+};'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "password",
+  autocomplete: "off",
+  "attr:data-1p-ignore": true,
+  "attr:data-form-type": "other",
+  placeholder: args.fns.hasClientSecret?.()
+    ? "Leave empty to keep existing secret"
+    : "Required on first save",
+  value: args.fns.clientSecret?.() ?? "",
+  onInput: (e) => args.fns.setClientSecret?.(e.target.value)
+};'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }`;'''
+        displayOrder: 7
+        componentName: Html
+        props: "return { as: \"label\", text: \"Redirect URI\" };"
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "url",
+  autocomplete: "off",
+  value: args.fns.redirectUri?.() ?? "",
+  onInput: (e) => args.fns.setRedirectUri?.(e.target.value)
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }`;'''
+        displayOrder: 9
+        componentName: Html
+        props: "return { as: \"label\", text: \"OAuth scope\" };"
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.fns.scope?.() ?? "",
+  onInput: (e) => args.fns.setScope?.(e.target.value)
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }`;'''
+        displayOrder: 11
+        componentName: Html
+        props: "return { as: \"label\", text: \"Environment (production or sandbox)\" };"
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 12
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.fns.environment?.() ?? "",
+  onInput: (e) => args.fns.setEnvironment?.(e.target.value)
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { margin-top: 1.25rem; }`;'''
+        displayOrder: 13
+        componentName: Html
+        props:
+          '''const saving = args.fns.saving?.();
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:disabled": saving ? true : undefined,
+  text: saving ? "Saving…" : "Save settings",
+  onClick: async () => {
+    await args.fns.saveSettings?.();
+  }
+};'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { padding: 2rem; text-align: center; color: ${args.theme.var.color.muted}; }`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  text: "Loading…",
+  hide: !args.fns.loading?.()
+};'''
+      }
+    }
+    {
+      id: "21"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "PageLayout", S: "1", E: "21" },
+    { id: "e3", T: "Attr", S: "2", E: "3" },
+    { id: "e4", T: "Attr", S: "2", E: "4" },
+    { id: "e5", T: "Attr", S: "2", E: "5" },
+    { id: "e6", T: "Attr", S: "2", E: "6" },
+    { id: "e7", T: "Attr", S: "2", E: "20" },
+    { id: "e8", T: "Attr", S: "6", E: "7" },
+    { id: "e9", T: "Attr", S: "6", E: "8" },
+    { id: "e10", T: "Attr", S: "6", E: "9" },
+    { id: "e11", T: "Attr", S: "6", E: "10" },
+    { id: "e12", T: "Attr", S: "6", E: "11" },
+    { id: "e13", T: "Attr", S: "6", E: "12" },
+    { id: "e14", T: "Attr", S: "6", E: "13" },
+    { id: "e15", T: "Attr", S: "6", E: "14" },
+    { id: "e16", T: "Attr", S: "6", E: "15" },
+    { id: "e17", T: "Attr", S: "6", E: "16" },
+    { id: "e18", T: "Attr", S: "6", E: "17" },
+    { id: "e19", T: "Attr", S: "6", E: "18" },
+    { id: "e20", T: "Attr", S: "6", E: "19" }
+  ]
+}

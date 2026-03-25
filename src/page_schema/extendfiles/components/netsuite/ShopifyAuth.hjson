@@ -170,7 +170,10 @@ return {
           '''return `._id {
   margin: 2rem 0.5rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
 }`;'''
         displayOrder: 2
         componentName: Html
@@ -178,7 +181,12 @@ return {
         props:
           '''return {
   as: "section",
-  hide: args.fns.isInIframe() || ["/orders", "/draft-orders", "/purchase-orders", "/inventory", "/inventory-transfers"].includes(args.location?.pathname)
+  hide:
+    args.fns.isInIframe() ||
+    ["/orders", "/draft-orders", "/purchase-orders", "/inventory", "/inventory-transfers"].includes(
+      args.location?.pathname || ""
+    ) ||
+    !!args.contextData?.props?.hideChromeHeader
 }'''
       }
     }
@@ -189,9 +197,12 @@ return {
         css:
           '''return `._id {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 0.5rem;
 }`;'''
         displayOrder: 1
         componentName: Html
@@ -199,6 +210,91 @@ return {
         props:
           '''return {
   as: "div"
+}'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        key: nav_left_balance
+        css:
+          '''return `._id {
+  flex: 1 1 0;
+  min-width: 0;
+}`;'''
+        props:
+          '''return { as: "div", "attr:aria-hidden": "true" };'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: nav_center_links
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: nav_right_user
+        css:
+          '''return `._id {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 0
+        componentName: Html
+        key: unique_home_nav
+        props:
+          '''return {
+  as: "a",
+  href: "/",
+  text: "Home"
 }'''
       }
     }
@@ -223,7 +319,8 @@ return {
           '''return {
   as: "a",
   href: "/netsuite-oauth",
-  text: "NetSuite OAuth"
+  text: "NetSuite OAuth",
+  hide: !args.user
 }'''
       }
     }
@@ -248,7 +345,59 @@ return {
           '''return {
   as: "a",
   href: "/netsuite-custom-records",
-  text: "NetSuite records"
+  text: "NetSuite records",
+  hide: !args.user
+}'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/auth/signin" || args.location.pathname.startsWith("/auth/signin/") ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_signin_nav
+        props:
+          '''return {
+  as: "a",
+  href: "/auth/signin",
+  text: "Sign in",
+  hide: !!args.user
+}'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/settings" || args.location.pathname.startsWith("/settings/") ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_settings_nav
+        props:
+          '''return {
+  as: "a",
+  href: "/settings",
+  text: "Settings"
 }'''
       }
     }
@@ -266,7 +415,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 3
+        displayOrder: 4
         componentName: Html
         key: ""
         props:
@@ -313,7 +462,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 4
+        displayOrder: 5
         componentName: Html
         key: unique_16
         props:
@@ -339,7 +488,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 5
+        displayOrder: 6
         componentName: Html
         key: unique_23
         props:
@@ -365,7 +514,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 6
+        displayOrder: 7
         componentName: Html
         key: unique_10
         props:
@@ -391,7 +540,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 7
+        displayOrder: 8
         componentName: Html
         key: unique_11
         props:
@@ -417,7 +566,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 8
+        displayOrder: 9
         componentName: Html
         key: unique_19
         props:
@@ -443,7 +592,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 9
+        displayOrder: 10
         componentName: Html
         key: unique_12
         props:
@@ -469,7 +618,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 10
+        displayOrder: 11
         componentName: Html
         key: unique_13
         props:
@@ -495,7 +644,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 11
+        displayOrder: 12
         componentName: Html
         key: unique_9
         props:
@@ -521,7 +670,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 12
+        displayOrder: 13
         componentName: Html
         key: unique_14
         props:
@@ -549,7 +698,7 @@ return {
 ._id:hover {
   text-decoration: underline;
 }`;'''
-        displayOrder: 13
+        displayOrder: 14
         componentName: Html
         key: unique_15
         props:
@@ -560,6 +709,81 @@ return {
   target: "_blank",
   hide: true
 }'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  max-width: min(320px, 70vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  color: ${args.theme.var.color.muted};
+  text-align: right;
+}`;'''
+        displayOrder: 15
+        componentName: Html
+        key: unique_username_nav
+        props:
+          '''
+const label =
+  args.user?.P?.username ||
+  args.user?.P?.email ||
+  "";
+
+const welcomeText = label ? `Welcome, ${label}` : "";
+
+const out = {
+  as: "span",
+  text: welcomeText,
+  title: welcomeText,
+  hide: !label
+};
+if (label) {
+  out["attr:aria-label"] = `Signed in as ${label}`;
+}
+return out;
+'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  flex-shrink: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 16
+        componentName: Html
+        key: unique_logout_nav
+        props:
+          '''
+const label =
+  args.user?.P?.username ||
+  args.user?.P?.email ||
+  "";
+
+return {
+  as: "a",
+  href: "/auth/logout",
+  text: "Logout",
+  hide: !label
+};
+'''
       }
     }
     {
@@ -651,7 +875,7 @@ return {
         props:
           '''return {
   as: "footer",
-  show: args.fns.isInIframe() === false
+  hide: true
 };'''
       }
     }
@@ -680,7 +904,7 @@ return {
   href: "https://calendly.com/kapil-decodecommerce/30min",
   target: "_blank",
   rel: "noopener noreferrer",
-  text: "Book a Free Shopify Catalog Strategy Call"
+  text: "Book a strategy call"
 };'''
       }
     }
@@ -735,82 +959,130 @@ return {
       E: "6"
     }
     {
-      id: e_netsuite_oauth_nav
+      id: e_nav_left_spacer
       T: Attr
       S: "6"
+      E: "32"
+    }
+    {
+      id: e_nav_center_wrap
+      T: Attr
+      S: "6"
+      E: "33"
+    }
+    {
+      id: e_nav_right_wrap
+      T: Attr
+      S: "6"
+      E: "34"
+    }
+    {
+      id: e_home_top_nav
+      T: Attr
+      S: "33"
+      E: "31"
+    }
+    {
+      id: e_signin_top_nav
+      T: Attr
+      S: "33"
+      E: "30"
+    }
+    {
+      id: e_netsuite_oauth_nav
+      T: Attr
+      S: "33"
       E: "26"
     }
     {
       id: e_netsuite_records_nav
       T: Attr
-      S: "6"
+      S: "33"
       E: "27"
+    }
+    {
+      id: e_settings_top_nav
+      T: Attr
+      S: "33"
+      E: "28"
     }
     {
       id: e9
       T: Attr
-      S: "6"
+      S: "33"
       E: "7"
     }
     {
       id: e10
       T: Attr
-      S: "6"
+      S: "33"
       E: "9"
     }
     {
       id: e11
       T: Attr
-      S: "6"
+      S: "33"
       E: "10"
     }
     {
       id: e12
       T: Attr
-      S: "6"
+      S: "33"
       E: "11"
     }
     {
       id: e13
       T: Attr
-      S: "6"
+      S: "33"
       E: "12"
     }
     {
       id: e14
       T: Attr
-      S: "6"
+      S: "33"
       E: "13"
     }
     {
       id: e15
       T: Attr
-      S: "6"
+      S: "33"
       E: "14"
     }
     {
       id: e16
       T: Attr
-      S: "6"
+      S: "33"
       E: "15"
     }
     {
       id: e17
       T: Attr
-      S: "6"
+      S: "33"
       E: "16"
     }
     {
       id: e18
       T: Attr
-      S: "6"
+      S: "33"
       E: "17"
     }
     {
       id: e19
       T: Attr
-      S: "6"
+      S: "33"
       E: "18"
+    }
+    {
+      id: e_username_top_nav
+      T: Attr
+      S: "34"
+      E: "29"
+    }
+    {
+      id: e_logout_top_nav
+      T: Attr
+      S: "34"
+      E: "35"
     }
     {
       id: e20

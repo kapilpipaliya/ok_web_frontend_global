@@ -1,0 +1,60 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getNetSuiteIntegrationSettings
+        description: Returns NetSuite OAuth app settings for the integration form (admin only). Client secret is never returned in plaintext.
+        body:
+          '''
+const user = await args.getUserFromSession();
+if (
+  !user ||
+  !(await args.checkRole(args.SYSTEM_ROLES.ADMIN, args.session, user))
+) {
+  return {
+    success: false,
+    message: "Administrator access is required to view NetSuite integration settings."
+  };
+}
+
+const result = await args.session.run(
+  `MATCH (s:Setting {type: $t}) RETURN s LIMIT 1`,
+  { t: "netsuite_integration" }
+);
+
+if (!result.records.length) {
+  return {
+    success: true,
+    data: {
+      accountId: "",
+      clientId: "",
+      hasClientSecret: false,
+      redirectUri: "",
+      scope: "rest_webservices",
+      environment: "production"
+    }
+  };
+}
+
+const j = args.convertNodeToJson(result.records[0].get("s"));
+const P = j?.P || {};
+
+return {
+  success: true,
+  data: {
+    accountId: String(P.accountId || ""),
+    clientId: String(P.clientId || ""),
+    hasClientSecret: !!P.clientSecret,
+    redirectUri: String(P.redirectUri || ""),
+    scope: String(P.scope || "rest_webservices"),
+    environment: String(P.environment || "production")
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -7,7 +7,7 @@
         key: netsuiteCustomRecordExtendFilesBeforeFetchData
         description: Sync NetSuite customrecord_extend_files_aut records into Neo4j before DynamicPage fetch
         body:
-          '''return;
+          '''
 const { tableVertexLabel, filters = {} } = args.contextData || {};
 if (tableVertexLabel !== "NetSuiteCustomRecordExtendFile") return;
 

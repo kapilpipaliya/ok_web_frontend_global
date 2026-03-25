@@ -17,7 +17,30 @@
         key: unique_1
         props:
           '''return {
-  as: "s-app-nav"
+  as: "s-app-nav",
+  style: {
+    display: "flex",
+    "flex-wrap": "wrap",
+    "justify-content": "center",
+    "align-items": "center",
+    gap: "0.5rem",
+    width: "100%"
+  }
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        key: unique_home_nav
+        props:
+          '''return {
+  as: "s-link",
+  href: "/",
+  text: "Home"
 }'''
       }
     }
@@ -32,7 +55,8 @@
           '''return {
   as: "s-link",
   href: "/netsuite-oauth",
-  text: "NetSuite OAuth"
+  text: "NetSuite OAuth",
+  hide: !args.user
 }'''
       }
     }
@@ -47,7 +71,39 @@
           '''return {
   as: "s-link",
   href: "/netsuite-custom-records",
-  text: "NetSuite records"
+  text: "NetSuite records",
+  hide: !args.user
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_signin_nav
+        props:
+          '''return {
+  as: "s-link",
+  href: "/auth/signin",
+  text: "Sign in",
+  hide: !!args.user
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: unique_settings_nav
+        props:
+          '''return {
+  as: "s-link",
+  href: "/settings",
+  text: "Settings"
 }'''
       }
     }
@@ -55,7 +111,7 @@
       id: "5"
       L: Attr
       P: {
-        displayOrder: 3
+        displayOrder: 4
         componentName: Html
         key: unique_3
         props:
@@ -71,7 +127,7 @@
       id: "6"
       L: Attr
       P: {
-        displayOrder: 4
+        displayOrder: 5
         componentName: Html
         key: unique_faq
         props:
@@ -87,7 +143,7 @@
       id: "7"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 6
         componentName: Html
         key: unique_docs
         props:
@@ -103,7 +159,7 @@
       id: "8"
       L: Attr
       P: {
-        displayOrder: 6
+        displayOrder: 7
         componentName: Html
         key: unique_tutorial
         props:
@@ -119,7 +175,7 @@
       id: "9"
       L: Attr
       P: {
-        displayOrder: 7
+        displayOrder: 8
         componentName: Html
         key: unique_changelog
         props:
@@ -135,7 +191,7 @@
       id: "10"
       L: Attr
       P: {
-        displayOrder: 8
+        displayOrder: 9
         componentName: Html
         key: unique_4
         props:
@@ -151,7 +207,7 @@
       id: "11"
       L: Attr
       P: {
-        displayOrder: 9
+        displayOrder: 10
         componentName: Html
         key: unique_5
         props:
@@ -172,6 +228,18 @@
       E: "3"
     }
     {
+      id: e_home_s_app_nav
+      T: Attr
+      S: "3"
+      E: "14"
+    }
+    {
+      id: e_signin_s_app_nav
+      T: Attr
+      S: "3"
+      E: "13"
+    }
+    {
       id: e4
       T: Attr
       S: "3"
@@ -182,6 +250,12 @@
       T: Attr
       S: "3"
       E: "17"
+    }
+    {
+      id: e_settings_nav
+      T: Attr
+      S: "3"
+      E: "12"
     }
     {
       id: e4c

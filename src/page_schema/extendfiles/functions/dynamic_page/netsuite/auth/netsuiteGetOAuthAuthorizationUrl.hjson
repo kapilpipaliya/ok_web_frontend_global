@@ -8,17 +8,52 @@
         description: Build NetSuite OAuth authorization URL and persist state
         body:
           '''
-const accountId = "tstdrv1395241" // (process.env.NETSUITE_ACCOUNT_ID || "").trim();
-const clientId = "5a3b5f9a352c602ed76a3a3ce6e25707d73414f4ace7088da646ded63ebb244b" // (process.env.NETSUITE_CLIENT_ID || "").trim();
-const redirectUri = "https://decodeorder.decodecommerce.com/netsuite-oauth" // (process.env.NETSUITE_REDIRECT_URI || "").trim();
-const scope = (process.env.NETSUITE_OAUTH_SCOPE || "rest_webservices").trim();
-const environment = (process.env.NETSUITE_ENV || "production").trim().toLowerCase();
+const readNetSuiteIntegrationFromDb = async (neoSession) => {
+  let accountId = "";
+  let clientId = "";
+  let clientSecret = "";
+  let redirectUri = "";
+  let scope = "rest_webservices";
+  let environment = "production";
+  try {
+    const r = await neoSession.run(
+      `MATCH (s:Setting {type: $t}) RETURN s LIMIT 1`,
+      { t: "netsuite_integration" }
+    );
+    if (r.records.length) {
+      const j = args.convertNodeToJson(r.records[0].get("s"));
+      const P = j?.P || {};
+      accountId = String(P.accountId || "").trim();
+      clientId = String(P.clientId || "").trim();
+      redirectUri = String(P.redirectUri || "").trim();
+      scope = String(P.scope || "rest_webservices").trim();
+      environment = String(P.environment || "production").trim().toLowerCase();
+      if (P.clientSecret) {
+        try {
+          clientSecret = args.decryptToken(String(P.clientSecret));
+        } catch (e) {
+          clientSecret = "";
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[netsuiteGetOAuthAuthorizationUrl] readNetSuiteIntegrationFromDb:", e?.message || e);
+  }
+  return { accountId, clientId, clientSecret, redirectUri, scope, environment };
+};
 
+const cfg = await readNetSuiteIntegrationFromDb(args.session);
+const accountId = cfg.accountId;
+const clientId = cfg.clientId;
+const redirectUri = cfg.redirectUri;
+const scope = cfg.scope;
+const environment = cfg.environment;
 
 if (!accountId || !clientId || !redirectUri) {
   return {
     success: false,
-    message: "Missing NetSuite OAuth configuration. Please set NETSUITE_ACCOUNT_ID, NETSUITE_CLIENT_ID, and NETSUITE_REDIRECT_URI."
+    message:
+      "Missing NetSuite OAuth configuration. An administrator must save Account ID, Client ID, and Redirect URI under app Settings."
   };
 }
 

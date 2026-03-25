@@ -1,0 +1,94 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: saveNetSuiteIntegrationSettings
+        description: Saves NetSuite OAuth app credentials to Setting (type netsuite_integration). Admin only. Encrypts client secret. Empty secret preserves existing when already stored.
+        body:
+          '''
+const user = await args.getUserFromSession();
+if (
+  !user ||
+  !(await args.checkRole(args.SYSTEM_ROLES.ADMIN, args.session, user))
+) {
+  return {
+    success: false,
+    message: "Administrator access is required to save NetSuite integration settings."
+  };
+}
+
+const cd = args.contextData || {};
+const accountId = String(cd.accountId || "").trim();
+const clientId = String(cd.clientId || "").trim();
+const redirectUri = String(cd.redirectUri || "").trim();
+const scope = String(cd.scope || "rest_webservices").trim();
+const environment = String(cd.environment || "production").trim().toLowerCase();
+const secretInput = cd.clientSecret != null ? String(cd.clientSecret).trim() : "";
+
+if (!accountId || !clientId || !redirectUri) {
+  return {
+    success: false,
+    message: "NetSuite Account ID, Client ID, and Redirect URI are required."
+  };
+}
+
+const existing = await args.session.run(
+  `MATCH (s:Setting {type: $t}) RETURN s LIMIT 1`,
+  { t: "netsuite_integration" }
+);
+
+let clientSecretStored = null;
+if (secretInput) {
+  clientSecretStored = args.encryptToken(secretInput);
+} else if (existing.records.length) {
+  const ex = args.convertNodeToJson(existing.records[0].get("s"));
+  if (ex?.P?.clientSecret) {
+    clientSecretStored = ex.P.clientSecret;
+  }
+}
+
+if (!clientSecretStored) {
+  return {
+    success: false,
+    message: "NetSuite client secret is required (enter the secret, or save again after it was stored once)."
+  };
+}
+
+const nowIso = new Date().toISOString();
+
+await args.session.run(
+  `MERGE (s:Setting {type: $type})
+   ON CREATE SET s.createdAt = datetime($nowIso), s.key = $key
+   SET s.accountId = $accountId,
+       s.clientId = $clientId,
+       s.clientSecret = $clientSecret,
+       s.redirectUri = $redirectUri,
+       s.scope = $scope,
+       s.environment = $environment,
+       s.updatedAt = datetime($nowIso)
+   RETURN s`,
+  {
+    type: "netsuite_integration",
+    key: "netsuite_integration_default",
+    nowIso,
+    accountId,
+    clientId,
+    clientSecret: clientSecretStored,
+    redirectUri,
+    scope,
+    environment
+  }
+);
+
+return {
+  success: true,
+  message: "NetSuite integration settings saved."
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

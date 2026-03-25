@@ -51,7 +51,7 @@ return {
           '''return {
   as: "meta",
   name: "description",
-  content: "Decode Orders Organizer helps you organize your Shopify order catalog in nested categories. View orders by category. Available in the Shopify App Store."
+  content: "NetSuite Extendfiles is a standalone app to browse NetSuite custom-record extendfiles: nested categories, searchable tables, and expandable rows."
 }'''
       }
     }
@@ -65,7 +65,7 @@ return {
           '''return {
   as: "meta",
   name: "keywords",
-  content: "Shopify app, order organizer, nested categories, order catalog, organize Shopify orders, Shopify admin app"
+  content: "NetSuite, extendfiles, custom records, nested categories, NetSuite OAuth, NetSuite integration, standalone app"
 }'''
       }
     }
@@ -107,7 +107,7 @@ return {
           '''return {
   as: "meta",
   property: "og:title",
-  content: "Decode Orders Organizer – Shopify app to organize orders in nested categories"
+  content: "NetSuite Extendfiles – Browse NetSuite custom record extendfiles by category"
 }'''
       }
     }
@@ -121,7 +121,7 @@ return {
           '''return {
   as: "meta",
   property: "og:description",
-  content: "Decode Orders Organizer helps you organize your Shopify order catalog in nested categories. View orders by category. Available in the Shopify App Store."
+  content: "NetSuite Extendfiles is a standalone app to browse NetSuite custom-record extendfiles: nested categories, searchable tables, and expandable rows."
 }'''
       }
     }
@@ -219,7 +219,9 @@ return {
         key: unique_3
         props:
           '''return {
-  hide: !args.fns.isInIframe()
+  hide:
+    !args.fns.isInIframe() ||
+    args.location?.pathname === "/netsuite-custom-records"
 }'''
       }
     }
@@ -230,6 +232,10 @@ return {
         displayOrder: 4
         componentName: ShopifyAuth
         key: unique_1
+        props:
+          '''return {
+  hideChromeHeader: args.location?.pathname === "/netsuite-custom-records"
+};'''
       }
     }
     {

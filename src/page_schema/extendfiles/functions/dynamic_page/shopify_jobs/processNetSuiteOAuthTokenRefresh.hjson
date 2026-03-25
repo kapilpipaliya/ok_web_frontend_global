@@ -12,16 +12,45 @@ if (args.contextData?.action !== "start") {
   return;
 }
 
-const clientId = (process.env.NETSUITE_CLIENT_ID || "").trim();
-const clientSecret = (process.env.NETSUITE_CLIENT_SECRET || "").trim();
+const readNetSuiteIntegrationFromDb = async (neoSession) => {
+  let accountId = "";
+  let clientId = "";
+  let clientSecret = "";
+  let redirectUri = "";
+  let scope = "rest_webservices";
+  let environment = "production";
+  try {
+    const r = await neoSession.run(
+      `MATCH (s:Setting {type: $t}) RETURN s LIMIT 1`,
+      { t: "netsuite_integration" }
+    );
+    if (r.records.length) {
+      const j = args.convertNodeToJson(r.records[0].get("s"));
+      const P = j?.P || {};
+      accountId = String(P.accountId || "").trim();
+      clientId = String(P.clientId || "").trim();
+      redirectUri = String(P.redirectUri || "").trim();
+      scope = String(P.scope || "rest_webservices").trim();
+      environment = String(P.environment || "production").trim().toLowerCase();
+      if (P.clientSecret) {
+        try {
+          clientSecret = args.decryptToken(String(P.clientSecret));
+        } catch (e) {
+          clientSecret = "";
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[processNetSuiteOAuthTokenRefresh] readNetSuiteIntegrationFromDb:", e?.message || e);
+  }
+  return { accountId, clientId, clientSecret, redirectUri, scope, environment };
+};
 
-if (!clientId || !clientSecret) {
+const cfgBootstrap = await readNetSuiteIntegrationFromDb(args.session);
+if (!cfgBootstrap.clientId || !cfgBootstrap.clientSecret) {
   console.warn(
-    "[processNetSuiteOAuthTokenRefresh] Skipping: NETSUITE_CLIENT_ID and NETSUITE_CLIENT_SECRET must be set."
+    "[processNetSuiteOAuthTokenRefresh] No NetSuite app credentials in database; refreshes will skip until Settings are saved."
   );
-  return {
-    stop: async () => {}
-  };
 }
 
 const intervalMs = Number(args.contextData?.intervalMs) > 0
@@ -86,6 +115,13 @@ const parseExpiresMs = (p) => {
 };
 
 const refreshTokensInSession = async (shopLabel, dbSession) => {
+  const cfg = await readNetSuiteIntegrationFromDb(dbSession);
+  const clientId = cfg.clientId;
+  const clientSecret = cfg.clientSecret;
+  if (!clientId || !clientSecret) {
+    return { skipped: true, reason: "no_app_credentials" };
+  }
+
   const oauthResult = await dbSession.run(
     `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
      RETURN n

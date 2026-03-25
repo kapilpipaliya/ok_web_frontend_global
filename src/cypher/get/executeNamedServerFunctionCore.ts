@@ -100,6 +100,8 @@ import {
   type PermissionContext,
   type PermissionResult,
 } from "~/lib/utils/permissions";
+import { checkRole } from "~/cypher/permissions/isPermission";
+import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import {
   responses,
   formatters,
@@ -571,6 +573,8 @@ export async function executeNamedServerFunctionCore(
       hasPermission,
       isAdmin,
       isOwner,
+      checkRole,
+      SYSTEM_ROLES,
       // Response transformers
       responses,
       formatters,

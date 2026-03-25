@@ -1,0 +1,273 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: "return { enabled: () => true }"
+        title: NetSuite Extendfiles — Organize custom record files in categories
+        key: ExtendfilesHome
+        url: /
+        props:
+          "return {\n  isNoPermissionCheck: true\n}"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          "return {\n  as: \"meta\",\n  name: \"description\",\n  content: \"NetSuite Extendfiles is a standalone app to browse NetSuite custom-record extendfiles in nested categories, expand rows for detail, and tune tables from Settings.\"\n}"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          "return `._id {\n  max-width: 800px;\n  margin: 0 auto;\n  padding: ${args.theme.var.spacing?.lg || \"2rem\"};\n  color: ${args.theme.var.color.text};\n}\n\n@media (max-width: 768px) {\n  ._id {\n    padding: ${args.theme.var.spacing?.md || \"1rem\"};\n  }\n}`;"
+        displayOrder: 2
+        componentName: Html
+        props: "return { as: \"main\" }"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          "return `._id {\n  font-size: 2rem;\n  font-weight: 700;\n  color: ${args.theme.var.color.text};\n  margin: 0 0 0.5rem 0;\n}\n\n@media (max-width: 768px) {\n  ._id { font-size: 1.75rem; }\n}`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h1\", text: \"NetSuite Extendfiles\" }"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          "return `._id {\n  font-size: 1.125rem;\n  line-height: 1.6;\n  color: ${args.theme.var.color.muted};\n  margin: 0 0 1rem 0;\n}`;"
+        displayOrder: 2
+        componentName: Html
+        props:
+          "return { as: \"p\", text: \"Manage NetSuite custom-record extendfiles in one place: category trees, search, and expandable rows in a simple table workspace.\" }"
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin-bottom: 1.5rem; }`;"
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text: "**NetSuite Extendfiles** helps you manage **NetSuite custom record extendfiles** with nested **categories**, row **expansion** for fields and related data, and **Settings** for columns and layout. Connect with **NetSuite OAuth**, then open **NetSuite records** from the navigation to work inside categories."
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css: "return `._id { margin-top: 2rem; }`;"
+        displayOrder: 4
+        componentName: Html
+        props: "return { as: \"section\" }"
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.75rem 0; }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h2\", text: \"Key features\" }"
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin: 0; }`;"
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: "- **NetSuite records** — Table of extendfiles linked to NetSuite custom records, with filters, sort, and expandable rows.\n- **Categories** — Sidebar trees so you can triage and file extendfiles by category.\n- **NetSuite OAuth** — Secure connection to your NetSuite account from **Settings** or the OAuth screen.\n- **Settings** — Column visibility, expansion panel options, and layout preferences for your workspace."
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css: "return `._id { margin-top: 2rem; }`;"
+        displayOrder: 5
+        componentName: Html
+        props: "return { as: \"section\" }"
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.75rem 0; }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h2\", text: \"How it works\" }"
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin: 0; }`;"
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: "1. Sign in and complete **NetSuite OAuth** when prompted.\n2. Open **NetSuite records** from the navigation to load your extendfiles table.\n3. Use the **category** sidebar and **expand** rows to inspect record detail.\n4. Adjust **Settings** for columns and expansion panels as needed."
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css: "return `._id { margin-top: 2rem; }`;"
+        displayOrder: 6
+        componentName: Html
+        props: "return { as: \"section\" }"
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.75rem 0; }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h2\", text: \"Who it is for\" }"
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; margin: 0; }`;"
+        displayOrder: 2
+        componentName: Html
+        props:
+          "return { as: \"p\", text: \"Teams that use NetSuite custom records and need extendfiles organized in categories—with a clear table and sidebar workflow in a standalone web app.\" }"
+      }
+    }
+    {
+      id: "16"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "13"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+  ]
+}
