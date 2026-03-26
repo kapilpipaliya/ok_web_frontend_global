@@ -28,20 +28,6 @@ return {
       }
     }
     {
-      id: "2"
-      L: Attr
-      P: {
-        as: meta
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  name: "shopify-api-key",
-  content: "ce06108efb1b49fe4e2b07d321635271"
-}'''
-      }
-    }
-    {
       id: "meta_desc"
       L: Attr
       P: {
@@ -51,7 +37,7 @@ return {
           '''return {
   as: "meta",
   name: "description",
-  content: "NetSuite Extendfiles is a standalone app to browse NetSuite custom-record extendfiles: nested categories, searchable tables, and expandable rows."
+  content: "NetSuite eXtendFiles is a standalone app to browse NetSuite eXtendFiles: nested categories, searchable tables, and filters."
 }'''
       }
     }
@@ -65,7 +51,7 @@ return {
           '''return {
   as: "meta",
   name: "keywords",
-  content: "NetSuite, extendfiles, custom records, nested categories, NetSuite OAuth, NetSuite integration, standalone app"
+  content: "NetSuite, eXtendFiles, custom records, nested categories, NetSuite OAuth, NetSuite integration, standalone app"
 }'''
       }
     }
@@ -107,7 +93,7 @@ return {
           '''return {
   as: "meta",
   property: "og:title",
-  content: "NetSuite Extendfiles – Browse NetSuite custom record extendfiles by category"
+  content: "NetSuite eXtendFiles – Browse NetSuite eXtendFiles by category"
 }'''
       }
     }
@@ -121,7 +107,7 @@ return {
           '''return {
   as: "meta",
   property: "og:description",
-  content: "NetSuite Extendfiles is a standalone app to browse NetSuite custom-record extendfiles: nested categories, searchable tables, and expandable rows."
+  content: "NetSuite eXtendFiles is a standalone app to browse NetSuite eXtendFiles: nested categories, searchable tables, and filters."
 }'''
       }
     }
@@ -221,7 +207,7 @@ return {
           '''return {
   hide:
     !args.fns.isInIframe() ||
-    args.location?.pathname === "/netsuite-custom-records"
+    args.location?.pathname === "/netsuite-extendfiles"
 }'''
       }
     }
@@ -234,7 +220,7 @@ return {
         key: unique_1
         props:
           '''return {
-  hideChromeHeader: args.location?.pathname === "/netsuite-custom-records"
+  hideChromeHeader: args.location?.pathname === "/netsuite-extendfiles"
 };'''
       }
     }
@@ -250,12 +236,6 @@ return {
     }
   ]
   edges: [
-    {
-      id: e1
-      T: Attr
-      S: "1"
-      E: "2"
-    }
     {
       id: e_meta_desc
       T: Attr

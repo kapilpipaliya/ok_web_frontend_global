@@ -12,10 +12,30 @@
       }
     }
     {
-      id: "2"
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        key: netsuite_settings_doc_title
+        props: "return { as: \"title\", text: \"NetSuite integration settings\" };"
+      }
+    }
+    {
+      id: "23"
       L: Attr
       P: {
         displayOrder: 1
+        componentName: Html
+        key: netsuite_settings_meta_title
+        props: "return { as: \"meta\", name: \"title\", content: \"NetSuite integration settings\" };"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 2
         componentName: Html
         key: netsuite_settings_root
         css:
@@ -331,6 +351,26 @@ return {
       }
     }
     {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.muted};
+  line-height: 1.45;
+  margin: 0 0 0.35rem 0;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "The redirect_uri you send in OAuth must exactly match the one in your Integration Record."
+};'''
+      }
+    }
+    {
       id: "14"
       L: Attr
       P: {
@@ -342,7 +382,7 @@ return {
   border: 1px solid ${args.theme.var.color.border};
   font-size: 0.9375rem;
 }`;'''
-        displayOrder: 8
+        displayOrder: 9
         componentName: Html
         props:
           '''return {
@@ -360,7 +400,7 @@ return {
       P: {
         css:
           '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }`;'''
-        displayOrder: 9
+        displayOrder: 10
         componentName: Html
         props: "return { as: \"label\", text: \"OAuth scope\" };"
       }
@@ -377,7 +417,7 @@ return {
   border: 1px solid ${args.theme.var.color.border};
   font-size: 0.9375rem;
 }`;'''
-        displayOrder: 10
+        displayOrder: 11
         componentName: Html
         props:
           '''return {
@@ -394,7 +434,7 @@ return {
       P: {
         css:
           '''return `._id { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; }`;'''
-        displayOrder: 11
+        displayOrder: 12
         componentName: Html
         props: "return { as: \"label\", text: \"Environment (production or sandbox)\" };"
       }
@@ -411,7 +451,7 @@ return {
   border: 1px solid ${args.theme.var.color.border};
   font-size: 0.9375rem;
 }`;'''
-        displayOrder: 12
+        displayOrder: 13
         componentName: Html
         props:
           '''return {
@@ -428,7 +468,7 @@ return {
       P: {
         css:
           '''return `._id { margin-top: 1.25rem; }`;'''
-        displayOrder: 13
+        displayOrder: 14
         componentName: Html
         props:
           '''const saving = args.fns.saving?.();
@@ -468,25 +508,143 @@ return {
     }
   ]
   edges: [
-    { id: "e1", T: "Attr", S: "1", E: "2" },
-    { id: "e2", T: "PageLayout", S: "1", E: "21" },
-    { id: "e3", T: "Attr", S: "2", E: "3" },
-    { id: "e4", T: "Attr", S: "2", E: "4" },
-    { id: "e5", T: "Attr", S: "2", E: "5" },
-    { id: "e6", T: "Attr", S: "2", E: "6" },
-    { id: "e7", T: "Attr", S: "2", E: "20" },
-    { id: "e8", T: "Attr", S: "6", E: "7" },
-    { id: "e9", T: "Attr", S: "6", E: "8" },
-    { id: "e10", T: "Attr", S: "6", E: "9" },
-    { id: "e11", T: "Attr", S: "6", E: "10" },
-    { id: "e12", T: "Attr", S: "6", E: "11" },
-    { id: "e13", T: "Attr", S: "6", E: "12" },
-    { id: "e14", T: "Attr", S: "6", E: "13" },
-    { id: "e15", T: "Attr", S: "6", E: "14" },
-    { id: "e16", T: "Attr", S: "6", E: "15" },
-    { id: "e17", T: "Attr", S: "6", E: "16" },
-    { id: "e18", T: "Attr", S: "6", E: "17" },
-    { id: "e19", T: "Attr", S: "6", E: "18" },
-    { id: "e20", T: "Attr", S: "6", E: "19" }
+    {
+      id: "e_doc_title"
+      T: "Attr"
+      S: "1"
+      E: "22"
+    },
+    {
+      id: "e_meta_title"
+      T: "Attr"
+      S: "1"
+      E: "23"
+    },
+    {
+      id: "e1"
+      T: "Attr"
+      S: "1"
+      E: "2"
+    },
+    {
+      id: "e2"
+      T: "PageLayout"
+      S: "1"
+      E: "21"
+    },
+    {
+      id: "e3"
+      T: "Attr"
+      S: "2"
+      E: "3"
+    },
+    {
+      id: "e4"
+      T: "Attr"
+      S: "2"
+      E: "4"
+    },
+    {
+      id: "e5"
+      T: "Attr"
+      S: "2"
+      E: "5"
+    },
+    {
+      id: "e6"
+      T: "Attr"
+      S: "2"
+      E: "6"
+    },
+    {
+      id: "e7"
+      T: "Attr"
+      S: "2"
+      E: "20"
+    },
+    {
+      id: "e8"
+      T: "Attr"
+      S: "6"
+      E: "7"
+    },
+    {
+      id: "e9"
+      T: "Attr"
+      S: "6"
+      E: "8"
+    },
+    {
+      id: "e10"
+      T: "Attr"
+      S: "6"
+      E: "9"
+    },
+    {
+      id: "e11"
+      T: "Attr"
+      S: "6"
+      E: "10"
+    },
+    {
+      id: "e12"
+      T: "Attr"
+      S: "6"
+      E: "11"
+    },
+    {
+      id: "e13"
+      T: "Attr"
+      S: "6"
+      E: "12"
+    },
+    {
+      id: "e14"
+      T: "Attr"
+      S: "6"
+      E: "13"
+    },
+    {
+      id: "e14_redirect_uri_hint"
+      T: "Attr"
+      S: "6"
+      E: "24"
+    },
+    {
+      id: "e15"
+      T: "Attr"
+      S: "6"
+      E: "14"
+    },
+    {
+      id: "e16"
+      T: "Attr"
+      S: "6"
+      E: "15"
+    },
+    {
+      id: "e17"
+      T: "Attr"
+      S: "6"
+      E: "16"
+    },
+    {
+      id: "e18"
+      T: "Attr"
+      S: "6"
+      E: "17"
+    },
+    {
+      id: "e19"
+      T: "Attr"
+      S: "6"
+      E: "18"
+    },
+    {
+      id: "e20"
+      T: "Attr"
+      S: "6"
+      E: "19"
+    }
   ]
 }

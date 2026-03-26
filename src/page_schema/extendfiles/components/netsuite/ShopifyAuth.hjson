@@ -21,6 +21,7 @@ const [authError, setAuthError] = args.createSignal(null);
 
 // Function to fetch auth data
 const fetchAuthData = async () => {
+  return;
   try {
     setIsLoading(true);
     setAuthError(null);
@@ -333,7 +334,7 @@ return {
   color: ${args.theme.var.color.primary};
   text-decoration: none;
   font-weight: 500;
-  ${args.location.pathname === "/netsuite-custom-records" ? `color: ${args.theme.var.color.info};` : ""}
+  ${args.location.pathname === "/netsuite-extendfiles" ? `color: ${args.theme.var.color.info};` : ""}
 }
 ._id:hover {
   text-decoration: underline;
@@ -344,8 +345,8 @@ return {
         props:
           '''return {
   as: "a",
-  href: "/netsuite-custom-records",
-  text: "NetSuite records",
+  href: "/netsuite-extendfiles",
+  text: "NetSuite eXtendFiles",
   hide: !args.user
 }'''
       }
@@ -397,7 +398,8 @@ return {
           '''return {
   as: "a",
   href: "/settings",
-  text: "Settings"
+  text: "Settings",
+  hide: !args.user
 }'''
       }
     }

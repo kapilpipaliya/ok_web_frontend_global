@@ -5,22 +5,42 @@
       L: "Page",
       P: {
         fns: "return { enabled: () => true }",
-        title: "NetSuite Custom Records",
+        title: "NetSuite eXtendFiles Records",
         key: "DecodeNetSuiteCustomRecords",
-        url: "/netsuite-custom-records",
+        url: "/netsuite-extendfiles",
         props: "return { isNoPermissionCheck: true };"
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 0,
+        componentName: "Html",
+        key: "netsuite_records_doc_title",
+        props: "return { as: \"title\", text: \"NetSuite eXtendFiles Records\" };"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        key: "netsuite_records_meta_title",
+        props: "return { as: \"meta\", name: \"title\", content: \"NetSuite eXtendFiles Records\" };"
       }
     },
     {
       id: "2",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 2,
         componentName: "DynamicPage",
         key: "",
         props:
           '''return {
-  tableVertexLabel: "NetSuiteCustomRecordExtendFile",
+  tableVertexLabel: "NetSuiteExtendFile",
   loadFromSetting: true
 };'''
       }
@@ -34,6 +54,8 @@
     }
   ],
   edges: [
+    { id: "e_doc_title", T: "Attr", S: "1", E: "4" },
+    { id: "e_meta_title", T: "Attr", S: "1", E: "5" },
     { id: "e1", T: "Attr", S: "1", E: "2" },
     { id: "e2", T: "PageLayout", S: "1", E: "3" }
   ]

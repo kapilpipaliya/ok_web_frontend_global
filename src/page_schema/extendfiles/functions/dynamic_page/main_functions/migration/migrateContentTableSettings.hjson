@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Migrates or creates default table configuration settings for NetSuite custom record files (NetSuiteCustomRecordExtendFile). Updates existing settings if they already exist.
+        description: Migrates or creates default table configuration settings for NetSuite custom record files (NetSuiteExtendFile). Updates existing settings if they already exist.
         body:
           '''
 /**
@@ -27,10 +27,10 @@ console.log(`🚀 Starting content table settings migration (dryRun: ${dryRun})`
 // Define settings configurations
 const settingsConfigs = [
   {
-    key: 'NetSuiteCustomRecordExtendFile_settings_default',
-    tableVertexLabel: 'NetSuiteCustomRecordExtendFile',
+    key: 'NetSuiteExtendFile_settings_default',
+    tableVertexLabel: 'NetSuiteExtendFile',
     icon: '🧾',
-    name: 'NetSuiteCustomRecordExtendFile',
+    name: 'NetSuiteExtendFile',
     config: `return {
   title: "eXtendFiles records",
   label: "Record",
@@ -54,7 +54,7 @@ const settingsConfigs = [
     { key: "fileName", label: "File name", type: "text", width: "200px", valueAccessor: (row) => row.P?.fileName || row.P?.name, overflowEllipsis: true },
     { key: "folderName", label: "Folder", type: "text", width: "200px", valueAccessor: (row) => row.P?.folderName, overflowEllipsis: true },
     { key: "mimeType", label: "MIME", type: "text", width: "120px", valueAccessor: (row) => { const v = row.P?.mimeType; if (v == null || v === "") return ""; const s = String(v); return s === "undefined" || s === "null" ? "" : s; }, overflowEllipsis: true },
-    { key: "fileSize", label: "Size (bytes)", type: "text", width: "100px", valueAccessor: (row) => row.P?.fileSize },
+    { key: "fileSize", label: "Size (bytes)", type: "text", width: "110px", valueAccessor: (row) => row.P?.fileSize },
     { key: "id", label: "Internal ID", type: "text", width: "110px", valueAccessor: (row) => row.P?.id },
     { key: "approved", label: "Approved", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.approved ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
     { key: "rejected", label: "Rejected", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.rejected ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "critical"], no: ["No", "neutral"] } },
@@ -78,8 +78,8 @@ const settingsConfigs = [
   usePolarisUI: true,
   sidebar: {
     enabled: true,
-    parentVertexLabel: "NetSuiteCustomRecordExtendFileCategory",
-    toParentEdgeType: "NetSuiteCustomRecordExtendFileCategory",
+    parentVertexLabel: "NetSuiteExtendFileCategory",
+    toParentEdgeType: "ExtendFileCategory",
     rootKeys: {},
     label: "Category",
     loadFullTree: true,
@@ -97,7 +97,7 @@ const settingsConfigs = [
       ]
     }
   },
-  hooks: { beforeFetchData: "netsuiteCustomRecordExtendFilesBeforeFetchData" }
+  hooks: { beforeFetchData: "netsuiteExtendFilesBeforeFetchData" }
 };`
   },
 ];

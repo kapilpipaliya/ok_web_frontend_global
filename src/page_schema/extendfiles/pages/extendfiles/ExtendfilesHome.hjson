@@ -5,21 +5,39 @@
       L: Page
       P: {
         fns: "return { enabled: () => true }"
-        title: NetSuite Extendfiles — Organize custom record files in categories
-        key: ExtendfilesHome
+        title: NetSuite eXtendFiles — Organize files in categories
+        key: EXtendFilesHome
         url: /
         props:
           "return {\n  isNoPermissionCheck: true\n}"
       }
     }
     {
-      id: "2"
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props: "return { as: \"title\", text: \"NetSuite eXtendFiles — Organize files in categories\" }"
+      }
+    }
+    {
+      id: "18"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
+        props: "return { as: \"meta\", name: \"title\", content: \"NetSuite eXtendFiles — Organize files in categories\" }"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
         props:
-          "return {\n  as: \"meta\",\n  name: \"description\",\n  content: \"NetSuite Extendfiles is a standalone app to browse NetSuite custom-record extendfiles in nested categories, expand rows for detail, and tune tables from Settings.\"\n}"
+          "return {\n  as: \"meta\",\n  name: \"description\",\n  content: \"NetSuite eXtendFiles is a standalone app to browse NetSuite eXtendFiles in nested categories, with search, filters, and table options you can tune from Settings.\"\n}"
       }
     }
     {
@@ -28,7 +46,7 @@
       P: {
         css:
           "return `._id {\n  max-width: 800px;\n  margin: 0 auto;\n  padding: ${args.theme.var.spacing?.lg || \"2rem\"};\n  color: ${args.theme.var.color.text};\n}\n\n@media (max-width: 768px) {\n  ._id {\n    padding: ${args.theme.var.spacing?.md || \"1rem\"};\n  }\n}`;"
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props: "return { as: \"main\" }"
       }
@@ -41,7 +59,7 @@
           "return `._id {\n  font-size: 2rem;\n  font-weight: 700;\n  color: ${args.theme.var.color.text};\n  margin: 0 0 0.5rem 0;\n}\n\n@media (max-width: 768px) {\n  ._id { font-size: 1.75rem; }\n}`;"
         displayOrder: 1
         componentName: Html
-        props: "return { as: \"h1\", text: \"NetSuite Extendfiles\" }"
+        props: "return { as: \"h1\", text: \"NetSuite eXtendFiles\" }"
       }
     }
     {
@@ -53,7 +71,7 @@
         displayOrder: 2
         componentName: Html
         props:
-          "return { as: \"p\", text: \"Manage NetSuite custom-record extendfiles in one place: category trees, search, and expandable rows in a simple table workspace.\" }"
+          "return { as: \"p\", text: \"Manage NetSuite eXtendFiles in one place: category trees, search, and a simple table workspace.\" }"
       }
     }
     {
@@ -65,7 +83,7 @@
         displayOrder: 3
         textType: markdown
         componentName: Html
-        text: "**NetSuite Extendfiles** helps you manage **NetSuite custom record extendfiles** with nested **categories**, row **expansion** for fields and related data, and **Settings** for columns and layout. Connect with **NetSuite OAuth**, then open **NetSuite records** from the navigation to work inside categories."
+        text: "**NetSuite eXtendFiles** helps you manage **NetSuite eXtendFiles** with nested **categories**. Connect with **NetSuite OAuth**, then open **NetSuite eXtendFiles** from the navigation to work inside categories."
         props: "return { as: \"div\" }"
       }
     }
@@ -99,7 +117,7 @@
         displayOrder: 2
         textType: markdown
         componentName: Html
-        text: "- **NetSuite records** — Table of extendfiles linked to NetSuite custom records, with filters, sort, and expandable rows.\n- **Categories** — Sidebar trees so you can triage and file extendfiles by category.\n- **NetSuite OAuth** — Secure connection to your NetSuite account from **Settings** or the OAuth screen.\n- **Settings** — Column visibility, expansion panel options, and layout preferences for your workspace."
+        text: "- **NetSuite eXtendFiles** — Table of eXtendFiles linked to categories, with filters and sort.\n- **NetSuite OAuth** — Secure connection to your NetSuite account from **Settings** or the OAuth screen.\n- **Settings** — Column visibility and layout preferences for your workspace."
         props: "return { as: \"div\" }"
       }
     }
@@ -133,7 +151,7 @@
         displayOrder: 2
         textType: markdown
         componentName: Html
-        text: "1. Sign in and complete **NetSuite OAuth** when prompted.\n2. Open **NetSuite records** from the navigation to load your extendfiles table.\n3. Use the **category** sidebar and **expand** rows to inspect record detail.\n4. Adjust **Settings** for columns and expansion panels as needed."
+        text: "1. Sign in and complete **NetSuite OAuth** when prompted.\n2. Open **NetSuite eXtendFiles** from the navigation to load your eXtendFiles table.\n3. Use the **category** sidebar to organize and find eXtendFiles.\n4. Adjust **Settings** as needed."
         props: "return { as: \"div\" }"
       }
     }
@@ -167,7 +185,7 @@
         displayOrder: 2
         componentName: Html
         props:
-          "return { as: \"p\", text: \"Teams that use NetSuite custom records and need extendfiles organized in categories—with a clear table and sidebar workflow in a standalone web app.\" }"
+          "return { as: \"p\", text: \"Teams that use eXtendFiles and need eXtendFiles organized in categories—with a clear table and sidebar workflow in a standalone web app.\" }"
       }
     }
     {
@@ -179,6 +197,18 @@
     }
   ]
   edges: [
+    {
+      id: e_meta_doc_title_home
+      T: Attr
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e_meta_name_title_home
+      T: Attr
+      S: "1"
+      E: "18"
+    }
     {
       id: e1
       T: Attr

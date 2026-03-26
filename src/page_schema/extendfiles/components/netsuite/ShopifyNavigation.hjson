@@ -70,8 +70,8 @@
         props:
           '''return {
   as: "s-link",
-  href: "/netsuite-custom-records",
-  text: "NetSuite records",
+  href: "/netsuite-extendfiles",
+  text: "NetSuite eXtendFiles",
   hide: !args.user
 }'''
       }
@@ -103,7 +103,8 @@
           '''return {
   as: "s-link",
   href: "/settings",
-  text: "Settings"
+  text: "Settings",
+  hide: !args.user
 }'''
       }
     }

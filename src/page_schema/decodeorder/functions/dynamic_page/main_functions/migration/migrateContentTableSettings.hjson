@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Migrates or creates default table configuration settings for Book, AudioVideo, Category, ShopifyProduct, Shopify orders/draft orders (orders sync includes return data for ShopifyReturn), purchase orders, inventory items, inventory transfers, Support, ShopifyShop, and NetSuite custom record files (NetSuiteCustomRecordExtendFile). Updates existing settings if they already exist.
+        description: Migrates or creates default table configuration settings for Book, AudioVideo, Category, ShopifyProduct, Shopify orders/draft orders (orders sync includes return data for ShopifyReturn), inventory items, inventory transfers, Support, and ShopifyShop. Updates existing settings if they already exist.
         body:
           '''
 /**
@@ -631,7 +631,9 @@ const settingsConfigs = [
       expansionPanelMaxHeight: 520,
       expandAccordionMaxWidth: 768,
       expandOneRowAtATime: false,
+      usePolarisUI: false,
       nestedTitle: "Products",
+      nestedShowIcon: false,
       emptyNestedText: "No products for this order.",
       nestedLoadingText: "Loading products…",
       nestedSort: { column: "productTitle", direction: "asc" },
@@ -786,7 +788,9 @@ const settingsConfigs = [
     {
       expansionPanelHeight: 320,
       expansionPanelMaxHeight: 440,
+      usePolarisUI: false,
       nestedTitle: "Returns",
+      nestedShowIcon: false,
       emptyNestedText: "No returns for this order.",
       nestedLoadingText: "Loading returns…",
       nestedColumns: [
@@ -1182,6 +1186,7 @@ const settingsConfigs = [
     expandAccordionMaxWidth: 768,
     expandOneRowAtATime: false,
     nestedTitle: "Products",
+    nestedShowIcon: false,
     emptyNestedText: "No Products on this draft.",
     nestedLoadingText: "Loading Products…",
     nestedSort: { column: "productTitle", direction: "asc" },
@@ -1520,74 +1525,6 @@ const settingsConfigs = [
 };`
   },
   {
-    key: 'ShopifyPurchaseOrder_settings_default',
-    tableVertexLabel: 'ShopifyPurchaseOrder',
-    icon: '📋',
-    name: 'ShopifyPurchaseOrder',
-    config: `return {
-  title: "Purchase orders",
-  label: "Purchase order",
-  icon: "carbon:document",
-  hideImportButtons: true,
-  hideExportButtons: true,
-  hideSettingsButton: false,
-  showActions: false,
-  showEditButton: false,
-  onRowClick: (row, args) => {
-    const vertexId = row?.P?.id ?? row?.id;
-    if (!vertexId || typeof window === "undefined") return;
-    const shopifyNumericSuffix = /([0-9]+)$/;
-    const m = String(vertexId).match(shopifyNumericSuffix);
-    const numericId = m ? m[1] : "";
-    if (!numericId) return;
-    let origin = window.shopify && window.shopify.origin ? String(window.shopify.origin) : "";
-    if (!origin) return;
-    if (origin.endsWith("/")) origin = origin.slice(0, -1);
-    window.open(origin + "/purchase_orders/" + numericId, "_blank", "noopener,noreferrer");
-  },
-  columns: [
-    { key: "name", label: "PO", type: "text", width: "140px", valueAccessor: (row) => row.P?.name },
-    { key: "status", label: "Status", type: "text", width: "120px", valueAccessor: (row) => row.P?.status },
-    { key: "referenceName", label: "Reference", type: "text", width: "140px", valueAccessor: (row) => row.P?.referenceName },
-    { key: "createdAt", label: "Created", type: "date", width: "130px", valueAccessor: (row) => row.P?.createdAt },
-    { key: "updatedAt", label: "Updated", type: "date", width: "130px", valueAccessor: (row) => row.P?.updatedAt },
-    { key: "tags", label: "Tags", type: "text", width: "180px", valueAccessor: (row) => row.P?.tags },
-    { key: "note", label: "Note", type: "text", width: "220px", valueAccessor: (row) => row.P?.note, overflowEllipsis: true },
-    { key: "id", label: "GraphQL ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
-  ],
-  rowHeight: 44,
-  showRowNumber: true,
-  showSelection: true,
-  resizableColumns: true,
-  columnWidths: { __selection: "36px", __rowNumber: "36px" },
-  enableLocalFilters: true,
-  enableLocalSort: true,
-  usePolarisUI: true,
-  sidebar: {
-    enabled: true,
-    parentVertexLabel: "ShopifyPurchaseOrderCategory",
-    toParentEdgeType: "PurchaseOrderCategory",
-    rootKeys: {},
-    label: "Category",
-    loadFullTree: true,
-    formConfig: {
-      gridColumns: 1,
-      groups: [
-        {
-          key: "basic",
-          title: "Basic Information",
-          gridColumns: 2,
-          fields: [
-            { key: "name", label: "Name", type: "text", required: true, maxLength: 255, colSpan: 2 }
-          ]
-        }
-      ]
-    }
-  },
-  hooks: { beforeFetchData: "shopifyPurchaseOrderBeforeFetchData" }
-};`
-  },
-  {
     key: 'ShopifyInventoryItem_settings_default',
     tableVertexLabel: 'ShopifyInventoryItem',
     icon: '📦',
@@ -1715,6 +1652,7 @@ const settingsConfigs = [
     expandAccordionMaxWidth: 768,
     expandOneRowAtATime: false,
     nestedTitle: "Lines",
+    nestedShowIcon: false,
     emptyNestedText: "No line items on this transfer.",
     nestedLoadingText: "Loading lines…",
     nestedSort: { column: "lineTitle", direction: "asc" },
@@ -1870,6 +1808,7 @@ const settingsConfigs = [
     expandAccordionMaxWidth: 768,
     expandOneRowAtATime: false,
     nestedTitle: "Return lines",
+    nestedShowIcon: false,
     emptyNestedText: "No return line items.",
     nestedLoadingText: "Loading return lines…",
     nestedSort: { column: "lineItemTitle", direction: "asc" },
@@ -1962,80 +1901,6 @@ const settingsConfigs = [
     }
   },
   hooks: {}
-};`
-  },
-  {
-    key: 'NetSuiteCustomRecordExtendFile_settings_default',
-    tableVertexLabel: 'NetSuiteCustomRecordExtendFile',
-    icon: '🧾',
-    name: 'NetSuiteCustomRecordExtendFile',
-    config: `return {
-  title: "eXtendFiles records",
-  label: "Record",
-  icon: "carbon:document",
-  hideImportButtons: true,
-  hideExportButtons: true,
-  hideSettingsButton: false,
-  showActions: false,
-  showEditButton: false,
-  rowClickable: false,
-  showRowNumber: true,
-  columns: [
-    {
-      key: "preview",
-      label: "Preview",
-      type: "imagePreview",
-      width: "88px",
-      sortable: false,
-      valueAccessor: (row) => row.P?.previewImageUrl || row.P?.fileUrl || null
-    },
-    { key: "fileName", label: "File name", type: "text", width: "200px", valueAccessor: (row) => row.P?.fileName || row.P?.name, overflowEllipsis: true },
-    { key: "folderName", label: "Folder", type: "text", width: "200px", valueAccessor: (row) => row.P?.folderName, overflowEllipsis: true },
-    { key: "mimeType", label: "MIME", type: "text", width: "120px", valueAccessor: (row) => { const v = row.P?.mimeType; if (v == null || v === "") return ""; const s = String(v); return s === "undefined" || s === "null" ? "" : s; }, overflowEllipsis: true },
-    { key: "fileSize", label: "Size (bytes)", type: "text", width: "100px", valueAccessor: (row) => row.P?.fileSize },
-    { key: "id", label: "Internal ID", type: "text", width: "110px", valueAccessor: (row) => row.P?.id },
-    { key: "approved", label: "Approved", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.approved ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
-    { key: "rejected", label: "Rejected", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.rejected ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "critical"], no: ["No", "neutral"] } },
-    { key: "privateUrl", label: "Private URL", type: "badge", width: "100px", valueAccessor: (row) => (row.P?.privateUrl ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
-    { key: "approvalId", label: "Approval UUID", type: "text", width: "200px", valueAccessor: (row) => row.P?.approvalId, overflowEllipsis: true },
-    { key: "originalTransaction", label: "Orig. trans.", type: "text", width: "110px", valueAccessor: (row) => row.P?.originalTransaction },
-    { key: "soPref", label: "SO pref", type: "text", width: "100px", valueAccessor: (row) => row.P?.soPref },
-    { key: "created", label: "Created", type: "text", width: "120px", valueAccessor: (row) => row.P?.created },
-    { key: "lastModified", label: "Last modified", type: "text", width: "120px", valueAccessor: (row) => row.P?.lastModified },
-    { key: "scriptId", label: "Script ID", type: "text", width: "200px", valueAccessor: (row) => row.P?.scriptId, overflowEllipsis: true },
-    { key: "isInactive", label: "Inactive", type: "badge", width: "90px", valueAccessor: (row) => (row.P?.isInactive ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "neutral"], no: ["No", "success"] } },
-    { key: "recordType", label: "Record type", type: "text", width: "200px", valueAccessor: (row) => row.P?.recordType, overflowEllipsis: true },
-    { key: "extraJson", label: "Extra fields", type: "text", width: "240px", valueAccessor: (row) => row.P?.extraJson || row.P?.rawJson || "", overflowEllipsis: true }
-  ],
-  rowHeight: 80,
-  showSelection: true,
-  resizableColumns: true,
-  columnWidths: { __selection: "36px", __rowNumber: "36px" },
-  enableLocalFilters: true,
-  enableLocalSort: true,
-  usePolarisUI: true,
-  sidebar: {
-    enabled: true,
-    parentVertexLabel: "NetSuiteCustomRecordExtendFileCategory",
-    toParentEdgeType: "NetSuiteCustomRecordExtendFileCategory",
-    rootKeys: {},
-    label: "Category",
-    loadFullTree: true,
-    formConfig: {
-      gridColumns: 1,
-      groups: [
-        {
-          key: "basic",
-          title: "Basic Information",
-          gridColumns: 2,
-          fields: [
-            { key: "name", label: "Name", type: "text", required: true, maxLength: 255, colSpan: 2 }
-          ]
-        }
-      ]
-    }
-  },
-  hooks: { beforeFetchData: "netsuiteCustomRecordExtendFilesBeforeFetchData" }
 };`
   },
   {

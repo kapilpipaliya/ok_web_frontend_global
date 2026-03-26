@@ -130,8 +130,11 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
         `<-${toParentEdgeType}`,
         { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
       ) || [];
-      if (children.length > 0) {
-        return children;
+      const categoryChildren = children.filter((child) =>
+        child?.L?.includes(parentVertexLabel)
+      );
+      if (categoryChildren.length > 0) {
+        return categoryChildren;
       }
     }
   }
@@ -169,7 +172,10 @@ const fetchChildren = async (parentId, forceRefresh = false) => {
           `<-${toParentEdgeType}`,
           { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
         ) || [];
-        return children;
+        const categoryChildren = children.filter((child) =>
+          child?.L?.includes(parentVertexLabel)
+        );
+        return categoryChildren;
       }
     }
   } catch (error) {
@@ -215,6 +221,7 @@ const sortItems = (items) => {
 const getChildren = (parentId) => {
   if (!parentId) return [];
   const toParentEdgeType = getToParentEdgeType();
+  const parentVertexLabel = getParentVertexLabel();
   // Access graph reactively
   const graph = args.graph;
   const parentVertex = graph.vertexes[parentId];
@@ -228,7 +235,14 @@ const getChildren = (parentId) => {
     { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
   ) || [];
 
-  return sortItems(children);
+  // Filter to sidebar category vertices only.
+  // `toParentEdgeType` is also used for content (e.g. NetSuiteExtendFile) -> category; without filtering,
+  // file rows incorrectly appear as sidebar tree children.
+  const categoryChildren = parentVertexLabel
+    ? children.filter((child) => child?.L?.includes(parentVertexLabel))
+    : children;
+
+  return sortItems(categoryChildren);
 };
 
 // Get loading state - not needed with graph, but kept for compatibility

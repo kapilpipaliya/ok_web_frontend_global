@@ -1,0 +1,281 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Why I Built Decode Orders Organizer
+        url: /blogs/why-i-built-decode-orders-organizer
+        key: ShopifyBlogPostWhyIBuilt
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Why I Built Decode Orders Organizer"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Store teams often spend too much time switching between Orders, Draft Orders, and individual detail screens just to answer simple operational questions."
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "I built Decode Orders Organizer to reduce that friction: category-driven navigation, fast table workflows, and expandable rows so teams can inspect line-level details without leaving context."
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.7;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "ul"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.4rem 0; }`;
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Organize orders and draft orders with consistent category trees"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.4rem 0; }`;
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Search, filter, and sort quickly across operational data"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css: return `._id { margin: 0 0 0.4rem 0; }`;
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "li",
+  text: "Expand rows to inspect nested line items and related details"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "The goal is simple: give merchants and operations teams a clearer workspace so they can make faster decisions with fewer mistakes."
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-top: 1.5rem;
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/blogs",
+  text: "Back to Blogs"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "11"
+    }
+  ]
+}

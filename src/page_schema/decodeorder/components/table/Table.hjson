@@ -129,7 +129,14 @@ const getHideSettingsButton = () => {
   if (isNestedLinesTable()) return true;
   return args.fns.prop('hideSettingsButton', args.contextData.props) ?? false;
 };
-const getIcon = () => args.fns.prop('icon', args.contextData.props);
+const getIcon = () => {
+  if (isNestedLinesTable()) {
+    const showNestedIcon = args.contextData.props?.nestedShowIcon === true;
+    if (!showNestedIcon) return undefined;
+    return args.contextData.props?.nestedIcon || args.fns.prop('icon', args.contextData.props);
+  }
+  return args.fns.prop('icon', args.contextData.props);
+};
 const getLabel = () => args.fns.prop('label', args.contextData.props);
 const getAddButtonLabel = () => {
   const label = getLabel();
@@ -1954,10 +1961,24 @@ return args.contextData.props?.nestedLinesMode === true
   ? `._id {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 0;
-  height: 100%;
-  max-height: 100%;
+  height: ${
+    (() => {
+      const rawHeight = args.contextData.props?.nestedLinesContainerHeight;
+      if (typeof rawHeight === "number" && !Number.isNaN(rawHeight) && rawHeight > 0) return `${rawHeight}px`;
+      if (typeof rawHeight === "string" && rawHeight.trim() !== "") return rawHeight;
+      return "280px";
+    })()
+  };
+  max-height: ${
+    (() => {
+      const rawMaxHeight = args.contextData.props?.nestedLinesContainerMaxHeight;
+      if (typeof rawMaxHeight === "number" && !Number.isNaN(rawMaxHeight) && rawMaxHeight > 0) return `${rawMaxHeight}px`;
+      if (typeof rawMaxHeight === "string" && rawMaxHeight.trim() !== "") return rawMaxHeight;
+      return "100%";
+    })()
+  };
 }`
   : `._id {
   display: flex;
@@ -3841,7 +3862,6 @@ if (!rowId || !Array.isArray(rowExpansions) || rowExpansions.length === 0) retur
 const expansionRowKey = String(rowId);
 const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 return {
-  as: "div",
   hide: !isRowExpansionOpen,
   data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
 };
@@ -3915,6 +3935,10 @@ return {
   nestedTableTitle: rowExpansion.nestedTitle || 'Nested',
   nestedTableColumns: rowExpansion.nestedColumns || [],
   nestedRowHeight: rowExpansion.nestedRowHeight || 36,
+  nestedShowIcon: rowExpansion.nestedShowIcon === true,
+  nestedIcon: rowExpansion.nestedIcon,
+  nestedLinesContainerHeight: rowExpansion.expansionPanelHeight ?? 280,
+  nestedLinesContainerMaxHeight: rowExpansion.expansionPanelMaxHeight ?? rowExpansion.expansionPanelHeight ?? 280,
   showRowNumber: rowExpansion.nestedShowRowNumber !== false,
   usePolarisUI: rowExpansion.usePolarisUI !== false,
   loadFromSetting: false,

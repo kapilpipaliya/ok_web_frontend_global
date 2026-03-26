@@ -52,25 +52,10 @@
       }
     }
     {
-      id: "13"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        key: unique_purchase_orders
-        props:
-          '''return {
-  as: "s-link",
-  href: "/purchase-orders",
-  text: "Purchase orders"
-}'''
-      }
-    }
-    {
       id: "14"
       L: Attr
       P: {
-        displayOrder: 4
+        displayOrder: 3
         componentName: Html
         key: unique_inventory
         props:
@@ -85,7 +70,7 @@
       id: "15"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 4
         componentName: Html
         key: unique_transfers
         props:
@@ -97,40 +82,10 @@
       }
     }
     {
-      id: "16"
-      L: Attr
-      P: {
-        displayOrder: 6
-        componentName: Html
-        key: unique_netsuite_oauth
-        props:
-          '''return {
-  as: "s-link",
-  href: "/netsuite-oauth",
-  text: "NetSuite OAuth"
-}'''
-      }
-    }
-    {
-      id: "17"
-      L: Attr
-      P: {
-        displayOrder: 7
-        componentName: Html
-        key: unique_netsuite_custom_records
-        props:
-          '''return {
-  as: "s-link",
-  href: "/netsuite-custom-records",
-  text: "NetSuite records"
-}'''
-      }
-    }
-    {
       id: "5"
       L: Attr
       P: {
-        displayOrder: 8
+        displayOrder: 5
         componentName: Html
         key: unique_3
         props:
@@ -145,7 +100,7 @@
       id: "6"
       L: Attr
       P: {
-        displayOrder: 9
+        displayOrder: 6
         componentName: Html
         key: unique_faq
         props:
@@ -160,7 +115,7 @@
       id: "7"
       L: Attr
       P: {
-        displayOrder: 10
+        displayOrder: 7
         componentName: Html
         key: unique_docs
         props:
@@ -172,10 +127,25 @@
       }
     }
     {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        key: unique_blogs
+        props:
+          '''return {
+  as: "s-link",
+  href: "/blogs",
+  text: "Blogs"
+}'''
+      }
+    }
+    {
       id: "8"
       L: Attr
       P: {
-        displayOrder: 11
+        displayOrder: 9
         componentName: Html
         key: unique_tutorial
         props:
@@ -191,7 +161,7 @@
       id: "9"
       L: Attr
       P: {
-        displayOrder: 12
+        displayOrder: 10
         componentName: Html
         key: unique_changelog
         props:
@@ -207,7 +177,7 @@
       id: "10"
       L: Attr
       P: {
-        displayOrder: 13
+        displayOrder: 11
         componentName: Html
         key: unique_4
         props:
@@ -222,7 +192,7 @@
       id: "11"
       L: Attr
       P: {
-        displayOrder: 14
+        displayOrder: 12
         componentName: Html
         key: unique_5
         props:
@@ -254,12 +224,6 @@
       E: "12"
     }
     {
-      id: e_purchase_orders
-      T: Attr
-      S: "3"
-      E: "13"
-    }
-    {
       id: e_inventory
       T: Attr
       S: "3"
@@ -270,18 +234,6 @@
       T: Attr
       S: "3"
       E: "15"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "3"
-      E: "16"
-    }
-    {
-      id: e4b
-      T: Attr
-      S: "3"
-      E: "17"
     }
     {
       id: e4c
@@ -300,6 +252,12 @@
       T: Attr
       S: "3"
       E: "7"
+    }
+    {
+      id: e_blogs
+      T: Attr
+      S: "3"
+      E: "16"
     }
     {
       id: e7

@@ -12,10 +12,30 @@
       }
     }
     {
-      id: "2"
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        key: netsuite_oauth_doc_title
+        props: '''return { as: "title", text: "NetSuite OAuth" };'''
+      }
+    }
+    {
+      id: "14"
       L: Attr
       P: {
         displayOrder: 1
+        componentName: Html
+        key: netsuite_oauth_meta_title
+        props: '''return { as: "meta", name: "title", content: "NetSuite OAuth" };'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 2
         componentName: Html
         key: netsuite_oauth_root
         css:
@@ -346,6 +366,8 @@ return {
     }
   ]
   edges: [
+    { id: "e0_doc_title", T: "Attr", S: "1", E: "13" }
+    { id: "e0_meta_title", T: "Attr", S: "1", E: "14" }
     { id: "e1", T: "Attr", S: "1", E: "2" }
     { id: "e2", T: "Attr", S: "2", E: "3" }
     { id: "e3", T: "Attr", S: "2", E: "4" }

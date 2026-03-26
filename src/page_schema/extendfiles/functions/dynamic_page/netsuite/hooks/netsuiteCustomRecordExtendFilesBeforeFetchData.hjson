@@ -4,12 +4,26 @@
       id: "1"
       L: Function
       P: {
-        key: netsuiteCustomRecordExtendFilesBeforeFetchData
+        key: netsuiteExtendFilesBeforeFetchData
         description: Sync NetSuite customrecord_extend_files_aut records into Neo4j before DynamicPage fetch
         body:
           '''
-const { tableVertexLabel, filters = {} } = args.contextData || {};
-if (tableVertexLabel !== "NetSuiteCustomRecordExtendFile") return;
+const {
+  tableVertexLabel,
+  filters = {},
+  categoryId,
+  showUnassigned,
+  parentVertexLabel,
+  toParentEdgeType,
+} = args.contextData || {};
+if (tableVertexLabel !== "NetSuiteExtendFile") return;
+
+// When sidebar root "Uncategorized" is selected, we sync only the uncategorized ids.
+// When a specific category is selected, we sync only the ids connected to that category.
+const isUncategorized =
+  showUnassigned === true ||
+  !categoryId ||
+  String(categoryId) === "uncategorized";
 
 const oauthResult = await args.session.run(
   `MATCH (n:OAuthConnection {integrationKey: "netsuite"})
@@ -18,7 +32,7 @@ const oauthResult = await args.session.run(
 );
 
 if (!oauthResult.records.length) {
-  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] NetSuite OAuth is not connected.");
+  console.warn("[netsuiteExtendFilesBeforeFetchData] NetSuite OAuth is not connected.");
   return;
 }
 
@@ -28,7 +42,7 @@ const accountId = String(oauthData?.P?.accountId || "").trim();
 const accessTokenEncrypted = oauthData?.P?.accessTokenEncrypted;
 
 if (!accountId || !accessTokenEncrypted) {
-  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] Missing NetSuite account/token.");
+  console.warn("[netsuiteExtendFilesBeforeFetchData] Missing NetSuite account/token.");
   return;
 }
 
@@ -36,21 +50,84 @@ let accessToken = "";
 try {
   accessToken = args.decryptToken(accessTokenEncrypted);
 } catch (error) {
-  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] Unable to decrypt NetSuite access token.");
+  console.warn("[netsuiteExtendFilesBeforeFetchData] Unable to decrypt NetSuite access token.");
   return;
 }
 
 if (!accessToken) {
-  console.warn("[netsuiteCustomRecordExtendFilesBeforeFetchData] Empty NetSuite access token.");
+  console.warn("[netsuiteExtendFilesBeforeFetchData] Empty NetSuite access token.");
   return;
 }
 
 const baseUrl = `https://${accountId}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql`;
 const escaped = (value) => String(value || "").replace(/'/g, "''");
 const nameLike = String(filters?.name || "").trim();
-const whereClause = nameLike
-  ? ` WHERE LOWER(name) LIKE LOWER('%${escaped(nameLike)}%')`
+// Track fetched ids only when we are not filtering by search term.
+// This allows safe stale-deletion (otherwise we'd delete records that don't match the search).
+const shouldTrackFetchedIds = !nameLike;
+const fetchedIds = shouldTrackFetchedIds ? new Set() : null;
+
+// Build id filter list from Neo4j graph relationships.
+// Content ids are stored as `P.id` on NetSuiteExtendFile vertices.
+let contentIdsToSync = [];
+if (parentVertexLabel && toParentEdgeType) {
+  if (!isUncategorized && categoryId) {
+    // Categorized: content linked to selected category
+    const rs = await args.session.run(
+      `MATCH (c:${tableVertexLabel})-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+       WHERE elementId(cat) = $categoryId
+       RETURN DISTINCT c.id AS id`,
+      { categoryId },
+    );
+    contentIdsToSync = rs.records
+      .map((r) => r.get("id"))
+      .filter((v) => v != null && String(v) !== "")
+      .map((v) => String(v));
+  } else {
+    // Uncategorized: content with no category relationship
+    const rs = await args.session.run(
+      `MATCH (c:${tableVertexLabel})
+       WHERE NOT EXISTS {
+         MATCH (c)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+       }
+       RETURN DISTINCT c.id AS id`,
+    );
+    contentIdsToSync = rs.records
+      .map((r) => r.get("id"))
+      .filter((v) => v != null && String(v) !== "")
+      .map((v) => String(v));
+  }
+}
+
+// Sync rules:
+// - `uncategorized` => always sync everything (no id filtering)
+// - categorized with no ids => do not fetch at all
+// - if we can't determine category ids for a categorized view, also do not fetch
+let shouldSyncAll = isUncategorized === true;
+
+if (!shouldSyncAll) {
+  // Categorized path
+  if (!parentVertexLabel || !toParentEdgeType) return;
+  if (!contentIdsToSync.length) return;
+}
+
+const toSuiteQlId = (id) => {
+  const s = String(id);
+  return /^\d+$/.test(s) ? s : `'${escaped(s)}'`;
+};
+
+const conditions = [];
+if (nameLike) {
+  conditions.push(`LOWER(name) LIKE LOWER('%${escaped(nameLike)}%')`);
+}
+if (!shouldSyncAll) {
+  conditions.push(`id IN (${contentIdsToSync.map(toSuiteQlId).join(",")})`);
+}
+
+const whereClause = conditions.length
+  ? ` WHERE ${conditions.join(" AND ")}`
   : "";
+
 const suiteQl = `SELECT * FROM customrecord_extend_files_aut${whereClause}`;
 
 const headers = {
@@ -77,7 +154,7 @@ const runMergeChunk = async (rows) => {
   if (!rows || rows.length === 0) return;
   await session.run(
     `UNWIND $rows AS row
-     MERGE (n:NetSuiteCustomRecordExtendFile {id: row.id})
+     MERGE (n:NetSuiteExtendFile {id: row.id})
      SET n += row.props`,
     { rows }
   );
@@ -167,6 +244,7 @@ while (hasMore) {
     const row = items[i] || {};
     const sourceId = row.id ?? row.internalid ?? `${offset + i + 1}`;
     const id = String(sourceId);
+    if (fetchedIds) fetchedIds.add(id);
     const name = str(row.name);
     const isInactive = flagTrue(row.isinactive);
     const lastModified = str(
@@ -233,7 +311,60 @@ while (hasMore) {
 
 await runMergeChunk(pendingRows.splice(0, pendingRows.length));
 
-console.log("[netsuiteCustomRecordExtendFilesBeforeFetchData] synced rows:", total);
+// Delete stale DB records when we performed an id-complete fetch.
+// - uncategorized: compare against all fetched ids and delete stale globally
+// - categorized: compare against fetched ids for the selected category and delete stale within that set
+let deletedCount = 0;
+if (fetchedIds && fetchedIds.size > 0) {
+  if (shouldSyncAll) {
+    // uncategorized full sync: delete any db ids not returned by NetSuite
+    const existingResult = await session.run(
+      `MATCH (n:NetSuiteExtendFile) RETURN n.id as id`,
+      {},
+    );
+    const existingIds = existingResult.records
+      .map((r) => r.get("id"))
+      .filter((v) => v != null && String(v) !== "")
+      .map((v) => String(v));
+
+    const toDelete = [];
+    for (const existingId of existingIds) {
+      if (!fetchedIds.has(existingId)) toDelete.push(existingId);
+    }
+
+    if (toDelete.length > 0) {
+      await session.run(
+        `MATCH (n:NetSuiteExtendFile) WHERE n.id IN $ids DETACH DELETE n`,
+        { ids: toDelete },
+      );
+      deletedCount = toDelete.length;
+    }
+  } else {
+    // categorized sync: delete only within the selected category's id set
+    const toDelete = contentIdsToSync
+      .map((id) => String(id))
+      .filter((id) => id && !fetchedIds.has(id));
+
+    if (toDelete.length > 0) {
+      await session.run(
+        `MATCH (n:NetSuiteExtendFile) WHERE n.id IN $ids DETACH DELETE n`,
+        { ids: toDelete },
+      );
+      deletedCount = toDelete.length;
+    }
+  }
+}
+
+console.log(
+  "[netsuiteExtendFilesBeforeFetchData] synced rows:",
+  total,
+  "deleted stale rows:",
+  deletedCount,
+  "syncMode:",
+  shouldSyncAll ? "uncategorized" : "categorized",
+  "searchFilterApplied:",
+  !!nameLike,
+);
 '''
       }
     }
