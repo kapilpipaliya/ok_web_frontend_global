@@ -1,0 +1,553 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Moves multiple content items to a category by creating relationships. If categoryId is null or 'uncategorized', removes relationships instead.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { 
+  contentIds, 
+  categoryId, 
+  relationshipType, 
+  categoryLabel, 
+  contentLabel, 
+  contentLabelDisplay,
+  enableUserScopingForSidebar, 
+  enableUserScopingForContent,
+  sourceCategoryId,
+  hooks
+} = args.contextData;
+
+if (!contentIds || !Array.isArray(contentIds) || contentIds.length === 0) {
+  return {
+    success: false,
+    message: "contentIds array is required and must not be empty"
+  };
+}
+
+if (!relationshipType || !categoryLabel || !contentLabel) {
+  return {
+    success: false,
+    message: "relationshipType, categoryLabel, and contentLabel are required"
+  };
+}
+
+const userUuid = user.P.uuid;
+const userCategoryRelType = `User${categoryLabel}`;
+const contentRelType = `User${contentLabel}`;
+
+// Initialize deleted edges tracking in context if not exists
+if (!args.context.deletedEdges) {
+  args.context.deletedEdges = [];
+}
+
+// If categoryId is null, undefined, or 'uncategorized', remove relationships
+const isUncategorized = !categoryId || categoryId === 'uncategorized';
+
+// Execute beforeMoveItemsToCategory hooks
+await args.executeHooks(hooks?.beforeMoveItemsToCategory, {
+  contentIds,
+  categoryId,
+  relationshipType,
+  categoryLabel,
+  contentLabel,
+  enableUserScopingForSidebar,
+  enableUserScopingForContent,
+  sourceCategoryId
+});
+
+try {
+  let query;
+  let queryParams;
+  let successCount = 0;
+  let errorCount = 0;
+  const errors = [];
+  const deletedEdgeIds = [];
+
+  if (isUncategorized) {
+    // Remove relationships for all content items
+    // First, get the edge IDs before deleting them
+    let getEdgeIdsQuery;
+    if (!enableUserScopingForContent) {
+      getEdgeIdsQuery = `
+        MATCH (content:${contentLabel})-[r:${relationshipType}]->(:${categoryLabel})
+        WHERE elementId(content) IN $contentIds
+        RETURN collect(elementId(r)) as edgeIds
+      `;
+      queryParams = { contentIds };
+    } else {
+      getEdgeIdsQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(:${categoryLabel})
+        WHERE elementId(content) IN $contentIds
+        RETURN collect(elementId(r)) as edgeIds
+      `;
+      queryParams = { userUuid, contentIds };
+    }
+
+    const getEdgeIdsResult = await args.session.run(getEdgeIdsQuery, queryParams);
+    const edgeIds = getEdgeIdsResult.records[0]?.get('edgeIds') || [];
+    const validEdgeIds = Array.isArray(edgeIds) ? edgeIds.filter(id => id !== null) : [];
+    
+    // Now delete the edges
+    if (validEdgeIds.length > 0) {
+      if (!enableUserScopingForContent) {
+        query = `
+          UNWIND $edgeIds as edgeId
+          MATCH ()-[r:${relationshipType}]->()
+          WHERE elementId(r) = edgeId
+          DELETE r
+          RETURN count(r) as deletedCount
+        `;
+        queryParams = { edgeIds: validEdgeIds };
+      } else {
+        query = `
+          UNWIND $edgeIds as edgeId
+          MATCH ()-[r:${relationshipType}]->()
+          WHERE elementId(r) = edgeId
+          DELETE r
+          RETURN count(r) as deletedCount
+        `;
+        queryParams = { edgeIds: validEdgeIds };
+      }
+
+      const deleteResult = await args.session.run(query, queryParams);
+      successCount = deleteResult.records[0]?.get('deletedCount') || 0;
+    }
+    
+    // Track deleted edge IDs
+    if (validEdgeIds.length > 0) {
+      deletedEdgeIds.push(...validEdgeIds);
+      args.context.deletedEdges.push(...validEdgeIds);
+    }
+    
+    // Calculate updated content counts for uncategorized and source category
+    const updatedCounts = {};
+    
+    if (successCount > 0) {
+      // Calculate uncategorized count (items without any category relationship)
+      let uncategorizedCountQuery;
+      let uncategorizedCountParams;
+      if (!enableUserScopingForContent) {
+        uncategorizedCountQuery = `
+          MATCH (content:${contentLabel})
+          WHERE NOT EXISTS {
+            MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+          }
+          RETURN count(DISTINCT content) as contentCount
+        `;
+        uncategorizedCountParams = {};
+      } else {
+        uncategorizedCountQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+          WHERE NOT EXISTS {
+            MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+          }
+          RETURN count(DISTINCT content) as contentCount
+        `;
+        uncategorizedCountParams = { userUuid };
+      }
+      
+      const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+      const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
+      updatedCounts.targetCount = uncategorizedCount;
+      updatedCounts.targetCategoryId = 'uncategorized';
+      
+      // Calculate source category count if provided and not uncategorized
+      if (sourceCategoryId && sourceCategoryId !== 'uncategorized') {
+        let sourceCountQuery;
+        let sourceCountParams;
+        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+          sourceCountQuery = `
+            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { sourceCategoryId };
+        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+          sourceCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+            MATCH (content)-[:${relationshipType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { userUuid, sourceCategoryId };
+        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+          sourceCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat)
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { userUuid, sourceCategoryId };
+        } else {
+          sourceCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $sourceCategoryId
+            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(cat)
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          sourceCountParams = { userUuid, sourceCategoryId };
+        }
+        
+        const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
+        updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
+        updatedCounts.sourceCategoryId = sourceCategoryId;
+      } else if (sourceCategoryId === 'uncategorized') {
+        // Source is uncategorized, so use the same uncategorized count
+        updatedCounts.sourceCount = uncategorizedCount;
+        updatedCounts.sourceCategoryId = 'uncategorized';
+      }
+    }
+    
+    const label = contentLabelDisplay || 'item';
+    const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
+    const uncategorizedResult = {
+      success: true,
+      message: `Moved ${successCount} ${successCount !== 1 ? plural : label} successfully`,
+      data: { movedCount: successCount, updatedCounts: Object.keys(updatedCounts).length > 0 ? updatedCounts : undefined }
+    };
+    
+    // Execute afterMoveItemsToCategory hooks
+    await args.executeHooks(hooks?.afterMoveItemsToCategory, {
+      contentIds,
+      categoryId,
+      relationshipType,
+      categoryLabel,
+      contentLabel,
+      enableUserScopingForSidebar,
+      enableUserScopingForContent,
+      sourceCategoryId,
+      result: uncategorizedResult
+    });
+    
+    return uncategorizedResult;
+  } else {
+    // Create relationships for all content items to the category
+    // Before creating, remove any existing relationships for these items
+    // Process each content item individually to handle errors gracefully
+    for (const contentId of contentIds) {
+      try {
+        // First, get old edge IDs before deleting
+        let getOldEdgeIdsQuery;
+        let getOldEdgeIdsParams;
+        
+        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+          getOldEdgeIdsQuery = `
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { contentId };
+        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+          getOldEdgeIdsQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { userUuid, contentId };
+        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+          getOldEdgeIdsQuery = `
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { contentId };
+        } else {
+          getOldEdgeIdsQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            OPTIONAL MATCH (content)-[oldRel:${relationshipType}]->(:${categoryLabel})
+            RETURN collect(elementId(oldRel)) as oldRelIds
+          `;
+          getOldEdgeIdsParams = { userUuid, contentId };
+        }
+
+        const getOldEdgeIdsResult = await args.session.run(getOldEdgeIdsQuery, getOldEdgeIdsParams);
+        const oldRelIds = getOldEdgeIdsResult.records[0]?.get('oldRelIds') || [];
+        const validOldRelIds = Array.isArray(oldRelIds) ? oldRelIds.filter(id => id !== null) : [];
+        
+        // Delete old edges if any exist
+        if (validOldRelIds.length > 0) {
+          const deleteOldEdgesQuery = `
+            UNWIND $edgeIds as edgeId
+            MATCH ()-[r:${relationshipType}]->()
+            WHERE elementId(r) = edgeId
+            DELETE r
+            RETURN count(r) as deletedCount
+          `;
+          await args.session.run(deleteOldEdgesQuery, { edgeIds: validOldRelIds });
+          deletedEdgeIds.push(...validOldRelIds);
+          args.context.deletedEdges.push(...validOldRelIds);
+        }
+        
+        // Now create the new relationship
+        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+          query = `
+            MATCH (cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { categoryId, contentId };
+        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+          query = `
+            MATCH (cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (u:User {uuid: $userUuid})
+            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { userUuid, categoryId, contentId };
+        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+          query = `
+            MATCH (u:User {uuid: $userUuid})
+            MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { userUuid, categoryId, contentId };
+        } else {
+          query = `
+            MATCH (u:User {uuid: $userUuid})
+            MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+            WHERE elementId(content) = $contentId
+            MERGE (content)-[r:${relationshipType}]->(cat)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+          queryParams = { userUuid, categoryId, contentId };
+        }
+
+        const result = await args.session.run(query, queryParams);
+        
+        if (result.records.length > 0) {
+          // Use processResult to populate graph structure
+          args.processResult(result.records, args.context, [], 'r');
+          successCount++;
+        } else {
+          errorCount++;
+          errors.push(`Content item ${contentId} not found or not accessible`);
+        }
+      } catch (error) {
+        errorCount++;
+        errors.push(`Error moving content ${contentId}: ${error.message}`);
+      }
+    }
+
+    // Calculate updated content counts for source and target categories
+    const updatedCounts = {};
+    
+    if (successCount > 0) {
+      // Calculate target category count
+      if (categoryId) {
+        let targetCountQuery;
+        let targetCountParams;
+        if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+          targetCountQuery = `
+            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          targetCountParams = { categoryId };
+        } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+          targetCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+            MATCH (content)-[:${relationshipType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          targetCountParams = { userUuid, categoryId };
+        } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+          targetCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat)
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          targetCountParams = { userUuid, categoryId };
+        } else {
+          targetCountQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+            WHERE elementId(cat) = $categoryId
+            MATCH (u)-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(cat)
+            RETURN count(DISTINCT content) as contentCount
+          `;
+          targetCountParams = { userUuid, categoryId };
+        }
+        
+        const targetCountResult = await args.session.run(targetCountQuery, targetCountParams);
+        updatedCounts.targetCount = targetCountResult.records[0]?.get('contentCount') || 0;
+        updatedCounts.targetCategoryId = categoryId;
+      }
+      
+      // Calculate source category count if provided
+      if (sourceCategoryId) {
+        if (sourceCategoryId === 'uncategorized') {
+          // Source is uncategorized, count items without any category relationship
+          let uncategorizedCountQuery;
+          let uncategorizedCountParams;
+          if (!enableUserScopingForContent) {
+            uncategorizedCountQuery = `
+              MATCH (content:${contentLabel})
+              WHERE NOT EXISTS {
+                MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+              }
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            uncategorizedCountParams = {};
+          } else {
+            uncategorizedCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+              WHERE NOT EXISTS {
+                MATCH (content)-[:${relationshipType}]->(:${categoryLabel})
+              }
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            uncategorizedCountParams = { userUuid };
+          }
+          
+          const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
+          updatedCounts.sourceCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
+          updatedCounts.sourceCategoryId = 'uncategorized';
+        } else {
+          // Source is a regular category
+          let sourceCountQuery;
+          let sourceCountParams;
+          if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+            sourceCountQuery = `
+              MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { sourceCategoryId };
+          } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+            sourceCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${contentRelType}]->(content:${contentLabel})
+              MATCH (content)-[:${relationshipType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { userUuid, sourceCategoryId };
+          } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+            sourceCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              MATCH (content:${contentLabel})-[r:${relationshipType}]->(cat)
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { userUuid, sourceCategoryId };
+          } else {
+            sourceCountQuery = `
+              MATCH (u:User {uuid: $userUuid})-[:${userCategoryRelType}]->(cat:${categoryLabel})
+              WHERE elementId(cat) = $sourceCategoryId
+              MATCH (u)-[:${contentRelType}]->(content:${contentLabel})-[r:${relationshipType}]->(cat)
+              RETURN count(DISTINCT content) as contentCount
+            `;
+            sourceCountParams = { userUuid, sourceCategoryId };
+          }
+          
+          const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
+          updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
+          updatedCounts.sourceCategoryId = sourceCategoryId;
+        }
+      }
+      
+      const label = contentLabelDisplay || 'item';
+      const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
+      const moveResult = {
+        success: true,
+        message: `Moved ${successCount} ${successCount !== 1 ? plural : label} successfully${errorCount > 0 ? ` (${errorCount} failed)` : ''}`,
+        data: { 
+          movedCount: successCount, 
+          errorCount, 
+          errors: errorCount > 0 ? errors : undefined,
+          updatedCounts
+        }
+      };
+      
+      // Execute afterMoveItemsToCategory hooks
+      await args.executeHooks(hooks?.afterMoveItemsToCategory, {
+        contentIds,
+        categoryId,
+        relationshipType,
+        categoryLabel,
+        contentLabel,
+        enableUserScopingForSidebar,
+        enableUserScopingForContent,
+        sourceCategoryId,
+        result: moveResult
+      });
+      
+      return moveResult;
+    } else {
+      const failResult = {
+        success: false,
+        message: `Failed to move items: ${errors.join('; ')}`,
+        data: { movedCount: 0, errorCount, errors }
+      };
+      
+      // Execute afterMoveItemsToCategory hooks even on failure
+      await args.executeHooks(hooks?.afterMoveItemsToCategory, {
+        contentIds,
+        categoryId,
+        relationshipType,
+        categoryLabel,
+        contentLabel,
+        enableUserScopingForSidebar,
+        enableUserScopingForContent,
+        sourceCategoryId,
+        result: failResult
+      });
+      
+      return failResult;
+    }
+  }
+} catch (error) {
+  console.error("Error moving items to category:", error);
+  return {
+    success: false,
+    message: error.message || "Failed to move items to category"
+  };
+}
+'''
+        key: moveItemsToCategory
+      }
+    }
+  ]
+  edges: []
+}
+
