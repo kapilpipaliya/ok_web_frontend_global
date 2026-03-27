@@ -74,7 +74,7 @@ export function SettingTabs() {
           <Show
             keyed
             when={
-              formStoreVertex()?.id && !isActiveFormFunction()
+              !isActiveFormFunction() && formStoreVertex()?.id
             }
           >
             <DesignerFormIdContext.Provider value={formStoreVertex().id}>
