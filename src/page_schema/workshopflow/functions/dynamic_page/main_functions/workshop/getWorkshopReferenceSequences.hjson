@@ -1,0 +1,34 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getWorkshopReferenceSequences
+        description: Returns all WorkshopReferenceSequence nodes as vertex-shaped rows (ordered by key).
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Not authenticated", data: { sequences: [] } };
+}
+
+const res = await args.session.run(
+  `MATCH (s:WorkshopReferenceSequence)
+   RETURN s
+   ORDER BY coalesce(s.key, "") ASC`,
+  {}
+);
+
+const sequences = args.processResult(res.records, args.context, "s");
+
+return {
+  success: true,
+  data: { sequences }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

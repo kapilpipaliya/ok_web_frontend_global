@@ -46,7 +46,7 @@ await args.executeHooks(hooks?.beforeGetUserVertices, {
 
 // Build query
 let query;
-let params = { limit };
+let params = { limit: args.neo4jDriver.int(limit) };
 
 if (!enableUserScoping) {
   // No user scoping - fetch all vertices of the label

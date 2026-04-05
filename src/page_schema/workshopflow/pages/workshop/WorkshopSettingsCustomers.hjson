@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Customers settings
+        url: /workshop/settings/customers
+        key: WorkshopSettingsCustomers
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsPicklistModulePage
+        props:
+          '''
+return {
+  picklistKey: "customer_status",
+  pageTitle: "Customers",
+  defaultTitle: "Customer status",
+  description:
+    "Customer lifecycle labels (e.g. active, VIP). Use optionsPicklist on customer forms when you add a status field.",
+  referenceSequenceKey: "WorkshopCustomer.customerNo",
+  referenceSectionTitle: "Customer numbers",
+  referenceSectionDescription:
+    "Auto-generated customer / account numbers when adding a customer. Numbers are reserved when the add form opens."
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wsc1", T: "RolePage", S: "1", E: "2" }
+    { id: "wsc2", T: "RolePagePage", S: "2", E: "3" }
+    { id: "wsc3", T: "PageLayout", S: "3", E: "4" }
+    { id: "wsc4", T: "Attr", S: "3", E: "5" }
+  ]
+}

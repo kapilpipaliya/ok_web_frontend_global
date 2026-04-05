@@ -1,0 +1,89 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Workshop Repairs
+        url: /workshop/repairs
+        key: WorkshopRepairs
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        key: workshop_repairs_dynamic_page
+        props:
+          '''
+return {
+  tableVertexLabel: "RepairOrder",
+  loadFromSetting: true
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: RolePage
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: RolePagePage
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: PageLayout
+      S: "3"
+      E: "5"
+    }
+  ]
+}

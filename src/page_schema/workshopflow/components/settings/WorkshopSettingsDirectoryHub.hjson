@@ -1,0 +1,227 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopSettingsDirectoryHub
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+const links = [
+  {
+    href: "/workshop/settings/customers",
+    label: "Customers",
+    hint: "Customer status and related picklists"
+  },
+  {
+    href: "/workshop/settings/technicians",
+    label: "Technicians",
+    hint: "Technician availability / status options"
+  },
+  {
+    href: "/workshop/settings/services",
+    label: "Services",
+    hint: "Service catalog option lists"
+  }
+];
+
+return { links };
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-dir-hub"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.lg};
+  max-width: 40rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Directory",
+  class: "workshop-dir-hub-title"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Configure option lists used with customers, technicians, and services. Pick a module below.",
+  class: "workshop-dir-hub-desc"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  line-height: 1.5;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        contextName: dirLink
+        loop: true
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-dir-hub-cards",
+  data: args.fns.links
+};
+'''
+        css:
+          '''
+return `._id.workshop-dir-hub-cards {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.dirLink;
+return {
+  as: "button",
+  type: "button",
+  class: "workshop-dir-hub-card",
+  onClick: () => args.navigate(item.href)
+};
+'''
+        css:
+          '''
+return `._id.workshop-dir-hub-card {
+  text-align: left;
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: border-color ${args.theme.var.animation.fast} ease,
+    background ${args.theme.var.animation.fast} ease;
+}
+._id.workshop-dir-hub-card:hover {
+  border-color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.background_light_100};
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.dirLink;
+return {
+  as: "div",
+  text: item.label,
+  class: "workshop-dir-hub-card-title"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.md};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.dirLink;
+return {
+  as: "div",
+  text: item.hint,
+  class: "workshop-dir-hub-card-hint"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wdh1", T: "Attr", S: "1", E: "2" }
+    { id: "wdh2", T: "Attr", S: "2", E: "3" }
+    { id: "wdh3", T: "Attr", S: "2", E: "4" }
+    { id: "wdh4", T: "Attr", S: "2", E: "5" }
+    { id: "wdh5", T: "Attr", S: "5", E: "6" }
+    { id: "wdh6", T: "Attr", S: "6", E: "7" }
+    { id: "wdh7", T: "Attr", S: "6", E: "8" }
+  ]
+}

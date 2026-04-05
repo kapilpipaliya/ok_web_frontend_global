@@ -1,0 +1,91 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopBeforeRepairUpdateValidate
+        description: Validates repair status transitions and required data before update.
+        body:
+          '''
+const elementId = args.contextData?.elementId || args.contextData?.data?.vertex?.id;
+const nextData = args.contextData?.data?.vertex?.P || {};
+const nextStatus = String(nextData.status || "").toLowerCase().trim();
+
+if (!elementId) {
+  return { success: true, message: "No repair id provided for validation" };
+}
+
+if (!nextStatus) {
+  return { success: true, message: "No status change requested" };
+}
+
+const lookup = await args.session.run(
+  `
+  MATCH (r:RepairOrder)
+  WHERE elementId(r) = $elementId
+  RETURN r
+  LIMIT 1
+  `,
+  { elementId }
+);
+
+if (lookup.records.length === 0) {
+  throw new Error("Repair order not found");
+}
+
+const current = lookup.records[0].get("r");
+const currentStatus = String(current.properties.status || "open").toLowerCase().trim();
+
+const allowed = {
+  "open": ["diagnosing", "waiting-parts", "cancelled"],
+  "diagnosing": ["waiting-parts", "ready-billing", "cancelled"],
+  "waiting-parts": ["diagnosing", "ready-billing", "cancelled"],
+  "ready-billing": ["closed", "diagnosing", "cancelled"],
+  "closed": [],
+  "cancelled": []
+};
+
+if (currentStatus !== nextStatus) {
+  const allowedTargets = allowed[currentStatus] || [];
+  if (!allowedTargets.includes(nextStatus)) {
+    throw new Error(`Invalid repair status transition from '${currentStatus}' to '${nextStatus}'`);
+  }
+}
+
+if (nextStatus === "ready-billing") {
+  const laborHours = Number(nextData.laborHours ?? current.properties.laborHours ?? 0);
+  const amount = Number(nextData.actualCost ?? nextData.estimatedCost ?? current.properties.actualCost ?? current.properties.estimatedCost ?? 0);
+  if (!Number.isFinite(laborHours) || laborHours < 0) {
+    throw new Error("Labor hours must be a valid non-negative number");
+  }
+  if (!Number.isFinite(amount) || amount < 0) {
+    throw new Error("Estimated or actual cost must be zero or a positive number before billing");
+  }
+}
+
+if (nextStatus === "closed") {
+  const invoiceCheck = await args.session.run(
+    `
+    MATCH (r:RepairOrder)-[:RepairOrderInvoice]->(i:WorkshopInvoice)
+    WHERE elementId(r) = $elementId
+    RETURN i
+    LIMIT 1
+    `,
+    { elementId }
+  );
+  if (invoiceCheck.records.length === 0) {
+    throw new Error("Cannot close repair order without linked invoice");
+  }
+}
+
+return {
+  success: true,
+  message: "Repair update validation passed"
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

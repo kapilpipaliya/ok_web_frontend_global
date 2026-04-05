@@ -257,7 +257,10 @@ const loadOptionsFromFunction = async (optionType, subType) => {
       params.subType = subType;
     }
 
-    const result = await args.fns.executeYTOFunction("getSelectOptions", { params });
+    const result = await args.executeNamedServerFunction({
+      functionName: "getSelectOptions",
+      contextData: { params }
+    });
 
     if (result?.error) {
       throw new Error(result.error);
@@ -299,7 +302,10 @@ const loadOptionsFromCustomFunction = async (functionName, singularName, pluralN
   setPlaceholder(tomSelectInstance, `Loading ${itemName.toLowerCase()}...`);
 
   try {
-    const result = await args.fns.executeYTOFunction(functionName, functionContext || {});
+    const result = await args.executeNamedServerFunction({
+      functionName,
+      contextData: functionContext || {}
+    });
 
     if (result?.error) {
       throw new Error(result.error);
@@ -690,11 +696,25 @@ const setupEffects = () => {
     }
   });
 
-  // Create effect to watch for changes in props options (when not using optionType)
+  // Create effect to watch for changes in props options (when not using optionType / functionName)
   args.createEffect(() => {
-    const newPropsOptions = args.contextData.props?.options || [];
+    const raw = args.contextData.props?.options;
+    const newPropsOptions =
+      typeof raw === "function"
+        ? (() => {
+            try {
+              const v = raw();
+              return Array.isArray(v) ? v : [];
+            } catch {
+              return [];
+            }
+          })()
+        : Array.isArray(raw)
+          ? raw
+          : [];
     const optionType = args.contextData.props?.optionType || "";
-    if (!optionType && newPropsOptions.length > 0) {
+    const fn = args.contextData.props?.functionName || "";
+    if (!optionType && !fn && newPropsOptions.length > 0) {
       setOptions(newPropsOptions);
     }
   });
@@ -857,8 +877,21 @@ return {
           '''
 const selectRef = args.fns.selectRef();
 
-// Get props
-const initialOptions = args.contextData.props?.options || [];
+// Get props (options may be a Solid accessor — do not use .length on a function)
+const rawOptions = args.contextData.props?.options;
+const initialOptions =
+  typeof rawOptions === "function"
+    ? (() => {
+        try {
+          const v = rawOptions();
+          return Array.isArray(v) ? v : [];
+        } catch {
+          return [];
+        }
+      })()
+    : Array.isArray(rawOptions)
+      ? rawOptions
+      : [];
 const optionType = args.contextData.props?.optionType || "";
 const subType = args.contextData.props?.subType || "";
 const functionName = args.contextData.props?.functionName || "";
@@ -875,6 +908,8 @@ const required = args.contextData.props?.required || false;
 const search = args.contextData.props?.search !== false;
 const multiple = args.contextData.props?.multiple || false;
 const className = args.contextData.props?.class;
+const titleAttr = args.contextData.props?.title || undefined;
+const ariaDescribedBy = args.contextData.props?.["aria-describedby"] || undefined;
 
 // Return element props with onMount and onCleanup
 return {
@@ -885,6 +920,8 @@ return {
   required: required,
   multiple: multiple,
   class: className,
+  title: titleAttr,
+  "aria-describedby": ariaDescribedBy,
   onMount: () => {
 
     // Check if TomSelect is already loaded

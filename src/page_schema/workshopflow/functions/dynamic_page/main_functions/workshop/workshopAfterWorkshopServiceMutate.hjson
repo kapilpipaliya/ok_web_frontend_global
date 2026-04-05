@@ -1,0 +1,30 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterWorkshopServiceMutate
+        description: After create/update WorkshopService, denormalizes categoryName from ServiceCategory edge for table display.
+        body:
+          '''
+const tableVertexLabel = args.contextData?.tableVertexLabel;
+const elementId = args.contextData?.elementId;
+if (tableVertexLabel !== "WorkshopService" || !elementId) {
+  return { success: true, message: "Skipped" };
+}
+
+await args.session.run(
+  `MATCH (s:WorkshopService) WHERE elementId(s) = $elementId
+   OPTIONAL MATCH (s)-[:ServiceCategoryItem]->(cat:ServiceCategory)
+   SET s.categoryName = coalesce(cat.name, "")`,
+  { elementId },
+);
+
+return { success: true, message: "Service category label synced" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

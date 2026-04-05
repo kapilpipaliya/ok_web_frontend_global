@@ -1,0 +1,97 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: saveWorkshopReferenceSequence
+        description: Upserts sequence definition by key; does not change currentNumber unless resetCounter is true.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Not authenticated" };
+}
+
+const {
+  key,
+  prefix = "",
+  suffix = "",
+  startingNumber = 1000,
+  incrementStep = 1,
+  format = "{prefix}{number}{suffix}",
+  resetRule = "never",
+  resetCounter = false,
+  numberPadding = 0
+} = args.contextData || {};
+
+if (!key || typeof key !== "string") {
+  return { success: false, message: "key is required" };
+}
+
+const start = Number(startingNumber);
+const step = Number(incrementStep);
+if (!Number.isFinite(start)) {
+  return { success: false, message: "startingNumber must be a number" };
+}
+if (!Number.isFinite(step) || step < 1) {
+  return { success: false, message: "incrementStep must be a positive number" };
+}
+
+const safeRule = String(resetRule || "never").toLowerCase();
+const allowed = new Set(["never", "daily", "monthly", "yearly"]);
+if (!allowed.has(safeRule)) {
+  return { success: false, message: "Invalid resetRule" };
+}
+
+const padN = Number(numberPadding);
+const safePad = Number.isFinite(padN) && padN >= 0 ? Math.min(32, Math.floor(padN)) : 0;
+
+await args.session.run(
+  `
+  MERGE (s:WorkshopReferenceSequence {key: $key})
+  ON CREATE SET s.createdAt = datetime()
+  SET s.prefix = $prefix,
+      s.suffix = $suffix,
+      s.startingNumber = toInteger($startingNumber),
+      s.incrementStep = toInteger($incrementStep),
+      s.format = $format,
+      s.resetRule = $resetRule,
+      s.numberPadding = toInteger($numberPadding),
+      s.updatedAt = datetime()
+  `,
+  {
+    key: String(key).trim(),
+    prefix: String(prefix ?? ""),
+    suffix: String(suffix ?? ""),
+    startingNumber: Math.trunc(start),
+    incrementStep: Math.trunc(step),
+    format: String(format || "{prefix}{number}{suffix}"),
+    resetRule: safeRule,
+    numberPadding: safePad
+  }
+);
+
+if (resetCounter === true) {
+  await args.session.run(
+    `
+    MATCH (s:WorkshopReferenceSequence {key: $key})
+    SET s.currentNumber = toInteger($startingNumber) - toInteger($incrementStep),
+        s.periodKey = null,
+        s.updatedAt = datetime()
+    `,
+    {
+      key: String(key).trim(),
+      startingNumber: Math.trunc(start),
+      incrementStep: Math.trunc(step)
+    }
+  );
+}
+
+return { success: true, message: "Sequence saved", data: { key: String(key).trim() } };
+'''
+      }
+    }
+  ]
+  edges: []
+}

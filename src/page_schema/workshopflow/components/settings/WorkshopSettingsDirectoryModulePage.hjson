@@ -1,0 +1,88 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopSettingsDirectoryModulePage
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-settings-layout"
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  width: 100%;
+  min-height: 60vh;
+  padding: ${args.theme.var.spacing.md};
+}
+
+@media (min-width: 769px) {
+  ._id.workshop-settings-layout {
+    flex-wrap: nowrap;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsSidebar
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main",
+  class: "workshop-settings-main"
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-main {
+  flex: 1;
+  min-width: 0;
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsDirectoryHub
+      }
+    }
+  ]
+  edges: [
+    { id: "wsdmp1", T: "Attr", S: "1", E: "2" }
+    { id: "wsdmp2", T: "Attr", S: "2", E: "3" }
+    { id: "wsdmp3", T: "Attr", S: "2", E: "4" }
+    { id: "wsdmp4", T: "Attr", S: "4", E: "5" }
+  ]
+}

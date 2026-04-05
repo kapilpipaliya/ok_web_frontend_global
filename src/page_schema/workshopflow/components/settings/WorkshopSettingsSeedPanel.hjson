@@ -1,0 +1,292 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopSettingsSeedPanel
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+const [keysFilter, setKeysFilter] = args.createSignal("");
+const [lastMessage, setLastMessage] = args.createSignal("");
+const [busy, setBusy] = args.createSignal(false);
+
+const parseKeys = () => {
+  const raw = keysFilter().trim();
+  if (!raw) return null;
+  return raw
+    .split(/[,\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+};
+
+const runSeed = async (mode) => {
+  setBusy(true);
+  setLastMessage("");
+  try {
+    const keys = parseKeys();
+    const res = await args.executeNamedServerFunction({
+      functionName: "seedWorkshopPicklists",
+      contextData: keys && keys.length ? { mode, keys } : { mode }
+    });
+    if (res?.error) {
+      setLastMessage("Error: " + String(res.error));
+      args.showErrorToast?.(String(res.error));
+      return;
+    }
+    const inner = res?.result;
+    if (!inner?.success) {
+      const msg = inner?.message || "Seed failed";
+      setLastMessage(msg);
+      args.showErrorToast?.(msg);
+      return;
+    }
+    const d = inner.data || {};
+    const summary = `Created: ${d.created ?? 0}, updated: ${d.updated ?? 0}, skipped: ${d.skipped ?? 0}`;
+    setLastMessage((inner.message || "Done") + " — " + summary);
+    args.showSuccessToast?.(inner.message || "Picklists updated");
+  } catch (e) {
+    setLastMessage(e?.message || "Seed failed");
+    args.showErrorToast?.(e?.message || "Seed failed");
+  } finally {
+    setBusy(false);
+  }
+};
+
+return {
+  keysFilter,
+  setKeysFilter,
+  lastMessage,
+  busy,
+  runSeed
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-seed-panel"
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+  max-width: 720px;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Seed picklist options",
+  class: "workshop-seed-title"
+};
+'''
+        css:
+          '''
+return `._id.workshop-seed-title {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Bootstrap default workshop picklist option nodes (AppointmentStatus, RepairStatus, etc.). “Missing only” skips picklists that already have options. “Force” deletes and recreates options for the selected keys.",
+  class: "workshop-seed-desc"
+};
+'''
+        css:
+          '''
+return `._id.workshop-seed-desc {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  line-height: 1.5;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Limit to keys (optional, comma-separated)",
+  class: "workshop-seed-label"
+};
+'''
+        css:
+          '''
+return `._id.workshop-seed-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: TextInput
+        props:
+          '''
+return {
+  value: args.fns.keysFilter(),
+  placeholder:
+    "e.g. appointment_status, repair_status — leave empty for all",
+  disabled: args.fns.busy(),
+  onChange: (e) => args.fns.setKeysFilter(e.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-seed-actions"
+};
+'''
+        css:
+          '''
+return `._id.workshop-seed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: args.fns.busy() ? "Working…" : "Seed missing only",
+  disabled: args.fns.busy(),
+  onClick: () => args.fns.runSeed("missingOnly")
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "danger",
+  text: "Force / replace",
+  disabled: args.fns.busy(),
+  onClick: () => {
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm(
+        "Overwrite picklist options for the selected keys? This deletes existing option nodes for those labels and recreates defaults."
+      )
+    ) {
+      return;
+    }
+    args.fns.runSeed("force");
+  }
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "pre",
+  text: args.fns.lastMessage() || " ",
+  class: "workshop-seed-log",
+  hide: !args.fns.lastMessage()
+};
+'''
+        css:
+          '''
+return `._id.workshop-seed-log {
+  margin: 0;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-size: ${args.theme.var.fontSize.sm};
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wss1", T: "Attr", S: "1", E: "2" }
+    { id: "wss2", T: "Attr", S: "2", E: "3" }
+    { id: "wss3", T: "Attr", S: "2", E: "4" }
+    { id: "wss4", T: "Attr", S: "2", E: "5" }
+    { id: "wss5", T: "Attr", S: "2", E: "6" }
+    { id: "wss6", T: "Attr", S: "2", E: "7" }
+    { id: "wss7", T: "Attr", S: "7", E: "8" }
+    { id: "wss8", T: "Attr", S: "7", E: "9" }
+    { id: "wss9", T: "Attr", S: "2", E: "10" }
+  ]
+}

@@ -1,0 +1,501 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "WorkshopD3Chart"
+      }
+    },
+    {
+      id: "variant_chart_type",
+      L: "ComponentVariant",
+      P: {
+        key: "chartType",
+        type: "string",
+        defValue: "line"
+      }
+    },
+    {
+      id: "chart_type_line",
+      L: "ComponentVariantOption",
+      P: {
+        key: "line",
+        value: "line",
+        description: "Line chart for time series data"
+      }
+    },
+    {
+      id: "chart_type_bar",
+      L: "ComponentVariantOption",
+      P: {
+        key: "bar",
+        value: "bar",
+        description: "Bar chart for categorical data"
+      }
+    },
+    {
+      id: "chart_type_pie",
+      L: "ComponentVariantOption",
+      P: {
+        key: "pie",
+        value: "pie",
+        description: "Pie chart for proportional data"
+      }
+    },
+    {
+      id: "chart_type_area",
+      L: "ComponentVariantOption",
+      P: {
+        key: "area",
+        value: "area",
+        description: "Area chart for stacked data"
+      }
+    },
+    {
+      id: "variant_width",
+      L: "ComponentVariant",
+      P: {
+        key: "width",
+        type: "number",
+        defValue: 800
+      }
+    },
+    {
+      id: "variant_height",
+      L: "ComponentVariant",
+      P: {
+        key: "height",
+        type: "number",
+        defValue: 400
+      }
+    },
+    {
+      id: "variant_data",
+      L: "ComponentVariant",
+      P: {
+        key: "data",
+        type: "object",
+        defValue: null
+      }
+    },
+    {
+      id: "chart_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+let echarts = null;
+let chartInstance = null;
+
+const loadECharts = async () => {
+  try {
+    if (!echarts) {
+      const echartsModule = await import("https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.esm.min.js");
+      echarts = echartsModule.default || echartsModule;
+    }
+    return echarts;
+  } catch (error) {
+    console.error("Failed to load ECharts:", error);
+    return null;
+  }
+};
+
+const createChart = async (container, data, chartType, width, height, theme) => {
+  if (!echarts || !data?.labels || !data?.datasets) return;
+
+  container.innerHTML = "";
+
+  const chartDiv = document.createElement("div");
+  chartDiv.style.width = width + "px";
+  chartDiv.style.height = height + "px";
+  container.appendChild(chartDiv);
+
+  if (chartInstance) {
+    chartInstance.dispose();
+  }
+
+  chartInstance = echarts.init(chartDiv);
+
+  let series = [];
+  let option = {};
+
+  if (chartType === "pie") {
+    const dataset = data.datasets[0];
+    const pieData = data.labels.map((label, index) => ({
+      name: label,
+      value: dataset.data[index]
+    }));
+
+    option = {
+      tooltip: {
+        trigger: "item",
+        backgroundColor: theme.var.color.background,
+        borderColor: theme.var.color.border,
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      legend: {
+        orient: "horizontal",
+        bottom: "bottom",
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      series: [
+        {
+          name: dataset.label || "Data",
+          type: "pie",
+          radius: "60%",
+          data: pieData,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: "rgba(0, 0, 0, 0.5)"
+            }
+          },
+          label: {
+            color: theme.var.color.text
+          }
+        }
+      ]
+    };
+  } else if (chartType === "bar") {
+    series = data.datasets.map((dataset) => ({
+      name: dataset.label,
+      type: "bar",
+      data: dataset.data,
+      itemStyle: {
+        color: dataset.backgroundColor || theme.var.color.primary,
+        borderRadius: [4, 4, 0, 0]
+      }
+    }));
+
+    option = {
+      tooltip: {
+        trigger: "axis",
+        axisPointer: {
+          type: "shadow"
+        },
+        backgroundColor: theme.var.color.background,
+        borderColor: theme.var.color.border,
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      legend: {
+        data: data.datasets.map((d) => d.label),
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      grid: {
+        left: "3%",
+        right: "4%",
+        bottom: "15%",
+        containLabel: true
+      },
+      xAxis: {
+        type: "category",
+        data: data.labels,
+        axisLine: {
+          lineStyle: {
+            color: theme.var.color.border
+          }
+        },
+        axisLabel: {
+          color: theme.var.color.muted,
+          rotate: 45,
+          interval: 0,
+          fontSize: 10
+        }
+      },
+      yAxis: {
+        type: "value",
+        axisLine: {
+          lineStyle: {
+            color: theme.var.color.border
+          }
+        },
+        axisLabel: {
+          color: theme.var.color.muted
+        },
+        splitLine: {
+          lineStyle: {
+            color: theme.var.color.border,
+            opacity: 0.3
+          }
+        }
+      },
+      series: series
+    };
+  } else if (chartType === "line") {
+    series = data.datasets.map((dataset) => ({
+      name: dataset.label,
+      type: "line",
+      data: dataset.data,
+      smooth: true,
+      lineStyle: {
+        color: dataset.borderColor || theme.var.color.primary,
+        width: 2
+      },
+      itemStyle: {
+        color: dataset.borderColor || theme.var.color.primary
+      },
+      areaStyle: dataset.fill
+        ? {
+            color: dataset.backgroundColor || theme.var.color.primary,
+            opacity: 0.3
+          }
+        : undefined
+    }));
+
+    option = {
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: theme.var.color.background,
+        borderColor: theme.var.color.border,
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      legend: {
+        data: data.datasets.map((d) => d.label),
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      grid: {
+        left: "3%",
+        right: "4%",
+        bottom: "15%",
+        containLabel: true
+      },
+      xAxis: {
+        type: "category",
+        boundaryGap: false,
+        data: data.labels,
+        axisLine: {
+          lineStyle: {
+            color: theme.var.color.border
+          }
+        },
+        axisLabel: {
+          color: theme.var.color.muted,
+          rotate: 45,
+          interval: 0,
+          fontSize: 10
+        }
+      },
+      yAxis: {
+        type: "value",
+        axisLine: {
+          lineStyle: {
+            color: theme.var.color.border
+          }
+        },
+        axisLabel: {
+          color: theme.var.color.muted
+        },
+        splitLine: {
+          lineStyle: {
+            color: theme.var.color.border,
+            opacity: 0.3
+          }
+        }
+      },
+      series: series
+    };
+  } else if (chartType === "area") {
+    series = data.datasets.map((dataset) => ({
+      name: dataset.label,
+      type: "line",
+      data: dataset.data,
+      smooth: true,
+      stack: "Total",
+      areaStyle: {
+        color: dataset.backgroundColor || theme.var.color.primary,
+        opacity: 0.7
+      },
+      lineStyle: {
+        color: dataset.borderColor || dataset.backgroundColor || theme.var.color.primary,
+        width: 2
+      },
+      itemStyle: {
+        color: dataset.borderColor || dataset.backgroundColor || theme.var.color.primary
+      }
+    }));
+
+    option = {
+      tooltip: {
+        trigger: "axis",
+        backgroundColor: theme.var.color.background,
+        borderColor: theme.var.color.border,
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      legend: {
+        data: data.datasets.map((d) => d.label),
+        textStyle: {
+          color: theme.var.color.text
+        }
+      },
+      grid: {
+        left: "3%",
+        right: "4%",
+        bottom: "15%",
+        containLabel: true
+      },
+      xAxis: {
+        type: "category",
+        boundaryGap: false,
+        data: data.labels,
+        axisLine: {
+          lineStyle: {
+            color: theme.var.color.border
+          }
+        },
+        axisLabel: {
+          color: theme.var.color.muted,
+          rotate: 45,
+          interval: 0,
+          fontSize: 10
+        }
+      },
+      yAxis: {
+        type: "value",
+        axisLine: {
+          lineStyle: {
+            color: theme.var.color.border
+          }
+        },
+        axisLabel: {
+          color: theme.var.color.muted
+        },
+        splitLine: {
+          lineStyle: {
+            color: theme.var.color.border,
+            opacity: 0.3
+          }
+        }
+      },
+      series: series
+    };
+  }
+
+  chartInstance.setOption(option);
+  return chartInstance;
+};
+
+const renderChart = async () => {
+  const container = args.ref();
+  if (!container) return;
+
+  const chartType = args.contextData.props?.chartType || "line";
+  const data = args.contextData.props?.data;
+
+  if (!data) {
+    container.innerHTML =
+      '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' +
+      args.theme.var.color.muted +
+      ';">No data available</div>';
+    return;
+  }
+
+  await loadECharts();
+  if (!echarts) {
+    container.innerHTML =
+      '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: ' +
+      args.theme.var.color.error +
+      ';">Failed to load ECharts library</div>';
+    return;
+  }
+
+  const containerWidth = container.offsetWidth || container.clientWidth || 800;
+  const containerHeight = container.offsetHeight || container.clientHeight || 400;
+
+  await createChart(container, data, chartType, containerWidth, containerHeight, args.theme);
+};
+
+let resizeTimeout;
+const handleResize = () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    renderChart();
+  }, 250);
+};
+
+return {
+  renderChart,
+  handleResize
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: () => {
+    args.fns.renderChart();
+    window.addEventListener("resize", args.fns.handleResize);
+  },
+  onCleanup: () => {
+    window.removeEventListener("resize", args.fns.handleResize);
+  }
+};
+''',
+        css: '''
+const height = args.contextData.props?.height || 400;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.md};
+  position: relative;
+  width: 100%;
+  height: ${height}px;
+  min-height: 300px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+._id > div {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+}
+
+._id canvas {
+  background: transparent !important;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    height: 300px;
+    min-height: 250px;
+    padding: 0.5rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_chart_type" },
+    { id: "e2", T: "ComponentVariantOption", S: "variant_chart_type", E: "chart_type_line" },
+    { id: "e3", T: "ComponentVariantOption", S: "variant_chart_type", E: "chart_type_bar" },
+    { id: "e4", T: "ComponentVariantOption", S: "variant_chart_type", E: "chart_type_pie" },
+    { id: "e5", T: "ComponentVariantOption", S: "variant_chart_type", E: "chart_type_area" },
+    { id: "e6", T: "ComponentVariant", S: "component_root", E: "variant_width" },
+    { id: "e7", T: "ComponentVariant", S: "component_root", E: "variant_height" },
+    { id: "e8", T: "ComponentVariant", S: "component_root", E: "variant_data" },
+    { id: "e9", T: "Attr", S: "component_root", E: "chart_container" }
+  ]
+}

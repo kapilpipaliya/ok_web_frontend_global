@@ -18,12 +18,16 @@ const {
 } = args.contextData || {};
 if (tableVertexLabel !== "NetSuiteExtendFile") return;
 
+// Match getUserContent: synthetic uncategorized category id is "_" + tableVertexLabel + "_uncategorized"
+const vertexLabel = tableVertexLabel;
+const uncategorizedVertexId = "_" + vertexLabel + "_uncategorized";
+
 // When sidebar root "Uncategorized" is selected, we sync only the uncategorized ids.
 // When a specific category is selected, we sync only the ids connected to that category.
 const isUncategorized =
   showUnassigned === true ||
   !categoryId ||
-  String(categoryId) === "uncategorized";
+  categoryId === uncategorizedVertexId;
 
 const oauthResult = await args.session.run(
   `MATCH (n:OAuthConnection {integrationKey: "netsuite"})

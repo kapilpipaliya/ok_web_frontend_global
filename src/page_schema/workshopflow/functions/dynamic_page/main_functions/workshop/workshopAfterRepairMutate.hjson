@@ -1,0 +1,34 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterRepairMutate
+        description: After create/update RepairOrder, denormalizes customer, appointment ref, and vehicle plate from FK edges for grids and invoices.
+        body:
+          '''
+const tableVertexLabel = args.contextData?.tableVertexLabel;
+const elementId = args.contextData?.elementId;
+if (tableVertexLabel !== "RepairOrder" || !elementId) {
+  return { success: true, message: "Skipped" };
+}
+
+await args.session.run(
+  `MATCH (r:RepairOrder) WHERE elementId(r) = $elementId
+   OPTIONAL MATCH (r)-[:RepairCustomer]->(cust:WorkshopCustomer)
+   OPTIONAL MATCH (r)-[:RepairAppointment]->(apt:WorkshopAppointment)
+   OPTIONAL MATCH (r)-[:RepairVehicle]->(veh:WorkshopVehicle)
+   SET r.customerName = coalesce(cust.name, ""),
+       r.appointmentNo = coalesce(apt.appointmentNo, ""),
+       r.vehiclePlate = coalesce(veh.plate, "")`,
+  { elementId },
+);
+
+return { success: true, message: "Repair display fields synced" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

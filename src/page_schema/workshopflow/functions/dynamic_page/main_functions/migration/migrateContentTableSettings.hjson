@@ -1,0 +1,1310 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Migrates or creates default workshop table configuration settings. Updates existing settings if they already exist.
+        body:
+          '''
+/**
+ * Migration: Content Table Settings
+ *
+ * This migration creates or updates default table configuration settings
+ * for workshop management modules, plus the workshop reports chart registry
+ * (`WorkshopReports_charts_default`, type `workshop_reports_charts`) for `getConfigurableGraphData`.
+ *
+ * Table config drives DynamicPage → getUserContent / mutateUserContent:
+ * - Select fields with selectConfig.edgeOnly + relationshipType define FK hydration (relationshipPropertyBindings).
+ * - nestedLineItems fields define parent property keys stripped on save (nestedLinePropertyStripKeys); optional extra keys: nestedLinePropertyStripKeys on the config object.
+ * - Optional relationshipPropertyBindings: [{ prop, rel }] for edges not declared as edgeOnly selects.
+ * - Sidebar: each list uses its own category label and item edge (e.g. WorkshopAppointmentCategory + WorkshopAppointmentCategoryItem); Inventory/Service keep InventoryCategory/ServiceCategory.
+ * - getUserContent: when relationshipPropertyBindings is not passed, bindings are derived from this Setting (user key then _default).
+ *
+ * Parameters (via args.contextData):
+ * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
+ *
+ * Returns:
+ * - Statistics about the migration
+ */
+
+const { dryRun = false } = args.contextData;
+
+console.log(`Starting workshop content settings migration (dryRun: ${dryRun})`);
+
+// Define settings configurations
+const settingsConfigs = [
+  {
+    key: 'WorkshopAppointment_settings_default',
+    tableVertexLabel: 'WorkshopAppointment',
+    icon: 'Calendar',
+    name: 'Workshop Appointments',
+    config: `return {
+  title: "Appointments",
+  label: "Appointment",
+  icon: "ph:calendar-check",
+  showActions: true,
+  showEditButton: true,
+  rowClickable: true,
+  showRowNumber: true,
+  columns: [
+    { key: "appointmentNo", label: "Appointment #", type: "text", width: "140px" },
+    { key: "scheduledAt", label: "Scheduled At", type: "date", width: "180px" },
+    { key: "customerName", label: "Customer", type: "text", width: "180px" },
+    { key: "vehiclePlate", label: "Plate", type: "text", width: "120px" },
+    { key: "serviceType", label: "Service", type: "text", width: "180px" },
+    { key: "assignedTechnician", label: "Technician", type: "text", width: "150px" },
+    { key: "status", label: "Status", type: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { scheduled: ["Scheduled", "info"], "in-progress": ["In Progress", "warning"], completed: ["Completed", "success"], cancelled: ["Cancelled", "critical"] } },
+    { key: "bay", label: "Bay", type: "text", width: "80px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  resizableColumns: true,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "schedule",
+        title: "Schedule",
+        gridColumns: 2,
+        fields: [
+          { key: "appointmentNo", label: "Appointment #", type: "text", required: true, colSpan: 1, tooltip: "Unique booking reference shown in the table, printouts, and linked repair orders. Auto-assigned from reference sequences (Workshop Settings → Appointments).", autoReferenceSequenceKey: "WorkshopAppointment.appointmentNo", readOnlyInAddMode: true },
+          { key: "status", label: "Status", type: "select", required: true, optionsPicklist: { picklistKey: "appointment_status" }, colSpan: 1, tooltip: "Lifecycle of this visit: scheduled, in progress, completed, or cancelled. Options are configured under Workshop Settings → Appointments." },
+          { key: "scheduledAt", label: "Scheduled At", type: "date", required: true, colSpan: 1, tooltip: "Date (and time if your workflow stores it) when the vehicle is expected. Use for scheduling and reminders." },
+          { key: "serviceBayId", label: "Service Bay", type: "select", selectConfig: { label: "WorkshopServiceBay", labelField: "name", relationshipType: "AppointmentServiceBay", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Bay or ramp from Directory → Service bays. Stored as a graph edge; the table shows the bay name." }
+        ]
+      },
+      {
+        key: "vehicleCustomer",
+        title: "Vehicle and Customer",
+        gridColumns: 2,
+        fields: [
+          { key: "customerId", label: "Customer", type: "select", required: true, selectConfig: { label: "WorkshopCustomer", labelField: "name", relationshipType: "AppointmentCustomer", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Links this appointment to a customer record. The graph stores the relationship; pick the customer from the list." },
+          { key: "customerPhone", label: "Phone", type: "text", colSpan: 1, tooltip: "Contact number for this visit. Can differ from the customer record if you track a mobile for the day." },
+          { key: "vehicleId", label: "Vehicle", type: "select", selectConfig: { label: "WorkshopVehicle", labelField: "plate", relationshipType: "AppointmentVehicle", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Registered vehicle record (Directory → Vehicles). Plate and model sync to this row for the schedule grid." },
+          { key: "vehiclePlate", label: "Plate (override)", type: "text", colSpan: 1, tooltip: "Optional override if no vehicle record is linked, or for temporary plates." },
+          { key: "vehicleModel", label: "Vehicle Model", type: "text", colSpan: 1, tooltip: "Make, model, and year or a short description (e.g. Toyota Corolla 2020). Filled from the vehicle record when linked." },
+          { key: "serviceId", label: "Service", type: "select", selectConfig: { label: "WorkshopService", labelField: "name", relationshipType: "AppointmentService", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Optional link to a catalog service for pricing and reporting." },
+          { key: "assignedTechnicianId", label: "Technician", type: "select", selectConfig: { label: "WorkshopTechnician", labelField: "name", relationshipType: "AppointmentTechnician", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Primary technician assigned to this appointment." },
+          { key: "complaint", label: "Customer Complaint", type: "textarea", colSpan: 2, tooltip: "What the customer reported: symptoms, noises, or work requested. Visible when opening a repair from this appointment." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["appointmentNo"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopAppointmentCategory",
+    toParentEdgeType: "WorkshopAppointmentCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Appointment categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    afterCreate: ["workshopAfterAppointmentMutate", "workshopAfterAppointmentCreate"],
+    afterUpdate: ["workshopAfterAppointmentMutate"]
+  }
+};`
+  },
+  {
+    key: 'RepairOrder_settings_default',
+    tableVertexLabel: 'RepairOrder',
+    icon: 'Wrench',
+    name: 'Repair Orders',
+    config: `return {
+  title: "Repair Orders",
+  label: "Repair Order",
+  icon: "ph:wrench",
+  columns: [
+    { key: "repairNo", label: "RO #", type: "text", width: "130px" },
+    { key: "appointmentNo", label: "Appointment #", type: "text", width: "130px" },
+    { key: "customerName", label: "Customer", type: "text", width: "180px" },
+    { key: "vehiclePlate", label: "Plate", type: "text", width: "110px" },
+    { key: "status", label: "Status", type: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { open: ["Open", "info"], diagnosing: ["Diagnosing", "warning"], "waiting-parts": ["Waiting Parts", "warning"], "ready-billing": ["Ready Billing", "warning"], closed: ["Closed", "success"], cancelled: ["Cancelled", "critical"] } },
+    { key: "diagnosis", label: "Diagnosis", type: "text", width: "220px", overflowEllipsis: true },
+    { key: "laborHours", label: "Labor Hrs", type: "number", width: "100px" },
+    { key: "estimatedCost", label: "Estimate", type: "number", width: "110px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  showActions: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "orderCore",
+        title: "Order Core",
+        gridColumns: 2,
+        fields: [
+          { key: "repairNo", label: "Repair Order #", type: "text", required: true, colSpan: 1, tooltip: "Unique repair order number; used on invoices, parts orders, and customer comms. Auto-assigned from reference sequences (Workshop Settings → Repairs).", autoReferenceSequenceKey: "RepairOrder.repairNo", readOnlyInAddMode: true },
+          { key: "appointmentId", label: "Appointment", type: "select", selectConfig: { label: "WorkshopAppointment", labelField: "appointmentNo", relationshipType: "RepairAppointment", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Optional link to the booking this job came from. Leave empty for walk-in work." },
+          { key: "status", label: "Status", type: "select", required: true, optionsPicklist: { picklistKey: "repair_status" }, colSpan: 1, tooltip: "Workflow stage: open through closed (and cancelled when used). Options are configured under Workshop Settings → Repairs." },
+          { key: "assignedTechnicianId", label: "Technician", type: "select", selectConfig: { label: "WorkshopTechnician", labelField: "name", relationshipType: "RepairTechnician", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Lead technician responsible for this repair order." },
+          { key: "customerId", label: "Customer", type: "select", required: true, selectConfig: { label: "WorkshopCustomer", labelField: "name", relationshipType: "RepairCustomer", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Billable customer for this repair. Required for invoices and payment tracking." },
+          { key: "vehicleId", label: "Vehicle", type: "select", selectConfig: { label: "WorkshopVehicle", labelField: "plate", relationshipType: "RepairVehicle", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Vehicle record for this job; plate syncs to the grid when linked." },
+          { key: "vehiclePlate", label: "Vehicle Plate", type: "text", colSpan: 1, tooltip: "Override or walk-in plate when no vehicle record is selected." }
+        ]
+      },
+      {
+        key: "workDetails",
+        title: "Work Details",
+        gridColumns: 2,
+        fields: [
+          { key: "diagnosis", label: "Diagnosis", type: "textarea", colSpan: 2, tooltip: "Technical finding: what was wrong, what was fixed, or recommended work." },
+          { key: "repairPartLines", label: "Parts used", type: "nestedLineItems", colSpan: 2, tooltip: "Parts linked to inventory with quantity and unit price. Stored as RepairPartLine nodes (RepairOrderRepairPartLine, RepairPartLineInventoryItem).", nestedLineItemsConfig: { childLabel: "RepairPartLine", parentToChildRelationshipType: "RepairOrderRepairPartLine", childToInventoryRelationshipType: "RepairPartLineInventoryItem", inventoryTargetLabel: "InventoryItem", parentElementIdPropOnChild: "repairOrderElementId", inventorySelectConfig: { label: "InventoryItem", labelField: "partNo", limit: 200, singularName: "Part", pluralName: "Parts" }, nestedLineItemsSyncRules: { quantityFieldKey: "qty", quantityRule: { op: ">", value: 0 }, inventoryRequiredMode: "always" }, lineColumns: [{ key: "qty", label: "Qty", columnType: "number", placeholder: "Qty", min: 0, step: 0.01, defaultValue: 1, gridMinmax: "minmax(3.25rem, 0.45fr)" }, { key: "unitPrice", label: "Unit price", columnType: "number", placeholder: "Unit price", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4.25rem, 0.55fr)" }, { key: "_inventory", label: "Part", columnType: "inventory", gridMinmax: "minmax(7rem, 1.05fr)" }, { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }] } },
+          { key: "laborHours", label: "Labor Hours", type: "number", min: 0, step: 0.25, colSpan: 1, tooltip: "Billable or actual labor time in hours (e.g. 1.25 for 1h15m)." },
+          { key: "estimatedCost", label: "Estimated Cost", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Quote or estimate before work is finalized." },
+          { key: "actualCost", label: "Actual Cost", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Final internal cost after job completion (parts + labor allocation)." },
+          { key: "completedAt", label: "Completed At", type: "date", colSpan: 1, tooltip: "Date the repair was finished or released to the customer." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["repairNo"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "RepairOrderCategory",
+    toParentEdgeType: "RepairOrderCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Repair categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    beforeUpdate: ["workshopBeforeRepairUpdateValidate"],
+    afterCreate: ["workshopAfterRepairMutate", "workshopAfterRepairStatusUpdate"],
+    afterUpdate: ["workshopAfterRepairMutate", "workshopAfterRepairStatusUpdate"]
+  }
+};`
+  },
+  {
+    key: 'InventoryItem_settings_default',
+    tableVertexLabel: 'InventoryItem',
+    icon: 'Box',
+    name: 'Inventory',
+    config: `return {
+  title: "Inventory",
+  label: "Inventory Item",
+  icon: "ph:package",
+  columns: [
+    { key: "partNo", label: "Part #", type: "text", width: "140px" },
+    { key: "name", label: "Part Name", type: "text", width: "220px" },
+    { key: "categoryName", label: "Category", type: "text", width: "150px" },
+    { key: "stockQty", label: "Stock", type: "number", width: "90px" },
+    { key: "reorderLevel", label: "Reorder", type: "number", width: "100px" },
+    { key: "unitCost", label: "Unit Cost", type: "number", width: "110px" },
+    { key: "supplierName", label: "Supplier", type: "text", width: "180px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "itemInfo",
+        title: "Item Information",
+        gridColumns: 2,
+        fields: [
+          { key: "partNo", label: "Part #", type: "text", required: true, colSpan: 1, tooltip: "SKU or manufacturer part number; must be unique for this inventory list." },
+          { key: "name", label: "Part Name", type: "text", required: true, colSpan: 1, tooltip: "Human-readable name shown in pick lists and invoices." },
+          { key: "categoryId", label: "Category", type: "select", selectConfig: { label: "InventoryCategory", labelField: "name", relationshipType: "InventoryCategoryItem", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Inventory category (same relationship as sidebar drag). Table column shows denormalized category name." },
+          { key: "supplierId", label: "Supplier", type: "select", selectConfig: { label: "WorkshopSupplier", labelField: "name", relationshipType: "InventoryItemSupplier", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Preferred vendor for this part. Manage suppliers under Directory → Suppliers." },
+          { key: "stockQty", label: "Stock Quantity", type: "number", required: true, min: 0, step: 1, colSpan: 1, tooltip: "On-hand quantity. Update when goods are received or consumed on jobs." },
+          { key: "reorderLevel", label: "Reorder Level", type: "number", min: 0, step: 1, colSpan: 1, tooltip: "When stock falls at or below this value, plan a reorder." },
+          { key: "unitCost", label: "Unit Cost", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Your cost per unit for margin and valuation." },
+          { key: "unitPrice", label: "Unit Price", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Default sell price per unit when billed on a repair or over the counter." },
+          { key: "notes", label: "Notes", type: "textarea", colSpan: 2, tooltip: "Bin location, alternate part numbers, or supplier notes." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["partNo"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "InventoryCategory",
+    toParentEdgeType: "InventoryCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Inventory Categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Category Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Display name of the inventory category in the sidebar and filters." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Stable internal key (e.g. filters-oil). Used for roots and imports; avoid spaces." },
+            { key: "description", label: "Description", type: "textarea", colSpan: 2, tooltip: "Optional longer description for admins only." }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    afterCreate: ["workshopAfterInventoryItemMutate"],
+    afterUpdate: ["workshopAfterInventoryItemMutate"]
+  }
+};`
+  },
+  {
+    key: 'WorkshopInvoice_settings_default',
+    tableVertexLabel: 'WorkshopInvoice',
+    icon: 'Receipt',
+    name: 'Invoices',
+    config: `return {
+  title: "Invoices",
+  label: "Invoice",
+  icon: "ph:receipt",
+  columns: [
+    { key: "invoiceNo", label: "Invoice #", type: "text", width: "140px" },
+    { key: "repairNo", label: "Repair #", type: "text", width: "120px" },
+    { key: "customerName", label: "Customer", type: "text", width: "180px" },
+    { key: "invoiceDate", label: "Date", type: "date", width: "120px" },
+    { key: "totalAmount", label: "Total", type: "number", width: "110px" },
+    { key: "paymentStatus", label: "Payment", type: "badge", width: "130px", badgeKeyCase: "lower", badgeToneMap: { unpaid: ["Unpaid", "critical"], partial: ["Partial", "warning"], paid: ["Paid", "success"] } }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "invoiceCore",
+        title: "Invoice",
+        gridColumns: 2,
+        fields: [
+          { key: "invoiceNo", label: "Invoice #", type: "text", required: true, colSpan: 1, tooltip: "Unique invoice number for accounting and customer reference. Auto-assigned from reference sequences (Workshop Settings → Billing).", autoReferenceSequenceKey: "WorkshopInvoice.invoiceNo", readOnlyInAddMode: true },
+          { key: "invoiceDate", label: "Invoice Date", type: "date", required: true, colSpan: 1, tooltip: "Issue date on the invoice; drives aging and tax periods." },
+          { key: "repairId", label: "Repair order", type: "select", required: true, selectConfig: { label: "RepairOrder", labelField: "repairNo", relationshipType: "InvoiceRepairOrder", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Links this invoice to a repair order. Customer context is taken from the repair in automations." },
+          { key: "invoiceLines", label: "Line items", type: "nestedLineItems", colSpan: 2, tooltip: "Invoice lines (part, labor, fee). Part lines can link to inventory. Stored as WorkshopInvoiceLine (WorkshopInvoiceWorkshopInvoiceLine, optional WorkshopInvoiceLineInventoryItem).", nestedLineItemsConfig: { childLabel: "WorkshopInvoiceLine", parentToChildRelationshipType: "WorkshopInvoiceWorkshopInvoiceLine", childToInventoryRelationshipType: "WorkshopInvoiceLineInventoryItem", inventoryTargetLabel: "InventoryItem", parentElementIdPropOnChild: "invoiceElementId", lineTypeOptions: [{ value: "part", label: "Part" }, { value: "labor", label: "Labor" }, { value: "fee", label: "Fee" }], inventorySelectConfig: { label: "InventoryItem", labelField: "partNo", limit: 200, singularName: "Part", pluralName: "Parts" }, nestedLineItemsSyncRules: { quantityFieldKey: "qty", quantityRule: { op: ">=", value: 0 }, inventoryRequiredMode: "when", inventoryRequiredWhenField: "lineType", inventoryRequiredWhenValues: ["part"], rowRequiredFields: ["lineType"] }, lineColumns: [{ key: "lineType", label: "Type", columnType: "select", optionsKey: "lineTypeOptions", placeholder: "Type", defaultValue: "labor", selectFallbackValue: "labor", gridMinmax: "minmax(5.25rem, 0.85fr)" }, { key: "description", label: "Description", columnType: "text", placeholder: "Description", defaultValue: "", gridMinmax: "minmax(6.5rem, 1.35fr)" }, { key: "qty", label: "Qty", columnType: "number", placeholder: "Qty", min: 0, step: 0.01, defaultValue: 1, gridMinmax: "minmax(3.25rem, 0.45fr)" }, { key: "unitPrice", label: "Unit price", columnType: "number", placeholder: "Unit price", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4.25rem, 0.55fr)" }, { key: "lineTotal", label: "Line total", columnType: "number", placeholder: "Line total", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4.25rem, 0.55fr)" }, { key: "_inventory", label: "Part", columnType: "inventory", showWhenField: "lineType", showWhenValues: ["part"], gridMinmax: "minmax(7rem, 1.05fr)" }, { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }] } },
+          { key: "subTotal", label: "Subtotal", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Sum before tax and discounts." },
+          { key: "taxAmount", label: "Tax", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Total tax component for this invoice." },
+          { key: "discountAmount", label: "Discount", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Total discounts applied (coupons, goodwill, bundles)." },
+          { key: "totalAmount", label: "Total Amount", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Amount due after tax and discounts; used for payment matching." },
+          { key: "paymentStatus", label: "Payment Status", type: "select", optionsPicklist: { picklistKey: "invoice_payment_status" }, colSpan: 1, tooltip: "Tracks whether the invoice is settled. Updated by payment hooks when configured. Options: Workshop Settings → Billing." },
+          { key: "notes", label: "Notes", type: "textarea", colSpan: 2, tooltip: "Payment terms, PO number, or internal billing notes." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["invoiceNo"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopInvoiceCategory",
+    toParentEdgeType: "WorkshopInvoiceCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Invoice categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    afterCreate: ["workshopAfterInvoiceStatusUpdate"],
+    afterUpdate: ["workshopAfterInvoiceStatusUpdate"]
+  }
+};`
+  },
+  {
+    key: 'WorkshopCustomer_settings_default',
+    tableVertexLabel: 'WorkshopCustomer',
+    icon: 'User',
+    name: 'Customers',
+    config: `return {
+  title: "Customers",
+  label: "Customer",
+  icon: "ph:user-circle",
+  columns: [
+    { key: "customerNo", label: "Customer #", type: "text", width: "140px" },
+    { key: "name", label: "Name", type: "text", width: "200px" },
+    { key: "phone", label: "Phone", type: "text", width: "140px" },
+    { key: "email", label: "Email", type: "text", width: "220px" },
+    { key: "address", label: "Address", type: "text", width: "260px", overflowEllipsis: true }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "customerInfo",
+        title: "Customer Information",
+        gridColumns: 2,
+        fields: [
+          { key: "customerNo", label: "Customer #", type: "text", required: true, colSpan: 1, tooltip: "Internal customer or account number; unique per workshop. Auto-assigned from reference sequences (Workshop Settings → Customers).", autoReferenceSequenceKey: "WorkshopCustomer.customerNo", readOnlyInAddMode: true },
+          { key: "name", label: "Name", type: "text", required: true, colSpan: 1, tooltip: "Primary contact or business name shown on appointments and invoices." },
+          { key: "phone", label: "Phone", type: "text", colSpan: 1, tooltip: "Main phone for SMS or callbacks." },
+          { key: "email", label: "Email", type: "text", colSpan: 1, tooltip: "Email for estimates, invoices, and marketing (if allowed)." },
+          { key: "address", label: "Address", type: "textarea", colSpan: 2, tooltip: "Billing or service address; multi-line is fine." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["customerNo","email"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopCustomerCategory",
+    toParentEdgeType: "WorkshopCustomerCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Customer categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: 'WorkshopSupplier_settings_default',
+    tableVertexLabel: 'WorkshopSupplier',
+    icon: 'Truck',
+    name: 'Suppliers',
+    config: `return {
+  title: "Suppliers",
+  label: "Supplier",
+  icon: "ph:truck",
+  columns: [
+    { key: "supplierCode", label: "Code", type: "text", width: "120px" },
+    { key: "name", label: "Name", type: "text", width: "220px" },
+    { key: "phone", label: "Phone", type: "text", width: "140px" },
+    { key: "email", label: "Email", type: "text", width: "200px" },
+    { key: "supplierType", label: "Type", type: "badge", width: "130px", badgeKeyCase: "lower", badgeToneMap: { distributor: ["Distributor", "info"], oem: ["OEM", "success"], local: ["Local", "neutral"], other: ["Other", "neutral"] } }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "supplierInfo",
+        title: "Supplier",
+        gridColumns: 2,
+        fields: [
+          { key: "supplierCode", label: "Supplier code", type: "text", required: true, colSpan: 1, tooltip: "Short unique code for this vendor (e.g. VEN-001). Auto-assigned from reference sequences (Workshop Settings → Suppliers).", autoReferenceSequenceKey: "WorkshopSupplier.supplierCode", readOnlyInAddMode: true },
+          { key: "name", label: "Name", type: "text", required: true, colSpan: 1, tooltip: "Vendor or supplier name shown on part records and reports." },
+          { key: "supplierType", label: "Type", type: "select", optionsPicklist: { picklistKey: "supplier_type" }, colSpan: 1, tooltip: "Classify the supplier. Options: Workshop Settings → Suppliers." },
+          { key: "phone", label: "Phone", type: "text", colSpan: 1, tooltip: "Main ordering or accounts phone." },
+          { key: "email", label: "Email", type: "text", colSpan: 1, tooltip: "Contact email for POs and statements." },
+          { key: "notes", label: "Notes", type: "textarea", colSpan: 2, tooltip: "Payment terms, account numbers, or internal notes." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["supplierCode"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopSupplierCategory",
+    toParentEdgeType: "WorkshopSupplierCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Supplier categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: 'WorkshopTechnician_settings_default',
+    tableVertexLabel: 'WorkshopTechnician',
+    icon: 'Tech',
+    name: 'Technicians',
+    config: `return {
+  title: "Technicians",
+  label: "Technician",
+  icon: "ph:hard-hat",
+  columns: [
+    { key: "techNo", label: "Tech #", type: "text", width: "120px" },
+    { key: "name", label: "Name", type: "text", width: "180px" },
+    { key: "specialization", label: "Specialization", type: "text", width: "180px" },
+    { key: "phone", label: "Phone", type: "text", width: "140px" },
+    { key: "status", label: "Status", type: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { active: ["Active", "success"], leave: ["On Leave", "warning"], inactive: ["Inactive", "neutral"] } }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "techInfo",
+        title: "Technician Information",
+        gridColumns: 2,
+        fields: [
+          { key: "techNo", label: "Tech #", type: "text", required: true, colSpan: 1, tooltip: "Employee or badge number; unique identifier for this technician." },
+          { key: "name", label: "Name", type: "text", required: true, colSpan: 1, tooltip: "Name as shown on schedules and repair assignments." },
+          { key: "skillId", label: "Primary skill", type: "select", selectConfig: { label: "WorkshopSkill", labelField: "name", relationshipType: "TechnicianPrimarySkill", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Primary skill catalog entry; the table column shows the skill name (Directory → Skills)." },
+          { key: "phone", label: "Phone", type: "text", colSpan: 1, tooltip: "Direct line or mobile for shop coordination." },
+          { key: "hourlyRate", label: "Hourly Rate", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Default labor rate used for estimates and costing." },
+          { key: "status", label: "Status", type: "select", optionsPicklist: { picklistKey: "technician_status" }, colSpan: 1, tooltip: "Inactive technicians are hidden from new assignments but keep history. Options: Workshop Settings → Technicians." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["techNo"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopTechnicianCategory",
+    toParentEdgeType: "WorkshopTechnicianCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Technician categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    afterCreate: ["workshopAfterTechnicianMutate"],
+    afterUpdate: ["workshopAfterTechnicianMutate"]
+  }
+};`
+  },
+  {
+    key: 'WorkshopService_settings_default',
+    tableVertexLabel: 'WorkshopService',
+    icon: 'Service',
+    name: 'Services',
+    config: `return {
+  title: "Services",
+  label: "Service",
+  icon: "ph:toolbox",
+  columns: [
+    { key: "serviceCode", label: "Code", type: "text", width: "120px" },
+    { key: "name", label: "Service", type: "text", width: "220px" },
+    { key: "categoryName", label: "Category", type: "text", width: "180px" },
+    { key: "durationMins", label: "Duration", type: "number", width: "100px" },
+    { key: "basePrice", label: "Base Price", type: "number", width: "110px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "serviceInfo",
+        title: "Service Information",
+        gridColumns: 2,
+        fields: [
+          { key: "serviceCode", label: "Service Code", type: "text", required: true, colSpan: 1, tooltip: "Short code for menus and integrations (e.g. OIL-STD)." },
+          { key: "name", label: "Service Name", type: "text", required: true, colSpan: 1, tooltip: "Customer-facing name of the service package." },
+          { key: "categoryId", label: "Category", type: "select", selectConfig: { label: "ServiceCategory", labelField: "name", relationshipType: "ServiceCategoryItem", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Service category (same as sidebar). Table shows denormalized category name." },
+          { key: "durationMins", label: "Duration (mins)", type: "number", min: 0, step: 5, colSpan: 1, tooltip: "Typical bay time for scheduling slots." },
+          { key: "basePrice", label: "Base Price", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Default price before upsells or parts." },
+          { key: "description", label: "Description", type: "textarea", colSpan: 2, tooltip: "What is included, exclusions, and warranty notes for staff and customers." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["serviceCode"],
+  hooks: {
+    afterCreate: ["workshopAfterWorkshopServiceMutate"],
+    afterUpdate: ["workshopAfterWorkshopServiceMutate"]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ServiceCategory",
+    toParentEdgeType: "ServiceCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Service Categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Category Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Service category name in the sidebar." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Stable key for roots and imports; use lowercase and hyphens." },
+            { key: "description", label: "Description", type: "textarea", colSpan: 2, tooltip: "Optional description for admins." }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: 'WorkshopPayment_settings_default',
+    tableVertexLabel: 'WorkshopPayment',
+    icon: 'Payment',
+    name: 'Payments',
+    config: `return {
+  title: "Payments",
+  label: "Payment",
+  icon: "ph:currency-circle-dollar",
+  columns: [
+    { key: "paymentNo", label: "Payment #", type: "text", width: "140px" },
+    { key: "invoiceNo", label: "Invoice #", type: "text", width: "140px" },
+    { key: "paymentDate", label: "Date", type: "date", width: "140px" },
+    { key: "method", label: "Method", type: "text", width: "120px" },
+    { key: "amount", label: "Amount", type: "number", width: "120px" },
+    { key: "referenceNo", label: "Reference", type: "text", width: "180px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "paymentInfo",
+        title: "Payment Information",
+        gridColumns: 2,
+        fields: [
+          { key: "paymentNo", label: "Payment #", type: "text", required: true, colSpan: 1, tooltip: "Unique receipt or payment reference for reconciliation. Auto-assigned from reference sequences (Workshop Settings → Payments).", autoReferenceSequenceKey: "WorkshopPayment.paymentNo", readOnlyInAddMode: true },
+          { key: "invoiceId", label: "Invoice", type: "select", required: true, selectConfig: { label: "WorkshopInvoice", labelField: "invoiceNo", relationshipType: "PaymentInvoice", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Invoice this payment applies to. Hooks update invoice payment status when linked." },
+          { key: "paymentDate", label: "Payment Date", type: "date", required: true, colSpan: 1, tooltip: "Date money was received or cleared." },
+          { key: "method", label: "Method", type: "select", required: true, optionsPicklist: { picklistKey: "payment_method" }, colSpan: 1, tooltip: "Tender type for reports and merchant settlement. Options: Workshop Settings → Payments." },
+          { key: "amount", label: "Amount", type: "number", required: true, min: 0.01, step: 0.01, colSpan: 1, tooltip: "Amount applied to the invoice; partial payments use a lower amount than the invoice total." },
+          { key: "referenceNo", label: "Reference #", type: "text", colSpan: 1, tooltip: "Bank ref, auth code, check number, or gateway transaction ID." },
+          { key: "notes", label: "Notes", type: "textarea", colSpan: 2, tooltip: "Internal notes about this payment (refunds, chargebacks, adjustments)." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["paymentNo"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopPaymentCategory",
+    toParentEdgeType: "WorkshopPaymentCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Payment categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    afterCreate: ["workshopAfterPaymentCreate"],
+    afterUpdate: ["workshopAfterPaymentCreate"]
+  }
+};`
+  },
+  {
+    key: 'WorkshopServiceBay_settings_default',
+    tableVertexLabel: 'WorkshopServiceBay',
+    icon: 'Garage',
+    name: 'Service bays',
+    config: `return {
+  title: "Service bays",
+  label: "Service bay",
+  icon: "ph:warehouse",
+  columns: [
+    { key: "name", label: "Name", type: "text", width: "200px" },
+    { key: "code", label: "Code", type: "text", width: "120px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "bay",
+        title: "Bay",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", type: "text", required: true, colSpan: 1, tooltip: "Display name on the schedule (e.g. Bay 1, Ramp A)." },
+          { key: "code", label: "Code", type: "text", colSpan: 1, tooltip: "Short code for labels or integrations." },
+          { key: "notes", label: "Notes", type: "textarea", colSpan: 2, tooltip: "Optional internal notes." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["name"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopServiceBayCategory",
+    toParentEdgeType: "WorkshopServiceBayCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Bay categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: 'WorkshopSkill_settings_default',
+    tableVertexLabel: 'WorkshopSkill',
+    icon: 'Certificate',
+    name: 'Skills',
+    config: `return {
+  title: "Skills",
+  label: "Skill",
+  icon: "ph:graduation-cap",
+  columns: [
+    { key: "name", label: "Skill", type: "text", width: "220px" },
+    { key: "code", label: "Code", type: "text", width: "120px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "skill",
+        title: "Skill",
+        gridColumns: 2,
+        fields: [
+          { key: "name", label: "Name", type: "text", required: true, colSpan: 1, tooltip: "Skill or certification label (e.g. EV, Diagnostics)." },
+          { key: "code", label: "Code", type: "text", colSpan: 1, tooltip: "Optional short code." },
+          { key: "description", label: "Description", type: "textarea", colSpan: 2, tooltip: "Optional details for admins." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["name"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopSkillCategory",
+    toParentEdgeType: "WorkshopSkillCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Skill categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: 'WorkshopVehicle_settings_default',
+    tableVertexLabel: 'WorkshopVehicle',
+    icon: 'Car',
+    name: 'Vehicles',
+    config: `return {
+  title: "Vehicles",
+  label: "Vehicle",
+  icon: "ph:car",
+  columns: [
+    { key: "plate", label: "Plate", type: "text", width: "130px" },
+    { key: "vehicleModel", label: "Model", type: "text", width: "220px" },
+    { key: "vehicleYear", label: "Year", type: "text", width: "90px" }
+  ],
+  rowHeight: 52,
+  showSelection: true,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "vehicle",
+        title: "Vehicle",
+        gridColumns: 2,
+        fields: [
+          { key: "plate", label: "Plate / fleet ID", type: "text", required: true, colSpan: 1, tooltip: "License plate or internal fleet identifier; unique per workshop list." },
+          { key: "vehicleModel", label: "Make / model", type: "text", colSpan: 1, tooltip: "e.g. Toyota Corolla." },
+          { key: "vehicleYear", label: "Year", type: "text", colSpan: 1, tooltip: "Model year if tracked." },
+          { key: "notes", label: "Notes", type: "textarea", colSpan: 2, tooltip: "VIN, color, or other notes." }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: ["plate"],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "WorkshopVehicleCategory",
+    toParentEdgeType: "WorkshopVehicleCategoryItem",
+    rootKeys: { key: "root" },
+    label: "Vehicle categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", type: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", type: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", type: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  }
+};`
+  }
+];
+
+// Reports / chart queries: consumed by getConfigurableGraphData (Setting key must match default there)
+const workshopReportsChartsSetting = {
+  key: "WorkshopReports_charts_default",
+  type: "workshop_reports_charts",
+  name: "Workshop reports charts",
+  config: `return {
+  graphs: {
+    workshopAppointmentsByStatus: {
+      title: "Appointments by status",
+      chartType: "pie",
+      datasetLabel: "Appointments",
+      description: "Appointments in the selected period grouped by status.",
+      cypher: "MATCH (a:WorkshopAppointment) WHERE coalesce(toString(a.scheduledAt), toString(a.createdAt), '') >= $since RETURN coalesce(toLower(toString(a.status)), 'unknown') AS label, count(*) AS value ORDER BY value DESC",
+      cypherScoped: "MATCH (u:User {uuid: $userUuid})-[:UserWorkshopAppointment]->(a:WorkshopAppointment) WHERE coalesce(toString(a.scheduledAt), toString(a.createdAt), '') >= $since RETURN coalesce(toLower(toString(a.status)), 'unknown') AS label, count(*) AS value ORDER BY value DESC"
+    },
+    workshopRepairsByStatus: {
+      title: "Repair orders by status",
+      chartType: "bar",
+      datasetLabel: "Repairs",
+      description: "Open and historical repair orders by workflow status.",
+      cypher: "MATCH (r:RepairOrder) WHERE coalesce(toString(r.createdAt), toString(r.updatedAt), '') >= $since RETURN coalesce(toLower(toString(r.status)), 'unknown') AS label, count(*) AS value ORDER BY value DESC",
+      cypherScoped: "MATCH (u:User {uuid: $userUuid})-[:UserRepairOrder]->(r:RepairOrder) WHERE coalesce(toString(r.createdAt), toString(r.updatedAt), '') >= $since RETURN coalesce(toLower(toString(r.status)), 'unknown') AS label, count(*) AS value ORDER BY value DESC"
+    },
+    workshopInvoiceTotalsByMonth: {
+      title: "Invoice totals by month",
+      chartType: "bar",
+      datasetLabel: "Total amount",
+      description: "Sum of invoice totals aggregated by year-month (YYYY-MM).",
+      cypher: "MATCH (w:WorkshopInvoice) WHERE coalesce(toString(w.invoiceDate), toString(w.createdAt), '') >= $since WITH substring(coalesce(toString(w.invoiceDate), toString(w.createdAt), ''), 0, 7) AS label, sum(toFloat(coalesce(w.totalAmount, 0))) AS value WHERE label <> '' RETURN label, value ORDER BY label",
+      cypherScoped: "MATCH (u:User {uuid: $userUuid})-[:UserWorkshopInvoice]->(w:WorkshopInvoice) WHERE coalesce(toString(w.invoiceDate), toString(w.createdAt), '') >= $since WITH substring(coalesce(toString(w.invoiceDate), toString(w.createdAt), ''), 0, 7) AS label, sum(toFloat(coalesce(w.totalAmount, 0))) AS value WHERE label <> '' RETURN label, value ORDER BY label"
+    },
+    workshopPaymentsByMethod: {
+      title: "Payments by method",
+      chartType: "pie",
+      datasetLabel: "Payments",
+      description: "Payment records grouped by tender type.",
+      cypher: "MATCH (p:WorkshopPayment) WHERE coalesce(toString(p.paymentDate), toString(p.createdAt), '') >= $since RETURN coalesce(toLower(toString(p.method)), 'other') AS label, count(*) AS value ORDER BY value DESC",
+      cypherScoped: "MATCH (u:User {uuid: $userUuid})-[:UserWorkshopPayment]->(p:WorkshopPayment) WHERE coalesce(toString(p.paymentDate), toString(p.createdAt), '') >= $since RETURN coalesce(toLower(toString(p.method)), 'other') AS label, count(*) AS value ORDER BY value DESC"
+    }
+  }
+};`
+};
+
+// Helper: non-table Setting (reports chart registry)
+async function processExtraSetting(setting) {
+  const { key, type, name, config } = setting;
+  console.log(`Processing ${name} (${key})...`);
+
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = $type,
+             s.updatedAt = datetime()
+         REMOVE s.tableVertexLabel
+         RETURN s`,
+        { key, config, type }
+      );
+      console.log(`Updated existing ${name}`);
+      return { created: 0, updated: 1 };
+    }
+    await args.session.run(
+      `CREATE (s:Setting {
+        key: $key,
+        type: $type,
+        config: $config,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      })
+      RETURN s`,
+      { key, type, config }
+    );
+    console.log(`Created new ${name}`);
+    return { created: 1, updated: 0 };
+  }
+  if (exists) {
+    console.log(`Would update existing ${name}`);
+    return { created: 0, updated: 1 };
+  }
+  console.log(`Would create new ${name}`);
+  return { created: 1, updated: 0 };
+}
+
+// Helper function to process a single setting
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+
+  console.log(`Processing ${name} settings (${icon})...`);
+
+  // Check if setting exists
+  const checkResult = await args.session.run(
+    `MATCH (s:Setting {key: $key}) RETURN s`,
+    { key }
+  );
+
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      // Update existing
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`Updated existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      // Create new
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'table_config',
+          tableVertexLabel: $tableVertexLabel,
+          config: $config,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`Created new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  } else {
+    // Dry run - just report
+    if (exists) {
+      console.log(`Would update existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      console.log(`Would create new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  }
+}
+
+// Process all settings
+const stats = {
+  created: 0,
+  updated: 0,
+  total: settingsConfigs.length,
+  reportsChartsCreated: 0,
+  reportsChartsUpdated: 0,
+  categorySidebarRootsSeeded: 0
+};
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const setting = settingsConfigs[i];
+  const result = await processSetting(setting);
+
+  stats.created += result.created;
+  stats.updated += result.updated;
+}
+
+const reportsChartsResult = await processExtraSetting(workshopReportsChartsSetting);
+stats.reportsChartsCreated = reportsChartsResult.created;
+stats.reportsChartsUpdated = reportsChartsResult.updated;
+
+// Default sidebar roots: one root category vertex per table-specific category label (no shared scope property)
+const WORKSHOP_CATEGORY_SIDEBAR_ROOTS = [
+  { neoLabel: "WorkshopAppointmentCategory", name: "All appointments" },
+  { neoLabel: "RepairOrderCategory", name: "All repair orders" },
+  { neoLabel: "WorkshopInvoiceCategory", name: "All invoices" },
+  { neoLabel: "WorkshopPaymentCategory", name: "All payments" },
+  { neoLabel: "WorkshopTechnicianCategory", name: "All technicians" },
+  { neoLabel: "WorkshopCustomerCategory", name: "All customers" },
+  { neoLabel: "WorkshopSupplierCategory", name: "All suppliers" },
+  { neoLabel: "WorkshopServiceBayCategory", name: "All service bays" },
+  { neoLabel: "WorkshopSkillCategory", name: "All skills" },
+  { neoLabel: "WorkshopVehicleCategory", name: "All vehicles" }
+];
+if (!dryRun) {
+  let categorySidebarRootsSeeded = 0;
+  for (let li = 0; li < WORKSHOP_CATEGORY_SIDEBAR_ROOTS.length; li++) {
+    const row = WORKSHOP_CATEGORY_SIDEBAR_ROOTS[li];
+    const label = row.neoLabel;
+    await args.session.run(
+      `MERGE (f:` +
+        label +
+        ` {key: $rootKey})
+      ON CREATE SET
+        f.name = $name,
+        f.displayOrder = 0,
+        f.createdAt = datetime(),
+        f.updatedAt = datetime()
+      ON MATCH SET
+        f.name = coalesce(f.name, $name),
+        f.updatedAt = datetime()
+      `,
+      { rootKey: "root", name: row.name }
+    );
+    categorySidebarRootsSeeded++;
+  }
+  stats.categorySidebarRootsSeeded = categorySidebarRootsSeeded;
+  console.log(
+    `Workshop category sidebar roots MERGE completed (${WORKSHOP_CATEGORY_SIDEBAR_ROOTS.length} labels)`
+  );
+}
+
+// Workshop picklists for optionsPicklist-backed form fields (create missing only; no user session required)
+const WORKSHOP_PICKLIST_NEO_LABEL = {
+  appointment_status: "AppointmentStatus",
+  repair_status: "RepairStatus",
+  invoice_payment_status: "InvoicePaymentStatus",
+  technician_status: "TechnicianStatus",
+  payment_method: "PaymentMethod",
+  inventory_stock_status: "InventoryStockStatus",
+  customer_status: "CustomerStatus",
+  service_status: "ServiceStatus",
+  supplier_type: "SupplierType"
+};
+
+let picklistsSeeded = 0;
+if (!dryRun) {
+  const PICKLIST_SEED = [
+    {
+      picklistKey: "appointment_status",
+      title: "Appointment status",
+      options: [
+        { value: "scheduled", label: "Scheduled", displayOrder: 10 },
+        { value: "in-progress", label: "In Progress", displayOrder: 20 },
+        { value: "completed", label: "Completed", displayOrder: 30 },
+        { value: "cancelled", label: "Cancelled", displayOrder: 40 }
+      ]
+    },
+    {
+      picklistKey: "repair_status",
+      title: "Repair order status",
+      options: [
+        { value: "open", label: "Open", displayOrder: 10 },
+        { value: "diagnosing", label: "Diagnosing", displayOrder: 20 },
+        { value: "waiting-parts", label: "Waiting Parts", displayOrder: 30 },
+        { value: "ready-billing", label: "Ready For Billing", displayOrder: 40 },
+        { value: "closed", label: "Closed", displayOrder: 50 },
+        { value: "cancelled", label: "Cancelled", displayOrder: 60 }
+      ]
+    },
+    {
+      picklistKey: "invoice_payment_status",
+      title: "Invoice payment status",
+      options: [
+        { value: "unpaid", label: "Unpaid", displayOrder: 10 },
+        { value: "partial", label: "Partially Paid", displayOrder: 20 },
+        { value: "paid", label: "Paid", displayOrder: 30 }
+      ]
+    },
+    {
+      picklistKey: "technician_status",
+      title: "Technician status",
+      options: [
+        { value: "active", label: "Active", displayOrder: 10 },
+        { value: "leave", label: "On Leave", displayOrder: 20 },
+        { value: "inactive", label: "Inactive", displayOrder: 30 }
+      ]
+    },
+    {
+      picklistKey: "payment_method",
+      title: "Payment method",
+      options: [
+        { value: "cash", label: "Cash", displayOrder: 10 },
+        { value: "card", label: "Card", displayOrder: 20 },
+        { value: "transfer", label: "Transfer", displayOrder: 30 },
+        { value: "mobile", label: "Mobile", displayOrder: 40 }
+      ]
+    },
+    {
+      picklistKey: "inventory_stock_status",
+      title: "Inventory stock status",
+      options: [
+        { value: "in-stock", label: "In stock", displayOrder: 10 },
+        { value: "low", label: "Low stock", displayOrder: 20 },
+        { value: "out-of-stock", label: "Out of stock", displayOrder: 30 },
+        { value: "ordered", label: "On order", displayOrder: 40 }
+      ]
+    },
+    {
+      picklistKey: "customer_status",
+      title: "Customer status",
+      options: [
+        { value: "active", label: "Active", displayOrder: 10 },
+        { value: "inactive", label: "Inactive", displayOrder: 20 },
+        { value: "vip", label: "VIP", displayOrder: 30 }
+      ]
+    },
+    {
+      picklistKey: "service_status",
+      title: "Service status",
+      options: [
+        { value: "active", label: "Active", displayOrder: 10 },
+        { value: "seasonal", label: "Seasonal", displayOrder: 20 },
+        { value: "archived", label: "Archived", displayOrder: 30 }
+      ]
+    },
+    {
+      picklistKey: "supplier_type",
+      title: "Supplier type",
+      options: [
+        { value: "distributor", label: "Distributor", displayOrder: 10 },
+        { value: "oem", label: "OEM", displayOrder: 20 },
+        { value: "local", label: "Local vendor", displayOrder: 30 },
+        { value: "other", label: "Other", displayOrder: 40 }
+      ]
+    }
+  ];
+
+  for (const def of PICKLIST_SEED) {
+    const sk = def.picklistKey.replace(/[^a-z0-9_]/gi, "_").toLowerCase();
+    const neoLabel = WORKSHOP_PICKLIST_NEO_LABEL[sk];
+    if (!neoLabel) {
+      console.warn(`Skipping picklist seed: unmapped picklistKey ${def.picklistKey}`);
+      continue;
+    }
+    const cntRes = await args.session.run(
+      `MATCH (o:\`${neoLabel}\`) RETURN count(o) AS c`,
+      {}
+    );
+    const existing =
+      cntRes.records[0]?.get("c")?.toNumber?.() ??
+      Number(cntRes.records[0]?.get("c")) ??
+      0;
+    if (existing > 0) continue;
+
+    for (let oi = 0; oi < def.options.length; oi++) {
+      const opt = def.options[oi];
+      await args.session.run(
+        `CREATE (o:\`${neoLabel}\` {
+             value: $value,
+             label: $label,
+             displayOrder: $displayOrder,
+             createdAt: datetime(),
+             updatedAt: datetime()
+           })`,
+        {
+          value: opt.value,
+          label: opt.label,
+          displayOrder: opt.displayOrder
+        }
+      );
+    }
+    picklistsSeeded++;
+    console.log(`Seeded ${neoLabel} (${def.options.length} option vertices)`);
+  }
+}
+
+// ==========================================
+// Reference sequences (MERGE defaults only — no content backfill)
+// ==========================================
+let referenceSequencesSeeded = 0;
+const REFERENCE_SEQUENCE_DEFAULTS = [
+  {
+    key: "WorkshopAppointment.appointmentNo",
+    prefix: "APT-",
+    suffix: "",
+    startingNumber: 1000,
+    incrementStep: 1,
+    format: "{prefix}{number}{suffix}",
+    resetRule: "never"
+  },
+  {
+    key: "WorkshopInvoice.invoiceNo",
+    prefix: "INV-",
+    suffix: "",
+    startingNumber: 1000,
+    incrementStep: 1,
+    format: "{prefix}{number}{suffix}",
+    resetRule: "never"
+  },
+  {
+    key: "RepairOrder.repairNo",
+    prefix: "RO-",
+    suffix: "",
+    startingNumber: 1000,
+    incrementStep: 1,
+    format: "{prefix}{number}{suffix}",
+    resetRule: "never"
+  },
+  {
+    key: "WorkshopPayment.paymentNo",
+    prefix: "PAY-",
+    suffix: "",
+    startingNumber: 1000,
+    incrementStep: 1,
+    format: "{prefix}{number}{suffix}",
+    resetRule: "never"
+  },
+  {
+    key: "WorkshopCustomer.customerNo",
+    prefix: "CUS-",
+    suffix: "",
+    startingNumber: 1000,
+    incrementStep: 1,
+    format: "{prefix}{number}{suffix}",
+    resetRule: "never"
+  },
+  {
+    key: "WorkshopSupplier.supplierCode",
+    prefix: "VEN-",
+    suffix: "",
+    startingNumber: 1000,
+    incrementStep: 1,
+    format: "{prefix}{number}{suffix}",
+    resetRule: "never"
+  }
+];
+
+if (!dryRun) {
+  for (let ri = 0; ri < REFERENCE_SEQUENCE_DEFAULTS.length; ri++) {
+    const row = REFERENCE_SEQUENCE_DEFAULTS[ri];
+    await args.session.run(
+      `
+      MERGE (s:WorkshopReferenceSequence {key: $key})
+      ON CREATE SET
+        s.prefix = $prefix,
+        s.suffix = $suffix,
+        s.startingNumber = toInteger($startingNumber),
+        s.incrementStep = toInteger($incrementStep),
+        s.format = $format,
+        s.resetRule = $resetRule,
+        s.numberPadding = 0,
+        s.createdAt = datetime(),
+        s.updatedAt = datetime()
+      `,
+      {
+        key: row.key,
+        prefix: row.prefix,
+        suffix: row.suffix,
+        startingNumber: row.startingNumber,
+        incrementStep: row.incrementStep,
+        format: row.format,
+        resetRule: row.resetRule
+      }
+    );
+    referenceSequencesSeeded++;
+  }
+  console.log(`Reference sequences MERGE completed (${REFERENCE_SEQUENCE_DEFAULTS.length} keys)`);
+}
+
+// ==========================================
+// Summary
+// ==========================================
+console.log("Migration Summary");
+console.log(`Created: ${stats.created}`);
+console.log(`Updated: ${stats.updated}`);
+console.log(`Total processed: ${stats.total}`);
+console.log(`Picklists seeded (new keys): ${picklistsSeeded}`);
+console.log(`Category sidebar roots MERGE run: ${stats.categorySidebarRootsSeeded}`);
+console.log(`Reference sequence keys MERGE run: ${referenceSequencesSeeded}`);
+
+return {
+  success: true,
+  message: dryRun
+    ? "Dry run completed - no changes made"
+    : "Workshop content table settings migration completed successfully",
+  data: {
+    ...stats,
+    dryRun,
+    picklistsSeeded,
+    referenceSequencesSeeded
+  }
+};
+'''
+        key: migrateContentTableSettings
+      }
+    }
+  ]
+  edges: []
+}

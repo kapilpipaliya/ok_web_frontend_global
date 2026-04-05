@@ -1,0 +1,107 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getWorkshopDashboardStats
+        description: Returns dashboard KPI values for workshop operations.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found", data: null };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const enableUserScoping = args.contextData?.enableUserScoping !== false;
+
+const scopedMatch = (label) => {
+  if (!enableUserScoping) return `MATCH (n:${label}) RETURN count(n) as total`;
+  return `
+    MATCH (u:User {uuid: $userUuid})-[:User${label}]->(n:${label})
+    RETURN count(n) as total
+  `;
+};
+
+const params = enableUserScoping ? { userUuid: user.P.uuid } : {};
+
+const [appointmentsResult, openRepairsResult, lowStockResult, unpaidInvoicesResult] = await Promise.all([
+  args.session.run(
+    enableUserScoping
+      ? `
+        MATCH (u:User {uuid: $userUuid})-[:UserWorkshopAppointment]->(a:WorkshopAppointment)
+        WHERE toLower(COALESCE(a.status, "")) IN ["scheduled","in-progress"]
+        RETURN count(a) as total
+      `
+      : `
+        MATCH (a:WorkshopAppointment)
+        WHERE toLower(COALESCE(a.status, "")) IN ["scheduled","in-progress"]
+        RETURN count(a) as total
+      `,
+    params
+  ),
+  args.session.run(
+    enableUserScoping
+      ? `
+        MATCH (u:User {uuid: $userUuid})-[:UserRepairOrder]->(r:RepairOrder)
+        WHERE toLower(COALESCE(r.status, "")) IN ["open","diagnosing","waiting-parts","ready-billing"]
+        RETURN count(r) as total
+      `
+      : `
+        MATCH (r:RepairOrder)
+        WHERE toLower(COALESCE(r.status, "")) IN ["open","diagnosing","waiting-parts","ready-billing"]
+        RETURN count(r) as total
+      `,
+    params
+  ),
+  args.session.run(
+    enableUserScoping
+      ? `
+        MATCH (u:User {uuid: $userUuid})-[:UserInventoryItem]->(i:InventoryItem)
+        WHERE toInteger(COALESCE(i.stockQty, 0)) <= toInteger(COALESCE(i.reorderLevel, 0))
+        RETURN count(i) as total
+      `
+      : `
+        MATCH (i:InventoryItem)
+        WHERE toInteger(COALESCE(i.stockQty, 0)) <= toInteger(COALESCE(i.reorderLevel, 0))
+        RETURN count(i) as total
+      `,
+    params
+  ),
+  args.session.run(
+    enableUserScoping
+      ? `
+        MATCH (u:User {uuid: $userUuid})-[:UserWorkshopInvoice]->(w:WorkshopInvoice)
+        WHERE toLower(COALESCE(w.paymentStatus, "unpaid")) <> "paid"
+        RETURN count(w) as total
+      `
+      : `
+        MATCH (w:WorkshopInvoice)
+        WHERE toLower(COALESCE(w.paymentStatus, "unpaid")) <> "paid"
+        RETURN count(w) as total
+      `,
+    params
+  )
+]);
+
+const asCount = (result) => Number(result.records?.[0]?.get("total") || 0);
+
+const totals = {
+  appointments: asCount(appointmentsResult),
+  openRepairs: asCount(openRepairsResult),
+  lowStockItems: asCount(lowStockResult),
+  unpaidInvoices: asCount(unpaidInvoicesResult)
+};
+
+return {
+  success: true,
+  message: "Workshop dashboard stats loaded",
+  data: totals
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

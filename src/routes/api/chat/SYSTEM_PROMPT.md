@@ -719,6 +719,56 @@ To grant a role permission to a page, create the following structure:
 2. Read Component props by using 'props' property in the function body with 'args.contextData.props["key"]' property
 3. When using component in the Item tree, in the direct children of the component use 'Slot' key to specify the slot name. If not specified, it will render all unnamed slots.
 
+## Workshop reference sequences (FormManagement + settings)
+
+Workshop apps can auto-generate stable reference strings (appointment numbers, invoice numbers, etc.) using Neo4j nodes labeled `WorkshopReferenceSequence` with a unique string property `key` (e.g. `WorkshopInvoice.invoiceNo`). Server functions: `getWorkshopReferenceSequences`, `saveWorkshopReferenceSequence`, `reserveWorkshopReferenceNumber`.
+
+**Form field flags** (in `formConfig.groups[].fields[]`):
+
+- `autoReferenceSequenceKey`: string — must match a `WorkshopReferenceSequence.key`. In **add** mode, `FormManagement` calls `reserveWorkshopReferenceNumber` after creating the draft vertex and writes the returned `value` into that field (one HTTP call per distinct key; fields sharing a key receive the same value without double increment).
+- `readOnlyInAddMode`: boolean — when `true`, the control is disabled in add mode (user cannot edit the auto-filled reference) but remains editable in edit mode unless the form is in view mode.
+
+**Sequence node properties** (typical): `prefix`, `suffix`, `startingNumber`, `incrementStep`, `format`, `resetRule` (`never` | `daily` | `monthly` | `yearly`), `periodKey`, `currentNumber`, optional `numberPadding` (zero-pad `{number}` in the formatted output).
+
+**Format template placeholders**: `{prefix}`, `{suffix}`, `{number}`, `{year}`, `{month}`, `{day}` (date is UTC at reserve time). Default template `{prefix}{number}{suffix}`.
+
+**Reservation timing**: Numbers are consumed when the add form loads (user may cancel — gaps are expected). Draft invoices created by hooks should use the same `reserveWorkshopReferenceNumber` call with the invoice sequence key, not ad-hoc timestamps.
+
+**Admin UI**: Per-area workshop settings use `WorkshopSettingsPicklistModulePage` props `referenceSequenceKey`, `referenceSectionTitle`, and `referenceSectionDescription` so `WorkshopReferenceSequenceEditor` renders inside the main column next to the settings sidebar (not as a separate full-width block above it).
+
+## Workshop reports charts (`getConfigurableGraphData`)
+
+- **Setting**: `migrateContentTableSettings` creates/updates `Setting` key `WorkshopReports_charts_default`, `type: workshop_reports_charts`, whose `config` is a function body returning `{ graphs: { [graphKey]: { title, chartType, datasetLabel?, description?, cypher, cypherScoped?, labelField?, valueField? } } }`. Only Cypher stored in that setting is executed; the client passes **`graphKey`** / **`graphKeys`** (e.g. `"all"`), **`rangePreset`** (`7d` | `30d` | `90d` | `365d`), **`enableUserScoping`**, and optional **`settingKey`**.
+- **Server function**: `getConfigurableGraphData` loads the setting, evaluates `config` with `new Function`, merges **`since`** (date string) and **`userUuid`** (when scoped) into parameters, runs each query, and returns Chart.js-style `{ labels, datasets }` per graph under `data.charts`. **`operation: "manifest"`** returns titles/chart types only (no Cypher in the response).
+- **UI**: Page `WorkshopReports` at `/workshop/reports` uses `WorkshopLayout`, `WorkshopD3Chart`, and `WorkshopLoadingSpinner`. Re-run migration after editing graph definitions so the `Setting` vertex updates.
+
+## Dynamic table config (`loadFromSetting` / `migrateContentTableSettings`)
+
+When a page uses `DynamicPage` with `loadFromSetting: true`, the evaluated table config object (from the `Setting` `config` function body) drives how rows are loaded, saved, exported, and how FK-style selects behave.
+
+### Edge-only relationship fields (`selectConfig.edgeOnly`)
+
+For `formConfig.groups[].fields[]` entries with `type: "select"` and `selectConfig`:
+
+- Set **`selectConfig.edgeOnly: true`** when the target id must **not** be persisted on the row vertex as a property; the graph edge (`selectConfig.relationshipType`) is the source of truth.
+- **`mutateUserContent`** strips keys that appear in the save payload’s `relationships` map from `P` before `CREATE`/`SET`, then patches the returned vertex `P` with the chosen ids for the client.
+- **`getUserContent`** optionally receives **`relationshipPropertyBindings`**: an array of `{ prop: "<fieldKey>", rel: "<relationshipType>" }`. `DynamicPage` builds this from every `edgeOnly` select (plus optional extras below). The server fills `P[prop]` from `vertex.OUT[rel]` for TomSelect and CSV cells.
+- If **`relationshipPropertyBindings` is omitted** (`undefined` / not sent), **`getUserContent`** loads the table **`Setting`** (same keys as `getUserContentSetting`: user override `"{tableVertexLabel}_settings"` then default `"{tableVertexLabel}_settings_default"`), evaluates `config` with `new Function(...)()`, and **derives the same binding list** from `formConfig` + optional `relationshipPropertyBindings` on that object. Callers that pass an **array** (including `[]`) use that list as-is and skip the Setting read.
+- **`exportUserContent`** forwards **`relationshipPropertyBindings`** when the client supplies it; when omitted, **`getUserContent`**’s server-side derivation still applies.
+
+Optional on the **root config object**:
+
+- **`relationshipPropertyBindings`**: extra `{ prop, rel }` rows for edges that are not declared as a form select with `edgeOnly` (advanced).
+
+### Nested line items on the parent row
+
+- Each field with **`type: "nestedLineItems"`** has a **`key`** (e.g. `invoiceLines`). **`DynamicPage`** passes **`nestedLinePropertyStripKeys`** to **`mutateUserContent`** (workshopflow) so those keys are removed from parent `P` on save, in addition to keys present in `nestedLineSync`.
+- Optional **`nestedLinePropertyStripKeys`** on the root config: additional parent property names to strip (e.g. legacy blob keys).
+
+### Hooks
+
+Use **`hooks.afterCreate` / `hooks.afterUpdate`** on the table config to denormalize display columns (names, labels) from related nodes after edges exist; keep raw related data as vertices, not flattened copies, when returning from server functions (see repo vertex format rules).
+
 ## Important Guidelines
 
 - Create visually balanced layouts
@@ -729,6 +779,7 @@ To grant a role permission to a page, create the following structure:
 - Do not skip any vertexes or edges
 - Use numeric IDs for the graph
 - The graph must be a directed acyclic graph (DAG) to prevent circular dependencies
+- do not short variable name, use meaningful variable names.
 
 ## Import Guidelines
 

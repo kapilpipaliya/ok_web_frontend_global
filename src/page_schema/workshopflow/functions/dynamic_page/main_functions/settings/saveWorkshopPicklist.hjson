@@ -1,0 +1,99 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Upserts option vertices by value (MERGE on value) for the domain label; DETACH DELETE only nodes whose value is not in the saved list. No Setting vertex.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Not authenticated" };
+}
+
+const { picklistKey, options } = args.contextData || {};
+if (!picklistKey || typeof picklistKey !== "string") {
+  return { success: false, message: "picklistKey is required" };
+}
+
+if (!Array.isArray(options)) {
+  return { success: false, message: "options must be an array" };
+}
+
+const safeKey = picklistKey.replace(/[^a-z0-9_]/gi, "_").toLowerCase();
+
+const WORKSHOP_PICKLIST_LABEL_BY_KEY = {
+  appointment_status: "AppointmentStatus",
+  repair_status: "RepairStatus",
+  invoice_payment_status: "InvoicePaymentStatus",
+  technician_status: "TechnicianStatus",
+  payment_method: "PaymentMethod",
+  inventory_stock_status: "InventoryStockStatus",
+  customer_status: "CustomerStatus",
+  service_status: "ServiceStatus",
+  supplier_type: "SupplierType"
+};
+
+const neoLabel = WORKSHOP_PICKLIST_LABEL_BY_KEY[safeKey];
+if (!neoLabel) {
+  return { success: false, message: "Unknown workshop picklist key" };
+}
+
+const seen = new Set();
+const normalized = [];
+for (let i = 0; i < options.length; i++) {
+  const o = options[i];
+  if (!o || typeof o !== "object") {
+    return { success: false, message: "Invalid option row (row " + (i + 1) + ")" };
+  }
+  const value = String(o.value != null ? o.value : "").trim();
+  const label = String(o.label != null ? o.label : "").trim();
+  if (!value || !label) {
+    return { success: false, message: "Each option needs non-empty value and label (row " + (i + 1) + ")" };
+  }
+  if (seen.has(value)) {
+    return { success: false, message: "Duplicate value: " + value };
+  }
+  seen.add(value);
+  if (!Number.isFinite(Number(o.displayOrder))) {
+    return { success: false, message: "Each option needs numeric displayOrder (row " + (i + 1) + ")" };
+  }
+  normalized.push({ value, label, displayOrder: Number(o.displayOrder) });
+}
+
+normalized.sort((a, b) => a.displayOrder - b.displayOrder);
+
+const keepValues = normalized.map((r) => r.value);
+
+if (normalized.length > 0) {
+  await args.session.run(
+    `UNWIND $opts AS row
+     MERGE (o:\`${neoLabel}\` {value: row.value})
+     ON CREATE SET o.createdAt = datetime()
+     SET o.label = row.label,
+         o.displayOrder = row.displayOrder,
+         o.updatedAt = datetime()`,
+    { opts: normalized }
+  );
+}
+
+await args.session.run(
+  `MATCH (o:\`${neoLabel}\`)
+   WHERE NOT o.value IN $keep
+   DETACH DELETE o`,
+  { keep: keepValues }
+);
+
+return {
+  success: true,
+  message: "Picklist saved",
+  data: { picklistKey: safeKey, optionVertexLabel: neoLabel, count: normalized.length }
+};
+'''
+        key: saveWorkshopPicklist
+      }
+    }
+  ]
+  edges: []
+}

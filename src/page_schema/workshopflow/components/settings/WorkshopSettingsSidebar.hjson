@@ -1,0 +1,170 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopSettingsSidebar
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid ${args.theme.var.color.border};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+  min-height: 280px;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid ${args.theme.var.color.border};
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+const items = [
+  { href: "/workshop/settings", label: "General", id: "general" },
+  { href: "/workshop/settings/appointments", label: "Appointments", id: "mod-appt" },
+  { href: "/workshop/settings/repairs", label: "Repairs", id: "mod-repair" },
+  { href: "/workshop/settings/inventory", label: "Inventory", id: "mod-inv" },
+  { href: "/workshop/settings/suppliers", label: "Suppliers", id: "mod-suppliers" },
+  { href: "/workshop/settings/billing", label: "Billing", id: "mod-bill" },
+  { href: "/workshop/settings/payments", label: "Payments", id: "mod-pay" },
+  { href: "/workshop/settings/directory", label: "Directory", id: "mod-dir" },
+  { href: "/workshop/settings/customers", label: "Customers", id: "mod-cust" },
+  { href: "/workshop/settings/technicians", label: "Technicians", id: "mod-tech" },
+  { href: "/workshop/settings/services", label: "Services", id: "mod-svc" },
+  { href: "/workshop/settings/seed", label: "Seed options", id: "seed" }
+];
+
+const isActive = (href) => {
+  const path = args.location?.pathname || "";
+  if (href === "/workshop/settings") {
+    return path === "/workshop/settings" || path === "/workshop/settings/";
+  }
+  return path === href || path.startsWith(href + "/");
+};
+
+return { items, isActive };
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "aside",
+  class: "workshop-settings-sidebar"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Settings",
+  class: "workshop-settings-sidebar-title"
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-sidebar-title {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        contextName: "navItem"
+        loop: true
+        props:
+          '''
+return {
+  as: "nav",
+  data: args.fns.items
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.navItem;
+const active = args.fns.isActive(item.href);
+return {
+  as: "a",
+  href: item.href,
+  text: item.label,
+  class: "workshop-settings-nav-link" + (active ? " is-active" : ""),
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate(item.href);
+  }
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-nav-link {
+  display: block;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+}
+._id.workshop-settings-nav-link:hover {
+  background: ${args.theme.var.color.background_light_200};
+}
+._id.workshop-settings-nav-link.is-active {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "4", E: "5" }
+  ]
+}

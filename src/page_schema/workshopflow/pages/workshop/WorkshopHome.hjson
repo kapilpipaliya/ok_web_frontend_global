@@ -1,0 +1,809 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: WorkshopHome
+        title: Workshopflow
+        url: /workshop
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: home_root
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-marketing-root"
+};'''
+        css:
+          '''return `._id.workshop-marketing-root {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: home_hero_title
+        props:
+          '''return {
+  as: "h1",
+  text: "Workshopflow",
+  class: "workshop-marketing-title"
+};'''
+        css:
+          '''return `._id.workshop-marketing-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem;
+}`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: home_hero_sub
+        props:
+          '''return {
+  as: "p",
+  text: "Run your car workshop from one place: scheduling, repairs, parts inventory, billing, and payments.",
+  class: "workshop-marketing-lead"
+};'''
+        css:
+          '''return `._id.workshop-marketing-lead {
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1.5rem;
+}`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: home_cta_row
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-marketing-cta"
+};'''
+        css:
+          '''return `._id.workshop-marketing-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: home_btn_dashboard
+        props:
+          '''return {
+  as: "a",
+  href: "/workshop/dashboard",
+  text: "Open app",
+  class: "workshop-btn-primary",
+  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/dashboard"); }
+};'''
+        css:
+          '''return `._id.workshop-btn-primary {
+  display: inline-block;
+  padding: 0.625rem 1.125rem;
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: home_btn_docs
+        props:
+          '''return {
+  as: "a",
+  href: "/workshop/docs",
+  text: "User guide",
+  class: "workshop-btn-secondary",
+  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs"); }
+};'''
+        css:
+          '''return `._id.workshop-btn-secondary {
+  display: inline-block;
+  padding: 0.625rem 1.125rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border_light_300};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}`;'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: home_features_h2
+        props:
+          '''return {
+  as: "h2",
+  text: "What you can do",
+  class: "workshop-marketing-h2"
+};'''
+        css:
+          '''return `._id.workshop-marketing-h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        key: home_features_list
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-marketing-features",
+  textType: "markdown",
+  text: `- Schedule appointments and assign bays and technicians.
+- Track repair orders from diagnosis through billing.
+- Manage parts stock and reorder levels.
+- Create invoices and record payments with clear status.`
+};'''
+        css:
+          '''return `._id.workshop-marketing-features {
+  margin: 0;
+  line-height: 1.65;
+  color: ${args.theme.var.color.text};
+}
+._id.workshop-marketing-features ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}`;'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        key: home_flow_h2
+        props:
+          '''return {
+  as: "h2",
+  text: "How work flows",
+  class: "workshop-marketing-h2"
+};'''
+        css:
+          '''return `._id.workshop-marketing-h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 1.75rem 0 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        key: home_flowchart_track
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-flowchart-track"
+};'''
+        css:
+          '''return [
+  `._id.workshop-flowchart-track {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem 0.2rem;
+    margin: 0 0 0.75rem;
+    padding: 1rem 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid ${args.theme.var.color.border_light_200};
+    background: ${args.theme.var.color.background_light_100};
+  }`,
+  `.workshop-flowchart-step {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid ${args.theme.var.color.border_light_300};
+    background: ${args.theme.var.color.background};
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: ${args.theme.var.color.text};
+    text-align: center;
+    min-width: 5.5rem;
+  }`,
+  `.workshop-flowchart-arrow {
+    color: ${args.theme.var.color.muted};
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 0.1rem;
+    user-select: none;
+  }`,
+  `@media (max-width: 640px) {
+    ._id.workshop-flowchart-track {
+      flex-direction: column;
+    }
+    .workshop-flowchart-arrow {
+      transform: rotate(90deg);
+      padding: 0.15rem 0;
+    }
+  }`
+];'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: home_flow_step1
+        props:
+          '''return {
+  as: "div",
+  text: "Appointment",
+  class: "workshop-flowchart-step"
+};'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: home_flow_a1
+        props:
+          '''return {
+  as: "span",
+  text: "→",
+  class: "workshop-flowchart-arrow"
+};'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: home_flow_step2
+        props:
+          '''return {
+  as: "div",
+  text: "Repair order",
+  class: "workshop-flowchart-step"
+};'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: home_flow_a2
+        props:
+          '''return {
+  as: "span",
+  text: "→",
+  class: "workshop-flowchart-arrow"
+};'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        key: home_flow_step3
+        props:
+          '''return {
+  as: "div",
+  text: "Invoice",
+  class: "workshop-flowchart-step"
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        key: home_flow_a3
+        props:
+          '''return {
+  as: "span",
+  text: "→",
+  class: "workshop-flowchart-arrow"
+};'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        key: home_flow_step4
+        props:
+          '''return {
+  as: "div",
+  text: "Payment",
+  class: "workshop-flowchart-step"
+};'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        key: home_flow_support
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-flowchart-support"
+};'''
+        css:
+          '''return `._id.workshop-flowchart-support {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px dashed ${args.theme.var.color.border_light_300};
+  background: ${args.theme.var.color.background_light_100};
+}
+._id .workshop-flowchart-support-title {
+  width: 100%;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.25rem;
+}
+._id .workshop-flowchart-pill {
+  flex: 1 1 8rem;
+  max-width: 14rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: ${args.theme.var.color.text};
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  text-align: center;
+}`;'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: home_flow_support_title
+        props:
+          '''return {
+  as: "div",
+  text: "Supports the main flow",
+  class: "workshop-flowchart-support-title"
+};'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: home_flow_pill1
+        props:
+          '''return {
+  as: "div",
+  text: "Customers · Technicians · Services",
+  class: "workshop-flowchart-pill"
+};'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: home_flow_pill2
+        props:
+          '''return {
+  as: "div",
+  text: "Inventory & parts usage on close",
+  class: "workshop-flowchart-pill"
+};'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        key: home_flow_caption
+        props:
+          '''return {
+  as: "p",
+  class: "workshop-flowchart-caption",
+  text: "This is the main daily process. Start with an appointment, then do the repair work, raise the invoice, and finally collect payment."
+};'''
+        css:
+          '''return `._id.workshop-flowchart-caption {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: ${args.theme.var.color.muted};
+}`;'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        key: home_steps_title
+        props:
+          '''return {
+  as: "h2",
+  text: "Step-by-step guide for any user",
+  class: "workshop-marketing-h2"
+};'''
+        css:
+          '''return `._id.workshop-marketing-h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 11
+        componentName: Html
+        key: home_steps_grid
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-steps-grid"
+};'''
+        css:
+          '''return `._id.workshop-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+
+@media (max-width: 768px) {
+  ._id.workshop-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}`;'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: home_step_card1
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-step-card",
+  textType: "markdown",
+  text: `**1) Appointments**
+
+Open Appointments, click Add, fill customer, vehicle, date, bay, and status. Save to schedule work.`
+};'''
+        css:
+          '''return `._id.workshop-step-card {
+  padding: 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+._id.workshop-step-card p {
+  margin: 0 0 0.35rem 0;
+}
+._id.workshop-step-card p:last-child {
+  margin-bottom: 0;
+}`;'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: home_step_card2
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-step-card",
+  textType: "markdown",
+  text: `**2) Repairs**
+
+Open Repairs, update diagnosis, labor, and parts used. Move status forward until Ready For Billing.`
+};'''
+        css:
+          '''return `._id.workshop-step-card {
+  padding: 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+._id.workshop-step-card p {
+  margin: 0 0 0.35rem 0;
+}
+._id.workshop-step-card p:last-child {
+  margin-bottom: 0;
+}`;'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: home_step_card3
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-step-card",
+  textType: "markdown",
+  text: `**3) Billing**
+
+Open Billing, check invoice date, line items, subtotal/tax/discount, and confirm total amount.`
+};'''
+        css:
+          '''return `._id.workshop-step-card {
+  padding: 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+._id.workshop-step-card p {
+  margin: 0 0 0.35rem 0;
+}
+._id.workshop-step-card p:last-child {
+  margin-bottom: 0;
+}`;'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: home_step_card4
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-step-card",
+  textType: "markdown",
+  text: `**4) Payments**
+
+Open Payments, select invoice record, enter method and amount, then save to update payment status.`
+};'''
+        css:
+          '''return `._id.workshop-step-card {
+  padding: 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+._id.workshop-step-card p {
+  margin: 0 0 0.35rem 0;
+}
+._id.workshop-step-card p:last-child {
+  margin-bottom: 0;
+}`;'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        displayOrder: 12
+        componentName: Html
+        key: home_help_title
+        props:
+          '''return {
+  as: "h2",
+  text: "Need help with specific fields?",
+  class: "workshop-marketing-h2"
+};'''
+        css:
+          '''return `._id.workshop-marketing-h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        displayOrder: 13
+        componentName: Html
+        key: home_help_text
+        props:
+          '''return {
+  as: "p",
+  class: "workshop-flowchart-caption",
+  text: "Use the User Guide to see every form field explained in plain language, with what to enter and when to use each module."
+};'''
+        css:
+          '''return `._id.workshop-flowchart-caption {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: ${args.theme.var.color.muted};
+}`;'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        displayOrder: 14
+        componentName: Html
+        key: home_help_btn
+        props:
+          '''return {
+  as: "a",
+  href: "/workshop/docs/getting-started",
+  text: "Open step-by-step documentation",
+  class: "workshop-btn-primary",
+  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs/getting-started"); }
+};'''
+        css:
+          '''return `._id.workshop-btn-primary {
+  display: inline-block;
+  padding: 0.625rem 1.125rem;
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}`;'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e_pl", T: "PageLayout", S: "1", E: "2" }
+    { id: "e_root", T: "Attr", S: "1", E: "3" }
+    { id: "e_h1", T: "Attr", S: "3", E: "4" }
+    { id: "e_lead", T: "Attr", S: "3", E: "5" }
+    { id: "e_cta", T: "Attr", S: "3", E: "6" }
+    { id: "e_btn1", T: "Attr", S: "6", E: "7" }
+    { id: "e_btn2", T: "Attr", S: "6", E: "8" }
+    { id: "e_h2", T: "Attr", S: "3", E: "9" }
+    { id: "e_ul", T: "Attr", S: "3", E: "10" }
+    { id: "e_flow_h2", T: "Attr", S: "3", E: "11" }
+    { id: "e_flow_track", T: "Attr", S: "3", E: "12" }
+    { id: "e_flow_s1", T: "Attr", S: "12", E: "13" }
+    { id: "e_flow_a1", T: "Attr", S: "12", E: "14" }
+    { id: "e_flow_s2", T: "Attr", S: "12", E: "15" }
+    { id: "e_flow_a2", T: "Attr", S: "12", E: "16" }
+    { id: "e_flow_s3", T: "Attr", S: "12", E: "17" }
+    { id: "e_flow_a3", T: "Attr", S: "12", E: "18" }
+    { id: "e_flow_s4", T: "Attr", S: "12", E: "19" }
+    { id: "e_flow_sup", T: "Attr", S: "3", E: "20" }
+    { id: "e_flow_sup_t", T: "Attr", S: "20", E: "21" }
+    { id: "e_flow_p1", T: "Attr", S: "20", E: "22" }
+    { id: "e_flow_p2", T: "Attr", S: "20", E: "23" }
+    { id: "e_flow_cap", T: "Attr", S: "3", E: "24" }
+    { id: "e_steps_t", T: "Attr", S: "3", E: "25" }
+    { id: "e_steps_g", T: "Attr", S: "3", E: "26" }
+    { id: "e_step_1", T: "Attr", S: "26", E: "27" }
+    { id: "e_step_2", T: "Attr", S: "26", E: "28" }
+    { id: "e_step_3", T: "Attr", S: "26", E: "29" }
+    { id: "e_step_4", T: "Attr", S: "26", E: "30" }
+    { id: "e_help_t", T: "Attr", S: "3", E: "31" }
+    { id: "e_help_p", T: "Attr", S: "3", E: "32" }
+    { id: "e_help_b", T: "Attr", S: "3", E: "33" }
+  ]
+}

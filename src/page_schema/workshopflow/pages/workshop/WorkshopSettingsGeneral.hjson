@@ -1,0 +1,127 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Workshop Settings
+        url: /workshop/settings
+        key: WorkshopSettingsGeneral
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-settings-layout"
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  width: 100%;
+  min-height: 60vh;
+  padding: ${args.theme.var.spacing.md};
+}
+
+@media (min-width: 769px) {
+  ._id.workshop-settings-layout {
+    flex-wrap: nowrap;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsSidebar
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main",
+  class: "workshop-settings-main"
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-main {
+  flex: 1;
+  min-width: 0;
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsPreferences
+      }
+    }
+  ]
+  edges: [
+    { "id": "wsg1", "T": "RolePage",    "S": "1", "E": "2" }
+    { "id": "wsg2", "T": "RolePagePage","S": "2", "E": "3" }
+    { "id": "wsg3", "T": "PageLayout",  "S": "3", "E": "4" }
+    { "id": "wsg4", "T": "Attr",        "S": "3", "E": "5" }
+    { "id": "wsg5", "T": "Attr",        "S": "5", "E": "6" }
+    { "id": "wsg6", "T": "Attr",        "S": "5", "E": "7" }
+    { "id": "wsg7", "T": "Attr",        "S": "7", "E": "8" }
+  ]
+}

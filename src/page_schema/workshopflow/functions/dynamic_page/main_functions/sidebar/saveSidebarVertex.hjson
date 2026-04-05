@@ -263,7 +263,7 @@ if (!enableUserScoping) {
   duplicateCheckQuery = `
     MATCH (v:${parentVertexLabel})
     WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
-    ${isUpdate ? 'AND elementId(v) <> $vertexId' : ''}
+    ${isUpdate ? "AND elementId(v) <> $vertexId" : ""}
     RETURN v
   `;
   duplicateCheckParams = {
@@ -274,7 +274,7 @@ if (!enableUserScoping) {
   duplicateCheckQuery = `
     MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
     WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
-    ${isUpdate ? 'AND elementId(v) <> $vertexId' : ''}
+    ${isUpdate ? "AND elementId(v) <> $vertexId" : ""}
     RETURN v
   `;
   duplicateCheckParams = {

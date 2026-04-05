@@ -1,0 +1,131 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: reserveWorkshopReferenceNumber
+        description: Atomically increments WorkshopReferenceSequence counter for key and returns formatted value (single write statement).
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Not authenticated" };
+}
+
+const sequenceKey = args.contextData?.sequenceKey;
+if (!sequenceKey || typeof sequenceKey !== "string") {
+  return { success: false, message: "sequenceKey is required" };
+}
+
+const key = String(sequenceKey).trim();
+
+const periodKeyForRule = (rule) => {
+  const r = String(rule || "never").toLowerCase();
+  const d = new Date();
+  if (r === "daily") return d.toISOString().slice(0, 10);
+  if (r === "monthly")
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+  if (r === "yearly") return String(d.getUTCFullYear());
+  return "never";
+};
+
+const padNum = (n, width) => {
+  const w = Number(width);
+  if (!Number.isFinite(w) || w <= 0) return String(n);
+  return String(n).padStart(Math.min(32, Math.floor(w)), "0");
+};
+
+const applyFormat = (template, ctx) => {
+  const t =
+    template && String(template).trim()
+      ? String(template)
+      : "{prefix}{number}{suffix}";
+  return t
+    .replace(/\{prefix\}/g, ctx.prefix || "")
+    .replace(/\{suffix\}/g, ctx.suffix || "")
+    .replace(/\{number\}/g, padNum(ctx.number, ctx.numberPadding))
+    .replace(/\{year\}/g, String(ctx.year))
+    .replace(/\{month\}/g, String(ctx.month).padStart(2, "0"))
+    .replace(/\{day\}/g, String(ctx.day).padStart(2, "0"));
+};
+
+const metaRes = await args.session.run(
+  `MATCH (s:WorkshopReferenceSequence {key: $key}) RETURN coalesce(s.resetRule, 'never') AS rr LIMIT 1`,
+  { key }
+);
+if (metaRes.records.length === 0) {
+  return { success: false, message: "Unknown sequence key: " + key };
+}
+const rrRaw = metaRes.records[0].get("rr");
+const periodKey = periodKeyForRule(rrRaw != null ? String(rrRaw) : "never");
+
+const incRes = await args.session.run(
+  `
+  MATCH (s:WorkshopReferenceSequence {key: $key})
+  WITH s, $periodKey AS pkey,
+    coalesce(toInteger(s.incrementStep), 1) AS step,
+    coalesce(toInteger(s.startingNumber), 1) AS start
+  WITH s, pkey, step, start,
+    CASE WHEN coalesce(s.periodKey, '') <> pkey
+      THEN start - step
+      ELSE coalesce(toInteger(s.currentNumber), start - step)
+    END AS base
+  SET s.currentNumber = base + step,
+      s.periodKey = pkey,
+      s.updatedAt = datetime()
+  RETURN s.prefix AS prefix,
+         s.suffix AS suffix,
+         s.format AS format,
+         s.currentNumber AS currentNumber,
+         toInteger(coalesce(s.numberPadding, 0)) AS numberPadding
+  `,
+  { key, periodKey }
+);
+
+if (incRes.records.length === 0) {
+  return { success: false, message: "Failed to reserve number" };
+}
+
+const rec = incRes.records[0];
+const rawNeo = rec.get("currentNumber");
+const rawNumber =
+  rawNeo && typeof rawNeo.toNumber === "function"
+    ? rawNeo.toNumber()
+    : Number(rawNeo);
+
+const prefix = rec.get("prefix") != null ? String(rec.get("prefix")) : "";
+const suffix = rec.get("suffix") != null ? String(rec.get("suffix")) : "";
+const formatStr = rec.get("format") != null ? String(rec.get("format")) : "";
+let numberPadding = rec.get("numberPadding");
+if (numberPadding && typeof numberPadding.toNumber === "function") {
+  numberPadding = numberPadding.toNumber();
+} else {
+  numberPadding = Number(numberPadding) || 0;
+}
+
+const now = new Date();
+const value = applyFormat(formatStr, {
+  prefix,
+  suffix,
+  number: rawNumber,
+  numberPadding,
+  year: now.getUTCFullYear(),
+  month: now.getUTCMonth() + 1,
+  day: now.getUTCDate()
+});
+
+return {
+  success: true,
+  data: {
+    value,
+    rawNumber,
+    periodKey
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

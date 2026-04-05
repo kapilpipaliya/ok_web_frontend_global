@@ -17,7 +17,10 @@ if (tableVertexLabel !== 'ShopifyProduct') {
   return;
 }
 
-const isUncategorized = showUnassigned || categoryId === 'uncategorized';
+// Match getUserContent: synthetic uncategorized category id is "_" + tableVertexLabel + "_uncategorized"
+const vertexLabel = tableVertexLabel;
+const uncategorizedVertexId = '_' + vertexLabel + '_uncategorized';
+const isUncategorized = showUnassigned || categoryId === uncategorizedVertexId;
 
 // For specific category, fetch existing products first to get their Shopify IDs
 let existingCategoryProducts = [];
@@ -256,14 +259,14 @@ if (isUncategorized) {
   console.log(`📦 Fetching ${categoryProductIds.size} specific products from Shopify...`);
   
   // Convert Set to Array for GraphQL query
-  const productIdsArray = Array.from(categoryProductIds);
+  const productGids = Array.from(categoryProductIds);
   
   // Shopify GraphQL supports fetching multiple products by ID
   // We'll batch them in chunks of 50 to avoid query size limits
   const batchSize = 50;
-  for (let i = 0; i < productIdsArray.length; i += batchSize) {
-    const batch = productIdsArray.slice(i, i + batchSize);
-    const productIdsString = batch.map(id => `"${id}"`).join(', ');
+  for (let batchOffset = 0; batchOffset < productGids.length; batchOffset += batchSize) {
+    const productGidBatch = productGids.slice(batchOffset, batchOffset + batchSize);
+    const productIdsString = productGidBatch.map(id => `"${id}"`).join(', ');
     
     const productsQuery = `
       query {
@@ -291,25 +294,25 @@ if (isUncategorized) {
         continue; // Skip this batch on error
       }
 
-      const batchProducts = (apiResponse.data.nodes || []).map((node) => {
-        if (!node) return null;
+      const productsFromBatch = (apiResponse.data.nodes || []).map((productNode) => {
+        if (!productNode) return null;
         return {
-          ...node,
-          variants: node.variants?.edges?.map((v) => v.node) || [],
-          media: node.media?.edges?.map((m) => m.node) || [],
-          metafields: node.metafields?.edges?.map((m) => m.node) || [],
-          collections: node.collections?.nodes || []
+          ...productNode,
+          variants: productNode.variants?.edges?.map((v) => v.node) || [],
+          media: productNode.media?.edges?.map((m) => m.node) || [],
+          metafields: productNode.metafields?.edges?.map((m) => m.node) || [],
+          collections: productNode.collections?.nodes || []
         };
       }).filter(Boolean);
 
-      allShopifyProducts = [...allShopifyProducts, ...batchProducts];
+      allShopifyProducts = [...allShopifyProducts, ...productsFromBatch];
       
       console.log(`📦 Retrieved ${allShopifyProducts.length} products so far...`);
       
       // Small delay to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 250));
     } catch (error) {
-      console.error(`Error fetching batch ${i / batchSize + 1} from Shopify:`, error);
+      console.error(`Error fetching batch ${batchOffset / batchSize + 1} from Shopify:`, error);
       continue; // Skip this batch on error
     }
   }

@@ -1,0 +1,58 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterInvoiceStatusUpdate
+        description: Hook that updates linked repair order when an invoice is created or updated (payment status vs repair workflow).
+        body:
+          '''
+const elementId = args.contextData?.elementId;
+if (!elementId) return { success: true, message: "No invoice id provided" };
+
+const invoiceResult = await args.session.run(
+  `
+  MATCH (i:WorkshopInvoice)
+  WHERE elementId(i) = $elementId
+  OPTIONAL MATCH (r:RepairOrder)-[:RepairOrderInvoice]->(i)
+  RETURN i, r
+  LIMIT 1
+  `,
+  { elementId }
+);
+
+if (invoiceResult.records.length === 0) {
+  return { success: true, message: "Invoice not found" };
+}
+
+const invoiceNode = invoiceResult.records[0].get("i");
+const repairNode = invoiceResult.records[0].get("r");
+if (!invoiceNode || !repairNode) {
+  return { success: true, message: "No linked repair order found" };
+}
+
+const paymentStatus = String(invoiceNode.properties.paymentStatus || "unpaid").toLowerCase();
+const repairStatus = paymentStatus === "paid" ? "closed" : "ready-billing";
+
+await args.session.run(
+  `
+  MATCH (r:RepairOrder)
+  WHERE elementId(r) = $repairId
+  SET r.status = $status,
+      r.updatedAt = datetime()
+  RETURN r
+  `,
+  {
+    repairId: repairNode.elementId,
+    status: repairStatus
+  }
+);
+
+return { success: true, message: "Repair order synchronized with invoice status" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

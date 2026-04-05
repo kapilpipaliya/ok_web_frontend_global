@@ -1,0 +1,243 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Function",
+      P: {
+        key: "getConfigurableGraphData",
+        description: "Runs predefined Cypher from a Setting config (graphs map) and returns Chart.js-style datasets. Supports batch (graphKeys all|array), manifest (metadata only), and user scoping via optional cypherScoped.",
+        body: '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found", data: null };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+const {
+  settingKey = "WorkshopReports_charts_default",
+  graphKey = null,
+  graphKeys = "all",
+  rangePreset = "30d",
+  enableUserScoping = false,
+  operation = "data",
+  extraParams = null
+} = args.contextData || {};
+
+const rangeDaysMap = { "7d": 7, "30d": 30, "90d": 90, "365d": 365, year: 365 };
+const days = rangeDaysMap[rangePreset] ?? 30;
+const sinceDate = new Date();
+sinceDate.setUTCDate(sinceDate.getUTCDate() - days);
+const since = sinceDate.toISOString().slice(0, 10);
+
+async function loadGraphConfig() {
+  let sr = await args.session.run(
+    `MATCH (s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
+    { key: settingKey }
+  );
+
+  if (sr.records.length === 0 && args.executeNamedServerFunction) {
+    try {
+      await args.executeNamedServerFunction({
+        functionName: "migrateContentTableSettings",
+        contextData: { dryRun: false }
+      });
+    } catch (e) {
+      console.error("getConfigurableGraphData: migration failed", e);
+    }
+    sr = await args.session.run(
+      `MATCH (s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
+      { key: settingKey }
+    );
+  }
+
+  if (sr.records.length === 0) {
+    return { error: `Setting not found: ${settingKey}` };
+  }
+
+  const cfgStr = sr.records[0].get("cfg");
+  if (!cfgStr || typeof cfgStr !== "string") {
+    return { error: "Setting has no config string" };
+  }
+
+  let parsed;
+  try {
+    const fn = new Function(cfgStr);
+    parsed = fn();
+  } catch (e) {
+    return { error: "Invalid chart configuration (eval failed)" };
+  }
+
+  if (!parsed || typeof parsed !== "object" || !parsed.graphs || typeof parsed.graphs !== "object") {
+    return { error: "Chart config must return { graphs: { ... } }" };
+  }
+
+  return { parsed };
+}
+
+const loaded = await loadGraphConfig();
+if (loaded.error) {
+  return { success: false, message: loaded.error, data: null };
+}
+
+const { parsed } = loaded;
+const graphs = parsed.graphs;
+
+const sanitizeManifest = () => {
+  const out = {};
+  for (const k of Object.keys(graphs)) {
+    const g = graphs[k];
+    out[k] = {
+      title: g.title || k,
+      chartType: g.chartType || "bar",
+      datasetLabel: g.datasetLabel || "Value",
+      description: g.description || ""
+    };
+  }
+  return { success: true, message: "Manifest loaded", data: { graphs: out, rangePreset } };
+};
+
+if (operation === "manifest") {
+  return sanitizeManifest();
+}
+
+const resolveKeys = () => {
+  if (graphKey && typeof graphKey === "string") {
+    return [graphKey];
+  }
+  if (graphKeys === "all") {
+    return Object.keys(graphs);
+  }
+  if (Array.isArray(graphKeys)) {
+    return graphKeys.filter((k) => typeof k === "string");
+  }
+  return [];
+};
+
+const keysToRun = resolveKeys();
+if (keysToRun.length === 0) {
+  return { success: false, message: "No graph keys to run", data: null };
+}
+
+const numFromNeo = (v) => {
+  if (v == null) return 0;
+  if (typeof v === "object" && typeof v.toNumber === "function") return v.toNumber();
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
+const strFromNeo = (v) => {
+  if (v == null) return "";
+  return String(v);
+};
+
+const palette = [
+  "oklch(0.55 0.18 250)",
+  "oklch(0.6 0.16 160)",
+  "oklch(0.62 0.18 45)",
+  "oklch(0.58 0.2 310)",
+  "oklch(0.55 0.12 200)",
+  "oklch(0.58 0.14 130)"
+];
+
+const buildChartData = (records, labelField, valueField, datasetLabel) => {
+  const labels = [];
+  const values = [];
+  for (const r of records) {
+    labels.push(strFromNeo(r.get(labelField)));
+    values.push(numFromNeo(r.get(valueField)));
+  }
+  if (labels.length === 0) {
+    return null;
+  }
+  const backgrounds = labels.map((_, i) => palette[i % palette.length]);
+  return {
+    labels,
+    datasets: [
+      {
+        label: datasetLabel || "Value",
+        data: values,
+        backgroundColor: backgrounds,
+        borderColor: backgrounds
+      }
+    ]
+  };
+};
+
+const baseParams =
+  extraParams && typeof extraParams === "object" && !Array.isArray(extraParams) ? { ...extraParams } : {};
+const params = enableUserScoping
+  ? { ...baseParams, since, rangePreset, userUuid: user.P.uuid }
+  : { ...baseParams, since, rangePreset };
+
+const charts = {};
+
+for (let i = 0; i < keysToRun.length; i++) {
+  const k = keysToRun[i];
+  const spec = graphs[k];
+  if (!spec || typeof spec !== "object") {
+    charts[k] = {
+      title: k,
+      chartType: "bar",
+      chartData: null,
+      error: "Unknown graph key"
+    };
+    continue;
+  }
+
+  const cypher =
+    enableUserScoping && spec.cypherScoped && typeof spec.cypherScoped === "string"
+      ? spec.cypherScoped
+      : spec.cypher;
+  if (!cypher || typeof cypher !== "string") {
+    charts[k] = {
+      title: spec.title || k,
+      chartType: spec.chartType || "bar",
+      chartData: null,
+      error: "No cypher defined"
+    };
+    continue;
+  }
+
+  try {
+    const result = await args.session.run(cypher, params);
+    const labelField = spec.labelField || "label";
+    const valueField = spec.valueField || "value";
+    const chartData = buildChartData(
+      result.records,
+      labelField,
+      valueField,
+      spec.datasetLabel || spec.title || k
+    );
+    charts[k] = {
+      title: spec.title || k,
+      chartType: spec.chartType || "bar",
+      chartData,
+      description: spec.description || ""
+    };
+  } catch (err) {
+    console.error(`getConfigurableGraphData: cypher failed for ${k}`, err);
+    charts[k] = {
+      title: spec.title || k,
+      chartType: spec.chartType || "bar",
+      chartData: null,
+      error: err?.message || "Query failed"
+    };
+  }
+}
+
+return {
+  success: true,
+  message: "Graph data loaded",
+  data: {
+    rangePreset,
+    settingKey,
+    charts
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

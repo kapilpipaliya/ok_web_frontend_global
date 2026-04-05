@@ -1,0 +1,32 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterInventoryItemMutate
+        description: After create/update InventoryItem, denormalizes supplierName and categoryName from InventoryItemSupplier and InventoryCategoryItem edges. Wired via table settings hooks only.
+        body:
+          '''
+const tableVertexLabel = args.contextData?.tableVertexLabel;
+const elementId = args.contextData?.elementId;
+if (tableVertexLabel !== "InventoryItem" || !elementId) {
+  return { success: true, message: "Skipped" };
+}
+
+await args.session.run(
+  `MATCH (c:InventoryItem) WHERE elementId(c) = $elementId
+   OPTIONAL MATCH (c)-[:InventoryItemSupplier]->(s:WorkshopSupplier)
+   OPTIONAL MATCH (c)-[:InventoryCategoryItem]->(cat:InventoryCategory)
+   SET c.supplierName = coalesce(s.name, ""),
+       c.categoryName = coalesce(cat.name, "")`,
+  { elementId },
+);
+
+return { success: true, message: "Supplier display name synced" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

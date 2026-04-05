@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Billing settings
+        url: /workshop/settings/billing
+        key: WorkshopSettingsBilling
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsPicklistModulePage
+        props:
+          '''
+return {
+  picklistKey: "invoice_payment_status",
+  pageTitle: "Billing",
+  defaultTitle: "Invoice payment status",
+  description:
+    "Payment states on invoices (unpaid, partial, paid). Hooks may expect these values.",
+  referenceSequenceKey: "WorkshopInvoice.invoiceNo",
+  referenceSectionTitle: "Invoice numbers",
+  referenceSectionDescription:
+    "Controls invoice numbers for manual entry and automation (e.g. draft invoices when a repair is ready for billing)."
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wsb1", T: "RolePage", S: "1", E: "2" }
+    { id: "wsb2", T: "RolePagePage", S: "2", E: "3" }
+    { id: "wsb3", T: "PageLayout", S: "3", E: "4" }
+    { id: "wsb4", T: "Attr", S: "3", E: "5" }
+  ]
+}

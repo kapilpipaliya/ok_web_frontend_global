@@ -1,0 +1,643 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        title: Workshop Reports
+        url: /workshop/reports
+        key: WorkshopReports
+        fns:
+          '''
+return {
+  enabled: true
+};
+'''
+        props:
+          '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        key: reports_shell
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onMount: () => {
+    args.fns.loadCharts();
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 60vh;
+}`;
+'''
+        fns:
+          '''
+const [rangePreset, setRangePreset] = args.createSignal("30d");
+const [chartsBundle, setChartsBundle] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+
+const loadCharts = async (presetOverride) => {
+  const preset = presetOverride != null ? presetOverride : rangePreset();
+  setLoading(true);
+  try {
+    const raw = await args.executeNamedServerFunction({
+      functionName: "getConfigurableGraphData",
+      contextData: {
+        rangePreset: preset,
+        graphKeys: "all",
+        settingKey: "WorkshopReports_charts_default",
+        enableUserScoping: true,
+        operation: "data"
+      }
+    });
+    if (raw?.error) {
+      setChartsBundle(null);
+      args.showErrorToast(typeof raw.error === "string" ? raw.error : "Failed to load workshop reports");
+      return;
+    }
+    const result = raw?.result != null ? raw.result : raw;
+    if (result?.success && result?.data?.charts) {
+      setChartsBundle(result.data.charts);
+    } else {
+      setChartsBundle(null);
+      args.showErrorToast(result?.message || "Failed to load workshop reports");
+    }
+  } catch (error) {
+    setChartsBundle(null);
+    args.showErrorToast(error?.message || "Failed to load workshop reports");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const chartEntry = (key) => {
+  const b = chartsBundle();
+  return b?.[key] || null;
+};
+
+const setRangeAndLoad = (preset) => {
+  setRangePreset(preset);
+  loadCharts(preset);
+};
+
+const tabStyle = (preset) => {
+  const active = rangePreset() === preset;
+  return {
+    padding: "0.4rem 0.75rem",
+    "border-radius": "0.375rem",
+    border: active
+      ? `1px solid ${args.theme.var.color.primary}`
+      : `1px solid ${args.theme.var.color.border_light_200}`,
+    background: active
+      ? args.theme.var.color.background_light_200
+      : args.theme.var.color.background,
+    color: args.theme.var.color.text,
+    cursor: "pointer"
+  };
+};
+
+return {
+  rangePreset,
+  setRangePreset,
+  chartsBundle,
+  loading,
+  loadCharts,
+  chartEntry,
+  setRangeAndLoad,
+  tabStyle
+};
+'''
+      }
+    }
+    {
+      id: "h1"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: "Workshop reports",
+  style: { margin: "0 0 0.5rem 0", "font-size": "1.5rem", "font-weight": "700", color: args.theme.var.color.text }
+};
+'''
+      }
+    }
+    {
+      id: "sub"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: "Charts load from the WorkshopReports_charts_default setting (see migrateContentTableSettings).",
+  style: { margin: 0, color: args.theme.var.color.muted, "font-size": "0.875rem" }
+};
+'''
+      }
+    }
+    {
+      id: "tabs_row"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  style: { display: "flex", "flex-wrap": "wrap", gap: "0.5rem", "margin-top": "1rem" }
+};
+'''
+      }
+    }
+    {
+      id: "tab7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "7 days",
+  onClick: () => args.fns.setRangeAndLoad("7d"),
+  style: args.fns.tabStyle("7d")
+};
+'''
+      }
+    }
+    {
+      id: "tab30"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "30 days",
+  onClick: () => args.fns.setRangeAndLoad("30d"),
+  style: args.fns.tabStyle("30d")
+};
+'''
+      }
+    }
+    {
+      id: "tab90"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "90 days",
+  onClick: () => args.fns.setRangeAndLoad("90d"),
+  style: args.fns.tabStyle("90d")
+};
+'''
+      }
+    }
+    {
+      id: "tab365"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "12 months",
+  onClick: () => args.fns.setRangeAndLoad("365d"),
+  style: args.fns.tabStyle("365d")
+};
+'''
+      }
+    }
+    {
+      id: "spin_wrap"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => !args.fns.loading(),
+  style: { display: "flex", "justify-content": "center", padding: "2rem" }
+};
+'''
+      }
+    }
+    {
+      id: "spin"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLoadingSpinner
+        props:
+          '''
+return {
+  text: "Loading charts...",
+  size: "large"
+};
+'''
+      }
+    }
+    {
+      id: "grid"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: () => args.fns.loading(),
+  style: {
+    display: "grid",
+    "grid-template-columns": "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "1.25rem",
+    "margin-top": "1rem"
+  }
+};
+'''
+      }
+    }
+    {
+      id: "c1wrap"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  style: {
+    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    "border-radius": "0.75rem",
+    padding: "0.75rem",
+    background: args.theme.var.color.background_light_100
+  }
+};
+'''
+      }
+    }
+    {
+      id: "c1t"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopAppointmentsByStatus");
+return {
+  as: "div",
+  text: e?.title || "Appointments by status",
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+};
+'''
+      }
+    }
+    {
+      id: "c1e"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopAppointmentsByStatus");
+return {
+  as: "div",
+  hide: () => !e?.error,
+  text: e?.error || "",
+  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+};
+'''
+      }
+    }
+    {
+      id: "c1"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: WorkshopD3Chart
+        props:
+          '''
+const e = args.fns.chartEntry("workshopAppointmentsByStatus");
+return {
+  chartType: e?.chartType || "pie",
+  data: e?.chartData,
+  height: 320
+};
+'''
+      }
+    }
+    {
+      id: "c2wrap"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  style: {
+    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    "border-radius": "0.75rem",
+    padding: "0.75rem",
+    background: args.theme.var.color.background_light_100
+  }
+};
+'''
+      }
+    }
+    {
+      id: "c2t"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopRepairsByStatus");
+return {
+  as: "div",
+  text: e?.title || "Repair orders by status",
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+};
+'''
+      }
+    }
+    {
+      id: "c2e"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopRepairsByStatus");
+return {
+  as: "div",
+  hide: () => !e?.error,
+  text: e?.error || "",
+  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+};
+'''
+      }
+    }
+    {
+      id: "c2"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: WorkshopD3Chart
+        props:
+          '''
+const e = args.fns.chartEntry("workshopRepairsByStatus");
+return {
+  chartType: e?.chartType || "bar",
+  data: e?.chartData,
+  height: 320
+};
+'''
+      }
+    }
+    {
+      id: "c3wrap"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  style: {
+    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    "border-radius": "0.75rem",
+    padding: "0.75rem",
+    background: args.theme.var.color.background_light_100
+  }
+};
+'''
+      }
+    }
+    {
+      id: "c3t"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopInvoiceTotalsByMonth");
+return {
+  as: "div",
+  text: e?.title || "Invoice totals by month",
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+};
+'''
+      }
+    }
+    {
+      id: "c3e"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopInvoiceTotalsByMonth");
+return {
+  as: "div",
+  hide: () => !e?.error,
+  text: e?.error || "",
+  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+};
+'''
+      }
+    }
+    {
+      id: "c3"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: WorkshopD3Chart
+        props:
+          '''
+const e = args.fns.chartEntry("workshopInvoiceTotalsByMonth");
+return {
+  chartType: e?.chartType || "bar",
+  data: e?.chartData,
+  height: 320
+};
+'''
+      }
+    }
+    {
+      id: "c4wrap"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  style: {
+    border: `1px solid ${args.theme.var.color.border_light_200}`,
+    "border-radius": "0.75rem",
+    padding: "0.75rem",
+    background: args.theme.var.color.background_light_100
+  }
+};
+'''
+      }
+    }
+    {
+      id: "c4t"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopPaymentsByMethod");
+return {
+  as: "div",
+  text: e?.title || "Payments by method",
+  style: { "font-weight": "600", "margin-bottom": "0.5rem", color: args.theme.var.color.text }
+};
+'''
+      }
+    }
+    {
+      id: "c4e"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const e = args.fns.chartEntry("workshopPaymentsByMethod");
+return {
+  as: "div",
+  hide: () => !e?.error,
+  text: e?.error || "",
+  style: { color: args.theme.var.color.error, "font-size": "0.8rem", "margin-bottom": "0.25rem" }
+};
+'''
+      }
+    }
+    {
+      id: "c4"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: WorkshopD3Chart
+        props:
+          '''
+const e = args.fns.chartEntry("workshopPaymentsByMethod");
+return {
+  chartType: e?.chartType || "pie",
+  data: e?.chartData,
+  height: 320
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e_r1", T: "RolePage", S: "1", E: "2" }
+    { id: "e_r2", T: "RolePagePage", S: "2", E: "3" }
+    { id: "e_pl", T: "PageLayout", S: "3", E: "9" }
+    { id: "e_pc", T: "Attr", S: "3", E: "4" }
+    { id: "e_h1", T: "Attr", S: "4", E: "h1" }
+    { id: "e_hs", T: "Attr", S: "4", E: "sub" }
+    { id: "e_tr", T: "Attr", S: "4", E: "tabs_row" }
+    { id: "e_t7", T: "Attr", S: "tabs_row", E: "tab7" }
+    { id: "e_t30", T: "Attr", S: "tabs_row", E: "tab30" }
+    { id: "e_t90", T: "Attr", S: "tabs_row", E: "tab90" }
+    { id: "e_t365", T: "Attr", S: "tabs_row", E: "tab365" }
+    { id: "e_spw", T: "Attr", S: "4", E: "spin_wrap" }
+    { id: "e_sp", T: "Attr", S: "spin_wrap", E: "spin" }
+    { id: "e_gr", T: "Attr", S: "4", E: "grid" }
+    { id: "e_g1", T: "Attr", S: "grid", E: "c1wrap" }
+    { id: "e_g1a", T: "Attr", S: "c1wrap", E: "c1t" }
+    { id: "e_g1b", T: "Attr", S: "c1wrap", E: "c1e" }
+    { id: "e_g1c", T: "Attr", S: "c1wrap", E: "c1" }
+    { id: "e_g2", T: "Attr", S: "grid", E: "c2wrap" }
+    { id: "e_g2a", T: "Attr", S: "c2wrap", E: "c2t" }
+    { id: "e_g2b", T: "Attr", S: "c2wrap", E: "c2e" }
+    { id: "e_g2c", T: "Attr", S: "c2wrap", E: "c2" }
+    { id: "e_g3", T: "Attr", S: "grid", E: "c3wrap" }
+    { id: "e_g3a", T: "Attr", S: "c3wrap", E: "c3t" }
+    { id: "e_g3b", T: "Attr", S: "c3wrap", E: "c3e" }
+    { id: "e_g3c", T: "Attr", S: "c3wrap", E: "c3" }
+    { id: "e_g4", T: "Attr", S: "grid", E: "c4wrap" }
+    { id: "e_g4a", T: "Attr", S: "c4wrap", E: "c4t" }
+    { id: "e_g4b", T: "Attr", S: "c4wrap", E: "c4e" }
+    { id: "e_g4c", T: "Attr", S: "c4wrap", E: "c4" }
+  ]
+}

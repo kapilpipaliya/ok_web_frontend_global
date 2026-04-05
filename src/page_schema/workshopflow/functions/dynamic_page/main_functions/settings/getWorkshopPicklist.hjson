@@ -1,0 +1,79 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Returns option vertices for the domain label (AppointmentStatus, RepairStatus, etc.). No Setting vertex. Supported picklist keys are fixed; unknown keys are rejected.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Not authenticated", data: { options: [], optionVertexes: [] } };
+}
+
+const { picklistKey } = args.contextData || {};
+if (!picklistKey || typeof picklistKey !== "string") {
+  return { success: false, message: "picklistKey is required", data: { options: [], optionVertexes: [] } };
+}
+
+const safeKey = picklistKey.replace(/[^a-z0-9_]/gi, "_").toLowerCase();
+
+const WORKSHOP_PICKLIST_LABEL_BY_KEY = {
+  appointment_status: "AppointmentStatus",
+  repair_status: "RepairStatus",
+  invoice_payment_status: "InvoicePaymentStatus",
+  technician_status: "TechnicianStatus",
+  payment_method: "PaymentMethod",
+  inventory_stock_status: "InventoryStockStatus",
+  customer_status: "CustomerStatus",
+  service_status: "ServiceStatus",
+  supplier_type: "SupplierType"
+};
+
+const WORKSHOP_PICKLIST_TITLE_BY_KEY = {
+  appointment_status: "Appointment status",
+  repair_status: "Repair order status",
+  invoice_payment_status: "Invoice payment status",
+  technician_status: "Technician status",
+  payment_method: "Payment method",
+  inventory_stock_status: "Inventory stock status",
+  customer_status: "Customer status",
+  service_status: "Service status",
+  supplier_type: "Supplier type"
+};
+
+const neoLabel = WORKSHOP_PICKLIST_LABEL_BY_KEY[safeKey];
+if (!neoLabel) {
+  return {
+    success: false,
+    message: "Unknown workshop picklist key",
+    data: { options: [], optionVertexes: [] }
+  };
+}
+
+const optRes = await args.session.run(
+  `MATCH (o:\`${neoLabel}\`) RETURN o ORDER BY coalesce(o.displayOrder, 0) ASC, toLower(coalesce(o.label, "")) ASC`,
+  {}
+);
+
+const optionVertexes = args.processResult(optRes.records, args.context, "o");
+
+return {
+  success: true,
+  data: {
+    head: null,
+    optionVertexes,
+    options: optionVertexes,
+    picklistKey: safeKey,
+    optionVertexLabel: neoLabel,
+    title: WORKSHOP_PICKLIST_TITLE_BY_KEY[safeKey] || ""
+  }
+};
+'''
+        key: getWorkshopPicklist
+      }
+    }
+  ]
+  edges: []
+}

@@ -754,29 +754,32 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
   
-  // Determine category ID from the category item that was used for fetching
-  const isUncategorized = categoryItem.P?.key === rootKey || categoryItem.P?.key === 'uncategorized' || categoryItem.id === 'uncategorized';
-  const categoryId = isUncategorized ? 'uncategorized' : categoryItem.id;
+  const tableLabel = args.fns.getTableVertexLabel?.();
+  const uncategorizedVertexId = tableLabel ? '_' + tableLabel + '_uncategorized' : null;
+  const isSyntheticUncat =
+    uncategorizedVertexId &&
+    (categoryItem.id === uncategorizedVertexId || categoryItem.P?.key === uncategorizedVertexId);
+  const isUncategorized = categoryItem.P?.key === rootKey || isSyntheticUncat;
+  if (isUncategorized && !uncategorizedVertexId) return;
+  const categoryId = isUncategorized ? uncategorizedVertexId : categoryItem.id;
   
   if (!categoryId) return;
   
-  // Get current count from graph
   let currentCount = 0;
   if (isUncategorized) {
-    const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+    const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
     currentCount = uncategorizedVertex?.P?.contentCount ?? 0;
   } else {
     const categoryVertex = args.graph?.vertexes?.[categoryId];
     currentCount = categoryVertex?.P?.contentCount ?? 0;
   }
   
-  // Update count if different - use fetched data length (before filtering)
   const fetchedLength = fetchedData?.length ?? 0;
   if (currentCount !== fetchedLength) {
     if (isUncategorized) {
-      const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+      const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
       if (uncategorizedVertex) {
-        args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+        args.mergeVertexProperties(0, uncategorizedVertexId, args.graph, args.setGraph, {
           contentCount: fetchedLength
         });
       }

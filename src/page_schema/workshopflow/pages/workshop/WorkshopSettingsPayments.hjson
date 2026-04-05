@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Payments settings
+        url: /workshop/settings/payments
+        key: WorkshopSettingsPayments
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsPicklistModulePage
+        props:
+          '''
+return {
+  picklistKey: "payment_method",
+  pageTitle: "Payments",
+  defaultTitle: "Payment method",
+  description:
+    "Tender types recorded on payments (cash, card, etc.). Keep values stable for reporting.",
+  referenceSequenceKey: "WorkshopPayment.paymentNo",
+  referenceSectionTitle: "Payment receipt numbers",
+  referenceSectionDescription:
+    "Unique payment / receipt references. Reserved when someone opens the add payment form."
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wspay1", T: "RolePage", S: "1", E: "2" }
+    { id: "wspay2", T: "RolePagePage", S: "2", E: "3" }
+    { id: "wspay3", T: "PageLayout", S: "3", E: "4" }
+    { id: "wspay4", T: "Attr", S: "3", E: "5" }
+  ]
+}

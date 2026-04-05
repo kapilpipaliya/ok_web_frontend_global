@@ -1,0 +1,780 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopPicklistEditor
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+const picklistKey = () => String(args.contextData.props?.picklistKey || "").trim();
+
+const [options, setOptions] = args.createSignal([]);
+const [optionVertexLabel, setOptionVertexLabel] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+const [saving, setSaving] = args.createSignal(false);
+
+const getRows = () =>
+  options().map((v, i) => ({
+    value: v?.P?.value != null ? String(v.P.value) : "",
+    label: v?.P?.label != null ? String(v.P.label) : "",
+    _idx: i
+  }));
+
+const loadPicklist = async () => {
+  const key = picklistKey();
+  if (!key) return;
+  setLoading(true);
+  try {
+    const res = await args.executeNamedServerFunction({
+      functionName: "getWorkshopPicklist",
+      contextData: { picklistKey: key }
+    });
+    if (res?.error) {
+      args.showErrorToast?.(String(res.error));
+      return;
+    }
+    const inner = res?.result;
+    if (!inner?.success) {
+      args.showErrorToast?.(inner?.message || "Failed to load picklist");
+      return;
+    }
+    const d = inner.data || {};
+    const verts = Array.isArray(d.optionVertexes) ? d.optionVertexes : [];
+    setOptions(args.klona(verts));
+    const srvLbl =
+      d.optionVertexLabel != null && String(d.optionVertexLabel).trim()
+        ? String(d.optionVertexLabel).trim()
+        : "";
+    if (!srvLbl) {
+      args.showErrorToast?.("Missing optionVertexLabel from server");
+      setOptionVertexLabel(null);
+    } else {
+      setOptionVertexLabel(srvLbl);
+    }
+  } catch (err) {
+    args.showErrorToast?.(err?.message || "Failed to load picklist");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const savePicklist = async () => {
+  const key = picklistKey();
+  if (!key) return;
+  setSaving(true);
+  try {
+    const cleaned = getRows().map((row, i) => ({
+      value: String(row.value != null ? row.value : "").trim(),
+      label: String(row.label != null ? row.label : "").trim(),
+      displayOrder: (i + 1) * 10
+    }));
+    const res = await args.executeNamedServerFunction({
+      functionName: "saveWorkshopPicklist",
+      contextData: {
+        picklistKey: key,
+        options: cleaned
+      }
+    });
+    if (res?.error) {
+      args.showErrorToast?.(String(res.error));
+      return;
+    }
+    const inner = res?.result;
+    if (!inner?.success) {
+      args.showErrorToast?.(inner?.message || "Save failed");
+      return;
+    }
+    args.showSuccessToast?.(inner.message || "Picklist saved");
+    await loadPicklist();
+  } catch (err) {
+    args.showErrorToast?.(err?.message || "Save failed");
+  } finally {
+    setSaving(false);
+  }
+};
+
+const addRow = () => {
+  const lbl = optionVertexLabel();
+  if (!lbl) {
+    args.showErrorToast?.("Load the picklist before adding rows");
+    return;
+  }
+  setOptions([
+    ...options(),
+    {
+      id: `draft:${Date.now()}:${Math.random().toString(36).slice(2, 9)}`,
+      L: [lbl],
+      P: { value: "", label: "" },
+      IN: {},
+      OUT: {}
+    }
+  ]);
+};
+
+const removeRow = (idx) => {
+  setOptions(options().filter((_, i) => i !== idx));
+};
+
+const updateRow = (idx, patch) => {
+  setOptions(
+    options().map((v, i) => {
+      if (i !== idx) return v;
+      const nextP = { ...(v.P || {}) };
+      if (Object.prototype.hasOwnProperty.call(patch, "value")) {
+        nextP.value = patch.value;
+      }
+      if (Object.prototype.hasOwnProperty.call(patch, "label")) {
+        nextP.label = patch.label;
+      }
+      return { ...v, P: nextP };
+    })
+  );
+};
+
+const moveRowUp = (idx) => {
+  const arr = options();
+  if (idx <= 0) return;
+  const next = arr.slice();
+  const t = next[idx - 1];
+  next[idx - 1] = next[idx];
+  next[idx] = t;
+  setOptions(next);
+};
+
+const moveRowDown = (idx) => {
+  const arr = options();
+  if (idx >= arr.length - 1) return;
+  const next = arr.slice();
+  const t = next[idx + 1];
+  next[idx + 1] = next[idx];
+  next[idx] = t;
+  setOptions(next);
+};
+
+const rowCount = () => options().length;
+
+return {
+  picklistKey,
+  getRows,
+  loadPicklist,
+  savePicklist,
+  addRow,
+  removeRow,
+  updateRow,
+  moveRowUp,
+  moveRowDown,
+  rowCount,
+  picklistHeading: () =>
+    String(args.contextData.props?.defaultTitle || args.contextData.props?.pageTitle || "")
+      .trim() || picklistKey(),
+  optionVertexLabelStr: () => optionVertexLabel() || "",
+  loading,
+  saving,
+  isLoading: () => loading(),
+  isSaving: () => saving()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+  max-width: 960px;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-picklist-editor",
+  onMount: () => {
+    args.fns.loadPicklist();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h1",
+  text: args.contextData.props?.pageTitle || "Picklist",
+  class: "workshop-picklist-editor-title"
+};
+'''
+        css:
+          '''
+return `._id.workshop-picklist-editor-title {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const d = args.contextData.props?.description;
+return {
+  as: "p",
+  text: d || "",
+  hide: !d,
+  class: "workshop-picklist-editor-desc"
+};
+'''
+        css:
+          '''
+return `._id.workshop-picklist-editor-desc {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  max-width: 52rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-picklist-meta"
+};
+'''
+        css:
+          '''
+return `._id.workshop-picklist-meta {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "label",
+  text: "Picklist",
+  class: "workshop-picklist-meta-label"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-picklist-meta-summary",
+  text: [
+    args.fns.picklistHeading(),
+    args.fns.optionVertexLabelStr()
+      ? " — graph label: " + args.fns.optionVertexLabelStr()
+      : ""
+  ].join("")
+};
+'''
+        css:
+          '''
+return `._id.workshop-picklist-meta-summary {
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.text};
+  line-height: 1.4;
+}`;
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-picklist-toolbar"
+};
+'''
+        css:
+          '''
+return `._id.workshop-picklist-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.sm};
+  align-items: center;
+}`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: args.fns.isSaving() ? "Saving…" : "Save",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onClick: () => args.fns.savePicklist()
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Add option",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onClick: () => args.fns.addRow()
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Reload",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onClick: () => args.fns.loadPicklist()
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  text: args.fns.isLoading() ? "Loading options…" : "",
+  hide: !args.fns.isLoading(),
+  class: "workshop-picklist-loading"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-picklist-table-wrap"
+};
+'''
+        css:
+          '''
+return `._id {
+  overflow-x: auto;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "table",
+  class: "workshop-picklist-table"
+};
+'''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: ${args.theme.var.fontSize.sm};
+}
+._id th {
+  text-align: left;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  font-weight: 600;
+}
+._id td {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${args.theme.var.color.border_light_200};
+  vertical-align: middle;
+}`;
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "thead" };
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "tr" };
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "th", text: "Value (stored)" };
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "th", text: "Label (shown)" };
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return { as: "th", text: "Reorder" };
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return { as: "th", text: "" };
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        contextName: pickRow
+        loop: true
+        props:
+          '''
+return {
+  as: "tbody",
+  data: args.fns.getRows()
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "tr" };
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "td" };
+'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+const row = args.contextData.pickRow;
+return {
+  value: row.value,
+  placeholder: "e.g. scheduled",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onChange: (e) => args.fns.updateRow(row._idx, { value: e.target.value })
+};
+'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return { as: "td" };
+'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: TextInput
+        props:
+          '''
+const row = args.contextData.pickRow;
+return {
+  value: row.label,
+  placeholder: "e.g. Scheduled",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onChange: (e) => args.fns.updateRow(row._idx, { label: e.target.value })
+};
+'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return { as: "td" };
+'''
+        css:
+          '''
+return `._id {
+  white-space: nowrap;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.xs};
+  align-items: center;
+}`;
+'''
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+const row = args.contextData.pickRow;
+return {
+  variant: "secondary",
+  text: "↑",
+  disabled:
+    args.fns.isLoading() || args.fns.isSaving() || row._idx === 0,
+  onClick: () => args.fns.moveRowUp(row._idx)
+};
+'''
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+const row = args.contextData.pickRow;
+return {
+  variant: "secondary",
+  text: "↓",
+  disabled:
+    args.fns.isLoading() ||
+    args.fns.isSaving() ||
+    row._idx >= args.fns.rowCount() - 1,
+  onClick: () => args.fns.moveRowDown(row._idx)
+};
+'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return { as: "td" };
+'''
+      }
+    }
+    {
+      id: "30"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+const row = args.contextData.pickRow;
+return {
+  variant: "secondary",
+  text: "Remove",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onClick: () => args.fns.removeRow(row._idx)
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "pe1", T: "Attr", S: "1", E: "2" }
+    { id: "pe2", T: "Attr", S: "2", E: "3" }
+    { id: "pe3", T: "Attr", S: "2", E: "4" }
+    { id: "pe4", T: "Attr", S: "2", E: "5" }
+    { id: "pe5", T: "Attr", S: "5", E: "6" }
+    { id: "pe6", T: "Attr", S: "5", E: "7" }
+    { id: "pe7", T: "Attr", S: "2", E: "8" }
+    { id: "pe8", T: "Attr", S: "8", E: "9" }
+    { id: "pe9", T: "Attr", S: "8", E: "10" }
+    { id: "pe10", T: "Attr", S: "8", E: "11" }
+    { id: "pe11", T: "Attr", S: "2", E: "12" }
+    { id: "pe12", T: "Attr", S: "2", E: "13" }
+    { id: "pe13", T: "Attr", S: "13", E: "14" }
+    { id: "pe14", T: "Attr", S: "14", E: "15" }
+    { id: "pe15", T: "Attr", S: "15", E: "16" }
+    { id: "pe16", T: "Attr", S: "16", E: "17" }
+    { id: "pe17", T: "Attr", S: "16", E: "18" }
+    { id: "pe18", T: "Attr", S: "16", E: "19" }
+    { id: "pe19", T: "Attr", S: "16", E: "20" }
+    { id: "pe20", T: "Attr", S: "14", E: "21" }
+    { id: "pe21", T: "Attr", S: "21", E: "22" }
+    { id: "pe22", T: "Attr", S: "22", E: "23" }
+    { id: "pe23", T: "Attr", S: "23", E: "24" }
+    { id: "pe24", T: "Attr", S: "22", E: "25" }
+    { id: "pe25", T: "Attr", S: "25", E: "26" }
+    { id: "pe26", T: "Attr", S: "22", E: "27" }
+    { id: "pe27", T: "Attr", S: "27", E: "28" }
+    { id: "pe27b", T: "Attr", S: "27", E: "31" }
+    { id: "pe28", T: "Attr", S: "22", E: "29" }
+    { id: "pe29", T: "Attr", S: "29", E: "30" }
+  ]
+}

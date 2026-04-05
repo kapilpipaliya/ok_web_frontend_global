@@ -1,0 +1,145 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterAppointmentCreate
+        description: Hook that auto-creates a repair order after appointment creation.
+        body:
+          '''
+const elementId = args.contextData?.elementId;
+if (!elementId) {
+  return { success: true, message: "No appointment id provided" };
+}
+
+const actualUser = await args.getUserFromSession();
+if (!actualUser) return { success: true, message: "No session user, skip hook" };
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const enableUserScoping = args.contextData?.enableUserScoping !== false;
+
+const lookup = await args.session.run(
+  `
+  MATCH (a:WorkshopAppointment)
+  WHERE elementId(a) = $elementId
+  RETURN a
+  LIMIT 1
+  `,
+  { elementId }
+);
+
+if (lookup.records.length === 0) {
+  return { success: true, message: "Appointment not found for hook" };
+}
+
+const appointment = lookup.records[0].get("a");
+const appointmentNo = appointment.properties.appointmentNo;
+if (!appointmentNo) {
+  return { success: true, message: "Appointment has no number, skip repair creation" };
+}
+
+const existingRepair = await args.session.run(
+  `
+  MATCH (r:RepairOrder {appointmentNo: $appointmentNo})
+  RETURN r
+  LIMIT 1
+  `,
+  { appointmentNo }
+);
+
+if (existingRepair.records.length > 0) {
+  return { success: true, message: "Repair order already exists for appointment" };
+}
+
+const resNo = await args.executeNamedServerFunction({
+  functionName: "reserveWorkshopReferenceNumber",
+  contextData: { sequenceKey: "RepairOrder.repairNo" }
+});
+if (resNo?.error || !resNo?.result?.success) {
+  return {
+    success: false,
+    message:
+      resNo?.result?.message ||
+      resNo?.error ||
+      "Could not allocate repair order number (configure Repairs reference sequence)"
+  };
+}
+const repairNo = resNo.result.data?.value;
+if (!repairNo) {
+  return { success: false, message: "Reserve returned empty repair order number" };
+}
+
+if (enableUserScoping) {
+  await args.session.run(
+    `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (a:WorkshopAppointment) WHERE elementId(a) = $elementId
+    OPTIONAL MATCH (a)-[:AppointmentCustomer]->(cust:WorkshopCustomer)
+    OPTIONAL MATCH (a)-[:AppointmentTechnician]->(tech:WorkshopTechnician)
+    OPTIONAL MATCH (a)-[:AppointmentVehicle]->(veh:WorkshopVehicle)
+    CREATE (r:RepairOrder {
+      repairNo: $repairNo,
+      appointmentNo: $appointmentNo,
+      customerName: coalesce(cust.name, ""),
+      vehiclePlate: coalesce(veh.plate, a.vehiclePlate, ""),
+      assignedTechnician: coalesce(tech.name, ""),
+      status: "open",
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    CREATE (u)-[:UserRepairOrder {createdAt: datetime()}]->(r)
+    MERGE (a)-[:AppointmentRepairOrder]->(r)
+    WITH r, cust, tech, veh
+    FOREACH (_ IN CASE WHEN cust IS NULL THEN [] ELSE [1] END |
+      MERGE (r)-[:RepairCustomer]->(cust))
+    FOREACH (_ IN CASE WHEN tech IS NULL THEN [] ELSE [1] END |
+      MERGE (r)-[:RepairTechnician]->(tech))
+    FOREACH (_ IN CASE WHEN veh IS NULL THEN [] ELSE [1] END |
+      MERGE (r)-[:RepairVehicle]->(veh))
+    RETURN r
+    `,
+    {
+      userUuid: user.P.uuid,
+      elementId,
+      repairNo,
+      appointmentNo
+    }
+  );
+} else {
+  await args.session.run(
+    `
+    MATCH (a:WorkshopAppointment) WHERE elementId(a) = $elementId
+    OPTIONAL MATCH (a)-[:AppointmentCustomer]->(cust:WorkshopCustomer)
+    OPTIONAL MATCH (a)-[:AppointmentTechnician]->(tech:WorkshopTechnician)
+    OPTIONAL MATCH (a)-[:AppointmentVehicle]->(veh:WorkshopVehicle)
+    CREATE (r:RepairOrder {
+      repairNo: $repairNo,
+      appointmentNo: $appointmentNo,
+      customerName: coalesce(cust.name, ""),
+      vehiclePlate: coalesce(veh.plate, a.vehiclePlate, ""),
+      assignedTechnician: coalesce(tech.name, ""),
+      status: "open",
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    MERGE (a)-[:AppointmentRepairOrder]->(r)
+    WITH r, cust, tech, veh
+    FOREACH (_ IN CASE WHEN cust IS NULL THEN [] ELSE [1] END |
+      MERGE (r)-[:RepairCustomer]->(cust))
+    FOREACH (_ IN CASE WHEN tech IS NULL THEN [] ELSE [1] END |
+      MERGE (r)-[:RepairTechnician]->(tech))
+    FOREACH (_ IN CASE WHEN veh IS NULL THEN [] ELSE [1] END |
+      MERGE (r)-[:RepairVehicle]->(veh))
+    RETURN r
+    `,
+    { elementId, repairNo, appointmentNo }
+  );
+}
+
+return { success: true, message: "Repair order auto-created from appointment" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

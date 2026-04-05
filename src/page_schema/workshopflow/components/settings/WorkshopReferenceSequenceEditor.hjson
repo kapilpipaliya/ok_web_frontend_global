@@ -1,0 +1,648 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopReferenceSequenceEditor
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns:
+          '''
+const sequenceKey = () => String(args.contextData.props?.sequenceKey || "").trim();
+
+const neoStr = (v) => {
+  if (v == null) return "";
+  if (typeof v.toNumber === "function") return String(v.toNumber());
+  return String(v);
+};
+
+const [prefix, setPrefix] = args.createSignal("");
+const [suffix, setSuffix] = args.createSignal("");
+const [startingNumber, setStartingNumber] = args.createSignal("1000");
+const [incrementStep, setIncrementStep] = args.createSignal("1");
+const [formatStr, setFormatStr] = args.createSignal("{prefix}{number}{suffix}");
+const [resetRule, setResetRule] = args.createSignal("never");
+const [numberPadding, setNumberPadding] = args.createSignal("0");
+const [currentNumberDisp, setCurrentNumberDisp] = args.createSignal("—");
+const [loading, setLoading] = args.createSignal(false);
+const [saving, setSaving] = args.createSignal(false);
+
+const loadSequence = async () => {
+  const key = sequenceKey();
+  if (!key) return;
+  setLoading(true);
+  try {
+    const res = await args.executeNamedServerFunction({
+      functionName: "getWorkshopReferenceSequences",
+      contextData: {}
+    });
+    if (res?.error) {
+      args.showErrorToast?.(String(res.error));
+      return;
+    }
+    const inner = res?.result;
+    if (!inner?.success) {
+      args.showErrorToast?.(inner?.message || "Failed to load sequences");
+      return;
+    }
+    const list = inner.data?.sequences || [];
+    const row = list.find((v) => String(v?.P?.key || "") === key);
+    if (!row) {
+      args.showErrorToast?.("Sequence not found: " + key);
+      return;
+    }
+    const P = row.P || {};
+    setPrefix(String(P.prefix ?? ""));
+    setSuffix(String(P.suffix ?? ""));
+    setStartingNumber(String(neoStr(P.startingNumber) || "1000"));
+    setIncrementStep(String(neoStr(P.incrementStep) || "1"));
+    setFormatStr(String(P.format || "{prefix}{number}{suffix}"));
+    setResetRule(String(P.resetRule || "never").toLowerCase());
+    setNumberPadding(String(neoStr(P.numberPadding) || "0"));
+    const cn = P.currentNumber;
+    if (cn === undefined || cn === null || cn === "") {
+      setCurrentNumberDisp("Not reserved yet (starts at next save/reserve)");
+    } else {
+      setCurrentNumberDisp(neoStr(cn));
+    }
+  } catch (err) {
+    args.showErrorToast?.(err?.message || "Failed to load sequence");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const saveSequence = async (opts) => {
+  const key = sequenceKey();
+  if (!key) return;
+  setSaving(true);
+  try {
+    const res = await args.executeNamedServerFunction({
+      functionName: "saveWorkshopReferenceSequence",
+      contextData: {
+        key,
+        prefix: prefix(),
+        suffix: suffix(),
+        startingNumber: Number(startingNumber()),
+        incrementStep: Number(incrementStep()),
+        format: formatStr(),
+        resetRule: resetRule(),
+        numberPadding: Number(numberPadding()),
+        resetCounter: opts?.resetCounter === true
+      }
+    });
+    if (res?.error) {
+      args.showErrorToast?.(String(res.error));
+      return;
+    }
+    const inner = res?.result;
+    if (!inner?.success) {
+      args.showErrorToast?.(inner?.message || "Save failed");
+      return;
+    }
+    args.showSuccessToast?.(inner.message || "Saved");
+    await loadSequence();
+  } catch (err) {
+    args.showErrorToast?.(err?.message || "Save failed");
+  } finally {
+    setSaving(false);
+  }
+};
+
+const onResetCounter = () => {
+  if (typeof globalThis.confirm === "function") {
+    const ok = globalThis.confirm(
+      "Reset the counter so the next reserved number uses the starting number rules? This does not change existing records."
+    );
+    if (!ok) return;
+  }
+  void saveSequence({ resetCounter: true });
+};
+
+return {
+  sequenceKey,
+  sectionTitle: () =>
+    String(args.contextData.props?.sectionTitle || "").trim() || "Reference number",
+  description: () => String(args.contextData.props?.description || "").trim(),
+  prefix,
+  setPrefix,
+  suffix,
+  setSuffix,
+  startingNumber,
+  setStartingNumber,
+  incrementStep,
+  setIncrementStep,
+  formatStr,
+  setFormatStr,
+  resetRule,
+  setResetRule,
+  numberPadding,
+  setNumberPadding,
+  currentNumberDisp,
+  loading,
+  saving,
+  loadSequence,
+  saveSequence,
+  onResetCounter,
+  isLoading: () => loading(),
+  isSaving: () => saving()
+};
+'''
+        css:
+          '''
+return `._id.workshop-refseq-editor {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  max-width: 960px;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sk = String(args.contextData.props?.sequenceKey || "").trim();
+return {
+  as: "div",
+  class: "workshop-refseq-editor",
+  hide: !sk,
+  onMount: () => {
+    if (sk) args.fns.loadSequence();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "h2",
+  text: args.fns.sectionTitle(),
+  class: "workshop-refseq-editor-title"
+};
+'''
+        css:
+          '''
+return `._id.workshop-refseq-editor-title {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const d = args.fns.description();
+return {
+  as: "p",
+  text: d,
+  hide: !d,
+  class: "workshop-refseq-editor-desc"
+};
+'''
+        css:
+          '''
+return `._id.workshop-refseq-editor-desc {
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  line-height: 1.45;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-refseq-meta",
+  text: `Key: ${args.fns.sequenceKey()} · Last counter: ${args.fns.currentNumberDisp()}`
+};
+'''
+        css:
+          '''
+return `._id.workshop-refseq-meta {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+return { as: "div", class: "workshop-refseq-grid" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-grid {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.35fr) 1fr;
+  gap: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+  align-items: center;
+}
+@media (max-width: 640px) {
+  ._id.workshop-refseq-grid {
+    grid-template-columns: 1fr;
+  }
+  ._id.workshop-refseq-grid .workshop-refseq-label {
+    margin-top: ${args.theme.var.spacing.sm};
+  }
+  ._id.workshop-refseq-grid .workshop-refseq-label:nth-child(1) {
+    margin-top: 0;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div", text: "Prefix", class: "workshop-refseq-label" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TextInput
+        props:
+          '''
+return {
+  title: "Prefix",
+  value: args.fns.prefix(),
+  onChange: (e) => args.fns.setPrefix(e.target.value),
+  disabled: args.fns.isLoading() || args.fns.isSaving()
+};
+'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return { as: "div", text: "Suffix", class: "workshop-refseq-label" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+}`;
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: TextInput
+        props:
+          '''
+return {
+  title: "Suffix",
+  value: args.fns.suffix(),
+  onChange: (e) => args.fns.setSuffix(e.target.value),
+  disabled: args.fns.isLoading() || args.fns.isSaving()
+};
+'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return { as: "div", text: "Starting number", class: "workshop-refseq-label" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+}`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: TextInput
+        props:
+          '''
+return {
+  title: "Starting number",
+  type: "number",
+  value: args.fns.startingNumber(),
+  onChange: (e) => args.fns.setStartingNumber(e.target.value),
+  disabled: args.fns.isLoading() || args.fns.isSaving()
+};
+'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''
+return { as: "div", text: "Increment step", class: "workshop-refseq-label" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+}`;
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: TextInput
+        props:
+          '''
+return {
+  title: "Increment step",
+  type: "number",
+  value: args.fns.incrementStep(),
+  onChange: (e) => args.fns.setIncrementStep(e.target.value),
+  disabled: args.fns.isLoading() || args.fns.isSaving()
+};
+'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''
+return { as: "div", text: "Format template", class: "workshop-refseq-label" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+}`;
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: TextInput
+        props:
+          '''
+return {
+  title: "Format template",
+  value: args.fns.formatStr(),
+  onChange: (e) => args.fns.setFormatStr(e.target.value),
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  placeholder: "{prefix}{number}{suffix}"
+};
+'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''
+return { as: "div", text: "Number padding", class: "workshop-refseq-label" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+}`;
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 12
+        componentName: TextInput
+        props:
+          '''
+return {
+  title: "Number padding (0 = no zero-padding)",
+  type: "number",
+  value: args.fns.numberPadding(),
+  onChange: (e) => args.fns.setNumberPadding(e.target.value),
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  placeholder: "0"
+};
+'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        displayOrder: 13
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: "Reset rule",
+  class: "workshop-refseq-label"
+};
+'''
+        css:
+          '''
+return `._id.workshop-refseq-label {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+}`;
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 14
+        componentName: TextInput
+        props:
+          '''
+return {
+  title: "Reset rule: never, daily, monthly, or yearly",
+  value: args.fns.resetRule(),
+  onChange: (e) => args.fns.setResetRule(e.target.value),
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  placeholder: "never"
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return { as: "div", class: "workshop-refseq-toolbar" };
+'''
+        css:
+          '''
+return `._id.workshop-refseq-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.sm};
+  align-items: center;
+}`;
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: args.fns.isSaving() ? "Saving…" : "Save",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onClick: () => args.fns.saveSequence({})
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Reset counter",
+  disabled: args.fns.isLoading() || args.fns.isSaving(),
+  onClick: () => args.fns.onResetCounter()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wrse1", T: "Attr", S: "1", E: "2" }
+    { id: "wrse2", T: "Attr", S: "2", E: "3" }
+    { id: "wrse3", T: "Attr", S: "2", E: "4" }
+    { id: "wrse4", T: "Attr", S: "2", E: "5" }
+    { id: "wrse5", T: "Attr", S: "2", E: "6" }
+    { id: "wrse6", T: "Attr", S: "6", E: "17" }
+    { id: "wrse6b", T: "Attr", S: "6", E: "7" }
+    { id: "wrse7", T: "Attr", S: "6", E: "18" }
+    { id: "wrse7b", T: "Attr", S: "6", E: "8" }
+    { id: "wrse8", T: "Attr", S: "6", E: "19" }
+    { id: "wrse8b", T: "Attr", S: "6", E: "9" }
+    { id: "wrse9", T: "Attr", S: "6", E: "20" }
+    { id: "wrse9b", T: "Attr", S: "6", E: "10" }
+    { id: "wrse10", T: "Attr", S: "6", E: "21" }
+    { id: "wrse10b", T: "Attr", S: "6", E: "11" }
+    { id: "wrse11", T: "Attr", S: "6", E: "22" }
+    { id: "wrse11b", T: "Attr", S: "6", E: "12" }
+    { id: "wrse12", T: "Attr", S: "6", E: "23" }
+    { id: "wrse12b", T: "Attr", S: "6", E: "13" }
+    { id: "wrse13", T: "Attr", S: "2", E: "14" }
+    { id: "wrse14", T: "Attr", S: "14", E: "15" }
+    { id: "wrse15", T: "Attr", S: "14", E: "16" }
+  ]
+}

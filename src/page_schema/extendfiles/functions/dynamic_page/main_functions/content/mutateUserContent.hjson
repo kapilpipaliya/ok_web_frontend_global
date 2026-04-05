@@ -20,11 +20,241 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-// Format: data is an object with { vertex, relationships }
+// Format: data is an object with { vertex, relationships, nestedLineSync? }
 const inputData = args.contextData.data || {};
 const vertex = inputData.vertex;
 const relationships = inputData.relationships || {};
-const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScoping, hooks } = args.contextData;
+const nestedLineSync = inputData.nestedLineSync || {};
+const { tableVertexLabel, operation, elementId, uniqueKeys = [], enableUserScoping, hooks, nestedLinePropertyStripKeys = [] } = args.contextData;
+
+const nestedLineStripFromConfig = Array.isArray(nestedLinePropertyStripKeys)
+  ? nestedLinePropertyStripKeys.map((k) => String(k))
+  : [];
+const NESTED_LINE_STRIP_KEYS = new Set([...Object.keys(nestedLineSync), ...nestedLineStripFromConfig]);
+
+const getInventoryVertexIdFromLineRow = (lineRow) => {
+  if (lineRow.inventoryItemId != null && String(lineRow.inventoryItemId).trim() !== "")
+    return String(lineRow.inventoryItemId).trim();
+  if (lineRow.inventoryId != null && String(lineRow.inventoryId).trim() !== "")
+    return String(lineRow.inventoryId).trim();
+  return null;
+};
+
+const rowPassesNestedLineSyncRules = (lineRow, nestedLineItemsSyncRules) => {
+  if (!nestedLineItemsSyncRules || typeof nestedLineItemsSyncRules !== "object") return true;
+
+  const quantityFieldKey =
+    nestedLineItemsSyncRules.quantityFieldKey != null
+      ? String(nestedLineItemsSyncRules.quantityFieldKey)
+      : null;
+  const quantityRule = nestedLineItemsSyncRules.quantityRule;
+  if (quantityFieldKey && quantityRule && typeof quantityRule === "object") {
+    const quantityValue = Number(lineRow[quantityFieldKey]);
+    const compareOp = quantityRule.op;
+    const compareTo = Number(quantityRule.value);
+    if (compareOp === ">") {
+      if (!Number.isFinite(quantityValue) || !(quantityValue > compareTo)) return false;
+    } else if (compareOp === ">=") {
+      if (!Number.isFinite(quantityValue) || !(quantityValue >= compareTo)) return false;
+    } else if (compareOp === "<") {
+      if (!Number.isFinite(quantityValue) || !(quantityValue < compareTo)) return false;
+    } else if (compareOp === "<=") {
+      if (!Number.isFinite(quantityValue) || !(quantityValue <= compareTo)) return false;
+    } else if (compareOp === "==") {
+      if (!Number.isFinite(quantityValue) || quantityValue !== compareTo) return false;
+    }
+  }
+
+  const requiredFieldKeys = Array.isArray(nestedLineItemsSyncRules.rowRequiredFields)
+    ? nestedLineItemsSyncRules.rowRequiredFields
+    : [];
+  for (let fieldIndex = 0; fieldIndex < requiredFieldKeys.length; fieldIndex++) {
+    const requiredKey = requiredFieldKeys[fieldIndex];
+    if (String(lineRow[requiredKey] ?? "").trim() === "") return false;
+  }
+
+  const inventoryVertexId = getInventoryVertexIdFromLineRow(lineRow);
+  const inventoryRequiredMode = nestedLineItemsSyncRules.inventoryRequiredMode || "never";
+  if (inventoryRequiredMode === "always") {
+    if (!inventoryVertexId) return false;
+  } else if (inventoryRequiredMode === "when") {
+    const whenFieldKey = nestedLineItemsSyncRules.inventoryRequiredWhenField;
+    const whenValues = Array.isArray(nestedLineItemsSyncRules.inventoryRequiredWhenValues)
+      ? nestedLineItemsSyncRules.inventoryRequiredWhenValues
+      : [];
+    if (whenFieldKey != null && String(whenFieldKey).trim() !== "" && whenValues.length > 0) {
+      const fieldRawValue = lineRow[whenFieldKey];
+      const normalizedFieldValue = String(fieldRawValue ?? "").trim().toLowerCase();
+      const fieldMatchesWhen = whenValues.some(
+        (allowedValue) => String(allowedValue).trim().toLowerCase() === normalizedFieldValue,
+      );
+      if (fieldMatchesWhen && !inventoryVertexId) return false;
+    }
+  }
+
+  return true;
+};
+
+const buildChildLineProps = (lineRow, parentElementIdPropOnChild, parentElementId) => {
+  const propertyKeysToSkip = new Set([
+    "id",
+    "inventoryItemId",
+    "inventoryId",
+    "_key",
+    "_draft"
+  ]);
+  const lineVertexProps = {};
+  for (const [propertyKey, propertyValue] of Object.entries(lineRow || {})) {
+    if (propertyKeysToSkip.has(propertyKey)) continue;
+    if (propertyValue === undefined || propertyValue === null || propertyValue === "") continue;
+    lineVertexProps[propertyKey] = propertyValue;
+  }
+  lineVertexProps[parentElementIdPropOnChild] = parentElementId;
+  return lineVertexProps;
+};
+
+const patchRelationshipFieldPropsOnVertex = (vertex, relationships) => {
+  if (!vertex?.P || !relationships || typeof relationships !== "object") return;
+  for (const [fieldKey, relConfig] of Object.entries(relationships)) {
+    if (!relConfig || typeof relConfig !== "object") continue;
+    const tid = relConfig.targetId;
+    vertex.P[fieldKey] =
+      tid != null && String(tid).trim() !== "" ? String(tid).trim() : null;
+  }
+};
+
+const stripRelationshipFieldKeysFromProps = (props, relationships) => {
+  if (!props || typeof props !== "object" || !relationships || typeof relationships !== "object")
+    return;
+  for (const fieldKey of Object.keys(relationships)) {
+    delete props[fieldKey];
+  }
+};
+
+const syncNestedLineCollections = async (session, params) => {
+  const {
+    parentElementId,
+    parentLabel,
+    nestedLineSync: syncMap,
+    enableUserScoping,
+    userUuid,
+    userRelationshipType
+  } = params;
+  if (!syncMap || typeof syncMap !== "object") return;
+  if (!parentElementId) return;
+
+  for (const [, spec] of Object.entries(syncMap)) {
+    if (!spec || typeof spec !== "object") continue;
+    const childLabel = spec.childLabel;
+    const parentToChildRelationshipType = spec.parentToChildRelationshipType;
+    const childToInventoryRelationshipType = spec.childToInventoryRelationshipType || null;
+    const inventoryTargetLabel = spec.inventoryTargetLabel || "InventoryItem";
+    const parentElementIdPropOnChild = spec.parentElementIdPropOnChild;
+    const nestedLineItemsSyncRules = spec.nestedLineItemsSyncRules;
+    const rows = Array.isArray(spec.rows) ? spec.rows : [];
+    const deletedLineIds = Array.isArray(spec.deletedLineIds) ? spec.deletedLineIds : [];
+    if (!childLabel || !parentToChildRelationshipType || !parentElementIdPropOnChild) continue;
+
+    if (enableUserScoping) {
+      const ownershipCheck = await session.run(
+        `MATCH (u:User {uuid: $uuid})-[:${userRelationshipType}]->(p:${parentLabel})
+         WHERE elementId(p) = $pid
+         RETURN p LIMIT 1`,
+        { uuid: userUuid, pid: parentElementId }
+      );
+      if (ownershipCheck.records.length === 0) continue;
+    }
+
+    for (let deleteIndex = 0; deleteIndex < deletedLineIds.length; deleteIndex++) {
+      const lineElementId = deletedLineIds[deleteIndex];
+      if (lineElementId == null || lineElementId === "") continue;
+      await session.run(
+        `MATCH (p:${parentLabel})-[:${parentToChildRelationshipType}]->(line:${childLabel})
+         WHERE elementId(p) = $pid AND elementId(line) = $lid
+         DETACH DELETE line`,
+        { pid: parentElementId, lid: String(lineElementId) }
+      );
+    }
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      const lineRow = rows[rowIndex];
+      if (!lineRow || typeof lineRow !== "object") continue;
+      if (!rowPassesNestedLineSyncRules(lineRow, nestedLineItemsSyncRules)) continue;
+
+      const inventoryVertexId = getInventoryVertexIdFromLineRow(lineRow);
+      const existingLineElementId =
+        lineRow.id != null && String(lineRow.id).trim() !== "" ? String(lineRow.id).trim() : null;
+
+      if (existingLineElementId) {
+        const lineVertexProps = buildChildLineProps(
+          lineRow,
+          parentElementIdPropOnChild,
+          parentElementId,
+        );
+        delete lineVertexProps.createdAt;
+        await session.run(
+          `MATCH (p:${parentLabel})-[:${parentToChildRelationshipType}]->(line:${childLabel})
+           WHERE elementId(p) = $pid AND elementId(line) = $lid
+           SET line += $props, line.updatedAt = datetime()`,
+          { pid: parentElementId, lid: existingLineElementId, props: lineVertexProps }
+        );
+        if (childToInventoryRelationshipType && inventoryTargetLabel) {
+          await session.run(
+            `MATCH (line:${childLabel})
+             WHERE elementId(line) = $lid
+             OPTIONAL MATCH (line)-[xr:${childToInventoryRelationshipType}]->()
+             DELETE xr`,
+            { lid: existingLineElementId }
+          );
+          if (inventoryVertexId) {
+            await session.run(
+              `MATCH (line:${childLabel})
+               WHERE elementId(line) = $lid
+               MATCH (inv:${inventoryTargetLabel})
+               WHERE elementId(inv) = $invId
+               MERGE (line)-[:${childToInventoryRelationshipType}]->(inv)`,
+              { lid: existingLineElementId, invId: inventoryVertexId }
+            );
+          }
+        }
+      } else {
+        const nowIso = new Date().toISOString();
+        const lineVertexProps = buildChildLineProps(
+          lineRow,
+          parentElementIdPropOnChild,
+          parentElementId,
+        );
+        lineVertexProps.createdAt = nowIso;
+        lineVertexProps.updatedAt = nowIso;
+        const createLineResult = await session.run(
+          `MATCH (p:${parentLabel})
+           WHERE elementId(p) = $pid
+           CREATE (line:${childLabel} $props)
+           CREATE (p)-[:${parentToChildRelationshipType}]->(line)
+           RETURN elementId(line) AS lid`,
+          { pid: parentElementId, props: lineVertexProps }
+        );
+        const newLineElementId = createLineResult.records[0]?.get("lid");
+        const newLineElementIdStr = newLineElementId != null ? String(newLineElementId) : null;
+        if (
+          newLineElementIdStr &&
+          inventoryVertexId &&
+          childToInventoryRelationshipType &&
+          inventoryTargetLabel
+        ) {
+          await session.run(
+            `MATCH (line:${childLabel})
+             WHERE elementId(line) = $lid
+             MATCH (inv:${inventoryTargetLabel})
+             WHERE elementId(inv) = $invId
+             MERGE (line)-[:${childToInventoryRelationshipType}]->(inv)`,
+            { lid: newLineElementIdStr, invId: inventoryVertexId }
+          );
+        }
+      }
+    }
+  }
+};
 
 // Extract form data from vertex
 if (!vertex || !vertex.P) {
@@ -144,6 +374,10 @@ try {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+    NESTED_LINE_STRIP_KEYS.forEach((k) => {
+      delete properties[k];
+    });
+    stripRelationshipFieldKeysFromProps(properties, relationships);
 
     // Create vertex and relationship in a single optimized transaction
     let createQuery;
@@ -213,6 +447,21 @@ try {
           console.error(`Error creating relationships for ${relationshipType}->${targetLabel}:`, relError);
         }
       }
+    }
+
+    patchRelationshipFieldPropsOnVertex(createdContent, relationships);
+
+    try {
+      await syncNestedLineCollections(args.session, {
+        parentElementId: createdElementId,
+        parentLabel: vertexLabel,
+        nestedLineSync,
+        enableUserScoping,
+        userUuid: user.P.uuid,
+        userRelationshipType: relationshipType
+      });
+    } catch (nestedErr) {
+      console.error("syncNestedLineCollections (create):", nestedErr);
     }
 
     const createResult = {
@@ -309,6 +558,10 @@ try {
         cleanProperties[k] = v;
       }
     }
+    NESTED_LINE_STRIP_KEYS.forEach((k) => {
+      delete cleanProperties[k];
+    });
+    stripRelationshipFieldKeysFromProps(cleanProperties, relationships);
 
     // Update vertex with ownership verification in single query
     let updateQuery;
@@ -351,42 +604,59 @@ try {
     const vertices = args.processResult(result.records, args.context, 'c');
     const updatedContent = vertices[0];
 
-    // Handle relationships if provided
+    // Handle relationships if provided (clear edge type per field, then optionally recreate)
     // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
     if (relationships && typeof relationships === "object") {
       for (const [fieldKey, relConfig] of Object.entries(relationships)) {
-        if (relConfig && relConfig.targetId && relConfig.relationshipType && relConfig.targetLabel) {
-          try {
-            // Delete existing relationships for this field
-            const deleteRelQuery = `
-              MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
-              WHERE elementId(c) = $contentId
-              DELETE r
-            `;
-            await args.session.run(deleteRelQuery, { contentId: updateElementId });
+        if (!relConfig?.relationshipType || !relConfig?.targetLabel) continue;
+        try {
+          const deleteRelQuery = `
+            MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
+            WHERE elementId(c) = $contentId
+            DELETE r
+          `;
+          await args.session.run(deleteRelQuery, { contentId: updateElementId });
 
-            // Create new relationship
-            const createRelQuery = `
-              MATCH (c:${vertexLabel})
-              WHERE elementId(c) = $contentId
-              MATCH (target:${relConfig.targetLabel})
-              WHERE elementId(target) = $targetId
-              MERGE (c)-[r:${relConfig.relationshipType}]->(target)
-              ON CREATE SET r.createdAt = datetime()
-              ON MATCH SET r.updatedAt = datetime()
-              RETURN r
-            `;
+          const targetId =
+            relConfig.targetId != null && String(relConfig.targetId).trim() !== ""
+              ? String(relConfig.targetId).trim()
+              : null;
+          if (!targetId) continue;
 
-            await args.session.run(createRelQuery, {
-              contentId: updateElementId,
-              targetId: relConfig.targetId
-            });
-          } catch (relError) {
-            console.error(`Error updating relationship for ${fieldKey}:`, relError);
-            // Don't fail the whole operation if relationship update fails
-          }
+          const createRelQuery = `
+            MATCH (c:${vertexLabel})
+            WHERE elementId(c) = $contentId
+            MATCH (target:${relConfig.targetLabel})
+            WHERE elementId(target) = $targetId
+            MERGE (c)-[r:${relConfig.relationshipType}]->(target)
+            ON CREATE SET r.createdAt = datetime()
+            ON MATCH SET r.updatedAt = datetime()
+            RETURN r
+          `;
+
+          await args.session.run(createRelQuery, {
+            contentId: updateElementId,
+            targetId,
+          });
+        } catch (relError) {
+          console.error(`Error updating relationship for ${fieldKey}:`, relError);
         }
       }
+    }
+
+    patchRelationshipFieldPropsOnVertex(updatedContent, relationships);
+
+    try {
+      await syncNestedLineCollections(args.session, {
+        parentElementId: updateElementId,
+        parentLabel: vertexLabel,
+        nestedLineSync,
+        enableUserScoping,
+        userUuid: user.P.uuid,
+        userRelationshipType: relationshipType
+      });
+    } catch (nestedErr) {
+      console.error("syncNestedLineCollections (update):", nestedErr);
     }
 
     const updateResult = {

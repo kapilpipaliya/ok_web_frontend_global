@@ -1,0 +1,71 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Services settings
+        url: /workshop/settings/services
+        key: WorkshopSettingsServices
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsPicklistModulePage
+        props:
+          '''
+return {
+  picklistKey: "service_status",
+  pageTitle: "Services",
+  defaultTitle: "Service status",
+  description:
+    "Catalog service states (active, seasonal, archived). Wire forms with optionsPicklist when you add a status field."
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wss1", T: "RolePage", S: "1", E: "2" }
+    { id: "wss2", T: "RolePagePage", S: "2", E: "3" }
+    { id: "wss3", T: "PageLayout", S: "3", E: "4" }
+    { id: "wss4", T: "Attr", S: "3", E: "5" }
+  ]
+}

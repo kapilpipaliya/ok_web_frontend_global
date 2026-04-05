@@ -1,0 +1,269 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: FloatingHelpTooltip
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+const [isOpen, setIsOpen] = args.createSignal(false);
+const [triggerRef, setTriggerRef] = args.createSignal(null);
+const [floatingRef, setFloatingRef] = args.createSignal(null);
+let cleanup = null;
+let hideTimer = null;
+
+const getPlacement = () => args.contextData.props?.placement || "top";
+
+const clearHideTimer = () => {
+  if (hideTimer != null) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+};
+
+const tearDownFloating = () => {
+  clearHideTimer();
+  if (cleanup) {
+    cleanup();
+    cleanup = null;
+  }
+};
+
+const setupFloatingUI = async () => {
+  const trigger = triggerRef();
+  const floating = floatingRef();
+  if (!trigger || !floating || !args.floatingUI) return;
+
+  try {
+    const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
+
+    const updatePosition = async () => {
+      const { x, y } = await computePosition(trigger, floating, {
+        placement: getPlacement(),
+        strategy: "fixed",
+        middleware: [
+          offset(6),
+          flip(),
+          shift({ padding: 8 })
+        ]
+      });
+      Object.assign(floating.style, {
+        left: String(x) + "px",
+        top: String(y) + "px"
+      });
+    };
+
+    if (cleanup) {
+      cleanup();
+      cleanup = null;
+    }
+
+    await updatePosition();
+
+    cleanup = autoUpdate(trigger, floating, updatePosition, {
+      ancestorScroll: true,
+      ancestorResize: true,
+      elementResize: true,
+      layoutShift: true,
+      animationFrame: false
+    });
+  } catch (e) {
+    console.error("FloatingHelpTooltip:", e);
+  }
+};
+
+const openTooltip = () => {
+  clearHideTimer();
+  setIsOpen(true);
+  requestAnimationFrame(() => setupFloatingUI());
+};
+
+const scheduleClose = () => {
+  clearHideTimer();
+  hideTimer = window.setTimeout(() => {
+    setIsOpen(false);
+    tearDownFloating();
+    hideTimer = null;
+  }, 100);
+};
+
+return {
+  isOpen,
+  setTriggerRef,
+  setFloatingRef,
+  openTooltip,
+  scheduleClose,
+  clearHideTimer,
+  tearDownFloating
+};
+'''
+        componentName: Html
+        props:
+          '''
+const p = args.contextData.props || {};
+return {
+  as: "span",
+  hide: p.hide === true || !p.text,
+  onCleanup: () => {
+    args.fns.tearDownFloating();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-left: 0.125rem;
+  border: none;
+  background: transparent;
+  color: ${args.theme.var.color.muted};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  cursor: help;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+._id:hover {
+  color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.background_light_200};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const text = args.contextData.props?.text || "";
+const fieldLabel = args.contextData.props?.fieldLabel || "";
+const aria = text
+  ? (fieldLabel ? `Help for ${fieldLabel}: ${text}` : `Help: ${text}`)
+  : "Help";
+
+return {
+  as: "span",
+  text: "\u24D8",
+  "aria-label": aria,
+  ref: args.fns.setTriggerRef,
+  onMouseEnter: () => args.fns.openTooltip(),
+  onMouseLeave: () => args.fns.scheduleClose(),
+  hide: !text
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "portal"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  z-index: 1100;
+  max-width: min(20rem, calc(100vw - 1rem));
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 400;
+  line-height: 1.45;
+  pointer-events: auto;
+  animation: fm-help-fade 0.12s ease-out;
+}
+
+@keyframes fm-help-fade {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const text = args.contextData.props?.text || "";
+
+return {
+  as: "div",
+  ref: args.fns.setFloatingRef,
+  text,
+  role: "tooltip",
+  hide: !args.fns.isOpen(),
+  onMouseEnter: () => args.fns.clearHideTimer(),
+  onMouseLeave: () => args.fns.scheduleClose()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+  ]
+}

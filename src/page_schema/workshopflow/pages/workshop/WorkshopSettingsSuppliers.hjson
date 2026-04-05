@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Suppliers settings
+        url: /workshop/settings/suppliers
+        key: WorkshopSettingsSuppliers
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsPicklistModulePage
+        props:
+          '''
+return {
+  picklistKey: "supplier_type",
+  pageTitle: "Suppliers",
+  defaultTitle: "Supplier type",
+  description:
+    "Classify vendors (distributor, OEM, local, etc.). Use optionsPicklist with picklistKey supplier_type on supplier forms.",
+  referenceSequenceKey: "WorkshopSupplier.supplierCode",
+  referenceSectionTitle: "Supplier codes",
+  referenceSectionDescription:
+    "Short vendor codes (e.g. VEN-1001). Reserved when the add supplier form opens."
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { "id": "wss1", "T": "RolePage", "S": "1", "E": "2" }
+    { "id": "wss2", "T": "RolePagePage", "S": "2", "E": "3" }
+    { "id": "wss3", "T": "PageLayout", "S": "3", "E": "4" }
+    { "id": "wss4", "T": "Attr", "S": "3", "E": "5" }
+  ]
+}

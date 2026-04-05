@@ -1,0 +1,72 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: checkAppointmentAvailability
+        description: Checks whether a time slot and bay are already occupied.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found", data: null };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const {
+  scheduledAt,
+  bay,
+  excludeAppointmentId,
+  enableUserScoping = true
+} = args.contextData || {};
+
+if (!scheduledAt || !bay) {
+  return {
+    success: false,
+    message: "scheduledAt and bay are required",
+    data: { isAvailable: false }
+  };
+}
+
+const query = enableUserScoping
+  ? `
+    MATCH (u:User {uuid: $userUuid})-[:UserWorkshopAppointment]->(a:WorkshopAppointment)
+    WHERE COALESCE(a.scheduledAt, "") = $scheduledAt
+      AND COALESCE(a.bay, "") = $bay
+      AND (a.status IS NULL OR toLower(a.status) <> "cancelled")
+      AND ($excludeAppointmentId IS NULL OR elementId(a) <> $excludeAppointmentId)
+    RETURN a
+    LIMIT 1
+  `
+  : `
+    MATCH (a:WorkshopAppointment)
+    WHERE COALESCE(a.scheduledAt, "") = $scheduledAt
+      AND COALESCE(a.bay, "") = $bay
+      AND (a.status IS NULL OR toLower(a.status) <> "cancelled")
+      AND ($excludeAppointmentId IS NULL OR elementId(a) <> $excludeAppointmentId)
+    RETURN a
+    LIMIT 1
+  `;
+
+const result = await args.session.run(query, {
+  userUuid: user.P.uuid,
+  scheduledAt,
+  bay,
+  excludeAppointmentId: excludeAppointmentId || null
+});
+
+const hasConflict = result.records.length > 0;
+return {
+  success: true,
+  message: hasConflict ? "Slot is not available" : "Slot is available",
+  data: {
+    isAvailable: !hasConflict
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

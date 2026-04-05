@@ -1,0 +1,137 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: WorkshopDocsGettingStarted
+        title: Getting started — Workshopflow
+        url: /workshop/docs/getting-started
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return { as: "div", class: "workshop-doc-root" };'''
+        css:
+          '''return `._id.workshop-doc-root { max-width: 48rem; margin: 0 auto; padding: 1rem 1rem 2.5rem; }`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return { as: "h1", text: "Getting started", class: "workshop-doc-h1" };'''
+        css:
+          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${args.theme.var.color.text}; }`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/workshop/docs",
+  text: "Back to user guide",
+  class: "workshop-doc-back",
+  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs"); }
+};'''
+        css:
+          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  class: "workshop-doc-body",
+  text: "Sign in to access the app. The left sidebar lists every module. You can resize the sidebar by dragging its right edge, or collapse it with the toggle button. Open a module to see a data table: search, sort, filter, then use Add to create a row or click a row to edit."
+};'''
+        css:
+          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; }`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Typical workflow",
+  class: "workshop-doc-h2"
+};'''
+        css:
+          '''return `._id.workshop-doc-h2 { font-size: 1.125rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: ${args.theme.var.color.text}; }`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-doc-body",
+  textType: "markdown",
+  text: `1. Maintain Customers, Technicians, Services, and Inventory first.
+2. Create Appointments for incoming work.
+3. Track Repairs through statuses until ready for billing.
+4. Review Invoices and record Payments.
+
+Use the Dashboard for a quick overview of appointments, open repairs, low stock, and unpaid invoices.`
+};'''
+        css:
+          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; }
+._id.workshop-doc-body ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+._id.workshop-doc-body p {
+  margin: 0;
+}`;'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "PageLayout", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e5", T: "Attr", S: "3", E: "6" }
+    { id: "e6", T: "Attr", S: "3", E: "7" }
+    { id: "e7", T: "Attr", S: "3", E: "8" }
+  ]
+}

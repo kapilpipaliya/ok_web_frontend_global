@@ -15,6 +15,15 @@ const getOnItemSelect = () => args.contextData.props?.onItemSelect;
 const getFetchChildren = () => args.contextData.props?.fetchChildren;
 const getParentVertexLabel = () => args.contextData.props?.sidebarConfig?.parentVertexLabel;
 const getToParentEdgeType = () => args.contextData.props?.sidebarConfig?.toParentEdgeType;
+const getUncategorizedVertexId = () => {
+  const label = args.contextData.props?.tableVertexLabel;
+  return label ? '_' + label + '_uncategorized' : null;
+};
+const isUncategorizedTreeNode = (node) => {
+  if (!node) return false;
+  const uid = getUncategorizedVertexId();
+  return !!(uid && (node.id === uid || node.P?.key === uid));
+};
 
 // Helper function to get sortable name from item
 const getItemSortName = (item) => {
@@ -313,8 +322,8 @@ const validateDropTarget = (categoryId, targetId) => {
     return { valid: false, reason: "Cannot move a category to itself" };
   }
 
-  // Check 2: Cannot drag root/uncategorized (backend passes id as "uncategorized")
-  if (categoryId === 'uncategorized') {
+  const uidVal = getUncategorizedVertexId();
+  if (uidVal && categoryId === uidVal) {
     return { valid: false, reason: "Root items cannot be moved" };
   }
 
@@ -333,8 +342,7 @@ const initDraggable = (element) => {
   const item = getItem();
   if (!item) return;
 
-  // Prevent dragging uncategorized (backend passes id as "uncategorized")
-  if (item.id === 'uncategorized') {
+  if (isUncategorizedTreeNode(item)) {
     return;
   }
 
@@ -518,8 +526,8 @@ const initDropTarget = (element) => {
           return;
         }
 
-        // Determine new parent ID (backend uses id "uncategorized" for root)
-        const newParentId = item.id === 'uncategorized' ? null : item.id;
+        const uidDrop = getUncategorizedVertexId();
+        const newParentId = uidDrop && item.id === uidDrop ? null : item.id;
 
         // Move the sidebar item
         await handleMoveSidebarItem(data.categoryId, newParentId);
@@ -577,7 +585,8 @@ const handleMoveSidebarItem = async (categoryId, newParentId) => {
     rootKeys,
     enableUserScoping,
     hooks: hooks,
-    label: label
+    label: label,
+    tableVertexLabel: args.contextData.props?.tableVertexLabel
   };
 
   try {
@@ -635,7 +644,7 @@ const handleTableItemsDrop = async (itemIds) => {
     const toParentEdgeType = getToParentEdgeType();
     const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
 
-    // Prevent dropping into the same active category (vertex id only; backend passes id "uncategorized" for root)
+    // Prevent dropping into the same active category (vertex id only)
     const currentSelected = getSelectedItem();
     if (currentSelected && item && currentSelected.id === item.id) {
       const contentLabel = args.contextData.props?.contentLabel || "Item";
@@ -644,8 +653,8 @@ const handleTableItemsDrop = async (itemIds) => {
       return;
     }
 
-    // Determine category ID - backend expects null for uncategorized (id is "uncategorized")
-    const categoryId = item.id === 'uncategorized' ? null : item.id;
+    const uCatDrop = getUncategorizedVertexId();
+    const categoryId = uCatDrop && item.id === uCatDrop ? null : item.id;
 
     // Get sidebar config
     const sidebarConfig = {
@@ -664,8 +673,9 @@ const handleTableItemsDrop = async (itemIds) => {
 
       // Determine source category (where items were moved FROM); use vertex id only
       const sourceCategory = currentSelected;
-      const isSourceUncategorized = sourceCategory && sourceCategory.id === 'uncategorized';
-      const isTargetUncategorized = item.id === 'uncategorized';
+      const uid = getUncategorizedVertexId();
+      const isSourceUncategorized = sourceCategory && uid && sourceCategory.id === uid;
+      const isTargetUncategorized = !!(uid && item.id === uid);
 
       // Update content counts using mergeVertexProperties
       const updatedCounts = result.data?.updatedCounts;
@@ -686,11 +696,16 @@ const handleTableItemsDrop = async (itemIds) => {
         }
 
         // For uncategorized target, update the uncategorized vertex directly if it exists
-        if (isTargetUncategorized && updatedCounts.targetCategoryId === 'uncategorized' && updatedCounts.targetCount !== undefined) {
-          // Try to find and update the uncategorized vertex in the graph
-          const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+        const tgtUncatId = uid;
+        if (
+          isTargetUncategorized &&
+          tgtUncatId &&
+          updatedCounts.targetCategoryId === tgtUncatId &&
+          updatedCounts.targetCount !== undefined
+        ) {
+          const uncategorizedVertex = args.graph?.vertexes?.[tgtUncatId];
           if (uncategorizedVertex) {
-            args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+            args.mergeVertexProperties(0, tgtUncatId, args.graph, args.setGraph, {
               contentCount: updatedCounts.targetCount
             });
           } else {
@@ -703,11 +718,15 @@ const handleTableItemsDrop = async (itemIds) => {
         }
 
         // For uncategorized source, update the uncategorized vertex directly if it exists
-        if (isSourceUncategorized && updatedCounts.sourceCategoryId === 'uncategorized' && updatedCounts.sourceCount !== undefined) {
-          // Try to find and update the uncategorized vertex in the graph
-          const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+        if (
+          isSourceUncategorized &&
+          tgtUncatId &&
+          updatedCounts.sourceCategoryId === tgtUncatId &&
+          updatedCounts.sourceCount !== undefined
+        ) {
+          const uncategorizedVertex = args.graph?.vertexes?.[tgtUncatId];
           if (uncategorizedVertex) {
-            args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+            args.mergeVertexProperties(0, tgtUncatId, args.graph, args.setGraph, {
               contentCount: updatedCounts.sourceCount
             });
           } else {
@@ -770,8 +789,7 @@ const handleDelete = async (e) => {
   const toParentEdgeType = getToParentEdgeType();
   const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
 
-  // Prevent deletion of uncategorized (backend passes id as "uncategorized")
-  if (item.id === 'uncategorized') {
+  if (isUncategorizedTreeNode(item)) {
     args.showErrorToast?.("Root item cannot be deleted");
     return;
   }
@@ -921,7 +939,9 @@ return {
   cleanupDragAndDrop,
   handleMoveSidebarItem,
   handleTableItemsDrop,
-  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true,
+  isUncategorizedTreeNode,
+  getUncategorizedVertexId
 };
 '''
         key: SidebarTreeItem
@@ -950,7 +970,7 @@ return `._id {
 /*args.createEffect(() => {
   const item = args.fns.getItem();
   if (!item) return;
-  if (item.id === "uncategorized") return;
+  if (args.fns.isUncategorizedTreeNode?.(item)) return;
 
   // Access expandedKeys prop to make effect reactive to prop changes
   const expandedKeys = args.contextData.props?.expandedKeys || [];
@@ -988,7 +1008,8 @@ const isDragging = args.fns.isDragging?.() || false;
 const item = args.fns.getItem();
 const rootKeys = args.contextData.props?.sidebarConfig?.rootKeys || {};
 const rootKey = rootKeys.key;
-const isRoot = item?.P?.key === rootKey || item?.P?.key === 'uncategorized';
+const isRoot =
+  item?.P?.key === rootKey || (args.fns.isUncategorizedTreeNode?.(item) ?? false);
 const isQueued = args.fns.isQueued?.() ?? false;
 
 // Determine drag over styling based on validation
@@ -1051,7 +1072,7 @@ return `._id {
         props:
           '''
 const item = args.fns.getItem();
-const isRoot = item?.id === 'uncategorized';
+const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 const isDragging = args.fns.isDragging?.() || false;
 const isDragOver = args.fns.isDragOver?.() || false;
 const isValidDrop = args.fns.isValidDrop?.() ?? true;
@@ -1252,12 +1273,12 @@ return `._id {
         props:
           '''
 const item = args.fns.getItem();
-const isUncategorized = item?.id === 'uncategorized';
+const isUncatRow = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 const isQueued = args.fns.isQueued?.() ?? false;
 
 return {
   as: "div",
-  hide: isUncategorized || isQueued,
+  hide: isUncatRow || isQueued,
   class: "tree-item-actions"
 };
 '''
@@ -1389,7 +1410,7 @@ return `._id {
         props:
           '''
 const item = args.fns.getItem();
-const isRoot = item?.id === 'uncategorized';
+const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 
 return {
   as: "icon",
@@ -1411,7 +1432,7 @@ return {
         props:
           '''
 const item = args.fns.getItem();
-const isRoot = item?.id === 'uncategorized';
+const isRoot = args.fns.isUncategorizedTreeNode?.(item) ?? false;
 
 return {
   as: "s-button",

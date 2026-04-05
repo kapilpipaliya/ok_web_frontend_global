@@ -1,0 +1,116 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: WorkshopSettingsPicklistModulePage
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  class: "workshop-settings-layout"
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  width: 100%;
+  min-height: 60vh;
+  padding: ${args.theme.var.spacing.md};
+}
+
+@media (min-width: 769px) {
+  ._id.workshop-settings-layout {
+    flex-wrap: nowrap;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsSidebar
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "main",
+  class: "workshop-settings-main"
+};
+'''
+        css:
+          '''
+return `._id.workshop-settings-main {
+  flex: 1;
+  min-width: 0;
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopReferenceSequenceEditor
+        props:
+          '''
+const p = args.contextData.props || {};
+return {
+  sequenceKey: String(p.referenceSequenceKey || "").trim(),
+  sectionTitle: p.referenceSectionTitle || "",
+  description: p.referenceSectionDescription || ""
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: WorkshopPicklistEditor
+        props:
+          '''
+const p = args.contextData.props || {};
+return {
+  picklistKey: p.picklistKey || "",
+  pageTitle: p.pageTitle || "Options",
+  defaultTitle: p.defaultTitle || "",
+  description: p.description || ""
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { "id": "wspmp1", "T": "Attr", "S": "1", "E": "2" }
+    { "id": "wspmp2", "T": "Attr", "S": "2", "E": "3" }
+    { "id": "wspmp3", "T": "Attr", "S": "2", "E": "4" }
+    { "id": "wspmp4", "T": "Attr", "S": "4", "E": "6" }
+    { "id": "wspmp5", "T": "Attr", "S": "4", "E": "5" }
+  ]
+}

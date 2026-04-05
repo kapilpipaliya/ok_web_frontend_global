@@ -33,7 +33,8 @@ const {
   enableUserScoping,
   hooks,
   elementIds,
-  onlyNotQueued
+  onlyNotQueued,
+  relationshipPropertyBindings
 } = args.contextData;
 
 const getGraphPayload = (nodes, rels) => ({
@@ -43,6 +44,102 @@ const getGraphPayload = (nodes, rels) => ({
   deleted_edges: Array.isArray(args.context?.deletedEdges) ? args.context.deletedEdges : []
 });
 
+// Optional: client passes bindings from table config (form fields with selectConfig.edgeOnly + relationshipType, plus config.relationshipPropertyBindings).
+const hydrateRelationshipSelectProps = (items, rels, bindings) => {
+  if (!Array.isArray(bindings) || bindings.length === 0 || !Array.isArray(items)) return;
+  for (let vi = 0; vi < items.length; vi++) {
+    const v = items[vi];
+    if (!v?.P || !v?.OUT) continue;
+    for (let bi = 0; bi < bindings.length; bi++) {
+      const row = bindings[bi];
+      const prop = row?.prop;
+      const rel = row?.rel;
+      if (!prop || !rel) continue;
+      const outArr = v.OUT[rel];
+      if (!Array.isArray(outArr) || outArr.length === 0) {
+        v.P[prop] = null;
+        continue;
+      }
+      const edgeObj = rels[outArr[0]];
+      if (edgeObj && edgeObj.E != null) v.P[prop] = edgeObj.E;
+      else v.P[prop] = null;
+    }
+  }
+};
+
+const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
+  if (!config || typeof config !== "object") return [];
+  const groups = config.formConfig?.groups;
+  if (!Array.isArray(groups)) return [];
+  const fields = [];
+  for (let gi = 0; gi < groups.length; gi++) {
+    const g = groups[gi]?.fields;
+    if (!Array.isArray(g)) continue;
+    for (let fi = 0; fi < g.length; fi++) fields.push(g[fi]);
+  }
+  const seen = new Set();
+  const bindings = [];
+  const addBinding = (prop, rel) => {
+    if (!prop || !rel) return;
+    const k = `${prop}\0${rel}`;
+    if (seen.has(k)) return;
+    seen.add(k);
+    bindings.push({ prop, rel });
+  };
+  for (let i = 0; i < fields.length; i++) {
+    const f = fields[i];
+    if (f?.type === "select" && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
+      addBinding(f.key, f.selectConfig.relationshipType);
+    }
+  }
+  const extra = config.relationshipPropertyBindings;
+  if (Array.isArray(extra)) {
+    for (let j = 0; j < extra.length; j++) {
+      const row = extra[j];
+      addBinding(row?.prop, row?.rel);
+    }
+  }
+  return bindings;
+};
+
+const fetchTableSettingConfigObject = async (label) => {
+  const uuid = user?.P?.uuid;
+  if (!uuid || !label) return null;
+  const userKey = `${label}_settings`;
+  let res = await args.session.run(
+    `MATCH (u:User {uuid: $uuid})-[:UserSetting]->(s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
+    { uuid, key: userKey }
+  );
+  let cfg = res.records[0]?.get("cfg");
+  if (cfg == null) {
+    const defaultKey = `${label}_settings_default`;
+    res = await args.session.run(
+      `MATCH (s:Setting {key: $key}) RETURN s.config AS cfg LIMIT 1`,
+      { key: defaultKey }
+    );
+    cfg = res.records[0]?.get("cfg");
+  }
+  if (cfg == null) return null;
+  const str = typeof cfg === "string" ? cfg : String(cfg);
+  if (!str.trim()) return null;
+  try {
+    const fn = new Function(str);
+    const o = fn();
+    return o && typeof o === "object" ? o : null;
+  } catch (e) {
+    console.warn("getUserContent: Setting.config eval failed", e);
+    return null;
+  }
+};
+
+const resolveRelationshipPropertyBindings = async (label) => {
+  if (Array.isArray(relationshipPropertyBindings)) {
+    return relationshipPropertyBindings;
+  }
+  const configObj = await fetchTableSettingConfigObject(label);
+  return buildRelationshipPropertyBindingsFromTableConfig(configObj);
+};
+
 if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
   return {
     success: false,
@@ -50,6 +147,8 @@ if (!tableVertexLabel || typeof tableVertexLabel !== "string") {
     data: []
   };
 }
+
+const effectiveRelationshipPropertyBindings = await resolveRelationshipPropertyBindings(tableVertexLabel);
 
 // Lightweight path: return only rows that are no longer queued (for background refresh without full reload)
 if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0) {
@@ -65,6 +164,7 @@ if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0
   const nodes = args.context.nodes || {};
   const rels = args.context.relationships || {};
   const items = Object.values(nodes).filter(v => v.L && v.L.includes(tableVertexLabel));
+  hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
   return {
     success: true,
     data: items,
@@ -78,6 +178,12 @@ if (onlyNotQueued === true && Array.isArray(elementIds) && elementIds.length > 0
 const vertexLabel = tableVertexLabel;
 // Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
 const relationshipType = `User${vertexLabel}`;
+const uncategorizedVertexId = '_' + vertexLabel + '_uncategorized';
+const categoryIdIsSyntheticUncategorized = !!(categoryId && categoryId === uncategorizedVertexId);
+const applyUnassignedCategoryScope =
+  !!(parentVertexLabel && toParentEdgeType && (showUnassigned === true || categoryIdIsSyntheticUncategorized));
+const useRealCategoryGraphMatch =
+  !!(categoryId && parentVertexLabel && toParentEdgeType && !categoryIdIsSyntheticUncategorized);
 
 // Build WHERE clause for filters
 const whereConditions = [];
@@ -106,7 +212,10 @@ if (search && search.trim()) {
     toLower(COALESCE(c.note, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.customerDisplayName, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.status, '')) CONTAINS $searchTerm OR
-    toLower(COALESCE(c.draftOrderName, '')) CONTAINS $searchTerm
+    toLower(COALESCE(c.draftOrderName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.partNo, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.supplierName, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.supplierCode, '')) CONTAINS $searchTerm
   )`);
   queryParams.searchTerm = searchTerm;
 }
@@ -142,17 +251,15 @@ if (sort && sort.column) {
   orderByClause = "ORDER BY COALESCE(c.name, c.title, '') ASC, c.createdAt DESC";
 }
 
-// Build category filter if provided
+// Build category filter if provided (synthetic uncategorized id uses unassigned scope, not elementId(cat))
 let categoryFilter = "";
-if (categoryId && parentVertexLabel && toParentEdgeType) {
-  // Filter by category relationship - content points to category: content-[toParentEdgeType]->category
+if (useRealCategoryGraphMatch) {
   categoryFilter = `
   MATCH (cat:${parentVertexLabel})
   WHERE elementId(cat) = $categoryId
   MATCH (c)-[:${toParentEdgeType}]->(cat)`;
   queryParams.categoryId = categoryId;
-} else if (showUnassigned && parentVertexLabel && toParentEdgeType) {
-  // Show items without any category relationship
+} else if (applyUnassignedCategoryScope) {
   const unassignedCondition = `NOT EXISTS {
     MATCH (c)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
   }`;
@@ -179,7 +286,7 @@ await args.executeHooks(hooks?.beforeFetchData, {
 // Optimized query with indexed user lookup first and related vertices
 let query = "";
 if (!enableUserScoping) {
-  if (categoryId && parentVertexLabel && toParentEdgeType) {
+  if (useRealCategoryGraphMatch) {
     // Query with category filter - content points to category: content-[toParentEdgeType]->category
     query = `
     MATCH (cat:${parentVertexLabel})
@@ -201,7 +308,7 @@ if (!enableUserScoping) {
     `;
   }
 } else {
-  if (categoryId && parentVertexLabel && toParentEdgeType) {
+  if (useRealCategoryGraphMatch) {
     // Query with category filter - content points to category: content-[toParentEdgeType]->category
     query = `
     MATCH (u:User {uuid: $userUuid})
@@ -236,6 +343,7 @@ args.processResult(queryResult.records, args.context, ['c', 'related'], 'r');
 const nodes = args.context.nodes || {};
 const rels = args.context.relationships || {};
 const items = Object.values(nodes).filter(v => v.L && v.L.includes(vertexLabel));
+hydrateRelationshipSelectProps(items, rels, effectiveRelationshipPropertyBindings);
 
 const result = {
   success: true,

@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Repairs settings
+        url: /workshop/settings/repairs
+        key: WorkshopSettingsRepairs
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: WorkshopSettingsPicklistModulePage
+        props:
+          '''
+return {
+  picklistKey: "repair_status",
+  pageTitle: "Repairs",
+  defaultTitle: "Repair order status",
+  description:
+    "Repair order workflow statuses. Include cancelled if you use it in hooks and badges.",
+  referenceSequenceKey: "RepairOrder.repairNo",
+  referenceSectionTitle: "Repair order numbers",
+  referenceSectionDescription:
+    "RO / job numbers shown on the floor, invoices, and parts orders. Reserved when the add form opens."
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "wsr1", T: "RolePage", S: "1", E: "2" }
+    { id: "wsr2", T: "RolePagePage", S: "2", E: "3" }
+    { id: "wsr3", T: "PageLayout", S: "3", E: "4" }
+    { id: "wsr4", T: "Attr", S: "3", E: "5" }
+  ]
+}

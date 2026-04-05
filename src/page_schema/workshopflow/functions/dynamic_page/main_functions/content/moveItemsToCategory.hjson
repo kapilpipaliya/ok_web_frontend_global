@@ -4,7 +4,7 @@
       id: "1"
       L: Function
       P: {
-        description: Moves multiple content items to a category by creating relationships. If categoryId is null or 'uncategorized', removes relationships instead.
+        description: Moves multiple content items to a category by creating relationships. If categoryId is null/empty or the synthetic _{contentLabel}_uncategorized id, removes relationships instead.
         body:
           '''
 // Get current authenticated user from session
@@ -50,14 +50,23 @@ if (!relationshipType || !categoryLabel || !contentLabel) {
 const userUuid = user.P.uuid;
 const userCategoryRelType = `User${categoryLabel}`;
 const contentRelType = `User${contentLabel}`;
+const uncategorizedVertexId = contentLabel ? '_' + contentLabel + '_uncategorized' : null;
+const isUncategorizedCategoryId = (id) =>
+  id == null ||
+  id === '' ||
+  (uncategorizedVertexId != null && id === uncategorizedVertexId);
+const isConcreteCategoryId = (id) =>
+  id != null &&
+  id !== '' &&
+  (uncategorizedVertexId == null || id !== uncategorizedVertexId);
 
 // Initialize deleted edges tracking in context if not exists
 if (!args.context.deletedEdges) {
   args.context.deletedEdges = [];
 }
 
-// If categoryId is null, undefined, or 'uncategorized', remove relationships
-const isUncategorized = !categoryId || categoryId === 'uncategorized';
+// If categoryId is null, undefined, or synthetic uncategorized id, remove relationships
+const isUncategorized = isUncategorizedCategoryId(categoryId);
 
 // Execute beforeMoveItemsToCategory hooks
 await args.executeHooks(hooks?.beforeMoveItemsToCategory, {
@@ -165,10 +174,10 @@ try {
       const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
       const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
       updatedCounts.targetCount = uncategorizedCount;
-      updatedCounts.targetCategoryId = 'uncategorized';
+      updatedCounts.targetCategoryId = uncategorizedVertexId;
       
       // Calculate source category count if provided and not uncategorized
-      if (sourceCategoryId && sourceCategoryId !== 'uncategorized') {
+      if (isConcreteCategoryId(sourceCategoryId)) {
         let sourceCountQuery;
         let sourceCountParams;
         if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
@@ -207,10 +216,10 @@ try {
         const sourceCountResult = await args.session.run(sourceCountQuery, sourceCountParams);
         updatedCounts.sourceCount = sourceCountResult.records[0]?.get('contentCount') || 0;
         updatedCounts.sourceCategoryId = sourceCategoryId;
-      } else if (sourceCategoryId === 'uncategorized') {
+      } else if (sourceCategoryId != null && isUncategorizedCategoryId(sourceCategoryId)) {
         // Source is uncategorized, so use the same uncategorized count
         updatedCounts.sourceCount = uncategorizedCount;
-        updatedCounts.sourceCategoryId = 'uncategorized';
+        updatedCounts.sourceCategoryId = uncategorizedVertexId;
       }
     }
     
@@ -416,7 +425,7 @@ try {
       
       // Calculate source category count if provided
       if (sourceCategoryId) {
-        if (sourceCategoryId === 'uncategorized') {
+        if (sourceCategoryId != null && isUncategorizedCategoryId(sourceCategoryId)) {
           // Source is uncategorized, count items without any category relationship
           let uncategorizedCountQuery;
           let uncategorizedCountParams;
@@ -442,7 +451,7 @@ try {
           
           const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
           updatedCounts.sourceCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
-          updatedCounts.sourceCategoryId = 'uncategorized';
+          updatedCounts.sourceCategoryId = uncategorizedVertexId;
         } else {
           // Source is a regular category
           let sourceCountQuery;

@@ -844,3 +844,9 @@ Mental model
 One viewport-sized scroller (40wrap) drives vertical + horizontal scroll and VirtualList scrollTop. Header/filter are masked horizontally but follow scrollLeft from that same scroller.
 
 
+Update repair status through each stage.
+Move to ready-billing and verify invoice creation.
+Close repair with valid partsUsed and confirm inventory deduction.
+Try overpaying an invoice to verify rejection.
+
+

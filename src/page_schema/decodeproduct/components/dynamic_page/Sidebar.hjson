@@ -13,6 +13,10 @@ const getFormConfig = () => args.fns.getSidebarConfig()?.formConfig;
 const getSidebarLabel = () => args.fns.getSidebarConfig()?.label || args.fns.getSidebarConfig()?.parentVertexLabel;
 
 const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getUncategorizedVertexId = () => {
+  const label = getTableVertexLabel();
+  return label ? '_' + label + '_uncategorized' : null;
+};
 const getRelationshipType = () => args.contextData.props?.relationshipType;
 
 // State management - using graph for data, signals only for UI state
@@ -191,12 +195,11 @@ const getItemSortName = (item) => {
   return item.P?.name || item.P?.title || item.P?.key || "";
 };
 
-// Helper function to check if item is Uncategorized
+// Helper function to check if item is the synthetic Uncategorized row for this table
 const isUncategorized = (item) => {
   if (!item) return false;
-  return item.P?.key === 'uncategorized' || item.id === 'uncategorized' || 
-         item.P?.name?.toLowerCase() === 'uncategorized' || 
-         item.P?.title?.toLowerCase() === 'uncategorized';
+  const uid = getUncategorizedVertexId();
+  return !!(uid && (item.id === uid || item.P?.key === uid));
 };
 
 // Common function to sort items (Uncategorized first, then alphabetically)
@@ -260,7 +263,12 @@ const getRoot = () => {
   if (!vertexes || !toParentEdgeType) return sortItems([]);
   const labelIds = graph.vertexLabelIdMap?.[parentVertexLabel];
   const candidateIds = Array.isArray(labelIds) ? labelIds : Object.keys(vertexes).filter(id => vertexes[id]?.L?.includes(parentVertexLabel));
-  const rootIds = candidateIds.filter(id => vertexes[id] != null && (id === 'uncategorized' || !(vertexes[id].OUT?.[toParentEdgeType]?.length)));
+  const syntheticUncat = getUncategorizedVertexId();
+  const rootIds = candidateIds.filter(
+    id =>
+      vertexes[id] != null &&
+      (id === syntheticUncat || !(vertexes[id].OUT?.[toParentEdgeType]?.length))
+  );
   const rootItems = rootIds.map(id => vertexes[id]).filter(v => v != null);
   return sortItems(rootItems);
 };
@@ -717,6 +725,7 @@ return {
   getToParentEdgeType,
   getRootKeys,
   getTableVertexLabel,
+  getUncategorizedVertexId,
   getRelationshipType,
   getSidebarLabel,
   isAddRootModalOpen,

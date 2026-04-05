@@ -125,6 +125,8 @@ return {
   placeholder: args.contextData.props?.placeholder || "",
   required: args.contextData.props?.required || false,
   disabled: args.contextData.props?.disabled || false,
+  title: args.contextData.props?.title || undefined,
+  "aria-describedby": args.contextData.props?.["aria-describedby"] || undefined,
   // readOnly: args.contextData.props?.readOnly || false, // not work on server
   maxLength: args.contextData.props?.maxLength || undefined,
   minLength: args.contextData.props?.minLength || undefined,

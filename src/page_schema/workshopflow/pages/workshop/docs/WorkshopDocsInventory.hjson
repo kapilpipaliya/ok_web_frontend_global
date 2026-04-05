@@ -1,0 +1,159 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        key: WorkshopDocsInventory
+        title: Inventory — Workshopflow help
+        url: /workshop/docs/inventory
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return { as: "div", class: "workshop-doc-root" };'''
+        css:
+          '''return `._id.workshop-doc-root { max-width: 48rem; margin: 0 auto; padding: 1rem 1rem 2.5rem; }`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return { as: "h1", text: "Inventory", class: "workshop-doc-h1" };'''
+        css:
+          '''return `._id.workshop-doc-h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; color: ${args.theme.var.color.text}; }`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "a",
+  href: "/workshop/docs",
+  text: "Back to user guide",
+  class: "workshop-doc-back",
+  onClick: (e) => { e.preventDefault(); args.navigate("/workshop/docs"); }
+};'''
+        css:
+          '''return `._id.workshop-doc-back { display: inline-block; margin-bottom: 1rem; color: ${args.theme.var.color.primary}; font-weight: 600; text-decoration: none; cursor: pointer; }`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  class: "workshop-doc-body",
+  text: "Open Inventory from the sidebar (/workshop/inventory). Part number is unique. Use Inventory Categories in the sidebar to filter: add categories, then assign each part to a category. Choose a supplier from the Suppliers directory (linked record); vendor records live under /workshop/suppliers."
+};'''
+        css:
+          '''return `._id.workshop-doc-body { margin: 0 0 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; }`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Form fields",
+  class: "workshop-doc-h2"
+};'''
+        css:
+          '''return `._id.workshop-doc-h2 { font-size: 1.125rem; font-weight: 700; margin: 1rem 0 0.5rem; color: ${args.theme.var.color.text}; }`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  class: "workshop-doc-body workshop-doc-table",
+  textType: "markdown",
+  text: `| Field | What to enter | Example |
+| --- | --- | --- |
+| Part # | Unique stock code | BP-01 |
+| Part Name | Item description | Front Brake Pad Set |
+| Category Name | Part category text | Brakes |
+| Supplier | Pick a supplier record | (from Suppliers list) |
+| Stock Quantity | Units currently in stock | 24 |
+| Reorder Level | Minimum before restock | 8 |
+| Unit Cost | Purchase price | 45.00 |
+| Unit Price | Selling price | 60.00 |
+| Notes | Internal comment | Fast-moving item |`
+};'''
+        css:
+          '''return `._id.workshop-doc-body { margin: 0; line-height: 1.6; color: ${args.theme.var.color.text}; }
+._id.workshop-doc-table {
+  margin: 0;
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+._id.workshop-doc-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+._id.workshop-doc-table th,
+._id.workshop-doc-table td {
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+._id.workshop-doc-table th {
+  background: ${args.theme.var.color.background_light_200};
+  font-weight: 600;
+}`;'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "PageLayout", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e5", T: "Attr", S: "3", E: "6" }
+    { id: "e6", T: "Attr", S: "3", E: "7" }
+    { id: "e7", T: "Attr", S: "3", E: "8" }
+  ]
+}

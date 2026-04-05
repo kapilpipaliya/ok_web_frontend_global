@@ -1,0 +1,164 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: postWorkshopPayment
+        description: Posts a payment and updates invoice payment status.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found", data: null };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const {
+  invoiceNo,
+  amount,
+  method,
+  paymentDate,
+  referenceNo,
+  notes,
+  allowOverpayment = false,
+  enableUserScoping = true
+} = args.contextData || {};
+
+if (!invoiceNo || amount === undefined || amount === null) {
+  return {
+    success: false,
+    message: "invoiceNo and amount are required"
+  };
+}
+
+const parsedAmount = Number(amount);
+if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+  return { success: false, message: "amount must be a positive number" };
+}
+
+const result = await args.session.executeWrite(async (tx) => {
+  const invoiceLookup = enableUserScoping
+    ? await tx.run(
+        `
+        MATCH (u:User {uuid: $userUuid})-[:UserWorkshopInvoice]->(i:WorkshopInvoice {invoiceNo: $invoiceNo})
+        RETURN i
+        LIMIT 1
+        `,
+        { userUuid: user.P.uuid, invoiceNo }
+      )
+    : await tx.run(
+        `
+        MATCH (i:WorkshopInvoice {invoiceNo: $invoiceNo})
+        RETURN i
+        LIMIT 1
+        `,
+        { invoiceNo }
+      );
+
+  if (invoiceLookup.records.length === 0) {
+    throw new Error("Invoice not found");
+  }
+
+  const invoice = invoiceLookup.records[0].get("i");
+  const currentPaid = Number(invoice.properties.paidAmount || 0);
+  const totalAmount = Number(invoice.properties.totalAmount || 0);
+  const nextPaidAmount = currentPaid + parsedAmount;
+
+  if (!allowOverpayment && totalAmount > 0 && nextPaidAmount > totalAmount) {
+    throw new Error(`Payment exceeds invoice balance. Remaining: ${Math.max(totalAmount - currentPaid, 0)}`);
+  }
+
+  let paymentStatus = "unpaid";
+  if (nextPaidAmount > 0 && nextPaidAmount < totalAmount) paymentStatus = "partial";
+  if (nextPaidAmount >= totalAmount && totalAmount > 0) paymentStatus = "paid";
+
+  const paymentNo = `PAY-${Date.now()}`;
+  const createPayment = enableUserScoping
+    ? await tx.run(
+        `
+        MATCH (u:User {uuid: $userUuid})
+        MATCH (i:WorkshopInvoice {invoiceNo: $invoiceNo})
+        CREATE (p:WorkshopPayment {
+          paymentNo: $paymentNo,
+          invoiceNo: $invoiceNo,
+          amount: $amount,
+          method: $method,
+          paymentDate: $paymentDate,
+          referenceNo: $referenceNo,
+          notes: $notes,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        CREATE (u)-[:UserWorkshopPayment {createdAt: datetime()}]->(p)
+        MERGE (p)-[:PaymentInvoice {createdAt: datetime()}]->(i)
+        RETURN p
+        `,
+        {
+          userUuid: user.P.uuid,
+          invoiceNo,
+          paymentNo,
+          amount: parsedAmount,
+          method: method || "cash",
+          paymentDate: paymentDate || new Date().toISOString().slice(0, 10),
+          referenceNo: referenceNo || "",
+          notes: notes || ""
+        }
+      )
+    : await tx.run(
+        `
+        MATCH (i:WorkshopInvoice {invoiceNo: $invoiceNo})
+        CREATE (p:WorkshopPayment {
+          paymentNo: $paymentNo,
+          invoiceNo: $invoiceNo,
+          amount: $amount,
+          method: $method,
+          paymentDate: $paymentDate,
+          referenceNo: $referenceNo,
+          notes: $notes,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        MERGE (p)-[:PaymentInvoice {createdAt: datetime()}]->(i)
+        RETURN p
+        `,
+        {
+          invoiceNo,
+          paymentNo,
+          amount: parsedAmount,
+          method: method || "cash",
+          paymentDate: paymentDate || new Date().toISOString().slice(0, 10),
+          referenceNo: referenceNo || "",
+          notes: notes || ""
+        }
+      );
+
+  await tx.run(
+    `
+    MATCH (i:WorkshopInvoice {invoiceNo: $invoiceNo})
+    SET i.paidAmount = $paidAmount,
+        i.paymentStatus = $paymentStatus,
+        i.updatedAt = datetime()
+    RETURN i
+    `,
+    {
+      invoiceNo,
+      paidAmount: nextPaidAmount,
+      paymentStatus
+    }
+  );
+
+  return args.convertNodeToJson(createPayment.records[0].get("p"));
+});
+
+return {
+  success: true,
+  message: "Payment posted successfully",
+  data: result
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

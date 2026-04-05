@@ -45,16 +45,34 @@ await args.executeHooks(hooks?.beforeGetVertexChildren, {
   enableUserScoping
 });
 
+// Optional filters from rootKeys (e.g. v.key = "root") — must apply in loadFullTree mode too
+const rootKeyFilterConditions = [];
+const rootKeyFilterParams = {};
+let rkParamIdx = 0;
+for (const [rk, rv] of Object.entries(rootKeys || {})) {
+  rkParamIdx++;
+  const pn = `rk${rkParamIdx}`;
+  rootKeyFilterConditions.push(`v.${rk} = $${pn}`);
+  rootKeyFilterParams[pn] = rv;
+}
+const rootKeyFilterClauseOnV =
+  rootKeyFilterConditions.length > 0 ? ` AND ${rootKeyFilterConditions.join(" AND ")}` : "";
+const edgeWhereClause =
+  rootKeyFilterConditions.length > 0
+    ? ` WHERE ${rootKeyFilterConditions.map((c) => c.replace(/^v\./, "child.")).join(" AND ")} AND ${rootKeyFilterConditions.map((c) => c.replace(/^v\./, "parent.")).join(" AND ")}`
+    : "";
+
 let rootVertices;
 
 if (fetchFullTree) {
   // Full tree: fetch all vertices and all edges in two queries
   if (!args.context.nodes) args.context.nodes = {};
   let allVerticesQuery;
-  const allVerticesParams = {};
+  const allVerticesParams = { ...rootKeyFilterParams };
   if (!enableUserScoping) {
     allVerticesQuery = `
       MATCH (v:${parentVertexLabel})
+      WHERE true${rootKeyFilterClauseOnV}
       RETURN v
       ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
     `;
@@ -62,6 +80,7 @@ if (fetchFullTree) {
     const userRel = `User${parentVertexLabel}`;
     allVerticesQuery = `
       MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(v:${parentVertexLabel})
+      WHERE true${rootKeyFilterClauseOnV}
       RETURN v
       ORDER BY COALESCE(v.displayOrder, 0), COALESCE(v.key, '') ASC
     `;
@@ -71,17 +90,17 @@ if (fetchFullTree) {
   args.processResult(allVerticesResult.records, args.context, 'v');
 
   let allEdgesQuery;
-  const allEdgesParams = {};
+  const allEdgesParams = { ...rootKeyFilterParams };
   if (!enableUserScoping) {
     allEdgesQuery = `
-      MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+      MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})${edgeWhereClause}
       RETURN child, parent, r
       ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
     `;
   } else {
     const userRel = `User${parentVertexLabel}`;
     allEdgesQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})
+      MATCH (u:User {uuid: $userUuid})-[:${userRel}]->(child:${parentVertexLabel})-[r:${toParentEdgeType}]->(parent:${parentVertexLabel})${edgeWhereClause}
       RETURN child, parent, r
       ORDER BY COALESCE(child.displayOrder, 0), COALESCE(child.key, '') ASC
     `;
@@ -190,11 +209,16 @@ if (tableVertexLabel && relationshipType) {
   }
   const uncatResult = await args.session.run(uncatQuery, uncatParams);
   uncategorizedCount = uncatResult.records[0]?.get('contentCount') || 0;
-  const uncategorizedId = 'uncategorized';
+  const uncategorizedId = '_' + tableVertexLabel + '_uncategorized';
   uncategorizedVertex = {
     id: uncategorizedId,
     L: [parentVertexLabel],
-    P: { key: 'uncategorized', name: 'Uncategorized', contentCount: uncategorizedCount },
+    P: {
+      key: uncategorizedId,
+      name: 'Uncategorized',
+      contentCount: uncategorizedCount,
+      tableVertexLabel: tableVertexLabel
+    },
     IN: {},
     OUT: {}
   };
@@ -205,7 +229,10 @@ if (tableVertexLabel && relationshipType) {
 // 4) Batch content count for all categories (roots + children) in one query
 const rootKey = rootKeys.key || null;
 if (tableVertexLabel && relationshipType && args.context.nodes) {
-  const categoryIds = Object.keys(args.context.nodes).filter(id => id !== 'uncategorized');
+  const syntheticUncategorizedId = '_' + tableVertexLabel + '_uncategorized';
+  const categoryIds = Object.keys(args.context.nodes).filter(
+    id => id !== syntheticUncategorizedId
+  );
   const countByCategoryId = {};
   if (categoryIds.length > 0) {
     let batchQuery;
@@ -240,7 +267,7 @@ if (tableVertexLabel && relationshipType && args.context.nodes) {
   for (const id of Object.keys(args.context.nodes)) {
     const node = args.context.nodes[id];
     if (!node || !node.P) continue;
-    if (id === 'uncategorized') continue;
+    if (id === syntheticUncategorizedId) continue;
     const useUncategorizedCount = rootKey && node.P.key === rootKey;
     const contentCount = useUncategorizedCount ? uncategorizedCount : (countByCategoryId[id] ?? 0);
     node.P.contentCount = contentCount;

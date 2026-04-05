@@ -1,0 +1,278 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true
+};
+'''
+        title: Workshop Dashboard
+        url: /workshop/dashboard
+        key: WorkshopDashboard
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(14rem, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+const [stats, setStats] = args.createSignal({
+  appointments: 0,
+  openRepairs: 0,
+  lowStockItems: 0,
+  unpaidInvoices: 0
+});
+const [loading, setLoading] = args.createSignal(false);
+
+const loadStats = async () => {
+  setLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getWorkshopDashboardStats",
+      contextData: {}
+    });
+    if (result?.success && result?.data) {
+      setStats(result.data);
+    }
+  } catch (error) {
+    args.showErrorToast(error?.message || "Failed to load workshop dashboard stats");
+  } finally {
+    setLoading(false);
+  }
+};
+
+return {
+  stats,
+  loading,
+  loadStats
+};
+'''
+        componentName: Html
+        key: dashboard_container
+        props:
+          '''
+return {
+  as: "div",
+  onMount: () => {
+    args.fns.loadStats();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: appointments_card
+        props:
+          '''
+return {
+  as: "div",
+  text: args.fns.loading()
+    ? "Loading appointments..."
+    : `Scheduled or in-progress appointments: ${args.fns.stats().appointments}`
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: repairs_card
+        props:
+          '''
+return {
+  as: "div",
+  text: args.fns.loading()
+    ? "Loading open repairs..."
+    : `Open repair orders: ${args.fns.stats().openRepairs}`
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        key: stock_card
+        props:
+          '''
+return {
+  as: "div",
+  text: args.fns.loading()
+    ? "Loading stock alerts..."
+    : `Low stock inventory items: ${args.fns.stats().lowStockItems}`
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border_light_200};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        key: unpaid_card
+        props:
+          '''
+return {
+  as: "div",
+  text: args.fns.loading()
+    ? "Loading invoices..."
+    : `Invoices not fully paid: ${args.fns.stats().unpaidInvoices}`
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: WorkshopLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: RolePage
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: RolePagePage
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: PageLayout
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "4"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "4"
+      E: "8"
+    }
+  ]
+}

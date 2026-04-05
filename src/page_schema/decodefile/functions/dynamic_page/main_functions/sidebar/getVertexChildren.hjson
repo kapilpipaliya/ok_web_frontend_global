@@ -211,15 +211,16 @@ if (rootKeys) {
     const uncategorizedCountResult = await args.session.run(uncategorizedCountQuery, uncategorizedCountParams);
     const uncategorizedCount = uncategorizedCountResult.records[0]?.get('contentCount') || 0;
     
-    // Create virtual 'uncategorized' vertex
-    const uncategorizedId = 'uncategorized';
+    // Create virtual uncategorized vertex (id is namespaced by content table label)
+    const uncategorizedId = '_' + tableVertexLabel + '_uncategorized';
     uncategorizedVertex = {
       id: uncategorizedId,
       L: [parentVertexLabel],
       P: {
-        key: 'uncategorized',
+        key: uncategorizedId,
         name: 'Uncategorized',
-        contentCount: uncategorizedCount
+        contentCount: uncategorizedCount,
+        tableVertexLabel: tableVertexLabel
       },
       IN: {},
       OUT: {}

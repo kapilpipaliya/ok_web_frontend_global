@@ -4,9 +4,19 @@
       id: "1"
       L: Function
       P: {
-        description: Syncs Shopify inventory transfers and transfer line items. Skips API when loading line items filtered by a single inventoryTransferId. Requires read_inventory_transfers and product visibility permission.
+        description: Syncs Shopify inventory transfers and transfer line items. Uncategorized runs full inventoryTransfers pagination; a specific category loads rows via getUserContent then fetches those transfers by GID. Skips API when line items are filtered by a single inventoryTransferId.
         body:
-          '''const { tableVertexLabel, filters = {}, sort = {}, shop: contextShop } = args.contextData;
+          '''const {
+  tableVertexLabel,
+  filters = {},
+  sort = {},
+  shop: contextShop,
+  showUnassigned,
+  categoryId,
+  parentVertexLabel,
+  toParentEdgeType,
+  enableUserScoping
+} = args.contextData;
 const isTransferTable = tableVertexLabel === "ShopifyInventoryTransfer";
 const isLineTable = tableVertexLabel === "ShopifyInventoryTransferLineItem";
 if (!isTransferTable && !isLineTable) return;
@@ -40,6 +50,52 @@ try {
 if (!admin) {
   console.log("[shopifyInventoryTransferBeforeFetchData] no admin client for shop:", shop);
   return;
+}
+
+const vertexLabel = tableVertexLabel;
+const uncategorizedVertexId = "_" + vertexLabel + "_uncategorized";
+const isUncategorized = showUnassigned === true || categoryId === uncategorizedVertexId;
+
+let categoryTransferGids = [];
+if (!isUncategorized && categoryId && parentVertexLabel && toParentEdgeType) {
+  try {
+    const fetchResult = await args.executeNamedServerFunction(
+      {
+        functionName: "getUserContent",
+        contextData: {
+          tableVertexLabel,
+          categoryId,
+          parentVertexLabel,
+          toParentEdgeType,
+          enableUserScoping,
+          hooks: null
+        }
+      },
+      { functionLookupSubDomain: "decodeorder" }
+    );
+    const rows =
+      fetchResult?.result?.success && Array.isArray(fetchResult.result.data) ? fetchResult.result.data : [];
+    const seenTransferGids = new Set();
+    for (const row of rows) {
+      const transferGid = isTransferTable ? row.P?.id : row.P?.inventoryTransferId;
+      if (transferGid && !seenTransferGids.has(transferGid)) {
+        seenTransferGids.add(transferGid);
+        categoryTransferGids.push(transferGid);
+      }
+    }
+    console.log(
+      "[shopifyInventoryTransferBeforeFetchData] category scope: unique transfer GIDs",
+      categoryTransferGids.length,
+      "table",
+      tableVertexLabel
+    );
+  } catch (error) {
+    console.error("[shopifyInventoryTransferBeforeFetchData] getUserContent (category scope):", error);
+  }
+  if (categoryTransferGids.length === 0) {
+    console.log("[shopifyInventoryTransferBeforeFetchData] no rows in category; skip Shopify sync");
+    return;
+  }
 }
 
 const statusFilter = filters.status || "ALL";
@@ -127,6 +183,53 @@ const transfersQuery =
     }
   }`.trim();
 
+const transfersByNodesQuery =
+  `
+  query getInventoryTransfersByIds($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on InventoryTransfer {
+          id
+          name
+          status
+          dateCreated
+          note
+          referenceName
+          hasTimelineComment
+          totalQuantity
+          receivedQuantity
+          tags
+          origin {
+            name
+            location {
+              id
+              name
+            }
+          }
+          destination {
+            name
+            location {
+              id
+              name
+            }
+          }
+          lineItems(first: ` +
+  BULK_LINE_ITEMS_FIRST +
+  `) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {` +
+  TRANSFER_LINE_NODE_FIELDS +
+  `
+              }
+            }
+          }
+      }
+    }
+  }`.trim();
+
 const transferLineItemsPageQuery =
   `
   query TransferLineItemsPage($transferId: ID!, $first: Int!, $after: String) {
@@ -205,34 +308,62 @@ const sortKey = sortCol === "name" || sortCol === "transferName" ? "ID" : "CREAT
 const reverse = sort.direction === "desc";
 
 let allTransfers = [];
-let cursor = null;
-let hasNextPage = true;
-while (hasNextPage) {
-  const variables = {
-    first: TRANSFERS_PAGE_SIZE,
-    after: cursor || null,
-    query: queryString || null,
-    sortKey,
-    reverse
-  };
-  const response = await admin.graphql(transfersQuery, { variables });
-  const apiResponse = response instanceof Response ? await response.json() : response;
-  if (apiResponse.errors && apiResponse.errors.length > 0) {
-    console.error(
-      "[shopifyInventoryTransferBeforeFetchData] GraphQL error:",
-      apiResponse.errors[0]?.message || "unknown"
-    );
-    return;
-  }
-  const edges = apiResponse.data?.inventoryTransfers?.edges || [];
-  allTransfers = allTransfers.concat(edges.map((e) => e.node));
-  hasNextPage = apiResponse.data?.inventoryTransfers?.pageInfo?.hasNextPage === true;
-  cursor = apiResponse.data?.inventoryTransfers?.pageInfo?.endCursor || null;
-  if (!cursor) break;
-  await new Promise((r) => setTimeout(r, 200));
-}
+const useCategoryTransferScope =
+  !isUncategorized &&
+  categoryId &&
+  parentVertexLabel &&
+  toParentEdgeType &&
+  categoryTransferGids.length > 0;
 
-console.log("[shopifyInventoryTransferBeforeFetchData] fetched transfers:", allTransfers.length);
+if (useCategoryTransferScope) {
+  const batchSize = 50;
+  for (let batchOffset = 0; batchOffset < categoryTransferGids.length; batchOffset += batchSize) {
+    const transferGidBatch = categoryTransferGids.slice(batchOffset, batchOffset + batchSize);
+    const response = await admin.graphql(transfersByNodesQuery, { variables: { ids: transferGidBatch } });
+    const apiResponse = response instanceof Response ? await response.json() : response;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error(
+        "[shopifyInventoryTransferBeforeFetchData] GraphQL error (nodes batch):",
+        apiResponse.errors[0]?.message || "unknown"
+      );
+      return;
+    }
+    const transferNodes = apiResponse.data?.nodes || [];
+    for (const transferNode of transferNodes) {
+      if (transferNode) allTransfers.push(transferNode);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  console.log("[shopifyInventoryTransferBeforeFetchData] fetched transfers (category scope):", allTransfers.length);
+} else {
+  let cursor = null;
+  let hasNextPage = true;
+  while (hasNextPage) {
+    const variables = {
+      first: TRANSFERS_PAGE_SIZE,
+      after: cursor || null,
+      query: queryString || null,
+      sortKey,
+      reverse
+    };
+    const response = await admin.graphql(transfersQuery, { variables });
+    const apiResponse = response instanceof Response ? await response.json() : response;
+    if (apiResponse.errors && apiResponse.errors.length > 0) {
+      console.error(
+        "[shopifyInventoryTransferBeforeFetchData] GraphQL error:",
+        apiResponse.errors[0]?.message || "unknown"
+      );
+      return;
+    }
+    const edges = apiResponse.data?.inventoryTransfers?.edges || [];
+    allTransfers = allTransfers.concat(edges.map((e) => e.node));
+    hasNextPage = apiResponse.data?.inventoryTransfers?.pageInfo?.hasNextPage === true;
+    cursor = apiResponse.data?.inventoryTransfers?.pageInfo?.endCursor || null;
+    if (!cursor) break;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  console.log("[shopifyInventoryTransferBeforeFetchData] fetched transfers:", allTransfers.length);
+}
 
 const strJoinTags = (tags) =>
   Array.isArray(tags) ? tags.filter((x) => x != null && x !== "").join(", ") : "";

@@ -1,0 +1,195 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Seeds option vertices per domain label only (no Setting). Upserts by value (MERGE), removes nodes not in the seed list. missingOnly skips picklists that already have options; force reapplies defaults the same way.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Not authenticated" };
+}
+
+const { mode = "missingOnly", keys } = args.contextData || {};
+const force = mode === "force" || mode === "replace";
+
+const DEFAULTS = [
+  {
+    picklistKey: "appointment_status",
+    title: "Appointment status",
+    options: [
+      { value: "scheduled", label: "Scheduled", displayOrder: 10 },
+      { value: "in-progress", label: "In Progress", displayOrder: 20 },
+      { value: "completed", label: "Completed", displayOrder: 30 },
+      { value: "cancelled", label: "Cancelled", displayOrder: 40 }
+    ]
+  },
+  {
+    picklistKey: "repair_status",
+    title: "Repair order status",
+    options: [
+      { value: "open", label: "Open", displayOrder: 10 },
+      { value: "diagnosing", label: "Diagnosing", displayOrder: 20 },
+      { value: "waiting-parts", label: "Waiting Parts", displayOrder: 30 },
+      { value: "ready-billing", label: "Ready For Billing", displayOrder: 40 },
+      { value: "closed", label: "Closed", displayOrder: 50 },
+      { value: "cancelled", label: "Cancelled", displayOrder: 60 }
+    ]
+  },
+  {
+    picklistKey: "invoice_payment_status",
+    title: "Invoice payment status",
+    options: [
+      { value: "unpaid", label: "Unpaid", displayOrder: 10 },
+      { value: "partial", label: "Partially Paid", displayOrder: 20 },
+      { value: "paid", label: "Paid", displayOrder: 30 }
+    ]
+  },
+  {
+    picklistKey: "technician_status",
+    title: "Technician status",
+    options: [
+      { value: "active", label: "Active", displayOrder: 10 },
+      { value: "leave", label: "On Leave", displayOrder: 20 },
+      { value: "inactive", label: "Inactive", displayOrder: 30 }
+    ]
+  },
+  {
+    picklistKey: "payment_method",
+    title: "Payment method",
+    options: [
+      { value: "cash", label: "Cash", displayOrder: 10 },
+      { value: "card", label: "Card", displayOrder: 20 },
+      { value: "transfer", label: "Transfer", displayOrder: 30 },
+      { value: "mobile", label: "Mobile", displayOrder: 40 }
+    ]
+  },
+  {
+    picklistKey: "inventory_stock_status",
+    title: "Inventory stock status",
+    options: [
+      { value: "in-stock", label: "In stock", displayOrder: 10 },
+      { value: "low", label: "Low stock", displayOrder: 20 },
+      { value: "out-of-stock", label: "Out of stock", displayOrder: 30 },
+      { value: "ordered", label: "On order", displayOrder: 40 }
+    ]
+  },
+  {
+    picklistKey: "customer_status",
+    title: "Customer status",
+    options: [
+      { value: "active", label: "Active", displayOrder: 10 },
+      { value: "inactive", label: "Inactive", displayOrder: 20 },
+      { value: "vip", label: "VIP", displayOrder: 30 }
+    ]
+  },
+  {
+    picklistKey: "service_status",
+    title: "Service status",
+    options: [
+      { value: "active", label: "Active", displayOrder: 10 },
+      { value: "seasonal", label: "Seasonal", displayOrder: 20 },
+      { value: "archived", label: "Archived", displayOrder: 30 }
+    ]
+  },
+  {
+    picklistKey: "supplier_type",
+    title: "Supplier type",
+    options: [
+      { value: "distributor", label: "Distributor", displayOrder: 10 },
+      { value: "oem", label: "OEM", displayOrder: 20 },
+      { value: "local", label: "Local vendor", displayOrder: 30 },
+      { value: "other", label: "Other", displayOrder: 40 }
+    ]
+  }
+];
+
+const WORKSHOP_PICKLIST_LABEL_BY_KEY = {
+  appointment_status: "AppointmentStatus",
+  repair_status: "RepairStatus",
+  invoice_payment_status: "InvoicePaymentStatus",
+  technician_status: "TechnicianStatus",
+  payment_method: "PaymentMethod",
+  inventory_stock_status: "InventoryStockStatus",
+  customer_status: "CustomerStatus",
+  service_status: "ServiceStatus",
+  supplier_type: "SupplierType"
+};
+
+async function writePicklistVertices(picklistKeyRaw, optionRows) {
+  const safe = String(picklistKeyRaw || "")
+    .replace(/[^a-z0-9_]/gi, "_")
+    .toLowerCase();
+  const neoLabel = WORKSHOP_PICKLIST_LABEL_BY_KEY[safe];
+  if (!neoLabel) {
+    throw new Error("Unknown workshop picklist key: " + String(picklistKeyRaw));
+  }
+
+  const keepValues = optionRows.map((r) => String(r.value != null ? r.value : ""));
+  if (optionRows.length > 0) {
+    await args.session.run(
+      `UNWIND $opts AS row
+       MERGE (o:\`${neoLabel}\` {value: row.value})
+       ON CREATE SET o.createdAt = datetime()
+       SET o.label = row.label,
+           o.displayOrder = row.displayOrder,
+           o.updatedAt = datetime()`,
+      { opts: optionRows }
+    );
+  }
+  await args.session.run(
+    `MATCH (o:\`${neoLabel}\`)
+     WHERE NOT o.value IN $keep
+     DETACH DELETE o`,
+    { keep: keepValues }
+  );
+}
+
+async function countOptionsForPicklist(picklistKeyRaw) {
+  const safe = String(picklistKeyRaw || "")
+    .replace(/[^a-z0-9_]/gi, "_")
+    .toLowerCase();
+  const neoLabel = WORKSHOP_PICKLIST_LABEL_BY_KEY[safe];
+  if (!neoLabel) return -1;
+  const r = await args.session.run(
+    `MATCH (o:\`${neoLabel}\`) RETURN count(o) AS c`,
+    {}
+  );
+  const c = r.records[0]?.get("c");
+  return c?.toNumber?.() ?? Number(c) ?? 0;
+}
+
+const filterKeys = Array.isArray(keys) && keys.length > 0 ? new Set(keys.map(String)) : null;
+const results = { created: 0, skipped: 0, updated: 0 };
+
+for (const def of DEFAULTS) {
+  if (filterKeys && !filterKeys.has(def.picklistKey)) continue;
+
+  const n = await countOptionsForPicklist(def.picklistKey);
+  const hasOptions = n > 0;
+
+  if (!hasOptions) {
+    await writePicklistVertices(def.picklistKey, def.options);
+    results.created++;
+  } else if (force) {
+    await writePicklistVertices(def.picklistKey, def.options);
+    results.updated++;
+  } else {
+    results.skipped++;
+  }
+}
+
+return {
+  success: true,
+  message: force ? "Picklists force-seeded" : "Picklists seeded (missing only)",
+  data: results
+};
+'''
+        key: seedWorkshopPicklists
+      }
+    }
+  ]
+  edges: []
+}

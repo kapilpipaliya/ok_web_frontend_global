@@ -1,0 +1,157 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterRepairStatusUpdate
+        description: Hook that creates draft invoice and deducts inventory when a repair is created or updated into billable/closed states.
+        body:
+          '''
+const elementId = args.contextData?.elementId;
+if (!elementId) return { success: true, message: "No repair id provided" };
+
+const repairResult = await args.session.run(
+  `
+  MATCH (r:RepairOrder)
+  WHERE elementId(r) = $elementId
+  RETURN r
+  LIMIT 1
+  `,
+  { elementId }
+);
+
+if (repairResult.records.length === 0) {
+  return { success: true, message: "Repair order not found" };
+}
+
+const repairNode = repairResult.records[0].get("r");
+const repair = args.convertNodeToJson(repairNode);
+const status = String(repair.P?.status || "").toLowerCase();
+
+if (status !== "ready-billing" && status !== "closed") {
+  return { success: true, message: "Repair not ready for billing" };
+}
+
+const repairNo = repair.P?.repairNo;
+if (!repairNo) return { success: true, message: "Repair missing number" };
+
+const existingInvoice = await args.session.run(
+  `
+  MATCH (i:WorkshopInvoice {repairNo: $repairNo})
+  RETURN i
+  LIMIT 1
+  `,
+  { repairNo }
+);
+
+if (existingInvoice.records.length > 0) {
+  // Continue to inventory deduction checks for closed repairs.
+} else {
+  const resInv = await args.executeNamedServerFunction({
+    functionName: "reserveWorkshopReferenceNumber",
+    contextData: { sequenceKey: "WorkshopInvoice.invoiceNo" }
+  });
+  if (resInv?.error || !resInv?.result?.success) {
+    return {
+      success: false,
+      message:
+        resInv?.result?.message ||
+        resInv?.error ||
+        "Could not allocate invoice number (configure Billing → reference sequence)"
+    };
+  }
+  const invoiceNo = resInv.result.data?.value;
+  if (!invoiceNo) {
+    return { success: false, message: "Reserve returned empty invoice number" };
+  }
+  const estimate = Number(repair.P?.actualCost || repair.P?.estimatedCost || 0);
+  const invoiceDate = new Date().toISOString().slice(0, 10);
+
+  await args.session.run(
+    `
+    MATCH (r:RepairOrder)
+    WHERE elementId(r) = $elementId
+    OPTIONAL MATCH (r)-[:RepairCustomer]->(cust:WorkshopCustomer)
+    CREATE (i:WorkshopInvoice {
+      invoiceNo: $invoiceNo,
+      repairNo: $repairNo,
+      customerName: coalesce(cust.name, r.customerName, ""),
+      invoiceDate: $invoiceDate,
+      subTotal: $subTotal,
+      taxAmount: 0,
+      discountAmount: 0,
+      totalAmount: $subTotal,
+      paidAmount: 0,
+      paymentStatus: "unpaid",
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    MERGE (r)-[:RepairOrderInvoice]->(i)
+    RETURN i
+    `,
+    {
+      elementId,
+      invoiceNo,
+      repairNo,
+      subTotal: estimate,
+      invoiceDate
+    }
+  );
+}
+
+// Deduct inventory once when the repair is closed (RepairPartLine + RepairPartLineInventoryItem).
+if (status === "closed") {
+  const alreadyDeducted = Boolean(repair.P?.inventoryDeductedAt);
+  if (!alreadyDeducted) {
+    const linesRes = await args.session.run(
+      `
+      MATCH (r:RepairOrder)-[:RepairOrderRepairPartLine]->(line:RepairPartLine)-[:RepairPartLineInventoryItem]->(i:InventoryItem)
+      WHERE elementId(r) = $elementId
+      RETURN line.qty AS qty, i.partNo AS partNo
+      `,
+      { elementId }
+    );
+
+    if (linesRes.records.length > 0) {
+      const inventoryDeductedAt = new Date().toISOString();
+      await args.session.executeWrite(async (tx) => {
+        for (let li = 0; li < linesRes.records.length; li++) {
+          const rec = linesRes.records[li];
+          const partNo = String(rec.get("partNo") || "").trim();
+          const qty = Number(rec.get("qty"));
+          if (!partNo || !Number.isFinite(qty) || qty <= 0) continue;
+
+          await tx.run(
+            `
+            MATCH (inv:InventoryItem {partNo: $partNo})
+            SET inv.stockQty = toInteger(COALESCE(inv.stockQty, 0)) - toInteger($qty),
+                inv.updatedAt = datetime()
+            RETURN inv
+            `,
+            { partNo, qty }
+          );
+        }
+
+        await tx.run(
+          `
+          MATCH (r:RepairOrder)
+          WHERE elementId(r) = $elementId
+          SET r.inventoryDeductedAt = $inventoryDeductedAt,
+              r.updatedAt = datetime()
+          RETURN r
+          `,
+          { elementId, inventoryDeductedAt }
+        );
+      });
+    }
+  }
+}
+
+return { success: true, message: "Repair automation processed successfully" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

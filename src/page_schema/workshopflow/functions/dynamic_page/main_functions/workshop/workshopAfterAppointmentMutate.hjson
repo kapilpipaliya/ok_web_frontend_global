@@ -1,0 +1,39 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: workshopAfterAppointmentMutate
+        description: After create/update WorkshopAppointment, denormalizes grid columns from FK edges (customer, service, tech, bay, vehicle).
+        body:
+          '''
+const tableVertexLabel = args.contextData?.tableVertexLabel;
+const elementId = args.contextData?.elementId;
+if (tableVertexLabel !== "WorkshopAppointment" || !elementId) {
+  return { success: true, message: "Skipped" };
+}
+
+await args.session.run(
+  `MATCH (a:WorkshopAppointment) WHERE elementId(a) = $elementId
+   OPTIONAL MATCH (a)-[:AppointmentCustomer]->(cust:WorkshopCustomer)
+   OPTIONAL MATCH (a)-[:AppointmentService]->(svc:WorkshopService)
+   OPTIONAL MATCH (a)-[:AppointmentTechnician]->(tech:WorkshopTechnician)
+   OPTIONAL MATCH (a)-[:AppointmentServiceBay]->(b:WorkshopServiceBay)
+   OPTIONAL MATCH (a)-[:AppointmentVehicle]->(veh:WorkshopVehicle)
+   SET a.customerName = coalesce(cust.name, ""),
+       a.serviceType = coalesce(svc.name, ""),
+       a.assignedTechnician = coalesce(tech.name, ""),
+       a.bay = coalesce(b.name, b.code, ""),
+       a.vehiclePlate = coalesce(veh.plate, ""),
+       a.vehicleModel = coalesce(veh.vehicleModel, "")`,
+  { elementId },
+);
+
+return { success: true, message: "Appointment display fields synced" };
+'''
+      }
+    }
+  ]
+  edges: []
+}
