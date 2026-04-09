@@ -420,7 +420,6 @@ return `._id {
     background: ${args.theme.var.color.background};
     border-right: 1px solid ${args.theme.var.color.border};
     flex-direction: column;
-    padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.lg};
     z-index: 1;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   }
@@ -441,7 +440,6 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
   padding-bottom: ${args.theme.var.spacing.lg};
   border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
@@ -489,6 +487,8 @@ return `._id {
   display: flex;
   flex-direction: column;
   gap: ${args.theme.var.spacing.lg};
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }`;
 '''
       }

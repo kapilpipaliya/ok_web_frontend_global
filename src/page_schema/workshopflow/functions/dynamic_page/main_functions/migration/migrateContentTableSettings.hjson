@@ -18,7 +18,7 @@
  * - Select fields with selectConfig.edgeOnly + relationshipType define FK hydration (relationshipPropertyBindings).
  * - nestedLineItems fields define parent property keys stripped on save (nestedLinePropertyStripKeys); optional extra keys: nestedLinePropertyStripKeys on the config object.
  * - Optional relationshipPropertyBindings: [{ prop, rel }] for edges not declared as edgeOnly selects.
- * - Sidebar: each list uses its own category label and item edge (e.g. WorkshopAppointmentCategory + WorkshopAppointmentCategoryItem); Inventory/Service keep InventoryCategory/ServiceCategory.
+ * - Sidebar: each list uses its own category label and item edge (e.g. WorkshopAppointmentCategory + WorkshopAppointmentCategoryItem); Inventory/Service keep InventoryCategory/ServiceCategory. Use `sidebar.rootKeys: {}` so getSidebarTreeRoots does not filter roots to a single property match (e.g. only key "root"); user-created top-level categories then load after refresh. The MERGE’d default folder still uses key "root" for the seeded “All …” node.
  * - getUserContent: when relationshipPropertyBindings is not passed, bindings are derived from this Setting (user key then _default).
  *
  * Parameters (via args.contextData):
@@ -98,7 +98,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopAppointmentCategory",
     toParentEdgeType: "WorkshopAppointmentCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Appointment categories",
     formConfig: {
       gridColumns: 1,
@@ -181,7 +181,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "RepairOrderCategory",
     toParentEdgeType: "RepairOrderCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Repair categories",
     formConfig: {
       gridColumns: 1,
@@ -252,7 +252,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "InventoryCategory",
     toParentEdgeType: "InventoryCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Inventory Categories",
     formConfig: {
       gridColumns: 1,
@@ -322,7 +322,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopInvoiceCategory",
     toParentEdgeType: "WorkshopInvoiceCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Invoice categories",
     formConfig: {
       gridColumns: 1,
@@ -386,7 +386,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopCustomerCategory",
     toParentEdgeType: "WorkshopCustomerCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Customer categories",
     formConfig: {
       gridColumns: 1,
@@ -447,7 +447,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopSupplierCategory",
     toParentEdgeType: "WorkshopSupplierCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Supplier categories",
     formConfig: {
       gridColumns: 1,
@@ -508,7 +508,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopTechnicianCategory",
     toParentEdgeType: "WorkshopTechnicianCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Technician categories",
     formConfig: {
       gridColumns: 1,
@@ -577,7 +577,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "ServiceCategory",
     toParentEdgeType: "ServiceCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Service Categories",
     formConfig: {
       gridColumns: 1,
@@ -640,7 +640,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopPaymentCategory",
     toParentEdgeType: "WorkshopPaymentCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Payment categories",
     formConfig: {
       gridColumns: 1,
@@ -699,7 +699,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopServiceBayCategory",
     toParentEdgeType: "WorkshopServiceBayCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Bay categories",
     formConfig: {
       gridColumns: 1,
@@ -754,7 +754,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopSkillCategory",
     toParentEdgeType: "WorkshopSkillCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Skill categories",
     formConfig: {
       gridColumns: 1,
@@ -811,7 +811,7 @@ const settingsConfigs = [
     enabled: true,
     parentVertexLabel: "WorkshopVehicleCategory",
     toParentEdgeType: "WorkshopVehicleCategoryItem",
-    rootKeys: { key: "root" },
+    rootKeys: {},
     label: "Vehicle categories",
     formConfig: {
       gridColumns: 1,
@@ -983,8 +983,7 @@ const stats = {
   updated: 0,
   total: settingsConfigs.length,
   reportsChartsCreated: 0,
-  reportsChartsUpdated: 0,
-  categorySidebarRootsSeeded: 0
+  reportsChartsUpdated: 0
 };
 
 for (let i = 0; i < settingsConfigs.length; i++) {
@@ -998,47 +997,6 @@ for (let i = 0; i < settingsConfigs.length; i++) {
 const reportsChartsResult = await processExtraSetting(workshopReportsChartsSetting);
 stats.reportsChartsCreated = reportsChartsResult.created;
 stats.reportsChartsUpdated = reportsChartsResult.updated;
-
-// Default sidebar roots: one root category vertex per table-specific category label (no shared scope property)
-const WORKSHOP_CATEGORY_SIDEBAR_ROOTS = [
-  { neoLabel: "WorkshopAppointmentCategory", name: "All appointments" },
-  { neoLabel: "RepairOrderCategory", name: "All repair orders" },
-  { neoLabel: "WorkshopInvoiceCategory", name: "All invoices" },
-  { neoLabel: "WorkshopPaymentCategory", name: "All payments" },
-  { neoLabel: "WorkshopTechnicianCategory", name: "All technicians" },
-  { neoLabel: "WorkshopCustomerCategory", name: "All customers" },
-  { neoLabel: "WorkshopSupplierCategory", name: "All suppliers" },
-  { neoLabel: "WorkshopServiceBayCategory", name: "All service bays" },
-  { neoLabel: "WorkshopSkillCategory", name: "All skills" },
-  { neoLabel: "WorkshopVehicleCategory", name: "All vehicles" }
-];
-if (!dryRun) {
-  let categorySidebarRootsSeeded = 0;
-  for (let li = 0; li < WORKSHOP_CATEGORY_SIDEBAR_ROOTS.length; li++) {
-    const row = WORKSHOP_CATEGORY_SIDEBAR_ROOTS[li];
-    const label = row.neoLabel;
-    await args.session.run(
-      `MERGE (f:` +
-        label +
-        ` {key: $rootKey})
-      ON CREATE SET
-        f.name = $name,
-        f.displayOrder = 0,
-        f.createdAt = datetime(),
-        f.updatedAt = datetime()
-      ON MATCH SET
-        f.name = coalesce(f.name, $name),
-        f.updatedAt = datetime()
-      `,
-      { rootKey: "root", name: row.name }
-    );
-    categorySidebarRootsSeeded++;
-  }
-  stats.categorySidebarRootsSeeded = categorySidebarRootsSeeded;
-  console.log(
-    `Workshop category sidebar roots MERGE completed (${WORKSHOP_CATEGORY_SIDEBAR_ROOTS.length} labels)`
-  );
-}
 
 // Workshop picklists for optionsPicklist-backed form fields (create missing only; no user session required)
 const WORKSHOP_PICKLIST_NEO_LABEL = {
@@ -1286,7 +1244,6 @@ console.log(`Created: ${stats.created}`);
 console.log(`Updated: ${stats.updated}`);
 console.log(`Total processed: ${stats.total}`);
 console.log(`Picklists seeded (new keys): ${picklistsSeeded}`);
-console.log(`Category sidebar roots MERGE run: ${stats.categorySidebarRootsSeeded}`);
 console.log(`Reference sequence keys MERGE run: ${referenceSequencesSeeded}`);
 
 return {
