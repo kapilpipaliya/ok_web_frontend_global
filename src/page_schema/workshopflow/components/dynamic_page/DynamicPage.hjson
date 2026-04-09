@@ -1166,16 +1166,12 @@ return {
         css:
           '''
 return `._id {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 16rem;
+  width: 100%;
   background: ${args.theme.var.color.background};
-  z-index: 1000;
 }`;
 '''
         displayOrder: 0
