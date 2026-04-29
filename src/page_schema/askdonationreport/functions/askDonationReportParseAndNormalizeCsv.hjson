@@ -1,0 +1,125 @@
+{
+  vertexes: [
+    {
+      id: adr_parse_root
+      L: Function
+      P: {
+        key: askDonationReportParseAndNormalizeCsv
+        description: Parse donation report CSV and normalize columns Date,Name,Address,Amount,AmountInWords,No,PAN,Phone
+        body:
+          '''const CANONICAL = ["Date", "Name", "Address", "Amount", "AmountInWords", "No", "PAN", "Phone"];
+const MAX_ROWS = 2000;
+
+const { csvText } = args.contextData || {};
+
+if (!csvText || typeof csvText !== "string") {
+  return { success: false, message: "csvText is required", data: null };
+}
+
+function parseCSVLine(line, delimiter) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === delimiter && !inQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+const cleaned = csvText.replace(/^\uFEFF/, "").trim();
+if (!cleaned) {
+  return { success: false, message: "CSV is empty", data: null };
+}
+
+const lines = cleaned.split(/\r?\n/).filter((l) => l.length > 0);
+if (lines.length < 2) {
+  return { success: false, message: "CSV must include a header row and at least one data row", data: null };
+}
+
+const firstLine = lines[0];
+const delimiter = firstLine.includes("\t") ? "\t" : ",";
+const rawHeaders = parseCSVLine(lines[0], delimiter);
+
+const headerToCanonical = new Map();
+for (let i = 0; i < rawHeaders.length; i++) {
+  const h = rawHeaders[i].replace(/^\uFEFF/, "").trim();
+  if (!h) continue;
+  const lower = h.toLowerCase();
+  for (const c of CANONICAL) {
+    if (c.toLowerCase() === lower) {
+      headerToCanonical.set(i, c);
+      break;
+    }
+  }
+}
+
+const missing = CANONICAL.filter((c) => ![...headerToCanonical.values()].includes(c));
+if (missing.length === CANONICAL.length) {
+  return {
+    success: false,
+    message: `No recognized columns. Expected headers: ${CANONICAL.join(", ")}`,
+    data: null,
+  };
+}
+
+const rows = [];
+for (let r = 1; r < lines.length; r++) {
+  const line = lines[r].trim();
+  if (!line) continue;
+
+  const values = parseCSVLine(line, delimiter);
+  const row = {};
+  for (const c of CANONICAL) {
+    row[c] = "";
+  }
+  for (let ci = 0; ci < values.length; ci++) {
+    const canon = headerToCanonical.get(ci);
+    if (!canon) continue;
+    let v = values[ci] ?? "";
+    if (v.startsWith('"') && v.endsWith('"') && v.length >= 2) {
+      v = v.slice(1, -1).replace(/""/g, '"');
+    }
+    row[canon] = String(v).trim();
+  }
+  rows.push(row);
+
+  if (rows.length > MAX_ROWS) {
+    return {
+      success: false,
+      message: `Too many rows (max ${MAX_ROWS})`,
+      data: null,
+    };
+  }
+}
+
+if (rows.length === 0) {
+  return { success: false, message: "No data rows found", data: null };
+}
+
+return {
+  success: true,
+  message: `Parsed ${rows.length} row(s)`,
+  data: { rows, rowCount: rows.length, missingColumns: missing },
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

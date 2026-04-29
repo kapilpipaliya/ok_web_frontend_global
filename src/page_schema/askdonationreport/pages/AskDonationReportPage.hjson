@@ -1,0 +1,1071 @@
+{
+  vertexes: [
+    {
+      id: "adr1"
+      L: Page
+      P: {
+        signinRequired: true
+        url: /ask-donation-report
+        key: AskDonationReportPage
+        fns:
+          '''const CANONICAL = ["Date", "Name", "Address", "Amount", "AmountInWords", "No", "PAN", "Phone"];
+
+const emptyRow = () => {
+  const o = {};
+  for (const k of CANONICAL) {
+    o[k] = "";
+  }
+  return o;
+};
+
+const [rows, setRows] = args.createSignal([emptyRow()]);
+const [busy, setBusy] = args.createSignal(false);
+const [statusMsg, setStatusMsg] = args.createSignal(
+  "The table starts with one empty row. Add or remove rows, import a CSV, edit cells, then download ZIP.",
+);
+
+const addRow = () => {
+  setRows((prev) => [...prev, emptyRow()]);
+};
+
+const deleteRow = (i) => {
+  setRows((prev) => prev.filter((_, j) => j !== i));
+};
+
+const updateCell = (i, key, val) => {
+  setRows((prev) => {
+    const next = [...prev];
+    const cur = { ...(next[i] || {}) };
+    for (const k of CANONICAL) {
+      if (cur[k] === undefined) {
+        cur[k] = "";
+      }
+    }
+    cur[key] = val;
+    next[i] = cur;
+    return next;
+  });
+};
+
+const onCsvSelected = async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  setStatusMsg("Parsing…");
+  try {
+    const text = await f.text();
+    const response = await args.executeNamedServerFunction({
+      functionName: "askDonationReportParseAndNormalizeCsv",
+      contextData: { csvText: text },
+    });
+    if (response?.error) {
+      args.showErrorToast(response.error);
+      setStatusMsg("");
+      return;
+    }
+    const r = response?.result;
+    if (!r?.success) {
+      args.showErrorToast(r?.message || "Parse failed");
+      setStatusMsg("");
+      return;
+    }
+    setRows(r.data.rows);
+    const warn =
+      r.data.missingColumns?.length > 0
+        ? " (missing columns filled empty: " + r.data.missingColumns.join(", ") + ")"
+        : "";
+    setStatusMsg(r.data.rowCount + " row(s) loaded." + warn + " Edit if needed, then download ZIP.");
+    args.showSuccessToast("CSV loaded");
+  } catch (err) {
+    args.showErrorToast(err?.message || "Failed to read file");
+    setStatusMsg("");
+  }
+  e.target.value = "";
+};
+
+const validateRows = async () => {
+  if (!rows().length) {
+    args.showWarningToast("No rows to validate — add a row or import CSV");
+    return;
+  }
+  const response = await args.executeNamedServerFunction({
+    functionName: "askDonationReportValidateRows",
+    contextData: { rows: rows() },
+  });
+  if (response?.error) {
+    args.showErrorToast(response.error);
+    return;
+  }
+  const r = response?.result;
+  if (!r?.success) {
+    args.showErrorToast(r?.message || "Validation failed");
+    return;
+  }
+  setRows(r.data.rows);
+  args.showSuccessToast("Rows validated");
+};
+
+const downloadZip = async () => {
+  if (!rows().length) {
+    args.showWarningToast("No rows");
+    return;
+  }
+  setBusy(true);
+  setStatusMsg("Loading PDF engine from CDN…");
+  try {
+    const pdfmeUrl =
+      "https://esm.sh/@pdfme/generator@6.0.6?deps=@pdfme/common@6.0.6";
+    const jszipUrl = "https://esm.sh/jszip@3.10.1";
+    const [{ generate }, JSZipMod, templateRes] = await Promise.all([
+      import(pdfmeUrl),
+      import(jszipUrl),
+      fetch("/api/askdonationreport/template"),
+    ]);
+    const JSZip = JSZipMod.default;
+    if (!templateRes.ok) {
+      throw new Error("Could not load template (HTTP " + templateRes.status + ")");
+    }
+    const template = await templateRes.json();
+    setStatusMsg("Generating PDFs…");
+    const zip = new JSZip();
+    const list = rows();
+    for (let i = 0; i < list.length; i++) {
+      setStatusMsg("Generating PDF " + (i + 1) + "/" + list.length + "…");
+      const raw = list[i];
+      const one = {};
+      for (const k of CANONICAL) {
+        one[k] = String(raw[k] ?? "");
+      }
+      const inputs = [one];
+      const pdf = await generate({ template, inputs });
+      let buf;
+      if (pdf instanceof Uint8Array) {
+        buf = pdf;
+      } else if (pdf && pdf.buffer) {
+        buf = new Uint8Array(pdf.buffer);
+      } else {
+        buf = new Uint8Array(pdf);
+      }
+      const base = String(raw.No ?? i + 1).replace(/[^a-zA-Z0-9._-]+/g, "_") || "row_" + (i + 1);
+      zip.file("donation-" + base + ".pdf", buf);
+    }
+    setStatusMsg("Building ZIP…");
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "donation-reports-" + Date.now() + ".zip";
+    a.click();
+    URL.revokeObjectURL(url);
+    args.showSuccessToast("ZIP download started");
+    setStatusMsg("Done. " + list.length + " PDF(s) in ZIP.");
+  } catch (err) {
+    console.error(err);
+    args.showErrorToast(err?.message || "ZIP generation failed");
+    setStatusMsg("");
+  } finally {
+    setBusy(false);
+  }
+};
+
+return {
+  enabled: true,
+  CANONICAL,
+  rows,
+  busy,
+  statusMsg,
+  updateCell,
+  addRow,
+  deleteRow,
+  onCsvSelected,
+  validateRows,
+  downloadZip,
+};
+'''
+        props:
+          '''return { isNoPermissionCheck: true };'''
+      }
+    }
+    {
+      id: "adr2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "main" };'''
+        css:
+          '''return `._id {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+  width: 100%;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Donation receipt PDFs (pdfme)",
+};'''
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Edit the table below, or upload a CSV with columns: Date, Name, Address, Amount, AmountInWords, No, PAN, Phone. Use Add row / Remove to change rows. Build a ZIP of one PDF per row (pdfme.com template).",
+};'''
+        css:
+          '''return `._id {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "file",
+  accept: ".csv,text/csv",
+  onChange: (e) => args.fns.onCsvSelected(e),
+};'''
+        css:
+          '''return `._id {
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr40"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Add row",
+  disabled: args.fns.busy(),
+  onClick: () => args.fns.addRow(),
+};'''
+        css:
+          '''return `._id {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  font-weight: 600;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}`;
+'''
+      }
+    }
+    {
+      id: "adr7"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Validate on server",
+  disabled: args.fns.busy(),
+  onClick: () => args.fns.validateRows(),
+};'''
+        css:
+          '''return `._id {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  font-weight: 600;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}`;
+'''
+      }
+    }
+    {
+      id: "adr8"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Download ZIP of PDFs",
+  disabled: args.fns.busy() || args.fns.rows().length === 0,
+  onClick: () => args.fns.downloadZip(),
+};'''
+        css:
+          '''return `._id {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  cursor: pointer;
+  font-weight: 600;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}`;
+'''
+      }
+    }
+    {
+      id: "adr9"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: args.fns.statusMsg(),
+};'''
+        css:
+          '''return `._id {
+  font-size: 0.9rem;
+  color: ${args.theme.var.color.text};
+  min-height: 1.25rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr10"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  overflow-x: auto;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "table",
+  cellSpacing: 0,
+  cellPadding: 0,
+};'''
+        css:
+          '''return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  th, td {
+    border: 1px solid ${args.theme.var.color.border};
+    padding: 0.35rem 0.5rem;
+    vertical-align: middle;
+  }
+  th {
+    background: ${args.theme.var.color.background_light_100};
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  input {
+    width: 100%;
+    min-width: 6rem;
+    box-sizing: border-box;
+    padding: 0.25rem 0.35rem;
+    border: 1px solid ${args.theme.var.color.border};
+    border-radius: 0.25rem;
+    background: ${args.theme.var.color.background};
+    color: ${args.theme.var.color.text};
+  }
+  ._id .row-remove {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 0.35rem;
+    border: 1px solid ${args.theme.var.color.border};
+    background: ${args.theme.var.color.background_light_100};
+    color: ${args.theme.var.color.text};
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  ._id .row-remove:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "adr12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "thead" };'''
+      }
+    }
+    {
+      id: "adr13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "tr" };'''
+      }
+    }
+    {
+      id: "adr14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "th", text: "Date" };'''
+      }
+    }
+    {
+      id: "adr15"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''return { as: "th", text: "Name" };'''
+      }
+    }
+    {
+      id: "adr16"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: '''return { as: "th", text: "Address" };'''
+      }
+    }
+    {
+      id: "adr17"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props: '''return { as: "th", text: "Amount" };'''
+      }
+    }
+    {
+      id: "adr18"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props: '''return { as: "th", text: "AmountInWords" };'''
+      }
+    }
+    {
+      id: "adr19"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props: '''return { as: "th", text: "No" };'''
+      }
+    }
+    {
+      id: "adr20"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props: '''return { as: "th", text: "PAN" };'''
+      }
+    }
+    {
+      id: "adr21"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props: '''return { as: "th", text: "Phone" };'''
+      }
+    }
+    {
+      id: "adr41"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        props: '''return { as: "th", text: "Actions" };'''
+        css:
+          '''return `._id {
+  width: 5.5rem;
+  text-align: center;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr22"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "tbody",
+  data: () => args.fns.rows(),
+  loop: true,
+  contextName: "row",
+};'''
+      }
+    }
+    {
+      id: "adr23"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "tr" };'''
+      }
+    }
+    {
+      id: "adr24"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr25"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.Date,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Date", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr26"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr27"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.Name,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Name", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr28"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr29"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.Address,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Address", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr30"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr31"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.Amount,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Amount", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr32"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr33"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.AmountInWords,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "AmountInWords", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr34"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr35"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.No,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "No", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr36"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr37"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.PAN,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "PAN", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr38"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: Html
+        props: '''return { as: "td" };'''
+      }
+    }
+    {
+      id: "adr39"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  value: args.contextData.row.Phone,
+  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Phone", e.currentTarget.value),
+};'''
+      }
+    }
+    {
+      id: "adr42"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        props: '''return { as: "td" };'''
+        css:
+          '''return `._id {
+  text-align: center;
+  vertical-align: middle;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr43"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Remove",
+  class: "row-remove",
+  disabled: args.fns.busy(),
+  onClick: () => args.fns.deleteRow(args.contextData.rowIndex),
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: ade1
+      T: Attr
+      S: adr1
+      E: adr2
+    }
+    {
+      id: ade2
+      T: Attr
+      S: adr2
+      E: adr3
+    }
+    {
+      id: ade3
+      T: Attr
+      S: adr2
+      E: adr4
+    }
+    {
+      id: ade4
+      T: Attr
+      S: adr2
+      E: adr5
+    }
+    {
+      id: ade5
+      T: Attr
+      S: adr2
+      E: adr9
+    }
+    {
+      id: ade6
+      T: Attr
+      S: adr2
+      E: adr10
+    }
+    {
+      id: ade7
+      T: Attr
+      S: adr5
+      E: adr6
+    }
+    {
+      id: ade7b
+      T: Attr
+      S: adr5
+      E: adr40
+    }
+    {
+      id: ade8
+      T: Attr
+      S: adr5
+      E: adr7
+    }
+    {
+      id: ade9
+      T: Attr
+      S: adr5
+      E: adr8
+    }
+    {
+      id: ade10
+      T: Attr
+      S: adr10
+      E: adr11
+    }
+    {
+      id: ade11
+      T: Attr
+      S: adr11
+      E: adr12
+    }
+    {
+      id: ade12
+      T: Attr
+      S: adr11
+      E: adr22
+    }
+    {
+      id: ade13
+      T: Attr
+      S: adr12
+      E: adr13
+    }
+    {
+      id: ade14
+      T: Attr
+      S: adr13
+      E: adr14
+    }
+    {
+      id: ade15
+      T: Attr
+      S: adr13
+      E: adr15
+    }
+    {
+      id: ade16
+      T: Attr
+      S: adr13
+      E: adr16
+    }
+    {
+      id: ade17
+      T: Attr
+      S: adr13
+      E: adr17
+    }
+    {
+      id: ade18
+      T: Attr
+      S: adr13
+      E: adr18
+    }
+    {
+      id: ade19
+      T: Attr
+      S: adr13
+      E: adr19
+    }
+    {
+      id: ade20
+      T: Attr
+      S: adr13
+      E: adr20
+    }
+    {
+      id: ade21
+      T: Attr
+      S: adr13
+      E: adr21
+    }
+    {
+      id: ade21b
+      T: Attr
+      S: adr13
+      E: adr41
+    }
+    {
+      id: ade22
+      T: Attr
+      S: adr22
+      E: adr23
+    }
+    {
+      id: ade23
+      T: Attr
+      S: adr23
+      E: adr24
+    }
+    {
+      id: ade24
+      T: Attr
+      S: adr24
+      E: adr25
+    }
+    {
+      id: ade25
+      T: Attr
+      S: adr23
+      E: adr26
+    }
+    {
+      id: ade26
+      T: Attr
+      S: adr26
+      E: adr27
+    }
+    {
+      id: ade27
+      T: Attr
+      S: adr23
+      E: adr28
+    }
+    {
+      id: ade28
+      T: Attr
+      S: adr28
+      E: adr29
+    }
+    {
+      id: ade29
+      T: Attr
+      S: adr23
+      E: adr30
+    }
+    {
+      id: ade30
+      T: Attr
+      S: adr30
+      E: adr31
+    }
+    {
+      id: ade31
+      T: Attr
+      S: adr23
+      E: adr32
+    }
+    {
+      id: ade32
+      T: Attr
+      S: adr32
+      E: adr33
+    }
+    {
+      id: ade33
+      T: Attr
+      S: adr23
+      E: adr34
+    }
+    {
+      id: ade34
+      T: Attr
+      S: adr34
+      E: adr35
+    }
+    {
+      id: ade35
+      T: Attr
+      S: adr23
+      E: adr36
+    }
+    {
+      id: ade36
+      T: Attr
+      S: adr36
+      E: adr37
+    }
+    {
+      id: ade37
+      T: Attr
+      S: adr23
+      E: adr38
+    }
+    {
+      id: ade38
+      T: Attr
+      S: adr38
+      E: adr39
+    }
+    {
+      id: ade38b
+      T: Attr
+      S: adr23
+      E: adr42
+    }
+    {
+      id: ade38c
+      T: Attr
+      S: adr42
+      E: adr43
+    }
+  ]
+}
