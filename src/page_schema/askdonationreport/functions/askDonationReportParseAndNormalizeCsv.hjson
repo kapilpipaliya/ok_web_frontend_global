@@ -5,16 +5,25 @@
       L: Function
       P: {
         key: askDonationReportParseAndNormalizeCsv
-        description: Parse donation report CSV and normalize columns Date,Name,Address,Amount,AmountInWords,No,PAN,Phone
+        description: Parse CSV; map headers to template field names from contextData.fieldNames (case-insensitive). Synonyms for a column whose name is "Mode" still apply.
         body:
-          '''const CANONICAL = ["Date", "Name", "Address", "Amount", "AmountInWords", "No", "PAN", "Phone"];
-const MAX_ROWS = 2000;
+          '''const MAX_ROWS = 2000;
 
-const { csvText } = args.contextData || {};
+const { csvText, fieldNames } = args.contextData || {};
 
 if (!csvText || typeof csvText !== "string") {
   return { success: false, message: "csvText is required", data: null };
 }
+
+if (!Array.isArray(fieldNames) || fieldNames.length === 0) {
+  return {
+    success: false,
+    message: "fieldNames is required (array of template schema field names from the client)",
+    data: null,
+  };
+}
+
+const FIELD_NAMES = fieldNames.map((x) => String(x));
 
 function parseCSVLine(line, delimiter) {
   const result = [];
@@ -57,23 +66,34 @@ const delimiter = firstLine.includes("\t") ? "\t" : ",";
 const rawHeaders = parseCSVLine(lines[0], delimiter);
 
 const headerToCanonical = new Map();
+const modeField = FIELD_NAMES.find((f) => f.toLowerCase() === "mode");
+
 for (let i = 0; i < rawHeaders.length; i++) {
   const h = rawHeaders[i].replace(/^\uFEFF/, "").trim();
   if (!h) continue;
   const lower = h.toLowerCase();
-  for (const c of CANONICAL) {
+  let matched = false;
+  for (const c of FIELD_NAMES) {
     if (c.toLowerCase() === lower) {
       headerToCanonical.set(i, c);
+      matched = true;
       break;
     }
   }
+  if (
+    !matched &&
+    modeField &&
+    (lower === "payment mode" || lower === "payment_mode" || lower === "mode of payment")
+  ) {
+    headerToCanonical.set(i, modeField);
+  }
 }
 
-const missing = CANONICAL.filter((c) => ![...headerToCanonical.values()].includes(c));
-if (missing.length === CANONICAL.length) {
+const missing = FIELD_NAMES.filter((c) => ![...headerToCanonical.values()].includes(c));
+if (missing.length === FIELD_NAMES.length) {
   return {
     success: false,
-    message: `No recognized columns. Expected headers: ${CANONICAL.join(", ")}`,
+    message: `No recognized columns. Expected headers matching: ${FIELD_NAMES.join(", ")}`,
     data: null,
   };
 }
@@ -85,7 +105,7 @@ for (let r = 1; r < lines.length; r++) {
 
   const values = parseCSVLine(line, delimiter);
   const row = {};
-  for (const c of CANONICAL) {
+  for (const c of FIELD_NAMES) {
     row[c] = "";
   }
   for (let ci = 0; ci < values.length; ci++) {

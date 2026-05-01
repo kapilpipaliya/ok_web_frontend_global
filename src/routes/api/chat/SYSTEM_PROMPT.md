@@ -261,6 +261,8 @@ export interface FunctionArgumentBaseType {
   // Server function execution
   executeServerFunction: (request: {functionBody: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
   executeNamedServerFunction: (request: {functionName: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
+  // Zod (same as ~/lib/utils/schemaValidation); use args.z in props/fns/css for client-side schemas
+  z: typeof import("zod").z;
 }
 ```
 

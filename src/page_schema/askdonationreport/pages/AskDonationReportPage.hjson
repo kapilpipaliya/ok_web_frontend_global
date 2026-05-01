@@ -4,25 +4,259 @@
       id: "adr1"
       L: Page
       P: {
-        signinRequired: true
+        signinRequired: false
         url: /ask-donation-report
         key: AskDonationReportPage
         fns:
-          '''const CANONICAL = ["Date", "Name", "Address", "Amount", "AmountInWords", "No", "PAN", "Phone"];
+          '''const BUILTIN_ROBOTO_FONT_BASE =
+  "https://cdn.jsdelivr.net/npm/roboto-font@0.1.0/fonts/Roboto/";
+
+const sanitizeFontKey = (raw) => {
+  const s = raw.replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "");
+  return s || "CustomFont";
+};
+
+const getDefaultBuiltinFonts = () => {
+  const b = BUILTIN_ROBOTO_FONT_BASE;
+  return {
+    Roboto: { data: b + "roboto-regular-webfont.ttf", fallback: true },
+    RobotoBold: { data: b + "roboto-bold-webfont.ttf" },
+    RobotoMedium: { data: b + "roboto-medium-webfont.ttf" },
+    RobotoItalic: { data: b + "roboto-italic-webfont.ttf" },
+  };
+};
+
+const buildPdfmeFontOption = (custom) => {
+  const out = { ...getDefaultBuiltinFonts() };
+  for (const { key, data } of custom) {
+    const k = sanitizeFontKey(key);
+    out[k] = { data };
+  }
+  return out;
+};
+
+const readSchemaFieldNames = (template) => {
+  const page = template?.schemas?.[0];
+  if (!Array.isArray(page)) return [];
+  const names = [];
+  for (const sch of page) {
+    const n = sch?.name != null ? String(sch.name).trim() : "";
+    if (n) names.push(n);
+  }
+  return names;
+};
+
+const readOriginalFontNames = (template) => {
+  const page = template?.schemas?.[0];
+  const out = {};
+  if (!Array.isArray(page)) return out;
+  for (const sch of page) {
+    if (sch?.name) {
+      out[sch.name] = sch.fontName || "Roboto";
+    }
+  }
+  return out;
+};
+
+const cloneWithFieldStyles = (template, patches) => {
+  const next =
+    typeof structuredClone === "function"
+      ? structuredClone(template)
+      : JSON.parse(JSON.stringify(template));
+  const page = next?.schemas?.[0];
+  if (!Array.isArray(page)) return next;
+  for (const sch of page) {
+    const name = sch?.name;
+    if (!name) continue;
+    const p = patches[name];
+    if (!p) continue;
+    if (p.fontName !== undefined && String(p.fontName).trim() !== "") {
+      sch.fontName = String(p.fontName).trim();
+    }
+    if (p.fontSize !== undefined && String(p.fontSize).trim() !== "") {
+      const n = Number(p.fontSize);
+      if (!Number.isNaN(n)) {
+        sch.fontSize = n;
+      }
+    }
+    if (typeof p.underline === "boolean") {
+      sch.underline = p.underline;
+    }
+    if (typeof p.strikethrough === "boolean") {
+      sch.strikethrough = p.strikethrough;
+    }
+  }
+  return next;
+};
 
 const emptyRow = () => {
   const o = {};
-  for (const k of CANONICAL) {
+  for (const k of schemaFieldNames()) {
     o[k] = "";
   }
   return o;
 };
 
-const [rows, setRows] = args.createSignal([emptyRow()]);
+const [rows, setRows] = args.createSignal([{}]);
 const [busy, setBusy] = args.createSignal(false);
+const [pdfTemplate, setPdfTemplate] = args.createSignal(null);
+const [templateFileLabel, setTemplateFileLabel] = args.createSignal("");
+
+const [fieldPatches, setFieldPatches] = args.createSignal({});
+const [origFonts, setOrigFonts] = args.createSignal({});
+const [fontRegKey, setFontRegKey] = args.createSignal("");
+const [pendingFontBytes, setPendingFontBytes] = args.createSignal(null);
+const [customFonts, setCustomFonts] = args.createSignal([]);
+
+const schemaFieldNames = () => {
+  const t = pdfTemplate();
+  if (!t) return [];
+  return readSchemaFieldNames(t);
+};
+
+const reshapeRowsToTemplateKeys = (parsedTemplate, prevRows) => {
+  const keys = readSchemaFieldNames(parsedTemplate);
+  const reshape = (r) => {
+    const out = {};
+    for (const k of keys) {
+      out[k] = r[k] == null ? "" : String(r[k]);
+    }
+    return out;
+  };
+  if (!keys.length) {
+    return prevRows.length ? prevRows.map(() => ({})) : [{}];
+  }
+  if (!prevRows.length) {
+    return [reshape({})];
+  }
+  return prevRows.map(reshape);
+};
+
+const styleRows = () => schemaFieldNames().map((name) => ({ name }));
+
+const getFieldPatch = (name) => {
+  const p = fieldPatches();
+  return p[name] || {};
+};
+
+const patchFieldPatch = (name, key, val) => {
+  setFieldPatches((prev) => {
+    const cur = prev[name] || {};
+    return { ...prev, [name]: { ...cur, [key]: val } };
+  });
+};
+
+const onPendingFontFile = async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  try {
+    const buf = await f.arrayBuffer();
+    setPendingFontBytes(new Uint8Array(buf));
+    args.showSuccessToast("Font file ready: " + f.name);
+  } catch (err) {
+    args.showErrorToast(err?.message || "Could not read font file");
+    setPendingFontBytes(null);
+  }
+  e.target.value = "";
+};
+
+const fetchGoogleFontBytes = async (familyName) => {
+  const url =
+    "/api/askdonationreport/google-font?family=" +
+    encodeURIComponent(familyName);
+  const res = await fetch(url);
+  if (!res.ok) {
+    let msg = "Font lookup failed (" + res.status + ")";
+    try {
+      const j = await res.json();
+      if (j?.error) {
+        msg = j.error;
+      }
+    } catch {}
+    throw new Error(msg);
+  }
+  const fontBuf = await res.arrayBuffer();
+  const bytes = new Uint8Array(fontBuf);
+  if (!bytes.length) {
+    throw new Error("Downloaded font file is empty");
+  }
+  return bytes;
+};
+
+const registerCustomFont = async () => {
+  const key = fontRegKey().trim();
+  if (!key) {
+    args.showWarningToast("Enter a font key / family name first");
+    return;
+  }
+  let data = pendingFontBytes();
+  if (!data || !data.length) {
+    try {
+      const familyName = key.replace(/[_-]+/g, " ");
+      args.showWarningToast(
+        "No file selected. Downloading from Google Fonts: " + familyName,
+      );
+      data = await fetchGoogleFontBytes(familyName);
+    } catch (err) {
+      args.showErrorToast(
+        err?.message || "Could not download font from Google Fonts",
+      );
+      return;
+    }
+  }
+  const clean = sanitizeFontKey(key);
+  setCustomFonts((prev) => {
+    const rest = prev.filter((x) => x.key !== clean);
+    return [...rest, { key: clean, data }];
+  });
+  setFontRegKey("");
+  setPendingFontBytes(null);
+  args.showSuccessToast("Registered font: " + clean);
+};
+
+const removeCustomFont = (fontKey) => {
+  setCustomFonts((prev) => prev.filter((x) => x.key !== fontKey));
+};
+
+const clearFieldPatches = () => {
+  setFieldPatches({});
+  args.showSuccessToast("Typography overrides cleared");
+};
+
 const [statusMsg, setStatusMsg] = args.createSignal(
-  "The table starts with one empty row. Add or remove rows, import a CSV, edit cells, then download ZIP.",
+  "Choose a pdfme template JSON file (.json). Table columns match the template’s field names after you load it — add/remove rows or import CSV, then download ZIP.",
 );
+
+const onTemplateSelected = async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  try {
+    const text = await f.text();
+    const parsed = JSON.parse(text);
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      !parsed.schemas ||
+      parsed.basePdf === undefined
+    ) {
+      args.showErrorToast("Invalid pdfme template: need schemas and basePdf");
+      setPdfTemplate(null);
+      setTemplateFileLabel("");
+      return;
+    }
+    setPdfTemplate(parsed);
+    setTemplateFileLabel(f.name);
+    setOrigFonts(readOriginalFontNames(parsed));
+    setFieldPatches({});
+    setRows((prev) => reshapeRowsToTemplateKeys(parsed, prev));
+    args.showSuccessToast("Template loaded: " + f.name);
+  } catch (err) {
+    args.showErrorToast(err?.message || "Could not read template JSON");
+    setPdfTemplate(null);
+    setTemplateFileLabel("");
+  }
+  e.target.value = "";
+};
 
 const addRow = () => {
   setRows((prev) => [...prev, emptyRow()]);
@@ -36,7 +270,7 @@ const updateCell = (i, key, val) => {
   setRows((prev) => {
     const next = [...prev];
     const cur = { ...(next[i] || {}) };
-    for (const k of CANONICAL) {
+    for (const k of schemaFieldNames()) {
       if (cur[k] === undefined) {
         cur[k] = "";
       }
@@ -50,12 +284,18 @@ const updateCell = (i, key, val) => {
 const onCsvSelected = async (e) => {
   const f = e.target.files?.[0];
   if (!f) return;
+  const keys = schemaFieldNames();
+  if (!keys.length) {
+    args.showWarningToast("Load a pdfme template first so CSV headers can be matched to field names");
+    e.target.value = "";
+    return;
+  }
   setStatusMsg("Parsing…");
   try {
     const text = await f.text();
     const response = await args.executeNamedServerFunction({
       functionName: "askDonationReportParseAndNormalizeCsv",
-      contextData: { csvText: text },
+      contextData: { csvText: text, fieldNames: keys },
     });
     if (response?.error) {
       args.showErrorToast(response.error);
@@ -68,7 +308,13 @@ const onCsvSelected = async (e) => {
       setStatusMsg("");
       return;
     }
-    setRows(r.data.rows);
+    const normalized = normalizeRowsLocally(r.data.rows);
+    if (!normalized.ok) {
+      args.showErrorToast(normalized.message);
+      setStatusMsg("");
+      return;
+    }
+    setRows(normalized.rows);
     const warn =
       r.data.missingColumns?.length > 0
         ? " (missing columns filled empty: " + r.data.missingColumns.join(", ") + ")"
@@ -82,61 +328,90 @@ const onCsvSelected = async (e) => {
   e.target.value = "";
 };
 
-const validateRows = async () => {
-  if (!rows().length) {
-    args.showWarningToast("No rows to validate — add a row or import CSV");
-    return;
+const MAX_ROWS = 2000;
+
+const normalizeRowsLocally = (raw) => {
+  const keys = schemaFieldNames();
+  if (!keys.length) {
+    return {
+      ok: false,
+      message: "Load a template with named fields first",
+      rows: [],
+    };
   }
-  const response = await args.executeNamedServerFunction({
-    functionName: "askDonationReportValidateRows",
-    contextData: { rows: rows() },
-  });
-  if (response?.error) {
-    args.showErrorToast(response.error);
-    return;
+  const rowSchema = args.z
+    .record(args.z.string(), args.z.any())
+    .transform((obj) => {
+      const out = {};
+      for (const k of keys) {
+        const v = obj[k];
+        out[k] = v == null ? "" : String(v).trim();
+      }
+      return out;
+    });
+  const arrSchema = args.z.array(rowSchema).max(MAX_ROWS);
+  const parsed = arrSchema.safeParse(raw);
+  if (!parsed.success) {
+    const issues = parsed.error?.issues ?? parsed.error?.errors ?? [];
+    const msg = issues
+      .map((e) => ((e.path && e.path.join) ? e.path.join(".") : "") + ": " + e.message)
+      .join("; ");
+    return { ok: false, message: msg || "Validation failed", rows: [] };
   }
-  const r = response?.result;
-  if (!r?.success) {
-    args.showErrorToast(r?.message || "Validation failed");
-    return;
-  }
-  setRows(r.data.rows);
-  args.showSuccessToast("Rows validated");
+  return { ok: true, message: "", rows: parsed.data };
 };
 
 const downloadZip = async () => {
+  const template = pdfTemplate();
+  if (!template) {
+    args.showWarningToast("Select a pdfme template JSON file first");
+    return;
+  }
   if (!rows().length) {
     args.showWarningToast("No rows");
     return;
   }
+  const norm = normalizeRowsLocally(rows());
+  if (!norm.ok) {
+    args.showErrorToast(norm.message);
+    return;
+  }
+  setRows(norm.rows);
   setBusy(true);
   setStatusMsg("Loading PDF engine from CDN…");
   try {
+    const verRaw = template.pdfmeVersion;
+    const ver =
+      typeof verRaw === "string" && verRaw.trim()
+        ? verRaw.trim().replace(/^v/i, "")
+        : "6.0.6";
     const pdfmeUrl =
-      "https://esm.sh/@pdfme/generator@6.0.6?deps=@pdfme/common@6.0.6";
+      "https://esm.sh/@pdfme/generator@" + ver + "?deps=@pdfme/common@" + ver;
     const jszipUrl = "https://esm.sh/jszip@3.10.1";
-    const [{ generate }, JSZipMod, templateRes] = await Promise.all([
+    const [{ generate }, JSZipMod] = await Promise.all([
       import(pdfmeUrl),
       import(jszipUrl),
-      fetch("/api/askdonationreport/template"),
     ]);
     const JSZip = JSZipMod.default;
-    if (!templateRes.ok) {
-      throw new Error("Could not load template (HTTP " + templateRes.status + ")");
-    }
-    const template = await templateRes.json();
     setStatusMsg("Generating PDFs…");
     const zip = new JSZip();
-    const list = rows();
+    const list = norm.rows;
+    const keys = schemaFieldNames();
     for (let i = 0; i < list.length; i++) {
       setStatusMsg("Generating PDF " + (i + 1) + "/" + list.length + "…");
       const raw = list[i];
       const one = {};
-      for (const k of CANONICAL) {
+      for (const k of keys) {
         one[k] = String(raw[k] ?? "");
       }
       const inputs = [one];
-      const pdf = await generate({ template, inputs });
+      const tplStyled = cloneWithFieldStyles(template, fieldPatches());
+      const fontOpt = buildPdfmeFontOption(customFonts());
+      const pdf = await generate({
+        template: tplStyled,
+        inputs,
+        options: { font: fontOpt },
+      });
       let buf;
       if (pdf instanceof Uint8Array) {
         buf = pdf;
@@ -145,8 +420,19 @@ const downloadZip = async () => {
       } else {
         buf = new Uint8Array(pdf);
       }
-      const base = String(raw.No ?? i + 1).replace(/[^a-zA-Z0-9._-]+/g, "_") || "row_" + (i + 1);
-      zip.file("donation-" + base + ".pdf", buf);
+      const noPart = String(raw.No ?? "").trim() || String(i + 1);
+      const namePart = String(raw.Name ?? "").trim();
+      let fileBase =
+        "ASK UMARALA DONATION RECEIPT - " + noPart + (namePart ? " " + namePart : "");
+      fileBase = fileBase.replace(/[\\\\/:*?\"<>|]+/g, "_").replace(/\\s+/g, " ").trim();
+      if (fileBase.length > 200) {
+        fileBase = fileBase.slice(0, 200).trim();
+      }
+      let zipName = fileBase + ".pdf";
+      if (zip.files[zipName]) {
+        zipName = fileBase + "_" + String(i + 1) + ".pdf";
+      }
+      zip.file(zipName, buf);
     }
     setStatusMsg("Building ZIP…");
     const blob = await zip.generateAsync({ type: "blob" });
@@ -169,15 +455,27 @@ const downloadZip = async () => {
 
 return {
   enabled: true,
-  CANONICAL,
+  schemaFieldNames,
   rows,
   busy,
   statusMsg,
+  templateFileLabel,
+  origFonts,
+  fontRegKey,
+  setFontRegKey,
+  customFonts,
+  styleRows,
+  getFieldPatch,
+  patchFieldPatch,
+  onPendingFontFile,
+  registerCustomFont,
+  removeCustomFont,
+  clearFieldPatches,
   updateCell,
   addRow,
   deleteRow,
+  onTemplateSelected,
   onCsvSelected,
-  validateRows,
   downloadZip,
 };
 '''
@@ -233,7 +531,7 @@ return {
         props:
           '''return {
   as: "p",
-  text: "Edit the table below, or upload a CSV with columns: Date, Name, Address, Amount, AmountInWords, No, PAN, Phone. Use Add row / Remove to change rows. Build a ZIP of one PDF per row (pdfme.com template).",
+  text: "Pick a pdfme template JSON (e.g. exported from the designer). After it loads, the table columns match that template’s field names (`schemas[0][].name`). Edit cells or upload a CSV whose headers match those names (case-insensitive). Add row / Remove as needed. ZIP builds one PDF per row.",
 };'''
         css:
           '''return `._id {
@@ -264,10 +562,108 @@ return {
       }
     }
     {
-      id: "adr6"
+      id: "adr44wrap"
       L: Attr
       P: {
         displayOrder: 1
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+._id .file-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  white-space: nowrap;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr44lab"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  class: "file-field-label",
+  text: "Template (JSON)",
+};'''
+      }
+    }
+    {
+      id: "adr44inp"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "file",
+  accept: ".json,application/json",
+  title: "pdfme template JSON",
+  onChange: (e) => args.fns.onTemplateSelected(e),
+};'''
+        css:
+          '''return `._id {
+  font-size: 0.9rem;
+  max-width: 16rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr6wrap"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+._id .file-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  white-space: nowrap;
+}`;
+'''
+      }
+    }
+    {
+      id: "adr6lab"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  class: "file-field-label",
+  text: "CSV data",
+};'''
+      }
+    }
+    {
+      id: "adr6inp"
+      L: Attr
+      P: {
+        displayOrder: 2
         componentName: Html
         props:
           '''return {
@@ -279,6 +675,7 @@ return {
         css:
           '''return `._id {
   font-size: 0.9rem;
+  max-width: 16rem;
 }`;
 '''
       }
@@ -287,7 +684,7 @@ return {
       id: "adr40"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 3
         componentName: Html
         props:
           '''return {
@@ -296,34 +693,6 @@ return {
   text: "Add row",
   disabled: args.fns.busy(),
   onClick: () => args.fns.addRow(),
-};'''
-        css:
-          '''return `._id {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid ${args.theme.var.color.border};
-  background: ${args.theme.var.color.background_light_100};
-  color: ${args.theme.var.color.text};
-  cursor: pointer;
-  font-weight: 600;
-  &:disabled { opacity: 0.55; cursor: not-allowed; }
-}`;
-'''
-      }
-    }
-    {
-      id: "adr7"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props:
-          '''return {
-  as: "button",
-  type: "button",
-  text: "Validate on server",
-  disabled: args.fns.busy(),
-  onClick: () => args.fns.validateRows(),
 };'''
         css:
           '''return `._id {
@@ -350,7 +719,7 @@ return {
   as: "button",
   type: "button",
   text: "Download ZIP of PDFs",
-  disabled: args.fns.busy() || args.fns.rows().length === 0,
+  disabled: args.fns.busy() || args.fns.rows().length === 0 || !args.fns.templateFileLabel(),
   onClick: () => args.fns.downloadZip(),
 };'''
         css:
@@ -368,10 +737,470 @@ return {
       }
     }
     {
-      id: "adr9"
+      id: "adrTyp0"
       L: Attr
       P: {
         displayOrder: 4
+        componentName: Html
+        props: '''return { as: "section" };'''
+        css:
+          '''return `._id {
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_50};
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp1"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "PDF typography & custom fonts",
+};'''
+        css:
+          '''return `._id {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp2"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Register a font with a stable key. If a .ttf/.otf file is selected, that file is used; otherwise Register tries to download from Google Fonts using the entered key/family name. Then set each field’s font key (built-ins: Roboto, RobotoBold, RobotoMedium, RobotoItalic). Size is in pdfme points. Checkboxes map to underline / strikethrough. Clear removes overrides for this session (reload the template file to reset from JSON).",
+};'''
+        css:
+          '''return `._id {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.85rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp3"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  placeholder: "Font key / Google family (e.g. Inter)",
+  disabled: args.fns.busy(),
+  value: args.fns.fontRegKey(),
+  onInput: (e) => args.fns.setFontRegKey(e.currentTarget.value),
+};'''
+        css:
+          '''return `._id {
+  min-width: 10rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.35rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "file",
+  accept: ".ttf,.otf,font/ttf,font/otf,application/x-font-ttf",
+  disabled: args.fns.busy(),
+  title: "Font file",
+  onChange: (e) => args.fns.onPendingFontFile(e),
+};'''
+        css:
+          '''return `._id { font-size: 0.85rem; max-width: 14rem; }`;
+'''
+      }
+    }
+    {
+      id: "adrTyp6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Register font",
+  disabled: args.fns.busy(),
+  onClick: () => args.fns.registerCustomFont(),
+};'''
+        css:
+          '''return `._id {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.35rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+  cursor: pointer;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp7"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  data: () => args.fns.customFonts(),
+  loop: true,
+  contextName: "cf",
+};'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.65rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: "Registered: " + args.contextData.cf.key,
+};'''
+        css:
+          '''return `._id {
+  font-family: monospace;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Remove",
+  disabled: args.fns.busy(),
+  onClick: () => args.fns.removeCustomFont(args.contextData.cf.key),
+};'''
+        css:
+          '''return `._id {
+  padding: 0.2rem 0.45rem;
+  font-size: 0.8rem;
+  border-radius: 0.3rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  cursor: pointer;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp11"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Per-field overrides (applies when you download ZIP):",
+};'''
+        css:
+          '''return `._id {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0.35rem 0 0.4rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp12"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  data: () => args.fns.styleRows(),
+  loop: true,
+  contextName: "sty",
+};'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: minmax(5rem, 1fr) minmax(7rem, 1.2fr) 4rem 1.8rem 1.8rem;
+  gap: 0.35rem 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+@media (max-width: 720px) {
+  ._id {
+    grid-template-columns: 1fr 1fr;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp14"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "span",
+  text: args.contextData.sty.name,
+};'''
+        css:
+          '''return `._id {
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  word-break: break-all;
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp15"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  disabled: args.fns.busy(),
+  placeholder:
+    "def: " + (args.fns.origFonts()[args.contextData.sty.name] || "Roboto"),
+  value: String(args.fns.getFieldPatch(args.contextData.sty.name).fontName ?? ""),
+  onInput: (e) =>
+    args.fns.patchFieldPatch(args.contextData.sty.name, "fontName", e.currentTarget.value),
+};'''
+        css:
+          '''return `._id {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.25rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp16"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "text",
+  inputMode: "decimal",
+  placeholder: "size",
+  disabled: args.fns.busy(),
+  value: String(args.fns.getFieldPatch(args.contextData.sty.name).fontSize ?? ""),
+  onInput: (e) =>
+    args.fns.patchFieldPatch(args.contextData.sty.name, "fontSize", e.currentTarget.value),
+};'''
+        css:
+          '''return `._id {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.25rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "adrTyp17"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "checkbox",
+  title: "Underline",
+  disabled: args.fns.busy(),
+  checked: args.fns.getFieldPatch(args.contextData.sty.name).underline === true,
+  onChange: (e) =>
+    args.fns.patchFieldPatch(
+      args.contextData.sty.name,
+      "underline",
+      e.currentTarget.checked,
+    ),
+};'''
+      }
+    }
+    {
+      id: "adrTyp18"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "input",
+  type: "checkbox",
+  title: "Strikethrough",
+  disabled: args.fns.busy(),
+  checked: args.fns.getFieldPatch(args.contextData.sty.name).strikethrough === true,
+  onChange: (e) =>
+    args.fns.patchFieldPatch(
+      args.contextData.sty.name,
+      "strikethrough",
+      e.currentTarget.checked,
+    ),
+};'''
+      }
+    }
+    {
+      id: "adrTyp19"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Clear typography overrides",
+  disabled: args.fns.busy(),
+  onClick: () => args.fns.clearFieldPatches(),
+};'''
+        css:
+          '''return `._id {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  border-radius: 0.35rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}`;
+'''
+      }
+    }
+    {
+      id: "adr9"
+      L: Attr
+      P: {
+        displayOrder: 5
         componentName: Html
         props:
           '''return {
@@ -392,7 +1221,7 @@ return {
       id: "adr10"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 6
         componentName: Html
         props: '''return { as: "div" };'''
         css:
@@ -479,82 +1308,37 @@ return {
       }
     }
     {
-      id: "adr14"
+      id: "adrHdrLoop"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
-        props: '''return { as: "th", text: "Date" };'''
+        props:
+          '''return {
+  data: () => args.fns.schemaFieldNames().map((key) => ({ key })),
+  loop: true,
+  contextName: "hdr",
+};'''
       }
     }
     {
-      id: "adr15"
+      id: "adrHdrTh"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
-        props: '''return { as: "th", text: "Name" };'''
-      }
-    }
-    {
-      id: "adr16"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props: '''return { as: "th", text: "Address" };'''
-      }
-    }
-    {
-      id: "adr17"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: Html
-        props: '''return { as: "th", text: "Amount" };'''
-      }
-    }
-    {
-      id: "adr18"
-      L: Attr
-      P: {
-        displayOrder: 5
-        componentName: Html
-        props: '''return { as: "th", text: "AmountInWords" };'''
-      }
-    }
-    {
-      id: "adr19"
-      L: Attr
-      P: {
-        displayOrder: 6
-        componentName: Html
-        props: '''return { as: "th", text: "No" };'''
-      }
-    }
-    {
-      id: "adr20"
-      L: Attr
-      P: {
-        displayOrder: 7
-        componentName: Html
-        props: '''return { as: "th", text: "PAN" };'''
-      }
-    }
-    {
-      id: "adr21"
-      L: Attr
-      P: {
-        displayOrder: 8
-        componentName: Html
-        props: '''return { as: "th", text: "Phone" };'''
+        props:
+          '''return {
+  as: "th",
+  text: args.contextData.hdr.key,
+};'''
       }
     }
     {
       id: "adr41"
       L: Attr
       P: {
-        displayOrder: 9
+        displayOrder: 2
         componentName: Html
         props: '''return { as: "th", text: "Actions" };'''
         css:
@@ -590,40 +1374,31 @@ return {
       }
     }
     {
-      id: "adr24"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props: '''return { as: "td" };'''
-      }
-    }
-    {
-      id: "adr25"
+      id: "adrColLoop"
       L: Attr
       P: {
         displayOrder: 1
         componentName: Html
         props:
           '''return {
-  as: "input",
-  type: "text",
-  value: args.contextData.row.Date,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Date", e.currentTarget.value),
+  data: () =>
+    args.fns.schemaFieldNames().map((columnKey) => ({ columnKey })),
+  loop: true,
+  contextName: "col",
 };'''
       }
     }
     {
-      id: "adr26"
+      id: "adrDynTd"
       L: Attr
       P: {
-        displayOrder: 2
+        displayOrder: 1
         componentName: Html
         props: '''return { as: "td" };'''
       }
     }
     {
-      id: "adr27"
+      id: "adrDynInp"
       L: Attr
       P: {
         displayOrder: 1
@@ -632,152 +1407,13 @@ return {
           '''return {
   as: "input",
   type: "text",
-  value: args.contextData.row.Name,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Name", e.currentTarget.value),
-};'''
-      }
-    }
-    {
-      id: "adr28"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        props: '''return { as: "td" };'''
-      }
-    }
-    {
-      id: "adr29"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input",
-  type: "text",
-  value: args.contextData.row.Address,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Address", e.currentTarget.value),
-};'''
-      }
-    }
-    {
-      id: "adr30"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: Html
-        props: '''return { as: "td" };'''
-      }
-    }
-    {
-      id: "adr31"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input",
-  type: "text",
-  value: args.contextData.row.Amount,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Amount", e.currentTarget.value),
-};'''
-      }
-    }
-    {
-      id: "adr32"
-      L: Attr
-      P: {
-        displayOrder: 5
-        componentName: Html
-        props: '''return { as: "td" };'''
-      }
-    }
-    {
-      id: "adr33"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input",
-  type: "text",
-  value: args.contextData.row.AmountInWords,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "AmountInWords", e.currentTarget.value),
-};'''
-      }
-    }
-    {
-      id: "adr34"
-      L: Attr
-      P: {
-        displayOrder: 6
-        componentName: Html
-        props: '''return { as: "td" };'''
-      }
-    }
-    {
-      id: "adr35"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input",
-  type: "text",
-  value: args.contextData.row.No,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "No", e.currentTarget.value),
-};'''
-      }
-    }
-    {
-      id: "adr36"
-      L: Attr
-      P: {
-        displayOrder: 7
-        componentName: Html
-        props: '''return { as: "td" };'''
-      }
-    }
-    {
-      id: "adr37"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input",
-  type: "text",
-  value: args.contextData.row.PAN,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "PAN", e.currentTarget.value),
-};'''
-      }
-    }
-    {
-      id: "adr38"
-      L: Attr
-      P: {
-        displayOrder: 8
-        componentName: Html
-        props: '''return { as: "td" };'''
-      }
-    }
-    {
-      id: "adr39"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        props:
-          '''return {
-  as: "input",
-  type: "text",
-  value: args.contextData.row.Phone,
-  onInput: (e) => args.fns.updateCell(args.contextData.rowIndex, "Phone", e.currentTarget.value),
+  value: args.contextData.row[args.contextData.col.columnKey],
+  onInput: (e) =>
+    args.fns.updateCell(
+      args.contextData.rowIndex,
+      args.contextData.col.columnKey,
+      e.currentTarget.value,
+    ),
 };'''
       }
     }
@@ -785,7 +1421,7 @@ return {
       id: "adr42"
       L: Attr
       P: {
-        displayOrder: 9
+        displayOrder: 2
         componentName: Html
         props: '''return { as: "td" };'''
         css:
@@ -840,6 +1476,126 @@ return {
       E: adr5
     }
     {
+      id: adeptyp0
+      T: Attr
+      S: adr2
+      E: adrTyp0
+    }
+    {
+      id: adeptyp1
+      T: Attr
+      S: adrTyp0
+      E: adrTyp1
+    }
+    {
+      id: adeptyp2
+      T: Attr
+      S: adrTyp0
+      E: adrTyp2
+    }
+    {
+      id: adeptyp3
+      T: Attr
+      S: adrTyp0
+      E: adrTyp3
+    }
+    {
+      id: adeptyp4
+      T: Attr
+      S: adrTyp0
+      E: adrTyp7
+    }
+    {
+      id: adeptyp5
+      T: Attr
+      S: adrTyp0
+      E: adrTyp11
+    }
+    {
+      id: adeptyp6
+      T: Attr
+      S: adrTyp0
+      E: adrTyp12
+    }
+    {
+      id: adeptyp7
+      T: Attr
+      S: adrTyp0
+      E: adrTyp19
+    }
+    {
+      id: adeptyp8
+      T: Attr
+      S: adrTyp3
+      E: adrTyp4
+    }
+    {
+      id: adeptyp9
+      T: Attr
+      S: adrTyp3
+      E: adrTyp5
+    }
+    {
+      id: adeptyp10
+      T: Attr
+      S: adrTyp3
+      E: adrTyp6
+    }
+    {
+      id: adeptyp11
+      T: Attr
+      S: adrTyp7
+      E: adrTyp8
+    }
+    {
+      id: adeptyp12
+      T: Attr
+      S: adrTyp8
+      E: adrTyp9
+    }
+    {
+      id: adeptyp13
+      T: Attr
+      S: adrTyp8
+      E: adrTyp10
+    }
+    {
+      id: adeptyp14
+      T: Attr
+      S: adrTyp12
+      E: adrTyp13
+    }
+    {
+      id: adeptyp15
+      T: Attr
+      S: adrTyp13
+      E: adrTyp14
+    }
+    {
+      id: adeptyp16
+      T: Attr
+      S: adrTyp13
+      E: adrTyp15
+    }
+    {
+      id: adeptyp17
+      T: Attr
+      S: adrTyp13
+      E: adrTyp16
+    }
+    {
+      id: adeptyp18
+      T: Attr
+      S: adrTyp13
+      E: adrTyp17
+    }
+    {
+      id: adeptyp19
+      T: Attr
+      S: adrTyp13
+      E: adrTyp18
+    }
+    {
       id: ade5
       T: Attr
       S: adr2
@@ -855,19 +1611,43 @@ return {
       id: ade7
       T: Attr
       S: adr5
-      E: adr6
+      E: adr44wrap
+    }
+    {
+      id: ade44a
+      T: Attr
+      S: adr44wrap
+      E: adr44lab
+    }
+    {
+      id: ade44b
+      T: Attr
+      S: adr44wrap
+      E: adr44inp
+    }
+    {
+      id: ade7csv
+      T: Attr
+      S: adr5
+      E: adr6wrap
+    }
+    {
+      id: ade6a
+      T: Attr
+      S: adr6wrap
+      E: adr6lab
+    }
+    {
+      id: ade6b
+      T: Attr
+      S: adr6wrap
+      E: adr6inp
     }
     {
       id: ade7b
       T: Attr
       S: adr5
       E: adr40
-    }
-    {
-      id: ade8
-      T: Attr
-      S: adr5
-      E: adr7
     }
     {
       id: ade9
@@ -900,52 +1680,16 @@ return {
       E: adr13
     }
     {
-      id: ade14
+      id: adeHdrLoop
       T: Attr
       S: adr13
-      E: adr14
+      E: adrHdrLoop
     }
     {
-      id: ade15
+      id: adeHdrTh
       T: Attr
-      S: adr13
-      E: adr15
-    }
-    {
-      id: ade16
-      T: Attr
-      S: adr13
-      E: adr16
-    }
-    {
-      id: ade17
-      T: Attr
-      S: adr13
-      E: adr17
-    }
-    {
-      id: ade18
-      T: Attr
-      S: adr13
-      E: adr18
-    }
-    {
-      id: ade19
-      T: Attr
-      S: adr13
-      E: adr19
-    }
-    {
-      id: ade20
-      T: Attr
-      S: adr13
-      E: adr20
-    }
-    {
-      id: ade21
-      T: Attr
-      S: adr13
-      E: adr21
+      S: adrHdrLoop
+      E: adrHdrTh
     }
     {
       id: ade21b
@@ -960,100 +1704,22 @@ return {
       E: adr23
     }
     {
-      id: ade23
+      id: adeColLoop
       T: Attr
       S: adr23
-      E: adr24
+      E: adrColLoop
     }
     {
-      id: ade24
+      id: adeColTd
       T: Attr
-      S: adr24
-      E: adr25
+      S: adrColLoop
+      E: adrDynTd
     }
     {
-      id: ade25
+      id: adeColInp
       T: Attr
-      S: adr23
-      E: adr26
-    }
-    {
-      id: ade26
-      T: Attr
-      S: adr26
-      E: adr27
-    }
-    {
-      id: ade27
-      T: Attr
-      S: adr23
-      E: adr28
-    }
-    {
-      id: ade28
-      T: Attr
-      S: adr28
-      E: adr29
-    }
-    {
-      id: ade29
-      T: Attr
-      S: adr23
-      E: adr30
-    }
-    {
-      id: ade30
-      T: Attr
-      S: adr30
-      E: adr31
-    }
-    {
-      id: ade31
-      T: Attr
-      S: adr23
-      E: adr32
-    }
-    {
-      id: ade32
-      T: Attr
-      S: adr32
-      E: adr33
-    }
-    {
-      id: ade33
-      T: Attr
-      S: adr23
-      E: adr34
-    }
-    {
-      id: ade34
-      T: Attr
-      S: adr34
-      E: adr35
-    }
-    {
-      id: ade35
-      T: Attr
-      S: adr23
-      E: adr36
-    }
-    {
-      id: ade36
-      T: Attr
-      S: adr36
-      E: adr37
-    }
-    {
-      id: ade37
-      T: Attr
-      S: adr23
-      E: adr38
-    }
-    {
-      id: ade38
-      T: Attr
-      S: adr38
-      E: adr39
+      S: adrDynTd
+      E: adrDynInp
     }
     {
       id: ade38b

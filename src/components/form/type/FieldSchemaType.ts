@@ -106,6 +106,8 @@ export interface FunctionArgumentBaseType {
     request: { functionName: string; contextData?: any },
     context?: Record<string, unknown>,
   ) => Promise<ServerResult>;
+  /** Zod namespace (`import { z } from "zod"`); exposed on dynamic component / page `args`. */
+  z: typeof import("zod").z;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {
