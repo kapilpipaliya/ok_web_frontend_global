@@ -49,6 +49,9 @@ after email setup we need to setup app server:
   The intermediate CA cert is in: /root/.acme.sh/decodeui.io_ecc/ca.cer Intermediate cert(s) only
   And the full-chain cert is in: /root/.acme.sh/decodeui.io_ecc/fullchain.cer Domain cert + intermediate chain
   Past your fullchain.cer and key on cyberpanel
+
+  for renew do:
+  acme.sh --renew -d decodeui.io --ecc --force
 5. configure cyberpanel to use this server as reverse proxy (rewrite rule)
 RewriteEngine On
 

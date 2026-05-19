@@ -1,0 +1,140 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Tutorial - Store Tasks
+        url: /tutorial
+        key: StoreTasksTutorial
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Tutorial"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: Follow these steps to get the most out of **Store Tasks**.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css: ""
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text:
+          '''### 1. Install and open the app
+
+Install **Store Tasks** from the [Shopify App Store](https://apps.shopify.com/). Open it from **Apps** in your Shopify admin so it loads in the embedded (iframe) experience.
+
+### 2. Explore lists and tasks
+
+Use the sidebar to switch between lists (or stay on **All tasks** depending on setup). Open **[Tasks](/tasks)** to manage rows in the table.
+
+### 3. Create and edit tasks
+
+Use **create** actions in the table to add rows. Fill in title, description, status, priority, optional due dates, assignee (staff), linked order, and comments.
+
+### 4. Tune the table
+
+Open **settings** when available to adjust columns—but **import/export** shortcuts may be hidden in some embedded setups.
+
+### 5. Get help
+
+Read [FAQ](/faq) and [Documentation](/docs); contact us from [Support](/support).
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "PageLayout", S: "1", E: "6" }
+    { id: "e3", T: "Attr", S: "2", E: "3" }
+    { id: "e4", T: "Attr", S: "2", E: "4" }
+    { id: "e5", T: "Attr", S: "2", E: "5" }
+  ]
+}

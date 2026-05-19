@@ -2,6 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
+import { getPrimaryAppDomain } from "~/lib/envDomains";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -65,7 +66,7 @@ export async function getInitialData(request?: APIEvent["request"]) {
     },
     timestamp: new Date().getTime(),
     subdomain: subDomain,
-    domain: domain || process.env.DOMAIN || null,
+    domain: domain || getPrimaryAppDomain() || null,
   } as ServerResult;
 }
 

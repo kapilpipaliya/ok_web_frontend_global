@@ -4,6 +4,7 @@
       id: "docs_page",
       L: "Page",
       P: {
+        public: true
         key: "RBDocs",
         url: "/docs",
         title: "Documentation - Personal Rulebook",

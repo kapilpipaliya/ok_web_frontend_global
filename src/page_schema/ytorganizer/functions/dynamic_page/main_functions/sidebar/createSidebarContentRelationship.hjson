@@ -1,0 +1,166 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Creates a relationship from a content item to a sidebar category (ContentItem -[relationshipType]-> Category)
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { categoryId, contentId, relationshipType, categoryLabel, contentLabel, enableUserScopingForSidebar, enableUserScopingForContent, hooks } = args.contextData;
+
+if (!categoryId || !contentId || !relationshipType || !categoryLabel || !contentLabel) {
+  return {
+    success: false,
+    message: "categoryId, contentId, relationshipType, categoryLabel, and contentLabel are required"
+  };
+}
+
+const userUuid = user.P.uuid;
+
+// Verify that both category and content belong to the user
+// For category: User -[UserCategory]-> Category
+// For content: User -[UserBook/UserAudioVideo]-> Content
+const userCategoryRelType = `User${categoryLabel}`;
+const contentRelType = `User${contentLabel}`;;
+
+// Execute beforeCreateRelationship hooks
+await args.executeHooks(hooks?.beforeCreateRelationship, {
+  categoryId,
+  contentId,
+  relationshipType,
+  categoryLabel,
+  contentLabel,
+  enableUserScopingForSidebar,
+  enableUserScopingForContent
+});
+
+try {
+  // Create relationship: ContentItem -[relationshipType]-> Category (content points to category)
+  // Build query based on scoping settings
+  let query;
+  let queryParams;
+  if (!enableUserScopingForSidebar && !enableUserScopingForContent) {
+    // No user scoping - just create relationship
+    query = `
+      MATCH (cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { categoryId, contentId };
+  } else if (!enableUserScopingForSidebar && enableUserScopingForContent) {
+    // Only content is scoped
+    query = `
+      MATCH (cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { userUuid, categoryId, contentId };
+  } else if (enableUserScopingForSidebar && !enableUserScopingForContent) {
+    // Only category is scoped
+    query = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { userUuid, categoryId, contentId };
+  } else {
+    // Both scoped (default)
+    query = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:${userCategoryRelType}]->(cat:${categoryLabel})
+      WHERE elementId(cat) = $categoryId
+      MATCH (u)-[:${contentRelType}]->(content:${contentLabel})
+      WHERE elementId(content) = $contentId
+      MERGE (content)-[r:${relationshipType}]->(cat)
+      ON CREATE SET r.createdAt = datetime()
+      RETURN r
+    `;
+    queryParams = { userUuid, categoryId, contentId };
+  }
+
+  const result = await args.session.run(query, queryParams);
+
+  let resultData;
+  if (result.records.length > 0) {
+    // Use processResult to populate graph structure with the relationship
+    args.processResult(result.records, args.context, [], 'r');
+    resultData = {
+      success: true,
+      message: "Relationship created successfully"
+    };
+  } else {
+    resultData = {
+      success: false,
+      message: `Failed to create relationship. ${categoryLabel} or ${contentLabel} not found or not accessible.`
+    };
+  }
+
+  // Execute afterCreateRelationship hooks
+  await args.executeHooks(hooks?.afterCreateRelationship, {
+    categoryId,
+    contentId,
+    relationshipType,
+    categoryLabel,
+    contentLabel,
+    enableUserScopingForSidebar,
+    enableUserScopingForContent,
+    result: resultData
+  });
+
+  return resultData;
+} catch (error) {
+  console.error("Error creating sidebar content relationship:", error);
+  const errorResult = {
+    success: false,
+    message: error.message || "Failed to create relationship"
+  };
+
+  // Execute afterCreateRelationship hooks even on error
+  await args.executeHooks(hooks?.afterCreateRelationship, {
+    categoryId,
+    contentId,
+    relationshipType,
+    categoryLabel,
+    contentLabel,
+    enableUserScopingForSidebar,
+    enableUserScopingForContent,
+    result: errorResult
+  });
+
+  return errorResult;
+}
+'''
+        key: createSidebarContentRelationship
+      }
+    }
+  ]
+  edges: []
+}

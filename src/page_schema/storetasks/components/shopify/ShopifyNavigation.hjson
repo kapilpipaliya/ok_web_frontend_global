@@ -1,0 +1,180 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        title: ShopifyNavigation
+        key: ShopifyNavigation
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  as: "s-app-nav"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: nav_tasks
+        props:
+          '''return {
+  as: "s-link",
+  href: "/tasks",
+  text: "Tasks"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: nav_staff
+        props:
+          '''return {
+  as: "s-link",
+  href: "/staff",
+  text: "Staff"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "s-link",
+  href: "/support",
+  text: "Support"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: unique_faq
+        props:
+          '''return {
+  as: "s-link",
+  href: "/faq",
+  text: "FAQ"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        key: unique_docs
+        props:
+          '''return {
+  as: "s-link",
+  href: "/docs",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        key: unique_4
+        props:
+          '''return {
+  as: "s-link",
+  href: "/billing",
+  text: "Billing"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: Html
+        key: unique_5
+        props:
+          '''return {
+  as: "s-link",
+  href: "/privacy",
+  text: "Privacy"
+}'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e_nav_staff
+      T: Attr
+      S: "3"
+      E: "12"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "11"
+    }
+  ]
+}

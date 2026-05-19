@@ -52,9 +52,7 @@ return {
   as: "div",
   hide: !isOpen,
   onClick: (e) => {
-    if (e.target === e.currentTarget && onCancel) {
-      onCancel();
-    }
+    if (e.target === e.currentTarget && onCancel) onCancel();
   }
 };
 '''
@@ -352,6 +350,7 @@ return `._id {
 const cancelText = args.contextData.props?.cancelText || "Cancel";
 const onCancel = args.contextData.props?.onCancel;
 const loading = args.contextData.props?.loading || false;
+const usePolaris = args.contextData.props?.getUsePolarisUI === true;
 
 return {
   as: "button",
@@ -359,10 +358,34 @@ return {
   text: cancelText,
   disabled: loading,
   onClick: () => {
-    if (onCancel && !loading) {
-      onCancel();
+    if (onCancel && !loading) onCancel();
+  },
+  hide: usePolaris
+};
+'''
+      }
     }
-  }
+    {
+      id: "10_polaris"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const cancelText = args.contextData.props?.cancelText || "Cancel";
+const onCancel = args.contextData.props?.onCancel;
+const loading = args.contextData.props?.loading || false;
+
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: cancelText,
+  disabled: loading,
+  onClick: () => {
+    if (onCancel && !loading) onCancel();
+  },
+  hide: args.contextData.props?.getUsePolarisUI !== true
 };
 '''
       }
@@ -442,6 +465,8 @@ return `._id {
 const confirmText = args.contextData.props?.confirmText || "Confirm";
 const onConfirm = args.contextData.props?.onConfirm;
 const loading = args.contextData.props?.loading || false;
+const usePolaris = args.contextData.props?.getUsePolarisUI === true;
+const variant = args.contextData.props?.variant || "danger";
 
 return {
   as: "button",
@@ -449,10 +474,39 @@ return {
   text: loading ? "Please wait..." : confirmText,
   disabled: loading,
   onClick: async () => {
-    if (onConfirm && !loading) {
-      await onConfirm();
+    if (onConfirm && !loading) await onConfirm();
+  },
+  hide: usePolaris
+};
+'''
+      }
     }
-  }
+    {
+      id: "11_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const confirmText = args.contextData.props?.confirmText || "Confirm";
+const onConfirm = args.contextData.props?.onConfirm;
+const loading = args.contextData.props?.loading || false;
+const variant = args.contextData.props?.variant || "danger";
+
+const polarisVariant = variant === "danger" ? "primary" : variant === "warning" ? "primary" : "primary";
+const polarisTone = variant === "danger" ? "critical" : undefined;
+
+return {
+  as: "s-button",
+  "attr:variant": polarisVariant,
+  "attr:tone": polarisTone,
+  text: loading ? "Please wait..." : confirmText,
+  disabled: loading,
+  onClick: async () => {
+    if (onConfirm && !loading) await onConfirm();
+  },
+  hide: args.contextData.props?.getUsePolarisUI !== true
 };
 '''
       }
@@ -674,10 +728,22 @@ return {
       E: "10"
     }
     {
+      id: e18a
+      T: Attr
+      S: "9"
+      E: "10_polaris"
+    }
+    {
       id: e19
       T: Attr
       S: "9"
       E: "11"
+    }
+    {
+      id: e19a
+      T: Attr
+      S: "9"
+      E: "11_polaris"
     }
     {
       id: e20

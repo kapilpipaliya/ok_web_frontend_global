@@ -4,6 +4,7 @@
       id: "page",
       L: "Page",
       P: {
+        public: true
         key: "Contact",
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,

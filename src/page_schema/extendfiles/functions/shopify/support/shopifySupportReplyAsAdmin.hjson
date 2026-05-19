@@ -1,0 +1,119 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: shopifySupportReplyAsAdmin
+        description: Adds a reply from an admin user to a Shopify support ticket and updates unread counters.
+        body:
+          '''
+// Add a reply to a Shopify support ticket as an admin.
+// Expected args.contextData:
+// - ticketId: string - REQUIRED
+// - message: string - REQUIRED
+// - shop: string (Shopify shop domain) - OPTIONAL safety filter
+
+const {
+  ticketId,
+  message,
+  shop
+} = args.contextData || {};
+
+if (!ticketId || typeof ticketId !== "string") {
+  return {
+    success: false,
+    message: "ticketId is required."
+  };
+}
+
+const rawMessage = (message || "").trim();
+if (!rawMessage) {
+  return {
+    success: false,
+    message: "Reply message is required."
+  };
+}
+
+const safeMessage = rawMessage.slice(0, 4000);
+
+// Try to get current user for email/name (admin context)
+let safeEmail = "";
+let safeName = "Support";
+if (args.getUserFromSession) {
+  try {
+    const currentUser = await args.getUserFromSession();
+    if (currentUser?.P?.email && typeof currentUser.P.email === "string") {
+      safeEmail = currentUser.P.email.slice(0, 320);
+    }
+    if (currentUser?.P?.name && typeof currentUser.P.name === "string") {
+      safeName = currentUser.P.name.slice(0, 200);
+    }
+  } catch (e) {
+    console.warn("shopifySupportReplyAsAdmin: getUserFromSession failed:", e);
+  }
+}
+
+let whereClause = "elementId(t) = $ticketId AND t.source = 'shopify'";
+const params = {
+  ticketId,
+  message: safeMessage,
+  email: safeEmail || "support@localhost",
+  name: safeName
+};
+
+if (shop && typeof shop === "string") {
+  whereClause = whereClause + " AND t.shop = $shop";
+  params.shop = shop;
+}
+
+const query = `
+  MATCH (t:Support)
+  WHERE ${whereClause}
+  CREATE (r:Reply {
+    message: $message,
+    createdAt: datetime(),
+    email: $email,
+    senderType: 'admin',
+    name: $name
+  })-[tr:ParentSupport]->(t)
+  SET t.lastMessageAt = datetime(),
+      t.lastMessageSender = 'admin',
+      t.unreadForShop = coalesce(t.unreadForShop, 0) + 1
+  RETURN t, r, tr
+`;
+
+const result = await args.session.run(query, params);
+
+if (!result.records || result.records.length === 0) {
+  return {
+    success: false,
+    message: "Support ticket not found or reply could not be created."
+  };
+}
+
+// Populate graph structure
+args.processResult(result.records, args.context, ["t", "r"], "tr");
+
+const nodes = args.context.nodes || {};
+const ticket = Object.values(nodes).find(
+  (v) => Array.isArray(v.L) && v.L.includes("Support")
+);
+const reply = Object.values(nodes).find(
+  (v) => Array.isArray(v.L) && v.L.includes("Reply")
+);
+
+return {
+  success: true,
+  message: "Reply sent successfully.",
+  data: {
+    ticket,
+    reply
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,84 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        fns:
+          '''
+const isInIframe = args.atom(false);
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    }),
+  isInIframe
+};
+''',
+        title: "Staff – Store Tasks",
+        key: "StoreTasksStaff",
+        url: "/staff",
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    args.fns.isInIframe(window.self !== window.top);
+  }
+};'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DynamicPage",
+        key: "storetasks_staff_dynamic_page",
+        props: '''return {
+  tableVertexLabel: "User",
+  loadFromSetting: true,
+  hide: !args.fns.isInIframe()
+};'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        key: "unique_1",
+        as: "div",
+        css: "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; padding: 1rem; }`;",
+        props: "return { show: args.fns.isInIframe() === false };"
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        key: "unique_2",
+        text: "Please open **Store Tasks** inside your Shopify admin (embedded app) to manage staff.",
+        textType: "markdown",
+        props: "return { as: 'p' };"
+      }
+    },
+    {
+      id: "5",
+      L: "PageLayout",
+      P: {
+        componentName: "ShopifyLayout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "PageLayout", S: "1", E: "5" },
+    { id: "e4", T: "Attr", S: "3", E: "4" }
+  ]
+}

@@ -14,14 +14,33 @@ export interface WebsiteSchemas {
   pages?: Record<string, ExportedSchema>;
   themes?: Record<string, ExportedSchema>;
   functions?: Record<string, ExportedSchema>;
+  emailTemplates?: Record<string, ExportedSchema>;
 }
 
 type AllWebsiteSchemas = Record<string, WebsiteSchemas>;
-type SchemaType = "components" | "pages" | "themes" | "functions";
+
+/** Folder names under each website directory in page_schema */
+type SchemaFolderType =
+  | "components"
+  | "pages"
+  | "themes"
+  | "functions"
+  | "email_templates";
+
+const SCHEMA_FOLDER_TO_WEBSITE_KEY: Record<
+  SchemaFolderType,
+  keyof WebsiteSchemas
+> = {
+  components: "components",
+  pages: "pages",
+  themes: "themes",
+  functions: "functions",
+  email_templates: "emailTemplates",
+};
 
 interface ParsedPath {
   websiteName: string;
-  schemaType: SchemaType;
+  schemaType: SchemaFolderType;
   fileName: string;
 }
 
@@ -35,7 +54,8 @@ function parseModulePath(path: string): ParsedPath | null {
     schemaType !== "components" &&
     schemaType !== "pages" &&
     schemaType !== "themes" &&
-    schemaType !== "functions"
+    schemaType !== "functions" &&
+    schemaType !== "email_templates"
   )
     return null;
 
@@ -45,7 +65,7 @@ function parseModulePath(path: string): ParsedPath | null {
 
   return {
     websiteName: parts[1],
-    schemaType: schemaType as SchemaType,
+    schemaType: schemaType as SchemaFolderType,
     fileName: fileName,
   };
 }
@@ -71,7 +91,7 @@ function extractKeyFromSchema(schema: ExportedSchema): string | null {
 
     const rootVertices = vertexesArray.filter((v) => !parentMap.has(v.id));
 
-    // Find the root vertex with label "Page", "Component", "Theme", or "Function"
+    // Find the root vertex with label "Page", "Component", "Theme", "Function", or "EmailTemplate"
     for (const vertex of rootVertices) {
       const labels = Array.isArray(vertex.L) ? vertex.L : [vertex.L];
 
@@ -79,7 +99,8 @@ function extractKeyFromSchema(schema: ExportedSchema): string | null {
         labels.includes("Page") ||
         labels.includes("Component") ||
         labels.includes("Theme") ||
-        labels.includes("Function")
+        labels.includes("Function") ||
+        labels.includes("EmailTemplate")
       ) {
         if (vertex.P && vertex.P.key) {
           return vertex.P.key as string;
@@ -114,29 +135,32 @@ function processSchemaFile(
     // Use the extracted key or fall back to fileName
     const key = schemaKey || parsedPath.fileName;
 
+    const groupKey = SCHEMA_FOLDER_TO_WEBSITE_KEY[parsedPath.schemaType];
+
     // Handle both AllWebsiteSchemas and WebsiteSchemas types
     if (
       "components" in schemas ||
       "pages" in schemas ||
       "themes" in schemas ||
-      "functions" in schemas
+      "functions" in schemas ||
+      "emailTemplates" in schemas
     ) {
       // WebsiteSchemas
       const websiteSchemas = schemas as WebsiteSchemas;
-      if (!websiteSchemas[parsedPath.schemaType]) {
-        websiteSchemas[parsedPath.schemaType] = {};
+      if (!websiteSchemas[groupKey]) {
+        websiteSchemas[groupKey] = {};
       }
-      websiteSchemas[parsedPath.schemaType]![key] = schema;
+      websiteSchemas[groupKey]![key] = schema;
     } else {
       // AllWebsiteSchemas
       const allSchemas = schemas as AllWebsiteSchemas;
       if (!allSchemas[parsedPath.websiteName]) {
         allSchemas[parsedPath.websiteName] = {};
       }
-      if (!allSchemas[parsedPath.websiteName][parsedPath.schemaType]) {
-        allSchemas[parsedPath.websiteName][parsedPath.schemaType] = {};
+      if (!allSchemas[parsedPath.websiteName][groupKey]) {
+        allSchemas[parsedPath.websiteName][groupKey] = {};
       }
-      allSchemas[parsedPath.websiteName][parsedPath.schemaType]![key] = schema;
+      allSchemas[parsedPath.websiteName][groupKey]![key] = schema;
     }
   } catch (error) {
     console.error(
@@ -223,6 +247,57 @@ function loadFromFilesystem(): Record<string, string> {
   return result;
 }
 
+/**
+ * Load schemas for one website under an arbitrary base directory (e.g. temp dir from schema sync).
+ * Layout: basePath/websiteName/{components,pages,themes,functions,email_templates}/ (recursive .hjson)
+ */
+export function loadWebsiteSchemasFromDirectory(
+  basePath: string,
+  websiteName: string,
+): WebsiteSchemas {
+  const schemas: WebsiteSchemas = {
+    components: {},
+    pages: {},
+    themes: {},
+    functions: {},
+    emailTemplates: {},
+  };
+
+  const websiteDir = path.join(basePath, websiteName);
+  if (!fs.existsSync(websiteDir)) {
+    return schemas;
+  }
+
+  const modules: Record<string, string> = {};
+
+  function readWebsiteDir(dir: string, relativePath: string): void {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relPath = relativePath
+        ? path.join(relativePath, entry.name)
+        : entry.name;
+      if (entry.isDirectory()) {
+        readWebsiteDir(fullPath, relPath);
+      } else if (entry.isFile() && entry.name.endsWith(".hjson")) {
+        const normalizedPath = `./${path.join(websiteName, relPath).replace(/\\/g, "/")}`;
+        modules[normalizedPath] = fs.readFileSync(fullPath, "utf-8");
+      }
+    }
+  }
+
+  readWebsiteDir(websiteDir, "");
+
+  for (const [filePath, content] of Object.entries(modules)) {
+    const parsedPath = parseModulePath(filePath);
+    if (!parsedPath || parsedPath.websiteName !== websiteName) continue;
+
+    processSchemaFile(schemas, parsedPath, content);
+  }
+
+  return schemas;
+}
+
 // Get specific website schemas synchronously with caching
 export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
   "use server";
@@ -236,6 +311,7 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
     pages: {},
     themes: {},
     functions: {},
+    emailTemplates: {},
   };
 
   // Load all .hjson files from filesystem

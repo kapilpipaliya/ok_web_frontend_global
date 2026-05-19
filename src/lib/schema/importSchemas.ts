@@ -49,7 +49,7 @@ interface PreprocessResult {
  */
 export async function findExistingVertex(
   sessionOrTx: Session | Transaction,
-  label: "Component" | "Page" | "Theme" | "Function",
+  label: "Component" | "Page" | "Theme" | "Function" | "EmailTemplate",
   key: string,
 ): Promise<string | null> {
   const result = await sessionOrTx.run(
@@ -140,6 +140,23 @@ export async function deleteExistingItems(
         console.log(`Deleting existing function: ${functionKey}`);
         await deleteVertex(sessionOrTx, existingFunctionId, user);
         deletedItems.push(`Function: ${functionKey}`);
+      }
+    }
+  }
+
+  // Delete existing email templates
+  if (websiteSchemas.emailTemplates) {
+    for (const templateKey of Object.keys(websiteSchemas.emailTemplates)) {
+      const existingId = await findExistingVertex(
+        sessionOrTx,
+        "EmailTemplate",
+        templateKey,
+      );
+
+      if (existingId) {
+        console.log(`Deleting existing email template: ${templateKey}`);
+        await deleteVertex(sessionOrTx, existingId, user);
+        deletedItems.push(`EmailTemplate: ${templateKey}`);
       }
     }
   }
@@ -319,13 +336,13 @@ async function activateTheme(tx: Transaction, themeKey: string): Promise<void> {
 }
 
 /**
- * Import a single schema (Component, Page, Theme, or Function)
+ * Import a single schema (Component, Page, Theme, Function, or EmailTemplate)
  */
 async function importSingleSchema(
   schema: ImportGraphData,
   graph: GraphType,
   setGraph: SetGraphType,
-  type: "Component" | "Page" | "Theme" | "Function",
+  type: "Component" | "Page" | "Theme" | "Function" | "EmailTemplate",
   key: string,
   tx: Transaction,
 ): Promise<SchemaImportResult> {
@@ -482,6 +499,28 @@ export async function importSchemas(
     }
   }
 
+  // Process email templates
+  if (websiteSchemas.emailTemplates) {
+    for (const [templateKey, schema] of Object.entries(
+      websiteSchemas.emailTemplates,
+    )) {
+      const result = await importSingleSchema(
+        schema,
+        graph,
+        setGraph,
+        "EmailTemplate",
+        templateKey,
+        tx,
+      );
+
+      await mutateData(result.commitData, tx);
+
+      stats.importedItems.push(`EmailTemplate: ${templateKey}`);
+      stats.totalVertices += result.vertexCount;
+      stats.totalEdges += result.edgeCount;
+    }
+  }
+
   // If only one theme was imported, activate it automatically
   if (importedThemeKeys.length === 1) {
     await activateTheme(tx, importedThemeKeys[0]);
@@ -522,6 +561,7 @@ export function buildSuccessResponse(
       pages: Object.keys(websiteSchemas.pages || {}).length,
       themes: Object.keys(websiteSchemas.themes || {}).length,
       functions: Object.keys(websiteSchemas.functions || {}).length,
+      emailTemplates: Object.keys(websiteSchemas.emailTemplates || {}).length,
       activatedTheme: stats.activatedTheme,
     },
   };

@@ -4,6 +4,7 @@
       id: "features_page",
       L: "Page",
       P: {
+        public: true
         key: "RBFeatures",
         url: "/features",
         title: "Features - Personal Rulebook",

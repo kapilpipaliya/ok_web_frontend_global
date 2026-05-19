@@ -1,0 +1,59 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: hydrateMeLogWater
+        description: One-tap water log for HydrateMe — creates HydrateMeWaterLog linked to the current user.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Sign in to log water." };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const uuid = user?.P?.uuid;
+if (!uuid) {
+  return { success: false, message: "User uuid missing." };
+}
+
+const raw = args.contextData?.amountMl;
+const amountMl = Math.max(1, Math.min(5000, Number(raw) || 250));
+const now = new Date();
+const loggedAt = now.toISOString();
+const loggedDate = loggedAt.slice(0, 10);
+
+await args.session.run(
+  `MATCH (u:User {uuid: $uuid})
+   CREATE (w:HydrateMeWaterLog {
+     amountMl: $amountMl,
+     loggedAt: $loggedAt,
+     loggedDate: $loggedDate,
+     note: coalesce($note, ""),
+     source: coalesce($source, "quick"),
+     createdAt: datetime()
+   })
+   CREATE (u)-[:UserHydrateMeWaterLog]->(w)`,
+  {
+    uuid,
+    amountMl,
+    loggedAt,
+    loggedDate,
+    note: args.contextData?.note != null ? String(args.contextData.note) : "",
+    source: args.contextData?.source != null ? String(args.contextData.source) : "quick",
+  },
+);
+
+return {
+  success: true,
+  message: `Logged ${amountMl} ml`,
+  data: { amountMl, loggedDate },
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

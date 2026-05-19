@@ -39,10 +39,39 @@ const {
 
 const itemLabel = sidebarLabel && typeof sidebarLabel === 'string' ? sidebarLabel : 'item';
 
+const propsBag = properties && typeof properties === "object" && !Array.isArray(properties) ? properties : {};
+let resolvedKey =
+  typeof key === "string"
+    ? key.trim()
+    : key != null && String(key).trim() !== ""
+      ? String(key).trim()
+      : "";
+// Key must be supplied explicitly via contextData.key (not inferred from properties)
+
+let resolvedName =
+  typeof name === "string"
+    ? name.trim()
+    : name != null && String(name).trim() !== ""
+      ? String(name).trim()
+      : "";
+if (!resolvedName) {
+  resolvedName = String(propsBag.name || propsBag.title || "").trim();
+}
+if (!resolvedName) {
+  resolvedName = resolvedKey;
+}
+
 const { operation = "create" } = args.contextData;
 const isDelete = operation === "delete";
 const isUpdate = Boolean(vertexId) && !isDelete;
-if (!isDelete && (!name || !name.trim())) {
+if (!isDelete && !resolvedKey) {
+  return {
+    success: false,
+    message: "Key is Required",
+    data: null
+  };
+}
+if (!isDelete && !resolvedName) {
   return {
     success: false,
     message: "Name is required",
@@ -62,8 +91,8 @@ if (!parentVertexLabel || !toParentEdgeType) {
 const userRelationshipType = `User${parentVertexLabel}`;
 const userUuid = enableUserScoping ? user.P.uuid : null;
 
-const vertexName = name.trim();
-const vertexKey = key || vertexName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+const vertexName = resolvedName;
+const vertexKey = resolvedKey;
 
 // Get root key from config
 const rootKey = rootKeys.key;
@@ -298,11 +327,11 @@ let vertexNode;
 let vertexElementId;
 let oldVertexData = null; // Declare outside if block so it's accessible in afterUpdate hook
 
-// Merge properties with name and key
+// Merge properties with name and key (name/key last so they win over stale P from client)
 const vertexProperties = {
+  ...properties,
   name: vertexName,
-  key: vertexKey,
-  ...properties
+  key: vertexKey
 };
 
 if (isUpdate) {

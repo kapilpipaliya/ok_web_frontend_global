@@ -1,0 +1,88 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Hook: enqueue reminder processing for a StoreTask row (BullMQ). Also patches returned vertex syncStatus so client starts polling.
+        key: storeTasksQueueTaskReminder
+        body:
+          '''
+const { elementId, tableVertexLabel, operation } = args.contextData || {};
+
+if (tableVertexLabel !== "StoreTask") {
+  return { success: true, message: "Skip: not StoreTask" };
+}
+if (!elementId) {
+  return { success: false, message: "storeTasksQueueTaskReminder: missing elementId" };
+}
+if (operation !== "create" && operation !== "update") {
+  return { success: true, message: `Skip: operation ${operation}` };
+}
+
+const queueName = "storeTasksReminders";
+
+const getRedisConnection = () => {
+  return args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379"),
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    maxLoadingRetryTime: 5000,
+    retryStrategy(times) {
+      if (times > 3) return null;
+      return Math.min(times * 200, 2000);
+    },
+    reconnectOnError(err) {
+      if (err.message && err.message.includes("READONLY")) return true;
+      return false;
+    }
+  };
+};
+
+const safe = (v) => String(v || "").replace(/[^a-z0-9_-]/gi, "-");
+const jobId = `${safe(queueName)}-${safe(args.subDomain)}-${safe(elementId)}-${Date.now()}`;
+
+const { Queue } = args.bullmq;
+const queue = new Queue(queueName, { connection: getRedisConnection() });
+
+await queue.add(
+  queueName,
+  {
+    subDomain: args.subDomain,
+    taskElementId: elementId,
+    requestedAt: new Date().toISOString()
+  },
+  {
+    jobId,
+    attempts: 3,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: 100,
+    removeOnFail: false
+  }
+);
+
+// Mark queued in DB (best-effort)
+try {
+  await args.session.run(
+    `MATCH (t:StoreTask) WHERE elementId(t) = $id
+     SET t.syncStatus = 'queued', t.updatedAt = datetime()
+     RETURN t`,
+    { id: elementId }
+  );
+} catch {}
+
+// Patch returned vertex payload so Table polling starts immediately
+try {
+  const v = args.contextData?.result?.data;
+  if (v && v.P) v.P.syncStatus = "queued";
+} catch {}
+
+return { success: true, message: "Queued reminder evaluation", data: { queueName, elementId } };
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

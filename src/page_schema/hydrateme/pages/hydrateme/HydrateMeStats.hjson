@@ -1,0 +1,306 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        title: HydrateMe stats
+        url: /hydrateme/stats
+        key: HydrateMeStats
+        fns:
+          '''
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {},
+    }),
+};
+'''
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: HydrateMeLayout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_stats_shell
+        fns:
+          '''
+const [week, setWeek] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+
+const loadWeekly = async () => {
+  setLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "hydrateMeGetWeeklyStats",
+      contextData: { days: 7 },
+    });
+    if (result?.error || result?.result?.success === false) {
+      const msg = result?.error || result?.result?.message || "Could not load stats.";
+      args.showErrorToast?.(msg);
+      setWeek(null);
+      return;
+    }
+    setWeek(result?.result?.data ?? null);
+  } catch (e) {
+    console.error(e);
+    args.showErrorToast?.("Could not load stats.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+return { week, loading, loadWeekly };
+'''
+        props:
+          '''return {
+  as: "div",
+  class: "hm-stats-shell",
+  onMount: () => {
+    args.fns.loadWeekly();
+  }
+};'''
+        css:
+          '''return `._id.hm-stats-shell {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.lg};
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_stats_h1
+        props:
+          '''return {
+  as: "h1",
+  class: "hm-stats-title",
+  text: "Last 7 days"
+};'''
+        css:
+          '''return `._id.hm-stats-title {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.xxl};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: hm_stats_goal
+        props:
+          '''const w = typeof args.fns.week === "function" ? args.fns.week() : null;
+const g = w?.goalMl ?? 2000;
+return {
+  as: "p",
+  class: "hm-stats-goal",
+  text: w ? `Daily goal: ${g} ml (bars scale to the week max)` : "Loading goal from your profile…"
+};'''
+        css:
+          '''return `._id.hm-stats-goal {
+  margin: 0;
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: hm_stats_chart
+        props:
+          '''return {
+  as: "div",
+  class: "hm-chart"
+};'''
+        css:
+          '''return `._id.hm-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: ${args.theme.var.spacing.sm};
+  min-height: 12rem;
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.secondary};
+}`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_stats_loop
+        props:
+          '''const w = typeof args.fns.week === "function" ? args.fns.week() : null;
+const series = Array.isArray(w?.series) ? w.series : [];
+const maxMl = series.reduce((m, r) => Math.max(m, Number(r?.totalMl) || 0), 0) || 1;
+return {
+  loop: true,
+  contextName: "dayRow",
+  data: series.map((r) => ({ ...r, maxMl }))
+};'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_stats_bar
+        props:
+          '''const row = args.contextData.dayRow;
+return {
+  as: "div",
+  class: "hm-bar-wrap",
+  title: `${row?.day || ""}: ${row?.totalMl || 0} ml`
+};'''
+        css:
+          '''return `._id.hm-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  min-width: 2rem;
+  min-height: 11rem;
+}`;'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_stats_bar_fill
+        props:
+          '''const row = args.contextData.dayRow;
+const maxMl = Number(row?.maxMl) || 1;
+const total = Number(row?.totalMl) || 0;
+const px = Math.max(4, Math.round((total / maxMl) * 160));
+return {
+  as: "div",
+  class: "hm-bar-fill",
+  style: { height: `${px}px`, width: "100%" }
+};'''
+        css:
+          '''return `._id.hm-bar-fill {
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: ${args.theme.var.color.primary};
+}`;'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: hm_stats_bar_label
+        props:
+          '''const row = args.contextData.dayRow;
+const d = row?.day || "";
+const short = d.length >= 10 ? d.slice(5, 10) : d;
+return {
+  as: "span",
+  class: "hm-bar-label",
+  text: short
+};'''
+        css:
+          '''return `._id.hm-bar-label {
+  font-size: ${args.theme.var.fontSize.xs};
+  color: ${args.theme.var.color.muted};
+}`;'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e_pl
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e_root
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e_h1
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e_g
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e_c
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e_l
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e_b
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e_bf
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e_bl
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+  ]
+}

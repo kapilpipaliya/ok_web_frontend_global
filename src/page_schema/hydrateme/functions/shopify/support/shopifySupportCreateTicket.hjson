@@ -1,0 +1,125 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: shopifySupportCreateTicket
+        description: Creates a new Shopify support ticket for the current shop and initializes unread counters.
+        body:
+          '''
+// Create a new Shopify support ticket.
+// shop is automatically available via args.shop (extracted from request query params or Shopify auth)
+// Expected args.contextData:
+// - subject: string - REQUIRED
+// - message: string - REQUIRED
+// - name: string - OPTIONAL (fallback: "Shopify User")
+// - email: string - OPTIONAL (fallback: current user email if available)
+
+const shop = args.shop;
+const {
+  subject,
+  message,
+  name,
+  email
+} = args.contextData || {};
+
+if (!shop || typeof shop !== "string") {
+  return {
+    success: false,
+    message: "Shop identifier is required."
+  };
+}
+
+const rawSubject = (subject || "").trim();
+const rawMessage = (message || "").trim();
+
+if (!rawMessage) {
+  return {
+    success: false,
+    message: "Message is required."
+  };
+}
+
+const safeSubject = rawSubject.slice(0, 200);
+const safeMessage = rawMessage.slice(0, 4000);
+const safeName = ((name || "").trim() || "Shopify User").slice(0, 200);
+
+let safeEmail = (email || "").trim().slice(0, 320);
+
+// Fallback to authenticated user email if available
+if (!safeEmail && args.getUserFromSession) {
+  try {
+    const currentUser = await args.getUserFromSession();
+    if (currentUser?.P?.email && typeof currentUser.P.email === "string") {
+      safeEmail = currentUser.P.email.slice(0, 320);
+    }
+  } catch (e) {
+    // Ignore session errors for Shopify embedded flows
+    console.warn("shopifySupportCreateTicket: getUserFromSession failed:", e);
+  }
+}
+
+if (!safeEmail) {
+  return {
+    success: false,
+    message: "Email is required."
+  };
+}
+
+// Create ticket first, then optionally attach status (SupportStatus may not exist in per-shop DB)
+const query = `
+  CREATE (t:Support {
+    name: $name,
+    email: $email,
+    subject: $subject,
+    message: $message,
+    createdAt: datetime(),
+    updatedAt: datetime(),
+    source: 'shopify',
+    shop: $shop,
+    lastMessageAt: datetime(),
+    lastMessageSender: 'shop',
+    unreadForAdmin: 1,
+    unreadForShop: 0
+  })
+  WITH t
+  OPTIONAL MATCH (status:SupportStatus {key: 'Open'})
+  FOREACH (s IN CASE WHEN status IS NULL THEN [] ELSE [status] END |
+    MERGE (t)-[:SupportSupportStatus]->(s)
+  )
+  RETURN t
+`;
+
+const result = await args.session.run(query, {
+  name: safeName,
+  email: safeEmail,
+  subject: safeSubject || "[No subject]",
+  message: safeMessage,
+  shop
+});
+
+if (!result.records || result.records.length === 0) {
+  return {
+    success: false,
+    message: "Failed to create support ticket."
+  };
+}
+
+// Populate graph structure and extract created ticket vertex
+const vertices = args.processResult(result.records, args.context, "t");
+const ticket = vertices && vertices[0] ? vertices[0] : null;
+
+return {
+  success: true,
+  message: "Support request created successfully.",
+  data: {
+    ticket
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

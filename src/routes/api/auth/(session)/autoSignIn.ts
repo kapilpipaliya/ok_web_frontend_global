@@ -10,6 +10,7 @@ import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
+import { isUserInactiveForSignIn } from "~/lib/auth/userSignInEligibility";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -52,6 +53,13 @@ export async function GET({ request }: APIEvent) {
     );
 
     if (!existingUser) {
+      return new Response(null, {
+        headers: { Location: API.urls.admin.signIn },
+        status: 302,
+      });
+    }
+
+    if (isUserInactiveForSignIn(existingUser)) {
       return new Response(null, {
         headers: { Location: API.urls.admin.signIn },
         status: 302,

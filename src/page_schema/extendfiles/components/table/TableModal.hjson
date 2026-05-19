@@ -312,6 +312,7 @@ return {
   mode: mode,
   inModal: true,
   vertexLabel: tableVertexLabel,
+  hide: () => !(args.contextData.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose
 };

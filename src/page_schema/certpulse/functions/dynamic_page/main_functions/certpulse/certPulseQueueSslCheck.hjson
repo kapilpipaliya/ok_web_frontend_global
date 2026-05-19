@@ -1,0 +1,102 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Hook: enqueue an immediate SSL status check for a CertPulseDomain row (BullMQ).
+        key: certPulseQueueSslCheck
+        body:
+          '''
+const { elementId, tableVertexLabel, operation } = args.contextData || {};
+
+if (tableVertexLabel !== "CertPulseDomain") {
+  return { success: true, message: "Skip: not CertPulseDomain" };
+}
+
+if (!elementId) {
+  return { success: false, message: "certPulseQueueSslCheck: missing elementId" };
+}
+
+// Only enqueue on create/update
+if (operation !== "create" && operation !== "update") {
+  return { success: true, message: `Skip: operation ${operation}` };
+}
+
+const queueName = "certpulseSslCheck";
+
+const getRedisConnection = () => {
+  return args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379"),
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    maxLoadingRetryTime: 5000,
+    retryStrategy(times) {
+      if (times > 3) return null;
+      return Math.min(times * 200, 2000);
+    },
+    reconnectOnError(err) {
+      if (err.message && err.message.includes("READONLY")) return true;
+      return false;
+    }
+  };
+};
+
+const connection = getRedisConnection();
+const { Queue } = args.bullmq;
+const queue = new Queue(queueName, { connection });
+
+// BullMQ custom IDs cannot contain ":".
+// We generate a safe ID (and still allow duplicates across time).
+const safe = (v) => String(v || "").replace(/[^a-z0-9_-]/gi, "-");
+const jobId = `${safe(queueName)}-${safe(args.subDomain)}-${safe(elementId)}-${Date.now()}`;
+
+await queue.add(
+  queueName,
+  {
+    subDomain: args.subDomain,
+    domainElementId: elementId,
+    requestedAt: new Date().toISOString()
+  },
+  {
+    jobId,
+    attempts: 3,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: 100,
+    removeOnFail: false
+  }
+);
+
+// Optionally mark queued on the row for UI refresh patterns
+try {
+  await args.session.run(
+    `MATCH (d:CertPulseDomain) WHERE elementId(d) = $id
+     SET d.syncStatus = 'queued', d.updatedAt = datetime()
+     RETURN d`,
+    { id: elementId }
+  );
+} catch (e) {
+  // Not fatal; queue is the main mechanism
+}
+
+// IMPORTANT: hooks run after mutateUserContent has already built the response payload.
+// Patch the returned vertex so the client immediately sees syncStatus === 'queued'
+// and starts background polling (Table/Sidebar look for that flag).
+try {
+  const resultVertex = args.contextData?.result?.data;
+  if (resultVertex && resultVertex.P) {
+    resultVertex.P.syncStatus = "queued";
+  }
+} catch (e) {
+  // ignore
+}
+
+return { success: true, message: "Queued SSL check", data: { queueName, elementId } };
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

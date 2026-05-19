@@ -4,6 +4,7 @@
       id: "terms_page",
       L: "Page",
       P: {
+        public: true
         key: "RBTerms",
         url: "/terms",
         title: "Terms of Service - Personal Rulebook",

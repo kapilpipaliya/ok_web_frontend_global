@@ -1,5 +1,6 @@
 import { type BrowserContext, chromium, type Page } from "playwright";
 
+import { getConfiguredAppDomains, getPrimaryAppDomain } from "~/lib/envDomains";
 import { isDev } from "~/pages/settings/constants";
 
 import { API } from "../api/endpoints";
@@ -226,9 +227,11 @@ async function setupBrowserAndPage(
   const domainPort = process.env.DOMAIN_PORT
     ? `:${process.env.DOMAIN_PORT}`
     : "";
-  const isDomainLocalhost =
-    process.env.DOMAIN === "localhost" ||
-    process.env.DOMAIN === "localhost.com";
+  const appDomains = getConfiguredAppDomains();
+  const primaryHost = getPrimaryAppDomain() ?? "";
+  const isDomainLocalhost = appDomains.some(
+    (d) => d === "localhost" || d === "localhost.com",
+  );
   const subDomainPart =
     subDomain && subDomain !== "admin"
       ? `${subDomain}.`
@@ -237,7 +240,7 @@ async function setupBrowserAndPage(
         : "admin.";
   const isDevEnvironment = isDev || isDomainLocalhost;
   const protocol = isDevEnvironment ? "https" : "https";
-  const baseUrl = `${protocol}://${subDomainPart}${process.env.DOMAIN}${isDevEnvironment ? domainPort : ""}`;
+  const baseUrl = `${protocol}://${subDomainPart}${primaryHost}${isDevEnvironment ? domainPort : ""}`;
   const queryString = searchParams.toString();
 
   const url = token

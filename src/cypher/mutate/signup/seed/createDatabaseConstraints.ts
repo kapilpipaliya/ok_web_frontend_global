@@ -8,6 +8,11 @@ export async function createDatabaseConstraints(session: Session) {
     `CREATE CONSTRAINT unique_role IF NOT EXISTS
      FOR (r:Role) REQUIRE r.key IS UNIQUE`,
 
+    `CREATE CONSTRAINT unique_user_email IF NOT EXISTS
+     FOR (u:User) REQUIRE u.email IS UNIQUE`,
+    `CREATE CONSTRAINT unique_user_username IF NOT EXISTS
+     FOR (u:User) REQUIRE u.username IS UNIQUE`,
+
     `CREATE CONSTRAINT unique_comp IF NOT EXISTS
      FOR (c:Comp) REQUIRE c.key IS UNIQUE`,
 

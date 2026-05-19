@@ -10,8 +10,12 @@ import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getAdminUser } from "~/cypher/permissions/utils/getAdminUser";
 import { isAppSubdomain } from "~/lib/appSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
-import { getDBSessionForShop } from "~/lib/shopify/shopifyHelpers";
-import { updateSession } from "~/server/auth/session/updateSession";
+import {
+  getDBSessionForShop,
+  getShopEmailFromShopifyAdmin,
+} from "~/lib/shopify/shopifyHelpers";
+import { validateEmail } from "~/lib/validation/validateEmail";
+import { isUserInactiveForSignIn } from "~/lib/auth/userSignInEligibility";
 
 export async function getSessionUser(): Promise<undefined | Vertex> {
   // Check if hostname is one of the app subdomains (decodeproduct, decodeorder, decodefile)
@@ -29,7 +33,12 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
             const shop = result.session.shop;
 
             if (shop) {
-              // Get database session for this shop (assumes database already exists)
+              const shopEmail = await getShopEmailFromShopifyAdmin(result.admin);
+              if (!shopEmail || validateEmail(shopEmail)) {
+                return undefined;
+              }
+              const email = shopEmail.trim();
+
               const appSessionData = await getDBSessionForSubdomain(
                 event.request,
               );
@@ -40,52 +49,25 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
                 );
 
                 try {
-                  // Find or create user in the database
-                  const user = await dbSession.executeWrite(async (tx) => {
-                    // Check if user already exists by email (shop) or uuid (shop)
-                    const existingUserResult = await tx.run(
-                      `MATCH (u:User)
-                       WHERE u.email = $shop OR u.uuid = $shop
-                       RETURN u
-                       LIMIT 1`,
-                      { shop }
-                    );
+                  const userResult = await dbSession.run(
+                    `MATCH (u:User {email: $email}) RETURN u LIMIT 1`,
+                    { email },
+                  );
 
-                    let userNode;
+                  if (userResult.records.length === 0) {
+                    return undefined;
+                  }
 
-                    if (existingUserResult.records.length > 0) {
-                      // User exists, return the existing node (no updates needed)
-                      userNode = existingUserResult.records[0].get('u');
-                    } else {
-                      // User doesn't exist, create it with only basic properties
-                      const createResult = await tx.run(
-                        `CREATE (u:User {
-                          email: $shop,
-                          uuid: $shop,
-                          createdAt: datetime()
-                        })
-                        RETURN u`,
-                        {
-                          shop,
-                        }
-                      );
-                      userNode = createResult.records[0].get('u');
-                    }
+                  const user = convertNodeToJson(
+                    userResult.records[0].get("u"),
+                  );
 
-                    // Convert Neo4j node to Vertex format
-                    return convertNodeToJson(userNode);
-                  });
-
-                  // Add Shopify-related properties to user object for session only (not saved in DB)
                   user.P.shop = shop;
                   user.P.shopDb = subDomain;
 
-                  // Update HTTP session with the user from database (with Shopify properties in session only)
-                  // await updateSession(user);
-
                   return user;
                 } catch (err) {
-                  console.error("Error in dbSession executeWrite:", err);
+                  console.error("Error loading Shopify session user:", err);
                   throw err;
                 } finally {
                   await dbSession.close();
@@ -178,6 +160,10 @@ export async function getUserFromSession(
     }
 
     const userFromDb = convertNodeToJson(result.records[0].get("u"));
+
+    if (isUserInactiveForSignIn(userFromDb)) {
+      return;
+    }
 
     if (!userFromDb.P.password) {
       // Create admin session

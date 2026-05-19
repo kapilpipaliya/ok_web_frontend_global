@@ -4,6 +4,7 @@
       id: "1"
       L: Page
       P: {
+        public: true
         fns: return { enabled: () => true }
         title: Changelog - Decode Products Organizer
         url: /changelog

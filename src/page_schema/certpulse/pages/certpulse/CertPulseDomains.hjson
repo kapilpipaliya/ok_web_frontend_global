@@ -1,0 +1,76 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Role
+      P: {
+        key: Admin
+      }
+    }
+    {
+      id: "2"
+      L: RolePage
+      P: {
+        access: FULL
+      }
+    }
+    {
+      id: "3"
+      L: Page
+      P: {
+        signinRequired: true
+        fns:
+          '''
+return {
+  enabled: true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: CertPulse Domains
+        url: /certpulse/domains
+        key: CertPulseDomains
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        key: certpulse_domains_dynamic_page
+        props:
+          '''
+return {
+  tableVertexLabel: "CertPulseDomain",
+  loadFromSetting: true
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: RolePage
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: RolePagePage
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+  ]
+}
+

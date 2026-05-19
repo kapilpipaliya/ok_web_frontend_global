@@ -4,6 +4,7 @@
       id: "website_home_page",
       L: "Page",
       P: {
+        public: true
         key: "RBWebsiteHome",
         url: "/",
         title: "Personal Rulebook - Build Better Habits",

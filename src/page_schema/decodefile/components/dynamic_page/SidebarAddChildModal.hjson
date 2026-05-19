@@ -308,6 +308,51 @@ const relationshipType = args.contextData.props?.relationshipType;
 const onSave = args.contextData.props?.onSave;
 const onClose = args.contextData.props?.onClose;
 
+const formHasKeyField = (cfg) => {
+  if (!cfg || !Array.isArray(cfg.groups)) return false;
+  for (let gi = 0; gi < cfg.groups.length; gi++) {
+    const fields = cfg.groups[gi]?.fields;
+    if (!Array.isArray(fields)) continue;
+    for (let fi = 0; fi < fields.length; fi++) {
+      if (fields[fi]?.key === "key") return true;
+    }
+  }
+  return false;
+};
+
+const ensureSidebarFormConfigWithKeyField = (cfg) => {
+  if (!cfg) return cfg;
+  if (formHasKeyField(cfg)) return cfg;
+  const out = args.klona(cfg);
+  const keyField = {
+    key: "key",
+    label: "Key",
+    type: "text",
+    required: true,
+    maxLength: 255,
+    colSpan: 2,
+    tooltip:
+      "Required. Enter a unique key yourself (letters, numbers, underscores). It is not generated from the name."
+  };
+  if (!Array.isArray(out.groups) || out.groups.length === 0) {
+    out.groups = [
+      {
+        key: "_sidebarGenerated",
+        title: "Details",
+        gridColumns: out.gridColumns || 1,
+        fields: [keyField]
+      }
+    ];
+    return out;
+  }
+  const g0 = out.groups[0];
+  const existing = Array.isArray(g0.fields) ? g0.fields : [];
+  g0.fields = [...existing, keyField];
+  return out;
+};
+
+const formConfigResolved = ensureSidebarFormConfigWithKeyField(formConfig);
+
 // Wrap onSave to handle saveSidebarVertex
 const wrappedOnSave = async (saveData) => {
   // Extract vertex and properties from saveData
@@ -317,14 +362,13 @@ const wrappedOnSave = async (saveData) => {
     return false;
   }
 
-  // Get name and key from vertex properties
-  const name = vertex.P?.name || vertex.P?.title || "";
-  const key = vertex.P?.key || "";
-
-  if (!name || !name.trim()) {
-    args.showErrorToast?.("Name is required");
+  const keyVal = String(vertex.P?.key ?? "").trim();
+  if (!keyVal) {
+    args.showErrorToast?.("Key is Required");
     return false;
   }
+  const nameVal = String(vertex.P?.name || vertex.P?.title || "").trim();
+  const nameForServer = nameVal || keyVal;
 
   // Call saveSidebarVertex function
   const label = args.contextData.props?.label || "Item";
@@ -333,13 +377,17 @@ const wrappedOnSave = async (saveData) => {
       functionName: "saveSidebarVertex",
       contextData: {
         vertexId: vertexId || null,
-        name: name.trim(),
-        key: key || name.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+        name: nameForServer,
+        key: keyVal,
         parentId: parentId,
         parentVertexLabel: parentVertexLabel,
         toParentEdgeType: toParentEdgeType,
         rootKeys: rootKeys,
-        properties: vertex.P,
+        properties: (() => {
+          const copy = args.klona(vertex.P || {});
+          delete copy.key;
+          return copy;
+        })(),
         tableVertexLabel: tableVertexLabel,
         relationshipType: relationshipType,
         enableUserScoping: args.contextData.props?.enableUserScoping,
@@ -383,10 +431,11 @@ const wrappedOnClose = () => {
 };
 
 return {
-  formConfig: formConfig,
+  formConfig: formConfigResolved,
   initialVertex: initialVertex || null,
   mode: mode,
   vertexLabel: null,
+  hide: () => !(args.contextData.props?.isOpen === true),
   onSave: wrappedOnSave,
   onClose: wrappedOnClose,
   inModal: true,

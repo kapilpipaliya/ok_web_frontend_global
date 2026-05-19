@@ -1,0 +1,634 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Generic function to create or update a vertex with parent relationship. Works with any sidebar configuration. Returns vertex in Vertex format using convertNodeToJSON.
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again.",
+    data: null
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { 
+  vertexId, 
+  name, 
+  key, 
+  parentId, 
+  parentVertexLabel, 
+  toParentEdgeType, 
+  rootKeys = {},
+  properties = {},
+  tableVertexLabel,
+  relationshipType,
+  enableUserScoping,
+  hooks,
+  label: sidebarLabel
+} = args.contextData;
+
+const itemLabel = sidebarLabel && typeof sidebarLabel === 'string' ? sidebarLabel : 'item';
+
+const propsBag = properties && typeof properties === "object" && !Array.isArray(properties) ? properties : {};
+let resolvedKey =
+  typeof key === "string"
+    ? key.trim()
+    : key != null && String(key).trim() !== ""
+      ? String(key).trim()
+      : "";
+// Key must be supplied explicitly via contextData.key (not inferred from properties)
+
+let resolvedName =
+  typeof name === "string"
+    ? name.trim()
+    : name != null && String(name).trim() !== ""
+      ? String(name).trim()
+      : "";
+if (!resolvedName) {
+  resolvedName = String(propsBag.name || propsBag.title || "").trim();
+}
+if (!resolvedName) {
+  resolvedName = resolvedKey;
+}
+
+const { operation = "create" } = args.contextData;
+const isDelete = operation === "delete";
+const isUpdate = Boolean(vertexId) && !isDelete;
+if (!isDelete && !resolvedKey) {
+  return {
+    success: false,
+    message: "Key is Required",
+    data: null
+  };
+}
+if (!isDelete && !resolvedName) {
+  return {
+    success: false,
+    message: "Name is required",
+    data: null
+  };
+}
+
+if (!parentVertexLabel || !toParentEdgeType) {
+  return {
+    success: false,
+    message: "parentVertexLabel and toParentEdgeType are required",
+    data: null
+  };
+}
+
+// Determine relationship type for user filtering (only if user scoping is enabled)
+const userRelationshipType = `User${parentVertexLabel}`;
+const userUuid = enableUserScoping ? user.P.uuid : null;
+
+const vertexName = resolvedName;
+const vertexKey = resolvedKey;
+
+// Get root key from config
+const rootKey = rootKeys.key;
+
+// Prevent deletion/update of root vertex
+if (isUpdate || isDelete) {
+  const existingCheck = await args.session.run(
+    `MATCH (v:${parentVertexLabel})
+     WHERE elementId(v) = $vertexId
+     RETURN v.key as key`,
+    { vertexId }
+  );
+
+  if (existingCheck.records.length > 0) {
+    const existingKey = existingCheck.records[0].get('key');
+    if (existingKey === rootKey) {
+      return {
+        success: false,
+        message: `Root ${itemLabel} cannot be modified or deleted`,
+        data: null
+      };
+    }
+  }
+}
+
+// For delete operation, check if vertex has children or associated content
+if (isDelete) {
+  if (!vertexId) {
+    return {
+      success: false,
+      message: `${itemLabel} ID is required for deletion`,
+      data: null
+    };
+  }
+
+  // Check if vertex has children (children point to parent: child-[toParentEdgeType]->parent)
+  const childrenCheck = await args.session.run(
+    `MATCH (child:${parentVertexLabel})-[r:${toParentEdgeType}]->(v:${parentVertexLabel})
+     WHERE elementId(v) = $vertexId
+     RETURN count(child) as childCount`,
+    { vertexId }
+  );
+
+  const childCount = childrenCheck.records[0]?.get('childCount') || 0;
+  if (childCount > 0) {
+    return {
+      success: false,
+      message: `Cannot delete ${itemLabel} with children. Please remove all children first.`,
+      data: null
+    };
+  }
+
+  // Check if vertex has associated content
+  // Content items point to category: content-[toParentEdgeType]->category
+  // So we check for incoming relationships from content to this category
+  const contentCheck = await args.session.run(
+    `MATCH (content)-[r:${toParentEdgeType}]->(v:${parentVertexLabel})
+     WHERE elementId(v) = $vertexId
+     RETURN count(content) as contentCount`,
+    { vertexId }
+  );
+
+  const contentCount = contentCheck.records[0]?.get('contentCount') || 0;
+  if (contentCount > 0) {
+    return {
+      success: false,
+      message: `Cannot delete ${itemLabel} with associated data. Please remove all associated items first.`,
+      data: null
+    };
+  }
+
+  // Get the vertex data and all edges before deletion for hooks (if needed)
+  // We need to fetch it before deletion to get properties like Shopify ID and all relationships
+  let deletedVertexData = null;
+  let outgoingEdges = [];
+  let incomingEdges = [];
+  try {
+    const fetchQuery = !enableUserScoping
+      ? `MATCH (v:${parentVertexLabel}) 
+         WHERE elementId(v) = $vertexId 
+         OPTIONAL MATCH (v)-[r]->(target)
+         OPTIONAL MATCH (source)-[r2]->(v)
+         RETURN v, 
+                collect(DISTINCT {type: type(r), from: elementId(v), to: elementId(target), edgeId: elementId(r), targetLabel: labels(target)[0]}) as outgoingEdges,
+                collect(DISTINCT {type: type(r2), from: elementId(source), to: elementId(v), edgeId: elementId(r2), sourceLabel: labels(source)[0]}) as incomingEdges`
+      : `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel}) 
+         WHERE elementId(v) = $vertexId 
+         OPTIONAL MATCH (v)-[r]->(target)
+         OPTIONAL MATCH (source)-[r2]->(v)
+         RETURN v, 
+                collect(DISTINCT {type: type(r), from: elementId(v), to: elementId(target), edgeId: elementId(r), targetLabel: labels(target)[0]}) as outgoingEdges,
+                collect(DISTINCT {type: type(r2), from: elementId(source), to: elementId(v), edgeId: elementId(r2), sourceLabel: labels(source)[0]}) as incomingEdges`;
+    const fetchParams = enableUserScoping ? { vertexId, userUuid } : { vertexId };
+    const fetchResult = await args.session.run(fetchQuery, fetchParams);
+    if (fetchResult.records.length > 0) {
+      const vertexNode = fetchResult.records[0].get('v');
+      deletedVertexData = args.convertNodeToJson(vertexNode);
+      
+      // Filter out null edges and collect separately
+      const outgoingEdgesRaw = fetchResult.records[0].get('outgoingEdges') || [];
+      const incomingEdgesRaw = fetchResult.records[0].get('incomingEdges') || [];
+      outgoingEdges = outgoingEdgesRaw.filter(e => e && e.edgeId && e.to);
+      incomingEdges = incomingEdgesRaw.filter(e => e && e.edgeId && e.from);
+    }
+  } catch (e) {
+    console.warn("Failed to fetch vertex data and edges before deletion for hooks:", e);
+  }
+
+  // Execute beforeDelete hooks
+  await args.executeHooks(hooks?.beforeDelete, {
+    vertexId: vertexId,
+    name: deletedVertexData?.P?.name || name,
+    key: deletedVertexData?.P?.key,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: deletedVertexData?.P || {},
+    isRoot: !parentId,
+    operation: "delete",
+    outgoingEdges: outgoingEdges,
+    incomingEdges: incomingEdges
+  });
+
+  // Delete the vertex and its relationships from database
+  let deleteQuery;
+  let deleteParams;
+  if (!enableUserScoping) {
+    deleteQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      DETACH DELETE v
+      RETURN count(v) as deletedCount
+    `;
+    deleteParams = { vertexId };
+  } else {
+    deleteQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      DETACH DELETE v
+      RETURN count(v) as deletedCount
+    `;
+    deleteParams = { vertexId, userUuid };
+  }
+  const deleteResult = await args.session.run(deleteQuery, deleteParams);
+
+  const deletedCount = deleteResult.records[0]?.get('deletedCount') || 0;
+  if (deletedCount === 0) {
+    return {
+      success: false,
+      message: `Failed to delete ${itemLabel}`,
+      data: null
+    };
+  }
+
+  const result = {
+    success: true,
+    message: `${itemLabel} deleted successfully`,
+    data: { id: vertexId, ...(deletedVertexData ? { P: deletedVertexData.P } : {}) },
+    deleted_vertexes: [vertexId]
+  };
+
+  // Execute afterDelete hooks
+  await args.executeHooks(hooks?.afterDelete, {
+    vertexId: vertexId,
+    name: deletedVertexData?.P?.name || name,
+    key: deletedVertexData?.P?.key,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: deletedVertexData?.P || {},
+    isRoot: !parentId,
+    operation: "delete",
+    result: result,
+    outgoingEdges: outgoingEdges,
+    incomingEdges: incomingEdges
+  });
+
+  // Return success with deleted vertex ID
+  return result;
+}
+
+// Prevent creating vertex with root key
+if (!isUpdate && vertexKey === rootKey) {
+  return {
+    success: false,
+    message: `Cannot create ${itemLabel} with key '${rootKey}'. This key is reserved.`,
+    data: null
+  };
+}
+
+// Check for duplicate names for the same user (or globally if scoping disabled)
+let duplicateCheckQuery;
+let duplicateCheckParams;
+if (!enableUserScoping) {
+  duplicateCheckQuery = `
+    MATCH (v:${parentVertexLabel})
+    WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
+    ${isUpdate ? "AND elementId(v) <> $vertexId" : ""}
+    RETURN v
+  `;
+  duplicateCheckParams = {
+    name: vertexName,
+    ...(isUpdate && { vertexId })
+  };
+} else {
+  duplicateCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+    WHERE toLower(COALESCE(v.name, v.title, '')) = toLower($name)
+    ${isUpdate ? "AND elementId(v) <> $vertexId" : ""}
+    RETURN v
+  `;
+  duplicateCheckParams = {
+    userUuid,
+    name: vertexName,
+    ...(isUpdate && { vertexId })
+  };
+}
+
+const duplicateResult = await args.session.run(duplicateCheckQuery, duplicateCheckParams);
+
+if (duplicateResult.records.length > 0) {
+  return {
+    success: false,
+    message: `A ${itemLabel} with this name already exists`,
+    data: null
+  };
+}
+
+let vertexNode;
+let vertexElementId;
+let oldVertexData = null; // Declare outside if block so it's accessible in afterUpdate hook
+
+// Merge properties with name and key (name/key last so they win over stale P from client)
+const vertexProperties = {
+  ...properties,
+  name: vertexName,
+  key: vertexKey
+};
+
+if (isUpdate) {
+  // Get the old vertex data before update for hooks
+  try {
+    const fetchQuery = !enableUserScoping
+      ? `MATCH (v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`
+      : `MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel}) WHERE elementId(v) = $vertexId RETURN v`;
+    const fetchParams = enableUserScoping ? { vertexId, userUuid } : { vertexId };
+    const fetchResult = await args.session.run(fetchQuery, fetchParams);
+    if (fetchResult.records.length > 0) {
+      const vertexNode = fetchResult.records[0].get('v');
+      oldVertexData = args.convertNodeToJson(vertexNode);
+    }
+  } catch (e) {
+    console.warn("Failed to fetch vertex data before update for hooks:", e);
+  }
+
+  // Execute beforeUpdate hooks
+  await args.executeHooks(hooks?.beforeUpdate, {
+    vertexId: vertexId,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId,
+    operation: "update",
+    oldData: oldVertexData
+  });
+
+  // Update existing vertex
+  const setClause = Object.keys(vertexProperties).map((prop, index) => {
+    return `v.${prop} = $prop${index}`;
+  }).join(', ');
+
+  let updateQuery;
+  let updateParams;
+  if (!enableUserScoping) {
+    updateQuery = `
+      MATCH (v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      SET ${setClause},
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    updateParams = {
+      vertexId,
+      ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+    };
+  } else {
+    updateQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      WHERE elementId(v) = $vertexId
+      SET ${setClause},
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    updateParams = {
+      userUuid,
+      vertexId,
+      ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+    };
+  }
+
+  const updateResult = await args.session.run(updateQuery, updateParams);
+
+  if (updateResult.records.length === 0) {
+    return {
+      success: false,
+      message: `${itemLabel} not found or you don't have permission to update it`,
+      data: null
+    };
+  }
+
+  // Use processResult to populate graph structure
+  const updateVertices = args.processResult(updateResult.records, args.context, 'v');
+  vertexNode = updateResult.records[0].get('v');
+  vertexElementId = updateResult.records[0].get('elementId');
+
+  // Handle parent relationship update if parentId is provided
+  // Relationship direction: child-[toParentEdgeType]->parent
+  if (parentId) {
+    // Remove existing parent relationships (child points to parent)
+    await args.session.run(
+      `MATCH (v:${parentVertexLabel})-[r:${toParentEdgeType}]->()
+       WHERE elementId(v) = $vertexId
+       DELETE r`,
+      { vertexId: vertexElementId }
+    );
+
+    // Create new parent relationship (child points to parent)
+    if (!enableUserScoping) {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId }
+      );
+    } else {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId, userUuid }
+      );
+    }
+  }
+} else {
+  // Execute beforeCreate hooks (only for create, not update)
+  await args.executeHooks(hooks?.beforeCreate, {
+    vertexId: null,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId
+  });
+  
+  // Create new vertex
+  const propertyKeys = Object.keys(vertexProperties);
+  const propertyAssignments = propertyKeys.map((key, index) => `v.${key} = $prop${index}`).join(', ');
+
+  let createQuery;
+  let createParams;
+  if (!enableUserScoping) {
+    createQuery = `
+      CREATE (v:${parentVertexLabel})
+      SET ${propertyAssignments},
+          v.createdAt = datetime(),
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    createParams = Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]));
+  } else {
+    createQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (u)-[:${userRelationshipType}]->(v:${parentVertexLabel})
+      SET ${propertyAssignments},
+          v.createdAt = datetime(),
+          v.updatedAt = datetime()
+      RETURN v, elementId(v) as elementId
+    `;
+    createParams = {
+      userUuid,
+      ...Object.fromEntries(Object.entries(vertexProperties).map(([key, value], index) => [`prop${index}`, value]))
+    };
+  }
+
+  const createResult = await args.session.run(createQuery, createParams);
+
+  // Use processResult to populate graph structure
+  const createVertices = args.processResult(createResult.records, args.context, 'v');
+  vertexNode = createResult.records[0].get('v');
+  vertexElementId = createResult.records[0].get('elementId');
+
+  // Create parent relationship if parentId is provided
+  // Relationship direction: child-[toParentEdgeType]->parent
+  if (parentId) {
+    if (!enableUserScoping) {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId }
+      );
+    } else {
+      await args.session.run(
+        `MATCH (v:${parentVertexLabel}), (p:${parentVertexLabel})
+         WHERE elementId(v) = $vertexId AND elementId(p) = $parentId
+         MATCH (u:User {uuid: $userUuid})-[:${userRelationshipType}]->(p)
+         CREATE (v)-[:${toParentEdgeType}]->(p)`,
+        { vertexId: vertexElementId, parentId, userUuid }
+      );
+    }
+  }
+}
+
+// Get vertex from graph context (already populated by processResult) or convert if needed
+let vertex;
+if (args.context.nodes[vertexElementId]) {
+  vertex = args.context.nodes[vertexElementId];
+} else {
+  vertex = args.convertNodeToJson(vertexNode);
+  args.context.nodes[vertex.id] = vertex;
+}
+
+// Calculate and add content count if tableVertexLabel and relationshipType are provided
+if (tableVertexLabel && relationshipType) {
+  const rootKey = rootKeys.key;
+  
+  let countQuery;
+  let countParams;
+  if (!enableUserScoping) {
+    if (vertex.P?.key === rootKey) {
+      // Root key: count items without any category relationship
+      countQuery = `
+        MATCH (content:${tableVertexLabel})
+        WHERE NOT EXISTS {
+          MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+        }
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = {};
+    } else {
+      // Regular item: count items related to this category
+      countQuery = `
+        MATCH (content:${tableVertexLabel})-[r:${toParentEdgeType}]->(cat:${parentVertexLabel})
+        WHERE elementId(cat) = $categoryId
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = { categoryId: vertex.id };
+    }
+  } else {
+    if (vertex.P?.key === rootKey) {
+      // Root key: count items without any category relationship
+      countQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+        WHERE NOT EXISTS {
+          MATCH (content)-[:${toParentEdgeType}]->(:${parentVertexLabel})
+        }
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = { userUuid };
+    } else {
+      // Regular item: count items related to this category
+      countQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:${relationshipType}]->(content:${tableVertexLabel})
+        MATCH (content)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
+        WHERE elementId(cat) = $categoryId
+        RETURN count(DISTINCT content) as contentCount
+      `;
+      countParams = { userUuid, categoryId: vertex.id };
+    }
+  }
+  
+  const countResult = await args.session.run(countQuery, countParams);
+  const contentCount = countResult.records[0]?.get('contentCount') || 0;
+  
+  // Update vertex with count
+  vertex.P.contentCount = contentCount;
+  if (args.context.nodes[vertex.id]) {
+    args.context.nodes[vertex.id].P.contentCount = contentCount;
+  }
+}
+
+const result = {
+  success: true,
+  message: isUpdate ? `${itemLabel} updated successfully` : `${itemLabel} created successfully`,
+  data: vertex
+};
+
+// Execute afterCreate hooks (only for create, not update)
+if (!isUpdate) {
+  await args.executeHooks(hooks?.afterCreate, {
+    vertexId: vertexElementId,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId,
+    result: result
+  });
+}
+
+// Execute afterUpdate hooks (for updates)
+if (isUpdate) {
+  await args.executeHooks(hooks?.afterUpdate, {
+    vertexId: vertexElementId,
+    name: vertexName,
+    key: vertexKey,
+    parentId,
+    parentVertexLabel,
+    toParentEdgeType,
+    rootKeys,
+    properties: vertexProperties,
+    isRoot: !parentId,
+    operation: "update",
+    result: result,
+    oldData: oldVertexData
+  });
+}
+
+return result;
+'''
+        key: saveSidebarVertex
+      }
+    }
+  ]
+  edges: []
+}

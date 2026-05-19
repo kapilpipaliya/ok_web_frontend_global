@@ -1,0 +1,451 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''
+const [loading, setLoading] = args.createSignal(true);
+const [openLog, setOpenLog] = args.createSignal(null);
+const [elapsedLabel, setElapsedLabel] = args.createSignal("");
+
+const formatElapsed = (ms) => {
+  const totalSec = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const pad = (n) => String(n).padStart(2, "0");
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+};
+
+const getClockInMs = (log) => {
+  const iso = log?.P?.clockInAt;
+  if (iso == null || String(iso).trim() === "") return NaN;
+  const t = new Date(String(iso)).getTime();
+  return Number.isFinite(t) ? t : NaN;
+};
+
+const formatClockInAt = (iso) => {
+  if (iso == null || String(iso).trim() === "") return "—";
+  try {
+    const d = new Date(String(iso));
+    if (Number.isNaN(d.getTime())) return String(iso);
+    return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  } catch {
+    return String(iso);
+  }
+};
+
+const tickElapsed = () => {
+  const ol = openLog();
+  if (!ol) {
+    setElapsedLabel("");
+    return;
+  }
+  const start = getClockInMs(ol);
+  if (!Number.isFinite(start)) {
+    setElapsedLabel("—");
+    return;
+  }
+  setElapsedLabel(formatElapsed(Date.now() - start));
+};
+
+args.createEffect(() => {
+  const ol = openLog();
+  if (!ol) {
+    setElapsedLabel("");
+    return;
+  }
+  tickElapsed();
+  const timerId = setInterval(tickElapsed, 1000);
+  return () => clearInterval(timerId);
+});
+
+const isClockedIn = () => {
+  const ol = openLog();
+  return ol != null && typeof ol === "object";
+};
+
+const loadState = async () => {
+  try {
+    setLoading(true);
+    const res = await args.executeNamedServerFunction({
+      functionName: "attendraPortalGetMyAttendance",
+      contextData: {}
+    });
+    const ok = res?.result?.success !== false && !res?.error;
+    if (!ok) {
+      args.showErrorToast?.(res?.result?.error || res?.error || "Failed to load attendance");
+      setOpenLog(null);
+      return;
+    }
+    setOpenLog(res?.result?.data?.openLog ?? null);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const toggleClock = async () => {
+  try {
+    setLoading(true);
+    const res = await args.executeNamedServerFunction({
+      functionName: "attendraPortalClockToggle",
+      contextData: {}
+    });
+    const ok = res?.result?.success !== false && !res?.error;
+    if (!ok) {
+      args.showErrorToast?.(res?.result?.error || res?.error || "Clock action failed");
+      return;
+    }
+    const action = res?.result?.data?.action;
+    args.showSuccessToast?.(action === "clocked_out" ? "Clocked out" : "Clocked in");
+    await loadState();
+  } finally {
+    setLoading(false);
+  }
+};
+
+return {
+  loading,
+  openLog,
+  isClockedIn,
+  elapsedLabel,
+  formatClockInAt,
+  loadState,
+  toggleClock
+};
+'''
+        title: Check in - Attendra
+        url: /portal/check-in
+        key: AttendraPortalCheckIn
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    if (!args.user) {
+      args.navigate("/auth/signin", { replace: true });
+      return;
+    }
+    args.fns.loadState();
+  }
+};'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  width: 100%;
+  padding: ${args.theme.var.spacing?.md || "1rem"};
+  max-width: none;
+  margin: 0;
+  text-align: left;
+}`;'''
+        props:
+          '''return {
+  as: "section"
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: ${args.theme.var.color.text};
+}`;'''
+        props:
+          '''return {
+  as: "h1",
+  text: "Check in"
+};'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_dark_400};
+  margin: 0 0 1.25rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}`;'''
+        props:
+          '''const loading = args.fns.loading();
+let text = "Loading…";
+if (!loading && !args.fns.isClockedIn()) {
+  text = "You are clocked out. Clock in to start recording your attendance.";
+}
+return {
+  as: "p",
+  hide: () => loading || args.fns.isClockedIn(),
+  text
+};'''
+      }
+    }
+    {
+      id: "ci_clock_panel"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing?.sm || "0.5rem"};
+  padding: 1.5rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  text-align: center;
+}`;'''
+        props:
+          '''return {
+  as: "motionFragment",
+  hide: () => args.fns.loading() || !args.fns.isClockedIn()
+};'''
+      }
+    }
+    {
+      id: "ci_clock_icon"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.success};
+}`;'''
+        props:
+          '''return {
+  as: "icon",
+  icon: "ph:clock",
+  width: 48,
+  height: 48
+};'''
+      }
+    }
+    {
+      id: "ci_elapsed"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  font-size: 2.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+}`;'''
+        props:
+          '''return {
+  as: "p",
+  text: args.fns.elapsedLabel() || "0:00"
+};'''
+      }
+    }
+    {
+      id: "ci_elapsed_caption"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.9rem;
+  color: ${args.theme.var.color.text_dark_400};
+}`;'''
+        props:
+          '''return {
+  as: "p",
+  text: "Time on shift"
+};'''
+      }
+    }
+    {
+      id: "ci_started"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''return `._id {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.85rem;
+  color: ${args.theme.var.color.muted};
+}`;'''
+        props:
+          '''const ol = args.fns.openLog();
+const started = ol?.P?.clockInAt;
+return {
+  as: "p",
+  text: started
+    ? `Clocked in at ${args.fns.formatClockInAt(started)}`
+    : ""
+};'''
+      }
+    }
+    {
+      id: "ci_btn_in"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''return `._id {
+  padding: 0.85rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}
+._id:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Clock in",
+  hide: () => args.fns.loading() || args.fns.isClockedIn(),
+  disabled: !!args.fns.loading(),
+  onClick: () => args.fns.toggleClock()
+};'''
+      }
+    }
+    {
+      id: "ci_btn_out"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        css:
+          '''return `._id {
+  padding: 0.85rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_text};
+}
+._id:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Clock out",
+  hide: () => args.fns.loading() || !args.fns.isClockedIn(),
+  disabled: !!args.fns.loading(),
+  onClick: () => args.fns.toggleClock()
+};'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: PortalLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e_page_root
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e_root_h1
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e_root_sub
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e_root_clock
+      T: Attr
+      S: "2"
+      E: "ci_clock_panel"
+    }
+    {
+      id: e_clock_icon
+      T: Attr
+      S: "ci_clock_panel"
+      E: "ci_clock_icon"
+    }
+    {
+      id: e_clock_elapsed
+      T: Attr
+      S: "ci_clock_panel"
+      E: "ci_elapsed"
+    }
+    {
+      id: e_clock_caption
+      T: Attr
+      S: "ci_clock_panel"
+      E: "ci_elapsed_caption"
+    }
+    {
+      id: e_clock_started
+      T: Attr
+      S: "ci_clock_panel"
+      E: "ci_started"
+    }
+    {
+      id: e_root_btn_in
+      T: Attr
+      S: "2"
+      E: "ci_btn_in"
+    }
+    {
+      id: e_root_btn_out
+      T: Attr
+      S: "2"
+      E: "ci_btn_out"
+    }
+    {
+      id: e_layout
+      T: PageLayout
+      S: "1"
+      E: "layout"
+    }
+  ]
+}

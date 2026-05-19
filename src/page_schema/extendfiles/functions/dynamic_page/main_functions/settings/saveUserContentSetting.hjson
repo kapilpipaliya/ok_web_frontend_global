@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { tableVertexLabel, config, key } = args.contextData;
+const { tableVertexLabel, config, key, settingsLabel } = args.contextData;
 
 if (!tableVertexLabel) {
   return {
@@ -29,8 +29,9 @@ if (!tableVertexLabel) {
   };
 }
 
+const labelForSettings = settingsLabel || tableVertexLabel;
 // Build setting key
-const settingKey = key || `${tableVertexLabel}_settings`;
+const settingKey = key || `${labelForSettings}_settings`;
 
 // Store config as JSON string for Neo4j compatibility
 const configString = config ? (typeof config === 'string' ? config : JSON.stringify(config)) : null;

@@ -1,0 +1,83 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Billing - Attendra
+        key: AttendraBilling
+        url: /billing
+        props: '''return { isNoPermissionCheck: true };'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id{ max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || "2rem"}; color:${args.theme.var.color.text}; }
+@media (max-width: 768px){ ._id{ padding:${args.theme.var.spacing?.md || "1rem"}; } }`;'''
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "main" };'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as:"h1", text:"Billing & plans" };'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        textType: markdown
+        css: '''return `._id{ color:${args.theme.var.color.muted}; line-height:1.6; margin:0 0 1rem 0; }`;'''
+        text: Billing for **Attendra** is managed through your Shopify admin. Your plan and invoices are available in Shopify billing settings.
+        props: '''return { as:"p" };'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: "e1"
+      T: "Attr"
+      S: "1"
+      E: "2"
+    }
+    {
+      id: "e2"
+      T: "PageLayout"
+      S: "1"
+      E: "layout"
+    }
+    {
+      id: "e3"
+      T: "Attr"
+      S: "2"
+      E: "3"
+    }
+    {
+      id: "e4"
+      T: "Attr"
+      S: "2"
+      E: "4"
+    }
+  ]
+}
+

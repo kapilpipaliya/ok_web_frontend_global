@@ -10,10 +10,8 @@ import { postAPI } from "~/lib/api/general/postApi";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "../settings/constants";
+import { STYLES } from "../settings/constants";
 import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
-import { createFormSubmitButton } from "~/pages/auth/functions/schema/createFormSubmitButton";
-import { createLinkButton } from "~/pages/auth/functions/schema/createLinkButton";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 
 // Define type for submitState store
@@ -76,6 +74,20 @@ export function ResendVerificationForm() {
     }
   };
 
+  const handleIdentifierEnter = async (
+    options: ResendVerificationFunctionArgumentType,
+  ) => {
+    if (options.contextData.submitState[0]?.isLoading) {
+      return;
+    }
+    try {
+      options.contextData.submitState[1]("isLoading", true);
+      await handleSubmit(options);
+    } finally {
+      options.contextData.submitState[1]("isLoading", false);
+    }
+  };
+
   const formSchema: FieldAttribute = {
     as: "div",
     attributes: [
@@ -87,52 +99,91 @@ export function ResendVerificationForm() {
         attributes: [
           ...createTextField(
             "identifier",
-            "Email or Username",
-            async (options: ResendVerificationFunctionArgumentType) => {
-              try {
-                options.contextData.submitState[1]("isLoading", true);
-                await handleSubmit(options);
-              } finally {
-                options.contextData.submitState[1]("isLoading", false);
-              }
-            },
+            "Username/Email",
+            handleIdentifierEnter,
             undefined,
             {
               required: true,
             },
           ),
-          createFormSubmitButton(
-            (options: ResendVerificationFunctionArgumentType) =>
-              options.contextData.submitState[0]?.isLoading
-                ? "Sending..."
-                : "Send Verification Email",
-            async (options: ResendVerificationFunctionArgumentType) => {
-              try {
-                options.contextData.submitState[1]("isLoading", true);
-                await handleSubmit(options);
-              } finally {
-                options.contextData.submitState[1]("isLoading", false);
-              }
+          {
+            as: "button",
+            css: [
+              STYLES.button2Css,
+              `return \`._id {
+                    width: 100%;
+                    margin-top: 12px;
+                  }
+                  ._id:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    background-color: \${args.theme.var.color.border};
+                  }\`;`,
+            ],
+            componentName: "Html",
+            props: (options: ResendVerificationFunctionArgumentType) => {
+              const isEmpty = !options.data?.P?.identifier?.trim();
+              const isLoading =
+                options.contextData.submitState[0]?.isLoading;
+
+              return {
+                disabled: isLoading || isEmpty,
+                onClick: async () => {
+                  try {
+                    options.contextData.submitState[1]("isLoading", true);
+                    await handleSubmit(options);
+                  } finally {
+                    options.contextData.submitState[1]("isLoading", false);
+                  }
+                },
+                text: isLoading ? "Sending..." : "Send Verification Email",
+              };
             },
-          ),
-          createLinkButton(
-            () => "Back to Sign In",
-            () => {
-              const params = new URLSearchParams(
-                searchParams as Record<string, string>,
-              );
-              const queryString = params.toString();
-              navigate(
-                `${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`,
-              );
-            },
-          ),
+            type: "button",
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "a",
+                css: `return \`._id {
+  color: \${args.theme.var.color.primary};
+  font-size: 14px;
+  cursor: pointer;
+}\`;`,
+                componentName: "Html",
+                props: () => ({
+                  onClick: () => {
+                    const params = new URLSearchParams(
+                      searchParams as Record<string, string>,
+                    );
+                    const queryString = params.toString();
+                    navigate(
+                      `${API.urls.admin.signIn}${queryString ? `?${queryString}` : ""}`,
+                    );
+                  },
+                }),
+                text: "Back to Sign In",
+              },
+            ],
+            css: `return \`._id {
+  text-align: center;
+  margin-top: 16px;
+  border-top: 1px solid \${args.theme.var.color.border};
+  padding-top: 16px;
+}\`;`,
+            componentName: "Html",
+          },
         ],
-        css: SETTINGS_CONSTANTS.FORM_GRID_CSS,
         componentName: "Html",
+        contextName: "submitState",
+        props: () => ({
+          data: createStore({
+            isLoading: false,
+          }),
+        }),
       },
     ],
-    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
   };
 
@@ -141,12 +192,6 @@ export function ResendVerificationForm() {
       {
         attributes: [formSchema],
         componentName: "Html",
-        contextName: "submitState",
-        props: () => ({
-          data: createStore({
-            isLoading: false,
-          }),
-        }),
       },
     ],
     componentName: "Html",

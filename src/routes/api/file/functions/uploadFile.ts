@@ -1,10 +1,13 @@
 import type { MultiPartData } from "h3";
-import type { Session, Transaction } from "neo4j-driver";
+import type { Node, Session, Transaction } from "neo4j-driver";
 
 import fs from "node:fs";
 import path from "node:path";
 
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { processResult } from "~/cypher/conversion/processResult";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
@@ -15,6 +18,7 @@ export async function uploadFiles(
   data: (MultiPartData & { label?: string })[],
   subDomain: string,
   neo4jSession: Session | Transaction,
+  linkUserUuid?: string | null,
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");
@@ -28,7 +32,7 @@ export async function uploadFiles(
       if (!file) {
         return null;
       }
-      const { data, filename, name: _, type, ...others } = file;
+      const { data, filename, type, ...others } = file;
       if (!filename) {
         return null;
       }
@@ -77,18 +81,39 @@ export async function uploadFiles(
         // username,
       };
 
-      return await saveFileMetadata(
+      const record = await saveFileMetadata(
         neo4jSession,
         metadata,
         undefined,
         others.label,
       );
+      if (record && linkUserUuid) {
+        try {
+          const node = record.get("f");
+          if (node) {
+            const v = convertNodeToJson(node as Node);
+            const fileId = v?.id;
+            if (fileId) {
+              await neo4jSession.run(
+                `MATCH (u:User {uuid: $uuid})
+                 MATCH (f:File) WHERE elementId(f) = $fileId
+                 MERGE (u)-[r:UserFile]->(f)
+                 ON CREATE SET r.createdAt = datetime()`,
+                { uuid: linkUserUuid, fileId },
+              );
+            }
+          }
+        } catch (e) {
+          console.error("uploadFiles: UserFile link failed", e);
+        }
+      }
+      return record;
     }),
   );
 
   const context = {
-    nodes: {} as { [key: string]: any },
-    relationships: {} as { [key: string]: any },
+    nodes: {} as Record<string, Vertex>,
+    relationships: {} as Record<string, Edge>,
   };
 
   const result = processResult(

@@ -1,0 +1,649 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns: return { enabled: () => true }
+        title: Shopify Support Conversation
+        url: /ShopifySupportConversation
+        key: ShopifySupportConversation
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+const [ticket, setTicket] = args.createSignal(null);
+const [messages, setMessages] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(false);
+const [sendingReply, setSendingReply] = args.createSignal(false);
+const [replyText, setReplyText] = args.createSignal("");
+
+const getSupportId = () => {
+  const id = args.searchParams?.supportId;
+  return typeof id === "string" && id ? id : null;
+};
+
+const loadConversation = async () => {
+  const ticketId = getSupportId();
+  if (!ticketId) {
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "shopifySupportGetConversation",
+      contextData: {
+        ticketId,
+        markAsReadFor: "admin"
+      }
+    });
+
+    if (result?.error || result?.result?.success === false) {
+      const message =
+        result?.error ||
+        result?.result?.message ||
+        "Failed to load conversation.";
+      args.showErrorToast?.(message);
+      return;
+    }
+
+    const payload = result?.result?.data || {};
+    const t = payload.ticket || null;
+    const msgs = Array.isArray(payload.messages) ? payload.messages : [];
+
+    // Prepend the initial ticket message as the first message in the conversation
+    const allMessages = [];
+    if (t && t.P?.message) {
+      allMessages.push({
+        P: {
+          message: t.P.message,
+          createdAt: t.P.createdAt || t.P.updatedAt,
+          email: t.P.email || "",
+          name: t.P.name || "",
+          senderType: "shop"
+        }
+      });
+    }
+    allMessages.push(...msgs);
+
+    setTicket(t);
+    setMessages(allMessages);
+  } catch (error) {
+    console.error("AdminSupportConversation.loadConversation error:", error);
+    args.showErrorToast?.("Failed to load conversation.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const sendReply = async () => {
+  const ticketId = getSupportId();
+  const text = (replyText() || "").trim();
+  if (!ticketId || !text) {
+    return;
+  }
+
+  setSendingReply(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "shopifySupportReplyAsAdmin",
+      contextData: {
+        ticketId,
+        message: text
+      }
+    });
+
+    if (result?.error || result?.result?.success === false) {
+      const message =
+        result?.error ||
+        result?.result?.message ||
+        "Failed to send reply.";
+      args.showErrorToast?.(message);
+      return;
+    }
+
+    const reply = result?.result?.data?.reply;
+    if (reply) {
+      const current = messages() || [];
+      setMessages([...current, reply]);
+    } else {
+      await loadConversation();
+    }
+
+    setReplyText("");
+    args.showSuccessToast?.("Reply sent.");
+  } catch (error) {
+    console.error("AdminSupportConversation.sendReply error:", error);
+    args.showErrorToast?.("Failed to send reply.");
+  } finally {
+    setSendingReply(false);
+  }
+};
+
+const formatTimestamp = (timestamp) => {
+  if (!timestamp) return "";
+  try {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return "Just now";
+    } else if (diffMins < 60) {
+      return `${diffMins}m ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    } else if (diffDays === 1) {
+      return "Yesterday";
+    } else if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    } else {
+      // Format as short date: "Jan 15" or "Dec 3"
+      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    }
+  } catch (e) {
+    return String(timestamp);
+  }
+};
+
+const initializeConversation = async () => {
+  await loadConversation();
+};
+
+return {
+  formatTimestamp,
+  ticket,
+  messages,
+  loading,
+  sendingReply,
+  replyText,
+  setReplyText,
+  initializeConversation,
+  loadConversation,
+  sendReply
+};
+'''
+        componentName: Html
+        key: admin_support_root
+        props:
+          '''
+return {
+  as: "div",
+  onMount: async () => {
+    await args.fns.initializeConversation();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid ${args.theme.var.color.border};
+  background: transparent;
+  font-size: 0.875rem;
+  cursor: pointer;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "← Back to tickets",
+  onClick: () => {
+    if (args.navigate) {
+      args.navigate("/ShopifySupportTickets");
+    } else if (typeof window !== "undefined") {
+      window.location.href = "/ShopifySupportTickets";
+    }
+  }
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const t = args.fns.ticket?.();
+return {
+  as: "h1",
+  text: t ? (t.P?.subject || "Support Conversation") : "Support Conversation"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1rem 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const t = args.fns.ticket?.();
+if (!t) {
+  return {
+    as: "p",
+    text: "Ticket not found."
+  };
+}
+
+const createdAt = t.P?.createdAt;
+const createdText = args.fns.formatTimestamp?.(createdAt) || "";
+
+return {
+  as: "p",
+  text: `${t.P?.email || ""} • ${createdText}`
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  padding: 0.75rem;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+._id[data-loading="true"] {
+  opacity: 0.6;
+}`;
+'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const loading = args.fns.loading?.();
+return {
+  as: "div",
+  "data-loading": loading ? "true" : "false"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        contextName: message
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  data: args.fns.messages?.() || []
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  margin-bottom: 0.35rem;
+}
+
+._id[data-sender="shop"] {
+  justify-content: flex-end;
+}
+
+._id[data-sender="admin"] {
+  justify-content: flex-start;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const m = args.contextData.message;
+if (!m) return {};
+const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
+const isShop = sender === "shop";
+
+return {
+  as: "div",
+  "data-sender": isShop ? "shop" : "admin"
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  max-width: 80%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+._id[data-sender="shop"] {
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.background_light_200_text};
+}
+
+._id[data-sender="admin"] {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const m = args.contextData.message;
+if (!m) return {};
+const sender = m.P?.senderType || (m.P?.email === "Support" ? "admin" : "shop");
+const isShop = sender === "shop";
+
+return {
+  as: "div",
+  "data-sender": isShop ? "shop" : "admin"
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const m = args.contextData.message;
+return {
+  as: "div",
+  text: m?.P?.message || ""
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const m = args.contextData.message;
+const createdAt = m?.P?.createdAt;
+let createdText = "";
+if (createdAt) {
+  try {
+    const date = new Date(createdAt);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+
+    if (isToday) {
+      // Show time only for today's messages
+      createdText = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    } else {
+      // Show short date + time for older messages
+      createdText = date.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " " + 
+                    date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    }
+  } catch (e) {
+    createdText = String(createdAt);
+  }
+}
+
+return {
+  as: "div",
+  text: createdText || ""
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.875rem;
+  resize: vertical;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const value = args.fns.replyText?.() || "";
+return {
+  as: "textarea",
+  rows: 2,
+  placeholder: "Type your reply...",
+  value,
+  onInput: (e) => args.fns.setReplyText?.(e.target.value)
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  border: none;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-self: flex-end;
+  cursor: pointer;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const sending = args.fns.sendingReply?.();
+const disabled = !(args.fns.replyText?.() || "").trim();
+
+return {
+  as: "button",
+  type: "button",
+  text: sending ? "Sending..." : "Send",
+  disabled,
+  onClick: async () => {
+    await args.fns.sendReply?.();
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "12"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+  ]
+}

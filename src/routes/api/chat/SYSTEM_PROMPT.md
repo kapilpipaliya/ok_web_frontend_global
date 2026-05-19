@@ -55,6 +55,7 @@ The `fns`, `props` and `css` properties accept javascript function body strings.
 #### User Settings Functions
 - `args.userSetting` - Get current user settings as an object (e.g., `args.userSetting.themeColorMode`)
 - `args.saveUserSetting({ key: value })` - Save user settings to the database (persists across sessions)
+- `args.postAPI(url, body, action?)` - Call JSON app API routes (same as `~/lib/api/general/postApi`; throws on HTTP or `{ error }` responses; use in `onMount` / click handlers for `/api/...` endpoints)
 
 Example usage in props:
 ```javascript
@@ -261,6 +262,8 @@ export interface FunctionArgumentBaseType {
   // Server function execution
   executeServerFunction: (request: {functionBody: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
   executeNamedServerFunction: (request: {functionName: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
+  /** JSON POST/PUT/DELETE to app routes (same as ~/lib/api/general/postApi). */
+  postAPI: (url: string, data: object | FormData, action?: "DELETE" | "POST" | "PUT") => Promise<Record<string, unknown>>;
   // Zod (same as ~/lib/utils/schemaValidation); use args.z in props/fns/css for client-side schemas
   z: typeof import("zod").z;
 }
@@ -728,7 +731,9 @@ Workshop apps can auto-generate stable reference strings (appointment numbers, i
 **Form field flags** (in `formConfig.groups[].fields[]`):
 
 - `autoReferenceSequenceKey`: string — must match a `WorkshopReferenceSequence.key`. In **add** mode, `FormManagement` calls `reserveWorkshopReferenceNumber` after creating the draft vertex and writes the returned `value` into that field (one HTTP call per distinct key; fields sharing a key receive the same value without double increment).
-- `readOnlyInAddMode`: boolean — when `true`, the control is disabled in add mode (user cannot edit the auto-filled reference) but remains editable in edit mode unless the form is in view mode.
+- `disabled`: boolean, `(ctx) => boolean`, or a string body compiled as `(ctx, args) => boolean` with `ctx.mode` in `"create"` | `"edit"` | `"view"` (add/create both map to `"create"`). Example for auto-filled reference fields: `disabled: (ctx) => ctx.mode === "create"` so the value cannot be edited until the row exists; view mode still disables inputs via FormManagement.
+
+**String validation** (generic; any field key): optional on each field or under **`formConfig.fieldValidationByKey[fieldKey]`** (preset merged first; **per-field properties override** when they are not `undefined`). Supported keys: **`pattern`** (RegExp source, no `/` delimiters), **`patternMessage`**, **`minLength`**, **`maxLength`**, **`minLengthMessage`**, **`maxLengthMessage`**. Order of checks: required / type rules, then email format, then length, then pattern. Only one error message per field per submit (first failing rule wins among length/pattern).
 
 **Sequence node properties** (typical): `prefix`, `suffix`, `startingNumber`, `incrementStep`, `format`, `resetRule` (`never` | `daily` | `monthly` | `yearly`), `periodKey`, `currentNumber`, optional `numberPadding` (zero-pad `{number}` in the formatted output).
 
@@ -747,6 +752,9 @@ Workshop apps can auto-generate stable reference strings (appointment numbers, i
 ## Dynamic table config (`loadFromSetting` / `migrateContentTableSettings`)
 
 When a page uses `DynamicPage` with `loadFromSetting: true`, the evaluated table config object (from the `Setting` `config` function body) drives how rows are loaded, saved, exported, and how FK-style selects behave.
+
+- **`title`** (string): Shown in the table toolbar heading (do not duplicate as a separate page `h1` when using `DynamicPage`).
+- **`subtitle`** (string, optional): Muted line under the title in the table toolbar (e.g. portal scoping hint).
 
 ### Edge-only relationship fields (`selectConfig.edgeOnly`)
 

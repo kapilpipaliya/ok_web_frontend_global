@@ -2,8 +2,9 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { v7 as uuidv7 } from "uuid";
 
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { createInvitedUserInDB } from "~/cypher/mutate/signup/user/createUserInDB";
+import { validateEmail } from "~/lib/validation/validateEmail";
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -29,6 +30,10 @@ export async function POST({ request }: APIEvent) {
 
     const { email, name, roles, username } = await request.json();
 
+    if (validateEmail(email)) {
+      throw new APIError("A valid email address is required", 400);
+    }
+
     const newUserUuid = uuidv7();
 
     // Use write transaction for atomicity - prevents race conditions
@@ -53,35 +58,27 @@ export async function POST({ request }: APIEvent) {
         throw new APIError("Username already taken", 400);
       }
 
-      // Create new user
-      const result = await tx.run(
-        `
-        CREATE (u:User {
-          uuid: $uuid,
-          email: $email,
-          username: $username,
-          name: $name,
-          status: "invited",
-          createdAt: datetime()
-        })
-        WITH u
-        UNWIND $roles as roleId
-        MATCH (r:Role)
-        WHERE elementId(r) = roleId
-        CREATE (u)-[:UserRole]->(r)
-        RETURN u
-      `,
-        {
-          email,
-          name,
-          roles,
-          username,
-          uuid: newUserUuid,
-        },
-      );
+      const user = await createInvitedUserInDB(tx, {
+        email: email.trim(),
+        name,
+        username,
+        uuid: newUserUuid,
+      });
 
-      // Extract the created user from the result
-      return convertNodeToJson(result.records[0].get("u"));
+      if (roles?.length) {
+        await tx.run(
+          `
+          MATCH (u:User {uuid: $uuid})
+          UNWIND $roles as roleId
+          MATCH (r:Role)
+          WHERE elementId(r) = roleId
+          CREATE (u)-[:UserRole]->(r)
+        `,
+          { roles, uuid: user.P.uuid },
+        );
+      }
+
+      return user;
     });
 
     // Get role names for logging

@@ -433,7 +433,8 @@ async function importSchemasForSubdomain(
       websiteSchemas.components ||
       websiteSchemas.pages ||
       websiteSchemas.themes ||
-      websiteSchemas.functions
+      websiteSchemas.functions ||
+      websiteSchemas.emailTemplates
     )
   ) {
     console.log(
@@ -446,7 +447,8 @@ async function importSchemasForSubdomain(
         defaultSchemas.components ||
         defaultSchemas.pages ||
         defaultSchemas.themes ||
-        defaultSchemas.functions
+        defaultSchemas.functions ||
+        defaultSchemas.emailTemplates
       )
     ) {
       console.log(

@@ -1,0 +1,128 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: shopifySupportReplyAsShop
+        description: Adds a reply from the shop user to a Shopify support ticket and updates unread counters.
+        body:
+          '''
+// Add a reply to a Shopify support ticket as the shop user.
+// shop is automatically available via args.shop (extracted from request query params or Shopify auth)
+// Expected args.contextData:
+// - ticketId: string - REQUIRED
+// - message: string - REQUIRED
+// - email: string - OPTIONAL (fallback to current user email if available)
+// - name: string - OPTIONAL
+
+const shop = args.shop;
+const {
+  ticketId,
+  message,
+  email,
+  name
+} = args.contextData || {};
+
+if (!ticketId || typeof ticketId !== "string") {
+  return {
+    success: false,
+    message: "ticketId is required."
+  };
+}
+
+const rawMessage = (message || "").trim();
+if (!rawMessage) {
+  return {
+    success: false,
+    message: "Reply message is required."
+  };
+}
+
+const safeMessage = rawMessage.slice(0, 4000);
+const safeName = ((name || "").trim() || "Shopify User").slice(0, 200);
+
+let safeEmail = (email || "").trim().slice(0, 320);
+
+// Fallback to authenticated user email if available
+if (!safeEmail && args.getUserFromSession) {
+  try {
+    const currentUser = await args.getUserFromSession();
+    if (currentUser?.P?.email && typeof currentUser.P.email === "string") {
+      safeEmail = currentUser.P.email.slice(0, 320);
+    }
+  } catch (e) {
+    console.warn("shopifySupportReplyAsShop: getUserFromSession failed:", e);
+  }
+}
+
+if (!safeEmail) {
+  return {
+    success: false,
+    message: "Email is required to send a reply."
+  };
+}
+
+let whereClause = "elementId(t) = $ticketId AND t.source = 'shopify'";
+const params = {
+  ticketId,
+  message: safeMessage,
+  email: safeEmail,
+  name: safeName
+};
+
+if (shop && typeof shop === "string") {
+  whereClause = whereClause + " AND t.shop = $shop";
+  params.shop = shop;
+}
+
+const query = `
+  MATCH (t:Support)
+  WHERE ${whereClause}
+  CREATE (r:Reply {
+    message: $message,
+    createdAt: datetime(),
+    email: $email,
+    senderType: 'shop',
+    name: $name
+  })-[tr:ParentSupport]->(t)
+  SET t.lastMessageAt = datetime(),
+      t.lastMessageSender = 'shop',
+      t.unreadForAdmin = coalesce(t.unreadForAdmin, 0) + 1
+  RETURN t, r, tr
+`;
+
+const result = await args.session.run(query, params);
+
+if (!result.records || result.records.length === 0) {
+  return {
+    success: false,
+    message: "Support ticket not found or reply could not be created."
+  };
+}
+
+// Populate graph structure
+args.processResult(result.records, args.context, ["t", "r"], "tr");
+
+const nodes = args.context.nodes || {};
+const ticket = Object.values(nodes).find(
+  (v) => Array.isArray(v.L) && v.L.includes("Support")
+);
+const reply = Object.values(nodes).find(
+  (v) => Array.isArray(v.L) && v.L.includes("Reply")
+);
+
+return {
+  success: true,
+  message: "Reply sent successfully.",
+  data: {
+    ticket,
+    reply
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

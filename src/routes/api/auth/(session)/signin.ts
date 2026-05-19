@@ -13,6 +13,10 @@ import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedi
 import { updateSession } from "~/server/auth/session/updateSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { logger } from "~/lib/logger";
+import {
+  USER_DEACTIVATED_SIGN_IN_MESSAGE,
+  isUserInactiveForSignIn,
+} from "~/lib/auth/userSignInEligibility";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
@@ -149,6 +153,10 @@ async function authenticateUser(
       "Please confirm your email address before logging in.",
       403,
     );
+  }
+
+  if (isUserInactiveForSignIn(user)) {
+    throw new APIError(USER_DEACTIVATED_SIGN_IN_MESSAGE, 403);
   }
 
   // when system user, check password from system db

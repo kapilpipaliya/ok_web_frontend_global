@@ -80,9 +80,6 @@ if (enableUserScoping) {
     CREATE (r:RepairOrder {
       repairNo: $repairNo,
       appointmentNo: $appointmentNo,
-      customerName: coalesce(cust.name, ""),
-      vehiclePlate: coalesce(veh.plate, a.vehiclePlate, ""),
-      assignedTechnician: coalesce(tech.name, ""),
       status: "open",
       createdAt: datetime(),
       updatedAt: datetime()
@@ -115,9 +112,6 @@ if (enableUserScoping) {
     CREATE (r:RepairOrder {
       repairNo: $repairNo,
       appointmentNo: $appointmentNo,
-      customerName: coalesce(cust.name, ""),
-      vehiclePlate: coalesce(veh.plate, a.vehiclePlate, ""),
-      assignedTechnician: coalesce(tech.name, ""),
       status: "open",
       createdAt: datetime(),
       updatedAt: datetime()

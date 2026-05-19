@@ -1,0 +1,173 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Imports user content (Books or AudioVideo) from CSV or JSON format
+        body:
+          '''
+// Get current authenticated user from session
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "User session not found. Please log in and try again."
+  };
+}
+
+// Get effective user (handles admin impersonation)
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+// Extract parameters
+const { tableVertexLabel, data, enableUserScoping, hooks } = args.contextData;
+
+if (!tableVertexLabel) {
+  return {
+    success: false,
+    message: "Invalid tableVertexLabel. Must not be empty."
+  };
+}
+
+if (!data || !data.trim()) {
+  return {
+    success: false,
+    message: "No data provided to import"
+  };
+}
+
+// Determine vertex label and relationship type
+const vertexLabel = tableVertexLabel;
+const relationshipType = `User${vertexLabel}`;
+
+// Parse data (try JSON first, then CSV)
+let items = [];
+const dataTrimmed = data.trim();
+
+try {
+  // Try JSON first
+  if (dataTrimmed.startsWith("[") || dataTrimmed.startsWith("{")) {
+    const parsed = JSON.parse(dataTrimmed);
+    items = Array.isArray(parsed) ? parsed : [parsed];
+  } else {
+    // Parse CSV
+    const lines = dataTrimmed.split("\n").filter(line => line.trim());
+    if (lines.length === 0) {
+      return {
+        success: false,
+        message: "No data found in CSV"
+      };
+    }
+
+    // Parse header
+    const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
+
+    // Parse rows
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(",").map(v => v.trim().replace(/^"|"$/g, ""));
+      const item = {};
+      headers.forEach((header, index) => {
+        item[header] = values[index] || "";
+      });
+      items.push(item);
+    }
+  }
+} catch (error) {
+  return {
+    success: false,
+    message: `Failed to parse data: ${error.message}`
+  };
+}
+
+if (items.length === 0) {
+  return {
+    success: false,
+    message: "No items found in data"
+  };
+}
+
+// Execute beforeImport hooks
+await args.executeHooks(hooks?.beforeImport, {
+  tableVertexLabel,
+  data: dataTrimmed,
+  itemsCount: items.length,
+  enableUserScoping
+});
+
+// Prepare batch insert data
+const batchItems = items.map(item => {
+  const { id, elementId, ...cleanItem } = item;
+  return {
+    ...cleanItem,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+});
+
+// Batch insert using UNWIND
+let successCount = 0;
+let errorCount = 0;
+const errors = [];
+
+try {
+  let batchQuery;
+  let batchParams;
+  if (!enableUserScoping) {
+    batchQuery = `
+      UNWIND $items as item
+      CREATE (c:${vertexLabel})
+      SET c = item
+      RETURN count(c) as created
+    `;
+    batchParams = { items: batchItems };
+  } else {
+    batchQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      UNWIND $items as item
+      CREATE (c:${vertexLabel})
+      SET c = item
+      CREATE (u)-[:${relationshipType} {createdAt: datetime()}]->(c)
+      RETURN count(c) as created
+    `;
+    batchParams = {
+      userUuid: user.P.uuid,
+      items: batchItems
+    };
+  }
+
+  const result = await args.session.run(batchQuery, batchParams);
+
+  const createdValue = result.records[0]?.get('created');
+  successCount = createdValue ? args.neo4jConvert.toNumber(createdValue) : 0;
+} catch (error) {
+  errorCount = items.length;
+  errors.push(`Batch import failed: ${error.message}`);
+}
+
+const result = {
+  success: true,
+  message: `Imported ${successCount} ${tableVertexLabel}s${errorCount > 0 ? `, ${errorCount} failed` : ""}`,
+  data: {
+    successCount,
+    errorCount,
+    errors: errors.length > 0 ? errors : undefined
+  }
+};
+
+// Execute afterImport hooks
+await args.executeHooks(hooks?.afterImport, {
+  tableVertexLabel,
+  data: dataTrimmed,
+  itemsCount: items.length,
+  enableUserScoping,
+  result: result
+});
+
+return result;
+'''
+        key: importUserContent
+      }
+    }
+  ]
+  edges: []
+}

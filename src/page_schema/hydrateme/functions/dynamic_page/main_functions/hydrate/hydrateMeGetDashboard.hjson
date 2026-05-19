@@ -1,0 +1,121 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: hydrateMeGetDashboard
+        description: HydrateMe home summary — profile, today intake, streak, recent logs.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return {
+    success: false,
+    message: "Sign in to track hydration.",
+    data: null,
+  };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const uuid = user?.P?.uuid;
+if (!uuid) {
+  return { success: false, message: "User uuid missing.", data: null };
+}
+
+const profRes = await args.session.run(
+  `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeUserProfile]->(p:HydrateMeUserProfile)
+   RETURN p LIMIT 1`,
+  { uuid },
+);
+let profile = null;
+if (profRes.records[0]) {
+  profile = args.convertNodeToJson(profRes.records[0].get("p"));
+}
+
+const today = new Date().toISOString().slice(0, 10);
+const dayRes = await args.session.run(
+  `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeWaterLog]->(w:HydrateMeWaterLog)
+   WHERE coalesce(w.loggedDate, substring(toString(coalesce(w.loggedAt, w.createdAt)), 0, 10)) = $today
+   RETURN sum(toFloat(coalesce(w.amountMl, 0))) AS total`,
+  { uuid, today },
+);
+const todayMlRaw = dayRes.records[0]?.get("total");
+const todayMl =
+  todayMlRaw != null && typeof todayMlRaw.toNumber === "function"
+    ? todayMlRaw.toNumber()
+    : Number(todayMlRaw) || 0;
+
+const goalMl = Math.max(0, Number(profile?.P?.dailyGoalMl) || 2000);
+
+const histRes = await args.session.run(
+  `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeWaterLog]->(w:HydrateMeWaterLog)
+   WITH coalesce(w.loggedDate, substring(toString(coalesce(w.loggedAt, w.createdAt)), 0, 10)) AS day,
+        sum(toFloat(coalesce(w.amountMl, 0))) AS total
+   WHERE day <> ''
+   RETURN day, total
+   ORDER BY day DESC
+   LIMIT 120`,
+  { uuid },
+);
+
+const byDay = new Map();
+for (let i = 0; i < histRes.records.length; i++) {
+  const r = histRes.records[i];
+  const d = r.get("day");
+  const t = r.get("total");
+  const dayStr = typeof d === "string" ? d : String(d ?? "");
+  const total =
+    t != null && typeof t.toNumber === "function" ? t.toNumber() : Number(t) || 0;
+  if (dayStr) byDay.set(dayStr, total);
+}
+
+const dayKey = (d) => d.toISOString().slice(0, 10);
+let streak = 0;
+const check = new Date();
+for (let s = 0; s < 120; s++) {
+  const k = dayKey(check);
+  const total = byDay.get(k) || 0;
+  const met = goalMl <= 0 ? total > 0 : total >= goalMl;
+  if (met) {
+    streak++;
+    check.setUTCDate(check.getUTCDate() - 1);
+  } else {
+    if (s === 0) {
+      check.setUTCDate(check.getUTCDate() - 1);
+      continue;
+    }
+    break;
+  }
+}
+
+const recentRes = await args.session.run(
+  `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeWaterLog]->(w:HydrateMeWaterLog)
+   RETURN w
+   ORDER BY coalesce(w.loggedAt, w.createdAt) DESC
+   LIMIT 12`,
+  { uuid },
+);
+const recentLogs = [];
+for (let j = 0; j < recentRes.records.length; j++) {
+  const node = recentRes.records[j].get("w");
+  if (node) recentLogs.push(args.convertNodeToJson(node));
+}
+
+return {
+  success: true,
+  data: {
+    profile,
+    todayMl,
+    goalMl,
+    streakDays: streak,
+    todayKey: today,
+    recentLogs,
+  },
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

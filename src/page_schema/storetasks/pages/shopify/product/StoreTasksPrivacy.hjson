@@ -1,0 +1,697 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Privacy Policy - Store Tasks
+        url: /privacy
+        key: StoreTasksPrivacy
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Privacy Policy"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.muted};
+  font-style: italic;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.9375rem;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const d = new Date(2026, 1, 20);
+const lastUpdated = "Last updated on: " + d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+return {
+  as: "p",
+  text: lastUpdated
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "DecodeCommerce provide applications (\"the Service\"), including Store Tasks, to merchants who use Shopify to build and maintain their online store. This Privacy Policy provides detailed information on how data is collected, used, and shared when you install or use our app with your Shopify store."
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Personal Data We Process"
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "When you install our app, we are automatically able to access certain types of information from your Shopify account. See more detailed information in Shopify's help docs."
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "How we use your data"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "We use the personal information we collect from you in order to provide the Service and to operate our app. Additionally, we use the personal information to: communicate with you, optimize or improve the Service, provide you with information about our products, and handle software bugs or support requests."
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_2
+        props:
+          '''return {
+  as: "h2",
+  text: "Sharing Your Information"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "p",
+  text: "We do not share your Personal Information with any third parties."
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Security and Data Retention"
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "We retain your Personal Information for one day after you uninstall the app or until you ask us to delete it."
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Your Rights"
+}'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: If you are in the EU, you have the right to access, update or delete your Information and obtain a copy of your information we store on our systems and have us update, correct or delete it. You are also entitled to obtain your Information in a structured, commonly used and machine-readable format, and have the right to transmit those data to another data controller. If you wish to exercise any of these rights, contact us directly at privacy@decodecommerce.com. You have a right to submit a complaint to the relevant supervisory data protection authority. If you are in the EU, you can lodge a complaint to the supervisory authority under the General Data Protection Regulations (GDPR), in particular in the Member State of your residence, place of work or where the alleged infringement of the GDPR occurred.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Changes To The Privacy Policy"
+}'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: We may update this privacy policy at any time in order to reflect, for example, changes to our practices or for other operational, legal or regulatory reasons. If we make changes to this policy, we will notify you by email of updates, so that you are aware of information we collect, how we use it, and under what circumstances, if any.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Contact Information"
+}'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: If you would like to access, correct, amend or delete any personal information, or require any additional information about our privacy policy please contact us via the [Support](/support) page in the app or at privacy@decodecommerce.com.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "28"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "28"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "7"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "10"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "16"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "2"
+      E: "19"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "2"
+      E: "22"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "2"
+      E: "25"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "7"
+      E: "9"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "13"
+      E: "14"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "13"
+      E: "15"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "16"
+      E: "17"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "16"
+      E: "18"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "19"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "19"
+      E: "21"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Resources - Store Tasks
+        url: /resources
+        key: StoreTasksResources
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        fns:
+          '''
+const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const toggleExpanded = (index) => {
+  setExpandedIndex((prev) => (prev === index ? null : index));
+};
+return {
+  expandedIndex,
+  setExpandedIndex,
+  toggleExpanded
+};
+'''
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''# Shopify Developer Resources
+
+A curated list of essential Shopify resources for Shopify app developers.
+
+---
+
+## 🚀 App Development
+
+- **Shopify App Store**  
+  https://apps.shopify.com/
+
+- **Shopify Partner Dashboard (Submit Your App)**  
+  https://partners.shopify.com/
+
+- **Shopify App Development Docs**  
+  https://shopify.dev/docs/apps
+
+- **App Review Guidelines**  
+  https://shopify.dev/docs/apps/store/review
+
+- **Shopify CLI**  
+  https://shopify.dev/docs/apps/tools/cli
+
+---
+
+## 🧩 APIs & SDKs
+
+- **Admin API (REST & GraphQL)**  
+  https://shopify.dev/docs/api/admin
+
+- **Storefront API**  
+  https://shopify.dev/docs/api/storefront
+
+- **Partner API**  
+  https://shopify.dev/docs/api/partner
+
+- **Webhooks**  
+  https://shopify.dev/docs/apps/webhooks
+
+- **App Bridge**  
+  https://shopify.dev/docs/apps/tools/app-bridge
+
+- **Polaris (Shopify Design System)**  
+  https://polaris.shopify.com/
+
+---
+
+## 🛠️ Extensions & Advanced Features
+
+- **Checkout UI Extensions**  
+  https://shopify.dev/docs/apps/checkout
+
+- **Admin UI Extensions**  
+  https://shopify.dev/docs/apps/admin
+
+- **Theme App Extensions**  
+  https://shopify.dev/docs/apps/online-store/theme-app-extensions
+
+- **Shopify Functions**  
+  https://shopify.dev/docs/apps/functions
+
+- **Hydrogen (Headless Framework)**  
+  https://shopify.dev/docs/custom-storefronts/hydrogen
+
+---
+
+## 💳 Billing & Monetization
+
+- **App Billing API**  
+  https://shopify.dev/docs/apps/billing
+
+- **Revenue Share Information**  
+  https://www.shopify.com/partners/blog/app-revenue
+
+---
+
+## 🔐 Authentication & Security
+
+- **OAuth Guide**  
+  https://shopify.dev/docs/apps/auth/oauth
+
+- **Session Tokens**  
+  https://shopify.dev/docs/apps/auth/session-tokens
+
+- **Security Best Practices**  
+  https://shopify.dev/docs/apps/store/security
+
+---
+
+## 📈 Growth & Marketing
+
+- **App Store Optimization (ASO)**  
+  https://shopify.dev/docs/apps/store/optimization
+
+- **Shopify Community**  
+  https://community.shopify.com/
+
+- **Developer Changelog**  
+  https://shopify.dev/changelog
+
+---
+
+## 🧪 Testing & Development Stores
+
+- **Create Development Store**  
+  https://partners.shopify.com/
+
+- **Testing Guide**  
+  https://shopify.dev/docs/apps/test'''
+        key: unique_3
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+  ]
+}

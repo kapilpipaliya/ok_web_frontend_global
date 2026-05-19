@@ -4,6 +4,7 @@
       id: "page",
       L: "Page",
       P: {
+        public: true
         key: "FullChandAtmaSadhanaNityaKram",
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,

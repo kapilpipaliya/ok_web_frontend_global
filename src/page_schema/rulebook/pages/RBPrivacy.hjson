@@ -4,6 +4,7 @@
       id: "privacy_page",
       L: "Page",
       P: {
+        public: true
         key: "RBPrivacy",
         url: "/privacy",
         title: "Privacy Policy - Personal Rulebook",

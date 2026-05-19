@@ -1,0 +1,290 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Background worker: daily SSL expiry check for CertPulseDomain vertices. Emails the owning user when expired (once per day per domain).
+        key: backgroundCertPulseSslDailyCheck
+        body:
+          '''
+// Worker lifecycle
+if (args.contextData?.action !== "start") {
+  return { success: true, message: "CertPulse SSL worker is ready" };
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const RUN_EVERY_MS = args.contextData?.intervalMs || DAY_MS;
+
+const nowIso = () => new Date().toISOString();
+const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
+
+const normalizeHost = (host) => {
+  if (!host || typeof host !== "string") return "";
+  return host
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .toLowerCase();
+};
+
+const tlsCheck = async ({ host, port }) => {
+  const cleanHost = normalizeHost(host);
+  const cleanPort = Number(port || 443);
+
+  if (!cleanHost) {
+    return { ok: false, status: "error", error: "Missing host" };
+  }
+  if (!Number.isFinite(cleanPort) || cleanPort <= 0 || cleanPort > 65535) {
+    return { ok: false, status: "error", error: "Invalid port" };
+  }
+
+  return await new Promise((resolve) => {
+    let resolved = false;
+    const finish = (payload) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(payload);
+    };
+
+    const socket = args.tls.connect(
+      {
+        host: cleanHost,
+        port: cleanPort,
+        servername: cleanHost,
+        rejectUnauthorized: false
+      },
+      () => {
+        try {
+          const cert = socket.getPeerCertificate?.();
+          if (!cert || Object.keys(cert).length === 0) {
+            socket.end();
+            return finish({ ok: false, status: "unknown", error: "No peer certificate" });
+          }
+
+          const validTo = cert.valid_to || cert.validTo || cert.valid_to_string;
+          const notAfter = validTo ? new Date(validTo) : null;
+          if (!notAfter || Number.isNaN(notAfter.getTime())) {
+            socket.end();
+            return finish({ ok: false, status: "error", error: `Unable to parse certificate expiry: ${String(validTo)}` });
+          }
+
+          const now = Date.now();
+          const msLeft = notAfter.getTime() - now;
+          const daysRemaining = Math.floor(msLeft / DAY_MS);
+          const status = msLeft < 0 ? "expired" : "valid";
+
+          socket.end();
+          return finish({
+            ok: true,
+            status,
+            sslNotAfter: notAfter.toISOString(),
+            sslDaysRemaining: daysRemaining
+          });
+        } catch (e) {
+          try { socket.end(); } catch {}
+          return finish({ ok: false, status: "error", error: e?.message || String(e) });
+        }
+      }
+    );
+
+    socket.setTimeout(15000, () => {
+      try { socket.destroy(); } catch {}
+      finish({ ok: false, status: "error", error: "TLS connection timed out" });
+    });
+
+    socket.on("error", (err) => {
+      try { socket.destroy(); } catch {}
+      finish({ ok: false, status: "error", error: err?.message || String(err) });
+    });
+  });
+};
+
+const updateDomainRow = async ({ session, domainId, patch }) => {
+  if (!domainId) return;
+  const keys = Object.keys(patch || {});
+  if (keys.length === 0) return;
+
+  const setParts = keys.map((k) => `d.${k} = $${k}`).join(", ");
+  await session.run(
+    `MATCH (d:CertPulseDomain) WHERE elementId(d) = $domainId
+     SET ${setParts},
+         d.updatedAt = datetime()
+     RETURN d`,
+    { domainId, ...patch }
+  );
+};
+
+const shouldNotifyExpired = (domainProps) => {
+  if (domainProps?.notifyOnExpired === false) return false;
+  return true;
+};
+
+const sendExpiredEmail = async ({ to, host, port, sslNotAfter }) => {
+  if (!to) return;
+  const subject = `SSL certificate expired: ${host}:${port}`;
+  const content = `
+    <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
+      <h2 style="margin:0 0 12px 0;">SSL certificate expired</h2>
+      <p style="margin:0 0 10px 0;">
+        CertPulse detected an expired certificate for <b>${host}:${port}</b>.
+      </p>
+      <p style="margin:0 0 10px 0;">
+        Certificate expiry (notAfter): <code>${sslNotAfter || "unknown"}</code>
+      </p>
+      <p style="margin:0;">
+        Open your dashboard to review: <a href="/certpulse/domains">CertPulse Domains</a>
+      </p>
+    </div>
+  `;
+
+  await args.sendEmail({
+    to,
+    subject,
+    content,
+    subDomain: args.subDomain
+  });
+};
+
+const runOnce = async () => {
+  // IMPORTANT: worker is long-lived; do not use args.session (it will be closed).
+  const session = await args.getSession();
+  try {
+  const startedAt = nowIso();
+  console.log(`[CertPulse] SSL daily check start ${startedAt}`);
+
+  // Pull per-user scoped domains (preferred). If a domain is not linked to a user,
+  // it will still be updated but no notification will be sent.
+  const result = await session.run(
+    `
+    MATCH (d:CertPulseDomain)
+    OPTIONAL MATCH (u:User)-[:UserCertPulseDomain]->(d)
+    RETURN d, u
+    `
+  );
+
+  let checked = 0;
+  let expired = 0;
+  let emailed = 0;
+  let errors = 0;
+
+  const today = dayKey();
+
+  for (let i = 0; i < result.records.length; i++) {
+    const record = result.records[i];
+    const dNode = record.get("d");
+    const uNode = record.get("u");
+
+    const d = args.convertNodeToJson(dNode);
+    const u = uNode ? args.convertNodeToJson(uNode) : null;
+
+    const domainId = d?.id;
+    const host = normalizeHost(d?.P?.host);
+    const port = Number(d?.P?.port || 443);
+    const enabled = d?.P?.enabled !== false;
+
+    if (!enabled) continue;
+
+    checked++;
+
+    const check = await tlsCheck({ host, port });
+    const patch = {
+      host,
+      port,
+      sslStatus: check.status || "unknown",
+      sslNotAfter: check.sslNotAfter || null,
+      sslDaysRemaining:
+        check.sslDaysRemaining !== undefined && check.sslDaysRemaining !== null
+          ? Number(check.sslDaysRemaining)
+          : null,
+      sslLastCheckedAt: nowIso(),
+      sslError: check.ok ? null : (check.error || "Unknown error")
+    };
+
+    try {
+      await updateDomainRow({ session, domainId, patch });
+    } catch (e) {
+      errors++;
+      console.error("[CertPulse] Failed to update domain row:", domainId, e);
+      continue;
+    }
+
+    if (check.status === "expired") {
+      expired++;
+
+      const lastNotifiedDay = d?.P?.sslLastNotifiedDay || null;
+      const alreadyNotifiedToday = lastNotifiedDay === today;
+
+      const notifyAllowed = shouldNotifyExpired(d?.P);
+      const email = u?.P?.email || null;
+
+      if (notifyAllowed && email && !alreadyNotifiedToday) {
+        try {
+          await sendExpiredEmail({
+            to: email,
+            host,
+            port,
+            sslNotAfter: check.sslNotAfter
+          });
+          emailed++;
+          await updateDomainRow({
+            session,
+            domainId,
+            patch: {
+              sslLastNotifiedAt: nowIso(),
+              sslLastNotifiedDay: today
+            }
+          });
+        } catch (e) {
+          errors++;
+          console.error("[CertPulse] Failed to email for expired cert:", host, e);
+        }
+      }
+    }
+
+    if (check.status === "error") errors++;
+  }
+
+  console.log(
+    `[CertPulse] SSL daily check done. checked=${checked} expired=${expired} emailed=${emailed} errors=${errors}`
+  );
+
+  return { success: true, data: { checked, expired, emailed, errors } };
+  } finally {
+    try { await session.close(); } catch {}
+  }
+};
+
+// Run immediately, then schedule
+let intervalId = null;
+try {
+  await runOnce();
+} catch (e) {
+  console.error("[CertPulse] Initial runOnce failed:", e);
+}
+
+intervalId = setInterval(async () => {
+  try {
+    await runOnce();
+  } catch (e) {
+    console.error("[CertPulse] Scheduled runOnce failed:", e);
+  }
+}, RUN_EVERY_MS);
+
+console.log(`[CertPulse] SSL worker started (intervalMs=${RUN_EVERY_MS})`);
+
+return {
+  stop: async () => {
+    try {
+      if (intervalId) clearInterval(intervalId);
+    } catch {}
+    console.log("[CertPulse] SSL worker stopped");
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

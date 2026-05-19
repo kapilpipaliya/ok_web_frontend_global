@@ -83,6 +83,10 @@ const getTitle = () => {
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
   return args.fns.prop('title', args.contextData.props);
 };
+const getSubtitle = () => {
+  if (isNestedLinesTable()) return args.contextData.props?.nestedTableSubtitle ?? '';
+  return args.fns.prop('subtitle', args.contextData.props);
+};
 const getSearchPlaceholder = () => args.fns.prop('searchPlaceholder', args.contextData.props) || "Search...";
 const getAdditionalFilters = () => args.fns.prop('additionalFilters', args.contextData.props) || [];
 const getCustomActions = () => args.fns.prop('customActions', args.contextData.props) || [];
@@ -150,6 +154,35 @@ const getOnDelete = () => args.fns.prop('onDelete', args.contextData.props);
 const getOnAfterDelete = () => args.fns.prop('onAfterDelete', args.contextData.props);
 const getRowClickable = () => args.fns.prop('rowClickable', args.contextData.props) === true;
 const getOnRowClick = () => args.fns.prop('onRowClick', args.contextData.props);
+const getSelectionMode = () => {
+  const mode = args.fns.prop('selectionMode', args.contextData.props);
+  return mode === 'single' ? 'single' : 'multiple';
+};
+const getOnSelectionChange = () => args.fns.prop('onSelectionChange', args.contextData.props);
+const getInitialSelectedRowIds = () => {
+  const raw = args.fns.prop('initialSelectedRowIds', args.contextData.props);
+  return Array.isArray(raw) ? raw.map((id) => String(id)).filter(Boolean) : [];
+};
+
+const notifySelectionChange = () => {
+  const onSelectionChange = getOnSelectionChange();
+  if (typeof onSelectionChange !== 'function') return;
+  const selectedIds = getSelectedRows();
+  const displayed = getDisplayData() || [];
+  const selectedItems = [];
+  selectedIds.forEach((rowElementId) => {
+    const rowData = displayed.find((row) => row?.id === rowElementId);
+    const graphVertex = args.graph?.vertexes?.[rowElementId];
+    if (graphVertex) {
+      selectedItems.push({
+        id: graphVertex.id,
+        row: rowData,
+        vertex: graphVertex
+      });
+    }
+  });
+  onSelectionChange(selectedIds, selectedItems, args);
+};
 
 const propsTableStateVertexId = args.contextData.props?.tableStateVertexId;
 let tableStateVertexId = propsTableStateVertexId;
@@ -193,6 +226,49 @@ const patchTableP = (partial) => {
   args.mergeVertexProperties(0, tableStateVertexId, args.graph, args.setGraph, partial);
 };
 const tableP = () => args.graph.vertexes[tableStateVertexId]?.P;
+
+/** TableUiState: P.data / P.filteredData are string[] vertex ids only. Resolve bodies via args.graph.vertexes[id]. */
+const normalizeRowIds = (entries) => {
+  const seen = new Set();
+  const out = [];
+  if (!Array.isArray(entries)) return out;
+  for (let i = 0; i < entries.length; i++) {
+    const id = entries[i];
+    if (typeof id !== 'string' || id === '') continue;
+    if (!seen.has(id)) {
+      seen.add(id);
+      out.push(id);
+    }
+  }
+  return out;
+};
+
+const rowIdsFromVertices = (rows) => {
+  const raw = [];
+  if (!Array.isArray(rows)) return normalizeRowIds(raw);
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (r?.id != null && r.id !== '') raw.push(String(r.id));
+  }
+  return normalizeRowIds(raw);
+};
+
+const vertexFromRowId = (id) => {
+  if (typeof id !== 'string' || id === '') return null;
+  return args.graph?.vertexes?.[id] || null;
+};
+
+const verticesFromRowIds = (ids) => {
+  const normalized = normalizeRowIds(ids);
+  const out = [];
+  for (let i = 0; i < normalized.length; i++) {
+    const vx = vertexFromRowId(normalized[i]);
+    if (vx) out.push(vx);
+  }
+  return out;
+};
+
+const resolvedFilteredVertices = () => verticesFromRowIds(tableP()?.filteredData ?? []);
 
 const getGroupByConfig = () => args.fns.prop('groupBy', args.contextData.props) || null;
 const toggleExpanded = (key) => {
@@ -414,7 +490,7 @@ const buildDisplayData = (filtered, groupByKey, collapsedList) => {
 };
 const getDisplayData = () => {
   const g = getGroupByConfig();
-  const filtered = tableP()?.filteredData ?? [];
+  const filtered = verticesFromRowIds(tableP()?.filteredData ?? []);
   if (!g) return filtered;
   const key = typeof g === 'string' ? g : (g.key || '');
   if (!key) return filtered;
@@ -614,7 +690,7 @@ const updateQueryParams = () => {
 
 // Apply local filters (for table header row filters)
 const applyLocalFilters = () => {
-  const dataSource = tableP()?.data ?? [];
+  const dataSource = verticesFromRowIds(tableP()?.data ?? []);
   let filtered = [...dataSource];
 
   // Apply search term
@@ -738,7 +814,7 @@ const applyLocalFilters = () => {
     }
   }
 
-  patchTableP({ filteredData: filtered });
+  patchTableP({ filteredData: normalizeRowIds(filtered.map((row) => String(row.id))) });
 };
 
 // Update category contentCount based on fetched data length when local filters are enabled
@@ -754,29 +830,32 @@ const updateCategoryCountFromFetchedData = (fetchedData, categoryItem) => {
   const rootKeys = sidebarConfig.rootKeys || {};
   const rootKey = rootKeys.key;
   
-  // Determine category ID from the category item that was used for fetching
-  const isUncategorized = categoryItem.P?.key === rootKey || categoryItem.P?.key === 'uncategorized' || categoryItem.id === 'uncategorized';
-  const categoryId = isUncategorized ? 'uncategorized' : categoryItem.id;
+  const tableLabel = args.fns.getTableVertexLabel?.();
+  const uncategorizedVertexId = tableLabel ? '_' + tableLabel + '_uncategorized' : null;
+  const isSyntheticUncat =
+    uncategorizedVertexId &&
+    (categoryItem.id === uncategorizedVertexId || categoryItem.P?.key === uncategorizedVertexId);
+  const isUncategorized = categoryItem.P?.key === rootKey || isSyntheticUncat;
+  if (isUncategorized && !uncategorizedVertexId) return;
+  const categoryId = isUncategorized ? uncategorizedVertexId : categoryItem.id;
   
   if (!categoryId) return;
   
-  // Get current count from graph
   let currentCount = 0;
   if (isUncategorized) {
-    const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+    const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
     currentCount = uncategorizedVertex?.P?.contentCount ?? 0;
   } else {
     const categoryVertex = args.graph?.vertexes?.[categoryId];
     currentCount = categoryVertex?.P?.contentCount ?? 0;
   }
   
-  // Update count if different - use fetched data length (before filtering)
   const fetchedLength = fetchedData?.length ?? 0;
   if (currentCount !== fetchedLength) {
     if (isUncategorized) {
-      const uncategorizedVertex = args.graph?.vertexes?.['uncategorized'];
+      const uncategorizedVertex = args.graph?.vertexes?.[uncategorizedVertexId];
       if (uncategorizedVertex) {
-        args.mergeVertexProperties(0, 'uncategorized', args.graph, args.setGraph, {
+        args.mergeVertexProperties(0, uncategorizedVertexId, args.graph, args.setGraph, {
           contentCount: fetchedLength
         });
       }
@@ -812,6 +891,27 @@ const debouncedSetSearchTerm = args.debounce(value => {
 const getCellValue = (row, column) => {
   if (column.valueAccessor) {
     return column.valueAccessor(row);
+  }
+  if (column.type === "select" && column.selectConfig?.relationshipType && column.selectConfig?.labelField) {
+    const sc = column.selectConfig;
+    const rel = sc.relationshipType;
+    const lf = sc.labelField;
+    const vxMap = args.graph?.vertexes ?? {};
+    const edgesMap = args.graph?.edges ?? {};
+    let tid = null;
+    if (row.OUT && rel) {
+      const outArr = row.OUT[rel];
+      if (Array.isArray(outArr) && outArr.length > 0) {
+        const ed = edgesMap[outArr[0]];
+        if (ed && ed.E != null) tid = ed.E;
+      }
+    }
+    if (tid != null && String(tid).trim() !== "") {
+      const node = vxMap[String(tid).trim()];
+      const lab = node?.P?.[lf];
+      if (lab != null && String(lab).trim() !== "") return String(lab).trim();
+    }
+    return "";
   }
   if (column.key.includes(".")) {
     const keys = column.key.split(".");
@@ -991,7 +1091,7 @@ const handleSort = (column) => {
 
 // Get unique values for a column
 const getUniqueColumnValues = (column) => {
-  const allData = tableP()?.data ?? [];
+  const allData = verticesFromRowIds(tableP()?.data ?? []);
   const uniqueValues = new Set();
 
   allData.forEach(row => {
@@ -1084,11 +1184,12 @@ const handleColumnFilterChange = (columnKey, value) => {
 const pollQueuedRows = async () => {
   const config = args.fns.evaluateConfig?.() || {};
   const intervalMs = config?.refetchIntervalWhenQueued;
-  const currentData = tableP()?.data ?? [];
-  const queuedIds = (Array.isArray(currentData) ? currentData : [])
-    .filter(r => (r.P?.syncStatus) === 'queued')
-    .map(r => r.id)
-    .filter(id => id !== undefined && id !== null);
+  const ids = normalizeRowIds(tableP()?.data ?? []);
+  const queuedIds = [];
+  for (let i = 0; i < ids.length; i++) {
+    const vx = vertexFromRowId(ids[i]);
+    if (vx?.P?.syncStatus === 'queued') queuedIds.push(ids[i]);
+  }
   if (queuedIds.length === 0 || !intervalMs) return;
   const refresh = args.fns.refreshQueuedRows;
   if (!refresh || typeof refresh !== 'function') return;
@@ -1096,11 +1197,9 @@ const pollQueuedRows = async () => {
     const result = await refresh(queuedIds);
     const updated = result?.data;
     if (Array.isArray(updated) && updated.length > 0) {
-      const updatedMap = new Map(updated.map(row => [row.id, row]));
-      const newData = currentData.map(row => updatedMap.get(row.id) || row);
-      patchTableP({ data: newData });
       applyLocalFilters();
-      const stillQueued = newData.some(r => (r.P?.syncStatus) === 'queued');
+      const dataIds = normalizeRowIds(tableP()?.data ?? []);
+      const stillQueued = dataIds.some((id) => vertexFromRowId(id)?.P?.syncStatus === 'queued');
       if (stillQueued && pollRef.id === null) {
         pollRef.id = setTimeout(() => {
           pollRef.id = null;
@@ -1128,7 +1227,8 @@ const pollQueuedRows = async () => {
 
 // Start background poll when any row has syncStatus 'queued'. Pass optional data array to check; if omitted, uses current data().
 const startPollIfQueued = (dataToCheck) => {
-  const rows = dataToCheck !== undefined ? dataToCheck : (tableP()?.data ?? []);
+  const rows =
+    dataToCheck !== undefined ? dataToCheck : verticesFromRowIds(tableP()?.data ?? []);
   if (pollRef.id) {
     clearTimeout(pollRef.id);
     pollRef.id = null;
@@ -1150,14 +1250,15 @@ const handleSearch = () => {
   if (isNestedLinesTable()) {
     const getRows = args.contextData.props?.getNestedLineRows;
     const rows = typeof getRows === 'function' ? getRows() : [];
-    patchTableP({ data: rows });
+    const ids = rowIdsFromVertices(rows);
+    patchTableP({ data: ids });
     const config = args.fns.evaluateConfig?.() || {};
     const enableLocalFilters = config?.enableLocalFilters === true;
     const enableLocalSort = config?.enableLocalSort === true;
     if (enableLocalFilters || enableLocalSort) {
       applyLocalFilters();
     } else {
-      patchTableP({ filteredData: rows });
+      patchTableP({ filteredData: ids });
     }
     return;
   }
@@ -1182,7 +1283,8 @@ const handleSearch = () => {
       } else {
         patchTableP({ expansionPrefetchIdsByParentId: null });
       }
-      patchTableP({ data: fetchedRows });
+      const contentRowIds = rowIdsFromVertices(fetchedRows);
+      patchTableP({ data: contentRowIds });
       
       // Update category count with fetched data length if local filters are enabled
       // Pass the categoryItem that was used for fetching, not the currently selected item
@@ -1194,8 +1296,7 @@ const handleSearch = () => {
       if (enableLocalFilters || enableLocalSort) {
         applyLocalFilters();
       } else {
-        // Server already filtered, just set filtered data to match data
-        patchTableP({ filteredData: fetchedRows });
+        patchTableP({ filteredData: contentRowIds });
       }
       
       startPollIfQueued(fetchedRows);
@@ -1205,25 +1306,71 @@ const handleSearch = () => {
 
 // Handle row selection (using vertex IDs)
 const toggleRowSelection = (vertexId) => {
+  const rowElementId = vertexId != null ? String(vertexId).trim() : "";
+  if (!rowElementId) return;
   const currentSelected = getSelectedRows();
-  const newSelected = new Set(currentSelected);
-  if (newSelected.has(vertexId)) {
-    newSelected.delete(vertexId);
+  let newSelected;
+  if (getSelectionMode() === 'single') {
+    if (currentSelected.has(rowElementId) && currentSelected.size === 1) {
+      newSelected = new Set();
+    } else {
+      newSelected = new Set([rowElementId]);
+    }
   } else {
-    newSelected.add(vertexId);
+    newSelected = new Set(currentSelected);
+    if (newSelected.has(rowElementId)) {
+      newSelected.delete(rowElementId);
+    } else {
+      newSelected.add(rowElementId);
+    }
   }
   setSelectedRows(newSelected);
+  notifySelectionChange();
 };
 
 const selectAllRows = () => {
   const displayed = getDisplayData();
-  const allVertexIds = new Set((displayed || []).map(row => row.id).filter(id => id !== undefined && id !== null));
-  setSelectedRows(allVertexIds);
+  if (getSelectionMode() === 'single') {
+    const firstRow = (displayed || []).find((row) => row?.id != null);
+    setSelectedRows(firstRow?.id ? new Set([String(firstRow.id)]) : new Set());
+  } else {
+    const allVertexIds = new Set(
+      (displayed || []).map((row) => row.id).filter((id) => id !== undefined && id !== null)
+    );
+    setSelectedRows(allVertexIds);
+  }
+  notifySelectionChange();
 };
 
 const clearSelection = () => {
   clearSelectedRows();
+  notifySelectionChange();
 };
+
+const applyInitialSelectedRowIds = () => {
+  const initialIds = getInitialSelectedRowIds();
+  if (initialIds.length === 0) {
+    clearSelectedRows();
+    return;
+  }
+  if (getSelectionMode() === 'single') {
+    setSelectedRows(new Set([initialIds[initialIds.length - 1]]));
+  } else {
+    setSelectedRows(new Set(initialIds));
+  }
+};
+
+const [initialSelectionAppliedKey, setInitialSelectionAppliedKey] = args.createSignal("");
+args.createEffect(() => {
+  const initialIds = getInitialSelectedRowIds();
+  const nextKey = initialIds.join("|");
+  if (initialSelectionAppliedKey() === nextKey) return;
+  setInitialSelectionAppliedKey(nextKey);
+  applyInitialSelectedRowIds();
+  if (initialIds.length > 0) {
+    notifySelectionChange();
+  }
+});
 
 // Shift+Arrow: anchor index for range selection (null when not extending)
 const selectionAnchorIndex = () => tableP()?.selectionAnchorIndex ?? null;
@@ -1240,6 +1387,7 @@ const selectRange = (fromIndex, toIndex) => {
     if (r?.id) ids.push(r.id);
   }
   setSelectedRows(new Set(ids));
+  notifySelectionChange();
 };
 const handleShiftArrow = (currentIndex, nextIndex) => {
   if (!getShowSelection()) return;
@@ -1325,9 +1473,12 @@ const handleSave = async (formDataToSave) => {
         mode === "add" ? "Item added successfully" : "Item updated successfully"
       );
       patchTableP({ isModalOpen: false });
-      // Optimistic update
+      // Optimistic update: state is ids only; graph is merged by DynamicPage save
       if (mode === "add") {
-        patchTableP({ data: [...(tableP()?.data ?? []), result.data] });
+        const newId = result.data?.id != null ? String(result.data.id) : null;
+        if (newId) {
+          patchTableP({ data: normalizeRowIds([...(tableP()?.data ?? []), newId]) });
+        }
         
         // Check if onAfterAdd function is provided
         const onAfterAdd = getOnAfterAdd();
@@ -1340,11 +1491,14 @@ const handleSave = async (formDataToSave) => {
           }
         }
       } else {
-        const updated = (tableP()?.data ?? []).map(row => 
-          row.id === originalRow?.id ? result.data : row
-        );
-        patchTableP({ data: updated });
-        
+        // (add or any edit save for a row not yet listed): append id so the table refreshes without a full reload.
+        const rowId = result.data?.id != null ? String(result.data.id) : null;
+        if (rowId) {
+          const cur = normalizeRowIds(tableP()?.data ?? []);
+          if (!cur.includes(rowId)) {
+            patchTableP({ data: normalizeRowIds([...cur, rowId]) });
+          }
+        }
         // Check if onAfterEdit function is provided
         const onAfterEdit = getOnAfterEdit();
         if (onAfterEdit && typeof onAfterEdit === 'function') {
@@ -1433,8 +1587,8 @@ const handleDelete = async (row) => {
     if (result?.success) {
       const label = getLabel();
       args.showSuccessToast?.(label ? `${label} deleted successfully` : "Item deleted successfully");
-      // Remove from data
-      const updated = (tableP()?.data ?? []).filter(item => item.id !== row.id);
+      const rid = String(row?.id ?? "");
+      const updated = normalizeRowIds(tableP()?.data ?? []).filter((id) => id !== rid);
       patchTableP({ data: updated });
       applyLocalFilters();
       
@@ -1592,8 +1746,8 @@ if (rowsToRemove && setRowsToRemove) {
   args.createEffect(() => {
     const idsToRemove = rowsToRemove?.();
     if (!idsToRemove || !Array.isArray(idsToRemove) || idsToRemove.length === 0) return;
-    const idSet = new Set(idsToRemove);
-    const updated = (tableP()?.data ?? []).filter(row => !idSet.has(row.id));
+    const idSet = new Set(idsToRemove.map((x) => String(x)));
+    const updated = normalizeRowIds(tableP()?.data ?? []).filter((id) => !idSet.has(id));
     patchTableP({ data: updated });
     applyLocalFilters();
     setRowsToRemove(null);
@@ -1739,9 +1893,9 @@ const cleanupTableDraggable = (element) => {
 
 const getSelectedItems = () => {
   const selected = getEffectiveSelectedRows();
-  const filtered = tableP()?.filteredData ?? [];
+  const filteredRows = resolvedFilteredVertices();
   const selectedIds = Array.from(selected);
-  return (filtered || []).filter(row => selectedIds.includes(row.id));
+  return filteredRows.filter((row) => row?.id != null && selectedIds.includes(row.id));
 };
 
 const hasActiveFilters = () => {
@@ -1815,6 +1969,7 @@ return {
   getColumns,
   getRowHeight,
   getTitle,
+  getSubtitle,
   getSearchPlaceholder,
   getAdditionalFilters,
   getCustomActions,
@@ -1871,6 +2026,11 @@ return {
   handleViewRow,
   getRowClickable,
   getOnRowClick,
+  getSelectionMode,
+  getOnSelectionChange,
+  getInitialSelectedRowIds,
+  notifySelectionChange,
+  applyInitialSelectedRowIds,
   shouldHideColumn,
   getGridTemplateColumns,
   renderCellContent,
@@ -1879,6 +2039,7 @@ return {
   initTableDraggable,
   cleanupTableDraggable,
   getSelectedItems,
+  resolveFilteredVerticesForExport: resolvedFilteredVertices,
   getSelectFilterProps,
   setRowRef,
   getRowRef,
@@ -2151,6 +2312,34 @@ return {
       }
     }
     {
+      id: "7d"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.5;
+  color: ${args.theme.var.color.text_dark_400};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const subtitle = args.fns.getSubtitle?.();
+const displaySubtitle =
+  subtitle != null && String(subtitle).trim() !== "" ? String(subtitle).trim() : "";
+return {
+  as: "p",
+  text: displaySubtitle,
+  hide: displaySubtitle === ""
+};
+'''
+      }
+    }
+    {
       id: "8"
       L: Attr
       P: {
@@ -2396,7 +2585,7 @@ return {
           '''
 return {
   variant: "secondary",
-  onClick: () => args.fns.handleExport(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.filteredData ?? []),
+  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
   text: "Export Filtered",
   leftIcon: "carbon:filter",
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
@@ -2418,7 +2607,7 @@ return {
   "attr:variant": "secondary",
   "attr:icon": "filter",
   text: "Export Filtered",
-  onClick: () => args.fns.handleExport(args.graph.vertexes[args.fns.tableStateVertexId]?.P?.filteredData ?? []),
+  onClick: () => args.fns.handleExport(args.fns.resolveFilteredVerticesForExport?.() ?? []),
   disabled: args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true,
   hide: !args.fns.getExportFunction() || args.fns.getHideExportButtons() || args.fns.getUsePolarisUI?.() !== true
 };
@@ -2690,10 +2879,11 @@ return `._id {
         props:
           '''
 const showSelection = args.fns.getShowSelection();
+const selectionMode = args.fns.getSelectionMode?.();
 
 return {
   as: "div",
-  hide: !showSelection,
+  hide: !showSelection || selectionMode === "single",
 };
 '''
       }
@@ -2718,8 +2908,9 @@ return `._id {
         props:
           '''
 const showSelection = args.fns.getShowSelection();
+const selectionMode = args.fns.getSelectionMode?.();
 const selected = args.fns.getSelectedRows();
-const filtered = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.filteredData ?? [];
+const filtered = args.fns.resolveFilteredVerticesForExport?.() ?? [];
 const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
 // const usePolaris = args.fns.getUsePolarisUI?.() === true;
 const usePolaris = false;
@@ -2738,7 +2929,7 @@ return {
     if (allSelected) args.fns.clearSelection();
     else args.fns.selectAllRows();
   },
-  hide: !showSelection
+  hide: !showSelection || args.fns.getSelectionMode?.() === "single"
 };
 '''
       }
@@ -4543,7 +4734,8 @@ return {
   formConfig: args.fns.getFormConfig(),
   initialVertex: args.graph.vertexes[args.fns.tableStateVertexId]?.P?.formData ?? null,
   onSave: args.fns.handleSave,
-  label: args.fns.getLabel()
+  label: args.fns.getLabel(),
+  tableVertexLabel: args.fns.getTableVertexLabel?.() ?? args.contextData.props?.tableVertexLabel
 };
 '''
       }
@@ -5301,6 +5493,12 @@ return {
       T: Attr
       S: "5"
       E: "6"
+    }
+    {
+      id: e32_subtitle
+      T: Attr
+      S: "5"
+      E: "7d"
     }
     {
       id: e33

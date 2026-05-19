@@ -1,0 +1,83 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: attendraEmployeeAfterCreate
+        description: After staff User create — shop DB cleanup (transient shop/invite fields), optional invited status, send invitation email (same as global UserManagement invite flow).
+        body:
+          '''
+const { tableVertexLabel, operation } = args.contextData || {};
+if (tableVertexLabel !== "User" || operation !== "create") {
+  return { success: true, message: "Skip: not User create" };
+}
+
+const shop = String(args.contextData?.shop || args.shop || "").trim().toLowerCase();
+if (!shop) {
+  return { success: true, message: "Skip: no shop in context" };
+}
+
+const result = args.contextData?.result;
+const employee = result?.data;
+const elementId = employee?.id;
+if (!elementId) return { success: true, message: "Skip: missing employee elementId" };
+
+const uuid = args.uuidv7();
+
+const { dbSession } = await args.getDBSessionForShop(shop, args.rawSubDomain);
+try {
+  await dbSession.run(
+    `MATCH (e:User) WHERE elementId(e) = $id
+     SET e.status = "invited",
+         e.updatedAt = $nowIso,
+         e.uuid = coalesce(e.uuid, $uuid)
+     REMOVE e.shop, e.shopDomain, e.inviteCode, e.inviteLink
+     RETURN e`,
+    { id: elementId, nowIso: new Date().toISOString(), uuid }
+  );
+} finally {
+  await dbSession.close();
+}
+
+try {
+  if (result?.data?.P) {
+    //if (result.data.P.status == null || String(result.data.P.status).trim() === "") {
+      result.data.P.status = "invited";
+    //}
+    if (result.data.P.uuid == null || String(result.data.P.uuid).trim() === "") {
+      result.data.P.uuid = uuid;
+    }
+    delete result.data.P.shop;
+    delete result.data.P.shopDomain;
+    delete result.data.P.inviteCode;
+    delete result.data.P.inviteLink;
+  }
+} catch (e) {
+  console.warn("attendraEmployeeAfterCreate: patch result failed", e);
+}
+
+try {
+  const sendInvitationEmail = args.sendInvitationEmail;
+  if (typeof sendInvitationEmail === "function" && employee && employee.P?.email) {
+    const req = args.getRequestEvent?.()?.request;
+    const shopDbName = args.getDatabaseNameForShop(shop, args.rawSubDomain);
+    if (req && args.session && args.subDomain) {
+      await sendInvitationEmail(req, employee, shopDbName, args.session, `${shopDbName}.decodecommerce.com`);
+    } else {
+      console.warn(
+        "attendraEmployeeAfterCreate: skip invitation email — missing request, session, or subDomain",
+      );
+    }
+  }
+} catch (invErr) {
+  console.error("attendraEmployeeAfterCreate: invitation email failed", invErr);
+}
+
+return { success: true, message: "Employee created (invitation email when configured)" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

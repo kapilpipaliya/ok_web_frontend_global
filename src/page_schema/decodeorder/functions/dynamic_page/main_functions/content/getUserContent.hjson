@@ -69,13 +69,14 @@ const hydrateRelationshipSelectProps = (items, rels, bindings) => {
 
 const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
   if (!config || typeof config !== "object") return [];
-  const groups = config.formConfig?.groups;
-  if (!Array.isArray(groups)) return [];
   const fields = [];
-  for (let gi = 0; gi < groups.length; gi++) {
-    const g = groups[gi]?.fields;
-    if (!Array.isArray(g)) continue;
-    for (let fi = 0; fi < g.length; fi++) fields.push(g[fi]);
+  const groups = config.formConfig?.groups;
+  if (Array.isArray(groups)) {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const g = groups[gi]?.fields;
+      if (!Array.isArray(g)) continue;
+      for (let fi = 0; fi < g.length; fi++) fields.push(g[fi]);
+    }
   }
   const seen = new Set();
   const bindings = [];
@@ -90,6 +91,15 @@ const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
     const f = fields[i];
     if (f?.type === "select" && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
       addBinding(f.key, f.selectConfig.relationshipType);
+    }
+  }
+  const cols = config.columns;
+  if (Array.isArray(cols)) {
+    for (let ci = 0; ci < cols.length; ci++) {
+      const c = cols[ci];
+      if (c?.type === "select" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
+        addBinding(c.key, c.selectConfig.relationshipType);
+      }
     }
   }
   const extra = config.relationshipPropertyBindings;
@@ -193,6 +203,7 @@ const queryParams = enableUserScoping ? { userUuid: user.P.uuid } : {};
 if (search && search.trim()) {
   const searchTerm = search.trim().toLowerCase();
   whereConditions.push(`(
+    toLower(COALESCE(c.fileName, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.name, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.description, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.title, '')) CONTAINS $searchTerm OR
@@ -206,6 +217,7 @@ if (search && search.trim()) {
     toLower(COALESCE(c.sku, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.vendor, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.email, '')) CONTAINS $searchTerm OR
+    toLower(COALESCE(c.username, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.displayFinancialStatus, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.displayFulfillmentStatus, '')) CONTAINS $searchTerm OR
     toLower(COALESCE(c.tags, '')) CONTAINS $searchTerm OR
@@ -248,7 +260,7 @@ if (sort && sort.column) {
   orderByClause = `ORDER BY c.${sort.column} ${direction}`;
 } else {
   // Default sorting - try name first, then title, then createdAt
-  orderByClause = "ORDER BY COALESCE(c.name, c.title, '') ASC, c.createdAt DESC";
+  orderByClause = "ORDER BY COALESCE(c.fileName, c.name, c.title, '') ASC, c.createdAt DESC";
 }
 
 // Build category filter if provided (synthetic uncategorized id uses unassigned scope, not elementId(cat))

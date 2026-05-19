@@ -1,0 +1,111 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: shopifySupportGetConversation
+        description: Fetches a single Shopify support ticket and its replies, and optionally marks messages as read.
+        body:
+          '''
+// Get Shopify support conversation for a single ticket.
+// shop is automatically available via args.shop (extracted from request query params or Shopify auth)
+// Expected args.contextData:
+// - ticketId: string (Neo4j elementId of Support vertex) - REQUIRED
+// - markAsReadFor: "shop" | "admin" | undefined - OPTIONAL
+
+const shop = args.shop;
+const {
+  ticketId,
+  markAsReadFor
+} = args.contextData || {};
+
+if (!ticketId || typeof ticketId !== "string") {
+  return {
+    success: false,
+    message: "ticketId is required."
+  };
+}
+
+let whereClause = "elementId(t) = $ticketId AND t.source = 'shopify'";
+const params = { ticketId };
+
+if (shop && typeof shop === "string") {
+  whereClause = whereClause + " AND t.shop = $shop";
+  params.shop = shop;
+}
+
+const query = `
+  MATCH (t:Support)
+  WHERE ${whereClause}
+  OPTIONAL MATCH (r:Reply)-[tr:ParentSupport]->(t)
+  WITH t, r, tr
+  ORDER BY r.createdAt ASC
+  RETURN t, r, tr
+`;
+
+const result = await args.session.run(query, params);
+
+if (!result.records || result.records.length === 0) {
+  return {
+    success: false,
+    message: "Support ticket not found."
+  };
+}
+
+// Populate graph structure
+args.processResult(result.records, args.context, ["t", "r"], "tr");
+
+const nodes = args.context.nodes || {};
+const ticket = Object.values(nodes).find(
+  (v) => Array.isArray(v.L) && v.L.includes("Support")
+);
+const messages = Object.values(nodes)
+  .filter((v) => Array.isArray(v.L) && v.L.includes("Reply"))
+  .sort((a, b) => {
+    const aDate = a.P?.createdAt ? new Date(a.P.createdAt).getTime() : 0;
+    const bDate = b.P?.createdAt ? new Date(b.P.createdAt).getTime() : 0;
+    return aDate - bDate;
+  });
+
+// Best-effort update of unread counters
+try {
+  if (markAsReadFor === "shop") {
+    await args.session.run(
+      `
+      MATCH (t:Support)
+      WHERE elementId(t) = $ticketId AND t.source = 'shopify'
+      SET t.unreadForShop = 0
+      RETURN t
+      `,
+      { ticketId }
+    );
+  } else if (markAsReadFor === "admin") {
+    await args.session.run(
+      `
+      MATCH (t:Support)
+      WHERE elementId(t) = $ticketId AND t.source = 'shopify'
+      SET t.unreadForAdmin = 0
+      RETURN t
+      `,
+      { ticketId }
+    );
+  }
+} catch (e) {
+  console.warn("shopifySupportGetConversation: failed to update unread counters:", e);
+}
+
+return {
+  success: true,
+  message: "Support conversation loaded.",
+  data: {
+    ticket,
+    messages
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

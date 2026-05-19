@@ -541,6 +541,20 @@ const settingsConfigs = [
       type: "date",
       width: "160px",
       valueAccessor: (row) => row.P?.updatedAt || row.updatedAt
+    },
+    {
+      key: "lastSynced",
+      label: "Last synced",
+      type: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.lastSynced || ""
+    },
+    {
+      key: "syncStatus",
+      label: "Sync status",
+      type: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.syncStatus || ""
     }
   ],
   rowHeight: 50,

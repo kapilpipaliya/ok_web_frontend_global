@@ -1,0 +1,771 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ShopifyAuth
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 2
+        fns:
+          '''// Create signals for loading state and auth data
+const [isLoading, setIsLoading] = args.createSignal(false);
+const [authData, setAuthData] = args.createSignal(null);
+const [authError, setAuthError] = args.createSignal(null);
+
+// Function to fetch auth data
+const fetchAuthData = async () => {
+  try {
+    setIsLoading(true);
+    setAuthError(null);
+
+    const searchParams = args.untrack(() => ({ ...args.searchParams }));
+
+    // Call the named server function "authShopifyAdminRequest"
+    const result = await args.executeNamedServerFunction(
+      {
+        functionName: "authShopifyAdminRequest",
+        contextData: {
+          searchParams,
+        },
+      },
+      {
+        useSessionShop: false
+      }
+    );
+
+    if (result?.error || result?.result?.success === false) {
+      console.error("Shopify auth failed:", result?.error || result?.result?.error);
+      const errorMessage = result?.error || result?.result?.error || "Shopify auth failed";
+      setAuthError(errorMessage);
+      setAuthData({
+        data: null,
+        error: errorMessage,
+        needsOAuth: result?.result?.needsOAuth || false,
+        redirectUrl: result?.result?.redirectUrl,
+      });
+      return;
+    }
+
+    const authResult = {
+      data: result?.result,
+      needsOAuth: result?.result?.needsOAuth || false,
+      redirectUrl: result?.result?.redirectUrl,
+    };
+
+    setAuthData(authResult);
+
+    // Check if OAuth redirect is needed
+    if (authResult?.needsOAuth && authResult?.redirectUrl) {
+      // Redirect to OAuth begin endpoint
+      window.location.href = authResult.redirectUrl;
+    }
+  } catch (err) {
+    console.error("Error fetching Shopify auth data:", err);
+    const errorMessage = err?.message || "Failed to authenticate with Shopify";
+    setAuthError(errorMessage);
+    setAuthData({
+      data: null,
+      error: errorMessage,
+      needsOAuth: false,
+      redirectUrl: null,
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Handle Shopify navigate event
+// when route is loaded outside the Shopify admin, then the user will be redirected to the Shopify admin
+const handleNavigate = (event) => {
+  const href = event.target?.getAttribute('href');
+  if (href) {
+    args.navigate(href);
+  }
+};
+
+// Fetch auth data and register event listener on mount
+const onMount = () => {
+  if (args.fns.isInIframe()) {
+    fetchAuthData();
+  }
+  document.addEventListener('shopify:navigate', handleNavigate);
+};
+
+// Unregister event listener on cleanup
+const onCleanup = () => {
+  document.removeEventListener('shopify:navigate', handleNavigate);
+};
+
+return {
+  isLoading,
+  setIsLoading,
+  authData,
+  setAuthData,
+  authError,
+  setAuthError,
+  fetchAuthData,
+  handleNavigate,
+  onMount,
+  onCleanup
+}'''
+        componentName: Html
+        key: unique_1
+        props:
+          '''return {
+  onMount: args.fns.onMount,
+  onCleanup: args.fns.onCleanup
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: unique_3
+        props:
+          '''return {
+  as: "s-page",
+  "attr:inlineSize": args.contextData?.props?.pageSize || "large"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}`;'''
+        displayOrder: 1
+        componentName: LoadingSpinner
+        key: unique_2
+        props:
+          '''const isLoading = args.fns.isLoading?.();
+
+return {
+  size: "medium",
+  color: "primary",
+  hide: !isLoading
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin: 2rem 0.5rem;
+  display: flex;
+  justify-content: center;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_7
+        props:
+          '''return {
+  as: "section",
+  hide: args.fns.isInIframe() || ["/app", "/employees", "/roles", "/attendance-logs", "/files", "/settings"].includes(args.location?.pathname)
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_8
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: ""
+        props:
+          '''return {
+  as: "a",
+  href: "/",
+  alt: "Home"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        as: img
+        css:
+          '''return `._id {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}`;'''
+        src: /api/file/downloadCompanySquareLogo
+        displayOrder: 1
+        componentName: Html
+        key: unique_20
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+    ${args.location.pathname === "/home" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        key: unique_16
+        props:
+          '''return {
+  as: "a",
+  href: "/",
+  text: "Home"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+    ${args.location.pathname === "/docs" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        key: unique_23
+        props:
+          '''return {
+  as: "a",
+  href: "/docs",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/faq" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        key: unique_10
+        props:
+          '''return {
+  as: "a",
+  href: "/faq",
+  text: "FAQ"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+    ${args.location.pathname === "/tutorial" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        key: unique_11
+        props:
+          '''return {
+  as: "a",
+  href: "/tutorial",
+  text: "Tutorial"
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+    ${args.location.pathname === "/roadmap" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        key: unique_19
+        props:
+          '''return {
+  as: "a",
+  href: "/roadmap",
+  text: "Roadmap"
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/support" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        key: unique_12
+        props:
+          '''return {
+  as: "a",
+  href: "/support",
+  text: "Support"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/billing" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        key: unique_13
+        props:
+          '''return {
+  as: "a",
+  href: "/billing",
+  text: "Billing"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/blogs" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        key: unique_9
+        props:
+          '''return {
+  as: "a",
+  href: "/blogs",
+  text: "Blogs"
+  , hide: true
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  ${args.location.pathname === "/privacy" ? `color: ${args.theme.var.color.info};` : ""}
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        key: unique_14
+        props:
+          '''return {
+  as: "a",
+  href: "/privacy",
+  text: "Privacy"
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+._id:hover {
+  text-decoration: underline;
+}`;'''
+        displayOrder: 11
+        componentName: Html
+        key: unique_15
+        props:
+          '''return {
+  as: "a",
+  href: "https://www.youtube.com/@DecodeProductsOrganizer/videos",
+  rel: "noopener noreferrer",
+  target: "_blank"
+  , hide: true
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        as: div
+        displayOrder: 1
+        componentName: Html
+        text: YouTube
+        key: unique_18
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        as: icon
+        displayOrder: 2
+        icon: lets-icons:external
+        componentName: Html
+        key: unique_17
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: unique_4
+        props:
+          '''const authError = args.fns.authError?.();
+
+return {
+  as: "s-banner",
+  "attr:tone": "critical",
+  "attr:heading": "Authentication failed",
+  text: authError || "",
+  hide: !authError
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: unique_5
+        props:
+          '''const isLoading = args.fns.isLoading?.();
+
+return {
+  as: "s-section",
+  "attr:padding": "none",
+  hide: isLoading
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        slotName: children
+        displayOrder: 1
+        componentName: Slot
+        key: unique_6
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  border-top: 1px solid ${args.theme.var.color.border};
+  padding: 1.5rem 2rem;
+  text-align: center;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        key: unique_21
+        props:
+          '''return {
+  as: "footer",
+  show: args.fns.isInIframe() === false
+};'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.primary_dark_200};
+    text-decoration: underline;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        key: unique_22
+        props:
+          '''return {
+  as: "a",
+  href: "https://calendly.com/kapil-decodecommerce/30min",
+  target: "_blank",
+  rel: "noopener noreferrer",
+  text: "Book a Free Shopify Catalog Strategy Call"
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "21"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "22"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "24"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "6"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "6"
+      E: "10"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "11"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "6"
+      E: "12"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "6"
+      E: "13"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "6"
+      E: "14"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "6"
+      E: "15"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "6"
+      E: "16"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "6"
+      E: "17"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "6"
+      E: "18"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "18"
+      E: "19"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "18"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "24"
+      E: "25"
+    }
+  ]
+}

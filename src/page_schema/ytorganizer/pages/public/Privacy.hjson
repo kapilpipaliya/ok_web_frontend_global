@@ -4,6 +4,7 @@
       id: "1"
       L: Page
       P: {
+        public: true
         description: Privacy policy for YSaar - Learn how we handle your YouTube data in compliance with Google's API Services requirements
         fns:
           '''

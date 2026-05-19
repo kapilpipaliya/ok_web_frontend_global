@@ -37,6 +37,7 @@ import { runWithParentOwnerFunction } from "~/components/form/dynamic_component/
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
+import { postAPI } from "~/lib/api/general/postApi";
 import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
@@ -325,6 +326,7 @@ export function createFunctionArgumentBase(
     },
     executeServerFunction,
     executeNamedServerFunction,
+    postAPI,
     /** Zod — same library as server/schema helpers; safe for use in `props`, `fns`, `css` bodies. */
     z,
     floatingUI,

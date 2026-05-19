@@ -61,6 +61,7 @@ try {
       searchParams: params,
     },
     appSubDomain: args.rawSubDomain,
+    shopifyAdmin: authResult.admin,
   });
   dbSession = result.dbSession;
   const { subDomain } = result;

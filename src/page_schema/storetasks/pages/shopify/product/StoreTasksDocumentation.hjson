@@ -1,0 +1,497 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Documentation - Store Tasks
+        url: /docs
+        key: StoreTasksDocumentation
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''This guide explains how to use **Store Tasks** in plain language. You don’t need developer skills—just Shopify admin access.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting around the app"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: In Shopify admin open **Store Tasks** from Apps. Typical links are [Tasks](/tasks) for work, [Support](/support) for conversations, plus [FAQ](/faq), [Documentation](/docs), [Tutorial](/tutorial), [Changelog](/changelog), [Billing](/billing), and [Privacy](/privacy). Shops and ticketing tools may expose [Shops](/ShopifyShops) and [Tickets](/ShopifySupportTickets) depending on setup.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text:
+          '''The **[Tasks](/tasks)** page is the spreadsheet-style view: search, filters, sorting, columns, opening rows to edit tasks, sidebar lists, and modal settings when enabled.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Sidebar and lists"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Lists (categories) organize tasks similarly to folders. Select a list to constrain the tasks you see or create rows under it. Naming and ordering follow your table settings."
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Task fields"
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''Typical columns and form fields:
+
+- **Title / description** — what needs doing and context.
+- **Status** — todo, doing, blocked, done (or whichever options your tenant configured).
+- **Priority** — low through urgent.
+- **Due & remind** — due dates plus optional reminders.
+- **Assignee** — relationship to staff **User** records.
+- **Order link** — optional relationship to a **ShopifyOrder** vertex.
+- **Comments** — nested line items recorded on the task.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Reminders"
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Reminders enqueue background jobs named in your migrations (for example hooks that queue emails). Operators should keep workers running wherever long-running Shopify jobs are executed for this codebase."
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Table settings"
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Settings are stored per installation (Setting vertex + config). Migrate settings after schema edits. Import/export tooling may be hidden for embedded Polaris experiences—use support if you must move data in bulk."
+}'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "More help"
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: Still stuck? Reach us from [Support](/support), skim [FAQ](/faq), or walk through [Tutorial](/tutorial).
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "24"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e1," T: "Attr", S: "1", E: "2" }
+    { id: "e2," T: "PageLayout", S: "1", E: "24" }
+    { id: "e3," T: "Attr", S: "2", E: "3" }
+    { id: "e4," T: "Attr", S: "2", E: "4" }
+    { id: "e5," T: "Attr", S: "2", E: "5" }
+    { id: "e6," T: "Attr", S: "2", E: "9" }
+    { id: "e7," T: "Attr", S: "2", E: "12" }
+    { id: "e8," T: "Attr", S: "2", E: "15" }
+    { id: "e9," T: "Attr", S: "2", E: "18" }
+    { id: "e10", T: "Attr", S: "2", E: "21" }
+    { id: "e11", T: "Attr", S: "5", E: "6" }
+    { id: "e12", T: "Attr", S: "5", E: "7" }
+    { id: "e13", T: "Attr", S: "5", E: "8" }
+    { id: "e14", T: "Attr", S: "9", E: "10" }
+    { id: "e15", T: "Attr", S: "9", E: "11" }
+    { id: "e16", T: "Attr", S: "12", E: "13" }
+    { id: "e17", T: "Attr", S: "12", E: "14" }
+    { id: "e18", T: "Attr", S: "15", E: "16" }
+    { id: "e19", T: "Attr", S: "15", E: "17" }
+    { id: "e20", T: "Attr", S: "18", E: "19" }
+    { id: "e21", T: "Attr", S: "18", E: "20" }
+    { id: "e22", T: "Attr", S: "21", E: "22" }
+    { id: "e23", T: "Attr", S: "21", E: "23" }
+  ]
+}

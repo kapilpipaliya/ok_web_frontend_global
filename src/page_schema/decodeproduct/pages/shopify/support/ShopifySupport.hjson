@@ -392,7 +392,7 @@ return {
         props:
           '''return {
   as: "p",
-  text: "Need help with the Decode Products Organizer app? Create a support request or continue an existing conversation with our team."
+  text: "Need help? Create a support request or continue an existing conversation with our team."
 }'''
       }
     }

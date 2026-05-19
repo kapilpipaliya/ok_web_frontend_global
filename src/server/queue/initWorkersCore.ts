@@ -2,13 +2,28 @@ import {
   startEmailWorker,
   stopEmailWorker,
 } from "~/server/queue/workers/emailWorker";
+import {
+  startEmailSettingsShopSyncWorker,
+  stopEmailSettingsShopSyncWorker,
+} from "~/server/queue/workers/emailSettingsShopSyncWorker";
+import {
+  startGlobalSettingsShopSyncWorker,
+  stopGlobalSettingsShopSyncWorker,
+} from "~/server/queue/workers/globalSettingsShopSyncWorker";
+import {
+  startCompanyLogosShopSyncWorker,
+  stopCompanyLogosShopSyncWorker,
+} from "~/server/queue/workers/companyLogosShopSyncWorker";
+import {
+  startSchemaJobsQueueWorker,
+  stopSchemaJobsQueueWorker,
+} from "~/server/queue/workers/schemaJobsQueueWorker";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 import { getDriver } from "~/cypher/core/driver";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
 import { closeClusterCommunication } from "~/server/cluster/clusterCommunication";
 import { closeDriver } from "~/cypher/core/driver";
-
 /**
  * Worker state management
  * Platform workers are stored with subdomain = 'platform'
@@ -77,7 +92,7 @@ export async function initWorkersCore() {
     // Note: Redis check is done in middleware before calling this function
     // If we reach here, Redis should be available
 
-    // Start platform-level workers only (currently only email worker)
+    // Start platform-level workers (BullMQ): email send, schema jobs, settings→shops sync
     const platformWorkers = getSubdomainWorkers("platform");
 
     try {
@@ -87,6 +102,66 @@ export async function initWorkersCore() {
       console.log("[Workers] Email worker started successfully");
     } catch (error) {
       console.error("[Workers] Failed to start email worker:", error);
+    }
+
+    try {
+      console.log("[Workers] Starting schema jobs queue worker...");
+      await startSchemaJobsQueueWorker();
+      platformWorkers.set("schemaJobsQueueWorker", {
+        stop: stopSchemaJobsQueueWorker,
+      });
+      console.log("[Workers] Schema jobs queue worker started successfully");
+    } catch (error) {
+      console.error(
+        "[Workers] Failed to start schema jobs queue worker:",
+        error,
+      );
+    }
+
+    try {
+      console.log("[Workers] Starting email settings shop sync worker...");
+      await startEmailSettingsShopSyncWorker();
+      platformWorkers.set("emailSettingsShopSyncWorker", {
+        stop: stopEmailSettingsShopSyncWorker,
+      });
+      console.log("[Workers] Email settings shop sync worker started successfully");
+    } catch (error) {
+      console.error(
+        "[Workers] Failed to start email settings shop sync worker:",
+        error,
+      );
+    }
+
+    try {
+      console.log("[Workers] Starting global settings shop sync worker...");
+      await startGlobalSettingsShopSyncWorker();
+      platformWorkers.set("globalSettingsShopSyncWorker", {
+        stop: stopGlobalSettingsShopSyncWorker,
+      });
+      console.log(
+        "[Workers] Global settings shop sync worker started successfully",
+      );
+    } catch (error) {
+      console.error(
+        "[Workers] Failed to start global settings shop sync worker:",
+        error,
+      );
+    }
+
+    try {
+      console.log("[Workers] Starting company logos shop sync worker...");
+      await startCompanyLogosShopSyncWorker();
+      platformWorkers.set("companyLogosShopSyncWorker", {
+        stop: stopCompanyLogosShopSyncWorker,
+      });
+      console.log(
+        "[Workers] Company logos shop sync worker started successfully",
+      );
+    } catch (error) {
+      console.error(
+        "[Workers] Failed to start company logos shop sync worker:",
+        error,
+      );
     }
 
     /**

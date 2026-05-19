@@ -4,6 +4,7 @@
       id: "1"
       L: Page
       P: {
+        public: true
         fns: return { enabled: () => true }
         title: Why I Built Decode Orders Organizer
         url: /blogs/why-i-built-decode-orders-organizer

@@ -1,0 +1,1347 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''
+const getParentVertexLabel = () => args.fns.getSidebarConfig()?.parentVertexLabel;
+const getToParentEdgeType = () => args.fns.getSidebarConfig()?.toParentEdgeType;
+const getRootKeys = () => args.fns.getSidebarConfig()?.rootKeys || {};
+const getFormConfig = () => args.fns.getSidebarConfig()?.formConfig;
+const getSidebarLabel = () => args.fns.getSidebarConfig()?.label || args.fns.getSidebarConfig()?.parentVertexLabel;
+
+const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getUncategorizedVertexId = () => {
+  const label = getTableVertexLabel();
+  return label ? '_' + label + '_uncategorized' : null;
+};
+const getRelationshipType = () => args.contextData.props?.relationshipType;
+
+// State management - using graph for data, signals only for UI state
+const [expandedKeys, setExpandedKeys] = args.createSignal([]);
+const [selectedItem, setSelectedItem] = args.createSignal(null);
+const [sidebarLoading, setSidebarLoading] = args.createSignal(false);
+const [operationLoading, setOperationLoading] = args.createSignal(false);
+const [isAddRootModalOpen, setIsAddRootModalOpen] = args.createSignal(false);
+// Single add/edit modal state: only one item modal open at a time (mode: 'add' | 'edit', and the item/parent)
+const [itemModalState, setItemModalState] = args.createSignal(null);
+const [searchQuery, setSearchQuery] = args.createSignal("");
+const [debouncedSearchQuery, setDebouncedSearchQuery] = args.createSignal("");
+const debouncedSetSearch = args.debounce((value) => setDebouncedSearchQuery(value), 200);
+const onSearchChange = (value) => {
+  setSearchQuery(value);
+  debouncedSetSearch(value);
+};
+const sidebarPollRef = { id: null };
+const sidebarPollCancelledRef = { current: false };
+
+// Graph namespace for sidebar data
+const SIDEBAR_NAMESPACE = "sidebar";
+const getSidebarNamespace = (key) => `${SIDEBAR_NAMESPACE}_${key}`;
+
+// Fetch root vertices and store in graph
+// options.preserveExpanded: when true, do not reset expandedKeys (e.g. after adding a category)
+const fetchRoot = async (options) => {
+  const parentVertexLabel = getParentVertexLabel();
+  const toParentEdgeType = getToParentEdgeType();
+  const rootKeys = getRootKeys();
+
+  if (!parentVertexLabel || !toParentEdgeType) {
+    return;
+  }
+
+  setSidebarLoading(true);
+  try {
+    const tableVertexLabel = getTableVertexLabel();
+    const relationshipType = getRelationshipType();
+
+    const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+
+    const sidebarContextData = {
+      parentVertexLabel,
+      toParentEdgeType,
+      rootKeys,
+      tableVertexLabel,
+      relationshipType,
+      enableUserScoping,
+      loadFullTree: args.fns.getSidebarConfig()?.loadFullTree === true,
+      hooks: args.contextData.props?.hooks
+    };
+    const result = await args.executeNamedServerFunction({
+      functionName: "getSidebarTreeRoots",
+      contextData: sidebarContextData
+    });
+
+    // Check for errors and show toast
+    const errorMessage = args.fns.extractError?.(result, true, "Failed to load root vertices");
+    if (errorMessage) {
+      return;
+    }
+
+    if (result?.result?.success && result.result.data) {
+      const rootItems = result.result.data;
+
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+
+      if (!options?.preserveExpanded) {
+        setExpandedKeys([]);
+      }
+
+      // Restore selection from URL (vertex id) so reload activates same category
+      const initialCategoryId = args.contextData.props?.initialCategoryId;
+      if (initialCategoryId && args.graph?.vertexes?.[initialCategoryId]) {
+        const vertex = args.graph.vertexes[initialCategoryId];
+        let parent = getParentCategory(initialCategoryId);
+        while (parent && parent.id) {
+          setExpandedKeys(keys => keys.includes(parent.id) ? keys : [...keys, parent.id]);
+          parent = getParentCategory(parent.id);
+        }
+        handleItemSelect(vertex);
+      } else if (rootItems.length > 0 && !selectedItem()) {
+        const firstRootItem = rootItems[0];
+        handleItemSelect(firstRootItem);
+      }
+      startSidebarQueuedPollIfNeeded();
+    }
+  } catch (error) {
+    console.error("Error fetching root:", error);
+    args.showErrorToast?.("Failed to load sidebar data");
+  } finally {
+    setSidebarLoading(false);
+  }
+};
+
+// Fetch children for a specific parent and store in graph
+const fetchChildren = async (parentId, forceRefresh = false) => {
+  const parentVertexLabel = getParentVertexLabel();
+  const toParentEdgeType = getToParentEdgeType();
+
+  if (!parentVertexLabel || !toParentEdgeType || !parentId) {
+    return [];
+  }
+
+  // Check graph first using evalExpression (unless forcing refresh)
+  if (!forceRefresh) {
+    const parentVertex = args.graph.vertexes[parentId];
+    if (parentVertex) {
+      // Use evalExpression to get children from graph
+      // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
+      const children = args.evalExpression(
+        `<-${toParentEdgeType}`,
+        { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+      ) || [];
+      const categoryChildren = children.filter((child) =>
+        child?.L?.includes(parentVertexLabel)
+      );
+      if (categoryChildren.length > 0) {
+        return categoryChildren;
+      }
+    }
+  }
+
+  try {
+    const tableVertexLabel = getTableVertexLabel();
+    const relationshipType = getRelationshipType();
+
+    const enableUserScoping = args.contextData.props?.enableUserScoping === true;
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "getVertexChildren",
+      contextData: {
+        parentVertexLabel,
+        toParentEdgeType,
+        parentId,
+        tableVertexLabel,
+        relationshipType,
+        enableUserScoping,
+        hooks: args.contextData.props?.hooks
+      }
+    });
+
+    if (result?.result?.success && result.result.data) {
+      // Store children in graph
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+      startSidebarQueuedPollIfNeeded();
+      // Return children using evalExpression from graph
+      // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
+      const parentVertex = args.graph.vertexes[parentId];
+      if (parentVertex) {
+        const children = args.evalExpression(
+          `<-${toParentEdgeType}`,
+          { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+        ) || [];
+        const categoryChildren = children.filter((child) =>
+          child?.L?.includes(parentVertexLabel)
+        );
+        return categoryChildren;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching children:", error);
+  }
+
+  return [];
+};
+
+// Helper function to get sortable name from item
+const getItemSortName = (item) => {
+  if (!item) return "";
+  return item.P?.name || item.P?.title || item.P?.key || "";
+};
+
+// Helper function to check if item is the synthetic Uncategorized row for this table
+const isUncategorized = (item) => {
+  if (!item) return false;
+  const uid = getUncategorizedVertexId();
+  return !!(uid && (item.id === uid || item.P?.key === uid));
+};
+
+// Common function to sort items (Uncategorized first, then alphabetically)
+const sortItems = (items) => {
+  if (!items || !Array.isArray(items)) return items;
+  return [...items].sort((a, b) => {
+    const isAUncategorized = isUncategorized(a);
+    const isBUncategorized = isUncategorized(b);
+
+    // Uncategorized items come first
+    if (isAUncategorized && !isBUncategorized) return -1;
+    if (!isAUncategorized && isBUncategorized) return 1;
+
+    // Both are uncategorized or both are not - sort alphabetically
+    const nameA = getItemSortName(a);
+    const nameB = getItemSortName(b);
+    return nameA.localeCompare(nameB);
+  });
+};
+
+// Get children for a specific parent using evalExpression (reactive)
+const getChildren = (parentId) => {
+  if (!parentId) return [];
+  const toParentEdgeType = getToParentEdgeType();
+  const parentVertexLabel = getParentVertexLabel();
+  // Access graph reactively
+  const graph = args.graph;
+  const parentVertex = graph.vertexes[parentId];
+  if (!parentVertex) return [];
+
+  // Use evalExpression to get children via incoming edge
+  // Relationship direction: child-[toParentEdgeType]->parent, so use <- to get children
+  // Expression format: ->EdgeType (outgoing) or <-EdgeType (incoming)
+  const children = args.evalExpression(
+    `<-${toParentEdgeType}`,
+    { graph: args.graph, setGraph: args.setGraph, vertexes: [parentVertex] }
+  ) || [];
+
+  // Filter to sidebar category vertices only.
+  // `toParentEdgeType` is also used for content (e.g. NetSuiteExtendFile) -> category; without filtering,
+  // file rows incorrectly appear as sidebar tree children.
+  const categoryChildren = parentVertexLabel
+    ? children.filter((child) => child?.L?.includes(parentVertexLabel))
+    : children;
+
+  return sortItems(categoryChildren);
+};
+
+// Get loading state - not needed with graph, but kept for compatibility
+const getLoadingState = (parentId) => {
+  return false; // Graph updates are synchronous
+};
+
+// Get root items computed from graph (GraphData: vertexes VertexMap, optional vertexLabelIdMap).
+// Roots = vertices with parentVertexLabel and no incoming toParentEdgeType + uncategorized.
+const getRoot = () => {
+  const toParentEdgeType = getToParentEdgeType();
+  const parentVertexLabel = getParentVertexLabel();
+  const graph = args.graph;
+  const vertexes = graph?.vertexes;
+  if (!vertexes || !toParentEdgeType) return sortItems([]);
+  const labelIds = graph.vertexLabelIdMap?.[parentVertexLabel];
+  const candidateIds = Array.isArray(labelIds) ? labelIds : Object.keys(vertexes).filter(id => vertexes[id]?.L?.includes(parentVertexLabel));
+  const syntheticUncat = getUncategorizedVertexId();
+  const rootIds = candidateIds.filter(
+    id =>
+      vertexes[id] != null &&
+      (id === syntheticUncat || !(vertexes[id].OUT?.[toParentEdgeType]?.length))
+  );
+  const rootItems = rootIds.map(id => vertexes[id]).filter(v => v != null);
+  return sortItems(rootItems);
+};
+
+// Search: filter tree item by query (local, no server)
+const filterTreeVertex = (item, query) => {
+  if (!item || !query || typeof query !== 'string') return { match: true, matchedChildren: false };
+  const q = query.trim().toLowerCase();
+  if (!q) return { match: true, matchedChildren: false };
+  const searchable = String(item.P?.name ?? item.P?.title ?? item.P?.key ?? '').toLowerCase();
+  if (searchable.includes(q)) return { match: true, matchedChildren: false };
+  const children = getChildren(item.id) || [];
+  const hasMatchingChild = children.some((child) => {
+    const r = filterTreeVertex(child, q);
+    return r.match || r.matchedChildren;
+  });
+  return { match: false, matchedChildren: hasMatchingChild };
+};
+
+// Search: whether to expand item (expand when search active and item matches or has matching children)
+const shouldExpandVertexForSearch = (item) => {
+  const q = debouncedSearchQuery()?.trim?.() || '';
+  if (!q) return (expandedKeys() || []).includes(item?.id);
+  const r = filterTreeVertex(item, q);
+  return r.match || r.matchedChildren;
+};
+
+// Search: roots to show (filter when search active)
+const getFilteredRoot = () => {
+  const q = debouncedSearchQuery()?.trim?.() || '';
+  if (!q) return getRoot();
+  return getRoot().filter((r) => {
+    const x = filterTreeVertex(r, q);
+    return x.match || x.matchedChildren;
+  });
+};
+
+// Collect all vertex ids in the tree that have syncStatus === 'queued'
+const getQueuedSidebarVertexIds = () => {
+  const ids = [];
+  const visit = (items) => {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+      if (item?.P?.syncStatus === 'queued' && item.id) ids.push(item.id);
+      const children = getChildren(item?.id) || [];
+      visit(children);
+    }
+  };
+  visit(getFilteredRoot());
+  return ids;
+};
+
+// Toggle expand/collapse
+const toggleExpand = async (itemId) => {
+  const currentExpanded = expandedKeys();
+  const isExpanded = currentExpanded.includes(itemId);
+
+  if (isExpanded) {
+    setExpandedKeys(currentExpanded.filter(id => id !== itemId));
+  } else {
+    setExpandedKeys([...currentExpanded, itemId]);
+    // Always fetch children when expanding (cache will be checked inside fetchChildren)
+    await fetchChildren(itemId);
+  }
+};
+
+// Handle item selection
+const handleItemSelect = (item) => {
+  setSelectedItem(item);
+  // Call onItemSelect if provided via props
+  if (args.contextData.props?.onItemSelect) {
+    args.contextData.props.onItemSelect(item);
+  }
+};
+
+// Handle opening add root modal
+const handleOpenAddRootModal = () => {
+  setIsAddRootModalOpen(true);
+};
+
+// Handle closing add root modal
+const handleCloseAddRootModal = () => {
+  setIsAddRootModalOpen(false);
+};
+
+// Handle saving root item (preserve expanded state so tree does not collapse)
+const handleAddRootSave = async (savedVertex) => {
+  await fetchRoot({ preserveExpanded: true });
+  setIsAddRootModalOpen(false);
+};
+
+// --- Add/Edit item modal (single modal in parent, only one open at a time) ---
+const isItemQueued = (item) => item?.P?.syncStatus === 'queued';
+
+const handleOpenAddChildModal = (parentItem) => {
+  if (!parentItem) return;
+  if (isItemQueued(parentItem)) {
+    args.showWarningToast?.("Cannot add: item is syncing");
+    return;
+  }
+  setItemModalState({ mode: 'add', parentItem });
+};
+
+const handleOpenEditModal = (item) => {
+  if (!item) return;
+  if (isItemQueued(item)) {
+    args.showWarningToast?.("Cannot edit: item is syncing");
+    return;
+  }
+  setItemModalState({ mode: 'edit', item });
+};
+
+const handleCloseItemModal = () => {
+  setItemModalState(null);
+};
+
+const handleAddChildSaveFromModal = async (savedVertex) => {
+  const state = itemModalState();
+  if (state?.mode !== 'add' || !state.parentItem) return;
+  const parentItem = state.parentItem;
+  setItemModalState(null);
+  try {
+    setOperationLoading(true);
+    const fetchChildrenFn = fetchChildren;
+    if (fetchChildrenFn) {
+      await fetchChildrenFn(parentItem.id, true);
+      const expanded = expandedKeys();
+      if (!expanded.includes(parentItem.id)) {
+        await toggleExpand(parentItem.id);
+      }
+    }
+    if (savedVertex?.P?.syncStatus === 'queued') {
+      startSidebarQueuedPollIfNeeded();
+    }
+  } finally {
+    setOperationLoading(false);
+  }
+};
+
+const handleEditSaveFromModal = (updatedVertex) => {
+  if (updatedVertex) {
+    updateItemInTree(updatedVertex);
+  }
+  setItemModalState(null);
+};
+
+// Update a specific item in the tree (for edits) - graph is automatically updated
+const updateItemInTree = (updatedVertex) => {
+  if (!updatedVertex || !updatedVertex.id) return;
+
+  // Update vertex in graph using replaceVertexProperties
+  args.replaceVertexProperties(0, updatedVertex.id, args.graph, args.setGraph, { ...updatedVertex.P });
+
+  // Root vertices signal only stores IDs, so no need to update it on edit
+  // The graph update will automatically reflect in getRoot() since it reads from graph
+
+  // Update selectedItem if it's the currently selected item
+  const currentSelected = selectedItem();
+  if (currentSelected && currentSelected.id === updatedVertex.id) {
+    setSelectedItem(updatedVertex);
+  }
+
+  // If the saved vertex is queued (sync in progress), start polling so we fetch updated status when ready
+  if (updatedVertex.P?.syncStatus === 'queued') {
+    startSidebarQueuedPollIfNeeded();
+  }
+};
+
+// Background refresh: fetch only sidebar vertices that are no longer queued and merge into graph
+const refreshQueuedSidebarItems = async (elementIds) => {
+  const parentVertexLabel = getParentVertexLabel();
+  if (!parentVertexLabel || !Array.isArray(elementIds) || elementIds.length === 0) return;
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getUserContent",
+      contextData: { tableVertexLabel: parentVertexLabel, elementIds, onlyNotQueued: true }
+    });
+    if (result?.result?.success && Array.isArray(result.result.data) && result.result.data.length > 0) {
+      for (const v of result.result.data) {
+        if (v?.id && v.P) {
+          args.mergeVertexProperties(0, v.id, args.graph, args.setGraph, v.P);
+        }
+      }
+    }
+  } catch (e) {
+    console.error("refreshQueuedSidebarItems:", e);
+  }
+};
+
+// Poll sidebar until no vertices have syncStatus === 'queued'
+const pollQueuedSidebar = async () => {
+  const intervalMs = args.fns.getSidebarConfig?.()?.refetchIntervalWhenQueued ?? 5000;
+  const queuedIds = getQueuedSidebarVertexIds();
+  if (queuedIds.length === 0) return;
+  await refreshQueuedSidebarItems(queuedIds);
+  if (sidebarPollCancelledRef.current) return;
+  const stillQueued = getQueuedSidebarVertexIds();
+  if (stillQueued.length > 0) {
+    if (sidebarPollRef.id) {
+      clearTimeout(sidebarPollRef.id);
+      sidebarPollRef.id = null;
+    }
+    sidebarPollRef.id = setTimeout(() => {
+      sidebarPollRef.id = null;
+      pollQueuedSidebar();
+    }, intervalMs);
+  }
+};
+
+const startSidebarQueuedPollIfNeeded = () => {
+  if (sidebarPollCancelledRef.current) return;
+  if (sidebarPollRef.id) {
+    clearTimeout(sidebarPollRef.id);
+    sidebarPollRef.id = null;
+  }
+  const queuedIds = getQueuedSidebarVertexIds();
+  if (queuedIds.length === 0) return;
+  // Run first poll immediately so sync status updates sooner; pollQueuedSidebar schedules the next run at intervalMs
+  pollQueuedSidebar();
+};
+
+// Clear poll timeout and mark as cancelled so in-flight poll does not reschedule (prevents leak on unmount)
+const cleanupSidebarPoll = () => {
+  sidebarPollCancelledRef.current = true;
+  if (sidebarPollRef.id) {
+    clearTimeout(sidebarPollRef.id);
+    sidebarPollRef.id = null;
+  }
+};
+
+// Remove a specific item from the tree (for deletes) - using graph
+const removeItemFromTree = (itemId) => {
+  if (!itemId) return;
+
+  // Find parent of deleted item using graph traversal
+  const toParentEdgeType = getToParentEdgeType();
+  const deletedVertex = args.graph.vertexes[itemId];
+  let parentItem = null;
+
+  if (deletedVertex && deletedVertex.IN && deletedVertex.IN[toParentEdgeType]) {
+    const parentIds = deletedVertex.IN[toParentEdgeType];
+    if (parentIds.length > 0) {
+      parentItem = args.graph.vertexes[parentIds[0]];
+    }
+  }
+
+  // Remove vertex from graph (getRoot() is computed from graph so roots update automatically)
+  args.deleteVertex(0, itemId, args.graph, args.setGraph);
+
+  // Select parent item if it exists, otherwise clear selection
+  const currentSelected = selectedItem();
+  if (currentSelected && currentSelected.id === itemId) {
+    if (parentItem) {
+      setSelectedItem(parentItem);
+      // Also call onItemSelect if provided
+      if (args.contextData.props?.onItemSelect) {
+        args.contextData.props.onItemSelect(parentItem);
+      }
+    } else {
+      setSelectedItem(null);
+    }
+  }
+};
+
+// Helper function to get all visible items in tree order (for navigation)
+const getAllVisibleItems = () => {
+  const rootItems = getRoot();
+  const expandedKeysList = expandedKeys();
+  const toParentEdgeType = getToParentEdgeType();
+
+  const result = [];
+
+  const traverse = (items) => {
+    for (const item of items) {
+      if (!item) continue;
+      result.push(item);
+
+      // If item is expanded, add its children recursively
+      if (Array.isArray(expandedKeysList) && expandedKeysList.includes(item.id)) {
+        // Use getChildren function to get children
+        const children = getChildren(item.id) || [];
+
+        // Recursively traverse children
+        if (children.length > 0) {
+          traverse(children);
+        }
+      }
+    }
+  };
+
+  traverse(rootItems);
+  return result;
+};
+
+// Helper function to get parent category
+const getParentCategory = (itemId) => {
+  if (!itemId) return null;
+  const toParentEdgeType = getToParentEdgeType();
+  if (!toParentEdgeType) return null;
+
+  const item = args.graph?.vertexes?.[itemId];
+  if (!item) return null;
+
+  // Relationship: child-[toParentEdgeType]->parent
+  // Use ->toParentEdgeType to get parent
+  const parent = args.evalExpression(
+    `->${toParentEdgeType}`,
+    { graph: args.graph, setGraph: args.setGraph, vertexes: [item] }
+  );
+
+  return parent && parent.length > 0 ? parent[0] : null;
+};
+
+// Helper function to get first child
+const getFirstChild = (itemId) => {
+  if (!itemId) return null;
+  const children = getChildren(itemId) || [];
+  return children.length > 0 ? children[0] : null;
+};
+
+// Navigate to adjacent category (for selection, not moving)
+const navigateToCategory = async (direction) => {
+  const currentSelected = selectedItem();
+  if (!currentSelected) return;
+
+  const allItems = getAllVisibleItems();
+  const currentIndex = allItems.findIndex(i => i.id === currentSelected.id);
+
+  if (currentIndex === -1) return;
+
+  let targetItem = null;
+  const expandedKeysList = expandedKeys();
+
+  switch (direction) {
+    case 'up':
+      // Select previous item
+      if (currentIndex > 0) {
+        targetItem = allItems[currentIndex - 1];
+      }
+      break;
+
+    case 'down':
+      // Select next item
+      if (currentIndex < allItems.length - 1) {
+        targetItem = allItems[currentIndex + 1];
+      }
+      break;
+
+    case 'left':
+      // Collapse if expanded, or select parent
+      const isExpanded = Array.isArray(expandedKeysList) && expandedKeysList.includes(currentSelected.id);
+      if (isExpanded) {
+        await toggleExpand(currentSelected.id);
+      } else {
+        // Select parent
+        const parent = getParentCategory(currentSelected.id);
+        if (parent) {
+          targetItem = parent;
+        }
+      }
+      break;
+
+    case 'right':
+      // Expand if collapsed, or select first child
+      const isExpanded2 = Array.isArray(expandedKeysList) && expandedKeysList.includes(currentSelected.id);
+      if (!isExpanded2) {
+        await toggleExpand(currentSelected.id);
+      } else {
+        // Select first child
+        const firstChild = getFirstChild(currentSelected.id);
+        if (firstChild) {
+          targetItem = firstChild;
+        }
+      }
+      break;
+  }
+
+  // Select the target item if found
+  if (targetItem) {
+    handleItemSelect(targetItem);
+  }
+};
+
+// Keyboard event handler for sidebar
+const handleSidebarKeyDown = async (e) => {
+  // Only handle if sidebar has focus and no modal is open
+  const currentSelected = selectedItem();
+  if (!currentSelected) return;
+
+  // Handle keyboard shortcuts for navigation/selection
+  switch (e.key) {
+    case 'ArrowUp':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('up');
+      break;
+
+    case 'ArrowDown':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('down');
+      break;
+
+    case 'ArrowLeft':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('left');
+      break;
+
+    case 'ArrowRight':
+      e.preventDefault();
+      e.stopPropagation();
+      await navigateToCategory('right');
+      break;
+
+    case 'Enter':
+      // Select/activate the current item (same as clicking)
+      e.preventDefault();
+      e.stopPropagation();
+      // handleItemSelect is already called, but we can trigger any additional action if needed
+      break;
+
+    case 'Escape':
+      // Cancel any ongoing operation (if needed)
+      e.preventDefault();
+      e.stopPropagation();
+      break;
+
+    default:
+      // Let other keys pass through
+      return;
+  }
+};
+
+// Initialize on mount
+const initialize = async () => {
+  await fetchRoot();
+};
+
+return {
+  getRoot,
+  expandedKeys,
+  setExpandedKeys,
+  selectedItem,
+  setSelectedItem,
+  sidebarLoading,
+  setSidebarLoading,
+  fetchRoot,
+  fetchChildren,
+  toggleExpand,
+  handleItemSelect,
+  initialize,
+  getParentVertexLabel,
+  getToParentEdgeType,
+  getRootKeys,
+  getTableVertexLabel,
+  getUncategorizedVertexId,
+  getRelationshipType,
+  getSidebarLabel,
+  isAddRootModalOpen,
+  setIsAddRootModalOpen,
+  handleOpenAddRootModal,
+  handleCloseAddRootModal,
+  handleAddRootSave,
+  itemModalState,
+  handleOpenAddChildModal,
+  handleOpenEditModal,
+  handleCloseItemModal,
+  handleAddChildSaveFromModal,
+  handleEditSaveFromModal,
+  updateItemInTree,
+  removeItemFromTree,
+  getChildren,
+  getLoadingState,
+  getOnMoveItemsToCategory: () => args.contextData.props?.onMoveItemsToCategory,
+  getAllVisibleItems,
+  navigateToCategory,
+  handleSidebarKeyDown,
+  getHooks: () => args.contextData.props?.hooks,
+  operationLoading,
+  setOperationLoading,
+  searchQuery,
+  setSearchQuery,
+  debouncedSearchQuery,
+  onSearchChange,
+  getFilteredRoot,
+  filterTreeVertex,
+  shouldExpandVertexForSearch,
+  startSidebarQueuedPollIfNeeded,
+  cleanupSidebarPoll
+};
+'''
+        key: Sidebar
+        props: ""
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
+return `._id {
+  display: grid;
+  grid-template-columns: ${sidebarWidth}px 2px 1fr;
+  height: 100%;
+  position: relative;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_container
+        props:
+          '''
+return {
+  as: "div",
+  onMount: () => {
+    args.fns.initialize();
+  },
+  onCleanup: () => {
+    args.fns.cleanupSidebarPoll?.();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  max-height: 100vh;
+  position: relative;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_tree
+        props:
+          '''
+return {
+  as: "div", // args.fns.getUsePolarisUI?.() === true ? "s-scroll-box" : "div",
+  onKeyDown: args.fns.handleSidebarKeyDown
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 100%;
+  line-height: 28px;
+  border: 1px solid ${args.theme.var.color.border};
+  background-color: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 14px;
+  height: 36px;
+  padding: 0 0.75rem 0 2rem;
+  border-radius: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0.5rem center;
+  background-size: 1.25rem;
+}
+._id:focus {
+  outline: none;
+  border-color: ${args.theme.var.color.primary};
+}
+._id::placeholder {
+  color: ${args.theme.var.color.text_light_400};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_search_bar
+        props:
+          '''
+return {
+  as: "input",
+  type: "search",
+  placeholder: "Search...",
+  value: args.fns.searchQuery(),
+  onInput: (e) => args.fns.onSearchChange(e.target.value),
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex-shrink: 0;
+  width: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_search_bar_shopify
+        props:
+          '''
+return {
+  as: "s-search-field",
+  label: "Search",
+  "attr:labelAccessibilityVisibility": "exclusive",
+  placeholder: "Search items",
+  value: args.fns.searchQuery(),
+  onInput: (e) => args.fns.onSearchChange(e?.target?.value ?? ''),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: sidebar_add_root_button_container
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: sidebar_add_root_button_polaris
+        props:
+          '''
+return {
+  as: "s-button",
+  "attr:variant": "primary",
+  "attr:icon": "plus",
+  text: `Add Root ${args.fns.getSidebarLabel()}`,
+  onClick: () => args.fns.handleOpenAddRootModal(),
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        key: sidebar_add_root_button
+        props:
+          '''
+return {
+  variant: "primary",
+  size: "sm",
+  text: `Add Root ${args.fns.getSidebarLabel()}`,
+  leftIcon: "carbon:add",
+  onClick: () => {
+    args.fns.handleOpenAddRootModal();
+  },
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        key: sidebar_tree_list
+        props:
+          '''
+return {
+  as: "ul",
+  loop: true,
+  contextName: "sidebarItem",
+  data: args.fns.getFilteredRoot()
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SidebarTreeItem
+        key: sidebar_tree_item
+        props:
+          '''
+const item = args.contextData.sidebarItem;
+// Get children from graph (reactive)
+const children = args.fns.getChildren(item?.id);
+const sidebarConfig = args.fns.getSidebarConfig();
+
+return {
+  item: item,
+  expandedKeys: args.fns.expandedKeys(),
+  selectedItem: args.fns.selectedItem(),
+  onToggleExpand: args.fns.toggleExpand,
+  onItemSelect: args.fns.handleItemSelect,
+  fetchChildren: args.fns.fetchChildren,
+  sidebarConfig: sidebarConfig,
+  onItemUpdate: args.fns.updateItemInTree,
+  onItemDelete: args.fns.removeItemFromTree,
+  childItems: children,
+  loading: false,
+  getChildren: args.fns.getChildren,
+  tableVertexLabel: args.fns.getTableVertexLabel(),
+  relationshipType: args.fns.getRelationshipType(),
+  enableUserScoping: args.contextData.props?.enableUserScoping,
+  onMoveItemsToCategory: args.fns.getOnMoveItemsToCategory(),
+  fetchRoot: args.fns.fetchRoot,
+  getRoot: args.fns.getRoot,
+  startSidebarQueuedPollIfNeeded: args.fns.startSidebarQueuedPollIfNeeded,
+  hooks: args.fns.getHooks(),
+  label: args.fns.getSidebarLabel(),
+  contentLabel: args.contextData.props?.contentLabel,
+  operationLoading: args.fns.operationLoading,
+  setOperationLoading: args.fns.setOperationLoading,
+  setExpandedKeys: args.fns.setExpandedKeys,
+  searchActive: !!(args.fns.debouncedSearchQuery?.()?.trim?.()),
+  filterTree: (item) => args.fns.filterTreeVertex?.(item, args.fns.debouncedSearchQuery()?.trim?.() || ''),
+  shouldExpandForSearch: (item) => args.fns.shouldExpandVertexForSearch?.(item),
+  onOpenAddModal: args.fns.handleOpenAddChildModal,
+  onOpenEditModal: args.fns.handleOpenEditModal
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(0.2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+}`;
+'''
+        displayOrder: 5
+        componentName: Html
+        key: sidebar_loading_overlay
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.operationLoading()
+};
+'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        key: sidebar_loading_spinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 2px;
+  height: 100%;
+  cursor: col-resize;
+  background-color: transparent;
+  border-left: 1px solid ${args.theme.var.color.border};
+  border-right: 1px solid ${args.theme.var.color.border};
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+
+  &:hover {
+    background-color: ${args.theme.var.color.primary}40;
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        key: sidebar_resize_handle
+        props:
+          '''
+const setSidebarWidth = args.contextData.props?.setSidebarWidth;
+const sidebarWidth = args.contextData.props?.sidebarWidth?.() || 240;
+
+return {
+  as: "div",
+  onMouseDown: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!setSidebarWidth) return;
+
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidth = Math.max(200, Math.min(800, startWidth + deltaX)); // Min 200px, Max 800px
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  overflow-y: auto;
+  height: 100%;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        key: sidebar_main_wrapper
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: main
+        key: sidebar_main_content
+        props:
+          '''
+return {
+
+};
+'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: SidebarAddChildModal
+        key: sidebar_add_root_modal
+        props:
+          '''
+const sidebarConfig = args.fns.getSidebarConfig();
+
+return {
+  isOpen: args.fns.isAddRootModalOpen(),
+  sidebarConfig: sidebarConfig,
+  parentId: null,
+  vertexId: null,
+  initialVertex: null,
+  mode: "add",
+  tableVertexLabel: args.fns.getTableVertexLabel(),
+  relationshipType: args.fns.getRelationshipType(),
+  onSave: args.fns.handleAddRootSave,
+  onClose: args.fns.handleCloseAddRootModal,
+  hooks: args.fns.getHooks(),
+  label: args.fns.getSidebarLabel()
+};
+'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: SidebarAddChildModal
+        key: sidebar_item_add_edit_modal
+        props:
+          '''
+const state = args.fns.itemModalState?.() ?? null;
+const sidebarConfig = args.fns.getSidebarConfig();
+const isOpen = state !== null;
+
+return {
+  isOpen: isOpen,
+  sidebarConfig: sidebarConfig,
+  parentId: state?.mode === 'add' ? state.parentItem?.id : null,
+  vertexId: state?.mode === 'edit' ? state.item?.id : null,
+  initialVertex: state?.mode === 'edit' ? state.item : null,
+  mode: state?.mode ?? "add",
+  tableVertexLabel: args.fns.getTableVertexLabel(),
+  relationshipType: args.fns.getRelationshipType(),
+  onSave: state?.mode === 'add' ? args.fns.handleAddChildSaveFromModal : args.fns.handleEditSaveFromModal,
+  onClose: args.fns.handleCloseItemModal,
+  hooks: args.contextData.props?.hooks,
+  label: args.fns.getSidebarLabel()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "16"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "17"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "13"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "9"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "11"
+      E: "12"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+  ]
+}

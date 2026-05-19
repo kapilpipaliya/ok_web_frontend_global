@@ -4,6 +4,7 @@
       id: "about_page",
       L: "Page",
       P: {
+        public: true
         key: "RBAbout",
         url: "/about",
         title: "About - Personal Rulebook",

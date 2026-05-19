@@ -56,15 +56,21 @@ export function AuthenticatedMenu(
     }[];
     if (isAdminRole(graph) && searchParams.admin) {
       adminMenuItems.push({
-        href: "/api/schema/import",
+        href: "/admin/SchemaImport",
         icon: "ph:upload",
         label: "Import Local Pages",
         target: "_blank",
       });
       adminMenuItems.push({
-        href: "/api/schema/export",
+        href: "/admin/SchemaExport",
         icon: "ph:download",
         label: "Export Pages and Components",
+        target: "_blank",
+      });
+      adminMenuItems.push({
+        href: "/admin/SchemaSync",
+        icon: "ph:arrows-clockwise",
+        label: "Sync schema to shops",
         target: "_blank",
       });
     }

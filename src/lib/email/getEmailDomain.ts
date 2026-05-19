@@ -27,7 +27,7 @@ export async function getEmailDomain(
         : null;
 
     // Use custom domain if available, otherwise fall back to request host
-    return subDomainVertex?.P?.domain || request.headers.get("host") || "";
+    return subDomainVertex?.P?.domain || request?.headers?.get("host") || "";
   } finally {
     await adminSession.close();
   }

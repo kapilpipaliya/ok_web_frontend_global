@@ -20,7 +20,7 @@ if (!actualUser) {
 const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
 // Extract parameters
-const { tableVertexLabel, key } = args.contextData;
+const { tableVertexLabel, key, settingsLabel } = args.contextData;
 
 if (!tableVertexLabel) {
   return {
@@ -29,8 +29,9 @@ if (!tableVertexLabel) {
   };
 }
 
+const labelForSettings = settingsLabel || tableVertexLabel;
 // Build setting key
-const settingKey = key || `${tableVertexLabel}_settings`;
+const settingKey = key || `${labelForSettings}_settings`;
 
 // Query for user's content setting using (User)-[UserSetting]->(Setting) with key in Setting
 const query = `
@@ -46,7 +47,7 @@ const result = await args.session.run(query, {
 
 if (result.records.length === 0) {
   // No user setting found, try to get default setting
-  const defaultKey = `${tableVertexLabel}_settings_default`;
+  const defaultKey = `${labelForSettings}_settings_default`;
   let defaultResult = await args.session.run(
     `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
     { defaultKey }

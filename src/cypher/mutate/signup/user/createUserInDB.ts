@@ -1,11 +1,13 @@
-import type { Session, Transaction } from "neo4j-driver";
-
+import type { ManagedTransaction, Session, Transaction } from "neo4j-driver";
 import { v7 as uuidv7 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { hashPassword } from "~/lib/auth/password";
+import { validateEmail } from "~/lib/validation/validateEmail";
 
 import type { Vertex } from "~/lib/graph/type/vertex";
+
+type Neo4jSessionOrTx = ManagedTransaction | Session | Transaction;
 
 // Common interfaces
 interface BaseUserData {
@@ -18,11 +20,16 @@ interface UserDataWithPassword extends BaseUserData {
   password?: string;
 }
 
+export interface InvitedUserData extends BaseUserData {
+  name?: string;
+  uuid?: string;
+}
+
 /**
  * Create a user in the admin database
  */
 export async function createUserInAdminDB(
-  adminTx: Session | Transaction,
+  adminTx: Neo4jSessionOrTx,
   userData: UserDataWithPassword,
 ): Promise<Vertex> {
   const uuid = uuidv7();
@@ -45,10 +52,48 @@ export async function createUserInAdminDB(
 }
 
 /**
+ * Create an invited user (no password) — same shape as POST /api/users/invite.
+ */
+export async function createInvitedUserInDB(
+  sessionOrTx: Neo4jSessionOrTx,
+  userData: InvitedUserData,
+): Promise<Vertex> {
+  if (validateEmail(userData.email)) {
+    throw new Error("A valid email address is required");
+  }
+
+  const uuid = userData.uuid ?? uuidv7();
+  const email = userData.email.trim();
+
+  return executeUserCreationQuery(
+    sessionOrTx,
+    `
+    CREATE (u:User {
+      uuid: $uuid,
+      email: $email,
+      username: $username,
+      name: $name,
+      status: "invited",
+      emailConfirmed: false,
+      createdAt: localDateTime()
+    })
+    RETURN u
+  `,
+    {
+      email,
+      name: userData.name ?? userData.username,
+      username: userData.username,
+      uuid,
+    },
+    "InvitedUser",
+  );
+}
+
+/**
  * Create a user in the user database
  */
 export async function createUserInUserDB(
-  sessionOrTx: Session | Transaction,
+  sessionOrTx: Neo4jSessionOrTx,
   params: Record<string, unknown> & UserDataWithPassword,
   isAdminUser?: boolean,
 ): Promise<Vertex> {
@@ -119,7 +164,7 @@ function buildUserCreationQuery(
  * Common function to execute a Neo4j user creation query
  */
 async function executeUserCreationQuery(
-  sessionOrTx: Session | Transaction,
+  sessionOrTx: Neo4jSessionOrTx,
   query: string,
   params: Record<string, unknown>,
   dbName: string,

@@ -1,0 +1,619 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        title: HydrateMe
+        url: /hydrateme
+        key: HydrateMeHome
+        fns:
+          '''
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {},
+    }),
+};
+'''
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: HydrateMeLayout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_home_root
+        fns:
+          '''
+const [dash, setDash] = args.createSignal(null);
+
+const loadDashboard = async () => {
+  if (!args.user) {
+    setDash(null);
+    return;
+  }
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "hydrateMeGetDashboard",
+      contextData: {},
+    });
+    if (result?.error || result?.result?.success === false) {
+      const msg = result?.error || result?.result?.message || "Could not load dashboard.";
+      args.showErrorToast?.(msg);
+      setDash(null);
+      return;
+    }
+    setDash(result?.result?.data ?? null);
+  } catch (e) {
+    console.error(e);
+    args.showErrorToast?.("Could not load dashboard.");
+  }
+};
+
+const logQuick = async (amountMl) => {
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "hydrateMeLogWater",
+      contextData: { amountMl },
+    });
+    if (result?.error || result?.result?.success === false) {
+      const msg = result?.error || result?.result?.message || "Could not log water.";
+      args.showErrorToast?.(msg);
+      return;
+    }
+    args.showSuccessToast?.(result?.result?.message || "Logged");
+    await loadDashboard();
+  } catch (e) {
+    console.error(e);
+    args.showErrorToast?.("Could not log water.");
+  }
+};
+
+return { dash, loadDashboard, logQuick };
+'''
+        props:
+          '''return {
+  as: "div",
+  class: "hm-home-root",
+  onMount: () => {
+    args.fns.loadDashboard();
+  }
+};'''
+        css:
+          '''return `._id.hm-home-root {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.lg};
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_home_h1
+        props:
+          '''return {
+  as: "h1",
+  class: "hm-home-title",
+  text: "Stay hydrated, together"
+};'''
+        css:
+          '''return `._id.hm-home-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: hm_home_lead
+        props:
+          '''return {
+  as: "p",
+  class: "hm-home-lead",
+  text: "Smart reminders, one-tap logging, and a circle that cares. Set your goal on Profile, then log water here or in the full Logbook."
+};'''
+        css:
+          '''return `._id.hm-home-lead {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.md};
+  line-height: 1.55;
+  color: ${args.theme.var.color.muted};
+}`;'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: hm_home_guest
+        props:
+          '''return {
+  as: "div",
+  class: "hm-guest",
+  text: "Sign in to track intake, streaks, and your Hydrate Circle.",
+  show: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-guest {
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 1px dashed ${args.theme.var.color.border};
+  color: ${args.theme.var.color.muted};
+}`;'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: hm_home_dash
+        props:
+          '''return {
+  as: "section",
+  class: "hm-dash",
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-dash {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+}`;'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_home_prog
+        props:
+          '''return {
+  as: "div",
+  class: "hm-prog",
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-prog {
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.secondary};
+}`;'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_home_prog_label
+        props:
+          '''const d = typeof args.fns.dash === "function" ? args.fns.dash() : null;
+const today = Number(d?.todayMl) || 0;
+const goal = Math.max(1, Number(d?.goalMl) || 2000);
+const streak = Number(d?.streakDays) || 0;
+return {
+  as: "p",
+  class: "hm-prog-label",
+  text: `Today: ${today} ml / ${goal} ml · Streak: ${streak} day(s)`,
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-prog-label {
+  margin: 0 0 ${args.theme.var.spacing.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: hm_home_prog_bar
+        props:
+          '''return {
+  as: "div",
+  class: "hm-prog-track",
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-prog-track {
+  height: 0.75rem;
+  border-radius: ${args.theme.var.borderRadius.full};
+  background: ${args.theme.var.color.border};
+  overflow: hidden;
+}`;'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_home_prog_fill
+        props:
+          '''const d = typeof args.fns.dash === "function" ? args.fns.dash() : null;
+const today = Number(d?.todayMl) || 0;
+const goal = Math.max(1, Number(d?.goalMl) || 2000);
+const pct = Math.min(100, Math.round((today / goal) * 100));
+return {
+  as: "div",
+  class: "hm-prog-fill",
+  style: { width: `${pct}%` },
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-prog-fill {
+  height: 100%;
+  border-radius: ${args.theme.var.borderRadius.full};
+  background: ${args.theme.var.color.primary};
+  transition: width ${args.theme.var.animation.normal} ease;
+}`;'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: hm_home_actions
+        props:
+          '''return {
+  as: "div",
+  class: "hm-actions",
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.sm};
+  align-items: center;
+}`;'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_btn_250
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "+ 250 ml",
+  hide: () => !args.user,
+  onClick: () => args.fns.logQuick(250)
+};'''
+        css:
+          '''return `._id {
+  min-height: ${args.theme.var.touch.minTarget};
+  padding: 0 ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}`;'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: hm_btn_500
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "+ 500 ml",
+  hide: () => !args.user,
+  onClick: () => args.fns.logQuick(500)
+};'''
+        css:
+          '''return `._id {
+  min-height: ${args.theme.var.touch.minTarget};
+  padding: 0 ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: 1px solid ${args.theme.var.color.border};
+  cursor: pointer;
+  font-weight: 600;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: hm_btn_logs
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "Open full logbook",
+  hide: () => !args.user,
+  onClick: () => args.navigate("/hydrateme/logs")
+};'''
+        css:
+          '''return `._id {
+  min-height: ${args.theme.var.touch.minTarget};
+  padding: 0 ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: transparent;
+  color: ${args.theme.var.color.info};
+  text-decoration: underline;
+}`;'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: hm_recent_h
+        props:
+          '''return {
+  as: "h2",
+  class: "hm-recent-h",
+  text: "Recent logs",
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-recent-h {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 700;
+}`;'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        key: hm_recent_loop
+        props:
+          '''const d = typeof args.fns.dash === "function" ? args.fns.dash() : null;
+const rows = Array.isArray(d?.recentLogs) ? d.recentLogs : [];
+return {
+  loop: true,
+  contextName: "logRow",
+  data: rows,
+  hide: () => !args.user
+};'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hm_recent_row
+        props:
+          '''const v = args.contextData.logRow;
+const ml = v?.P?.amountMl ?? "";
+const when = v?.P?.loggedAt || v?.P?.loggedDate || "";
+return {
+  as: "div",
+  class: "hm-recent-row",
+  text: `${ml} ml · ${when}`
+};'''
+        css:
+          '''return `._id.hm-recent-row {
+  padding: ${args.theme.var.spacing.xs} 0;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: Html
+        key: hm_home_tip
+        props:
+          '''return {
+  as: "p",
+  class: "hm-tip",
+  text: "After quick adds, open Logbook for the full DynamicPage table (edit, filter, export). Run migrateHydrateMeSettings once to seed table configs.",
+  hide: () => !args.user
+};'''
+        css:
+          '''return `._id.hm-tip {
+  margin: 0;
+  font-size: ${args.theme.var.fontSize.xs};
+  color: ${args.theme.var.color.muted};
+}`;'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: DynamicPage
+        key: hm_home_dp
+        props:
+          '''
+return {
+  tableVertexLabel: "HydrateMeWaterLog",
+  loadFromSetting: true,
+  hide: () => !args.user
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e_pl
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e_root
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e_h1
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e_lead
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e_guest
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e_dash
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e_p1
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e_plb
+      T: Attr
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e_ptr
+      T: Attr
+      S: "8"
+      E: "10"
+    }
+    {
+      id: e_pfi
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e_act
+      T: Attr
+      S: "7"
+      E: "12"
+    }
+    {
+      id: e_b1
+      T: Attr
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e_b2
+      T: Attr
+      S: "12"
+      E: "14"
+    }
+    {
+      id: e_b3
+      T: Attr
+      S: "12"
+      E: "15"
+    }
+    {
+      id: e_rh
+      T: Attr
+      S: "7"
+      E: "16"
+    }
+    {
+      id: e_rl
+      T: Attr
+      S: "7"
+      E: "17"
+    }
+    {
+      id: e_rr
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e_tip
+      T: Attr
+      S: "3"
+      E: "19"
+    }
+    {
+      id: e_dp
+      T: Attr
+      S: "3"
+      E: "20"
+    }
+  ]
+}

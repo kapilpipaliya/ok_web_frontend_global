@@ -8,6 +8,7 @@ import type { Session } from "neo4j-driver";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getDriver } from "~/cypher/core/driver";
 import { isAppSubdomain } from "~/lib/appSubdomain";
+import { v7 as uuidv7 } from "uuid";
 import {
   getUserFromSession,
   getSessionUser,
@@ -50,6 +51,7 @@ import {
   encryptClientSecret,
 } from "~/lib/auth/tokenEncryption";
 import { sendEmail } from "~/lib/playwright/sendEmail";
+import { sendInvitationEmail } from "~/routes/api/users/functions/sendInvitationEmail";
 import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
 import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
 import {
@@ -64,6 +66,9 @@ import { serverFunctionUtils } from "~/lib/utils/serverFunctionUtils";
 import { cypherUtils } from "~/lib/utils/cypherUtils";
 import * as crypto from "crypto";
 import * as path from "path";
+import * as tls from "tls";
+import * as dns from "dns";
+import * as net from "net";
 import { getNeogmaInstance } from "~/cypher/core/driver";
 // Enhanced server function utilities
 import { errors, isAppError, errorToResponse } from "~/lib/utils/errorClasses";
@@ -547,6 +552,9 @@ export async function executeNamedServerFunctionCore(
       // Node.js built-ins
       crypto,
       path,
+      tls,
+      dns,
+      net,
       // Enhanced utilities
       // Error handling
       errors,
@@ -633,6 +641,8 @@ export async function executeNamedServerFunctionCore(
       rawSubDomain: rawSubDomain,
       getDBSessionForShop,
       getDatabaseNameForShop,
+      /** Same as POST `/api/users/invite`: `sendInvitationEmail(request, userVertex, subDomain, dbSession)` — use `args.request` / `getRequestEvent`, `args.subDomain`, `args.session`. */
+      sendInvitationEmail,
       getShopifyClient: () =>
         getShopify(rawSubDomain!),
       getSessionUser,
@@ -641,6 +651,7 @@ export async function executeNamedServerFunctionCore(
       debounce,
       getRequestEvent,
       cloneVertexWithEdges,
+      uuidv7,
       shop: shopForContext,
     };
 

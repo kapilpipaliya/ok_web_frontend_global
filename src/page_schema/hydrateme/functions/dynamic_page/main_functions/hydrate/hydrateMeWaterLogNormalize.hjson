@@ -1,0 +1,35 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: hydrateMeWaterLogNormalize
+        description: After create/update HydrateMeWaterLog, fills loggedAt and loggedDate when missing.
+        body:
+          '''
+const tableVertexLabel = args.contextData?.tableVertexLabel;
+const elementId = args.contextData?.elementId;
+if (tableVertexLabel !== "HydrateMeWaterLog" || !elementId) {
+  return { success: true, message: "Skipped" };
+}
+
+await args.session.run(
+  `MATCH (w:HydrateMeWaterLog)
+   WHERE elementId(w) = $elementId
+   SET w.createdAt = coalesce(w.createdAt, datetime()),
+       w.loggedAt = coalesce(w.loggedAt, toString(datetime())),
+       w.loggedDate = coalesce(
+         w.loggedDate,
+         substring(toString(w.loggedAt), 0, 10)
+       )`,
+  { elementId },
+);
+
+return { success: true, message: "HydrateMe water log meta normalized" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

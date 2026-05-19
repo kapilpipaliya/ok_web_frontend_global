@@ -12,7 +12,12 @@ import { addSystemAdminRoleToUser } from "./admin/addSystemAdminRoleToUser";
 import { newAdminValidations } from "./admin/newAdminValidations";
 import { createRootFolder } from "./seed/createRootFolder";
 import { insertComponents } from "./seed/insertComponents";
-import { createUserInAdminDB } from "./user/createUserInDB";
+import { validateEmail } from "~/lib/validation/validateEmail";
+
+import {
+  createInvitedUserInDB,
+  createUserInAdminDB,
+} from "./user/createUserInDB";
 
 export async function signupAdmin(
   tx: Transaction,
@@ -29,6 +34,10 @@ export async function signupAdmin(
     username: data.username,
   });
 
+  if (isAdmin) {
+    await createRootFolder(tx);
+  }
+
   // Create Account vertex and AccountUser relationship
   const accountId = uuidv7();
   await createAccount(tx, accountId, data.username);
@@ -42,7 +51,6 @@ export async function signupAdmin(
   // Create SubDomain and link with Account if it's system user
   if (isAdmin) {
     await createSystemSubdomain(tx, accountId);
-    await createRootFolder(tx);
 
     const response = await insertComponents(tx);
     if (!response.success) {
@@ -51,6 +59,36 @@ export async function signupAdmin(
 
     await saveAllEmailTemplates(tx);
   }
+
+  return { accountId, error: "", user };
+}
+
+/**
+ * Same account/admin setup as signupAdmin, but creates an invited user without a password
+ * (status "invited") so the merchant can set credentials via the invitation email flow.
+ */
+export async function signupAdminInvited(
+  tx: Transaction,
+  data: Pick<SignupRequestData, "email" | "username"> & { name?: string },
+) {
+  if (validateEmail(data.email)) {
+    throw new Error("A valid email address is required");
+  }
+
+  const email = data.email.trim();
+  await newAdminValidations(tx, data.username, email);
+
+  const user = await createInvitedUserInDB(tx, {
+    email,
+    name: data.name,
+    username: data.username,
+  });
+
+  await createRootFolder(tx);
+  const accountId = uuidv7();
+  await createAccount(tx, accountId, data.username);
+  await createAccountUserRelation(tx, accountId, user.P.uuid);
+  await addAdminRoleToUser(tx, user.P.uuid);
 
   return { accountId, error: "", user };
 }

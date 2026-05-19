@@ -1,0 +1,195 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Worker: consumes storeTasksReminders queue; updates task syncStatus and sends due/reminder emails to assignee.
+        key: processStoreTasksRemindersQueue
+        body:
+          '''
+if (args.contextData?.action !== "start") {
+  return { success: true, message: "StoreTasks reminders queue worker is ready" };
+}
+
+const queueName = "storeTasksReminders";
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const getRedisConnection = () => {
+  return args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379"),
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    maxLoadingRetryTime: 5000,
+    retryStrategy(times) {
+      if (times > 3) return null;
+      return Math.min(times * 200, 2000);
+    },
+    reconnectOnError(err) {
+      if (err.message && err.message.includes("READONLY")) return true;
+      return false;
+    }
+  };
+};
+
+const toIso = (d) => (d instanceof Date ? d.toISOString() : new Date(d).toISOString());
+const dayKey = (d = new Date()) => new Date(d).toISOString().slice(0, 10);
+
+const shouldSendReminder = (taskP) => {
+  // Only remind for not-done tasks
+  const status = String(taskP?.status || "todo").toLowerCase();
+  if (status === "done") return false;
+  return true;
+};
+
+const sendReminderEmail = async ({ to, subject, html }) => {
+  if (!to) return;
+  await args.sendEmail({ to, subject, content: html, subDomain: args.subDomain });
+};
+
+const processOne = async (job) => {
+  const dbSession = await args.getSession();
+  try {
+    const payload = job?.data || {};
+    const taskElementId = payload.taskElementId;
+    if (!taskElementId) return { success: false, message: "Missing taskElementId" };
+
+    // Mark processing
+    await dbSession.run(
+      `MATCH (t:StoreTask) WHERE elementId(t) = $id
+       SET t.syncStatus = 'processing', t.updatedAt = datetime()
+       RETURN t`,
+      { id: taskElementId }
+    );
+
+    // Load task + assignee
+    const res = await dbSession.run(
+      `
+      MATCH (t:StoreTask) WHERE elementId(t) = $id
+      OPTIONAL MATCH (t)-[:StoreTaskAssignee]->(u:User)
+      OPTIONAL MATCH (t)-[:StoreTaskOrder]->(o:ShopifyOrder)
+      RETURN t, u, o
+      `,
+      { id: taskElementId }
+    );
+    if (res.records.length === 0) {
+      return { success: false, message: "Task not found" };
+    }
+
+    const tNode = res.records[0].get("t");
+    const uNode = res.records[0].get("u");
+    const oNode = res.records[0].get("o");
+
+    const task = args.convertNodeToJson(tNode);
+    const user = uNode ? args.convertNodeToJson(uNode) : null;
+    const order = oNode ? args.convertNodeToJson(oNode) : null;
+
+    const taskP = task?.P || {};
+    const email = user?.P?.email || null;
+
+    const dueAtRaw = taskP.dueAt || null;
+    const remindAtRaw = taskP.remindAt || null;
+    const now = Date.now();
+
+    let dueAt = null;
+    try { if (dueAtRaw) dueAt = new Date(dueAtRaw); } catch {}
+    let remindAt = null;
+    try { if (remindAtRaw) remindAt = new Date(remindAtRaw); } catch {}
+
+    const today = dayKey();
+    const lastRemindedDay = taskP.lastRemindedDay || null;
+
+    let shouldRemindNow = false;
+    if (remindAt && !Number.isNaN(remindAt.getTime())) {
+      shouldRemindNow = remindAt.getTime() <= now;
+    } else if (dueAt && !Number.isNaN(dueAt.getTime())) {
+      // If due date is today or overdue, remind (once per day)
+      const msLeft = dueAt.getTime() - now;
+      shouldRemindNow = msLeft <= 0 || msLeft <= DAY_MS;
+    }
+
+    if (email && shouldRemindNow && shouldSendReminder(taskP) && lastRemindedDay !== today) {
+      const orderName = order?.P?.name || order?.P?.orderNumber || "";
+      const orderLine = orderName ? `<p style="margin:0 0 8px 0;"><b>Order:</b> ${orderName}</p>` : "";
+      const subject = `Task reminder: ${taskP.title || "Task"}`;
+      const html = `
+        <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
+          <h2 style="margin:0 0 12px 0;">Task reminder</h2>
+          <p style="margin:0 0 8px 0;"><b>${taskP.title || "Task"}</b></p>
+          ${orderLine}
+          <p style="margin:0 0 8px 0;"><b>Status:</b> ${String(taskP.status || "todo")}</p>
+          <p style="margin:0 0 8px 0;"><b>Due:</b> ${dueAt ? toIso(dueAt) : "—"}</p>
+          ${taskP.description ? `<p style="margin:0 0 8px 0;">${String(taskP.description)}</p>` : ""}
+          <p style="margin:0;"><a href="/tasks">Open Store Tasks</a></p>
+        </div>
+      `;
+      await sendReminderEmail({ to: email, subject, html });
+
+      await dbSession.run(
+        `MATCH (t:StoreTask) WHERE elementId(t) = $id
+         SET t.lastRemindedAt = $at,
+             t.lastRemindedDay = $day,
+             t.syncStatus = 'done',
+             t.updatedAt = datetime()
+         RETURN t`,
+        { id: taskElementId, at: new Date().toISOString(), day: today }
+      );
+    } else {
+      // No reminder needed; mark done
+      await dbSession.run(
+        `MATCH (t:StoreTask) WHERE elementId(t) = $id
+         SET t.syncStatus = 'done', t.updatedAt = datetime()
+         RETURN t`,
+        { id: taskElementId }
+      );
+    }
+
+    return { success: true, data: { taskElementId } };
+  } catch (e) {
+    // Mark error state if possible
+    try {
+      const payload = job?.data || {};
+      const taskElementId = payload.taskElementId;
+      if (taskElementId) {
+        await dbSession.run(
+          `MATCH (t:StoreTask) WHERE elementId(t) = $id
+           SET t.syncStatus = 'error',
+               t.lastError = $err,
+               t.updatedAt = datetime()
+           RETURN t`,
+          { id: taskElementId, err: e?.message || String(e) }
+        );
+      }
+    } catch {}
+    throw e;
+  } finally {
+    try { await dbSession.close(); } catch {}
+  }
+};
+
+const { Worker, QueueEvents } = args.bullmq;
+const connection = getRedisConnection();
+
+const worker = new Worker(queueName, async (job) => await processOne(job), { connection });
+const queueEvents = new QueueEvents(queueName, { connection });
+
+worker.on("completed", (job) => console.log(`[StoreTasks] reminder job completed id=${job?.id}`));
+worker.on("failed", (job, err) => console.error(`[StoreTasks] reminder job failed id=${job?.id}`, err));
+
+console.log(`[StoreTasks] reminders queue worker started (${queueName})`);
+
+return {
+  stop: async () => {
+    try { await worker.close(); } catch {}
+    try { await queueEvents.close(); } catch {}
+    console.log("[StoreTasks] reminders queue worker stopped");
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

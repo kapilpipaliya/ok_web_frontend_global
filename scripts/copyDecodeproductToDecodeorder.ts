@@ -16,7 +16,7 @@ const ROOT = path.resolve(__dirname, "..");
 const SOURCE = path.join(ROOT, "src/page_schema/decodeproduct");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["decodeorder", "decodefile", "extendfiles", "workshopflow"];
+const DEST_NAMES = ["decodeorder", "decodefile", "extendfiles", "workshopflow", "hydrateme", "certpulse", "storetasks", "attendra", "ytorganizer"];
 
 const SKIP_DIRS = [
   "functions/dynamic_page/shopify_hooks/category",

@@ -13,6 +13,7 @@ export async function sendInvitationEmail(
   user: Vertex,
   subDomain: string,
   dbSession: Session,
+  host?: string,
 ) {
   const userData = encodeUserData({
     email: user.P.email,
@@ -20,9 +21,8 @@ export async function sendInvitationEmail(
   });
 
   const inviteToken = await generateSecureToken(userData, dbSession);
-  const protocol = request.url.startsWith("https") ? "https" : "http";
-  const host = await getEmailDomain(request, subDomain);
-  const url = `${protocol}://${host}/api/auth/confirmInvitation?token=${inviteToken}`;
+  const host_ = host ? host : await getEmailDomain(request, subDomain);
+  const url = `https://${host_}/api/auth/confirmInvitation?token=${inviteToken}`;
 
   sendNotificationEmail(
     EMAIL_TEMPLATES.InvitationEmail,

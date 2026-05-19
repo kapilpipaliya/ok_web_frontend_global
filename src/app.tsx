@@ -19,6 +19,19 @@ import { GraphContext } from "~/lib/graph/context/GraphContext";
 import { GetInitialData } from "./GetInitialData";
 import { HydrationLoader } from "./components/HydrationLoader";
 
+/** Above VertexPickerModal (10050) and other app overlays so toasts stay visible. */
+const TOAST_CONTAINER_Z_INDEX = 20000;
+
+const isAppRouteExcludedFromLoader = (pathname: string) =>
+  [
+    "/app",
+    "/orders",
+    "/draft-orders",
+    "/products",
+    "/files",
+    "/tasks",
+  ].includes(pathname);
+
 // Create a generic error fallback component
 const ErrorFallback = (props: {
   error: Error;
@@ -63,11 +76,7 @@ export default function App() {
             const navigate = useNavigate();
 
             const isExcludedFromLoader = () =>
-              (location.pathname === "/app" ||
-                location.pathname === "/orders" ||
-                location.pathname === "/draft-orders" ||
-                location.pathname === "/products" ||
-                location.pathname === "/files") &&
+              isAppRouteExcludedFromLoader(location.pathname) &&
               (isServer || isAppSubdomain(window.location.hostname));
 
             // Set up Capacitor deep linking listener
@@ -132,7 +141,11 @@ export default function App() {
                   </Suspense>
                   <Show when={isHydrated()}>
                     {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
-                    <Toaster />
+                    <Toaster
+                      containerStyle={{
+                        "z-index": String(TOAST_CONTAINER_Z_INDEX),
+                      }}
+                    />
                     {/* </Show> */}
                   </Show>
                   <HydrationLoader show={showLoader() && !isExcludedFromLoader()} />

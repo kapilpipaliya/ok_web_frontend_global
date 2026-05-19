@@ -106,6 +106,12 @@ export interface FunctionArgumentBaseType {
     request: { functionName: string; contextData?: any },
     context?: Record<string, unknown>,
   ) => Promise<ServerResult>;
+  /** Same as `postAPI` from `~/lib/api/general/postApi` — JSON POST to app API routes. */
+  postAPI: (
+    url: string,
+    data: object | FormData,
+    action?: "DELETE" | "POST" | "PUT",
+  ) => Promise<Record<string, unknown>>;
   /** Zod namespace (`import { z } from "zod"`); exposed on dynamic component / page `args`. */
   z: typeof import("zod").z;
 }

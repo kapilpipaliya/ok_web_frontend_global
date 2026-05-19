@@ -216,7 +216,8 @@ return {
   variant: config.variant,
   loading: config.loading,
   onConfirm: config.onConfirm,
-  onCancel: config.onCancel
+  onCancel: config.onCancel,
+  getUsePolarisUI: args.contextData.props?.getUsePolarisUI?.() === true
 };
 '''
       }

@@ -117,9 +117,14 @@ const patchRelationshipFieldPropsOnVertex = (vertex, relationships) => {
   if (!vertex?.P || !relationships || typeof relationships !== "object") return;
   for (const [fieldKey, relConfig] of Object.entries(relationships)) {
     if (!relConfig || typeof relConfig !== "object") continue;
-    const tid = relConfig.targetId;
-    vertex.P[fieldKey] =
-      tid != null && String(tid).trim() !== "" ? String(tid).trim() : null;
+    const ids = Array.isArray(relConfig.targetIds)
+      ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
+      : [];
+    if (ids.length === 0) {
+      vertex.P[fieldKey] = null;
+      continue;
+    }
+    vertex.P[fieldKey] = ids.length === 1 ? ids[0] : ids;
   }
 };
 
@@ -256,6 +261,9 @@ const syncNestedLineCollections = async (session, params) => {
   }
 };
 
+// Note: The returned API graph is built from args.context.nodes/relationships.
+// Relationship writes must RETURN nodes/edges and run processResult to appear in the response.
+
 // Extract form data from vertex
 if (!vertex || !vertex.P) {
   return {
@@ -281,7 +289,8 @@ if (!operation || !["create", "update", "delete"].includes(operation)) {
 
 // Determine vertex label and relationship type based on tableVertexLabel
 const vertexLabel = tableVertexLabel;
-// Relationship type is "User" + vertexLabel (e.g., "UserBook", "UserAudioVideo", "UserCategory")
+// Must match getUserContent.hjson: ownership is User + tableVertexLabel (e.g. UserFile for File).
+// File uploads always create (User)-[:UserFile]->(File); tableSettingsLabel (e.g. AttendraFilePortal) is only for settings keys.
 const relationshipType = `User${vertexLabel}`;
 
 // Execute before hooks based on operation
@@ -374,6 +383,9 @@ try {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+    if (vertexLabel === "User" && !properties.uuid) {
+      properties.uuid = args.crypto.randomUUID();
+    }
     NESTED_LINE_STRIP_KEYS.forEach((k) => {
       delete properties[k];
     });
@@ -416,12 +428,16 @@ try {
     const createdElementId = createdContent.id;
 
     // Handle relationships if provided (batched by relationshipType + targetLabel)
-    // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
+    // Format: { fieldKey: { relationshipType, targetLabel, targetIds } }
     if (relationships && typeof relationships === "object") {
       const validRels = [];
       for (const [fieldKey, relConfig] of Object.entries(relationships)) {
-        if (relConfig && relConfig.targetId && relConfig.relationshipType && relConfig.targetLabel) {
-          validRels.push({ ...relConfig, fieldKey });
+        if (!relConfig?.relationshipType || !relConfig?.targetLabel) continue;
+        const ids = Array.isArray(relConfig.targetIds)
+          ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
+          : [];
+        for (let ri = 0; ri < ids.length; ri++) {
+          validRels.push({ ...relConfig, fieldKey, targetId: ids[ri] });
         }
       }
       const byTypeAndLabel = new Map();
@@ -434,15 +450,18 @@ try {
         const [relationshipType, targetLabel] = key.split('|');
         const targetIds = items.map(i => i.targetId);
         try {
-          await args.session.run(
+          const relRes = await args.session.run(
             `UNWIND $targetIds as targetId
              MATCH (c:${vertexLabel}) WHERE elementId(c) = $contentId
              MATCH (target:${targetLabel}) WHERE elementId(target) = targetId
              MERGE (c)-[r:${relationshipType}]->(target)
              ON CREATE SET r.createdAt = datetime()
-             RETURN count(r) as created`,
+             RETURN c,
+               [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
+               [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist`,
             { contentId: createdElementId, targetIds }
           );
+          args.processResult(relRes.records, args.context, ["c", "tlist"], "rlist");
         } catch (relError) {
           console.error(`Error creating relationships for ${relationshipType}->${targetLabel}:`, relError);
         }
@@ -480,7 +499,7 @@ try {
       enableUserScoping,
       result: createResult
     });
-    
+
     return createResult;
 
   } else if (operation === "update") {
@@ -605,11 +624,49 @@ try {
     const updatedContent = vertices[0];
 
     // Handle relationships if provided (clear edge type per field, then optionally recreate)
-    // Format: { fieldKey: { relationshipType, targetLabel, targetId } }
+    // Format: { fieldKey: { relationshipType, targetLabel, targetIds } }
     if (relationships && typeof relationships === "object") {
       for (const [fieldKey, relConfig] of Object.entries(relationships)) {
         if (!relConfig?.relationshipType || !relConfig?.targetLabel) continue;
         try {
+          // Capture edge ids so response includes deleted_edges (client can remove stale edges/labels)
+          const captureRelQuery = `
+            MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
+            WHERE elementId(c) = $contentId
+            RETURN c, [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rdel
+          `;
+          const captureRes = await args.session.run(captureRelQuery, { contentId: updateElementId });
+          args.processResult(captureRes.records, args.context, "c", "rdel");
+          const relMap = args.context.relationships || {};
+          const captured = captureRes.records?.[0]?.get?.("rdel");
+          const relArr = Array.isArray(captured) ? captured : captured ? [captured] : [];
+          for (let i = 0; i < relArr.length; i++) {
+            const rel = relArr[i];
+            if (!rel) continue;
+            // processResult stored it into context.relationships keyed by converted edge id
+            // but we don't know the id directly here; push all edges of this type + source that match.
+          }
+          // Safer: compute deleted ids from relationship map using source id + type.
+          const delIds = [];
+          for (const [eid, e] of Object.entries(relMap)) {
+            if (e && e.S === updateElementId && e.T === relConfig.relationshipType) delIds.push(eid);
+          }
+          if (!args.context.deletedEdges) args.context.deletedEdges = [];
+          for (let i = 0; i < delIds.length; i++) args.context.deletedEdges.push(delIds[i]);
+          // Do not return deleted edges in graph.edges; also remove them from node IN/OUT so UI reads the latest edge.
+          const nodesMap = args.context.nodes || {};
+          for (let i = 0; i < delIds.length; i++) {
+            const delId = delIds[i];
+            const ed = relMap[delId];
+            if (ed) {
+              const sNode = nodesMap[ed.S];
+              const eNode = nodesMap[ed.E];
+              if (sNode?.OUT?.[ed.T]) sNode.OUT[ed.T] = sNode.OUT[ed.T].filter((x) => x !== delId);
+              if (eNode?.IN?.[ed.T]) eNode.IN[ed.T] = eNode.IN[ed.T].filter((x) => x !== delId);
+            }
+            delete relMap[delId];
+          }
+
           const deleteRelQuery = `
             MATCH (c:${vertexLabel})-[r:${relConfig.relationshipType}]->()
             WHERE elementId(c) = $contentId
@@ -617,27 +674,31 @@ try {
           `;
           await args.session.run(deleteRelQuery, { contentId: updateElementId });
 
-          const targetId =
-            relConfig.targetId != null && String(relConfig.targetId).trim() !== ""
-              ? String(relConfig.targetId).trim()
-              : null;
-          if (!targetId) continue;
+          const targetIds = Array.isArray(relConfig.targetIds)
+            ? relConfig.targetIds.map((x) => String(x).trim()).filter(Boolean)
+            : [];
+
+          if (targetIds.length === 0) continue;
 
           const createRelQuery = `
+            UNWIND $targetIds AS targetId
             MATCH (c:${vertexLabel})
             WHERE elementId(c) = $contentId
             MATCH (target:${relConfig.targetLabel})
-            WHERE elementId(target) = $targetId
+            WHERE elementId(target) = targetId
             MERGE (c)-[r:${relConfig.relationshipType}]->(target)
             ON CREATE SET r.createdAt = datetime()
             ON MATCH SET r.updatedAt = datetime()
-            RETURN r
+            RETURN c,
+              [x IN COLLECT(DISTINCT r) WHERE x IS NOT NULL] AS rlist,
+              [x IN COLLECT(DISTINCT target) WHERE x IS NOT NULL] AS tlist
           `;
 
-          await args.session.run(createRelQuery, {
+          const createRes = await args.session.run(createRelQuery, {
             contentId: updateElementId,
-            targetId,
+            targetIds,
           });
+          args.processResult(createRes.records, args.context, ["c", "tlist"], "rlist");
         } catch (relError) {
           console.error(`Error updating relationship for ${fieldKey}:`, relError);
         }
@@ -675,7 +736,7 @@ try {
       enableUserScoping,
       result: updateResult
     });
-    
+
     return updateResult;
 
   } else if (operation === "delete") {

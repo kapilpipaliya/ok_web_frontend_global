@@ -2,6 +2,7 @@ import { parse } from "tldts";
 
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
+import { hostnameMatchesConfiguredAppDomain } from "~/lib/envDomains";
 
 export async function getSubDomain(host: string) {
   const result = parse(host);
@@ -23,7 +24,10 @@ export async function getSubDomain(host: string) {
   if (effectiveSubdomain === "admin") {
     return { domain, subdomain: ADMIN_DB_NAME };
   }
-  if (domain === process.env.DOMAIN || hostname === process.env.DOMAIN) {
+  if (
+    hostnameMatchesConfiguredAppDomain(domain) ||
+    hostnameMatchesConfiguredAppDomain(hostname)
+  ) {
     return { domain, subdomain: effectiveSubdomain || "www" };
   }
 

@@ -1,0 +1,235 @@
+{
+  vertexes: [
+    {
+      id: hm_layout_root
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: ConfirmProvider
+      }
+    },
+    {
+      id: hm_layout_shell
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        fns:
+          '''
+const navItems = [
+  { id: "home", href: "/hydrateme", label: "Home", pathCheck: (p) => p === "/hydrateme" || p === "/hydrateme/" },
+  { id: "logs", href: "/hydrateme/logs", label: "Logbook", pathCheck: (p) => p.startsWith("/hydrateme/logs") },
+  { id: "circle", href: "/hydrateme/circle", label: "Circle", pathCheck: (p) => p.startsWith("/hydrateme/circle") },
+  { id: "stats", href: "/hydrateme/stats", label: "Stats", pathCheck: (p) => p.startsWith("/hydrateme/stats") },
+  { id: "profile", href: "/hydrateme/profile", label: "You", pathCheck: (p) => p.startsWith("/hydrateme/profile") }
+];
+return { navItems };
+'''
+        props:
+          '''return { as: "div" };'''
+        css:
+          '''return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;'''
+      }
+    },
+    {
+      id: hm_top_bar
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "header" };'''
+        css:
+          '''return `._id {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+}`;'''
+      }
+    },
+    {
+      id: hm_brand
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "HydrateMe",
+  onClick: () => args.navigate("/hydrateme")
+};'''
+        css:
+          '''return `._id {
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.title};
+  color: ${args.theme.var.color.primary};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.xs} 0;
+}`;'''
+      }
+    },
+    {
+      id: hm_nav_row
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''return { as: "nav" };'''
+        css:
+          '''return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.xs};
+  align-items: center;
+}`;'''
+      }
+    },
+    {
+      id: hm_nav_loop
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  loop: true,
+  contextName: "navItem",
+  data: args.fns.navItems
+};'''
+      }
+    },
+    {
+      id: hm_nav_btn
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const item = args.contextData.navItem;
+const pathname = args.location?.pathname || "";
+const active = item?.pathCheck?.(pathname) === true;
+return {
+  as: "button",
+  type: "button",
+  text: item?.label || "",
+  onClick: () => args.navigate(item?.href || "/hydrateme"),
+  class: active ? "hm-nav-link hm-nav-link-active" : "hm-nav-link"
+};'''
+        css:
+          '''return `._id.hm-nav-link {
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: 1px solid transparent;
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  cursor: pointer;
+  transition: background ${args.theme.var.animation.fast} ease, border-color ${args.theme.var.animation.fast} ease;
+}
+._id.hm-nav-link:hover {
+  background: ${args.theme.var.color.secondary};
+}
+._id.hm-nav-link-active {
+  border-color: ${args.theme.var.color.primary};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.primary};
+}`;'''
+      }
+    },
+    {
+      id: hm_main
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props: '''return { as: "main" };'''
+        css:
+          '''return `._id {
+  flex: 1;
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing.md};
+  padding-bottom: calc(${args.theme.var.spacing.xxl} + env(safe-area-inset-bottom, 0px));
+}`;'''
+      }
+    },
+    {
+      id: hm_slot
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Slot
+        slot: 1children
+      }
+    }
+  ]
+  edges: [
+    {
+      id: hm_e0
+      T: Attr
+      S: hm_layout_root
+      E: hm_layout_shell
+    }
+    {
+      id: hm_e1
+      T: Attr
+      S: hm_layout_shell
+      E: hm_top_bar
+    }
+    {
+      id: hm_e2
+      T: Attr
+      S: hm_top_bar
+      E: hm_brand
+    }
+    {
+      id: hm_e3
+      T: Attr
+      S: hm_top_bar
+      E: hm_nav_row
+    }
+    {
+      id: hm_e4
+      T: Attr
+      S: hm_nav_row
+      E: hm_nav_loop
+    }
+    {
+      id: hm_e5
+      T: Attr
+      S: hm_nav_loop
+      E: hm_nav_btn
+    }
+    {
+      id: hm_e6
+      T: Attr
+      S: hm_layout_shell
+      E: hm_main
+    }
+    {
+      id: hm_e7
+      T: Attr
+      S: hm_main
+      E: hm_slot
+    }
+  ]
+}

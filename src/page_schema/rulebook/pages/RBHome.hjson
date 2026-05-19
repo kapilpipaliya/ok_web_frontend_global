@@ -4,6 +4,7 @@
       id: "page_root",
       L: "Page",
       P: {
+        public: true
         key: "RBHome",
         url: "/rb",
         fns: '''

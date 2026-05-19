@@ -1,10 +1,24 @@
 import type { APIEvent } from "@solidjs/start/server";
+import type { Record as Neo4jRecord } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { processResult } from "~/cypher/conversion/processResult";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+
+function buildUserProfileImageGraph(records: Neo4jRecord[]) {
+  const context: {
+    nodes: Record<string, Vertex>;
+    relationships: Record<string, Edge>;
+  } = { nodes: {}, relationships: {} };
+  processResult(records, context, ["u", "f"], "r");
+  return { vertexes: context.nodes, edges: context.relationships };
+}
 
 export async function POST({ request }: APIEvent) {
   const { profileImage, uuid } = await request.json();
@@ -24,64 +38,56 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Profile image is required", 400);
     }
 
-    // First check if the relationship already exists
-    const existingResult = await dbSession.run(
+    const deleteOtherProfileImageEdgesResult = await dbSession.run(
       `MATCH (u:User {uuid: $uuid})-[r:UserProfileImage]->(f:File)
-       WHERE elementId(f) = $profileImage
-       RETURN r`,
+       WHERE elementId(f) <> $profileImage
+       WITH collect(elementId(r)) AS deletedEdgeIds, collect(r) AS relationshipsToDelete
+       FOREACH (relationship IN relationshipsToDelete | DELETE relationship)
+       RETURN deletedEdgeIds`,
       { profileImage, uuid },
     );
 
-    // If relationship exists, delete other relationships and return
-    if (existingResult.records.length > 0) {
-      await dbSession.run(
-        `MATCH (u:User {uuid: $uuid})-[r:UserProfileImage]->(f:File)
-         WHERE elementId(f) <> $profileImage
-         DELETE r`,
-        { profileImage, uuid },
-      );
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-      });
-    }
+    const deletedEdgeIdsRaw =
+      deleteOtherProfileImageEdgesResult.records[0]?.get("deletedEdgeIds");
+    const deletedEdgeIds = Array.isArray(deletedEdgeIdsRaw)
+      ? deletedEdgeIdsRaw
+          .map((edgeId) => (edgeId != null ? String(edgeId).trim() : ""))
+          .filter((edgeId) => edgeId !== "")
+      : [];
 
-    // Delete all existing UserProfileImage relationships
-    await dbSession.run(
-      `MATCH (u:User {uuid: $uuid})-[r:UserProfileImage]->(f:File)
-       DELETE r`,
-      { uuid },
-    );
-
-    // Create new relationship
-    const result = await dbSession.run(
+    const linkResult = await dbSession.run(
       `MATCH (u:User {uuid: $uuid})
        MATCH (f:File) WHERE elementId(f) = $profileImage
-       MERGE (u)-[:UserProfileImage]->(f)
-       RETURN u, f`,
+       MERGE (u)-[r:UserProfileImage]->(f)
+       RETURN u, r, f`,
       { profileImage, uuid },
     );
 
-    if (!(result.records[0]?.get("u") && result.records[0]?.get("f"))) {
+    if (!linkResult.records[0]?.get("u") || !linkResult.records[0]?.get("f")) {
       throw new APIError("User or file not found", 404);
     }
-    const file = convertNodeToJson(result.records[0]?.get("f"));
 
-    // Log the profile image update activity
+    const rawFileNode = linkResult.records[0].get("f");
+    const graphPayload = buildUserProfileImageGraph(linkResult.records);
+
+    const fileJson = convertNodeToJson(rawFileNode);
+
     await createActivityLog(
       dbSession,
       "profile_image_update",
       "User",
       uuid,
       user.P.email,
-      `Profile image updated to ${file.P.fileName || file.id}`,
+      `Profile image updated to ${fileJson.P.fileName || fileJson.id}`,
     );
 
     return {
       graph: {
-        edges: [],
-        vertexes: [file],
+        vertexes: graphPayload.vertexes,
+        edges: graphPayload.edges,
+        deleted_edges: deletedEdgeIds,
       },
-      result: file,
+      success: true,
       timestamp: new Date().getTime(),
     };
   } catch (error) {

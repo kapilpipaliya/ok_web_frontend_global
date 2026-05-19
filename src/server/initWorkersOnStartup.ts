@@ -3,6 +3,9 @@
  *
  * This module initializes workers when the server starts.
  * It checks Redis availability first and only starts workers if Redis is running.
+ *
+ * Platform BullMQ workers (email send, schema-jobs, settings/logos→shops sync) are
+ * registered inside `initWorkersCore()` — invoked below after Redis is healthy.
  */
 import { checkRedisConnection } from "~/server/queue/checkRedis";
 import {
@@ -10,7 +13,6 @@ import {
   initWorkersCore,
 } from "~/server/queue/initWorkersCore";
 import { initClusterCommunication } from "~/server/cluster/clusterCommunication";
-
 // Use global shared state to prevent duplicate initialization across module instances
 // (Vinxi dev mode creates multiple module instances in separate contexts)
 declare global {

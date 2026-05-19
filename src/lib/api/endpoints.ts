@@ -14,6 +14,7 @@ export const API = {
     profileUrl: "/api/auth/updateProfile",
     resendEmailConfirmationUrl: "/api/auth/resendEmailConfirmation",
     resendVerificationUrl: "/api/auth/resendVerification",
+    setPasswordUrl: "/api/auth/set-password",
     signUpUrl: "/api/auth/signup",
     updateProfileImageUrl: "/api/auth/updateProfileImage",
   },
@@ -108,6 +109,7 @@ export const API = {
     },
     user: {
       forgotPassword: "/auth/forgotPassword",
+      setPassword: "/auth/set-password",
       logout: "/auth/logout",
       resendVerification: "/auth/resendVerification",
       signUp: "/auth/signup",

@@ -4,6 +4,7 @@
       id: "1"
       L: Page
       P: {
+        public: true
         description: Get in touch with YSaar support team
         fns:
           '''

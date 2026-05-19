@@ -18,7 +18,8 @@ export function updateNodeRelations(
     if (!sourceNode.OUT[relationship.T]) {
       sourceNode.OUT[relationship.T] = [];
     }
-    sourceNode.OUT[relationship.T].push(relationship.id);
+    const outArr = sourceNode.OUT[relationship.T];
+    if (!outArr.includes(relationship.id)) outArr.push(relationship.id);
   }
 
   const targetNode = nodes[relationship.E];
@@ -26,6 +27,7 @@ export function updateNodeRelations(
     if (!targetNode.IN[relationship.T]) {
       targetNode.IN[relationship.T] = [];
     }
-    targetNode.IN[relationship.T].push(relationship.id);
+    const inArr = targetNode.IN[relationship.T];
+    if (!inArr.includes(relationship.id)) inArr.push(relationship.id);
   }
 }

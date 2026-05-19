@@ -4,6 +4,7 @@
       id: "contact_page",
       L: "Page",
       P: {
+        public: true
         key: "RBContact",
         url: "/contact",
         title: "Contact & Support - Personal Rulebook",

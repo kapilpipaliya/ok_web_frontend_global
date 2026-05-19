@@ -2,7 +2,6 @@ export const iconMap = {
   // Box: "ph:cube",
   Component: "ph:puzzle-piece",
   Data: "ph:database",
-  // FileUploader: "ph:upload",
   Form: "ph:clipboard",
   Html: "ph:file-html",
   // Page: "ph:file-text",

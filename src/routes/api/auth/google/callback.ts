@@ -11,6 +11,10 @@ import { decryptClientSecret } from "~/lib/auth/tokenEncryption";
 import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
+import {
+  USER_DEACTIVATED_SIGN_IN_MESSAGE,
+  isUserInactiveForSignIn,
+} from "~/lib/auth/userSignInEligibility";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -123,6 +127,10 @@ export async function GET({ request }: APIEvent) {
             "This account is scheduled for deletion and cannot be accessed. Please contact support if this is a mistake.",
             403,
           );
+        }
+
+        if (isUserInactiveForSignIn(user)) {
+          throw new APIError(USER_DEACTIVATED_SIGN_IN_MESSAGE, 403);
         }
 
         // Update user with Google information

@@ -12,17 +12,26 @@ export function buildSchemaQueryParams(keys: OpenedSchemaKeys): URLSearchParams 
 }
 
 /**
- * Returns the full URL for exporting the given schema keys (opens in new tab).
+ * Opens the admin page that queues an export (same query params as the API are forwarded when you click Start).
  */
 export function getExportUrl(keys: OpenedSchemaKeys): string {
   const params = buildSchemaQueryParams(keys);
-  return `${typeof window !== "undefined" ? window.location.origin : ""}/api/schema/export?${params.toString()}`;
+  const base = typeof window !== "undefined" ? window.location.origin : "";
+  const q = params.toString();
+  return q ? `${base}/admin/SchemaExport?${q}` : `${base}/admin/SchemaExport`;
 }
 
 /**
- * Returns the full URL for importing the given schema keys (opens in new tab).
+ * Opens the admin page that queues an import.
  */
 export function getImportUrl(keys: OpenedSchemaKeys): string {
   const params = buildSchemaQueryParams(keys);
-  return `${typeof window !== "undefined" ? window.location.origin : ""}/api/schema/import?${params.toString()}`;
+  const base = typeof window !== "undefined" ? window.location.origin : "";
+  const q = params.toString();
+  return q ? `${base}/admin/SchemaImport?${q}` : `${base}/admin/SchemaImport`;
+}
+
+export function getSchemaSyncPageUrl(): string {
+  const base = typeof window !== "undefined" ? window.location.origin : "";
+  return `${base}/admin/SchemaSync`;
 }

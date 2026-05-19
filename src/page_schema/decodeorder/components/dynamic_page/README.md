@@ -95,6 +95,10 @@ return {
 - Uses `formConfig` from the DynamicPage config to render the add/edit modal via `TableModal` + `FormManagement`.
 - Watches `selectedSidebarItem` and re-runs `handleSearch()` whenever the sidebar selection changes.
 
+**Table row state vs graph**
+
+The `TableUiState` vertex stores **`P.data` and `P.filteredData` as arrays of vertex id strings** only (including nested line-item tables). Row payloads are read from **`args.graph.vertexes[id]`** in the Neo4j shape (`id`, `L`, `P`, `IN`, `OUT`). After `getUserContent` / `mutateUserContent`, **DynamicPage** merges the returned `graph` (`applyServerGraphToLocalGraph`); the table resolves ids to vertices for filtering, sorting, rendering, batch actions, and export.
+
 4. **Sidebar** (`Sidebar.hjson`, `SidebarTreeItem.hjson`, `SidebarAddChildModal.hjson`):
 
 - Reads `sidebar` config from `getSidebarConfig()`:

@@ -77,14 +77,15 @@ if (search && search.trim()) {
   query += `
     WHERE toLower(COALESCE(v.name, '')) CONTAINS $searchTerm OR
           toLower(COALESCE(v.title, '')) CONTAINS $searchTerm OR
-          toLower(COALESCE(v.description, '')) CONTAINS $searchTerm
+          toLower(COALESCE(v.description, '')) CONTAINS $searchTerm OR
+          toLower(COALESCE(v.key, '')) CONTAINS $searchTerm
   `;
   params.searchTerm = searchTerm;
 }
 
 query += `
   RETURN v
-  ORDER BY COALESCE(v.name, v.title, '') ASC
+  ORDER BY COALESCE(v.key, v.name, v.title, '') ASC
   LIMIT $limit
 `;
 

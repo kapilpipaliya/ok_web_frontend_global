@@ -72,11 +72,9 @@ if (existingInvoice.records.length > 0) {
     `
     MATCH (r:RepairOrder)
     WHERE elementId(r) = $elementId
-    OPTIONAL MATCH (r)-[:RepairCustomer]->(cust:WorkshopCustomer)
     CREATE (i:WorkshopInvoice {
       invoiceNo: $invoiceNo,
       repairNo: $repairNo,
-      customerName: coalesce(cust.name, r.customerName, ""),
       invoiceDate: $invoiceDate,
       subTotal: $subTotal,
       taxAmount: 0,
@@ -88,6 +86,7 @@ if (existingInvoice.records.length > 0) {
       updatedAt: datetime()
     })
     MERGE (r)-[:RepairOrderInvoice]->(i)
+    MERGE (i)-[:InvoiceRepairOrder]->(r)
     RETURN i
     `,
     {

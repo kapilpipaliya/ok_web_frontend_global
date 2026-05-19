@@ -4,6 +4,7 @@ import { AdminWorkerManagement } from "~/pages/global/worker/AdminWorkerManageme
 import { AdminNodeManagement } from "~/pages/global/cluster/AdminNodeManagement";
 import { RedisManagement } from "~/pages/global/redis/RedisManagement";
 import { BackupManagement } from "~/pages/global/backup/BackupManagement";
+import { SchemaOperationsManagement } from "~/pages/global/schema/SchemaOperationsManagement";
 
 export default function SystemGlobalSettings() {
   const menuItems = [
@@ -36,6 +37,12 @@ export default function SystemGlobalSettings() {
       icon: "ph:floppy-disk",
       id: "backup",
       label: "Backup Management",
+    },
+    {
+      component: SchemaOperationsManagement,
+      icon: "ph:arrows-left-right",
+      id: "schema-operations",
+      label: "Schema Operations",
     },
   ];
 

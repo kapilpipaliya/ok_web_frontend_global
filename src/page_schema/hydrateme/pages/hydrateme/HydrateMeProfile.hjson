@@ -1,0 +1,93 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        title: HydrateMe profile
+        url: /hydrateme/profile
+        key: HydrateMeProfile
+        fns:
+          '''
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {},
+    }),
+};
+'''
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: PageLayout
+      P: {
+        displayOrder: 1
+        componentName: HydrateMeLayout
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: hydrateme_profile_lead
+        props:
+          '''return {
+  as: "p",
+  class: "hm-lead",
+  text: "Keep one profile row (profileKey default). Set daily goal and reminder cadence."
+};'''
+        css:
+          '''return `._id.hm-lead {
+  margin: 0 0 1rem;
+  font-size: ${args.theme.var.fontSize.md};
+  color: ${args.theme.var.color.muted};
+}`;'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: DynamicPage
+        key: hydrateme_profile_dp
+        props:
+          '''
+return {
+  tableVertexLabel: "HydrateMeUserProfile",
+  loadFromSetting: true
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e_pl
+      T: PageLayout
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e_root
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e_dp
+      T: Attr
+      S: "1"
+      E: "4"
+    }
+  ]
+}

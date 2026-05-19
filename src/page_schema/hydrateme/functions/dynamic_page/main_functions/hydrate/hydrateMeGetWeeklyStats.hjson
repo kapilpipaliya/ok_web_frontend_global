@@ -1,0 +1,76 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: hydrateMeGetWeeklyStats
+        description: Returns last 7 days of HydrateMe intake totals for charts.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Sign in to see stats.", data: null };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const uuid = user?.P?.uuid;
+if (!uuid) {
+  return { success: false, message: "User uuid missing.", data: null };
+}
+
+const days = Number(args.contextData?.days);
+const n = Number.isFinite(days) ? Math.min(90, Math.max(7, Math.floor(days))) : 7;
+
+const start = new Date();
+start.setUTCDate(start.getUTCDate() - (n - 1));
+const startKey = start.toISOString().slice(0, 10);
+
+const res = await args.session.run(
+  `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeWaterLog]->(w:HydrateMeWaterLog)
+   WITH coalesce(w.loggedDate, substring(toString(coalesce(w.loggedAt, w.createdAt)), 0, 10)) AS day,
+        sum(toFloat(coalesce(w.amountMl, 0))) AS total
+   WHERE day >= $startKey AND day <> ""
+   RETURN day, total
+   ORDER BY day ASC`,
+  { uuid, startKey },
+);
+
+const series = [];
+for (let i = 0; i < res.records.length; i++) {
+  const r = res.records[i];
+  const d = r.get("day");
+  const t = r.get("total");
+  series.push({
+    day: typeof d === "string" ? d : String(d ?? ""),
+    totalMl:
+      t != null && typeof t.toNumber === "function" ? t.toNumber() : Number(t) || 0,
+  });
+}
+
+const profRes = await args.session.run(
+  `MATCH (u:User {uuid: $uuid})-[:UserHydrateMeUserProfile]->(p:HydrateMeUserProfile)
+   RETURN p LIMIT 1`,
+  { uuid },
+);
+let profile = null;
+if (profRes.records[0]) {
+  profile = args.convertNodeToJson(profRes.records[0].get("p"));
+}
+const goalMl = Math.max(0, Number(profile?.P?.dailyGoalMl) || 2000);
+
+return {
+  success: true,
+  data: {
+    goalMl,
+    startKey,
+    days: n,
+    series,
+  },
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

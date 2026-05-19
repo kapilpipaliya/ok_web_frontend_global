@@ -3,6 +3,8 @@
  * Common utilities for building cloud storage paths
  */
 
+import { getPrimaryAppDomain } from "~/lib/envDomains";
+
 /**
  * Build cloud storage path for backup files
  * Format: backup/{domain}/{databaseName}/{filename}
@@ -15,7 +17,7 @@ export function buildBackupPath(
   filename: string,
   databaseName?: string,
 ): string {
-  const domain = process.env.DOMAIN || "default";
+  const domain = getPrimaryAppDomain() || "default";
 
   if (databaseName) {
     return `backup/${domain}/${databaseName}/${filename}`;
@@ -31,7 +33,7 @@ export function buildBackupPath(
  * @returns Prefix for listing files in the domain folder
  */
 export function buildBackupPrefix(): string {
-  const domain = process.env.DOMAIN || "default";
+  const domain = getPrimaryAppDomain() || "default";
   return `backup/${domain}/`;
 }
 
@@ -41,5 +43,5 @@ export function buildBackupPrefix(): string {
  * @returns Current domain or 'default'
  */
 export function getDomain(): string {
-  return process.env.DOMAIN || "default";
+  return getPrimaryAppDomain() || "default";
 }

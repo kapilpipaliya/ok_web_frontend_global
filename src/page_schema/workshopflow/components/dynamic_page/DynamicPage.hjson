@@ -40,6 +40,12 @@ const selectedSidebarItem = () => {
 
 // Basic context/prop accessors
 const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getTableSettingsLabel = () => {
+  const raw = args.contextData.props?.tableSettingsLabel;
+  const fallback = getTableVertexLabel();
+  if (raw != null && String(raw).trim() !== "") return String(raw).trim();
+  return fallback;
+};
 const getUncategorizedVertexId = () => {
   const label = getTableVertexLabel();
   return label ? '_' + label + '_uncategorized' : null;
@@ -186,9 +192,11 @@ const getGenericSettingsFunction = () => {
   if (!tableVertexLabel) return null;
   return async () => {
     try {
+      const tableSettingsLabel = getTableSettingsLabel();
       const result = await args.fns.executeYTOFunction("getUserContentSetting", {
         tableVertexLabel,
-        key: `${tableVertexLabel}_settings`
+        settingsLabel: tableSettingsLabel,
+        key: `${tableSettingsLabel}_settings`
       });
 
       // Check for errors and show toast
@@ -231,7 +239,8 @@ const getGenericDataFunction = () => {
         search: enableLocalFilters ? undefined : filters.search,
         filters: enableLocalFilters ? undefined : filters.filters,
         sort: enableLocalSort ? undefined : filters.sort,
-        enableUserScoping: enableUserScopingForContent
+        enableUserScoping: enableUserScopingForContent,
+        tableSettingsLabel: getTableSettingsLabel()
       };
 
       // Add sidebar filtering if item is selected
@@ -298,7 +307,8 @@ const refreshQueuedRows = async (elementIds) => {
       tableVertexLabel,
       elementIds,
       onlyNotQueued: true,
-      relationshipPropertyBindings: buildRelationshipPropertyBindings(config)
+      relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
+      tableSettingsLabel: getTableSettingsLabel()
     });
     applyServerGraphToLocalGraph(result);
     if (result?.result?.success && result.result.data) return { success: true, data: result.result.data };
@@ -320,7 +330,8 @@ const fetchUserContentRows = async (params = {}) => {
       sort,
       enableUserScoping: enableUserScopingForContent,
       hooks: hooks !== undefined ? hooks : config?.hooks,
-      relationshipPropertyBindings: buildRelationshipPropertyBindings(config)
+      relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
+      tableSettingsLabel: getTableSettingsLabel()
     });
     applyServerGraphToLocalGraph(result);
     const errorMessage = extractError(result, false, null);
@@ -382,6 +393,19 @@ const updateSidebarCategoryCount = (categoryId, increment = 1) => {
   }
 };
 
+/** True if content id is listed in any TableUiState P.data (row not yet in table after upload→promote). */
+const isContentInTableData = (contentId) => {
+  if (contentId == null || contentId === "") return false;
+  const cid = String(contentId);
+  for (const vid in args.graph.vertexes) {
+    const v = args.graph.vertexes[vid];
+    if (!v?.L?.includes("TableUiState")) continue;
+    const data = v.P?.data;
+    if (Array.isArray(data) && data.includes(cid)) return true;
+  }
+  return false;
+};
+
 const getGenericSaveFunction = () => {
   const tableVertexLabel = getTableVertexLabel();
   if (!tableVertexLabel) return null;
@@ -414,19 +438,52 @@ const getGenericSaveFunction = () => {
 
       const enableUserScopingForContent = tableConfig?.enableUserScopingForContent === true;
 
+      const neoElementIdFromVertex = (v) => {
+        if (!v || v.id == null || v.id === undefined) return undefined;
+        const s = String(v.id).trim();
+        return s.includes(":") ? s : undefined;
+      };
+      const isLocalVertexId = (id) => {
+        if (id == null || id === undefined) return false;
+        return String(id).trim().startsWith("-");
+      };
+      const effectiveElementIdFromVertex = (v) =>
+        neoElementIdFromVertex(v) ??
+        (v?.id != null && !isLocalVertexId(v.id) ? String(v.id).trim() : undefined);
+
+      const resolvedMutateElementId =
+        effectiveElementIdFromVertex(originalRow) ??
+        effectiveElementIdFromVertex(apiData?.vertex);
+
+      // Add modal after graphFileUpload: File already exists in Neo4j — update metadata, do not CREATE again.
+      let operation =
+        mode === "add" ? "create" : mode === "edit" ? "update" : "delete";
+      if (operation === "create" && resolvedMutateElementId) {
+        operation = "update";
+      }
+
       const result = await args.fns.executeYTOFunction("mutateUserContent", {
         tableVertexLabel,
-        operation: mode === "add" ? "create" : mode === "edit" ? "update" : "delete",
+        tableSettingsLabel: getTableSettingsLabel(),
+        operation,
         data: apiData,
-        elementId: originalRow?.id,
+        elementId: resolvedMutateElementId,
         uniqueKeys: uniqueKeys,
         enableUserScoping: enableUserScopingForContent,
         hooks: tableConfig?.hooks,
         nestedLinePropertyStripKeys: buildNestedLinePropertyStripKeys(tableConfig)
       });
+      applyServerGraphToLocalGraph(result);
 
-      // If adding a new item and sidebar item is selected, add relationship FROM sidebar item TO new content
-      if (mode === "add" && result?.result?.success && result.result.data) {
+      const savedContentId = String(
+        result?.result?.data?.id ?? ""
+      );
+      const shouldAssignSidebarCategory =
+        result?.result?.success &&
+        result.result.data &&
+        (!isContentInTableData(savedContentId));
+
+      if (shouldAssignSidebarCategory) {
         const sidebarItem = selectedSidebarItem();
         const sidebarConfig = getSidebarConfig();
 
@@ -443,12 +500,12 @@ const getGenericSaveFunction = () => {
             const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
             const enableUserScopingForContent = config?.enableUserScopingForContent === true;
 
-            // Create relationship: Category -[toParentEdgeType]-> ContentItem
+            // File -[toParentEdgeType]-> Folder (MERGE on server); merge graph + bump count on success
             try {
-              const newContentId = result.result.data.id;
-              await args.fns.executeYTOFunction("createSidebarContentRelationship", {
+              if (!savedContentId) throw new Error("missing content id after save");
+              const relResult = await args.fns.executeYTOFunction("createSidebarContentRelationship", {
                 categoryId: sidebarItem.id,
-                contentId: newContentId,
+                contentId: savedContentId,
                 relationshipType: sidebarConfig.toParentEdgeType,
                 categoryLabel: sidebarConfig.parentVertexLabel,
                 contentLabel: tableVertexLabel,
@@ -456,9 +513,9 @@ const getGenericSaveFunction = () => {
                 enableUserScopingForContent: enableUserScopingForContent,
                 hooks: config?.hooks
               });
-
+              applyServerGraphToLocalGraph(relResult);
               // Update category count - increment by 1
-              updateSidebarCategoryCount(sidebarItem.id, 1);
+              if (!extractError(relResult, false)) updateSidebarCategoryCount(sidebarItem.id, 1);
             } catch (relError) {
               console.error("Error creating sidebar relationship:", relError);
               // Don't fail the whole operation if relationship creation fails
@@ -521,9 +578,11 @@ const getGenericSaveSettingsFunction = () => {
   if (!tableVertexLabel) return null;
   return async (configText) => {
     try {
+      const tableSettingsLabel = getTableSettingsLabel();
       const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
         tableVertexLabel,
-        key: `${tableVertexLabel}_settings`,
+        settingsLabel: tableSettingsLabel,
+        key: `${tableSettingsLabel}_settings`,
         config: configText
       });
 
@@ -558,7 +617,8 @@ const getGenericImportFunction = () => {
         tableVertexLabel,
         data,
         enableUserScoping: enableUserScopingForContent,
-        hooks: config?.hooks
+        hooks: config?.hooks,
+        tableSettingsLabel: getTableSettingsLabel()
       });
 
       // Check for errors (don't show toast here, let caller handle it)
@@ -596,7 +656,8 @@ const getGenericExportFunction = () => {
         columns: sanitizedColumns,
         enableUserScoping: enableUserScopingForContent,
         hooks: config?.hooks,
-        relationshipPropertyBindings: buildRelationshipPropertyBindings(config)
+        relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
+        tableSettingsLabel: getTableSettingsLabel()
       });
 
       // Check for errors (don't show toast here, let caller handle it)
@@ -1104,10 +1165,55 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
   }
 };
 
+
+const getShowSelection = () => {
+  const value = prop("showSelection", args.contextData.props);
+  return value === true;
+};
+
+const getSelectionMode = () => {
+  const value = prop("selectionMode", args.contextData.props);
+  return value === "single" ? "single" : "multiple";
+};
+
+const getOnSelectionChange = () => prop("onSelectionChange", args.contextData.props);
+
+const getInitialSelectedRowIds = () => {
+  const value = prop("initialSelectedRowIds", args.contextData.props);
+  return Array.isArray(value) ? value : undefined;
+};
+
+const getTablePassthroughProps = () => {
+  const passthrough = {};
+  const showSelectionValue = prop("showSelection", args.contextData.props);
+  if (showSelectionValue !== undefined) {
+    passthrough.showSelection = showSelectionValue === true;
+  }
+  const selectionModeValue = prop("selectionMode", args.contextData.props);
+  if (selectionModeValue === "single" || selectionModeValue === "multiple") {
+    passthrough.selectionMode = selectionModeValue;
+  }
+  const onSelectionChange = getOnSelectionChange();
+  if (typeof onSelectionChange === "function") {
+    passthrough.onSelectionChange = onSelectionChange;
+  }
+  const initialSelectedRowIds = getInitialSelectedRowIds();
+  if (Array.isArray(initialSelectedRowIds)) {
+    passthrough.initialSelectedRowIds = initialSelectedRowIds;
+  }
+  return passthrough;
+};
+
 // Exported API
 return {
   prop,
+  getShowSelection,
+  getSelectionMode,
+  getOnSelectionChange,
+  getInitialSelectedRowIds,
+  getTablePassthroughProps,
   getTableVertexLabel,
+  getTableSettingsLabel,
   getUncategorizedVertexId,
   getLoadFromSetting,
   getConfigFunction,
@@ -1236,8 +1342,8 @@ return {
         props:
           '''
 const tableVertexLabel = args.fns.getTableVertexLabel();
-// Relationship type is "User" + tableVertexLabel (e.g., "UserBook", "UserAudioVideo")
-const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
+const tableSettingsLabel = args.fns.getTableSettingsLabel();
+const relationshipType = tableVertexLabel ? `User${tableSettingsLabel}` : null;
 
 // Get config to check user scoping settings and hooks
 const { config } = args.fns.getCachedConfig();
@@ -1278,7 +1384,8 @@ return {
   setSelectedRows: args.fns.setSelectedRows,
   clearSelectedRows: args.fns.clearSelectedRows,
   rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
-  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids })
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
+  ...args.fns.getTablePassthroughProps()
 }'''
       }
     }
@@ -1317,7 +1424,8 @@ return {
   setSelectedRows: args.fns.setSelectedRows,
   clearSelectedRows: args.fns.clearSelectedRows,
   rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
-  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids })
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
+  ...args.fns.getTablePassthroughProps()
 }'''
       }
     }

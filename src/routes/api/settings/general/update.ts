@@ -8,9 +8,11 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { isShopDatabaseName } from "~/lib/shopify/getDatabaseNameForShop";
+import { enqueueGlobalSettingsShopSync } from "~/server/queue/globalSettingsShopSyncQueue";
 
 export async function POST({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const user = await getUserFromSession(request);
@@ -73,6 +75,12 @@ export async function POST({ request }: APIEvent) {
       user?.P?.email ?? "",
       "Updated global settings",
     );
+
+    if (!isShopDatabaseName(subDomain)) {
+      void enqueueGlobalSettingsShopSync(subDomain).catch((err) => {
+        console.warn("[Global settings] Failed to enqueue Shopify shop global settings sync:", err);
+      });
+    }
 
     return {
       graph: {

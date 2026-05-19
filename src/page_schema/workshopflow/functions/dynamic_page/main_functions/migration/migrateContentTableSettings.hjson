@@ -50,12 +50,12 @@ const settingsConfigs = [
   columns: [
     { key: "appointmentNo", label: "Appointment #", type: "text", width: "140px" },
     { key: "scheduledAt", label: "Scheduled At", type: "date", width: "180px" },
-    { key: "customerName", label: "Customer", type: "text", width: "180px" },
-    { key: "vehiclePlate", label: "Plate", type: "text", width: "120px" },
-    { key: "serviceType", label: "Service", type: "text", width: "180px" },
-    { key: "assignedTechnician", label: "Technician", type: "text", width: "150px" },
+    { key: "customerId", label: "Customer", type: "select", width: "180px", selectConfig: { label: "WorkshopCustomer", labelField: "name", relationshipType: "AppointmentCustomer", limit: 100, edgeOnly: true } },
+    { key: "vehicleId", label: "Vehicle", type: "select", width: "120px", selectConfig: { label: "WorkshopVehicle", labelField: "plate", relationshipType: "AppointmentVehicle", limit: 200, edgeOnly: true } },
+    { key: "serviceId", label: "Service", type: "select", width: "180px", selectConfig: { label: "WorkshopService", labelField: "name", relationshipType: "AppointmentService", limit: 100, edgeOnly: true } },
+    { key: "assignedTechnicianId", label: "Technician", type: "select", width: "150px", selectConfig: { label: "WorkshopTechnician", labelField: "name", relationshipType: "AppointmentTechnician", limit: 100, edgeOnly: true } },
     { key: "status", label: "Status", type: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { scheduled: ["Scheduled", "info"], "in-progress": ["In Progress", "warning"], completed: ["Completed", "success"], cancelled: ["Cancelled", "critical"] } },
-    { key: "bay", label: "Bay", type: "text", width: "80px" }
+    { key: "serviceBayId", label: "Bay", type: "select", width: "120px", selectConfig: { label: "WorkshopServiceBay", labelField: "name", relationshipType: "AppointmentServiceBay", limit: 100, edgeOnly: true } }
   ],
   rowHeight: 52,
   showSelection: true,
@@ -70,7 +70,7 @@ const settingsConfigs = [
         title: "Schedule",
         gridColumns: 2,
         fields: [
-          { key: "appointmentNo", label: "Appointment #", type: "text", required: true, colSpan: 1, tooltip: "Unique booking reference shown in the table, printouts, and linked repair orders. Auto-assigned from reference sequences (Workshop Settings → Appointments).", autoReferenceSequenceKey: "WorkshopAppointment.appointmentNo", readOnlyInAddMode: true },
+          { key: "appointmentNo", label: "Appointment #", type: "text", required: true, colSpan: 1, tooltip: "Unique booking reference shown in the table, printouts, and linked repair orders. Auto-assigned from reference sequences (Workshop Settings → Appointments).", autoReferenceSequenceKey: "WorkshopAppointment.appointmentNo", disabled: (ctx) => ctx.mode === "create" },
           { key: "status", label: "Status", type: "select", required: true, optionsPicklist: { picklistKey: "appointment_status" }, colSpan: 1, tooltip: "Lifecycle of this visit: scheduled, in progress, completed, or cancelled. Options are configured under Workshop Settings → Appointments." },
           { key: "scheduledAt", label: "Scheduled At", type: "date", required: true, colSpan: 1, tooltip: "Date (and time if your workflow stores it) when the vehicle is expected. Use for scheduling and reminders." },
           { key: "serviceBayId", label: "Service Bay", type: "select", selectConfig: { label: "WorkshopServiceBay", labelField: "name", relationshipType: "AppointmentServiceBay", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Bay or ramp from Directory → Service bays. Stored as a graph edge; the table shows the bay name." }
@@ -117,8 +117,7 @@ const settingsConfigs = [
     }
   },
   hooks: {
-    afterCreate: ["workshopAfterAppointmentMutate", "workshopAfterAppointmentCreate"],
-    afterUpdate: ["workshopAfterAppointmentMutate"]
+    afterCreate: ["workshopAfterAppointmentCreate"]
   }
 };`
   },
@@ -133,9 +132,9 @@ const settingsConfigs = [
   icon: "ph:wrench",
   columns: [
     { key: "repairNo", label: "RO #", type: "text", width: "130px" },
-    { key: "appointmentNo", label: "Appointment #", type: "text", width: "130px" },
-    { key: "customerName", label: "Customer", type: "text", width: "180px" },
-    { key: "vehiclePlate", label: "Plate", type: "text", width: "110px" },
+    { key: "appointmentId", label: "Appointment #", type: "select", width: "130px", selectConfig: { label: "WorkshopAppointment", labelField: "appointmentNo", relationshipType: "RepairAppointment", limit: 100, edgeOnly: true } },
+    { key: "customerId", label: "Customer", type: "select", width: "180px", selectConfig: { label: "WorkshopCustomer", labelField: "name", relationshipType: "RepairCustomer", limit: 100, edgeOnly: true } },
+    { key: "vehicleId", label: "Plate", type: "select", width: "110px", selectConfig: { label: "WorkshopVehicle", labelField: "plate", relationshipType: "RepairVehicle", limit: 200, edgeOnly: true } },
     { key: "status", label: "Status", type: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { open: ["Open", "info"], diagnosing: ["Diagnosing", "warning"], "waiting-parts": ["Waiting Parts", "warning"], "ready-billing": ["Ready Billing", "warning"], closed: ["Closed", "success"], cancelled: ["Cancelled", "critical"] } },
     { key: "diagnosis", label: "Diagnosis", type: "text", width: "220px", overflowEllipsis: true },
     { key: "laborHours", label: "Labor Hrs", type: "number", width: "100px" },
@@ -152,7 +151,7 @@ const settingsConfigs = [
         title: "Order Core",
         gridColumns: 2,
         fields: [
-          { key: "repairNo", label: "Repair Order #", type: "text", required: true, colSpan: 1, tooltip: "Unique repair order number; used on invoices, parts orders, and customer comms. Auto-assigned from reference sequences (Workshop Settings → Repairs).", autoReferenceSequenceKey: "RepairOrder.repairNo", readOnlyInAddMode: true },
+          { key: "repairNo", label: "Repair Order #", type: "text", required: true, colSpan: 1, tooltip: "Unique repair order number; used on invoices, parts orders, and customer comms. Auto-assigned from reference sequences (Workshop Settings → Repairs).", autoReferenceSequenceKey: "RepairOrder.repairNo", disabled: (ctx) => ctx.mode === "create" },
           { key: "appointmentId", label: "Appointment", type: "select", selectConfig: { label: "WorkshopAppointment", labelField: "appointmentNo", relationshipType: "RepairAppointment", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Optional link to the booking this job came from. Leave empty for walk-in work." },
           { key: "status", label: "Status", type: "select", required: true, optionsPicklist: { picklistKey: "repair_status" }, colSpan: 1, tooltip: "Workflow stage: open through closed (and cancelled when used). Options are configured under Workshop Settings → Repairs." },
           { key: "assignedTechnicianId", label: "Technician", type: "select", selectConfig: { label: "WorkshopTechnician", labelField: "name", relationshipType: "RepairTechnician", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Lead technician responsible for this repair order." },
@@ -201,8 +200,8 @@ const settingsConfigs = [
   },
   hooks: {
     beforeUpdate: ["workshopBeforeRepairUpdateValidate"],
-    afterCreate: ["workshopAfterRepairMutate", "workshopAfterRepairStatusUpdate"],
-    afterUpdate: ["workshopAfterRepairMutate", "workshopAfterRepairStatusUpdate"]
+    afterCreate: ["workshopAfterRepairStatusUpdate"],
+    afterUpdate: ["workshopAfterRepairStatusUpdate"]
   }
 };`
   },
@@ -218,11 +217,11 @@ const settingsConfigs = [
   columns: [
     { key: "partNo", label: "Part #", type: "text", width: "140px" },
     { key: "name", label: "Part Name", type: "text", width: "220px" },
-    { key: "categoryName", label: "Category", type: "text", width: "150px" },
+    { key: "categoryId", label: "Category", type: "select", width: "150px", selectConfig: { label: "InventoryCategory", labelField: "name", relationshipType: "InventoryCategoryItem", limit: 200, edgeOnly: true } },
     { key: "stockQty", label: "Stock", type: "number", width: "90px" },
     { key: "reorderLevel", label: "Reorder", type: "number", width: "100px" },
     { key: "unitCost", label: "Unit Cost", type: "number", width: "110px" },
-    { key: "supplierName", label: "Supplier", type: "text", width: "180px" }
+    { key: "supplierId", label: "Supplier", type: "select", width: "180px", selectConfig: { label: "WorkshopSupplier", labelField: "name", relationshipType: "InventoryItemSupplier", limit: 200, edgeOnly: true } }
   ],
   rowHeight: 52,
   showSelection: true,
@@ -236,7 +235,7 @@ const settingsConfigs = [
         fields: [
           { key: "partNo", label: "Part #", type: "text", required: true, colSpan: 1, tooltip: "SKU or manufacturer part number; must be unique for this inventory list." },
           { key: "name", label: "Part Name", type: "text", required: true, colSpan: 1, tooltip: "Human-readable name shown in pick lists and invoices." },
-          { key: "categoryId", label: "Category", type: "select", selectConfig: { label: "InventoryCategory", labelField: "name", relationshipType: "InventoryCategoryItem", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Inventory category (same relationship as sidebar drag). Table column shows denormalized category name." },
+          { key: "categoryId", label: "Category", type: "select", selectConfig: { label: "InventoryCategory", labelField: "name", relationshipType: "InventoryCategoryItem", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Inventory category (same relationship as sidebar drag)." },
           { key: "supplierId", label: "Supplier", type: "select", selectConfig: { label: "WorkshopSupplier", labelField: "name", relationshipType: "InventoryItemSupplier", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Preferred vendor for this part. Manage suppliers under Directory → Suppliers." },
           { key: "stockQty", label: "Stock Quantity", type: "number", required: true, min: 0, step: 1, colSpan: 1, tooltip: "On-hand quantity. Update when goods are received or consumed on jobs." },
           { key: "reorderLevel", label: "Reorder Level", type: "number", min: 0, step: 1, colSpan: 1, tooltip: "When stock falls at or below this value, plan a reorder." },
@@ -269,10 +268,6 @@ const settingsConfigs = [
         }
       ]
     }
-  },
-  hooks: {
-    afterCreate: ["workshopAfterInventoryItemMutate"],
-    afterUpdate: ["workshopAfterInventoryItemMutate"]
   }
 };`
   },
@@ -287,8 +282,7 @@ const settingsConfigs = [
   icon: "ph:receipt",
   columns: [
     { key: "invoiceNo", label: "Invoice #", type: "text", width: "140px" },
-    { key: "repairNo", label: "Repair #", type: "text", width: "120px" },
-    { key: "customerName", label: "Customer", type: "text", width: "180px" },
+    { key: "repairId", label: "Repair #", type: "select", width: "120px", selectConfig: { label: "RepairOrder", labelField: "repairNo", relationshipType: "InvoiceRepairOrder", limit: 100, edgeOnly: true } },
     { key: "invoiceDate", label: "Date", type: "date", width: "120px" },
     { key: "totalAmount", label: "Total", type: "number", width: "110px" },
     { key: "paymentStatus", label: "Payment", type: "badge", width: "130px", badgeKeyCase: "lower", badgeToneMap: { unpaid: ["Unpaid", "critical"], partial: ["Partial", "warning"], paid: ["Paid", "success"] } }
@@ -303,7 +297,7 @@ const settingsConfigs = [
         title: "Invoice",
         gridColumns: 2,
         fields: [
-          { key: "invoiceNo", label: "Invoice #", type: "text", required: true, colSpan: 1, tooltip: "Unique invoice number for accounting and customer reference. Auto-assigned from reference sequences (Workshop Settings → Billing).", autoReferenceSequenceKey: "WorkshopInvoice.invoiceNo", readOnlyInAddMode: true },
+          { key: "invoiceNo", label: "Invoice #", type: "text", required: true, colSpan: 1, tooltip: "Unique invoice number for accounting and customer reference. Auto-assigned from reference sequences (Workshop Settings → Billing).", autoReferenceSequenceKey: "WorkshopInvoice.invoiceNo", disabled: (ctx) => ctx.mode === "create" },
           { key: "invoiceDate", label: "Invoice Date", type: "date", required: true, colSpan: 1, tooltip: "Issue date on the invoice; drives aging and tax periods." },
           { key: "repairId", label: "Repair order", type: "select", required: true, selectConfig: { label: "RepairOrder", labelField: "repairNo", relationshipType: "InvoiceRepairOrder", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Links this invoice to a repair order. Customer context is taken from the repair in automations." },
           { key: "invoiceLines", label: "Line items", type: "nestedLineItems", colSpan: 2, tooltip: "Invoice lines (part, labor, fee). Part lines can link to inventory. Stored as WorkshopInvoiceLine (WorkshopInvoiceWorkshopInvoiceLine, optional WorkshopInvoiceLineInventoryItem).", nestedLineItemsConfig: { childLabel: "WorkshopInvoiceLine", parentToChildRelationshipType: "WorkshopInvoiceWorkshopInvoiceLine", childToInventoryRelationshipType: "WorkshopInvoiceLineInventoryItem", inventoryTargetLabel: "InventoryItem", parentElementIdPropOnChild: "invoiceElementId", lineTypeOptions: [{ value: "part", label: "Part" }, { value: "labor", label: "Labor" }, { value: "fee", label: "Fee" }], inventorySelectConfig: { label: "InventoryItem", labelField: "partNo", limit: 200, singularName: "Part", pluralName: "Parts" }, nestedLineItemsSyncRules: { quantityFieldKey: "qty", quantityRule: { op: ">=", value: 0 }, inventoryRequiredMode: "when", inventoryRequiredWhenField: "lineType", inventoryRequiredWhenValues: ["part"], rowRequiredFields: ["lineType"] }, lineColumns: [{ key: "lineType", label: "Type", columnType: "select", optionsKey: "lineTypeOptions", placeholder: "Type", defaultValue: "labor", selectFallbackValue: "labor", gridMinmax: "minmax(5.25rem, 0.85fr)" }, { key: "description", label: "Description", columnType: "text", placeholder: "Description", defaultValue: "", gridMinmax: "minmax(6.5rem, 1.35fr)" }, { key: "qty", label: "Qty", columnType: "number", placeholder: "Qty", min: 0, step: 0.01, defaultValue: 1, gridMinmax: "minmax(3.25rem, 0.45fr)" }, { key: "unitPrice", label: "Unit price", columnType: "number", placeholder: "Unit price", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4.25rem, 0.55fr)" }, { key: "lineTotal", label: "Line total", columnType: "number", placeholder: "Line total", min: 0, step: 0.01, defaultValue: 0, gridMinmax: "minmax(4.25rem, 0.55fr)" }, { key: "_inventory", label: "Part", columnType: "inventory", showWhenField: "lineType", showWhenValues: ["part"], gridMinmax: "minmax(7rem, 1.05fr)" }, { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }] } },
@@ -372,7 +366,7 @@ const settingsConfigs = [
         title: "Customer Information",
         gridColumns: 2,
         fields: [
-          { key: "customerNo", label: "Customer #", type: "text", required: true, colSpan: 1, tooltip: "Internal customer or account number; unique per workshop. Auto-assigned from reference sequences (Workshop Settings → Customers).", autoReferenceSequenceKey: "WorkshopCustomer.customerNo", readOnlyInAddMode: true },
+          { key: "customerNo", label: "Customer #", type: "text", required: true, colSpan: 1, tooltip: "Internal customer or account number; unique per workshop. Auto-assigned from reference sequences (Workshop Settings → Customers).", autoReferenceSequenceKey: "WorkshopCustomer.customerNo", disabled: (ctx) => ctx.mode === "create" },
           { key: "name", label: "Name", type: "text", required: true, colSpan: 1, tooltip: "Primary contact or business name shown on appointments and invoices." },
           { key: "phone", label: "Phone", type: "text", colSpan: 1, tooltip: "Main phone for SMS or callbacks." },
           { key: "email", label: "Email", type: "text", colSpan: 1, tooltip: "Email for estimates, invoices, and marketing (if allowed)." },
@@ -432,7 +426,7 @@ const settingsConfigs = [
         title: "Supplier",
         gridColumns: 2,
         fields: [
-          { key: "supplierCode", label: "Supplier code", type: "text", required: true, colSpan: 1, tooltip: "Short unique code for this vendor (e.g. VEN-001). Auto-assigned from reference sequences (Workshop Settings → Suppliers).", autoReferenceSequenceKey: "WorkshopSupplier.supplierCode", readOnlyInAddMode: true },
+          { key: "supplierCode", label: "Supplier code", type: "text", required: true, colSpan: 1, tooltip: "Short unique code for this vendor (e.g. VEN-001). Auto-assigned from reference sequences (Workshop Settings → Suppliers).", autoReferenceSequenceKey: "WorkshopSupplier.supplierCode", disabled: (ctx) => ctx.mode === "create" },
           { key: "name", label: "Name", type: "text", required: true, colSpan: 1, tooltip: "Vendor or supplier name shown on part records and reports." },
           { key: "supplierType", label: "Type", type: "select", optionsPicklist: { picklistKey: "supplier_type" }, colSpan: 1, tooltip: "Classify the supplier. Options: Workshop Settings → Suppliers." },
           { key: "phone", label: "Phone", type: "text", colSpan: 1, tooltip: "Main ordering or accounts phone." },
@@ -479,7 +473,7 @@ const settingsConfigs = [
   columns: [
     { key: "techNo", label: "Tech #", type: "text", width: "120px" },
     { key: "name", label: "Name", type: "text", width: "180px" },
-    { key: "specialization", label: "Specialization", type: "text", width: "180px" },
+    { key: "skillId", label: "Specialization", type: "select", width: "180px", selectConfig: { label: "WorkshopSkill", labelField: "name", relationshipType: "TechnicianPrimarySkill", limit: 200, edgeOnly: true } },
     { key: "phone", label: "Phone", type: "text", width: "140px" },
     { key: "status", label: "Status", type: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { active: ["Active", "success"], leave: ["On Leave", "warning"], inactive: ["Inactive", "neutral"] } }
   ],
@@ -525,10 +519,6 @@ const settingsConfigs = [
         }
       ]
     }
-  },
-  hooks: {
-    afterCreate: ["workshopAfterTechnicianMutate"],
-    afterUpdate: ["workshopAfterTechnicianMutate"]
   }
 };`
   },
@@ -544,7 +534,7 @@ const settingsConfigs = [
   columns: [
     { key: "serviceCode", label: "Code", type: "text", width: "120px" },
     { key: "name", label: "Service", type: "text", width: "220px" },
-    { key: "categoryName", label: "Category", type: "text", width: "180px" },
+    { key: "categoryId", label: "Category", type: "select", width: "180px", selectConfig: { label: "ServiceCategory", labelField: "name", relationshipType: "ServiceCategoryItem", limit: 200, edgeOnly: true } },
     { key: "durationMins", label: "Duration", type: "number", width: "100px" },
     { key: "basePrice", label: "Base Price", type: "number", width: "110px" }
   ],
@@ -560,7 +550,7 @@ const settingsConfigs = [
         fields: [
           { key: "serviceCode", label: "Service Code", type: "text", required: true, colSpan: 1, tooltip: "Short code for menus and integrations (e.g. OIL-STD)." },
           { key: "name", label: "Service Name", type: "text", required: true, colSpan: 1, tooltip: "Customer-facing name of the service package." },
-          { key: "categoryId", label: "Category", type: "select", selectConfig: { label: "ServiceCategory", labelField: "name", relationshipType: "ServiceCategoryItem", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Service category (same as sidebar). Table shows denormalized category name." },
+          { key: "categoryId", label: "Category", type: "select", selectConfig: { label: "ServiceCategory", labelField: "name", relationshipType: "ServiceCategoryItem", limit: 200, edgeOnly: true }, colSpan: 1, tooltip: "Service category (same as sidebar)." },
           { key: "durationMins", label: "Duration (mins)", type: "number", min: 0, step: 5, colSpan: 1, tooltip: "Typical bay time for scheduling slots." },
           { key: "basePrice", label: "Base Price", type: "number", min: 0, step: 0.01, colSpan: 1, tooltip: "Default price before upsells or parts." },
           { key: "description", label: "Description", type: "textarea", colSpan: 2, tooltip: "What is included, exclusions, and warranty notes for staff and customers." }
@@ -569,10 +559,6 @@ const settingsConfigs = [
     ]
   },
   uniqueKeys: ["serviceCode"],
-  hooks: {
-    afterCreate: ["workshopAfterWorkshopServiceMutate"],
-    afterUpdate: ["workshopAfterWorkshopServiceMutate"]
-  },
   sidebar: {
     enabled: true,
     parentVertexLabel: "ServiceCategory",
@@ -608,9 +594,9 @@ const settingsConfigs = [
   icon: "ph:currency-circle-dollar",
   columns: [
     { key: "paymentNo", label: "Payment #", type: "text", width: "140px" },
-    { key: "invoiceNo", label: "Invoice #", type: "text", width: "140px" },
+    { key: "invoiceId", label: "Invoice #", type: "select", width: "140px", selectConfig: { label: "WorkshopInvoice", labelField: "invoiceNo", relationshipType: "PaymentInvoice", limit: 100, edgeOnly: true } },
     { key: "paymentDate", label: "Date", type: "date", width: "140px" },
-    { key: "method", label: "Method", type: "text", width: "120px" },
+    { key: "method", label: "Method", type: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { cash: ["Cash", "success"], card: ["Card", "info"], transfer: ["Transfer", "neutral"], mobile: ["Mobile", "neutral"] } },
     { key: "amount", label: "Amount", type: "number", width: "120px" },
     { key: "referenceNo", label: "Reference", type: "text", width: "180px" }
   ],
@@ -624,7 +610,7 @@ const settingsConfigs = [
         title: "Payment Information",
         gridColumns: 2,
         fields: [
-          { key: "paymentNo", label: "Payment #", type: "text", required: true, colSpan: 1, tooltip: "Unique receipt or payment reference for reconciliation. Auto-assigned from reference sequences (Workshop Settings → Payments).", autoReferenceSequenceKey: "WorkshopPayment.paymentNo", readOnlyInAddMode: true },
+          { key: "paymentNo", label: "Payment #", type: "text", required: true, colSpan: 1, tooltip: "Unique receipt or payment reference for reconciliation. Auto-assigned from reference sequences (Workshop Settings → Payments).", autoReferenceSequenceKey: "WorkshopPayment.paymentNo", disabled: (ctx) => ctx.mode === "create" },
           { key: "invoiceId", label: "Invoice", type: "select", required: true, selectConfig: { label: "WorkshopInvoice", labelField: "invoiceNo", relationshipType: "PaymentInvoice", limit: 100, edgeOnly: true }, colSpan: 1, tooltip: "Invoice this payment applies to. Hooks update invoice payment status when linked." },
           { key: "paymentDate", label: "Payment Date", type: "date", required: true, colSpan: 1, tooltip: "Date money was received or cleared." },
           { key: "method", label: "Method", type: "select", required: true, optionsPicklist: { picklistKey: "payment_method" }, colSpan: 1, tooltip: "Tender type for reports and merchant settlement. Options: Workshop Settings → Payments." },

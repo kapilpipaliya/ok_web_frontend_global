@@ -4,6 +4,7 @@ import {
   getSetting as getSettingFunc,
   saveSetting as saveSettingFunc,
 } from "~/lib/api/server/settings/settingsFunctions";
+import { enqueueEmailSettingsShopSync } from "~/server/queue/emailSettingsShopSyncQueue";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 
@@ -70,13 +71,28 @@ export async function saveSetting(
       accountId = accountResult.records[0]?.get("accountId");
     }
 
-    return await saveSettingFunc(
+    const result = await saveSettingFunc(
       dbSession,
       type,
       data,
       user?.P.email ?? "",
       accountId,
     );
+
+    if (
+      !result.error &&
+      type === "email" &&
+      !accountId
+    ) {
+      void enqueueEmailSettingsShopSync(subDomain).catch((err) => {
+        console.warn(
+          "[Email settings] Failed to enqueue Shopify shop email sync:",
+          err,
+        );
+      });
+    }
+
+    return result;
   } finally {
     await dbSession.close();
   }

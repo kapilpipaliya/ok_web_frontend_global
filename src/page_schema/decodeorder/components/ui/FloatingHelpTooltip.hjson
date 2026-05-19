@@ -18,6 +18,7 @@ return `._id {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
+  flex-shrink: 0;
 }`;
 '''
         displayOrder: 1
@@ -118,9 +119,17 @@ return {
         props:
           '''
 const p = args.contextData.props || {};
+const rawText = p.text;
+const textNonEmpty =
+  typeof rawText === "string"
+    ? rawText.replace(/\\n/g, "\n").trim() !== ""
+    : Boolean(rawText);
+const hasPolicy = typeof p.policyRows === "function";
+const policyCount = hasPolicy ? (p.policyRows() || []).length : 0;
+const hasText = textNonEmpty || (hasPolicy && policyCount > 0);
 return {
   as: "span",
-  hide: p.hide === true || !p.text,
+  hide: p.hide === true || !hasText,
   onCleanup: () => {
     args.fns.tearDownFloating();
   }
@@ -129,7 +138,7 @@ return {
       }
     }
     {
-      id: "3"
+      id: "3w"
       L: Attr
       P: {
         css:
@@ -138,22 +147,22 @@ return `._id {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.125rem;
-  height: 1.125rem;
-  margin-left: 0.125rem;
+  gap: 0.125rem;
+  min-width: 1.375rem;
+  min-height: 1.375rem;
+  margin-left: 0.25rem;
   border: none;
   background: transparent;
-  color: ${args.theme.var.color.muted};
   border-radius: ${args.theme.var.borderRadius.sm};
   cursor: help;
   font-size: 0.75rem;
   line-height: 1;
-  padding: 0;
+  padding: 0.125rem;
   flex-shrink: 0;
+  box-sizing: content-box;
 }
 
 ._id:hover {
-  color: ${args.theme.var.color.primary};
   background: ${args.theme.var.color.background_light_200};
 }`;
 '''
@@ -161,20 +170,97 @@ return `._id {
         componentName: Html
         props:
           '''
-const text = args.contextData.props?.text || "";
-const fieldLabel = args.contextData.props?.fieldLabel || "";
-const aria = text
-  ? (fieldLabel ? `Help for ${fieldLabel}: ${text}` : `Help: ${text}`)
-  : "Help";
+const p = args.contextData.props || {};
+const rawText = p.text || "";
+const textTrim =
+  typeof rawText === "string" &&
+  rawText.replace(/\\n/g, "\n").trim() !== "";
+const hasPolicy = typeof p.policyRows === "function";
+const policyCount = hasPolicy ? (p.policyRows() || []).length : 0;
+const hasContent = textTrim || (hasPolicy && policyCount > 0);
+const fieldLabel = p.fieldLabel || "";
+const aria =
+  fieldLabel && hasContent
+    ? `Password requirements for ${fieldLabel}`
+    : "Help";
 
 return {
   as: "span",
-  text: "\u24D8",
-  "aria-label": aria,
   ref: args.fns.setTriggerRef,
   onMouseEnter: () => args.fns.openTooltip(),
   onMouseLeave: () => args.fns.scheduleClose(),
-  hide: !text
+  hide: !hasContent,
+  "aria-label": aria,
+  tabIndex: 0
+};
+'''
+      }
+    }
+    {
+      id: "3i"
+      L: Attr
+      P: {
+        css:
+          '''
+const p = args.contextData.props || {};
+const tt = p.triggerTint;
+const tint =
+  typeof tt === "function" ? tt() : args.theme.var.color.muted;
+return `._id {
+  flex-shrink: 0;
+  color: ${tint};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const p = args.contextData.props || {};
+const trig = p.triggerIcon;
+if (trig === undefined || trig === null || trig === "") {
+  return {
+    as: "icon",
+    icon: "ph:question",
+    width: 20,
+    height: 20,
+    hide: true
+  };
+}
+const iconRaw = typeof trig === "function" ? trig() : trig;
+const icon = String(iconRaw || "").trim() || "ph:question";
+return {
+  as: "icon",
+  icon,
+  width: 20,
+  height: 20,
+  hide: false
+};
+'''
+      }
+    }
+    {
+      id: "3t"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const p = args.contextData.props || {};
+const trig = p.triggerIcon;
+if (trig === undefined || trig === null || trig === "") {
+  return {
+    as: "span",
+    text: "\u24D8",
+    hide: false
+  };
+}
+const iconRaw = typeof trig === "function" ? trig() : trig;
+const hasIcon = Boolean(String(iconRaw || "").trim());
+return {
+  as: "span",
+  text: "\u24D8",
+  hide: hasIcon
 };
 '''
       }
@@ -202,18 +288,22 @@ return {
 return `._id {
   position: fixed;
   z-index: 1100;
-  max-width: min(20rem, calc(100vw - 1rem));
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  max-width: min(18.75rem, calc(100vw - 1rem));
+  padding: 12px;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.md};
+  border-radius: 4px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  font-size: ${args.theme.var.fontSize.sm};
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.45;
   pointer-events: auto;
   animation: fm-help-fade 0.12s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  white-space: normal;
 }
 
 @keyframes fm-help-fade {
@@ -225,16 +315,196 @@ return `._id {
         componentName: Html
         props:
           '''
-const text = args.contextData.props?.text || "";
-
 return {
   as: "div",
   ref: args.fns.setFloatingRef,
-  text,
   role: "tooltip",
   hide: !args.fns.isOpen(),
   onMouseEnter: () => args.fns.clearHideTimer(),
   onMouseLeave: () => args.fns.scheduleClose()
+};
+'''
+      }
+    }
+    {
+      id: "5a"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  white-space: pre-wrap;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const p = args.contextData.props || {};
+const hasPolicy = typeof p.policyRows === "function";
+const rawText = p.text || "";
+const text =
+  typeof rawText === "string" ? rawText.replace(/\\n/g, "\n") : rawText;
+return {
+  as: "div",
+  text,
+  hide: hasPolicy || !text
+};
+'''
+      }
+    }
+    {
+      id: "5t"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 16px;
+  color: ${args.theme.var.color.primary};
+  margin: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const p = args.contextData.props || {};
+const hasPolicy = typeof p.policyRows === "function";
+const title =
+  typeof p.policyTitle === "string" && p.policyTitle.trim() !== ""
+    ? p.policyTitle.trim()
+    : "Password Requirements";
+return {
+  as: "div",
+  text: title,
+  hide: !hasPolicy
+};
+'''
+      }
+    }
+    {
+      id: "5b"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  margin: 0;
+  padding-left: 16px;
+  list-style: none;
+}`;
+'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const p = args.contextData.props || {};
+const hasPolicy = typeof p.policyRows === "function";
+return {
+  as: "div",
+  loop: true,
+  contextName: "policyRow",
+  data: () => (hasPolicy ? p.policyRows() || [] : []),
+  hide: !hasPolicy
+};
+'''
+      }
+    }
+    {
+      id: "5br"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.35;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5bicon"
+      L: Attr
+      P: {
+        css:
+          '''
+const row = args.contextData.policyRow;
+const hasInput = Boolean(row?.hasInput);
+const met = Boolean(row?.met);
+const c = !hasInput
+  ? args.theme.var.color.text
+  : met
+    ? args.theme.var.color.success
+    : args.theme.var.color.error;
+return `._id {
+  flex-shrink: 0;
+  color: ${c};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const row = args.contextData.policyRow;
+const hasInput = Boolean(row?.hasInput);
+const met = Boolean(row?.met);
+const icon = !hasInput
+  ? "ph:circle"
+  : met
+    ? "ph:check-circle-fill"
+    : "ph:x-circle-fill";
+return {
+  as: "icon",
+  icon,
+  width: 18,
+  height: 18
+};
+'''
+      }
+    }
+    {
+      id: "5bmsg"
+      L: Attr
+      P: {
+        css:
+          '''
+const row = args.contextData.policyRow;
+const hasInput = Boolean(row?.hasInput);
+const met = Boolean(row?.met);
+const c = !hasInput
+  ? args.theme.var.color.text
+  : met
+    ? args.theme.var.color.success
+    : args.theme.var.color.muted;
+return `._id {
+  font-size: 14px;
+  color: ${c};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "span",
+  text: args.contextData.policyRow?.message || ""
 };
 '''
       }
@@ -251,7 +521,19 @@ return {
       id: e2
       T: Attr
       S: "2"
-      E: "3"
+      E: "3w"
+    }
+    {
+      id: e2i
+      T: Attr
+      S: "3w"
+      E: "3i"
+    }
+    {
+      id: e2t
+      T: Attr
+      S: "3w"
+      E: "3t"
     }
     {
       id: e3
@@ -264,6 +546,42 @@ return {
       T: Attr
       S: "4"
       E: "5"
+    }
+    {
+      id: e5a
+      T: Attr
+      S: "5"
+      E: "5a"
+    }
+    {
+      id: e5t
+      T: Attr
+      S: "5"
+      E: "5t"
+    }
+    {
+      id: e5b
+      T: Attr
+      S: "5"
+      E: "5b"
+    }
+    {
+      id: e5br
+      T: Attr
+      S: "5b"
+      E: "5br"
+    }
+    {
+      id: e5br1
+      T: Attr
+      S: "5br"
+      E: "5bicon"
+    }
+    {
+      id: e5br3
+      T: Attr
+      S: "5br"
+      E: "5bmsg"
     }
   ]
 }

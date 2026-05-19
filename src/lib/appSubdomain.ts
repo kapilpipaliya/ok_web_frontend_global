@@ -6,6 +6,8 @@ export const APP_SUBDOMAIN_HOSTNAMES = [
   "decodeproduct.decodecommerce.com",
   "decodeorder.decodecommerce.com",
   "decodefile.decodecommerce.com",
+  "storetasks.decodecommerce.com",
+  "attendra.decodecommerce.com",
 ] as const;
 
 /**

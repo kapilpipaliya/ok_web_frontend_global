@@ -27,7 +27,6 @@ return `._id {
   line-height: 1.6;
   font-family: inherit;
   resize: ${resize};
-  min-height: calc(${args.theme.var.touch.input} * 2);
 
   &:focus {
     outline: none;
@@ -75,6 +74,8 @@ return {
   required: args.contextData.props?.required || false,
   disabled: args.contextData.props?.disabled || false,
   readOnly: args.contextData.props?.readOnly || false,
+  title: args.contextData.props?.title || undefined,
+  "aria-describedby": args.contextData.props?.["aria-describedby"] || undefined,
   rows: args.contextData.props?.rows || 4,
   cols: args.contextData.props?.cols || undefined,
   maxLength: args.contextData.props?.maxLength || undefined,

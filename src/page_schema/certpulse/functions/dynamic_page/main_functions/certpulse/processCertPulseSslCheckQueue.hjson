@@ -1,0 +1,262 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Worker: consumes certpulseSslCheck queue and updates CertPulseDomain SSL status; emails owner when expired.
+        key: processCertPulseSslCheckQueue
+        body:
+          '''
+if (args.contextData?.action !== "start") {
+  return { success: true, message: "CertPulse SSL queue worker is ready" };
+}
+
+const queueName = "certpulseSslCheck";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
+const normalizeHost = (host) => {
+  if (!host || typeof host !== "string") return "";
+  return host
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .toLowerCase();
+};
+
+const getRedisConnection = () => {
+  return args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379"),
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    maxLoadingRetryTime: 5000,
+    retryStrategy(times) {
+      if (times > 3) return null;
+      return Math.min(times * 200, 2000);
+    },
+    reconnectOnError(err) {
+      if (err.message && err.message.includes("READONLY")) return true;
+      return false;
+    }
+  };
+};
+
+const tlsCheck = async ({ host, port }) => {
+  const cleanHost = normalizeHost(host);
+  const cleanPort = Number(port || 443);
+
+  if (!cleanHost) return { ok: false, status: "error", error: "Missing host" };
+  if (!Number.isFinite(cleanPort) || cleanPort <= 0 || cleanPort > 65535)
+    return { ok: false, status: "error", error: "Invalid port" };
+
+  return await new Promise((resolve) => {
+    let resolved = false;
+    const finish = (payload) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(payload);
+    };
+
+    const socket = args.tls.connect(
+      {
+        host: cleanHost,
+        port: cleanPort,
+        servername: cleanHost,
+        rejectUnauthorized: false
+      },
+      () => {
+        try {
+          const cert = socket.getPeerCertificate?.();
+          if (!cert || Object.keys(cert).length === 0) {
+            socket.end();
+            return finish({ ok: false, status: "unknown", error: "No peer certificate" });
+          }
+
+          const validTo = cert.valid_to || cert.validTo || cert.valid_to_string;
+          const notAfter = validTo ? new Date(validTo) : null;
+          if (!notAfter || Number.isNaN(notAfter.getTime())) {
+            socket.end();
+            return finish({ ok: false, status: "error", error: `Unable to parse certificate expiry: ${String(validTo)}` });
+          }
+
+          const now = Date.now();
+          const msLeft = notAfter.getTime() - now;
+          const daysRemaining = Math.floor(msLeft / DAY_MS);
+          const status = msLeft < 0 ? "expired" : "valid";
+
+          socket.end();
+          return finish({
+            ok: true,
+            status,
+            sslNotAfter: notAfter.toISOString(),
+            sslDaysRemaining: daysRemaining
+          });
+        } catch (e) {
+          try { socket.end(); } catch {}
+          return finish({ ok: false, status: "error", error: e?.message || String(e) });
+        }
+      }
+    );
+
+    socket.setTimeout(15000, () => {
+      try { socket.destroy(); } catch {}
+      finish({ ok: false, status: "error", error: "TLS connection timed out" });
+    });
+
+    socket.on("error", (err) => {
+      try { socket.destroy(); } catch {}
+      finish({ ok: false, status: "error", error: err?.message || String(err) });
+    });
+  });
+};
+
+const shouldNotifyExpired = (domainProps) => {
+  if (domainProps?.notifyOnExpired === false) return false;
+  return true;
+};
+
+const sendExpiredEmail = async ({ to, host, port, sslNotAfter }) => {
+  if (!to) return;
+  const subject = `SSL certificate expired: ${host}:${port}`;
+  const content = `
+    <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
+      <h2 style="margin:0 0 12px 0;">SSL certificate expired</h2>
+      <p style="margin:0 0 10px 0;">
+        CertPulse detected an expired certificate for <b>${host}:${port}</b>.
+      </p>
+      <p style="margin:0 0 10px 0;">
+        Certificate expiry (notAfter): <code>${sslNotAfter || "unknown"}</code>
+      </p>
+      <p style="margin:0;">
+        Open your dashboard to review: <a href="/certpulse/domains">CertPulse Domains</a>
+      </p>
+    </div>
+  `;
+  await args.sendEmail({ to, subject, content, subDomain: args.subDomain });
+};
+
+const processOne = async (job) => {
+  // IMPORTANT: worker is long-lived; do not use args.session (it will be closed).
+  const dbSession = await args.getSession();
+  try {
+  const payload = job?.data || {};
+  const domainElementId = payload.domainElementId;
+  if (!domainElementId) return { success: false, message: "Missing domainElementId" };
+
+  // Load row and owner (if any)
+  const res = await dbSession.run(
+    `
+    MATCH (d:CertPulseDomain) WHERE elementId(d) = $id
+    OPTIONAL MATCH (u:User)-[:UserCertPulseDomain]->(d)
+    RETURN d, u
+    `,
+    { id: domainElementId }
+  );
+  if (res.records.length === 0) return { success: false, message: "Domain not found" };
+
+  const dNode = res.records[0].get("d");
+  const uNode = res.records[0].get("u");
+  const d = args.convertNodeToJson(dNode);
+  const u = uNode ? args.convertNodeToJson(uNode) : null;
+
+  const enabled = d?.P?.enabled !== false;
+  if (!enabled) {
+    await dbSession.run(
+      `MATCH (d:CertPulseDomain) WHERE elementId(d) = $id
+       SET d.syncStatus = NULL, d.updatedAt = datetime()
+       RETURN d`,
+      { id: domainElementId }
+    );
+    return { success: true, message: "Skipped (disabled)" };
+  }
+
+  const host = normalizeHost(d?.P?.host);
+  const port = Number(d?.P?.port || 443);
+
+  const check = await tlsCheck({ host, port });
+  const nowIso = new Date().toISOString();
+
+  const patch = {
+    host,
+    port,
+    sslStatus: check.status || "unknown",
+    sslNotAfter: check.sslNotAfter || null,
+    sslDaysRemaining:
+      check.sslDaysRemaining !== undefined && check.sslDaysRemaining !== null
+        ? Number(check.sslDaysRemaining)
+        : null,
+    sslLastCheckedAt: nowIso,
+    sslError: check.ok ? null : (check.error || "Unknown error"),
+    syncStatus: null
+  };
+
+  await dbSession.run(
+    `MATCH (d:CertPulseDomain) WHERE elementId(d) = $id
+     SET d += $props, d.updatedAt = datetime()
+     RETURN d`,
+    { id: domainElementId, props: patch }
+  );
+
+  if (check.status === "expired") {
+    const today = dayKey();
+    const notifyAllowed = shouldNotifyExpired(d?.P);
+    const email = u?.P?.email || null;
+    const lastNotifiedDay = d?.P?.sslLastNotifiedDay || null;
+
+    if (notifyAllowed && email && lastNotifiedDay !== today) {
+      await sendExpiredEmail({ to: email, host, port, sslNotAfter: check.sslNotAfter });
+      await dbSession.run(
+        `MATCH (d:CertPulseDomain) WHERE elementId(d) = $id
+         SET d.sslLastNotifiedAt = $at,
+             d.sslLastNotifiedDay = $day,
+             d.updatedAt = datetime()
+         RETURN d`,
+        { id: domainElementId, at: nowIso, day: today }
+      );
+    }
+  }
+
+  return { success: true, data: { domainElementId, status: check.status } };
+  } finally {
+    try { await dbSession.close(); } catch {}
+  }
+};
+
+const { Worker, QueueEvents } = args.bullmq;
+const connection = getRedisConnection();
+
+const worker = new Worker(
+  queueName,
+  async (job) => {
+    return await processOne(job);
+  },
+  { connection }
+);
+
+const queueEvents = new QueueEvents(queueName, { connection });
+
+worker.on("completed", (job) => {
+  console.log(`[CertPulse] queue completed job=${job?.id}`);
+});
+worker.on("failed", (job, err) => {
+  console.error(`[CertPulse] queue failed job=${job?.id}`, err);
+});
+
+console.log(`[CertPulse] SSL queue worker started (${queueName})`);
+
+return {
+  stop: async () => {
+    try { await worker.close(); } catch {}
+    try { await queueEvents.close(); } catch {}
+    console.log("[CertPulse] SSL queue worker stopped");
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

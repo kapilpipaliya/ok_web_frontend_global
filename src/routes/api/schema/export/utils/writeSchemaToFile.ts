@@ -7,7 +7,12 @@ import type { ExportedSchema } from "~/routes/api/schema/ExportedSchema";
 import { normalizeSchema } from "./normalizeSchema";
 import { readdir, stat } from "fs/promises";
 
-export type ExportType = "components" | "pages" | "themes" | "functions";
+export type ExportType =
+  | "components"
+  | "pages"
+  | "themes"
+  | "functions"
+  | "email_templates";
 
 // ---- NEW: recursively search for existing target file ----
 async function findExistingSchemaFile(

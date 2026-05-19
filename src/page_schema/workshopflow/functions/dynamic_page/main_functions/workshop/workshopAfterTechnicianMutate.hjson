@@ -5,23 +5,10 @@
       L: Function
       P: {
         key: workshopAfterTechnicianMutate
-        description: After create/update WorkshopTechnician, denormalizes specialization text from primary WorkshopSkill edge.
+        description: No-op (removed denormalized specialization text; use skillId edge and WorkshopSkill).
         body:
           '''
-const tableVertexLabel = args.contextData?.tableVertexLabel;
-const elementId = args.contextData?.elementId;
-if (tableVertexLabel !== "WorkshopTechnician" || !elementId) {
-  return { success: true, message: "Skipped" };
-}
-
-await args.session.run(
-  `MATCH (t:WorkshopTechnician) WHERE elementId(t) = $elementId
-   OPTIONAL MATCH (t)-[:TechnicianPrimarySkill]->(sk:WorkshopSkill)
-   SET t.specialization = coalesce(sk.name, "")`,
-  { elementId },
-);
-
-return { success: true, message: "Technician specialization synced" };
+return { success: true, message: "Skipped" };
 '''
       }
     }

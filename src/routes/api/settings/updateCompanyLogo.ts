@@ -1,15 +1,66 @@
 import type { APIEvent } from "@solidjs/start/server";
+import type { Record as Neo4jRecord } from "neo4j-driver";
 
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import {
+  convertNodeToJson,
+  convertRelationshipToJson,
+} from "~/cypher/conversion/convertNodeToJson";
+import { updateNodeRelations } from "~/cypher/conversion/updateRelations";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { isShopDatabaseName } from "~/lib/shopify/getDatabaseNameForShop";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { enqueueCompanyLogosShopSync } from "~/server/queue/companyLogosShopSyncQueue";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+
+function collectDeletedEdgeIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((edgeId) => (edgeId != null ? String(edgeId).trim() : ""))
+    .filter((edgeId) => edgeId !== "");
+}
+
+function buildCompanyLogoGraph(records: Neo4jRecord[]) {
+  const context: {
+    nodes: Record<string, Vertex>;
+    relationships: Record<string, Edge>;
+  } = { nodes: {}, relationships: {} };
+
+  const record = records[0];
+  if (!record) {
+    return { vertexes: context.nodes, edges: context.relationships };
+  }
+
+  const globalSettingNode = record.get("g");
+  if (globalSettingNode) {
+    const globalSettingVertex = convertNodeToJson(globalSettingNode);
+    context.nodes[globalSettingVertex.id] = globalSettingVertex;
+  }
+
+  for (const relationshipKey of ["rectR", "squareR", "favR"] as const) {
+    const relationshipNode = record.get(relationshipKey);
+    if (!relationshipNode) continue;
+    const convertedRelationship = convertRelationshipToJson(relationshipNode);
+    updateNodeRelations(context.nodes, convertedRelationship);
+    context.relationships[convertedRelationship.id] = convertedRelationship;
+  }
+
+  for (const fileKey of ["rectLogo", "squareLogo", "favicon"] as const) {
+    const fileNode = record.get(fileKey);
+    if (!fileNode) continue;
+    const fileVertex = convertNodeToJson(fileNode);
+    context.nodes[fileVertex.id] = fileVertex;
+  }
+
+  return { vertexes: context.nodes, edges: context.relationships };
+}
 
 export async function POST({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const user = await getUserFromSession(request);
@@ -48,15 +99,17 @@ export async function POST({ request }: APIEvent) {
       );
     }
 
-    // Delete all existing CompanyRectangularLogo relationships
-    await dbSession.run(
-      `MATCH (g:GlobalSetting)-[r:CompanyRectangularLogo]->(f:File)
-       DELETE r`,
+    const deleteLogoEdgesResult = await dbSession.run(
+      `MATCH (g:GlobalSetting)-[r:CompanyRectangularLogo|CompanySquareLogo|CompanyFavicon]->()
+       WITH collect(elementId(r)) AS deletedEdgeIds, collect(r) AS relationshipsToDelete
+       FOREACH (relationship IN relationshipsToDelete | DELETE relationship)
+       RETURN deletedEdgeIds`,
+    );
+    const deletedEdgeIds = collectDeletedEdgeIds(
+      deleteLogoEdgesResult.records[0]?.get("deletedEdgeIds"),
     );
 
-    // Handle rectangular logo
     if (rectangularLogo) {
-      // Create new relationship
       await dbSession.run(
         `MATCH (g:GlobalSetting)
          MATCH (f:File) WHERE elementId(f) = $rectangularLogo
@@ -65,15 +118,7 @@ export async function POST({ request }: APIEvent) {
       );
     }
 
-    // Delete all existing CompanySquareLogo relationships
-    await dbSession.run(
-      `MATCH (g:GlobalSetting)-[r:CompanySquareLogo]->(f:File)
-       DELETE r`,
-    );
-
-    // Handle Square logo
     if (squareLogo) {
-      // Create new relationship
       await dbSession.run(
         `MATCH (g:GlobalSetting)
          MATCH (f:File) WHERE elementId(f) = $squareLogo
@@ -82,15 +127,7 @@ export async function POST({ request }: APIEvent) {
       );
     }
 
-    // Delete all existing CompanyFavicon relationships
-    await dbSession.run(
-      `MATCH (g:GlobalSetting)-[r:CompanyFavicon]->(f:File)
-       DELETE r`,
-    );
-
-    // Handle favicon
     if (favicon) {
-      // Create new relationship
       await dbSession.run(
         `MATCH (g:GlobalSetting)
          MATCH (f:File) WHERE elementId(f) = $favicon
@@ -99,13 +136,12 @@ export async function POST({ request }: APIEvent) {
       );
     }
 
-    // Get updated GlobalSetting with all logos
     const result = await dbSession.run(
       `MATCH (g:GlobalSetting)
-       OPTIONAL MATCH (g)-[:CompanyRectangularLogo]->(rectLogo:File)
-       OPTIONAL MATCH (g)-[:CompanySquareLogo]->(squareLogo:File)
-       OPTIONAL MATCH (g)-[:CompanyFavicon]->(favicon:File)
-       RETURN g, rectLogo, squareLogo, favicon`,
+       OPTIONAL MATCH (g)-[rectR:CompanyRectangularLogo]->(rectLogo:File)
+       OPTIONAL MATCH (g)-[squareR:CompanySquareLogo]->(squareLogo:File)
+       OPTIONAL MATCH (g)-[favR:CompanyFavicon]->(favicon:File)
+       RETURN g, rectR, rectLogo, squareR, squareLogo, favR, favicon`,
     );
 
     if (!result.records[0]?.get("g")) {
@@ -150,26 +186,19 @@ export async function POST({ request }: APIEvent) {
       `Company logos updated: ${logDetails.join(", ")}`,
     );
 
-    const vertexes = {
-      [updatedGlobalSetting.id]: updatedGlobalSetting,
-    };
-
-    if (rectangularLogoFile) {
-      vertexes[rectangularLogoFile.id] = rectangularLogoFile;
+    if (!isShopDatabaseName(subDomain)) {
+      void enqueueCompanyLogosShopSync(subDomain).catch((err) => {
+        console.warn("[Company logos] Failed to enqueue Shopify shop company logos sync:", err);
+      });
     }
 
-    if (squareLogoFile) {
-      vertexes[squareLogoFile.id] = squareLogoFile;
-    }
-
-    if (faviconFile) {
-      vertexes[faviconFile.id] = faviconFile;
-    }
+    const graphPayload = buildCompanyLogoGraph(result.records);
 
     return {
       graph: {
-        edges: {},
-        vertexes: vertexes,
+        vertexes: graphPayload.vertexes,
+        edges: graphPayload.edges,
+        deleted_edges: deletedEdgeIds,
       },
       result: {
         globalSetting: updatedGlobalSetting,

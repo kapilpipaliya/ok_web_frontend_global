@@ -26,7 +26,6 @@ return `._id {
   border-radius: ${args.theme.var.borderRadius.sm};
   background: ${args.theme.var.color.background};
   transition: all ${args.theme.var.animation.fast} ease;
-  min-height: ${args.theme.var.touch.input};
 
   &:focus-within {
     border-color: ${args.theme.var.color.primary};
@@ -102,11 +101,12 @@ return `._id {
   font-size: ${args.theme.var.fontSize.md};
   background: transparent;
   color: ${args.theme.var.color.text};
-  line-height: 1.5;
+  // line-height: 1.5;
 
   &::placeholder {
     color: ${args.theme.var.color.muted};
     opacity: 1;
+    font-size: ${args.theme.var.fontSize.sm};
   }
 
   &:disabled {
@@ -125,6 +125,8 @@ return {
   placeholder: args.contextData.props?.placeholder || "",
   required: args.contextData.props?.required || false,
   disabled: args.contextData.props?.disabled || false,
+  title: args.contextData.props?.title || undefined,
+  "aria-describedby": args.contextData.props?.["aria-describedby"] || undefined,
   // readOnly: args.contextData.props?.readOnly || false, // not work on server
   maxLength: args.contextData.props?.maxLength || undefined,
   minLength: args.contextData.props?.minLength || undefined,

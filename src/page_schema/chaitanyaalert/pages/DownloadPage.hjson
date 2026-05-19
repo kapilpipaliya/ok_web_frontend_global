@@ -4,6 +4,7 @@
       id: "1",
       L: "Page",
       P: {
+        public: true
         key: "ChaitanyaAlertDownloadPage",
         url: "/download",
         fns: '''
