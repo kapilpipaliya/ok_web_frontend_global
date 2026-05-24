@@ -1,0 +1,173 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Attendra – Staff Time & Shift Tracking
+        key: Home
+        url: /
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "description",
+  content: "Staff time and shift tracking for Shopify store teams. Manage employees and roles, track hours, and review time records inside Shopify Admin."
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+@media (max-width: 768px) {
+  ._id { padding: ${args.theme.var.spacing?.md || "1rem"}; }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props: '''return { as: "main" }'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { margin: 0 0 0.5rem 0; font-size: 2rem; font-weight: 700; }`;'''
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "h1", text: "Attendra" }'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id { margin: 0 0 1.25rem 0; color: ${args.theme.var.color.muted}; font-size: 1.05rem; line-height: 1.6; }`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: Staff time and shift tracking for Shopify store teams. Manage **employees and roles**, track hours, and review daily/weekly time — inside Shopify Admin.
+        props: '''return { as: "p" }'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css: '''return `._id { margin-top: 1.5rem; }`;'''
+        displayOrder: 3
+        componentName: Html
+        props: '''return { as: "section" }'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css: '''return `._id { margin: 0 0 0.5rem 0; font-weight: 600; font-size: 1.25rem; }`;'''
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "h2", text: "MVP features" }'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css: '''return `._id { margin: 0; color: ${args.theme.var.color.text}; line-height: 1.7; }`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''- **Employees**: add staff, roles, active/inactive
+- **Clock in/out**: embedded admin; staff portal via Dashboard **Portal Url**
+- **Time logs**: clock-in/out timestamps + total hours
+- **Dashboard**: who’s clocked in, late arrivals, total hours today
+- **Settings**: timezone, late threshold, auto clock-out
+
+Need help? See [FAQ](/faq) or [Documentation](/docs).'''
+        props: '''return { as: "div", textType: "markdown" }'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: "e1"
+      T: "Attr"
+      S: "1"
+      E: "2"
+    }
+    {
+      id: "e2"
+      T: "Attr"
+      S: "1"
+      E: "3"
+    }
+    {
+      id: "e3"
+      T: "PageLayout"
+      S: "1"
+      E: "layout"
+    }
+    {
+      id: "e4"
+      T: "Attr"
+      S: "3"
+      E: "4"
+    }
+    {
+      id: "e5"
+      T: "Attr"
+      S: "3"
+      E: "5"
+    }
+    {
+      id: "e6"
+      T: "Attr"
+      S: "3"
+      E: "6"
+    }
+    {
+      id: "e7"
+      T: "Attr"
+      S: "6"
+      E: "7"
+    }
+    {
+      id: "e8"
+      T: "Attr"
+      S: "6"
+      E: "8"
+    }
+  ]
+}
+

@@ -51,7 +51,7 @@ return {
           '''return {
   as: "meta",
   name: "description",
-  content: "Staff attendance and shift tracking for Shopify store teams. Manage employees and roles, track hours, and review attendance inside Shopify Admin."
+  content: "Staff time and shift tracking for Shopify store teams. Manage employees and roles, track hours, and review time records inside Shopify Admin."
 }'''
       }
     }
@@ -65,7 +65,7 @@ return {
           '''return {
   as: "meta",
   name: "keywords",
-  content: "attendance, staff attendance, time tracking, shift tracking, workforce tracking, employee clock in, staff clock, timesheet, Shopify admin app"
+  content: "time tracking, staff time, shift tracking, workforce tracking, employee clock in, staff clock, timesheet, Shopify admin app"
 }'''
       }
     }
@@ -107,7 +107,7 @@ return {
           '''return {
   as: "meta",
   property: "og:title",
-  content: "Attendra – Staff Attendance & Time Tracking"
+  content: "Attendra – Staff Time & Shift Tracking"
 }'''
       }
     }
@@ -121,7 +121,7 @@ return {
           '''return {
   as: "meta",
   property: "og:description",
-  content: "Staff attendance and shift tracking for Shopify store teams. Manage employees and roles, track hours, and review attendance inside Shopify Admin."
+  content: "Staff time and shift tracking for Shopify store teams. Manage employees and roles, track hours, and review time records inside Shopify Admin."
 }'''
       }
     }

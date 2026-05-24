@@ -89,7 +89,7 @@ const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
   };
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i];
-    if (f?.type === "select" && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
+    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
       addBinding(f.key, f.selectConfig.relationshipType);
     }
   }
@@ -97,7 +97,7 @@ const buildRelationshipPropertyBindingsFromTableConfig = (config) => {
   if (Array.isArray(cols)) {
     for (let ci = 0; ci < cols.length; ci++) {
       const c = cols[ci];
-      if (c?.type === "select" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
+      if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
         addBinding(c.key, c.selectConfig.relationshipType);
       }
     }
@@ -249,10 +249,6 @@ if (filters && typeof filters === "object") {
   }
 }
 
-let whereClause = whereConditions.length > 0 
-  ? "WHERE " + whereConditions.join(" AND ")
-  : "";
-
 // Build ORDER BY clause
 let orderByClause = "";
 if (sort && sort.column) {
@@ -272,17 +268,19 @@ if (useRealCategoryGraphMatch) {
   MATCH (c)-[:${toParentEdgeType}]->(cat)`;
   queryParams.categoryId = categoryId;
 } else if (applyUnassignedCategoryScope) {
-  const unassignedCondition = `NOT EXISTS {
+  whereConditions.push(`NOT EXISTS {
     MATCH (c)-[:${toParentEdgeType}]->(cat:${parentVertexLabel})
-  }`;
-  if (whereClause) {
-    whereClause = whereClause + " AND " + unassignedCondition;
-  } else {
-    whereClause = "WHERE " + unassignedCondition;
-  }
+  }`);
 }
 
-// Execute beforeFetchData hooks
+// beforeFetchData hooks may append Cypher match segments / WHERE conditions (see queryModification).
+const queryModification = {
+  leadingMatchSegments: [],
+  additionalWhereConditions: [],
+  additionalQueryParameters: {},
+  forceEmptyResult: false
+};
+
 await args.executeHooks(hooks?.beforeFetchData, {
   tableVertexLabel,
   search,
@@ -292,28 +290,75 @@ await args.executeHooks(hooks?.beforeFetchData, {
   showUnassigned,
   parentVertexLabel,
   toParentEdgeType,
-  enableUserScoping
+  enableUserScoping,
+  queryModification,
+  sessionUser: user
 });
+
+if (queryModification.forceEmptyResult === true) {
+  return {
+    success: true,
+    data: [],
+    relatedVertices: [],
+    graph: getGraphPayload({}, {}),
+    message: `Found 0 ${tableVertexLabel} items`
+  };
+}
+
+const combinedWhereConditions = whereConditions.concat(
+  Array.isArray(queryModification.additionalWhereConditions)
+    ? queryModification.additionalWhereConditions
+    : []
+);
+const combinedQueryParameters = Object.assign(
+  {},
+  queryParams,
+  queryModification.additionalQueryParameters && typeof queryModification.additionalQueryParameters === "object"
+    ? queryModification.additionalQueryParameters
+    : {}
+);
+
+let combinedWhereClause =
+  combinedWhereConditions.length > 0
+    ? "WHERE " + combinedWhereConditions.join(" AND ")
+    : "";
+
+const hasCustomLeadingMatch =
+  Array.isArray(queryModification.leadingMatchSegments) &&
+  queryModification.leadingMatchSegments.length > 0;
+const leadingMatchBlock = hasCustomLeadingMatch
+  ? queryModification.leadingMatchSegments.join("\n")
+  : "";
+
+const buildStandardContentMatch = () =>
+  hasCustomLeadingMatch ? leadingMatchBlock : `MATCH (c:${vertexLabel})`;
 
 // Optimized query with indexed user lookup first and related vertices
 let query = "";
 if (!enableUserScoping) {
   if (useRealCategoryGraphMatch) {
-    // Query with category filter - content points to category: content-[toParentEdgeType]->category
     query = `
     MATCH (cat:${parentVertexLabel})
     WHERE elementId(cat) = $categoryId
-    MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
-    ${whereClause}
+    ${buildStandardContentMatch()}
+    MATCH (c)-[:${toParentEdgeType}]->(cat)
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else if (hasCustomLeadingMatch) {
+    query = `
+    ${leadingMatchBlock}
+    ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
     ${orderByClause}
     RETURN c, r, related
     `;
   } else {
-    // Standard query without category filter
     query = `
     MATCH (c:${vertexLabel})
-    ${whereClause}
+    ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
     ${orderByClause}
     RETURN c, r, related
@@ -321,24 +366,36 @@ if (!enableUserScoping) {
   }
 } else {
   if (useRealCategoryGraphMatch) {
-    // Query with category filter - content points to category: content-[toParentEdgeType]->category
+    const scopedContentMatch = hasCustomLeadingMatch
+      ? leadingMatchBlock
+      : `MATCH (c:${vertexLabel})`;
     query = `
     MATCH (u:User {uuid: $userUuid})
     MATCH (cat:${parentVertexLabel})
     WHERE elementId(cat) = $categoryId
-    MATCH (c:${vertexLabel})-[catRel:${toParentEdgeType}]->(cat)
+    ${scopedContentMatch}
+    MATCH (c)-[:${toParentEdgeType}]->(cat)
     MATCH (u)-[:${relationshipType}]->(c)
-    ${whereClause}
+    ${combinedWhereClause}
+    OPTIONAL MATCH (c)-[r]->(related)
+    ${orderByClause}
+    RETURN c, r, related
+    `;
+  } else if (hasCustomLeadingMatch) {
+    query = `
+    MATCH (u:User {uuid: $userUuid})
+    ${leadingMatchBlock}
+    MATCH (u)-[:${relationshipType}]->(c)
+    ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
     ${orderByClause}
     RETURN c, r, related
     `;
   } else {
-    // Standard query without category filter
     query = `
     MATCH (u:User {uuid: $userUuid})
     MATCH (u)-[:${relationshipType}]->(c:${vertexLabel})
-    ${whereClause}
+    ${combinedWhereClause}
     OPTIONAL MATCH (c)-[r]->(related)
     ${orderByClause}
     RETURN c, r, related
@@ -346,7 +403,7 @@ if (!enableUserScoping) {
   }
 }
 
-const queryResult = await args.session.run(query, queryParams);
+const queryResult = await args.session.run(query, combinedQueryParameters);
 
 // Use processResult to populate graph structure (nodes + relationships)
 if (!args.context.nodes) args.context.nodes = {};

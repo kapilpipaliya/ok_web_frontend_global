@@ -7,7 +7,9 @@ export function getLogoSchema(
   height:80px; margin-bottom:24px;
 }\`;`,
   borderCss = `return \`._id {
-  color: \${args.theme.var.color.text_light_200}; margin-top:24px; margin-bottom:24px;
+  border: none;
+  border-top: 1px solid \${args.theme.var.color.border_hex};
+  margin-top:24px; margin-bottom:24px;
 }\`;`,
 ) {
   return {
@@ -53,9 +55,12 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
         attributes: [
           getLogoSchema(),
           {
-            as: "",
+            as: "div",
             attributes: content,
             componentName: "Html",
+            css: `return \`._id {
+  color: \${args.theme.var.color.text_hex};
+}\`;`,
             displayOrder: 2,
           },
           {
@@ -64,7 +69,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
               {
                 as: "p",
                 css: `return \`._id {
-  color: \${args.theme.var.color.text_light_200};
+  color: \${args.theme.var.color.text_light_200_hex};
   font-size: 12px;
 }\`;`,
                 componentName: "Html",
@@ -84,15 +89,17 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   max-width: 600px;
   margin: auto;
   padding: 32px;
-  background-color: \${args.theme.var.color.background_light_100};
+  background-color: \${args.theme.var.color.background_light_100_hex};
+  color: \${args.theme.var.color.text_hex};
 }\`;`,
         componentName: "Html",
-        displayOrder: 1,
+        displayOrder: 3,
       },
     ],
     css: `return \`._id {
   min-height: 100vh;
-  background-color: \${args.theme.var.color.background};
+  background-color: \${args.theme.var.color.background_hex};
+  color: \${args.theme.var.color.text_hex};
   padding: 32px;
 }\`;`,
     componentName: "Html",

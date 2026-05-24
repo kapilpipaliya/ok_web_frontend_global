@@ -57,7 +57,7 @@ if (result.records.length === 0) {
   if (defaultResult.records.length === 0 && args.executeNamedServerFunction) {
     try {
       await args.executeNamedServerFunction({
-        functionName: 'migrateContentTableSettings',
+        functionName: "migrateDynamicPageSettings",
         contextData: { dryRun: false }
       });
       defaultResult = await args.session.run(
@@ -65,7 +65,7 @@ if (result.records.length === 0) {
         { defaultKey }
       );
     } catch (migrateError) {
-      console.error('getUserContentSetting: migrateContentTableSettings failed', migrateError);
+      console.error('getUserContentSetting: settings migration failed', migrateError);
     }
   }
 

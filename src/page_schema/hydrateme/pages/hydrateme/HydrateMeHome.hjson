@@ -471,7 +471,7 @@ return {
           '''return {
   as: "p",
   class: "hm-tip",
-  text: "After quick adds, open Logbook for the full DynamicPage table (edit, filter, export). Run migrateHydrateMeSettings once to seed table configs.",
+  text: "After quick adds, open Logbook for the full DynamicPage table (edit, filter, export).",
   hide: () => !args.user
 };'''
         css:

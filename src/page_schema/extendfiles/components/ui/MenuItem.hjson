@@ -52,6 +52,11 @@ return `._id {
 ._id:focus {
   outline: 2px solid ${args.theme.var.color.primary};
   outline-offset: -2px;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }`;
 '''
         displayOrder: 1
@@ -63,6 +68,11 @@ const onClick = args.contextData.props?.onClick;
 const href = args.contextData.props?.href;
 const type = args.contextData.props?.type || "default";
 const isDivider = args.contextData.props?.isDivider;
+const title = args.contextData.props?.title || "";
+const disabled = args.contextData.props?.disabled === true;
+const reasonActive = args.contextData.props?.["data-reason-active"] === "true";
+const reasonVariant = args.contextData.props?.["data-reason-variant"];
+const reasonKind = args.contextData.props?.["data-reason-kind"];
 
 // If it's a divider, render a simple div
 if (isDivider) {
@@ -72,12 +82,24 @@ if (isDivider) {
 }
 
 // If href is provided, render as link
+const reasonAttrs = {
+  "data-reason-active": args.contextData.props?.["data-reason-active"],
+  "data-reason-variant": args.contextData.props?.["data-reason-variant"],
+  "data-reason-kind": args.contextData.props?.["data-reason-kind"],
+  "data-reason-code": args.contextData.props?.["data-reason-code"]
+};
+
 if (href) {
   return {
     as: "a",
-    href: href,
-    onClick: onClick,
-    role: "menuitem"
+    href: disabled ? undefined : href,
+    onClick: disabled ? undefined : onClick,
+    role: "menuitem",
+    title: title || undefined,
+    "aria-disabled": disabled ? true : undefined,
+    class: reasonActive && reasonVariant ? `_reason _reason-${reasonVariant}` : undefined,
+    style: disabled ? "opacity: 0.5; pointer-events: auto; cursor: not-allowed;" : undefined,
+    ...reasonAttrs
   };
 }
 
@@ -85,7 +107,12 @@ if (href) {
 return {
   as: "button",
   onClick: onClick,
-  role: "menuitem"
+  role: "menuitem",
+  title: title || undefined,
+  disabled: disabled,
+  type: "button",
+  class: reasonActive && reasonVariant ? `_reason _reason-${reasonVariant}` : undefined,
+  ...reasonAttrs
 };
 '''
       }
@@ -167,12 +194,29 @@ return {
       L: ComponentVariant
       P: {
         type: string
+        key: title
+      }
+    }
+    {
+      id: "7b"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: string
         key: type
         defValue: default
       }
     }
     {
-      id: "8"
+      id: "9"
       L: ComponentVariantOption
       P: {
         description: Danger menu item (red)
@@ -181,7 +225,7 @@ return {
       }
     }
     {
-      id: "9"
+      id: "10"
       L: ComponentVariantOption
       P: {
         description: Default menu item
@@ -216,6 +260,18 @@ return {
       E: "7"
     }
     {
+      id: e4b
+      T: ComponentVariant
+      S: "1"
+      E: "7b"
+    }
+    {
+      id: e4c
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
       id: e5
       T: Attr
       S: "2"
@@ -230,14 +286,14 @@ return {
     {
       id: e7
       T: ComponentVariantOption
-      S: "7"
-      E: "8"
+      S: "8"
+      E: "9"
     }
     {
       id: e8
       T: ComponentVariantOption
-      S: "7"
-      E: "9"
+      S: "8"
+      E: "10"
     }
   ]
 }

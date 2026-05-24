@@ -1,65 +1,28 @@
 import { For, Show } from "solid-js";
 import { As } from "~/components/As";
-import { API } from "~/lib/api/endpoints";
 import type {
   SchemaDatabaseInfo,
   SchemaJobStatusRow,
   SchemaOperation,
 } from "~/server/schema/schemaOperationsManagement";
 import {
+  hasAnyJobOutput,
   hasJobOutput,
   SchemaJobOutputPopover,
+  type SchemaJobOutputTab,
 } from "~/pages/global/schema/SchemaJobOutputPopover";
+import { SchemaDatabaseLinksMenu } from "~/pages/global/schema/SchemaDatabaseLinksMenu";
+import {
+  importSyncAllLabel,
+  operationAllLabel,
+  operationLabel,
+  type SchemaDatabaseAdminLink,
+  schemaOpButtonCss,
+  statusLabel,
+} from "~/pages/global/schema/schemaOperationsUtils";
 
-function statusLabel(status: string) {
-  switch (status) {
-    case "queued":
-      return "Queued";
-    case "running":
-      return "Running";
-    case "success":
-      return "Complete";
-    case "failed":
-      return "Failed";
-    case "enqueue_failed":
-      return "Queue failed";
-    default:
-      return status;
-  }
-}
-
-export function getAppSubdomainSignInUrl(subdomainKey: string) {
-  return `${API.auth.prepareAutoSignInUrl}?subdomain=${encodeURIComponent(subdomainKey)}`;
-}
-
-/** Shop DB host is the Neo4j database name (e.g. shopattendra…). */
-export function getShopDatabaseSignInUrl(databaseName: string) {
-  const path = "/auth/signin";
-  const db = String(databaseName ?? "").trim();
-  if (db === "") {
-    return path;
-  }
-  if (typeof window === "undefined") {
-    return `https://${db}.decodecommerce.com${path}`;
-  }
-  const { protocol, hostname, port } = window.location;
-  const portSuffix = port ? `:${port}` : "";
-  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
-    return `${protocol}//${db}.localhost${portSuffix}${path}`;
-  }
-  return `${protocol}//${db}.decodecommerce.com${portSuffix}${path}`;
-}
-
-function operationLabel(op: SchemaOperation) {
-  switch (op) {
-    case "export":
-      return "Export";
-    case "import":
-      return "Import";
-    case "sync":
-      return "Sync";
-  }
-}
+const TABLE_GRID =
+  "2fr 1fr 1fr 1.5fr minmax(280px, 3fr)";
 
 function statusBadgeCss(
   args: { theme: { var: { color: Record<string, string> } } },
@@ -89,25 +52,65 @@ function statusBadgeCss(
   font-weight: 600;
   background: ${bg};
   color: ${color};
-  ${showOutputHint ? "text-decoration: underline dotted; text-underline-offset: 2px;" : ""}
+  ${showOutputHint ? "text-decoration: underline dotted; text-underline-offset: 2px; cursor: pointer;" : ""}
 }\`;`;
 }
 
-function SchemaJobStatusBadge(props: {
+function buildOutputTabs(
+  databaseName: string,
+  row: () => SchemaJobStatusRow | undefined,
+  jobOutputByDb: () => Map<
+    string,
+    { import?: SchemaJobStatusRow; sync?: SchemaJobStatusRow }
+  >,
+): SchemaJobOutputTab[] {
+  const out = jobOutputByDb().get(databaseName);
+  const tabs: SchemaJobOutputTab[] = [];
+  if (out?.import) {
+    tabs.push({ label: "Import", row: out.import });
+  }
+  if (out?.sync) {
+    tabs.push({ label: "Sync", row: out.sync });
+  }
+  if (tabs.length === 0) {
+    const single = row();
+    if (single) {
+      tabs.push({
+        label: operationLabel(single.operation),
+        row: single,
+      });
+    }
+  }
+  return tabs;
+}
+
+function JobStatusCell(props: {
+  databaseName: string;
   status: string;
   row: () => SchemaJobStatusRow | undefined;
+  jobOutputByDb: () => Map<
+    string,
+    { import?: SchemaJobStatusRow; sync?: SchemaJobStatusRow }
+  >;
 }) {
+  const outputTabs = () =>
+    buildOutputTabs(props.databaseName, props.row, props.jobOutputByDb);
+
+  const badge = (
+    <As
+      as="span"
+      css={(args) =>
+        statusBadgeCss(args, props.status, hasAnyJobOutput(outputTabs()))
+      }
+    >
+      {statusLabel(props.status)}
+    </As>
+  );
+
   return (
-    <SchemaJobOutputPopover row={props.row}>
-      <As
-        as="span"
-        css={(args) =>
-          statusBadgeCss(args, props.status, hasJobOutput(props.row()))
-        }
-      >
-        {statusLabel(props.status)}
-      </As>
-    </SchemaJobOutputPopover>
+    <Show when={hasAnyJobOutput(outputTabs())} fallback={badge}>
+      <SchemaJobOutputPopover tabs={outputTabs}>{badge}</SchemaJobOutputPopover>
+    </Show>
   );
 }
 
@@ -118,23 +121,33 @@ export interface SchemaDatabaseTableSectionProps {
   operations: readonly SchemaOperation[];
   busy: boolean;
   activeOperation: SchemaOperation | null;
+  pipelineStep: () => "import" | "sync" | null;
   statusByDb: () => Map<string, SchemaJobStatusRow>;
+  jobOutputByDb: () => Map<
+    string,
+    { import?: SchemaJobStatusRow; sync?: SchemaJobStatusRow }
+  >;
   onRunAll: (operation: SchemaOperation) => void;
   onRunOne: (operation: SchemaOperation, databaseName: string) => void;
-  /** Builds sign-in URL per database row; omit to hide Sign in. */
+  onRunAllImportThenSync?: () => void;
+  onRunOneImportThenSync?: (databaseName: string) => void;
   getSignInUrl?: (databaseName: string) => string;
+  /** Admin page shortcuts (app databases); opens via auto sign-in + redirect. */
+  adminPageLinks?: readonly SchemaDatabaseAdminLink[];
+  getAdminPageUrl?: (databaseName: string, path: string) => string;
 }
 
 export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProps) {
+  const rowDisabled = (db: SchemaDatabaseInfo) =>
+    props.busy || db.currentStatus !== "online";
+
   return (
     <As
-      as="motionFragment"
-      css={`return \`._id {
-  margin-bottom: 2.5rem;
-}\`;`}
+      as="section"
+      css={`return \`._id { margin-bottom: 2.5rem; }\`;`}
     >
       <As
-        as="motionFragment"
+        as="div"
         css={`return \`._id {
   display: flex;
   flex-wrap: wrap;
@@ -144,7 +157,7 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
   margin-bottom: 1rem;
 }\`;`}
       >
-        <As as="motionFragment">
+        <As as="div">
           <As
             as="h2"
             css={`return \`._id {
@@ -170,11 +183,7 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
         </As>
         <As
           as="motionFragment"
-          css={`return \`._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}\`;`}
+          css={`return \`._id { display: flex; flex-wrap: wrap; gap: 0.5rem; }\`;`}
         >
           <For each={props.operations}>
             {(op) => (
@@ -183,24 +192,28 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
                 type="button"
                 disabled={props.busy}
                 onClick={() => props.onRunAll(op)}
-                css={`return \`._id {
-  padding: 0.5rem 0.85rem;
-  border-radius: 0.375rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
-}
-._id:disabled { opacity: 0.55; cursor: wait; }\`;`}
+                css={schemaOpButtonCss("primary")}
               >
-                {props.busy && props.activeOperation === op
-                  ? `${operationLabel(op)} all…`
-                  : `${operationLabel(op)} all`}
+                {operationAllLabel(
+                  op,
+                  props.busy,
+                  props.activeOperation,
+                  props.pipelineStep,
+                )}
               </As>
             )}
           </For>
+          <Show when={props.onRunAllImportThenSync}>
+            <As
+              as="button"
+              type="button"
+              disabled={props.busy}
+              onClick={() => props.onRunAllImportThenSync?.()}
+              css={schemaOpButtonCss("info")}
+            >
+              {importSyncAllLabel(props.busy, props.pipelineStep)}
+            </As>
+          </Show>
         </As>
       </As>
 
@@ -221,7 +234,7 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
         }
       >
         <As
-          as="motionFragment"
+          as="div"
           css={`return \`._id {
   border: 1px solid \${args.theme.var.color.border};
   border-radius: 0.5rem;
@@ -229,10 +242,10 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
 }\`;`}
         >
           <As
-            as="div"
+            as="motionFragment"
             css={`return \`._id {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1.5fr minmax(240px, 2.5fr);
+  grid-template-columns: ${TABLE_GRID};
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   font-size: 0.75rem;
@@ -254,12 +267,14 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
               const name = database.name;
               const jobRow = () => props.statusByDb().get(name);
               const jobStatus = () => jobRow()?.status;
+              const signInUrl = props.getSignInUrl?.(name);
+
               return (
                 <As
                   as="motionFragment"
                   css={`return \`._id {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1.5fr minmax(240px, 2.5fr);
+  grid-template-columns: ${TABLE_GRID};
   gap: 0.75rem;
   padding: 0.875rem 1rem;
   align-items: center;
@@ -287,16 +302,18 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
                   </As>
                   <As as="span">
                     <Show when={jobStatus()} fallback={<span>—</span>}>
-                      <SchemaJobStatusBadge
+                      <JobStatusCell
+                        databaseName={name}
                         status={jobStatus()!}
                         row={jobRow}
+                        jobOutputByDb={props.jobOutputByDb}
                       />
                     </Show>
                     <Show when={jobRow()?.error}>
                       <As
-                        as="motionFragment"
+                        as="p"
                         css={`return \`._id {
-  margin-top: 0.25rem;
+  margin: 0.25rem 0 0 0;
   font-size: 0.7rem;
   color: \${args.theme.var.color.error};
   word-break: break-word;
@@ -307,38 +324,50 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
                     </Show>
                   </As>
                   <As
-                    as="motionFragment"
+                    as="div"
                     css={`return \`._id {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+  align-items: center;
 }\`;`}
                   >
-                    <Show when={props.getSignInUrl}>
+                    <Show when={signInUrl}>
                       <As
                         as="a"
-                        href={props.getSignInUrl!(name)}
+                        href={signInUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title={props.getSignInUrl!(name)}
-                        css={`return \`._id {
-  padding: 0.35rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid \${args.theme.var.color.primary};
-  background: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.primary_text};
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-}
-._id:hover {
-  background: \${args.theme.var.color.primary_dark_200};
-}\`;`}
+                        title={signInUrl}
+                        css={schemaOpButtonCss("link", "sm")}
                       >
                         Sign in
+                      </As>
+                    </Show>
+                    <Show
+                      when={
+                        props.adminPageLinks &&
+                        props.adminPageLinks.length > 0 &&
+                        props.getAdminPageUrl
+                      }
+                    >
+                      <SchemaDatabaseLinksMenu
+                        databaseName={name}
+                        links={props.adminPageLinks!}
+                        getPageUrl={props.getAdminPageUrl!}
+                        disabled={rowDisabled(database)}
+                      />
+                    </Show>
+                    <Show when={props.onRunOneImportThenSync}>
+                      <As
+                        as="button"
+                        type="button"
+                        disabled={rowDisabled(database)}
+                        onClick={() => props.onRunOneImportThenSync?.(name)}
+                        title="Import from files, then sync to shops"
+                        css={schemaOpButtonCss("info", "sm")}
+                      >
+                        Import & Sync
                       </As>
                     </Show>
                     <For each={props.operations}>
@@ -346,21 +375,9 @@ export function SchemaDatabaseTableSection(props: SchemaDatabaseTableSectionProp
                         <As
                           as="button"
                           type="button"
-                          disabled={
-                            props.busy || database.currentStatus !== "online"
-                          }
+                          disabled={rowDisabled(database)}
                           onClick={() => props.onRunOne(op, name)}
-                          css={`return \`._id {
-  padding: 0.35rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid \${args.theme.var.color.border};
-  background: \${args.theme.var.color.background_light_100};
-  color: \${args.theme.var.color.text};
-}
-._id:disabled { opacity: 0.45; cursor: not-allowed; }\`;`}
+                          css={schemaOpButtonCss("ghost", "sm")}
                         >
                           {operationLabel(op)}
                         </As>

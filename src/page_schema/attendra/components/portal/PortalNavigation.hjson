@@ -111,11 +111,18 @@ const portalNavSectionsData = [
         pathCheck: (pathname) => String(pathname || "") === "/portal/check-in"
       },
       {
-        id: "attendance_logs",
-        href: "/portal/attendance-logs",
-        label: "Attendance logs",
+        id: "time_logs",
+        href: "/portal/time-logs",
+        label: "My Time Logs",
         icon: "ph:clipboard-text",
-        pathCheck: (pathname) => String(pathname || "") === "/portal/attendance-logs"
+        pathCheck: (pathname) => String(pathname || "") === "/portal/time-logs"
+      },
+      {
+        id: "tasks",
+        href: "/portal/tasks",
+        label: "My tasks",
+        icon: "ph:check-square",
+        pathCheck: (pathname) => String(pathname || "") === "/portal/tasks"
       }
     ]
   },

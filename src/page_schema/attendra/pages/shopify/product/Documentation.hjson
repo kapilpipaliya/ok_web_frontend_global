@@ -1,0 +1,118 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Documentation - Attendra
+        url: /docs
+        key: Documentation
+        props: '''return { isNoPermissionCheck: true };'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id{ max-width: 860px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || "2rem"}; color:${args.theme.var.color.text}; }
+@media (max-width: 768px){ ._id{ padding:${args.theme.var.spacing?.md || "1rem"}; } }`;'''
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as: "main" };'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props: '''return { as:"h1", text:"Documentation" };'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        textType: markdown
+        css: '''return `._id{ margin: 0 0 1.25rem 0; color:${args.theme.var.color.muted}; line-height: 1.6; }`;'''
+        text: This guide explains how to use **Attendra** in plain language.
+        props: '''return { as: "p" };'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        textType: markdown
+        css: '''return `._id{ margin: 0; color:${args.theme.var.color.text}; line-height: 1.75; }`;'''
+        text:
+          '''## Pages
+
+- **Dashboard** (`/app`): quick view of who’s present and recent activity.
+- **Employees** (`/employees`): add/edit staff, roles, active/inactive.
+- **Roles** (`/roles`): define role keys for assignments.
+- **Time Logs** (`/time-logs`): clock in/out timestamps and total hours.
+- **Settings** (`/settings`): timezone, late threshold, auto clock-out.
+
+## Staff portal
+
+Staff authenticate via your shop’s portal sign-in URL (open **Portal Url** on the Dashboard). Clock in/out from the embedded admin or your separate staff portal when available.
+
+## Tips
+
+- Mark employees inactive instead of deleting, to preserve history.
+- Use [Support](/support) if you need help with setup.
+'''
+        props: '''return { as: "div", textType: "markdown" };'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: "e1"
+      T: "Attr"
+      S: "1"
+      E: "2"
+    }
+    {
+      id: "e2"
+      T: "PageLayout"
+      S: "1"
+      E: "layout"
+    }
+    {
+      id: "e3"
+      T: "Attr"
+      S: "2"
+      E: "3"
+    }
+    {
+      id: "e4"
+      T: "Attr"
+      S: "2"
+      E: "4"
+    }
+    {
+      id: "e5"
+      T: "Attr"
+      S: "2"
+      E: "5"
+    }
+  ]
+}
+

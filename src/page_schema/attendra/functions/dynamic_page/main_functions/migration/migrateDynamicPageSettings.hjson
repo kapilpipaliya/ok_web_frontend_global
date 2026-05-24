@@ -1,0 +1,1128 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: migrateDynamicPageSettings
+        description: Seeds default Attendra DynamicPage table_config Setting rows (employees, roles, time logs, tasks, portal time logs, graph files, settings, Shopify shops). Optional dryRun in contextData.
+        body:
+          '''
+/**
+ * Attendra — migrate default table settings for DynamicPage (getUserContent / mutateUserContent).
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = args.contextData || {};
+console.log(`Attendra settings migration (dryRun: ${dryRun})`);
+
+const settingsConfigs = [
+  {
+    key: "Employee_settings_default",
+    tableVertexLabel: "User",
+    icon: "Users",
+    name: "Employees",
+    config: `return {
+  title: "Employees",
+  label: "Employee",
+  icon: "ph:users-three",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete employee?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "email", label: "Email", dataType: "text", renderer: "text", width: "240px", required: true, overflowEllipsis: true },
+    { key: "name", label: "Name", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+    { key: "username", label: "Username", dataType: "text", renderer: "text", width: "160px", overflowEllipsis: true },
+    { key: "role", label: "Roles", dataType: "relation", renderer: "text", multiSelect: true, width: "200px", overflowEllipsis: true, sortable: false, filterType: "text", selectConfig: { label: "Role", labelField: "key", relationshipType: "UserRole", limit: 200, edgeOnly: true, enableUserScoping: false } },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "130px", badgeKeyCase: "lower", badgeToneMap: { active: ["Active", "success"], inactive: ["Inactive", "critical"], invited: ["Invited", "attention"] } },
+  ],
+  rowHeight: 52,
+  uniqueKeys: ["email", "username"],
+  hooks: {
+    afterCreate: ["employeeAfterCreate"],
+    afterUpdate: ["employeeAfterUpdate"]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "EmployeeCategory",
+    toParentEdgeType: "EmployeeCategoryUser",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Group",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar group or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    fieldValidationByKey: {
+      username: {
+        pattern: "^[a-zA-Z0-9_-]+$",
+        patternMessage: "Username can only contain letters, numbers, underscores, and hyphens",
+        minLengthMessage: "Username must be at least 3 characters"
+      },
+      name: {
+        pattern: "^[a-zA-Z -]+$",
+        patternMessage: "Name can only contain letters, spaces, and hyphens",
+        minLengthMessage: "Name must be at least 2 characters",
+        maxLengthMessage: "Name must be at most 100 characters"
+      }
+    },
+    groups: [
+      {
+        key: "employee",
+        title: "Employee",
+        gridColumns: 2,
+        fields: [
+          { key: "email", label: "Email", dataType: "email", renderer: "text", required: true, colSpan: 2 },
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 1, minLength: 2, maxLength: 100 },
+          { key: "username", label: "Username", dataType: "text", renderer: "text", required: true, colSpan: 1, minLength: 3, maxLength: 64 },
+          {
+            key: "role",
+            label: "Roles",
+            dataType: "relation", renderer: "multiSelect",
+            required: true,
+            colSpan: 2,
+            placeholder: "Select roles",
+            selectConfig: {
+              label: "Role",
+              labelField: "key",
+              relationshipType: "UserRole",
+              limit: 200,
+              edgeOnly: true,
+              enableUserScoping: false
+            }
+          },
+          {
+            key: "status",
+            label: "Status",
+            dataType: "select", renderer: "select",
+            visible: (ctx) => ctx.mode !== "create",
+            required: true,
+            colSpan: 1,
+            options: [
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" }
+            ],
+            tooltip: "Same choices as global user admin. Shown when editing an employee; new employees get status from the invite flow."
+          }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "Role_settings_default",
+    tableVertexLabel: "Role",
+    icon: "Shield",
+    name: "Roles",
+    config: `return {
+  title: "Roles",
+  label: "Role",
+  icon: "ph:shield-check",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete role?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  showAddButton: true,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "key", label: "Key", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true }
+  ],
+  rowHeight: 48,
+  uniqueKeys: ["key"],
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "role",
+        title: "Role",
+        gridColumns: 1,
+        fields: [
+          { key: "key", label: "Role key", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Unique key (e.g. Staff). Used for UserRole assignment." }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "Time_settings_default",
+    tableVertexLabel: "Time",
+    icon: "Clock",
+    name: "Time logs",
+    config: `return {
+  title: "Time logs",
+  label: "Time record",
+  icon: "ph:clock",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete time record?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  showAddButton: true,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "employeeId", label: "Employee", dataType: "relation", renderer: "text", width: "240px", overflowEllipsis: true, sortable: false, selectConfig: { label: "User", labelField: "name", relationshipType: "TimeEmployee", limit: 200, edgeOnly: true, enableUserScoping: false } },
+    { key: "clockInAt", label: "Clock in", dataType: "date", renderer: "isoDateTime", width: "220px" },
+    { key: "clockOutAt", label: "Clock out", dataType: "date", renderer: "isoDateTime", width: "220px" },
+    { key: "totalHours", label: "Hours", dataType: "text", renderer: "text", width: "120px" },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "140px", badgeKeyCase: "lower", badgeToneMap: { open: ["Open", "warning"], closed: ["Closed", "success"] } }
+  ],
+  rowHeight: 52,
+  uniqueKeys: [],
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "log",
+        title: "Time record",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "employeeId",
+            label: "Employee",
+            dataType: "select", renderer: "select",
+            required: false,
+            colSpan: 2,
+            placeholder: "Select employee…",
+            tooltip: "Choose which employee this clock entry is for.",
+            selectConfig: {
+              label: "User",
+              labelField: "name",
+              relationshipType: "TimeEmployee",
+              limit: 200,
+              edgeOnly: true,
+              enableUserScoping: false
+            }
+          },
+          { key: "clockInAt", label: "Clock in (ISO)", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Example: 2026-05-08T14:30:00.000Z" },
+          { key: "clockOutAt", label: "Clock out (ISO)", dataType: "text", renderer: "text", required: false, colSpan: 1, tooltip: "Leave empty if the shift is still open." },
+          { key: "totalHours", label: "Total hours", dataType: "text", renderer: "text", required: false, colSpan: 1, tooltip: "Decimal hours when clocked out (e.g. 7.5)." },
+          { key: "status", label: "Status", dataType: "select", renderer: "select", required: true, colSpan: 1, options: [
+            { value: "open", label: "Open" },
+            { value: "closed", label: "Closed" }
+          ] }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "TimePortal_settings_default",
+    tableVertexLabel: "Time",
+    icon: "Clock",
+    name: "Portal time logs",
+    config: `return {
+  title: "My Time Logs",
+  subtitle: "Only your own clock in/out records are shown.",
+  label: "Time record",
+  icon: "ph:clock",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: true,
+  actions: [],
+  showAddButton: false,
+  rowClickable: false,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "clockInAt", label: "Clock in", dataType: "date", renderer: "isoDateTime", width: "220px" },
+    { key: "clockOutAt", label: "Clock out", dataType: "date", renderer: "isoDateTime", width: "220px" },
+    { key: "totalHours", label: "Hours", dataType: "text", renderer: "text", width: "120px" },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "140px", badgeKeyCase: "lower", badgeToneMap: { open: ["Open", "warning"], closed: ["Closed", "success"] } }
+  ],
+  rowHeight: 52,
+  uniqueKeys: [],
+  hooks: {
+    beforeFetchData: ["portalTimeLogsBeforeFetch"]
+  },
+  formConfig: {
+    gridColumns: 1,
+    groups: []
+  }
+};`
+  },
+  {
+    key: "File_settings_default",
+    tableVertexLabel: "File",
+    icon: "File",
+    name: "Files",
+    config: `return {
+  title: "Files",
+  label: "File",
+  icon: "ph:file",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text", renderer: "imagePreview",
+      width: "150px",
+      sortable: false,
+      valueAccessor: (row) => {
+        const fileName = row.P?.fileName != null ? String(row.P.fileName).trim() : "";
+        if (fileName === "") return null;
+        const mime = String(row.P?.mimeType || row.P?.fileType || "");
+        if (mime && !mime.startsWith("image/")) return null;
+        return "/api/file/download/" + encodeURIComponent(fileName);
+      }
+    },
+    {
+      key: "fileName",
+      label: "Name",
+      dataType: "text", renderer: "text",
+      width: "240px",
+      valueAccessor: (row) => row.P?.fileName || "",
+      overflowEllipsis: true
+    },
+    {
+      key: "fileSize",
+      label: "Size (bytes)",
+      dataType: "text", renderer: "text",
+      width: "110px",
+      valueAccessor: (row) => (row.P?.fileSize != null ? String(row.P.fileSize) : "")
+    },
+    {
+      key: "fileType",
+      label: "Type",
+      dataType: "text", renderer: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.mimeType || row.P?.fileType || ""
+    },
+    { key: "uploadDate", label: "Uploaded", dataType: "date", renderer: "date", width: "130px" },
+    {
+      key: "description",
+      label: "Description",
+      dataType: "text", renderer: "text",
+      width: "220px",
+      valueAccessor: (row) => row.P?.description,
+      overflowEllipsis: true
+    }
+  ],
+  rowHeight: 64,
+  showRowNumber: true,
+  showSelection: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete file?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  showAddButton: true,
+  rowClickable: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Folder",
+    toParentEdgeType: "ParentFolder",
+    rootKeys: {},
+    label: "Folder",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "key",
+              label: "Key",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "description",
+              label: "Description",
+              dataType: "text", renderer: "textArea",
+              maxLength: 2000,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {}
+  },
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "File",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "__fileUpload",
+            dataType: "file", renderer: "graphFileUpload",
+            required: true,
+            colSpan: 2,
+            tooltip: "Choose a file to upload. It is stored in the repository and linked to your user (UserFile). Then set description and save.",
+            visible: "ctx.mode === 'create'",
+            uploadConfiguration: {
+              accept: "*/*",
+              uploadUrl: "/api/file/upload",
+              hidePreview: false,
+              enableDragDrop: true,
+              fullWidth: true,
+              previewMinHeight: "12.5rem",
+              previewMaxItemHeight: "16rem",
+              previewObjectFit: "contain",
+              fileDownloadUrlPrefix: "/api/file/download",
+              pickButtonLabel: "Choose file to upload",
+              successToastMessage: "File uploaded",
+              onUploadSuccess: async (hook) => {
+                hook.callbacks.assignFormVertex?.(hook.uploadedId);
+                hook.syncFormFields?.(hook.uploadedId);
+                hook.syncPreview(hook.uploadedId);
+                hook.showSuccess();
+              },
+            }
+          },
+          {
+            key: "fileName",
+            label: "File name",
+            dataType: "text", renderer: "text",
+            required: true,
+            maxLength: 512,
+            colSpan: 2,
+            tooltip: "Display name for the file.",
+            disabled: "ctx.mode === 'edit'"
+          },
+          {
+            key: "description",
+            label: "Description",
+            dataType: "text", renderer: "textArea",
+            required: false,
+            maxLength: 4000,
+            colSpan: 2
+          },
+          {
+            key: "fileSize",
+            label: "Size (bytes)",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "fileType",
+            label: "MIME type",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "uploadDate",
+            label: "Upload date",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "FilePortal_settings_default",
+    tableVertexLabel: "File",
+    icon: "File",
+    name: "Portal files",
+    config: `return {
+  title: "My files",
+  subtitle: "Files you uploaded in the app.",
+  label: "File",
+  icon: "ph:file",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: true,
+  actions: [],
+  showAddButton: true,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: true,
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text", renderer: "imagePreview",
+      width: "150px",
+      sortable: false,
+      valueAccessor: (row) => {
+        const fileName = row.P?.fileName != null ? String(row.P.fileName).trim() : "";
+        if (fileName === "") return null;
+        const mime = String(row.P?.mimeType || row.P?.fileType || "");
+        if (mime && !mime.startsWith("image/")) return null;
+        return "/api/file/download/" + encodeURIComponent(fileName);
+      }
+    },
+    {
+      key: "fileName",
+      label: "Name",
+      dataType: "text", renderer: "text",
+      width: "240px",
+      valueAccessor: (row) => row.P?.fileName || "",
+      overflowEllipsis: true
+    },
+    {
+      key: "fileSize",
+      label: "Size (bytes)",
+      dataType: "text", renderer: "text",
+      width: "100px",
+      valueAccessor: (row) => (row.P?.fileSize != null ? String(row.P.fileSize) : "")
+    },
+    {
+      key: "fileType",
+      label: "Type",
+      dataType: "text", renderer: "text",
+      width: "120px",
+      valueAccessor: (row) => row.P?.mimeType || row.P?.fileType || ""
+    },
+    { key: "uploadDate", label: "Uploaded", dataType: "date", renderer: "date", width: "130px" },
+    {
+      key: "description",
+      label: "Description",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.description,
+      overflowEllipsis: true
+    }
+  ],
+  rowHeight: 64,
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Folder",
+    toParentEdgeType: "ParentFolder",
+    rootKeys: {},
+    label: "Folder",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "key",
+              label: "Key",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "description",
+              label: "Description",
+              dataType: "text", renderer: "textArea",
+              maxLength: 2000,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {}
+  },
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "File",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "__fileUpload",
+            dataType: "file", renderer: "graphFileUpload",
+            required: true,
+            colSpan: 2,
+            tooltip: "Choose a file to upload. It is stored in the repository and linked to your user (UserFile). Then set description and save.",
+            visible: "ctx.mode === 'create'",
+            uploadConfiguration: {
+              accept: "*/*",
+              uploadUrl: "/api/file/upload",
+              hidePreview: false,
+              enableDragDrop: true,
+              fullWidth: true,
+              previewMinHeight: "12.5rem",
+              previewMaxItemHeight: "16rem",
+              previewObjectFit: "contain",
+              fileDownloadUrlPrefix: "/api/file/download",
+              pickButtonLabel: "Choose file to upload",
+              successToastMessage: "File uploaded",
+              onUploadSuccess: async (hook) => {
+                hook.callbacks.assignFormVertex?.(hook.uploadedId);
+                hook.syncFormFields?.(hook.uploadedId);
+                hook.syncPreview(hook.uploadedId);
+                hook.showSuccess();
+              },
+            }
+          },
+          {
+            key: "fileName",
+            label: "File name",
+            dataType: "text", renderer: "text",
+            required: true,
+            maxLength: 512,
+            colSpan: 2,
+            tooltip: "Display name for the file.",
+            disabled: "ctx.mode === 'edit'"
+          },
+          {
+            key: "description",
+            label: "Description",
+            dataType: "text", renderer: "textArea",
+            required: false,
+            maxLength: 4000,
+            colSpan: 2
+          },
+          {
+            key: "fileSize",
+            label: "Size (bytes)",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "fileType",
+            label: "MIME type",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "uploadDate",
+            label: "Upload date",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "Task_settings_default",
+    tableVertexLabel: "Task",
+    icon: "Check",
+    name: "Tasks",
+    config: `return {
+  title: "Tasks",
+  label: "Task",
+  icon: "ph:check-square",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete task?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  refetchIntervalWhenQueued: 5000,
+  columns: [
+    { key: "title", label: "Task", dataType: "text", renderer: "text", width: "260px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { todo: ["To do", "warning"], doing: ["Doing", "info"], blocked: ["Blocked", "critical"], done: ["Done", "success"] } },
+    { key: "priority", label: "Priority", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { low: ["Low", "neutral"], normal: ["Normal", "info"], high: ["High", "warning"], urgent: ["Urgent", "critical"] } },
+    { key: "dueAt", label: "Due", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "assigneeId", label: "Assignee", dataType: "relation", renderer: "text", filterType: "text", width: "200px", overflowEllipsis: true, sortable: false, selectConfig: { label: "User", labelField: "name", relationshipType: "TaskAssignee", limit: 50, edgeOnly: true, enableUserScoping: false } },
+    { key: "syncStatus", label: "Sync", dataType: "text", renderer: "badge", width: "110px", badgeKeyCase: "lower", badgeToneMap: { queued: ["Queued", "warning"], processing: ["Processing", "info"], done: ["Done", "success"], error: ["Error", "critical"] } }
+  ],
+  rowHeight: 50,
+  uniqueKeys: ["title", "dueAt"],
+  hooks: {
+    afterCreate: ["queueTaskReminder"],
+    afterUpdate: ["queueTaskReminder"]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "TaskCategory",
+    toParentEdgeType: "TaskCategoryItem",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "List",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar list or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "task",
+        title: "Task",
+        gridColumns: 2,
+        fields: [
+          { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Short summary shown in the task list." },
+          { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Longer notes for the assignee." },
+          { key: "status", label: "Status", dataType: "select", renderer: "select", required: true, colSpan: 1, defaultValue: "todo", options: [
+            { value: "todo", label: "To do" },
+            { value: "doing", label: "Doing" },
+            { value: "blocked", label: "Blocked" },
+            { value: "done", label: "Done" }
+          ] },
+          { key: "priority", label: "Priority", dataType: "select", renderer: "select", colSpan: 1, defaultValue: "normal", options: [
+            { value: "low", label: "Low" },
+            { value: "normal", label: "Normal" },
+            { value: "high", label: "High" },
+            { value: "urgent", label: "Urgent" }
+          ] },
+          { key: "dueAt", label: "Due date", dataType: "date", renderer: "date", colSpan: 1, tooltip: "Used for reminders and overdue highlighting." },
+          { key: "remindAt", label: "Remind at", dataType: "date", renderer: "date", colSpan: 1, tooltip: "Optional specific reminder time." },
+          { key: "assigneeId", label: "Assign to", dataType: "select", renderer: "select", colSpan: 2, selectConfig: { label: "User", labelField: "name", relationshipType: "TaskAssignee", limit: 50, edgeOnly: true, enableUserScoping: false }, tooltip: "Assign to an employee (User vertex). Stored as an edge." }
+        ]
+      },
+      {
+        key: "comments",
+        title: "Notes / comments",
+        gridColumns: 1,
+        fields: [
+          { key: "comments", label: "Comments", dataType: "json", renderer: "nestedLineItems", colSpan: 2, tooltip: "Task comments (child nodes).", nestedLineItemsConfig: {
+            childLabel: "TaskComment",
+            parentToChildRelationshipType: "TaskTaskComment",
+            parentElementIdPropOnChild: "taskElementId",
+            nestedLineItemsSyncRules: { quantityRule: { op: ">=", value: 0 } },
+            lineColumns: [
+              { key: "message", label: "Comment", columnType: "text", placeholder: "Write a comment...", defaultValue: "", gridMinmax: "minmax(10rem, 1fr)" },
+              { key: "authorEmail", label: "By", columnType: "text", placeholder: "email", defaultValue: "", gridMinmax: "minmax(8rem, 0.6fr)" },
+              { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }
+            ]
+          } }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "TaskPortal_settings_default",
+    tableVertexLabel: "Task",
+    icon: "Check",
+    name: "Portal tasks",
+    config: `return {
+  title: "My tasks",
+  subtitle: "Tasks assigned to you.",
+  label: "Task",
+  icon: "ph:check-square",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: true,
+  actions: [],
+  showAddButton: false,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "TaskCategory",
+    toParentEdgeType: "TaskCategoryItem",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "List",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Sidebar list or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  columns: [
+    { key: "title", label: "Task", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { todo: ["To do", "warning"], doing: ["Doing", "info"], blocked: ["Blocked", "critical"], done: ["Done", "success"] } },
+    { key: "priority", label: "Priority", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { low: ["Low", "neutral"], normal: ["Normal", "info"], high: ["High", "warning"], urgent: ["Urgent", "critical"] } },
+    { key: "dueAt", label: "Due", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true }
+  ],
+  rowHeight: 50,
+  uniqueKeys: [],
+  hooks: {
+    beforeFetchData: ["portalTasksBeforeFetch"]
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "task",
+        title: "Task",
+        gridColumns: 2,
+        fields: [
+          { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, disabled: true },
+          { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, disabled: true },
+          { key: "status", label: "Status", dataType: "select", renderer: "select", required: true, colSpan: 1, options: [
+            { value: "todo", label: "To do" },
+            { value: "doing", label: "Doing" },
+            { value: "blocked", label: "Blocked" },
+            { value: "done", label: "Done" }
+          ] },
+          { key: "priority", label: "Priority", dataType: "select", renderer: "select", colSpan: 1, disabled: true, options: [
+            { value: "low", label: "Low" },
+            { value: "normal", label: "Normal" },
+            { value: "high", label: "High" },
+            { value: "urgent", label: "Urgent" }
+          ] },
+          { key: "dueAt", label: "Due date", dataType: "date", renderer: "date", colSpan: 1, disabled: true },
+          { key: "remindAt", label: "Remind at", dataType: "date", renderer: "date", colSpan: 1, disabled: true }
+        ]
+      },
+      {
+        key: "comments",
+        title: "Notes / comments",
+        gridColumns: 1,
+        fields: [
+          { key: "comments", label: "Comments", dataType: "json", renderer: "nestedLineItems", colSpan: 2, nestedLineItemsConfig: {
+            childLabel: "TaskComment",
+            parentToChildRelationshipType: "TaskTaskComment",
+            parentElementIdPropOnChild: "taskElementId",
+            nestedLineItemsSyncRules: { quantityRule: { op: ">=", value: 0 } },
+            lineColumns: [
+              { key: "message", label: "Comment", columnType: "text", placeholder: "Write a comment...", defaultValue: "", gridMinmax: "minmax(10rem, 1fr)" },
+              { key: "authorEmail", label: "By", columnType: "text", placeholder: "email", defaultValue: "", gridMinmax: "minmax(8rem, 0.6fr)" },
+              { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }
+            ]
+          } }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "Setting_settings_default",
+    tableVertexLabel: "Setting",
+    icon: "Settings",
+    name: "Settings",
+    config: `return {
+  title: "Settings",
+  label: "Setting",
+  icon: "ph:gear",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  rowClickable: true,
+  showRowNumber: false,
+  showSelection: false,
+  resizableColumns: true,
+  enableLocalFilters: false,
+  enableLocalSort: false,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "timezone", label: "Business timezone", dataType: "text", renderer: "text", width: "240px" },
+    { key: "lateThresholdMinutes", label: "Late threshold (minutes)", dataType: "text", renderer: "text", width: "220px" },
+    { key: "autoClockOutHours", label: "Auto clock-out (hours)", dataType: "text", renderer: "text", width: "220px" }
+  ],
+  rowHeight: 52,
+  uniqueKeys: ["key"],
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "biz",
+        title: "Business settings",
+        gridColumns: 2,
+        fields: [
+          { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Keep as 'default' for a single-settings row." },
+          { key: "timezone", label: "Business timezone", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Example: America/New_York" },
+          { key: "lateThresholdMinutes", label: "Late threshold (minutes)", dataType: "number", renderer: "number", colSpan: 1 },
+          { key: "autoClockOutHours", label: "Auto clock-out (hours)", dataType: "number", renderer: "number", colSpan: 1 },
+          { key: "workdayStart", label: "Workday start", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Example: 09:00" },
+          { key: "workdayEnd", label: "Workday end", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Example: 17:00" }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "ShopifyShop_settings_default",
+    tableVertexLabel: "ShopifyShop",
+    icon: "Store",
+    name: "ShopifyShop",
+    config: `return {
+  title: "Shops",
+  label: "Shop",
+  icon: "carbon:store",
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "shop",
+      label: "Shop domain",
+      dataType: "text", renderer: "text",
+      width: "320px",
+      required: true
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    },
+    {
+      key: "updatedAt",
+      label: "Updated",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.updatedAt || row.updatedAt
+    },
+    {
+      key: "lastSynced",
+      label: "Last synced",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.lastSynced || ""
+    },
+    {
+      key: "syncStatus",
+      label: "Sync status",
+      dataType: "text", renderer: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.syncStatus || ""
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "40px", __actions: "80px" },
+  formConfig: null,
+  actions: [
+    {
+      key: "delete",
+      type: "delete",
+      confirm: {
+        title: "Delete shop",
+        message: "Delete this shop and drop its database? This cannot be undone.",
+        confirmText: "Delete",
+        cancelText: "Cancel",
+        variant: "danger"
+      }
+    }
+  ],
+  uniqueKeys: [],
+  usePolarisUI: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  hooks: {},
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyShopCategory",
+    toParentEdgeType: "ParentShopifyShopCategory",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Group",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar group name (e.g. Production, Trial)." },
+          ]
+        }
+      ]
+    }
+  }
+};`
+  }
+];
+
+async function processSetting(setting) {
+  const { key, tableVertexLabel, name, config } = setting;
+  console.log(`Processing ${name} (${key})...`);
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      return { created: 0, updated: 1 };
+    }
+
+    await args.session.run(
+      `CREATE (s:Setting {
+        key: $key,
+        type: 'table_config',
+        tableVertexLabel: $tableVertexLabel,
+        config: $config,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      }) RETURN s`,
+      { key, config, tableVertexLabel }
+    );
+    return { created: 1, updated: 0 };
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+const stats = { created: 0, updated: 0, total: settingsConfigs.length };
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const r = await processSetting(settingsConfigs[i]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+
+// Seed a single default settings row (Setting { key: "default" }) so Settings page has something to edit.
+if (!dryRun) {
+  const seedRes = await args.session.run(
+    `MATCH (s:Setting {key: 'default'}) RETURN s LIMIT 1`,
+    {}
+  );
+  if (seedRes.records.length === 0) {
+    await args.session.run(
+      `CREATE (s:Setting {
+        key: 'default',
+        timezone: 'UTC',
+        lateThresholdMinutes: 10,
+        autoClockOutHours: 12,
+        workdayStart: '09:00',
+        workdayEnd: '17:00',
+        createdAt: $nowIso,
+        updatedAt: $nowIso
+      }) RETURN s`,
+      { nowIso: new Date().toISOString() }
+    );
+  }
+}
+
+return {
+  success: true,
+  message: dryRun ? "Attendra migration dry run" : "Attendra settings migration completed",
+  data: { ...stats, dryRun }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

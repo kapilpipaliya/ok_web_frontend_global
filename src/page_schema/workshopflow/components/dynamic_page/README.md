@@ -6,29 +6,20 @@ The implementation is split into:
 
 - Components:
   - `DynamicPage.hjson` (this folder)
-  - `Sidebar.hjson`, `SidebarTreeItem.hjson`, `SidebarAddChildModal.hjson` (this folder)
-  - `Table.hjson`, `TableModal.hjson` (`../table`)
+  - `../table/Table.hjson`
+  - `Sidebar.hjson`, `SidebarTreeItem.hjson`, `SidebarAddChildModal.hjson`
 - Server functions:
-  - `functions/dynamic_page/getUserContent.hjson`
-  - `functions/dynamic_page/mutateUserContent.hjson`
-  - `functions/dynamic_page/getVertexChildren.hjson`
-  - `functions/dynamic_page/saveSidebarVertex.hjson`
-  - `functions/dynamic_page/createSidebarContentRelationship.hjson`
-  - `functions/dynamic_page/migrateContentTableSettings.hjson`
-  - plus settings/import/export helpers
-
-The goal is to have:
-
-- One **DynamicPage** per logical content type (Book, AudioVideo, Category, etc.)
-- A **Table** that reads/writes that content type
-- An optional **Sidebar tree** that:
-  - Shows a hierarchy (e.g. categories)
-  - Filters the table by the selected node
-  - Lets you add/edit nodes with the same form system used by the table
+  - `functions/dynamic_page/main_functions/content/getUserContent.hjson`
+  - `functions/dynamic_page/main_functions/content/mutateUserContent.hjson`
+  - `functions/dynamic_page/main_functions/settings/getUserContentSetting.hjson`
+  - `functions/dynamic_page/main_functions/settings/saveUserContentSetting.hjson`
+  - `functions/dynamic_page/main_functions/sidebar/getVertexChildren.hjson`
+  - `functions/dynamic_page/main_functions/sidebar/saveSidebarVertex.hjson`
+  - `functions/dynamic_page/main_functions/migration/migrateDynamicPageSettings.hjson` (Attendra defaults)
 
 ---
 
-### 1. Data flow overview
+### 1. High-level flow
 
 1. A page HJSON uses `DynamicPage`:
 
@@ -36,264 +27,247 @@ The goal is to have:
 {
   vertexes: [
     {
-      id: "1"
-      L: Component
+      id: "page_root",
+      L: "Page",
+      P: { key: "MyPage", url: "/MyPage", title: "My Page" }
+    },
+    {
+      id: "dynamic_page_attr",
+      L: "Attr",
       P: {
-        key: BooksPage
-        componentName: DynamicPage
+        displayOrder: 1,
+        componentName: "DynamicPage",
         props: '''
 return {
-  tableVertexLabel: "book",
+  tableVertexLabel: "MyType",
   loadFromSetting: true
 };
 '''
       }
     }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "page_root", E: "dynamic_page_attr" }
   ]
-  edges: []
 }
 ```
 
-2. **DynamicPage**:
+2. **DynamicPage** loads table settings from Neo4j (`Setting` with `type: table_config`), evaluates the config function body, and passes it to **Table**.
 
-- Reads:
-  - `tableVertexLabel` – logical type (`"book"`, `"audioVideo"`, `"category"`, etc.)
-  - `loadFromSetting` – whether to use settings/migration instead of inline config
-  - Optional `configFunction` / `settingsFunction`
-- Uses:
-  - `getUserContentSetting` / `saveUserContentSetting`
-  - `migrateContentTableSettings` (default config/migration)
-- Produces a normalized config object:
-
-```ts
-{
-  columns: [...],
-  formConfig: { groups: [...] },
-  uniqueKeys: [...],
-  sidebar?: {
-    enabled: true,
-    parentVertexLabel: "Category",
-    toParentEdgeType: "ParentCategory",
-    rootKeys: { key: "root" },
-    formConfig: {...} // form for add/edit sidebar nodes
-  }
-}
-```
-
-- Exposes helpers via `args.fns` to children:
-  - `fetchData` / `getGenericDataFunction`
-  - `getGenericSaveFunction`
-  - `getSidebarConfig`, `hasSidebar`
-  - `selectedSidebarItem`, `handleSidebarItemSelect`, etc.
-
-3. **Table** (`components/table/Table.hjson`):
-
-- Uses `args.fns.fetchData` to load data:
-  - Internally calls `getGenericDataFunction` → `getUserContent`
-- Uses `args.fns.getGenericSaveFunction` to save:
-  - Internally calls `mutateUserContent`
-- Uses `formConfig` from the DynamicPage config to render the add/edit modal via `TableModal` + `FormManagement`.
-- Watches `selectedSidebarItem` and re-runs `handleSearch()` whenever the sidebar selection changes.
-
-**Table row state vs graph**
-
-The `TableUiState` vertex stores **`P.data` and `P.filteredData` as arrays of vertex id strings** only (including nested line-item tables). Row payloads are read from **`args.graph.vertexes[id]`** in the Neo4j shape (`id`, `L`, `P`, `IN`, `OUT`). After `getUserContent` / `mutateUserContent`, **DynamicPage** merges the returned `graph` (`applyServerGraphToLocalGraph`); the table resolves ids to vertices for filtering, sorting, rendering, batch actions, and export.
-
-4. **Sidebar** (`Sidebar.hjson`, `SidebarTreeItem.hjson`, `SidebarAddChildModal.hjson`):
-
-- Reads `sidebar` config from `getSidebarConfig()`:
-  - `parentVertexLabel` – label of the tree node vertex (e.g. `"Category"`)
-  - `toParentEdgeType` – edge label used to represent the tree (e.g. `"ParentCategory"`)
-  - `rootKeys` – e.g. `{ key: "root" }` to identify the root node(s)
-  - `formConfig` – form used to add/edit sidebar nodes (same schema as table forms)
-- Uses `getVertexChildren` to:
-  - Load root nodes (by `rootKeys`)
-  - Lazily load children when expanding a node
-- `SidebarTreeItem`:
-  - Tracks expanded/selected state
-  - Shows child count in the label, e.g. `Category A (3)`
-  - Renders `+` (add child) and `✎` (edit) icons
-  - Opens `SidebarAddChildModal` for add/edit
-- `SidebarAddChildModal`:
-  - Uses `FormManagement` + `sidebar.formConfig`
-  - Saves via `saveSidebarVertex` (generic “sidebar vertex” function)
-  - On success, refreshes children and (for add) ensures the parent is expanded
-
-5. **Filtering the Table via Sidebar**
-
-- DynamicPage keeps `selectedSidebarItem` in its fns.
-- `getGenericDataFunction` inspects `selectedSidebarItem` and `sidebar` config:
-
-  - If a regular node is selected:
-
-    - Sends `categoryId = selectedSidebarItem.id` and the sidebar’s `parentVertexLabel` / `toParentEdgeType` into `getUserContent`.
-    - `getUserContent` matches:
-
-      ```cypher
-      MATCH (cat:Category)-[:ParentCategory]->(c:Book|AudioVideo)
-      WHERE elementId(cat) = $categoryId
-      ```
-
-  - If the **root** node is selected (e.g. `P.key === "root"`):
-
-    - Sends `showUnassigned: true` with `parentVertexLabel` / `toParentEdgeType`.
-    - `getUserContent` adds a `NOT EXISTS` clause so only items with **no category relationship** are returned.
-
-- Table’s `handleSearch` → `fetchData` chain is re-run whenever `selectedSidebarItem` changes, so the rows always match the current sidebar selection.
-
-6. **Adding relationships on table “Add”**
-
-- When the user clicks “Add” in the table, the form is saved via `getGenericSaveFunction`:
-  - Calls `mutateUserContent` to create/update/delete the content vertex.
-  - If `mode === "add"` **and** a non-root sidebar item is selected:
-    - Calls `createSidebarContentRelationship` to create:
-
-      ```cypher
-      (Category)-[:ParentCategory]->(Book|AudioVideo)
-      ```
-
-    - So new rows are automatically related to the selected node.
+3. **Table** renders columns and row **`actions`** from config; business logic runs only in **`actionHandlers`** on the page (or `action.onClick` in props).
 
 ---
 
-### 2. How to configure a new `tableVertexLabel`
+### 2. Columns and form fields: `dataType` + `renderer`
 
-Assume you want to add a new content type `category` that also has a sidebar.
+Do **not** overload `type` for columns or form fields. Use two keys:
 
-#### 2.1 Add default settings in `migrateContentTableSettings.hjson`
+| Property | Meaning | Examples |
+|----------|---------|----------|
+| `dataType` | Semantic data: validation, filters, sort, form input kind | `"text"`, `"email"`, `"number"`, `"boolean"`, `"date"`, `"relation"`, `"select"` |
+| `renderer` | Visual presentation only | `"text"`, `"badge"`, `"link"`, `"date"`, `"currency"`, `"image"`, `"iconAction"` |
 
-Edit `functions/dynamic_page/migrateContentTableSettings.hjson` and add a settings entry:
+**Column example (status badge):**
+
+```js
+{ key: "status", label: "Status", dataType: "text", renderer: "badge", badgeToneMap: { active: ["Active", "success"] } }
+```
+
+**Column example (email as mailto link):**
+
+```js
+{ key: "email", label: "Email", dataType: "email", renderer: "link" }
+```
+
+**Column example (money):**
+
+```js
+{ key: "price", label: "Price", dataType: "number", renderer: "currency", currency: "USD" }
+```
+
+**Form field example:**
+
+```js
+{ key: "notes", label: "Notes", dataType: "text", renderer: "textArea" }
+{ key: "role", label: "Role", dataType: "relation", renderer: "multiSelect", multiSelect: true, selectConfig: { … } }
+```
+
+Structural table columns use `renderer` only: `"rowNumber"`, `"expand"`, `"iconAction"`.
+
+---
+
+### 3. Table row actions
+
+#### Table responsibility (only)
+
+- Render action buttons from `actions` config
+- Run `visible` / `disabled` predicates per row
+- Show `confirm` dialogs
+- Invoke `onClick` / built-in `edit` / `delete` handlers
+- Built-in delete without custom handler uses `formConfig.saveFunction` + `mutateUserContent`
+
+#### Not in Table
+
+- Permissions, Shopify logic, domain mutations — use `actionHandlers` on the page or server functions
+
+#### Config (`actions` in migration settings)
+
+```js
+actions: [
+  { key: "edit", type: "edit" },
+  {
+    key: "delete",
+    type: "delete",
+    group: "primary",
+    visible: ({ row }) => !row.P?.isSystem,
+    disabled: ({ row }) => row.P?.syncStatus === "syncing",
+    disabledReason: "Cannot delete while sync is in progress",
+    reasonVariant: "warning",
+    confirm: {
+      title: "Delete?",
+      message: "This cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger"
+    }
+  },
+  {
+    key: "approve",
+    type: "custom",
+    label: "Approve",
+    icon: "carbon:checkmark",
+    group: "secondary", // overflow menu (alias: display: "menu")
+    visible: ({ row }) => row.P?.status === "pending"
+  }
+]
+```
+
+| Field | Where | Purpose |
+|-------|-------|---------|
+| `actions` | settings | Serializable action definitions |
+| `actionHandlers` | **page props only** | `{ [key]: async (row) => void }` |
+| `visible` | action | `boolean` or `({ row, action, graph, … }) => boolean` — `false` removes the control |
+| `disabled` | action | `boolean` or `({ row, action, graph, … }) => boolean` — `true` disables (control stays visible) |
+| `disabledReason` | action | `string` or `({ row, action, … }) => string` — tooltip when disabled (overrides `title`) |
+| `reasonVariant` | action | `"info"` \| `"warning"` \| `"danger"` or `({ row, action }) => variant` — styles reason state (default `info`) |
+| `reasonCode` | action | Stable code e.g. `"requires_admin"` — i18n, analytics, audit (`string` or `({ row, action }) => string`) |
+| `reasonCodeMap` | settings / props | `{ [code]: "Display text" }` — maps `reasonCode` → localized label |
+| `group` | action | `"primary"` (icon, default) or `"secondary"` (⋯ menu) |
+| `display` | action | `"menu"` alias for `group: "secondary"` |
+
+Predicate context: `{ row, action, graph, tableStateVertexId, getSelectedRows, getDisplayData }`.  
+`confirm.message` may be a function with the same context: `({ row, action }) => "…"`.
+
+**Visibility:** `visible: false` (or predicate returning false) **hides** the action — no disabled placeholder. Use `disabled` + `disabledReason` when the action should stay visible but not clickable.
+
+**Reason tooltips:** When disabled with `disabledReason` / `reasonCode`, the control uses resolved text as `title` and sets `data-reason-*` attributes for popovers, i18n, and telemetry.
+
+```js
+// Optional table-level map (settings or page props) for i18n / telemetry
+reasonCodeMap: {
+  requires_admin: "Requires admin role",
+  sync_in_progress: "Cannot change while sync is running"
+},
+actions: [
+  {
+    key: "delete",
+    type: "delete",
+    disabled: ({ row }) => !row.P?.canDelete,
+    reasonCode: "requires_admin",
+    disabledReason: "Requires admin role", // fallback until map/i18n wired
+    reasonVariant: "warning"
+  }
+]
+```
+
+`reasonCode` is stable for localization, analytics, permission debugging, and audit logs. UI resolves display text via `reasonCodeMap` (then falls back to `disabledReason`). Controls expose `data-reason-code` when disabled with a reason.
+
+| `loadingIcon` | action | Icon while running (default `carbon:renew`) |
+| `showActionsColumn` | settings | Optional override; default `actions.length > 0` |
+| `formConfig` | settings | Add/edit modal; enables built-in `type: "edit"` and default delete |
+
+Built-in types:
+
+- **`edit`** — opens form modal (`handleEdit` / `onEdit` prop)
+- **`delete`** — `actionHandlers.delete` or `formConfig.saveFunction` delete mode
+- **`custom`** — requires `onClick` on action or `actionHandlers[key]`
+
+#### Per-row loading
+
+Table tracks `runningAction[rowId][actionKey]` while an async handler runs. Primary icons show a spinner; duplicate clicks are ignored.
+
+#### Bulk actions (future)
+
+`args.fns.runBulkAction(action, rows)` runs the same pipeline as a row click for each selected row (skips hidden/disabled). Wire from `batchActions` toolbar when needed.
+
+#### Page props example (Shopify shops)
+
+```js
+return {
+  tableVertexLabel: "ShopifyShop",
+  loadFromSetting: true,
+  actionHandlers: {
+    delete: async (row) => {
+      await args.executeNamedServerFunction({
+        functionName: "deleteShopifyShop",
+        contextData: { shop: row.P.shop }
+      });
+      // refresh table row ids…
+    }
+  }
+};
+```
+
+Settings hold confirm copy; the page only wires the handler.
+
+#### Toolbar `customActions`
+
+Header toolbar slots (`customActions` in config) are separate from row `actions` — use for page-level buttons (export, etc.), not per-row buttons.
+
+---
+
+### 4. Configure a new `tableVertexLabel`
+
+#### 4.1 Add default settings in `migrateDynamicPageSettings.hjson`
 
 ```js
 {
-  key: 'category_settings_default',
-  tableVertexLabel: 'category',
-  icon: '📁',
-  name: 'Category',
+  key: 'MyType_settings_default',
+  tableVertexLabel: 'MyType',
+  name: 'MyType',
   config: `return {
-  title: "Categories",
-  columns: [
-    { key: "name", label: "Name", type: "text", width: "200px", required: true },
-    { key: "key",  label: "Key",  type: "text", width: "150px" }
+  title: "My items",
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "…" } }
   ],
-  rowHeight: 50,
-  showRowNumber: true,
-  showSelection: true,
-  showActions: true,
-  resizableColumns: true,
-  formConfig: {
-    gridColumns: 1,
-    groups: [
-      {
-        key: "basic",
-        title: "Basic Information",
-        gridColumns: 2,
-        fields: [
-          { key: "name", label: "Name", type: "text", required: true, maxLength: 255, colSpan: 2 },
-          { key: "key",  label: "Key",  type: "text", maxLength: 100, colSpan: 2 }
-        ]
-      }
-    ]
-  },
-  uniqueKeys: [],
-  sidebar: {
-    enabled: true,
-    parentVertexLabel: "Category",
-    toParentEdgeType: "ParentCategory",
-    rootKeys: { key: "root" },
-    formConfig: {
-      gridColumns: 1,
-      groups: [
-        {
-          key: "basic",
-          title: "Basic Information",
-          gridColumns: 2,
-          fields: [
-            { key: "name", label: "Name", type: "text", required: true, maxLength: 255, colSpan: 2 },
-            { key: "key",  label: "Key",  type: "text", maxLength: 100, colSpan: 2 }
-          ]
-        }
-      ]
-    }
-  }
+  columns: [ /* … */ ],
+  formConfig: { groups: [ /* … */ ] }
 };`
 }
 ```
 
-This single config drives:
-
-- **Table UI** (columns, row height, action buttons)
-- **Form** (fields and layout for add/edit)
-- **Sidebar** (what vertex/edges form the tree, which roots to show, what fields to use for add/edit)
-
-#### 2.2 Add/extend server logic for the new type
-
-- `getUserContent.hjson`:
-  - Validate `tableVertexLabel` and map it to a `vertexLabel` and `relationshipType`.
-  - If you introduce a new type beyond `"book"`/`"audioVideo"`, extend the mapping accordingly.
-
-- `mutateUserContent.hjson`:
-  - Same change: extend `vertexLabel` / `relationshipType` mapping if needed.
-
-If your new type behaves differently (e.g. different ownership model), you can create a separate pair of functions instead of reusing `getUserContent` / `mutateUserContent`.
-
-#### 2.3 Wire up a page to use `DynamicPage`
-
-Create a page HJSON (e.g. `Category.hjson`) that uses `DynamicPage`:
+#### 4.2 Wire a page
 
 ```hjson
-{
-  vertexes: [
-    {
-      id: "1"
-      L: Component
-      P: {
-        key: CategoryPage
-        componentName: DynamicPage
-        props: '''
+props: '''
 return {
-  tableVertexLabel: "category",
+  tableVertexLabel: "MyType",
   loadFromSetting: true
 };
 '''
-      }
-    }
-  ]
-  edges: []
-}
 ```
 
-Run the schema migration for this page’s environment so that `migrateContentTableSettings` populates the default config into `UserContentSetting`.
+Run `migrateDynamicPageSettings` after changing defaults.
 
 ---
 
-### 3. Quick checklist when adding a new type
+### 5. Sidebar, filtering, relationships
 
-1. **Server functions**
-   - [ ] `getUserContent` knows about your `tableVertexLabel` (label + relationship type).
-   - [ ] `mutateUserContent` knows about your `tableVertexLabel`.
+See sections above in repo history for sidebar `parentVertexLabel`, `toParentEdgeType`, `getUserContent` category filters, and `createSidebarContentRelationship` on add.
 
-2. **Migration / settings**
-   - [ ] Added an entry to `migrateContentTableSettings.hjson` with:
-     - `tableVertexLabel`
-     - `columns`
-     - `formConfig`
-     - Optional `sidebar` config (if you want a tree + filtering).
+---
 
-3. **Page**
-   - [ ] Created a Page HJSON using `DynamicPage` with `tableVertexLabel` and `loadFromSetting: true`.
+### 6. Table row state vs graph
 
-4. **Sidebar behavior (optional)**
-   - [ ] `sidebar.parentVertexLabel` / `sidebar.toParentEdgeType` match your graph schema.
-   - [ ] `rootKeys` is correct for your root node(s) (e.g. `{ key: "root" }`).
-   - [ ] `saveSidebarVertex` and `getVertexChildren` are aligned with your label/edge choices.
-
-Once these are in place, you should get:
-
-- A working DynamicPage listing your content type
-- A functional table with search/filter/sort/add/edit/delete
-- An optional sidebar tree that:
-  - Shows hierarchy
-  - Filters the table by selection
-  - Uses the same form system to create/edit tree nodes
-
+`TableUiState` stores row id arrays; payloads live in `args.graph.vertexes[id]`. After `getUserContent` / `mutateUserContent`, DynamicPage merges the returned graph.

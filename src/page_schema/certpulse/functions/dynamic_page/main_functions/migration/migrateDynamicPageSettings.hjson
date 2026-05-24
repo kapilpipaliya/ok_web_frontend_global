@@ -1,0 +1,167 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Seeds default CertPulse DynamicPage table_config Setting rows (domains). Optional dryRun in contextData.
+        key: migrateDynamicPageSettings
+        body:
+          '''
+/**
+ * CertPulse — migrate default table settings for DynamicPage (getUserContent / mutateUserContent).
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = args.contextData || {};
+
+console.log(`CertPulse settings migration (dryRun: ${dryRun})`);
+
+const settingsConfigs = [
+  {
+    key: "CertPulseDomain_settings_default",
+    tableVertexLabel: "CertPulseDomain",
+    icon: "Lock",
+    name: "Domains",
+    config: `return {
+  title: "Domains",
+  label: "Domain",
+  icon: "ph:shield-check",
+  enableUserScopingForContent: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  columns: [
+    { key: "host", label: "Domain", dataType: "text", renderer: "text", width: "260px", overflowEllipsis: true },
+    { key: "port", label: "Port", dataType: "number", renderer: "number", width: "90px" },
+    { key: "syncStatus", label: "Sync", dataType: "text", renderer: "badge", width: "110px", badgeKeyCase: "lower", badgeToneMap: { queued: ["Queued", "warning"], processing: ["Processing", "info"], done: ["Done", "success"], error: ["Error", "critical"] } },
+    { key: "sslStatus", label: "Status", dataType: "text", renderer: "badge", width: "140px", badgeKeyCase: "lower", badgeToneMap: { valid: ["Valid", "success"], expired: ["Expired", "critical"], error: ["Error", "warning"], unknown: ["Unknown", "info"] } },
+    { key: "sslNotAfter", label: "Expires", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+    { key: "sslDaysRemaining", label: "Days left", dataType: "number", renderer: "number", width: "110px" },
+    { key: "sslLastCheckedAt", label: "Last checked", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true }
+  ],
+  rowHeight: 52,
+  uniqueKeys: ["host", "port"],
+  hooks: {
+    afterCreate: ["certPulseQueueSslCheck"],
+    afterUpdate: ["certPulseQueueSslCheck"]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "CertPulseDomainCategory",
+    toParentEdgeType: "CertPulseDomainCategoryItem",
+    rootKeys: {},
+    label: "Domain categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar folder name." },
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", dataType: "number", renderer: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "domain",
+        title: "Domain",
+        gridColumns: 2,
+        fields: [
+          { key: "host", label: "Domain / subdomain", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Example: example.com or api.example.com. Do not include protocol (https://)." },
+          { key: "port", label: "TLS port", dataType: "number", renderer: "number", required: true, min: 1, max: 65535, step: 1, colSpan: 1, defaultValue: 443, tooltip: "Most HTTPS endpoints use 443." },
+          { key: "enabled", label: "Enabled", dataType: "boolean", renderer: "checkbox", colSpan: 1, defaultValue: true, tooltip: "If disabled, CertPulse will skip checks for this row." },
+          { key: "notifyOnExpired", label: "Email on expired", dataType: "boolean", renderer: "checkbox", colSpan: 2, defaultValue: true, tooltip: "When enabled, CertPulse emails you once per day per expired domain." }
+        ]
+      },
+      {
+        key: "status",
+        title: "Status",
+        gridColumns: 2,
+        fields: [
+          { key: "sslStatus", label: "SSL status", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Computed by the daily worker: valid / expired / error / unknown." },
+          { key: "sslNotAfter", label: "Certificate expires", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Computed expiry timestamp from the peer certificate." },
+          { key: "sslDaysRemaining", label: "Days remaining", dataType: "number", renderer: "number", colSpan: 1, tooltip: "Computed from sslNotAfter." },
+          { key: "sslLastCheckedAt", label: "Last checked at", dataType: "text", renderer: "text", colSpan: 1, tooltip: "When CertPulse last checked this endpoint." },
+          { key: "sslError", label: "Last error", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "If status is error, details are stored here." }
+        ]
+      }
+    ]
+  }
+};`
+  }
+];
+
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+  console.log(`Processing ${name} (${icon})...`);
+
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`Updated ${name}`);
+      return { created: 0, updated: 1 };
+    }
+
+    await args.session.run(
+      `CREATE (s:Setting {
+        key: $key,
+        type: 'table_config',
+        tableVertexLabel: $tableVertexLabel,
+        config: $config,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      }) RETURN s`,
+      { key, config, tableVertexLabel }
+    );
+    console.log(`Created ${name}`);
+    return { created: 1, updated: 0 };
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+const stats = { created: 0, updated: 0, total: settingsConfigs.length };
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const r = await processSetting(settingsConfigs[i]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+return {
+  success: true,
+  message: dryRun ? "CertPulse migration dry run" : "CertPulse settings migration completed",
+  data: { ...stats, dryRun }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

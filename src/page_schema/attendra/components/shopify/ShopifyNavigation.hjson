@@ -80,6 +80,21 @@
       }
     }
     {
+      id: "nav_tasks"
+      L: Attr
+      P: {
+        displayOrder: 3.5
+        componentName: Html
+        key: unique_tasks
+        props:
+          '''return {
+  as: "s-link",
+  href: "/tasks",
+  text: "Tasks"
+}'''
+      }
+    }
+    {
       id: "13"
       L: Attr
       P: {
@@ -89,8 +104,8 @@
         props:
           '''return {
   as: "s-link",
-  href: "/attendance-logs",
-  text: "Attendance Logs"
+  href: "/time-logs",
+  text: "Time Logs"
 }'''
       }
     }
@@ -294,6 +309,12 @@
       E: "17"
     }
     {
+      id: e_nav_tasks
+      T: Attr
+      S: "3"
+      E: "nav_tasks"
+    }
+    {
       id: e5
       T: Attr
       S: "3"
@@ -340,24 +361,6 @@
       T: Attr
       S: "3"
       E: "9"
-    }
-    {
-      id: e12
-      T: Attr
-      S: "3"
-      E: "15"
-    }
-    {
-      id: e13
-      T: Attr
-      S: "3"
-      E: "16"
-    }
-    {
-      id: e14
-      T: Attr
-      S: "3"
-      E: "10"
     }
     {
       id: e15

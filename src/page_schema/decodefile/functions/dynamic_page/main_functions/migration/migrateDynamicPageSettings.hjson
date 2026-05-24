@@ -1,0 +1,433 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Migrates or creates default table configuration settings for ShopifyFile and ShopifyFileCategory. Updates existing settings if they already exist.
+        body:
+          '''
+/**
+ * Migration: Content Table Settings (File management)
+ *
+ * Creates or updates default table configuration for ShopifyFile and ShopifyFileCategory.
+ *
+ * Parameters (via args.contextData):
+ * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
+ */
+
+const { dryRun = false } = args.contextData;
+
+console.log(`🚀 Starting file table settings migration (dryRun: ${dryRun})`);
+
+const settingsConfigs = [
+  {
+    key: 'ShopifyFile_settings_default',
+    tableVertexLabel: 'ShopifyFile',
+    tableVertexLabel: 'ShopifyFile',
+    icon: '📁',
+    name: 'ShopifyFile',
+    config: `return {
+  title: "Files",
+  label: "File",
+  icon: "carbon:document",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text", renderer: "imagePreview",
+      width: "80px",
+      sortable: false,
+      valueAccessor: (row) => {
+        const preview = row.P?.preview;
+        if (preview && typeof preview === 'string') {
+          try {
+            const p = JSON.parse(preview);
+            return p?.image?.url || p?.url || null;
+          } catch (e) {}
+        }
+        return row.P?.previewUrl || row.P?.imageUrl || null;
+      }
+    },
+    {
+      key: "filename",
+      label: "File name",
+      dataType: "text", renderer: "text",
+      width: "220px",
+      valueAccessor: (row) => row.P?.filename || row.P?.id || '',
+      overflowEllipsis: true
+    },
+    {
+      key: "fileType",
+      label: "Type",
+      dataType: "text", renderer: "text",
+      width: "120px",
+      valueAccessor: (row) => row.P?.fileType || row.P?.mediaContentType || ''
+    },
+    {
+      key: "alt",
+      label: "Alt text",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.alt,
+      titleAccessor: (row) => row.P?.alt || undefined,
+      overflowEllipsis: true
+    },
+    {
+      key: "fileStatus",
+      label: "Status",
+      dataType: "text", renderer: "badge",
+      width: "100px",
+      valueAccessor: (row) => row.P?.fileStatus,
+      badgeKeyCase: "lower",
+      badgeToneMap: {
+        uploaded: ["Uploaded", "success"],
+        processing: ["Processing", "warning"],
+        failed: ["Failed", "critical"],
+        ready: ["Ready", "success"]
+      }
+    },
+    {
+      key: "syncStatus",
+      label: "Sync",
+      dataType: "text", renderer: "badge",
+      width: "100px",
+      valueAccessor: (row) => row.P?.syncStatus,
+      badgeKeyCase: "lower",
+      badgeToneMap: {
+        complete: ["Synced", "success"],
+        queued: ["Syncing", "warning"],
+        failed: ["Failed", "critical"]
+      },
+      badgeTitleAccessor: (row) => row?.P?.syncError || undefined
+    },
+    /*{
+      key: "originalFileSize",
+      label: "Size",
+      dataType: "text", renderer: "text",
+      width: "90px",
+      valueAccessor: (row) => {
+        const bytes = row.P?.originalFileSize;
+        if (bytes == null || bytes === 0) return '';
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      }
+    },*/
+    {
+      key: "createdAt",
+      label: "Date added",
+      dataType: "date", renderer: "date",
+      width: "110px",
+      valueAccessor: (row) => row.P?.createdAt
+    },
+    {
+      key: "__copyLink",
+      label: "",
+      dataType: "text", renderer: "iconAction",
+      width: "72px",
+      sortable: false,
+      filterable: false,
+      iconAction: {
+        action: "clipboard",
+        icon: "carbon:link",
+        activeIcon: "carbon:checkmark",
+        title: "Copy link",
+        activeTitle: "Copied",
+        activeDurationMs: 1500,
+        textAccessor: (row) => row.P?.originUrl || row.P?.imageUrl || ''
+      }
+    }
+  ],
+  rowHeight: 64,
+  showRowNumber: true,
+  showSelection: true,
+  actions: [],
+  rowClickable: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __copyLink: "72px" },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "basic",
+        title: "File Details",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "alt",
+            label: "Alt text",
+            dataType: "text", renderer: "text",
+            maxLength: 500,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: [],
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  refetchIntervalWhenQueued: 5000,
+  hooks: {
+    beforeFetchData: "shopifyFileBeforeFetchData",
+    afterCreate: "shopifyFileAfterCreate",
+    afterUpdate: "shopifyFileAfterUpdate",
+    afterDelete: "shopifyFileAfterDelete",
+    afterCreateRelationship: "shopifyFileAfterCreateRelationship",
+    afterMoveItemsToCategory: "shopifyFileAfterMoveItemsToCategory"
+  },
+  editLink: {
+    icon: "carbon:view",
+    getHref: (row) => {
+      const id = row.P?.id;
+      if (!id) return '';
+      const origin = typeof window !== 'undefined' && window.shopify?.origin ? window.shopify.origin : '';
+      const num = String(id).replace(/^gid:\\/\\/shopify\\/[^/]+\\//, '');
+      return \`\${origin}/content/files/\${num}?selectedView=all\`;
+    },
+    label: "Files in Shopify",
+    target: "_top",
+    rel: "noopener noreferrer",
+    style: "color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;"
+  },
+  onRowClick: (row, args) => {
+    const id = row?.P?.id;
+    if (!id) return;
+    const origin = typeof window !== 'undefined' && window.shopify?.origin ? window.shopify.origin : '';
+    const num = String(id).replace(/^gid:\\/\\/shopify\\/[^/]+\\//, '');
+    const href = \`\${origin}/content/files/\${num}?selectedView=all\`;
+    if (href && typeof window !== 'undefined') {
+      window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  },
+  onEdit: (row, args) => {
+    const id = row?.P?.id;
+    if (!id) return;
+    const origin = typeof window !== 'undefined' && window.shopify?.origin ? window.shopify.origin : '';
+    const num = String(id).replace(/^gid:\\/\\/shopify\\/[^/]+\\//, '');
+    const href = \`\${origin}/content/files/\${num}?selectedView=all\`;
+    if (href && typeof window !== 'undefined') {
+      window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyFileCategory",
+    toParentEdgeType: "FileCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    refetchIntervalWhenQueued: 5000,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {}
+  }
+};`
+  },
+  {
+    key: 'ShopifyFileCategory_settings_default',
+    tableVertexLabel: 'ShopifyFileCategory',
+    icon: '📂',
+    name: 'ShopifyFileCategory',
+    config: `return {
+  title: "File Categories",
+  columns: [
+    {
+      key: "name",
+      label: "Name",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      required: true
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __actions: "88px" },
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "name",
+            label: "Name",
+            dataType: "text", renderer: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: [],
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyFileCategory",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {}
+  }
+};`
+  }
+];
+
+// Helper function to process a single setting
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+
+  console.log(`\n${icon} Processing ${name} settings...`);
+
+  // Check if setting exists
+  const checkResult = await args.session.run(
+    `MATCH (s:Setting {key: $key}) RETURN s`,
+    { key }
+  );
+
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      // Update existing
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`✅ Updated existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      // Create new
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'table_config',
+          tableVertexLabel: $tableVertexLabel,
+          config: $config,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`✅ Created new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  } else {
+    // Dry run - just report
+    if (exists) {
+      console.log(`📋 Would update existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      console.log(`📋 Would create new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  }
+}
+
+// Process all settings
+const stats = {
+  shopifyFileSettingsCreated: 0,
+  shopifyFileSettingsUpdated: 0,
+  shopifyFileCategorySettingsCreated: 0,
+  shopifyFileCategorySettingsUpdated: 0
+};
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const setting = settingsConfigs[i];
+  const result = await processSetting(setting);
+  if (setting.tableVertexLabel === 'ShopifyFile') {
+    stats.shopifyFileSettingsCreated += result.created;
+    stats.shopifyFileSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyFileCategory') {
+    stats.shopifyFileCategorySettingsCreated += result.created;
+    stats.shopifyFileCategorySettingsUpdated += result.updated;
+  }
+}
+
+// ==========================================
+// Summary
+// ==========================================
+console.log('\n📊 Migration Summary:');
+console.log('==========================================');
+console.log(`ShopifyFile settings - Created: ${stats.shopifyFileSettingsCreated}, Updated: ${stats.shopifyFileSettingsUpdated}`);
+console.log(`ShopifyFileCategory settings - Created: ${stats.shopifyFileCategorySettingsCreated}, Updated: ${stats.shopifyFileCategorySettingsUpdated}`);
+console.log('==========================================');
+
+return {
+  success: true,
+  message: dryRun
+    ? "Dry run completed - no changes made"
+    : "File table settings migration completed successfully",
+  data: {
+    ...stats,
+    dryRun
+  }
+};
+'''
+        key: migrateDynamicPageSettings
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,221 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Seeds default YT Organizer DynamicPage table_config Setting rows (Book, AudioVideo). Optional dryRun in contextData.
+        key: migrateDynamicPageSettings
+        body:
+          '''
+/**
+ * YT Organizer — migrate default table settings for DynamicPage / Table (getUserContent / mutateUserContent).
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = args.contextData || {};
+
+console.log(`YT Organizer settings migration (dryRun: ${dryRun})`);
+
+const settingsConfigs = [
+  {
+    key: "Book_settings_default",
+    tableVertexLabel: "Book",
+    icon: "Book",
+    name: "Books",
+    config: `return {
+  title: "Books",
+  label: "Book",
+  icon: "ph:book-open",
+  enableUserScopingForContent: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete book?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __actions: "88px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  columns: [
+    { key: "title", label: "Title", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
+    { key: "subTitle", label: "Subtitle", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "language", label: "Language", dataType: "text", renderer: "text", width: "100px" },
+    { key: "description", label: "Notes", dataType: "text", renderer: "text", width: "240px", overflowEllipsis: true }
+  ],
+  rowHeight: 50,
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Category",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: { key: "root" },
+    label: "Categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Category",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key." }
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "basic",
+        title: "Book",
+        gridColumns: 2,
+        fields: [
+          { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "subTitle", label: "Subtitle", dataType: "text", renderer: "text", colSpan: 2 },
+          { key: "language", label: "Language", dataType: "text", renderer: "text", colSpan: 1 },
+          { key: "name", label: "Short name", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Optional display name used in search." },
+          { key: "description", label: "Notes", dataType: "text", renderer: "textArea", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "AudioVideo_settings_default",
+    tableVertexLabel: "AudioVideo",
+    icon: "Video",
+    name: "Audio / video",
+    config: `return {
+  title: "Audio / video",
+  label: "Item",
+  icon: "ph:film-strip",
+  enableUserScopingForContent: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete item?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __actions: "88px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  columns: [
+    { key: "title", label: "Title", dataType: "text", renderer: "text", width: "220px", required: true, overflowEllipsis: true },
+    { key: "fileName", label: "File", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "subTitle", label: "Subtitle", dataType: "text", renderer: "text", width: "160px", overflowEllipsis: true },
+    { key: "event", label: "Event", dataType: "text", renderer: "text", width: "140px", overflowEllipsis: true },
+    { key: "language", label: "Language", dataType: "text", renderer: "text", width: "100px" }
+  ],
+  rowHeight: 50,
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Category",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: { key: "root" },
+    label: "Categories",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Category",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key." }
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "basic",
+        title: "Audio / video",
+        gridColumns: 2,
+        fields: [
+          { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "fileName", label: "File name", dataType: "text", renderer: "text", colSpan: 2 },
+          { key: "subTitle", label: "Subtitle", dataType: "text", renderer: "text", colSpan: 2 },
+          { key: "event", label: "Event", dataType: "text", renderer: "text", colSpan: 1 },
+          { key: "language", label: "Language", dataType: "text", renderer: "text", colSpan: 1 },
+          { key: "description", label: "Notes", dataType: "text", renderer: "textArea", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};`
+  }
+];
+
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+  console.log(`Processing ${name} (${icon})...`);
+
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`Updated ${name}`);
+      return { created: 0, updated: 1 };
+    }
+
+    await args.session.run(
+      `CREATE (s:Setting {
+        key: $key,
+        type: 'table_config',
+        tableVertexLabel: $tableVertexLabel,
+        config: $config,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      }) RETURN s`,
+      { key, config, tableVertexLabel }
+    );
+    console.log(`Created ${name}`);
+    return { created: 1, updated: 0 };
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+const stats = { created: 0, updated: 0, total: settingsConfigs.length };
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const r = await processSetting(settingsConfigs[i]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+return {
+  success: true,
+  message: dryRun ? "YT Organizer migration dry run" : "YT Organizer settings migration completed",
+  data: { ...stats, dryRun }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

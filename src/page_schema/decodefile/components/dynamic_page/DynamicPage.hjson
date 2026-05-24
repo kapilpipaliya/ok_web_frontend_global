@@ -66,15 +66,18 @@ const getCachedConfig = () => {
 };
 
 const prop = (key, localProps) => {
-  const { config, loadFromSetting } = getCachedConfig();
-  const fromProps = localProps?.[key];
+  const fromLocalProps = localProps?.[key];
+  if (fromLocalProps !== undefined) {
+    return fromLocalProps;
+  }
+  const fromProps = args.contextData.props?.[key];
   if (fromProps !== undefined) {
     return fromProps;
   }
+  const { config, loadFromSetting } = getCachedConfig();
   if (loadFromSetting) {
     return config?.[key];
   }
-  return args.contextData.props[key];
 };
 
 // Derive server payload from evaluated table config (see migrate default table_config return shape).
@@ -104,8 +107,17 @@ const buildRelationshipPropertyBindings = (config) => {
   };
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i];
-    if (f?.type === "select" && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
+    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
       addBinding(f.key, f.selectConfig.relationshipType);
+    }
+  }
+  const cols = config.columns;
+  if (Array.isArray(cols)) {
+    for (let ci = 0; ci < cols.length; ci++) {
+      const c = cols[ci];
+      if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
+        addBinding(c.key, c.selectConfig.relationshipType);
+      }
     }
   }
   const extra = config.relationshipPropertyBindings;
@@ -124,7 +136,7 @@ const buildNestedLinePropertyStripKeys = (config) => {
   const keys = [];
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i];
-    if (f?.type === "nestedLineItems" && f.key) keys.push(String(f.key));
+    if (f?.renderer === "nestedLineItems" && f.key) keys.push(String(f.key));
   }
   const extra = config.nestedLinePropertyStripKeys;
   if (Array.isArray(extra)) {
@@ -1167,29 +1179,29 @@ const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) 
 
 
 const getShowSelection = () => {
-  const value = prop("showSelection", args.contextData.props);
+  const value = prop("showSelection");
   return value === true;
 };
 
 const getSelectionMode = () => {
-  const value = prop("selectionMode", args.contextData.props);
+  const value = prop("selectionMode");
   return value === "single" ? "single" : "multiple";
 };
 
-const getOnSelectionChange = () => prop("onSelectionChange", args.contextData.props);
+const getOnSelectionChange = () => prop("onSelectionChange");
 
 const getInitialSelectedRowIds = () => {
-  const value = prop("initialSelectedRowIds", args.contextData.props);
+  const value = prop("initialSelectedRowIds");
   return Array.isArray(value) ? value : undefined;
 };
 
 const getTablePassthroughProps = () => {
   const passthrough = {};
-  const showSelectionValue = prop("showSelection", args.contextData.props);
+  const showSelectionValue = prop("showSelection");
   if (showSelectionValue !== undefined) {
     passthrough.showSelection = showSelectionValue === true;
   }
-  const selectionModeValue = prop("selectionMode", args.contextData.props);
+  const selectionModeValue = prop("selectionMode");
   if (selectionModeValue === "single" || selectionModeValue === "multiple") {
     passthrough.selectionMode = selectionModeValue;
   }
@@ -1361,7 +1373,7 @@ return {
   fetchRoot: args.fns.fetchRoot,
   hooks: config?.sidebar?.hooks,
   initialCategoryId: args.searchParams?.sidebarCategory,
-  contentLabel: args.fns.prop('label', args.contextData.props)
+  contentLabel: args.fns.prop('label')
 };
 '''
       }

@@ -25,7 +25,7 @@ export async function GET({ request }: APIEvent) {
 
   try {
     const url = new URL(request.url);
-    const { targetDomain, targetSubdomain } = validateRequest(url);
+    const { targetDomain, targetSubdomain, redirectPath } = validateRequest(url);
 
     if (subDomain !== ADMIN_DB_NAME) {
       throw new APIError(
@@ -58,6 +58,7 @@ export async function GET({ request }: APIEvent) {
       targetDomain,
       targetSubdomain,
       secureToken,
+      redirectPath,
     );
 
     return new Response(null, {
@@ -79,9 +80,13 @@ function buildautoSignInUrl(
   targetDomain: null | string,
   targetSubdomain: null | string,
   secureToken: string,
+  redirectPath: null | string,
 ) {
   const protocol = url.protocol;
   const hostname = url.hostname;
+  const redirectQuery = redirectPath
+    ? `&redirect=${encodeURIComponent(redirectPath)}`
+    : "";
 
   // Check if this is a localhost environment (localhost, *.localhost, or *.localhost.*)
   const parsed = parse(hostname);
@@ -95,7 +100,7 @@ function buildautoSignInUrl(
     const port = url.port ? `:${url.port}` : "";
 
     if (targetDomain) {
-      return `${protocol}//${targetDomain}${API.auth.autoSignInUrl}?token=${secureToken}`;
+      return `${protocol}//${targetDomain}${API.auth.autoSignInUrl}?token=${secureToken}${redirectQuery}`;
     }
 
     // Extract base domain from current hostname
@@ -111,27 +116,39 @@ function buildautoSignInUrl(
       localhostBase = parsed.domain || "localhost";
     }
 
-    return `${protocol}//${targetSubdomain}.${localhostBase}${port}${API.auth.autoSignInUrl}?token=${secureToken}`;
+    return `${protocol}//${targetSubdomain}.${localhostBase}${port}${API.auth.autoSignInUrl}?token=${secureToken}${redirectQuery}`;
   }
 
   // For production domains, use the base domain from parsed result
   const baseDomain = parsed.domain;
 
   if (targetDomain) {
-    return `${protocol}//${targetDomain}${API.auth.autoSignInUrl}?token=${secureToken}`;
+    return `${protocol}//${targetDomain}${API.auth.autoSignInUrl}?token=${secureToken}${redirectQuery}`;
   }
-  return `${protocol}//${targetSubdomain}.${baseDomain}${API.auth.autoSignInUrl}?token=${secureToken}`;
+  return `${protocol}//${targetSubdomain}.${baseDomain}${API.auth.autoSignInUrl}?token=${secureToken}${redirectQuery}`;
+}
+
+function validateRedirectPath(value: null | string): null | string {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) {
+    throw new APIError("Invalid redirect path", 400);
+  }
+  return trimmed;
 }
 
 function validateRequest(url: URL) {
   const targetSubdomain = url.searchParams.get("subdomain");
   const targetDomain = url.searchParams.get("domain");
+  const redirectPath = validateRedirectPath(url.searchParams.get("redirect"));
 
   if (!(targetSubdomain || targetDomain)) {
     throw new APIError("Missing subdomain or domain parameter", 400);
   }
 
-  return { targetDomain, targetSubdomain };
+  return { targetDomain, targetSubdomain, redirectPath };
 }
 
 function validateUser(user?: null | Vertex) {

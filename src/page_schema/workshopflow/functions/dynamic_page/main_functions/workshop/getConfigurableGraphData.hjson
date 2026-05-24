@@ -39,7 +39,7 @@ async function loadGraphConfig() {
   if (sr.records.length === 0 && args.executeNamedServerFunction) {
     try {
       await args.executeNamedServerFunction({
-        functionName: "migrateContentTableSettings",
+        functionName: "migrateDynamicPageSettings",
         contextData: { dryRun: false }
       });
     } catch (e) {

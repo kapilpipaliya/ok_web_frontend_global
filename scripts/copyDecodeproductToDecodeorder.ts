@@ -19,6 +19,8 @@ const SOURCE = path.join(ROOT, "src/page_schema/decodeproduct");
 const DEST_NAMES = ["decodeorder", "decodefile", "extendfiles", "workshopflow", "hydrateme", "certpulse", "storetasks", "attendra", "ytorganizer"];
 
 const SKIP_DIRS = [
+  //"functions",
+  //"pages",
   "functions/dynamic_page/shopify_hooks/category",
   "functions/dynamic_page/shopify_hooks/product",
   "functions/dynamic_page/shopify_hooks/menu",
@@ -28,6 +30,12 @@ const SKIP_DIRS = [
   "pages/shopify/blog",
   "pages/shopify/product",
   "functions/dynamic_page/main_functions/migration",
+
+  "components/portal",
+  "functions/jobs",
+  "pages/shopify/admin",
+  "pages/portal",
+  "functions/app",
   
 ];
 
@@ -44,9 +52,10 @@ const SKIP_FILES = [
   "functions/dynamic_page/shopify_jobs/product/processShopifyProductAfterMoveItemsToCategory.hjson",
   "functions/shopify/fetchFirst25Products.hjson",
   "pages/shopify/DecodeProduct.hjson",
+  "readme.md",
 
 
-
+   "pages/shopify/support/ShopifySupport.hjson"
 ];
 
 function shouldSkip(relativePath: string): boolean {

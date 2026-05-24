@@ -62,6 +62,30 @@ const shouldExpandOneRowAtATime = (rowExpansion) => {
   return false;
 };
 
+/** Structural columns use renderer only; data columns use dataType + renderer. */
+const STRUCTURAL_COLUMN_RENDERERS = ["rowNumber", "expand", "iconAction", "actions"];
+
+const getColumnRenderer = (col) => col?.renderer || "text";
+
+const getColumnDataType = (col) => col?.dataType || "text";
+
+const isStructuralColumn = (col) =>
+  STRUCTURAL_COLUMN_RENDERERS.includes(getColumnRenderer(col));
+
+/** Filter UI kind: text | select | checkbox | date | badge */
+const getColumnFilterKind = (col) => {
+  if (col?.filterType) return col.filterType;
+  const renderer = getColumnRenderer(col);
+  if (renderer === "badge") return "badge";
+  const dataType = getColumnDataType(col);
+  // Relation columns show a related label (name, email); filter by substring on that label.
+  if (dataType === "relation" && col.selectConfig?.labelField) return "text";
+  if (dataType === "relation" || dataType === "select") return "select";
+  if (dataType === "boolean") return "checkbox";
+  if (dataType === "date") return "date";
+  return "text";
+};
+
 const getColumns = () => {
   if (isNestedLinesTable()) {
     return args.contextData.props?.nestedTableColumns || [];
@@ -70,8 +94,8 @@ const getColumns = () => {
   // would override loadFromSetting config (empty array is !== undefined).
   const base = args.fns.prop('columns') || [];
   const groupBy = getGroupByConfig();
-  if (groupBy) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
-  if (getRowExpansionConfigs().length > 0) return [{ key: '__expand', type: 'expand', width: '32px', label: '' }, ...base];
+  if (groupBy) return [{ key: '__expand', renderer: 'expand', width: '32px', label: '' }, ...base];
+  if (getRowExpansionConfigs().length > 0) return [{ key: '__expand', renderer: 'expand', width: '32px', label: '' }, ...base];
   return base;
 };
 
@@ -108,17 +132,334 @@ const getShowAddButton = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showAddButton ?? false;
   return args.fns.prop('showAddButton', args.contextData.props) ?? true;
 };
-const getShowEditButton = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.showEditButton ?? false;
-  return args.fns.prop('showEditButton', args.contextData.props) ?? true;
-};
 const getShowSelection = () => {
   if (isNestedLinesTable()) return args.contextData.props?.showSelection ?? false;
   return args.fns.prop('showSelection', args.contextData.props);
 };
-const getShowActions = () => {
-  if (isNestedLinesTable()) return args.contextData.props?.showActions ?? false;
-  return args.fns.prop('showActions', args.contextData.props);
+const DEFAULT_ACTION_META = {
+  edit: { icon: "carbon:edit", variant: "ghost", title: "Edit", ariaLabel: "Edit" },
+  delete: { icon: "carbon:trash-can", variant: "danger", title: "Delete", ariaLabel: "Delete" }
+};
+
+const getActionHandlers = () => {
+  const handlers = args.fns.prop("actionHandlers", args.contextData.props);
+  return handlers && typeof handlers === "object" ? handlers : {};
+};
+
+const normalizeAction = (action, index) => {
+  if (!action || typeof action !== "object") return null;
+  const type = action.type || "custom";
+  const key = action.key || type || `action_${index ?? 0}`;
+  const meta = DEFAULT_ACTION_META[type] || {};
+  const group =
+    action.group === "secondary" || action.display === "menu" ? "secondary" : "primary";
+  return {
+    key,
+    type,
+    group,
+    label: action.label,
+    icon: action.icon ?? meta.icon,
+    variant: action.variant ?? meta.variant ?? "ghost",
+    title: action.title ?? action.label ?? meta.title,
+    ariaLabel: action.ariaLabel ?? action.title ?? action.label ?? meta.ariaLabel ?? key,
+    confirm: action.confirm,
+    visible: action.visible,
+    disabled: action.disabled,
+    disabledReason: action.disabledReason,
+    reasonCode: action.reasonCode,
+    reasonVariant: action.reasonVariant,
+    loadingIcon: action.loadingIcon,
+    onClick: action.onClick
+  };
+};
+
+/** Row actions from settings `actions` array; handlers merged from props `actionHandlers`. */
+const getActions = () => {
+  const configured = args.fns.prop("actions", args.contextData.props);
+  if (!Array.isArray(configured)) return [];
+  const handlers = getActionHandlers();
+  const out = [];
+  for (let i = 0; i < configured.length; i++) {
+    const normalized = normalizeAction(configured[i], i);
+    if (!normalized) continue;
+    if (!normalized.onClick && typeof handlers[normalized.key] === "function") {
+      normalized.onClick = handlers[normalized.key];
+    }
+    out.push(normalized);
+  }
+  return out;
+};
+
+/** Actions column when `actions.length > 0`, or explicit `showActionsColumn` override. */
+const getShowActionsColumn = () => {
+  if (isNestedLinesTable()) return false;
+  const configured = args.fns.prop("showActionsColumn", args.contextData.props);
+  if (configured !== undefined) return configured === true;
+  return getActions().length > 0;
+};
+
+/** Context for action predicates and confirm.message: `({ row, action, graph, ... }) => …` */
+const buildActionContext = (action, row) => ({
+  row,
+  action,
+  graph: args.graph,
+  tableStateVertexId,
+  getSelectedRows: () => getSelectedRows(),
+  getDisplayData: () => getDisplayData()
+});
+
+const invokeActionPredicate = (fn, action, row, label) => {
+  if (typeof fn !== "function") return undefined;
+  try {
+    return fn(buildActionContext(action, row));
+  } catch (e) {
+    console.error(`${label}:`, e);
+    return undefined;
+  }
+};
+
+/** `visible`: boolean | `({ row, action, … }) => boolean` — false hides; omitted => shown. */
+const isActionVisible = (action, row) => {
+  if (!action) return false;
+  if (action.type === "edit" && !args.fns.getFormConfig?.()) return false;
+  if (action.visible === false) return false;
+  if (action.visible === true) return true;
+  if (typeof action.visible === "function") {
+    const result = invokeActionPredicate(action.visible, action, row, "isActionVisible");
+    if (result === false) return false;
+    return true;
+  }
+  return true;
+};
+
+/** `disabled`: boolean | `({ row, action, … }) => boolean` — true disables; omitted => enabled. */
+const isActionDisabled = (action, row) => {
+  if (!action) return true;
+  if (action.disabled === true) return true;
+  if (action.disabled === false) return false;
+  if (typeof action.disabled === "function") {
+    return invokeActionPredicate(action.disabled, action, row, "isActionDisabled") === true;
+  }
+  return false;
+};
+
+/** `disabledReason`: string | `({ row, action, … }) => string` for automatic tooltips when disabled. */
+const resolveActionReason = (action, row, reasonKey) => {
+  if (!action || !reasonKey) return "";
+  const raw = action[reasonKey];
+  if (raw == null || raw === "") return "";
+  if (typeof raw === "string") return raw;
+  if (typeof raw === "function") {
+    const result = invokeActionPredicate(raw, action, row, reasonKey);
+    return result != null && String(result).trim() !== "" ? String(result) : "";
+  }
+  return "";
+};
+
+const resolveActionReasonCode = (action, row) => {
+  if (!action) return "";
+  const raw = action.reasonCode;
+  if (raw == null || raw === "") return "";
+  if (typeof raw === "string") return String(raw).trim();
+  if (typeof raw === "function") {
+    const result = invokeActionPredicate(raw, action, row, "reasonCode");
+    return result != null && String(result).trim() !== "" ? String(result).trim() : "";
+  }
+  return "";
+};
+
+/** Table/settings map: reason code → display string (localization). */
+const getActionReasonCodeMap = () => {
+  const fromProps = args.fns.prop("reasonCodeMap", args.contextData.props);
+  if (fromProps && typeof fromProps === "object" && !Array.isArray(fromProps)) return fromProps;
+  const config = args.fns.evaluateConfig?.() || {};
+  const fromConfig = config.reasonCodeMap;
+  if (fromConfig && typeof fromConfig === "object" && !Array.isArray(fromConfig)) return fromConfig;
+  return {};
+};
+
+const localizeReasonCode = (code) => {
+  if (!code) return "";
+  const mapped = getActionReasonCodeMap()[code];
+  return typeof mapped === "string" && mapped.trim() !== "" ? mapped.trim() : "";
+};
+
+/** Explicit reason text, else `reasonCodeMap[reasonCode]`. */
+const resolveActionReasonText = (action, row, reasonKey) => {
+  const explicit = resolveActionReason(action, row, reasonKey);
+  if (explicit) return explicit;
+  return localizeReasonCode(resolveActionReasonCode(action, row));
+};
+
+const hasDisabledReasonHint = (action, row) =>
+  resolveActionReason(action, row, "disabledReason") !== "" ||
+  resolveActionReasonCode(action, row) !== "";
+
+const filterVisibleActionsForRow = (actions, row) => {
+  if (!Array.isArray(actions)) return [];
+  const out = [];
+  for (let i = 0; i < actions.length; i++) {
+    if (isActionVisible(actions[i], row)) out.push(actions[i]);
+  }
+  return out;
+};
+
+const REASON_VARIANTS = ["info", "warning", "danger"];
+
+const normalizeReasonVariant = (value) => {
+  const v = value != null ? String(value).toLowerCase() : "";
+  return REASON_VARIANTS.includes(v) ? v : "info";
+};
+
+/** `reasonVariant`: "info" | "warning" | "danger" | `({ row, action }) => variant` */
+const resolveActionReasonVariant = (action, row) => {
+  if (!action) return "info";
+  const raw = action.reasonVariant;
+  if (typeof raw === "function") {
+    return normalizeReasonVariant(invokeActionPredicate(raw, action, row, "reasonVariant"));
+  }
+  return normalizeReasonVariant(raw);
+};
+
+/** Active reason metadata for tooltips, telemetry, and `data-reason-*` hooks. */
+const getActionReasonState = (action, row) => {
+  const fallbackTitle = action?.title || action?.label || action?.ariaLabel || action?.key || "";
+  if (!action) {
+    return { text: "", code: "", variant: "info", active: false, kind: null };
+  }
+  if (isActionDisabled(action, row) && hasDisabledReasonHint(action, row)) {
+    const code = resolveActionReasonCode(action, row);
+    const text = resolveActionReasonText(action, row, "disabledReason");
+    return {
+      text,
+      code,
+      variant: resolveActionReasonVariant(action, row),
+      active: true,
+      kind: "disabled"
+    };
+  }
+  return { text: fallbackTitle, code: "", variant: "info", active: false, kind: null };
+};
+
+const getActionTooltip = (action, row) => getActionReasonState(action, row).text;
+
+/** Spread onto action controls for popovers, i18n, analytics, audit. */
+const getActionReasonDataAttrs = (action, row) => {
+  const state = getActionReasonState(action, row);
+  if (!state.active) return {};
+  const attrs = {
+    "data-reason-active": "true",
+    "data-reason-variant": state.variant,
+    "data-reason-kind": state.kind
+  };
+  if (state.code) attrs["data-reason-code"] = state.code;
+  return attrs;
+};
+
+const getPrimaryActionsForRow = (row) =>
+  filterVisibleActionsForRow(getActions(), row).filter((a) => a.group !== "secondary");
+
+const getSecondaryActionsForRow = (row) =>
+  filterVisibleActionsForRow(getActions(), row).filter((a) => a.group === "secondary");
+
+const hasSecondaryActionsForRow = (row) => getSecondaryActionsForRow(row).length > 0;
+
+/** Per-row async loading: runningAction[rowId][actionKey] */
+const [runningAction, setRunningAction] = args.createSignal({});
+
+const isActionRunning = (action, row) => {
+  const rowId = row?.id != null ? String(row.id) : "";
+  const key = action?.key;
+  if (!rowId || !key) return false;
+  return runningAction()[rowId]?.[key] === true;
+};
+
+const setActionRunning = (action, row, running) => {
+  const rowId = row?.id != null ? String(row.id) : "";
+  const key = action?.key;
+  if (!rowId || !key) return;
+  setRunningAction((prev) => {
+    const next = { ...prev };
+    const rowMap = { ...(next[rowId] || {}) };
+    if (running) rowMap[key] = true;
+    else delete rowMap[key];
+    if (Object.keys(rowMap).length === 0) delete next[rowId];
+    else next[rowId] = rowMap;
+    return next;
+  });
+};
+
+const confirmRowAction = async (confirmCfg, action, row) => {
+  const title = confirmCfg?.title || "Confirm";
+  const message =
+    typeof confirmCfg?.message === "function"
+      ? confirmCfg.message(buildActionContext(action, row))
+      : confirmCfg?.message ?? "";
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm || args.fns?.rbConfirm;
+  if (rbConfirm) {
+    return rbConfirm({
+      title,
+      message,
+      confirmText: confirmCfg?.confirmText || "Confirm",
+      cancelText: confirmCfg?.cancelText || "Cancel",
+      variant: confirmCfg?.variant || (confirmCfg?.danger !== false && title.toLowerCase().includes("delete") ? "danger" : "default")
+    });
+  }
+  return confirm(message ? `${title}\n\n${message}` : title);
+};
+
+const runRowAction = async (action, row) => {
+  if (!action || !isActionVisible(action, row) || isActionDisabled(action, row)) return;
+  if (isActionRunning(action, row)) return;
+
+  if (action.confirm) {
+    const ok = await confirmRowAction(action.confirm, action, row);
+    if (!ok) return;
+  }
+
+  setActionRunning(action, row, true);
+  try {
+    if (typeof action.onClick === "function") {
+      await action.onClick(row);
+      return;
+    }
+    if (action.type === "edit") {
+      const onEdit = getOnEdit();
+      if (typeof onEdit === "function") {
+        await onEdit(row);
+        return;
+      }
+      await handleEdit(row);
+      return;
+    }
+    if (action.type === "delete") {
+      const handlers = getActionHandlers();
+      const deleteHandler = handlers[action.key] || handlers.delete;
+      if (typeof deleteHandler === "function") {
+        await deleteHandler(row);
+        return;
+      }
+      await handleDelete(row, { skipConfirm: !!action.confirm, confirm: action.confirm });
+      return;
+    }
+    args.showErrorToast?.("Action handler not configured");
+  } catch (error) {
+    console.error("runRowAction:", error);
+    args.showErrorToast?.(error?.message || "Action failed");
+    throw error;
+  } finally {
+    setActionRunning(action, row, false);
+  }
+};
+
+/** Bulk row actions (e.g. batch toolbar); skips hidden/disabled rows per action rules. */
+const runBulkAction = async (action, rows) => {
+  if (!action || !Array.isArray(rows) || rows.length === 0) return;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!isActionVisible(action, row) || isActionDisabled(action, row)) continue;
+    await runRowAction(action, row);
+  }
 };
 const getResizableColumns = () => args.fns.prop('resizableColumns', args.contextData.props) ?? true;
 const getHideExportButtons = () => {
@@ -150,7 +491,6 @@ const getOnEdit = () => args.fns.prop('onEdit', args.contextData.props);
 const getOnAfterAdd = () => args.fns.prop('onAfterAdd', args.contextData.props);
 const getOnAfterEdit = () => args.fns.prop('onAfterEdit', args.contextData.props);
 const getOnAdd = () => args.fns.prop('onAdd', args.contextData.props);
-const getOnDelete = () => args.fns.prop('onDelete', args.contextData.props);
 const getOnAfterDelete = () => args.fns.prop('onAfterDelete', args.contextData.props);
 const getRowClickable = () => args.fns.prop('rowClickable', args.contextData.props) === true;
 const getOnRowClick = () => args.fns.prop('onRowClick', args.contextData.props);
@@ -497,6 +837,40 @@ const getDisplayData = () => {
   return buildDisplayData(filtered, key, tableP()?.collapsedKeys ?? []);
 };
 
+/** Row ids currently shown in the table body (excludes group-by parent rows). */
+const getSelectableVisibleRowIds = () => {
+  const displayed = getDisplayData();
+  if (!Array.isArray(displayed) || displayed.length === 0) return [];
+  const ids = [];
+  for (let i = 0; i < displayed.length; i++) {
+    const row = displayed[i];
+    if (!row || row._isParent === true) continue;
+    const id = row.id;
+    if (id != null && id !== "") ids.push(String(id));
+  }
+  return ids;
+};
+
+let lastNestedLinesSyncKey = "";
+const syncNestedLinesTableData = () => {
+  if (!isNestedLinesTable()) return;
+  const getRows = args.contextData.props?.getNestedLineRows;
+  const rows = typeof getRows === "function" ? getRows() : [];
+  const ids = rowIdsFromVertices(rows);
+  const syncKey = ids.join("\0");
+  if (syncKey === lastNestedLinesSyncKey) return;
+  lastNestedLinesSyncKey = syncKey;
+  patchTableP({ data: ids });
+  const config = args.fns.evaluateConfig?.() || {};
+  const enableLocalFilters = config?.enableLocalFilters === true;
+  const enableLocalSort = config?.enableLocalSort === true;
+  if (enableLocalFilters || enableLocalSort) {
+    applyLocalFilters();
+  } else {
+    patchTableP({ filteredData: ids });
+  }
+};
+
 // Get selected rows functions from props (always provided by parent)
 const getSelectedRows = () => {
   const propFn = args.contextData.props?.getSelectedRows;
@@ -703,7 +1077,7 @@ const applyLocalFilters = () => {
       // Only check values for visible columns, not keys
       for (const col of columns) {
         // Skip special/row number columns
-        if (col.type === "rowNumber" || col.type === "iconAction" || col.type === "expand") {
+        if (isStructuralColumn(col)) {
           continue;
         }
         const cellValue = getCellValue(row, col);
@@ -726,11 +1100,11 @@ const applyLocalFilters = () => {
       const filterValue = (tableP()?.columnFilters ?? {})[col.key];
       if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
         // Skip rowNumber filter - it's calculated, not a property
-        if (col.type === "rowNumber" || col.type === "iconAction" || col.type === "expand") {
+        if (isStructuralColumn(col)) {
           continue;
         }
         const cellValue = getCellValue(row, col);
-        if (col.type === "text") {
+        if (getColumnFilterKind(col) === "text") {
           // Support both single value and array (for multiple select filters)
           if (Array.isArray(filterValue)) {
             if (filterValue.length === 0) {
@@ -750,7 +1124,7 @@ const applyLocalFilters = () => {
               return false;
             }
           }
-        } else if (col.type === "select") {
+        } else if (getColumnFilterKind(col) === "select") {
           // Support both single value and array (multiple select)
           if (Array.isArray(filterValue)) {
             if (filterValue.length === 0 || !filterValue.includes(cellValue)) {
@@ -761,11 +1135,11 @@ const applyLocalFilters = () => {
               return false;
             }
           }
-        } else if (col.type === "checkbox") {
+        } else if (getColumnFilterKind(col) === "checkbox") {
           if (cellValue !== filterValue) {
             return false;
           }
-        } else if (col.type === "date" || col.type === "isoDateTime") {
+        } else if (getColumnFilterKind(col) === "date") {
           // Date filtering logic
           const filterDate = new Date(filterValue);
           const cellDate = new Date(cellValue);
@@ -776,7 +1150,7 @@ const applyLocalFilters = () => {
           if (Math.abs(cellDate - filterDate) > 86400000) { // More than 1 day difference
             return false;
           }
-        } else if (col.type === "badge") {
+        } else if (getColumnFilterKind(col) === "badge") {
           // Badge columns: partial match on raw value or display label (e.g. "Act" matches "Active")
           const cellVal = cellValue != null ? String(cellValue) : "";
           const cellKey = col.badgeKeyCase === "lower" ? cellVal.toLowerCase() : cellVal;
@@ -892,7 +1266,7 @@ const getCellValue = (row, column) => {
   if (column.valueAccessor) {
     return column.valueAccessor(row);
   }
-  if (column.type === "select" && column.selectConfig?.relationshipType && column.selectConfig?.labelField) {
+  if (getColumnDataType(column) === "relation" && column.selectConfig?.relationshipType && column.selectConfig?.labelField) {
     const sc = column.selectConfig;
     const rel = sc.relationshipType;
     const lf = sc.labelField;
@@ -906,10 +1280,14 @@ const getCellValue = (row, column) => {
         if (ed && ed.E != null) tid = ed.E;
       }
     }
-    if (tid != null && String(tid).trim() !== "") {
-      const node = vxMap[String(tid).trim()];
+    const resolveLabelFromVertexId = (vertexId) => {
+      if (vertexId == null || String(vertexId).trim() === "") return "";
+      const node = vxMap[String(vertexId).trim()];
       const lab = node?.P?.[lf];
-      if (lab != null && String(lab).trim() !== "") return String(lab).trim();
+      return lab != null && String(lab).trim() !== "" ? String(lab).trim() : "";
+    };
+    if (tid != null) {
+      return resolveLabelFromVertexId(tid);
     }
     return "";
   }
@@ -928,9 +1306,12 @@ const getCellValue = (row, column) => {
   return row[column.key];
 };
 
-// Render cell content based on column type
+// Render cell content from column renderer (+ dataType for value semantics)
 const renderCellContent = (row, column, rowIndex) => {
-  if (column.type === 'expand') {
+  const renderer = getColumnRenderer(column);
+  const dataType = getColumnDataType(column);
+
+  if (renderer === 'expand') {
     const gb = getGroupByConfig();
     if (gb) {
       const parentKey = row._parentKey;
@@ -955,7 +1336,7 @@ const renderCellContent = (row, column, rowIndex) => {
   }
   const value = getCellValue(row, column);
 
-  if (column.type === "rowNumber") {
+  if (renderer === "rowNumber") {
     return rowIndex + 1;
   }
 
@@ -963,29 +1344,29 @@ const renderCellContent = (row, column, rowIndex) => {
     return column.render(value, row, column);
   }
 
-  if (column.type === "checkbox") {
+  if (dataType === "boolean" || renderer === "checkbox") {
     return value ? "✓" : "";
   }
 
-  if (column.type === "image" || column.type === "imagePreview") {
+  if (renderer === "image" || renderer === "imagePreview") {
     const imageUrl = value || column.defaultImage;
     return imageUrl ? { type: "image", url: imageUrl, alt: column.alt || "" } : "";
   }
 
-  if (column.type === "youtubeLink") {
+  if (renderer === "youtubeLink") {
     const videoId = value || column.videoIdAccessor?.(row);
     if (!videoId) return "";
     return { type: "youtubeLink", videoId };
   }
 
-  if (column.type === "downloadLink") {
+  if (renderer === "downloadLink") {
     const url = value || column.urlAccessor?.(row);
     const icon = column.icon || "carbon:download";
     if (!url) return "";
     return { type: "downloadLink", url, icon };
   }
 
-  if (column.type === "iconAction") {
+  if (renderer === "iconAction") {
     const cfg = column.iconAction || {};
     const action = cfg.action || "clipboard";
     const payload = typeof cfg.textAccessor === "function" ? cfg.textAccessor(row) : (value ?? getCellValue(row, column));
@@ -998,7 +1379,7 @@ const renderCellContent = (row, column, rowIndex) => {
     return { type: "iconAction", actionColumn: column };
   }
 
-  if (column.type === "duration") {
+  if (renderer === "duration") {
     if (!value) return "";
     const seconds = typeof value === "number" ? value : parseInt(value);
     if (isNaN(seconds)) return value;
@@ -1011,21 +1392,21 @@ const renderCellContent = (row, column, rowIndex) => {
     return `${minutes}:${String(secs).padStart(2, "0")}`;
   }
 
-  if (column.type === "date") {
+  if (renderer === "date" || (dataType === "date" && renderer === "text")) {
     if (!value) return "";
     const date = new Date(value);
     if (isNaN(date.getTime())) return value;
     return date.toLocaleDateString();
   }
 
-  if (column.type === "isoDateTime") {
+  if (renderer === "isoDateTime") {
     if (!value) return "";
     const date = new Date(value);
     if (isNaN(date.getTime())) return value;
     return date.toLocaleString();
   }
 
-  if (column.type === "join") {
+  if (renderer === "join") {
     if (!value || !Array.isArray(value)) return "";
     const separator = column.separator || ", ";
     const displayKey = column.displayKey || "name";
@@ -1036,17 +1417,40 @@ const renderCellContent = (row, column, rowIndex) => {
     }).join(separator);
   }
 
-  if (column.type === "actions") {
+  if (renderer === "actions") {
     return { type: "actions", row, column };
   }
 
-  if (column.type === "badge") {
+  if (renderer === "badge") {
     const map = column.badgeToneMap || {};
     const v = (value || "").toString();
     const key = (column.badgeKeyCase === "lower" ? v.toLowerCase() : v);
     const entry = map[key];
     const [text, tone] = Array.isArray(entry) ? entry : [v || "", "neutral"];
     return { type: "badge", text, tone };
+  }
+
+  if (renderer === "link") {
+    const text = value != null ? String(value) : "";
+    const href =
+      dataType === "email" && text
+        ? `mailto:${text.trim()}`
+        : typeof column.hrefAccessor === "function"
+          ? column.hrefAccessor(row)
+          : text;
+    if (!href && !text) return "";
+    return { type: "textLink", text: text || href, href: href || text, title: text || column.label };
+  }
+
+  if (renderer === "currency") {
+    const n = typeof value === "number" ? value : parseFloat(value);
+    if (value == null || value === "" || Number.isNaN(n)) return value != null ? String(value) : "";
+    const currency = column.currency || "USD";
+    try {
+      return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(n);
+    } catch {
+      return String(n);
+    }
   }
 
   // Default: return as string
@@ -1056,7 +1460,7 @@ const renderCellContent = (row, column, rowIndex) => {
 // Handle sort
 const handleSort = (column) => {
   // Don't allow sorting for rowNumber columns
-  if (column.type === "rowNumber" || column.type === "iconAction") return;
+  if (getColumnRenderer(column) === "rowNumber" || getColumnRenderer(column) === "iconAction") return;
   if (column.sortable === false) return;
 
   const sortConfig = tableP()?.sortConfig ?? { column: null, direction: null };
@@ -1248,18 +1652,7 @@ const startPollIfQueued = (dataToCheck) => {
 // Handle search
 const handleSearch = () => {
   if (isNestedLinesTable()) {
-    const getRows = args.contextData.props?.getNestedLineRows;
-    const rows = typeof getRows === 'function' ? getRows() : [];
-    const ids = rowIdsFromVertices(rows);
-    patchTableP({ data: ids });
-    const config = args.fns.evaluateConfig?.() || {};
-    const enableLocalFilters = config?.enableLocalFilters === true;
-    const enableLocalSort = config?.enableLocalSort === true;
-    if (enableLocalFilters || enableLocalSort) {
-      applyLocalFilters();
-    } else {
-      patchTableP({ filteredData: ids });
-    }
+    syncNestedLinesTableData();
     return;
   }
   const config = args.fns.evaluateConfig?.() || {};
@@ -1528,47 +1921,42 @@ const handleSave = async (formDataToSave) => {
   }
 };
 
-// Handle delete
-const handleDelete = async (row) => {
-  const onDelete = getOnDelete();
-  
-  // If onDelete function is provided, call it instead of default delete
-  if (onDelete && typeof onDelete === 'function') {
+// Built-in delete: actionHandlers[key] or default mutateUserContent via formConfig.saveFunction.
+const handleDelete = async (row, options = {}) => {
+  const handlers = getActionHandlers();
+  const deleteHandler = handlers[options?.actionKey] || handlers.delete;
+
+  if (deleteHandler && typeof deleteHandler === "function") {
     try {
-      await onDelete(row);
+      await deleteHandler(row);
       return;
     } catch (error) {
-      console.error("Error in onDelete function:", error);
+      console.error("Error in delete handler:", error);
       args.showErrorToast?.(error?.message || "Failed to execute delete action");
       return;
     }
   }
-  
-  // Default behavior: use formConfig saveFunction
+
   const formConfig = args.fns.getFormConfig();
   if (!formConfig?.saveFunction) {
     args.showErrorToast?.("Delete function not configured");
     return;
   }
 
-  // Use rbConfirm if available
-  const rbConfirm = args.contextData?.confirmContext?.rbConfirm || args.fns?.rbConfirm;
-  if (rbConfirm) {
-    const confirmed = await rbConfirm({
+  if (!options.skipConfirm) {
+    const confirmCfg = options.confirm || {
       title: "Delete Item",
       message: "Are you sure you want to delete this item? This action cannot be undone.",
       confirmText: "Delete",
       cancelText: "Cancel",
       variant: "danger"
-    });
-    if (!confirmed) {
-      return;
-    }
-  } else {
-    // Fallback to browser confirm
-    if (!confirm("Are you sure you want to delete this item?")) {
-      return;
-    }
+    };
+    const confirmed = await confirmRowAction(
+      confirmCfg,
+      { key: options?.actionKey || "delete", type: "delete" },
+      row
+    );
+    if (!confirmed) return;
   }
 
   try {
@@ -1654,7 +2042,6 @@ const getGridTemplateColumns = () => {
   const columns = getColumns();
   const showRowNumber = getShowRowNumber();
   const showSelection = getShowSelection();
-  const showActions = getShowActions();
   let template = "";
 
   // Add selection column if enabled
@@ -1662,8 +2049,7 @@ const getGridTemplateColumns = () => {
     template += `${getColumnWidth("__selection")} `;
   }
 
-  // Add actions column if enabled and form config exists
-  if (showActions && args.fns.getFormConfig()) {
+  if (getShowActionsColumn()) {
     template += `${getColumnWidth("__actions")} `;
   }
 
@@ -1977,9 +2363,7 @@ return {
   getShowRowNumber,
   getHideColumns,
   getShowAddButton,
-  getShowEditButton,
   getShowSelection,
-  getShowActions,
   getResizableColumns,
   getHideExportButtons,
   getHideImportButtons,
@@ -1992,7 +2376,31 @@ return {
   getOnAfterAdd,
   getOnAfterEdit,
   getOnAdd,
-  getOnDelete,
+  getShowActionsColumn,
+  getColumnRenderer,
+  getColumnDataType,
+  getColumnFilterKind,
+  isStructuralColumn,
+  getActions,
+  getActionHandlers,
+  isActionVisible,
+  isActionDisabled,
+  resolveActionReason,
+  resolveActionReasonCode,
+  resolveActionReasonText,
+  getActionReasonCodeMap,
+  localizeReasonCode,
+  resolveActionReasonVariant,
+  getActionReasonState,
+  getActionTooltip,
+  getActionReasonDataAttrs,
+  getPrimaryActionsForRow,
+  getSecondaryActionsForRow,
+  hasSecondaryActionsForRow,
+  isActionRunning,
+  runRowAction,
+  runBulkAction,
+  confirmRowAction,
   getOnAfterDelete,
   getUsePolarisUI: () => {
     if (isNestedLinesTable()) return args.contextData.props?.usePolarisUI === true;
@@ -2044,6 +2452,8 @@ return {
   setRowRef,
   getRowRef,
   getDisplayData,
+  getSelectableVisibleRowIds,
+  syncNestedLinesTableData,
   getGroupByConfig,
   getRowExpansionConfigs,
   getExpansionPanelHeight,
@@ -2087,14 +2497,14 @@ return {
           '''return {
   onMount: async () => {
     if (args.fns.isNestedLinesTable?.()) {
-      args.fns.handleSearch();
+      args.fns.syncNestedLinesTableData?.();
       if (typeof args.createEffect === "function") {
         args.createEffect(() => {
           const getRows = args.contextData.props?.getNestedLineRows;
           const getLoading = args.contextData.props?.getNestedLinesLoading;
           if (typeof getRows === "function") getRows();
           if (typeof getLoading === "function") getLoading();
-          args.fns.handleSearch();
+          args.fns.syncNestedLinesTableData?.();
         });
       }
       return;
@@ -2910,8 +3320,8 @@ return `._id {
 const showSelection = args.fns.getShowSelection();
 const selectionMode = args.fns.getSelectionMode?.();
 const selected = args.fns.getSelectedRows();
-const filtered = args.fns.resolveFilteredVerticesForExport?.() ?? [];
-const allSelected = filtered.length > 0 && filtered.every(row => row.id && selected.has(row.id));
+const visibleIds = args.fns.getSelectableVisibleRowIds?.() ?? [];
+const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
 // const usePolaris = args.fns.getUsePolarisUI?.() === true;
 const usePolaris = false;
 
@@ -2995,7 +3405,6 @@ return {
       P: {
         css:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 
 return `._id {
@@ -3015,12 +3424,11 @@ return `._id {
         componentName: Html
         props:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 
 return {
   as: "div",
-  hide: !hasFormConfig || !showActions
+  hide: !args.fns.getShowActionsColumn()
 };
 '''
       }
@@ -3042,13 +3450,12 @@ return `._id {
         componentName: Html
         props:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 
 return {
   as: "div",
   text: "Actions",
-  hide: !hasFormConfig || !showActions
+  hide: !args.fns.getShowActionsColumn()
 };
 '''
       }
@@ -3059,7 +3466,6 @@ return {
       P: {
         css:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const resizableColumns = args.fns.getResizableColumns();
 
@@ -3095,7 +3501,6 @@ return `._id {
         componentName: Html
         props:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const resizableColumns = args.fns.getResizableColumns();
 
@@ -3103,7 +3508,7 @@ const resizeHandler = args.fns.createResizeHandler("__actions");
 
 return {
   as: "div",
-  hide: !resizableColumns || !hasFormConfig || !showActions,
+  hide: !resizableColumns || !args.fns.getShowActionsColumn(),
   onMouseDown: resizeHandler,
   onTouchStart: resizeHandler
 };
@@ -3125,7 +3530,7 @@ const showRowNumber = args.fns.getShowRowNumber();
 
 return {
   data: showRowNumber 
-    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
     : columns
 };
 '''
@@ -3148,7 +3553,7 @@ return `._id {
   display: flex;
   align-items: center;
   gap: ${args.theme.var.spacing.xs};
-  cursor: ${(column.sortable !== false && column.type !== "rowNumber" && column.type !== "iconAction" && column.type !== "expand") ? "pointer" : "default"};
+  cursor: ${(column.sortable !== false && !args.fns.isStructuralColumn(column)) ? "pointer" : "default"};
   user-select: none;
   position: relative;
 }`;
@@ -3159,8 +3564,8 @@ return `._id {
           '''
 const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
-const isRowNumber = column.type === "rowNumber";
-const isExpandColumn = column.type === "expand";
+const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
 
 return {
   as: "div",
@@ -3197,10 +3602,10 @@ const isSorted = sortConfig.column === column.key;
 
 return {
   as: "div",
-  text: column.type === "iconAction" || column.type === "expand"
+  text: args.fns.getColumnRenderer(column) === "iconAction" || args.fns.getColumnRenderer(column) === "expand"
     ? ""
     : (column.label || column.key),
-  hide: column.type === "rowNumber" || column.type === "iconAction" || column.type === "expand"
+  hide: args.fns.isStructuralColumn(column)
 };
 '''
       }
@@ -3231,15 +3636,15 @@ const column = args.contextData.column;
 const sortConfig = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.sortConfig ?? { column: null, direction: null };
 const isSorted = sortConfig.column === column.key;
 const direction = sortConfig.direction;
-const isRowNumber = column.type === "rowNumber";
-const isExpandColumn = column.type === "expand";
+const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
 
 return {
   as: "icon",
   icon: direction === "asc" ? "carbon:chevron-up" : "carbon:chevron-down",
   width: 16,
   height: 16,
-  hide: !isSorted || column.sortable === false || isRowNumber || column.type === "iconAction" || isExpandColumn
+  hide: !isSorted || column.sortable === false || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn
 };
 '''
       }
@@ -3267,15 +3672,15 @@ const column = args.contextData.column;
 const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 const filterValue = columnFilters[column.key];
 const hasFilter = filterValue !== undefined && filterValue !== null && filterValue !== "" && (!Array.isArray(filterValue) || (filterValue.length > 0 && !(filterValue.length === 1 && filterValue[0] === "_All_VALUES_")));
-const isRowNumber = column.type === "rowNumber";
-const isExpandColumn = column.type === "expand";
+const isRowNumber = args.fns.getColumnRenderer(column) === "rowNumber";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
 
 return {
   as: "icon",
   icon: "carbon:filter",
   width: 14,
   height: 14,
-  hide: !hasFilter || isRowNumber || column.type === "iconAction" || isExpandColumn,
+  hide: !hasFilter || isRowNumber || args.fns.getColumnRenderer(column) === "iconAction" || isExpandColumn,
   title: "Filter applied"
 };
 '''
@@ -3329,7 +3734,7 @@ const shouldHide = args.fns.shouldHideColumn(column);
 
 // Determine column key for resize
 const getColumnKey = () => {
-  if (column.type === "rowNumber") {
+  if (args.fns.getColumnRenderer(column) === "rowNumber") {
     return column.key;
   }
   return column.key;
@@ -3402,7 +3807,6 @@ return {
       P: {
         css:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 
 return `._id {
@@ -3413,12 +3817,11 @@ return `._id {
         componentName: Html
         props:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 
 return {
   as: "div",
-  hide: !hasFormConfig || !showActions
+  hide: !args.fns.getShowActionsColumn()
 };
 '''
       }
@@ -3438,7 +3841,7 @@ const showRowNumber = args.fns.getShowRowNumber();
 
 return {
   data: showRowNumber 
-    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
     : columns
 };
 '''
@@ -3480,7 +3883,7 @@ return {
 const column = args.contextData.column;
 const columnFilters = args.graph.vertexes[args.fns.tableStateVertexId]?.P?.columnFilters ?? {};
 // Preserve array values from URL - don't default to empty string for select filters
-const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (column.type === "select" || column.filterType === "select" ? [] : "");
+const filterValue = columnFilters[column.key] !== undefined ? columnFilters[column.key] : (args.fns.getColumnFilterKind(column) === "select" ? [] : "");
 
 return `._id {
   width: 100%;
@@ -3499,32 +3902,32 @@ const getFilterValue = () => {
     return value;
   }
   // Default to empty array for select filters, empty string for others
-  return (column.type === "select" || column.filterType === "select") ? [] : "";
+  return args.fns.getColumnFilterKind(column) === "select" ? [] : "";
 };
 const filterValue = getFilterValue();
 
 // Skip filter for rowNumber
-if (column.type === "rowNumber") {
+if (args.fns.getColumnRenderer(column) === "rowNumber") {
   return { as: "div", hide: true };
 }
 
 // Skip filter for preview / image columns
-if (column.key === "preview" || column.type === "imagePreview" || column.type === "image") {
+if (column.key === "preview" || args.fns.getColumnRenderer(column) === "imagePreview" || args.fns.getColumnRenderer(column) === "image") {
   return { as: "div", hide: true };
 }
 
 // Skip filter for iconAction column
-if (column.type === "iconAction") {
+if (args.fns.getColumnRenderer(column) === "iconAction") {
   return { as: "div", hide: true };
 }
 
 // Skip filter for expand column
-if (column.type === "expand") {
+if (args.fns.getColumnRenderer(column) === "expand") {
   return { as: "div", hide: true };
 }
 
 // Render appropriate filter component based on column type
-if (column.type === "select" && column.options) {
+if (args.fns.getColumnFilterKind(column) === "select" && column.options) {
   const usePolaris = args.fns.getUsePolarisUI?.() === true;
   if (usePolaris) {
     const displayValue = Array.isArray(filterValue) ? filterValue.join(", ") : (filterValue || "");
@@ -3548,7 +3951,7 @@ if (column.type === "select" && column.options) {
   );
 }
 
-if (column.type === "checkbox") {
+if (args.fns.getColumnFilterKind(column) === "checkbox") {
   // const usePolaris = args.fns.getUsePolarisUI?.() === true;
   const usePolaris = false;
   const isChecked = filterValue === true || filterValue === "true";
@@ -3567,7 +3970,7 @@ if (column.type === "checkbox") {
   };
 }
 
-if (column.type === "date" || column.type === "isoDateTime") {
+if (args.fns.getColumnFilterKind(column) === "date") {
   const usePolaris = args.fns.getUsePolarisUI?.() === true;
   if (usePolaris) {
     return {
@@ -3588,7 +3991,7 @@ if (column.type === "date" || column.type === "isoDateTime") {
 }
 
 // Badge columns: show select from badgeToneMap when available, so filter works by raw value
-if (column.type === "badge" && column.badgeToneMap) {
+if (args.fns.getColumnRenderer(column) === "badge" && column.badgeToneMap) {
   const options = [{ value: "_All_VALUES_", label: "All" }, ...Object.entries(column.badgeToneMap).map(([val, arr]) => ({ value: val, label: Array.isArray(arr) ? arr[0] : String(arr) }))];
   const usePolaris = args.fns.getUsePolarisUI?.() === true;
   if (usePolaris) {
@@ -3610,7 +4013,7 @@ if (column.type === "badge" && column.badgeToneMap) {
 }
 
 // Determine filter type (default: "select" for text columns)
-const filterType = column.filterType || (column.type === "text" || !column.type ? "select" : "text");
+const filterType = column.filterType || (args.fns.getColumnFilterKind(column) === "text" ? "text" : "select");
 
 // If filterType is "select", show select with unique values
 if (filterType === "select") {
@@ -4247,7 +4650,6 @@ return {
       P: {
         css:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
@@ -4264,7 +4666,6 @@ return `._id {
         componentName: Html
         props:
           '''
-const showActions = args.fns.getShowActions();
 const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
@@ -4272,158 +4673,129 @@ const rowData = virtualItem.rowData;
 
 return {
   as: "div",
-  hide: !hasFormConfig || !showActions
+  hide: !args.fns.getShowActionsColumn()
 };
 '''
       }
     }
     {
-      id: "45"
+      id: "44a"
       L: Attr
       P: {
-        displayOrder: 1
-        componentName: IconButton
-        props:
-          '''
-const showActions = args.fns.getShowActions();
-const hasFormConfig = !!args.fns.getFormConfig();
-const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return {};
-const rowData = virtualItem.rowData;
-
-return {
-  icon: "carbon:edit",
-  variant: "ghost",
-  size: "sm",
-  onClick: (e) => {
-    e.stopPropagation();
-    args.fns.handleEdit(rowData);
-  },
-  ariaLabel: "Edit",
-  title: "Edit",
-  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || (() => {
-    const editLink = args.fns.prop('editLink', args.contextData.props);
-    if (!editLink) return false;
-    const hasHref = editLink?.getHref?.(rowData);
-    const hasOnClick = typeof (editLink?.getOnClick ?? editLink?.onClick) === "function";
-    return !!(hasHref || hasOnClick);
-  })()
-};
-'''
-      }
-    }
-    {
-      id: "45a"
-      L: Attr
-      P: {
+        contextName: tableAction
+        loop: true
         displayOrder: 1
         componentName: Html
         props:
           '''
-const showActions = args.fns.getShowActions();
-const hasFormConfig = !!args.fns.getFormConfig();
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
-const rowData = virtualItem.rowData;
-const editLink = args.fns.prop('editLink', args.contextData.props);
-const getHrefFn = editLink?.getHref;
-const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
-const defaultStyle = "color: " + (args.theme?.var?.color?.primary ?? "inherit") + "; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;";
-const styleVal = editLink?.style;
-const editLinkStyle = typeof styleVal === "function" ? styleVal(rowData) : (styleVal ?? defaultStyle);
-const onClickFn = editLink?.getOnClick ?? editLink?.onClick;
-const hasCustomOnClick = typeof onClickFn === "function";
-const editLinkIcon = editLink?.icon;
-const showIconLink = !!editLinkIcon;
-
-return {
-  as: "a",
-  href: editHref ?? "#",
-  target: editLink?.target ?? "_top",
-  rel: editLink?.rel ?? "noopener noreferrer",
-  text: editLink?.label ?? "Edit",
-  onClick: (e) => {
-    e.stopPropagation();
-    if (hasCustomOnClick) {
-      e.preventDefault();
-      onClickFn(rowData, e);
-    } else if (!editHref) {
-      e.preventDefault();
-    }
-  },
-  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || (!editHref && !hasCustomOnClick) || showIconLink,
-  style: editLinkStyle
-};
+return { data: args.fns.getPrimaryActionsForRow(virtualItem.rowData) };
 '''
       }
     }
     {
-      id: "45b"
+      id: "44b"
       L: Attr
       P: {
         displayOrder: 1
         componentName: IconButton
         props:
           '''
-const showActions = args.fns.getShowActions();
-const hasFormConfig = !!args.fns.getFormConfig();
+const action = args.contextData.tableAction;
 const virtualItem = args.contextData.virtualItem;
-if (!virtualItem) return {};
+if (!virtualItem || !action) return { hide: true };
 const rowData = virtualItem.rowData;
-const editLink = args.fns.prop('editLink', args.contextData.props);
-const getHrefFn = editLink?.getHref;
-const editHref = getHrefFn && typeof getHrefFn === "function" ? getHrefFn(rowData) : (editLink?.href ?? null);
-const onClickFn = editLink?.getOnClick ?? editLink?.onClick;
-const hasCustomOnClick = typeof onClickFn === "function";
-const editLinkIcon = editLink?.icon;
-
+const disabled = args.fns.isActionDisabled(action, rowData);
+const loading = args.fns.isActionRunning(action, rowData);
+const reason = args.fns.getActionReasonState(action, rowData);
+const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
 return {
-  icon: editLinkIcon,
-  href: editHref ?? "#",
-  target: editLink?.target ?? "_top",
+  icon: loading ? (action.loadingIcon || "carbon:renew") : (action.icon || "carbon:overflow-menu-horizontal"),
+  variant: action.variant || "ghost",
   size: "sm",
-  variant: "ghost",
-  title: editLink?.label ?? "Edit",
-  ariaLabel: editLink?.label ?? "Edit",
+  title: reason.text,
+  ariaLabel: reason.text,
+  reasonVariant: reason.active ? reason.variant : undefined,
+  loading,
+  disabled: disabled || loading,
+  ...reasonAttrs,
   onClick: (e) => {
     e.stopPropagation();
-    if (hasCustomOnClick) {
-      e.preventDefault();
-      onClickFn(rowData, e);
-    } else if (!editHref) {
-      e.preventDefault();
-    }
-  },
-  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton() || !editLinkIcon || (!editHref && !hasCustomOnClick)
+    if (disabled || loading) return;
+    args.fns.runRowAction(action, rowData);
+  }
 };
 '''
       }
     }
     {
-      id: "46"
+      id: "44c"
       L: Attr
       P: {
         displayOrder: 2
-        componentName: IconButton
+        componentName: FloatingMenu
         props:
           '''
-const showActions = args.fns.getShowActions();
-const hasFormConfig = !!args.fns.getFormConfig();
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem) return { hide: true };
+const rowData = virtualItem.rowData;
+return {
+  placement: "bottom-end",
+  triggerIcon: "carbon:overflow-menu-horizontal",
+  hide: !args.fns.hasSecondaryActionsForRow(rowData)
+};
+'''
+      }
+    }
+    {
+      id: "44d"
+      L: Attr
+      P: {
+        contextName: tableMenuAction
+        slotName: menu-items
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
 const virtualItem = args.contextData.virtualItem;
 if (!virtualItem) return {};
+return { data: args.fns.getSecondaryActionsForRow(virtualItem.rowData) };
+'''
+      }
+    }
+    {
+      id: "44e"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: MenuItem
+        props:
+          '''
+const action = args.contextData.tableMenuAction;
+const virtualItem = args.contextData.virtualItem;
+if (!virtualItem || !action) return { hide: true };
 const rowData = virtualItem.rowData;
-
+const disabled = args.fns.isActionDisabled(action, rowData);
+const loading = args.fns.isActionRunning(action, rowData);
+const reason = args.fns.getActionReasonState(action, rowData);
+const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
+const isDanger = action.type === "delete" || action.variant === "danger";
 return {
-  icon: "carbon:trash-can",
-  variant: "danger",
-  size: "sm",
+  text: action.label || action.title || action.key,
+  icon: loading ? (action.loadingIcon || "carbon:renew") : action.icon,
+  type: isDanger ? "danger" : "default",
+  title: reason.text,
+  reasonVariant: reason.active ? reason.variant : undefined,
+  disabled: disabled || loading,
+  ...reasonAttrs,
   onClick: (e) => {
-    e.stopPropagation();
-    args.fns.handleDelete(rowData);
-  },
-  ariaLabel: "Delete",
-  title: "Delete",
-  hide: !hasFormConfig || !showActions || !args.fns.getShowEditButton()
+    e?.stopPropagation();
+    if (disabled || loading) return;
+    void args.fns.runRowAction(action, rowData);
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
 };
 '''
       }
@@ -4447,7 +4819,7 @@ const rowData = virtualItem.rowData;
 
 return {
   data: showRowNumber 
-    ? [{ key: "__rowNumber", label: "#", type: "rowNumber" }, ...columns]
+    ? [{ key: "__rowNumber", label: "#", renderer: "rowNumber" }, ...columns]
     : columns
 };
 '''
@@ -4461,7 +4833,7 @@ return {
           '''
 const column = args.contextData.column;
 const shouldHide = args.fns.shouldHideColumn(column);
-const isExpandColumn = column.type === "expand";
+const isExpandColumn = args.fns.getColumnRenderer(column) === "expand";
 
 return `._id {
   grid-row: 1;
@@ -4640,12 +5012,8 @@ if (typeof cellContent === "object" && cellContent !== null) {
     };
   }
   if (cellContent.type === "actions") {
-    const showEditButton = args.fns.getShowEditButton();
-    const formConfig = args.fns.getFormConfig();
-    const row = cellContent.row;
-
     return {
-      as: "div",
+      as: "motion.div",
       style: "display: flex; gap: 8px; align-items: center;"
     };
   }
@@ -4687,10 +5055,9 @@ if (typeof cellContent === "object" && cellContent !== null) {
   }
 }
 
-// Add edit button if actions column and edit is enabled
-if (column.type === "actions" && args.fns.getShowEditButton() && args.fns.getFormConfig()) {
+if (args.fns.getColumnRenderer(column) === "actions" && args.fns.getActions().some((a) => a.type === "edit")) {
   return {
-    as: "div",
+    as: "motion.div",
     style: "display: flex; gap: 8px; align-items: center;"
   };
 }
@@ -4897,7 +5264,7 @@ return {
 const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.filter(col => col.type !== "rowNumber").map(col => col.key);
+  const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 
@@ -4920,7 +5287,7 @@ return `._id {
 const columns = args.fns.getColumns();
 const getSampleCSVHeader = () => {
   if (!columns || columns.length === 0) return "";
-  const headers = columns.filter(col => col.type !== "rowNumber").map(col => col.key);
+  const headers = columns.filter(col => args.fns.getColumnRenderer(col) !== "rowNumber").map(col => col.key);
   return headers.join(",");
 };
 
@@ -5134,15 +5501,6 @@ return {
       }
     }
     {
-      id: "65"
-      L: ComponentVariant
-      P: {
-        type: boolean
-        key: showEditButton
-        defValue: true
-      }
-    }
-    {
       id: "66"
       L: ComponentVariant
       P: {
@@ -5194,12 +5552,19 @@ return {
       }
     }
     {
-      id: "72"
+      id: "72a"
       L: ComponentVariant
       P: {
-        type: boolean
-        key: showActions
-        defValue: true
+        type: array
+        key: actions
+      }
+    }
+    {
+      id: "72b"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: actionHandlers
       }
     }
     {
@@ -5242,7 +5607,6 @@ return {
       P: {
         type: array
         key: customActions
-        defValue: []
       }
     }
     {
@@ -5321,12 +5685,6 @@ return {
       E: "64"
     }
     {
-      id: e4
-      T: ComponentVariant
-      S: "1"
-      E: "65"
-    }
-    {
       id: e5
       T: ComponentVariant
       S: "1"
@@ -5363,10 +5721,16 @@ return {
       E: "71"
     }
     {
-      id: e11
+      id: e11a
       T: ComponentVariant
       S: "1"
-      E: "72"
+      E: "72a"
+    }
+    {
+      id: e11b
+      T: ComponentVariant
+      S: "1"
+      E: "72b"
     }
     {
       id: e12
@@ -5843,28 +6207,34 @@ return {
       E: "43"
     }
     {
-      id: e71
+      id: e71_loop
       T: Attr
       S: "44"
-      E: "45"
+      E: "44a"
     }
     {
-      id: e71a
+      id: e71_loop_btn
       T: Attr
-      S: "44"
-      E: "45a"
+      S: "44a"
+      E: "44b"
     }
     {
-      id: e71b
+      id: e71_menu
       T: Attr
       S: "44"
-      E: "45b"
+      E: "44c"
     }
     {
-      id: e72
+      id: e71_menu_loop
       T: Attr
-      S: "44"
-      E: "46"
+      S: "44c"
+      E: "44d"
+    }
+    {
+      id: e71_menu_item
+      T: Attr
+      S: "44d"
+      E: "44e"
     }
     {
       id: e73

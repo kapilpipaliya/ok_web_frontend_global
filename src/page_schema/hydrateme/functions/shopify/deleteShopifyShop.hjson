@@ -1,0 +1,71 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: deleteShopifyShop
+        description: Deletes a ShopifyShop vertex from the subdomain database and drops the shop's Neo4j database.
+        body:
+          '''
+// Admin: remove shop record and dedicated shop database (same as shop/redact webhook).
+// contextData: { shop: string } — Shopify shop domain (e.g. my-store.myshopify.com)
+
+const { shop } = args.contextData || {};
+
+if (!shop || typeof shop !== "string") {
+  return {
+    success: false,
+    message: "Shop domain is required."
+  };
+}
+
+const appSubDomain = args.rawSubDomain;
+if (!appSubDomain) {
+  return {
+    success: false,
+    message: "Application subdomain is required."
+  };
+}
+
+const shopDatabaseName = args.getDatabaseNameForShop(shop, appSubDomain);
+const driver = await args.getDriver();
+const systemSession = driver.session();
+
+try {
+  await systemSession.run(`DROP DATABASE ${shopDatabaseName} IF EXISTS`);
+  console.log(`Dropped database ${shopDatabaseName} for ${shop}`);
+} catch (error) {
+  console.error(`Failed to drop database ${shopDatabaseName} for ${shop}:`, error);
+  return {
+    success: false,
+    message: error?.message || `Failed to drop database ${shopDatabaseName}`
+  };
+} finally {
+  await systemSession.close();
+}
+
+try {
+  await args.session.run(
+    `MATCH (s:ShopifyShop {shop: $shop}) DELETE s`,
+    { shop }
+  );
+} catch (error) {
+  console.error(`Failed to delete ShopifyShop vertex for ${shop}:`, error);
+  return {
+    success: false,
+    message: error?.message || "Failed to delete shop record"
+  };
+}
+
+return {
+  success: true,
+  message: `Deleted shop ${shop} and database ${shopDatabaseName}`,
+  data: { shop, shopDatabaseName }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

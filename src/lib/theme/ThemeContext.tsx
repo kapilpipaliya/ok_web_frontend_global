@@ -3,6 +3,7 @@ import { createContext, useContext } from "solid-js";
 // Moving constants and utility functions to separate modules
 
 import {
+  colorToHex,
   createColorScheme,
   getLightShade,
   getDarkShade,
@@ -246,7 +247,9 @@ function handleColorProperties(
   currentPath: string[],
   getColorMode?: () => ColorMode,
 ) {
-  // Try specialized color handlers first
+  const hexMatch = prop.match(/(.+)_hex$/);
+  const colorProp = hexMatch ? hexMatch[1] : prop;
+
   const colorHandlerFunctions = [
     colorHandlers.handleTextColorAccess,
     colorHandlers.handleShadeAccess,
@@ -254,21 +257,24 @@ function handleColorProperties(
   ];
 
   for (const handler of colorHandlerFunctions) {
-    const result = handler(target, prop, getColorMode);
+    const result = handler(target, colorProp, getColorMode);
     if (result !== undefined) {
-      return result;
+      return hexMatch && typeof result === "string"
+        ? colorToHex(result)
+        : result;
     }
   }
 
-  // Handle direct color access for properties at color level (e.g., color.primary)
   if (currentPath.length === 2) {
     const directResult = colorHandlers.handleDirectColorAccess(
       target,
-      prop,
+      colorProp,
       getColorMode,
     );
     if (directResult !== undefined) {
-      return directResult;
+      return hexMatch && typeof directResult === "string"
+        ? colorToHex(directResult)
+        : directResult;
     }
   }
 

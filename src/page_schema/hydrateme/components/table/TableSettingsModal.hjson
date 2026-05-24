@@ -248,8 +248,8 @@ const toggleExample = () => {
 
 const getDetailedExample = () => {
   return `return {
-  // Table columns configuration
-  // type "iconAction": configurable icon button — column.iconAction: { action: "clipboard"|"openUrl"|"custom", textAccessor(row),
+  // Table columns: dataType = semantic data (validation/filter/sort); renderer = presentation only
+  // renderer "iconAction": column.iconAction: { action: "clipboard"|"openUrl"|"custom", textAccessor(row),
   //   icon, activeIcon (carbon: ids), iconText, activeIconText, title, activeTitle, activeDurationMs, variant, size,
   //   showFeedback, allowEmpty, openUrlTarget, openUrlWindowFeatures, htmlButtonStyle, buttonBg, activeButtonBg, buttonFg, activeButtonFg,
   //   onClick(row, column, rowIndex, helpers) for action "custom" — helpers: getPayloadText, copyToClipboard, setFeedbackActive, clearFeedback }
@@ -257,7 +257,8 @@ const getDetailedExample = () => {
     {
       key: "name",
       label: "Name",
-      type: "text",
+      dataType: "text",
+      renderer: "text",
       sortable: true,
       filterable: true,
       editable: true,
@@ -267,7 +268,8 @@ const getDetailedExample = () => {
     {
       key: "description",
       label: "Description",
-      type: "text",
+      dataType: "text",
+      renderer: "text",
       sortable: true,
       filterable: true,
       editable: true,
@@ -276,7 +278,8 @@ const getDetailedExample = () => {
     {
       key: "year",
       label: "Year",
-      type: "number",
+      dataType: "number",
+      renderer: "text",
       sortable: true,
       filterable: true,
       editable: true,
@@ -285,7 +288,8 @@ const getDetailedExample = () => {
     {
       key: "language",
       label: "Language",
-      type: "select",
+      dataType: "relation",
+      renderer: "text",
       sortable: true,
       filterable: true,
       editable: true,
@@ -295,7 +299,8 @@ const getDetailedExample = () => {
     {
       key: "isActive",
       label: "Active",
-      type: "checkbox",
+      dataType: "boolean",
+      renderer: "checkbox",
       sortable: true,
       filterable: true,
       editable: true,
@@ -304,7 +309,8 @@ const getDetailedExample = () => {
     {
       key: "createdAt",
       label: "Created",
-      type: "isoDateTime",
+      dataType: "date",
+      renderer: "isoDateTime",
       sortable: true,
       filterable: true,
       editable: false,
@@ -313,7 +319,8 @@ const getDetailedExample = () => {
     {
       key: "preview",
       label: "Preview",
-      type: "image",
+      dataType: "text",
+      renderer: "image",
       sortable: false,
       filterable: false,
       editable: true,
@@ -322,7 +329,8 @@ const getDetailedExample = () => {
     {
       key: "download",
       label: "Download",
-      type: "link",
+      dataType: "text",
+      renderer: "downloadLink",
       sortable: false,
       filterable: false,
       editable: false,
@@ -331,7 +339,7 @@ const getDetailedExample = () => {
     {
       key: "__copyLink",
       label: "",
-      type: "iconAction",
+      renderer: "iconAction",
       sortable: false,
       filterable: false,
       editable: false,
@@ -360,28 +368,32 @@ const getDetailedExample = () => {
           {
             key: "name",
             label: "Name",
-            type: "text",
+            dataType: "text",
+            renderer: "text",
             required: true,
             colSpan: 2 // Span across 2 columns within the group
           },
           {
             key: "description",
             label: "Description",
-            type: "textArea",
+            dataType: "text",
+            renderer: "textArea",
             required: false,
             colSpan: 2
           },
           {
             key: "year",
             label: "Year",
-            type: "number",
+            dataType: "number",
+            renderer: "number",
             required: false,
             colSpan: 1
           },
           {
             key: "language",
             label: "Language",
-            type: "select",
+            dataType: "select",
+            renderer: "select",
             required: false,
             options: ["English", "Spanish", "French"],
             colSpan: 1
@@ -414,7 +426,6 @@ const getDetailedExample = () => {
   rowHeight: 50,
   showRowNumber: true,
   showSelection: true,
-  showActions: true,
   resizableColumns: true,
   searchPlaceholder: "Search...",
 
@@ -454,7 +465,10 @@ const getDetailedExample = () => {
 
   // Show/hide buttons
   showAddButton: true,
-  showEditButton: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone." } }
+  ],
 
   // Data and function props (optional when loadFromSetting is true)
   dataFunction: null, // Optional: custom data fetching function

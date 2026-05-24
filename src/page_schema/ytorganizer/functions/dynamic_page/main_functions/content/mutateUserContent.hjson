@@ -290,7 +290,7 @@ if (!operation || !["create", "update", "delete"].includes(operation)) {
 // Determine vertex label and relationship type based on tableVertexLabel
 const vertexLabel = tableVertexLabel;
 // Must match getUserContent.hjson: ownership is User + tableVertexLabel (e.g. UserFile for File).
-// File uploads always create (User)-[:UserFile]->(File); tableSettingsLabel (e.g. AttendraFilePortal) is only for settings keys.
+// File uploads always create (User)-[:UserFile]->(File); tableSettingsLabel (e.g. FilePortal) is only for settings keys.
 const relationshipType = `User${vertexLabel}`;
 
 // Execute before hooks based on operation

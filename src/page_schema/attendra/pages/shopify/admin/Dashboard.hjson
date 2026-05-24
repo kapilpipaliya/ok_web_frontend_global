@@ -1,0 +1,364 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''
+const isInIframe = args.atom(false);
+const [loading, setLoading] = args.createSignal(false);
+const [dashboard, setDashboard] = args.createSignal(null);
+
+const loadDashboard = async () => {
+  try {
+    setLoading(true);
+    const res = await args.executeNamedServerFunction({
+      functionName: "getDashboard",
+      contextData: {}
+    });
+    const ok = res?.result?.success !== false && !res?.error;
+    if (!ok) {
+      args.showErrorToast?.(res?.error || res?.result?.error || "Failed to load dashboard");
+      setDashboard(null);
+      return;
+    }
+    setDashboard(res?.result?.data || null);
+  } finally {
+    setLoading(false);
+  }
+};
+
+return {
+  enabled: () => true,
+  isInIframe,
+  loading,
+  dashboard,
+  loadDashboard
+};
+'''
+        title: Dashboard - Attendra
+        url: /app
+        key: Dashboard
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    args.fns.isInIframe(window.self !== window.top);
+    if (args.fns.isInIframe()) args.fns.loadDashboard();
+  }
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: root
+        css:
+          '''return `._id{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+}
+@media (max-width: 768px){
+  ._id{ padding: ${args.theme.var.spacing?.md || "1rem"}; }
+}`;'''
+        props:
+          '''return {
+  as: "main",
+  hide: !args.fns.isInIframe()
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: h1
+        css:
+          '''return `._id{
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: ${args.theme.var.color.text};
+}`;'''
+        props:
+          '''return {
+  as: "h1",
+  text: "Time dashboard"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: sub
+        css:
+          '''return `._id{
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1.25rem 0;
+  font-size: 0.95rem;
+}`;'''
+        props:
+          '''return {
+  as: "p",
+  text: "Today’s status for your team. Use Employees to manage staff and Time Logs for detailed records."
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: portal_signin
+        css:
+          '''return `._id{
+  margin: 0 0 1.25rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}`;'''
+        props:
+          '''const d = args.fns.dashboard?.();
+const path = d?.portalSignInPath || "";
+const href = typeof d?.portalSignInUrl === "string" && d.portalSignInUrl.length > 0 ? d.portalSignInUrl : "";
+const show = args.fns.isInIframe() && !!path && !!href && href !== "#";
+return {
+  as: "s-button",
+  "attr:variant": "secondary",
+  text: "Portal Signin",
+  hide: !show,
+  onClick: () => {
+    if (href && href !== "#") {
+      window.open(href, "_blank", "noopener,noreferrer");
+    }
+  }
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: cards
+        css:
+          '''return `._id{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 900px){
+  ._id{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px){
+  ._id{ grid-template-columns: 1fr; }
+}`;'''
+        props: '''return { as: "section" }'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        contextName: kpi
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id{
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  min-width: 0;
+}`;'''
+        props:
+          '''
+const d = args.fns.dashboard?.();
+const loading = args.fns.loading?.();
+const items = [
+  { k: "presentToday", label: "Present today", value: d?.presentToday ?? (loading ? "…" : "0") },
+  { k: "clockedInNow", label: "Clocked in now", value: d?.clockedInNow ?? (loading ? "…" : "0") },
+  { k: "lateArrivals", label: "Late arrivals", value: d?.lateArrivals ?? (loading ? "…" : "0") },
+  { k: "hoursToday", label: "Hours today", value: d?.hoursToday ?? (loading ? "…" : "0.0") }
+];
+
+return {
+  as: "div",
+  data: items
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id{ color:${args.theme.var.color.muted}; font-size: 0.85rem; margin: 0 0 0.25rem 0; }`;'''
+        props:
+          '''return {
+  as: "div",
+  text: args.contextData.kpi?.label || ""
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id{ color:${args.theme.var.color.text}; font-size: 1.4rem; font-weight: 700; margin: 0; }`;'''
+        props:
+          '''return {
+  as: "div",
+  text: String(args.contextData.kpi?.value ?? "")
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: Html
+        key: activity
+        css:
+          '''return `._id{
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.75rem;
+  padding: 1rem;
+}`;'''
+        props: '''return { as: "section" }'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id{ margin: 0 0 0.5rem 0; font-weight: 600; color: ${args.theme.var.color.text}; }`;'''
+        props: '''return { as: "h2", text: "Recent activity" }'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        textType: markdown
+        css:
+          '''return `._id{ margin: 0; color:${args.theme.var.color.muted}; font-size: 0.95rem; line-height: 1.6; }`;'''
+        props:
+          '''
+const d = args.fns.dashboard?.();
+const rows = Array.isArray(d?.recentActivity) ? d.recentActivity : [];
+const text = rows.length ? rows.map((r) => `- ${r}`).join("\\n") : (args.fns.loading?.() ? "Loading…" : "No activity yet.");
+return { as: "div", text, textType: "markdown" };
+'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: "e_page_root"
+      T: "Attr"
+      S: "1"
+      E: "2"
+    }
+    {
+      id: "e_root_h1"
+      T: "Attr"
+      S: "2"
+      E: "3"
+    }
+    {
+      id: "e_root_sub"
+      T: "Attr"
+      S: "2"
+      E: "4"
+    }
+    {
+      id: "e_root_portal"
+      T: "Attr"
+      S: "2"
+      E: "12"
+    }
+    {
+      id: "e_root_cards"
+      T: "Attr"
+      S: "2"
+      E: "5"
+    }
+    {
+      id: "e_cards_card"
+      T: "Attr"
+      S: "5"
+      E: "6"
+    }
+    {
+      id: "e_card_label"
+      T: "Attr"
+      S: "6"
+      E: "7"
+    }
+    {
+      id: "e_card_value"
+      T: "Attr"
+      S: "6"
+      E: "8"
+    }
+    {
+      id: "e_root_activity"
+      T: "Attr"
+      S: "2"
+      E: "9"
+    }
+    {
+      id: "e_act_h2"
+      T: "Attr"
+      S: "9"
+      E: "10"
+    }
+    {
+      id: "e_act_list"
+      T: "Attr"
+      S: "9"
+      E: "11"
+    }
+    {
+      id: "e_layout"
+      T: "PageLayout"
+      S: "1"
+      E: "layout"
+    }
+  ]
+}

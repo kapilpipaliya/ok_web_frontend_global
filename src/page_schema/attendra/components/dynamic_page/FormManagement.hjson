@@ -25,6 +25,16 @@ return `._id {
         displayOrder: 1
         fns:
           '''
+// Form field schema: dataType = semantics/validation; renderer = UI control
+const getFieldDataType = (field) => field?.dataType || "text";
+
+const getFieldRenderer = (field) => field?.renderer || "text";
+
+const isRelationField = (field) => {
+  const fieldDataType = getFieldDataType(field);
+  return fieldDataType === "relation" || fieldDataType === "select";
+};
+
 // Form state management using Vertex format
 const getFormConfig = () => args.contextData.props?.formConfig;
 const getInitialVertex = () => args.contextData.props?.initialVertex;
@@ -252,39 +262,59 @@ const ensureFormTxn = () => {
 };
 
 const getNestedLineVerticesForField = (field) => {
-  const cfg = field?.nestedLineItemsConfig;
+  const nestedLineItemsConfig = field?.nestedLineItemsConfig;
   const parent = getFormVertex();
-  if (!field || field.type !== "nestedLineItems" || !cfg?.parentToChildRelationshipType || !parent) {
+  if (
+    !field ||
+    getFieldRenderer(field) !== "nestedLineItems" ||
+    !nestedLineItemsConfig?.parentToChildRelationshipType ||
+    !parent
+  ) {
     return [];
   }
-  const expr = cfg.rowsExpression || `->${cfg.parentToChildRelationshipType}`;
-  const raw = args.evalExpression(expr, { graph: args.graph, vertexes: [parent] }) || [];
-  const arr = Array.isArray(raw) ? raw : [];
-  const verts = arr.filter((rowVertex) => rowVertex && typeof rowVertex.id === "string");
-  verts.sort((a, b) => (Number(a.P?.displayOrder) || 0) - (Number(b.P?.displayOrder) || 0));
-  return verts;
+  const rowsExpression =
+    nestedLineItemsConfig.rowsExpression ||
+    `->${nestedLineItemsConfig.parentToChildRelationshipType}`;
+  const expressionResult =
+    args.evalExpression(rowsExpression, { graph: args.graph, vertexes: [parent] }) || [];
+  const rowVertices = Array.isArray(expressionResult) ? expressionResult : [];
+  const sortedRowVertices = rowVertices.filter(
+    (rowVertex) => rowVertex && typeof rowVertex.id === "string"
+  );
+  sortedRowVertices.sort(
+    (left, right) => (Number(left.P?.displayOrder) || 0) - (Number(right.P?.displayOrder) || 0)
+  );
+  return sortedRowVertices;
 };
 
-const buildNestedLineRowPayload = (rowVertex, cfg) => {
-  const fk = cfg.parentElementIdPropOnChild;
-  const invRel = cfg.childToInventoryRelationshipType;
-  const invLab = cfg.inventoryTargetLabel || "InventoryItem";
+const buildNestedLineRowPayload = (rowVertex, nestedLineItemsConfig) => {
+  const parentElementIdProperty = nestedLineItemsConfig.parentElementIdPropOnChild;
+  const inventoryRelationshipType = nestedLineItemsConfig.childToInventoryRelationshipType;
+  const inventoryTargetLabel = nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem";
   let inventoryItemId = "";
-  if (invRel && rowVertex.OUT && rowVertex.OUT[invRel]) {
-    const eids = rowVertex.OUT[invRel];
-    for (let ei = 0; ei < eids.length; ei++) {
-      const edge = args.graph.edges[eids[ei]];
+  if (
+    inventoryRelationshipType &&
+    rowVertex.OUT &&
+    rowVertex.OUT[inventoryRelationshipType]
+  ) {
+    const outgoingEdgeIds = rowVertex.OUT[inventoryRelationshipType];
+    for (let edgeIndex = 0; edgeIndex < outgoingEdgeIds.length; edgeIndex++) {
+      const edge = args.graph.edges[outgoingEdgeIds[edgeIndex]];
       if (!edge) continue;
-      const tgt = args.graph.vertexes[edge.E];
-      if (tgt?.L?.includes(invLab)) {
+      const targetVertex = args.graph.vertexes[edge.E];
+      if (targetVertex?.L?.includes(inventoryTargetLabel)) {
         inventoryItemId = edge.E;
         break;
       }
     }
   }
-  const row = { id: rowVertex.id, ...args.klona(rowVertex.P || {}), inventoryItemId };
-  if (fk) delete row[fk];
-  return row;
+  const rowPayload = {
+    id: rowVertex.id,
+    ...args.klona(rowVertex.P || {}),
+    inventoryItemId
+  };
+  if (parentElementIdProperty) delete rowPayload[parentElementIdProperty];
+  return rowPayload;
 };
 
 // String validation: per-field props + optional formConfig.fieldValidationByKey[field.key] preset (field wins for defined keys)
@@ -395,8 +425,8 @@ const initializeForm = () => {
 
     for (const field of allFields) {
       if (!isFieldVisible(field)) continue;
-      if (field.type === "graphFileUpload") continue;
-      if (field.type === "embeddedVertexPicker") continue;
+      if (getFieldRenderer(field) === "graphFileUpload") continue;
+      if (getFieldRenderer(field) === "embeddedVertexPicker") continue;
       if (field.defaultValue !== undefined) {
         initialProperties[field.key] = field.defaultValue;
       } else {
@@ -488,15 +518,15 @@ const getFieldValue = (fieldKey) => {
   const vertex = getFormVertex();
   if (!vertex) return "";
   const field = getAllFields().find((f) => f.key === fieldKey);
-  if (field?.type === "graphFileUpload") return "";
+  if (getFieldRenderer(field) === "graphFileUpload") return "";
   if (
     field &&
-    (field.type === "multiSelect" || field.multiSelect === true) &&
+    (getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&
     fieldUsesEdgeOnlyRelationship(field)
   ) {
     return getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
   }
-  if (field && field.type === "select" && fieldUsesEdgeOnlyRelationship(field)) {
+  if (field && isRelationField(field) && fieldUsesEdgeOnlyRelationship(field)) {
     const ids = getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
     return ids.length > 0 ? ids[0] : "";
   }
@@ -506,8 +536,8 @@ const getFieldValue = (fieldKey) => {
 // Set form field value in vertex using mergeVertexProperties
 const setFieldValue = (fieldKey, value) => {
   const nestedField = getAllFields().find((f) => f.key === fieldKey);
-  if (nestedField?.type === "nestedLineItems") return;
-  if (nestedField?.type === "graphFileUpload") return;
+  if (getFieldRenderer(nestedField) === "nestedLineItems") return;
+  if (getFieldRenderer(nestedField) === "graphFileUpload") return;
   const vertexId = formVertexId();
   if (!vertexId) return;
 
@@ -533,11 +563,11 @@ const validate = () => {
   const newErrors = {};
   for (const field of allFields) {
     if (!isFieldVisible(field)) continue;
-    if (field.type === "graphFileUpload") continue;
+    if (getFieldRenderer(field) === "graphFileUpload") continue;
     const value = vertex.P[field.key];
     const rules = mergeValidationPreset(field);
 
-    if (isFieldRequired(field) && (field.type === "multiSelect" || field.multiSelect === true)) {
+    if (isFieldRequired(field) && (getFieldRenderer(field) === "multiSelect" || field.multiSelect === true)) {
       let multiSelectValue = vertex.P[field.key];
       if (fieldUsesEdgeOnlyRelationship(field)) {
         if (multiSelectValue === undefined || multiSelectValue === null) {
@@ -553,7 +583,7 @@ const validate = () => {
       continue;
     }
 
-    if (field.type === "nestedLineItems" && isFieldRequired(field)) {
+    if (getFieldRenderer(field) === "nestedLineItems" && isFieldRequired(field)) {
       const rows = getNestedLineVerticesForField(field);
       if (rows.length === 0) {
         newErrors[field.key] = `${field.label || field.key}: add at least one line`;
@@ -565,7 +595,7 @@ const validate = () => {
       newErrors[field.key] = `${field.label || field.key} is required`;
     }
 
-    if (field.type === "email" && value) {
+    if (getFieldDataType(field) === "email" && value) {
       const trimmedEmail = String(value).trim();
       if (
         trimmedEmail &&
@@ -643,10 +673,10 @@ const handleSave = async () => {
     if (allFields.length > 0) {
       for (const field of allFields) {
         if (!isFieldVisible(field)) continue;
-        if (field.type === "graphFileUpload") continue;
-        if (field.type === "embeddedVertexPicker") continue;
+        if (getFieldRenderer(field) === "graphFileUpload") continue;
+        if (getFieldRenderer(field) === "embeddedVertexPicker") continue;
         if (
-          (field.type === "multiSelect" || field.multiSelect === true) &&
+          (getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&
           field.selectConfig &&
           !field.selectConfig.propertyOnly
         ) {
@@ -672,7 +702,7 @@ const handleSave = async () => {
           };
           continue;
         }
-        if (field.type === "select" && field.selectConfig && !field.selectConfig.propertyOnly) {
+        if (isRelationField(field) && field.selectConfig && !field.selectConfig.propertyOnly) {
           const selectedId = vertex.P[field.key];
           const trimmedId =
             selectedId != null && String(selectedId).trim() !== ""
@@ -691,17 +721,18 @@ const handleSave = async () => {
     const nMeta = nestedLineMeta();
     for (const field of allFields) {
       if (!isFieldVisible(field)) continue;
-      if (field.type !== "nestedLineItems" || !field.nestedLineItemsConfig) continue;
-      const cfg = field.nestedLineItemsConfig;
+      if (getFieldRenderer(field) !== "nestedLineItems" || !field.nestedLineItemsConfig) continue;
+      const nestedLineItemsConfig = field.nestedLineItemsConfig;
       nestedLineSync[field.key] = {
-        childLabel: cfg.childLabel,
-        parentToChildRelationshipType: cfg.parentToChildRelationshipType,
-        childToInventoryRelationshipType: cfg.childToInventoryRelationshipType || null,
-        inventoryTargetLabel: cfg.inventoryTargetLabel || "InventoryItem",
-        parentElementIdPropOnChild: cfg.parentElementIdPropOnChild,
-        nestedLineItemsSyncRules: cfg.nestedLineItemsSyncRules || null,
+        childLabel: nestedLineItemsConfig.childLabel,
+        parentToChildRelationshipType: nestedLineItemsConfig.parentToChildRelationshipType,
+        childToInventoryRelationshipType:
+          nestedLineItemsConfig.childToInventoryRelationshipType || null,
+        inventoryTargetLabel: nestedLineItemsConfig.inventoryTargetLabel || "InventoryItem",
+        parentElementIdPropOnChild: nestedLineItemsConfig.parentElementIdPropOnChild,
+        nestedLineItemsSyncRules: nestedLineItemsConfig.nestedLineItemsSyncRules || null,
         rows: getNestedLineVerticesForField(field).map((rowVertex) =>
-          buildNestedLineRowPayload(rowVertex, cfg)
+          buildNestedLineRowPayload(rowVertex, nestedLineItemsConfig)
         ),
         deletedLineIds: nMeta.deletedIdsByField[field.key] || []
       };
@@ -836,6 +867,9 @@ return {
   ensureFormTxn,
   getNestedLineVerticesForField,
   applyAutoReferenceSequencesAfterAdd,
+  getFieldDataType,
+  getFieldRenderer,
+  isRelationField,
   assignFormVertex: (vertexId) => {
     if (vertexId == null || String(vertexId).trim() === "") return;
     setFormVertexId(String(vertexId).trim());
@@ -1077,7 +1111,7 @@ return `._id {
 const field = args.contextData.field;
 return {
   as: "div",
-  hide: field?.type === "graphFileUpload"
+  hide: args.fns.getFieldRenderer(field) === "graphFileUpload"
 };
 '''
       }
@@ -1117,14 +1151,14 @@ return {
         props:
           '''
 const field = args.contextData.field;
-const tm = args.fns.getFieldTooltipMeta(field);
+const tooltipMeta = args.fns.getFieldTooltipMeta(field);
 
 return {
   componentName: "FloatingHelpTooltip",
-  text: tm.showFloatingHelp ? tm.floatingHelpText : "",
+  text: tooltipMeta.showFloatingHelp ? tooltipMeta.floatingHelpText : "",
   fieldLabel: field.label || field.key,
-  placement: tm.placement,
-  hide: !tm.showFloatingHelp
+  placement: tooltipMeta.placement,
+  hide: !tooltipMeta.showFloatingHelp
 };
 '''
       }
@@ -1147,12 +1181,12 @@ return `._id {
         props:
           '''
 const field = args.contextData.field;
-const tm = args.fns.getFieldTooltipMeta(field);
+const tooltipMeta = args.fns.getFieldTooltipMeta(field);
 return {
-  as: "div",
+  as: "motion.div",
   id: `fm-field-hint-${field.key}`,
-  text: tm.body,
-  hide: field?.type === "graphFileUpload" || !tm.showBelow,
+  text: tooltipMeta.body,
+  hide: args.fns.getFieldRenderer(field) === "graphFileUpload" || !tooltipMeta.showBelow,
   "aria-live": "polite"
 };
 '''
@@ -1165,7 +1199,7 @@ return {
         css:
           '''
 const field = args.contextData.field;
-if (field?.type === "graphFileUpload") {
+if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
   return `._id {
   width: auto;
   max-width: 100%;
@@ -1185,12 +1219,12 @@ const value = args.fns.getFieldValue(field.key);
 const setFieldValue = args.fns.setFieldValue;
 const fieldDisabled = args.fns.isFieldDisabled(field);
 const fieldRequired = args.fns.isFieldRequired(field);
-const tm = args.fns.getFieldTooltipMeta(field);
+const tooltipMeta = args.fns.getFieldTooltipMeta(field);
 const hintId = `fm-field-hint-${field.key}`;
-const a11y = tm.showBelow && tm.body ? { "aria-describedby": hintId } : {};
+const accessibility = tooltipMeta.showBelow && tooltipMeta.body ? { "aria-describedby": hintId } : {};
 
-// Render appropriate input based on field type
-if (field.type === "graphFileUpload") {
+// Render appropriate input from field renderer (+ dataType for validation/input kind)
+if (args.fns.getFieldRenderer(field) === "graphFileUpload") {
   const baseUploadConfiguration =
     field.uploadConfiguration != null &&
     typeof field.uploadConfiguration === "object" &&
@@ -1213,11 +1247,11 @@ if (field.type === "graphFileUpload") {
       formTxnId: args.fns.formTxnId,
       revertTransaction: args.revertTransaction,
     },
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "embeddedVertexPicker") {
+if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
   const pickerConfiguration =
     field.pickerConfiguration != null && typeof field.pickerConfiguration === "object"
       ? field.pickerConfiguration
@@ -1252,18 +1286,10 @@ if (field.type === "embeddedVertexPicker") {
   if (pickerConfiguration.secondaryLabel != null) {
     secondaryLabel = String(pickerConfiguration.secondaryLabel).trim();
   } else if (pickerConfiguration.buildSecondaryLabelFromVertex === true && selectedVertex) {
-    const secondaryDisplayPropertyKey =
-      pickerConfiguration.secondaryDisplayProperty != null
-        ? String(pickerConfiguration.secondaryDisplayProperty)
-        : previewFileNamePropertyKey;
-    const secondaryParts = [];
-    if (pickerConfiguration.includeVertexIdInSecondary === true && selectedElementId) {
-      secondaryParts.push(`ID: ${selectedElementId}`);
+    const label = selectedVertex.P?.[previewFileNamePropertyKey];
+    if (label != null && String(label).trim() !== "") {
+      secondaryLabel = String(label).trim();
     }
-    if (selectedVertex.P?.[secondaryDisplayPropertyKey] != null) {
-      secondaryParts.push(String(selectedVertex.P[secondaryDisplayPropertyKey]));
-    }
-    secondaryLabel = secondaryParts.join(" · ");
   }
   const showImagePreview =
     pickerConfiguration.showImagePreview === true && previewUrl !== "";
@@ -1305,11 +1331,11 @@ if (field.type === "embeddedVertexPicker") {
       }
     },
     onClear: () => setFieldValue(field.key, selectionMode === "multiple" ? [] : ""),
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "nestedLineItems" && field.nestedLineItemsConfig) {
+if (args.fns.getFieldRenderer(field) === "nestedLineItems" && field.nestedLineItemsConfig) {
   return {
     componentName: "FormNestedLineItems",
     field,
@@ -1321,7 +1347,7 @@ if (field.type === "nestedLineItems" && field.nestedLineItemsConfig) {
   };
 }
 
-if (field.type === "textArea" || field.type === "textarea") {
+if (args.fns.getFieldRenderer(field) === "textArea") {
   return {
     componentName: "TextArea",
     value: value,
@@ -1330,17 +1356,19 @@ if (field.type === "textArea" || field.type === "textarea") {
     required: fieldRequired,
     maxLength: field.maxLength,
     disabled: fieldDisabled,
-    ...a11y
+    ...accessibility
   };
 }
 
 if (
-  (field.type === "multiSelect" || field.multiSelect === true) &&
+  (args.fns.getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&
   field.selectConfig &&
   !field.selectConfig.propertyOnly
 ) {
-  const lf = field.selectConfig.labelField || "name";
-  const labelKey = String(lf).includes(".") ? String(lf) : `P.${lf}`;
+  const labelFieldName = field.selectConfig.labelField || "name";
+  const labelKey = String(labelFieldName).includes(".")
+    ? String(labelFieldName)
+    : `P.${labelFieldName}`;
   const enableUserScoping =
     field.selectConfig.enableUserScoping !== undefined
       ? field.selectConfig.enableUserScoping
@@ -1374,12 +1402,12 @@ if (
     placeholder: field.placeholder || `Select ${field.label || field.key}...`,
     required: fieldRequired,
     disabled: fieldDisabled,
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "select" && field.optionsPicklist?.picklistKey) {
-  const pk = String(field.optionsPicklist.picklistKey || "").trim();
+if (args.fns.isRelationField(field) && field.optionsPicklist?.picklistKey) {
+  const picklistKey = String(field.optionsPicklist.picklistKey || "").trim();
   return {
     componentName: "TomSelect",
     value: value,
@@ -1392,17 +1420,19 @@ if (field.type === "select" && field.optionsPicklist?.picklistKey) {
     valueKey: "P.value",
     labelKey: "P.label",
     dataKey: "options",
-    functionContext: { picklistKey: pk },
+    functionContext: { picklistKey },
     placeholder: field.placeholder || `Select ${field.label || field.key}...`,
     required: fieldRequired,
     disabled: fieldDisabled,
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "select" && field.selectConfig) {
-  const lf = field.selectConfig.labelField || "name";
-  const labelKey = String(lf).includes(".") ? String(lf) : `P.${lf}`;
+if (args.fns.isRelationField(field) && field.selectConfig) {
+  const labelFieldName = field.selectConfig.labelField || "name";
+  const labelKey = String(labelFieldName).includes(".")
+    ? String(labelFieldName)
+    : `P.${labelFieldName}`;
   const enableUserScoping =
     field.selectConfig.enableUserScoping !== undefined
       ? field.selectConfig.enableUserScoping
@@ -1429,11 +1459,11 @@ if (field.type === "select" && field.selectConfig) {
     placeholder: field.placeholder || `Select ${field.label || field.key}...`,
     required: fieldRequired,
     disabled: fieldDisabled,
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "select" && Array.isArray(field.options)) {
+if (args.fns.isRelationField(field) && Array.isArray(field.options)) {
   return {
     componentName: "TomSelect",
     value: value,
@@ -1444,11 +1474,11 @@ if (field.type === "select" && Array.isArray(field.options)) {
     placeholder: field.placeholder || `Select ${field.label || field.key}...`,
     required: fieldRequired,
     disabled: fieldDisabled,
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "checkbox") {
+if (args.fns.getFieldDataType(field) === "boolean" || args.fns.getFieldRenderer(field) === "checkbox") {
   return {
     as: "input",
     type: "checkbox",
@@ -1457,11 +1487,11 @@ if (field.type === "checkbox") {
       setFieldValue(field.key, e.target.checked);
     },
     disabled: fieldDisabled,
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "date") {
+if (args.fns.getFieldDataType(field) === "date") {
   let dateValue = value;
   if (typeof dateValue === "string") {
     if (dateValue.includes("T")) {
@@ -1480,11 +1510,11 @@ if (field.type === "date") {
     onChange: (e) => {
       setFieldValue(field.key, e.target.value);
     },
-    ...a11y
+    ...accessibility
   };
 }
 
-if (field.type === "number") {
+if (args.fns.getFieldDataType(field) === "number") {
   return {
     componentName: "TextInput",
     type: "number",
@@ -1497,14 +1527,14 @@ if (field.type === "number") {
     min: field.min,
     max: field.max,
     disabled: fieldDisabled,
-    ...a11y
+    ...accessibility
   };
 }
 
 // Default: text input
 return {
   componentName: "TextInput",
-  type: field.type === "email" ? "email" : "text",
+  type: args.fns.getFieldDataType(field) === "email" ? "email" : "text",
   value: value,
   onChange: (e) => {
     setFieldValue(field.key, e.target.value);
@@ -1514,7 +1544,7 @@ return {
   maxLength: field.maxLength,
   minLength: field.minLength,
   disabled: fieldDisabled,
-  ...a11y
+  ...accessibility
 };
 '''
       }

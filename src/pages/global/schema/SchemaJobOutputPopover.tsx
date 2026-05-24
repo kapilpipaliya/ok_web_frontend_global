@@ -8,6 +8,7 @@ import {
 import {
   createEffect,
   createSignal,
+  For,
   onCleanup,
   Show,
   type JSX,
@@ -15,6 +16,11 @@ import {
 import { Portal } from "solid-js/web";
 import { As } from "~/components/As";
 import type { SchemaJobStatusRow } from "~/server/schema/schemaOperationsManagement";
+
+export type SchemaJobOutputTab = {
+  label: string;
+  row: SchemaJobStatusRow;
+};
 
 function formatJobOutput(row: SchemaJobStatusRow | undefined): string | null {
   if (!row) {
@@ -51,19 +57,40 @@ export function hasJobOutput(row: SchemaJobStatusRow | undefined): boolean {
   return formatJobOutput(row) != null;
 }
 
+export function hasAnyJobOutput(tabs: SchemaJobOutputTab[]): boolean {
+  return tabs.some((t) => hasJobOutput(t.row));
+}
+
 export interface SchemaJobOutputPopoverProps {
-  row: () => SchemaJobStatusRow | undefined;
+  tabs: () => SchemaJobOutputTab[];
   children: JSX.Element;
 }
 
 export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
   const [open, setOpen] = createSignal(false);
+  const [activeTab, setActiveTab] = createSignal(0);
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [coords, setCoords] = createSignal({ x: 0, y: 0 });
 
-  const outputText = () => formatJobOutput(props.row());
-  const canShow = () => hasJobOutput(props.row());
+  const visibleTabs = () =>
+    props.tabs().filter((t) => hasJobOutput(t.row));
+
+  const canShow = () => visibleTabs().length > 0;
+
+  const outputText = () => {
+    const tabs = visibleTabs();
+    const idx = activeTab();
+    const row = tabs[idx]?.row ?? tabs[0]?.row;
+    return formatJobOutput(row);
+  };
+
+  createEffect(() => {
+    const tabs = visibleTabs();
+    if (activeTab() >= tabs.length) {
+      setActiveTab(0);
+    }
+  });
 
   const updatePosition = async () => {
     const refEl = reference();
@@ -145,43 +172,38 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
     clearLeaveTimer();
   });
 
+  if (!canShow()) {
+    return <>{props.children}</>;
+  }
+
   return (
     <>
       <span
         ref={setReference}
-        style={{
-          display: "inline-block",
-          cursor: canShow() ? "pointer" : "default",
-        }}
+        style={{ display: "inline-block", cursor: "pointer" }}
         onMouseEnter={openPopover}
         onMouseLeave={scheduleClose}
         onClick={(e) => {
           e.stopPropagation();
-          if (!canShow()) {
-            return;
-          }
           setOpen((v) => !v);
         }}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            if (!canShow()) {
-              return;
-            }
             setOpen((v) => !v);
           }
         }}
-        role={canShow() ? "button" : undefined}
-        tabIndex={canShow() ? 0 : undefined}
-        aria-expanded={canShow() ? open() : undefined}
+        role="button"
+        tabIndex={0}
+        aria-expanded={open()}
       >
         {props.children}
       </span>
 
-      <Show when={open() && canShow()}>
+      <Show when={open()}>
         <Portal>
           <As
-            as="div"
+            as="motionFragment"
             ref={setFloating}
             role="dialog"
             aria-label="Job output"
@@ -245,8 +267,53 @@ export function SchemaJobOutputPopover(props: SchemaJobOutputPopoverProps) {
                 ×
               </As>
             </As>
+
+            <Show when={visibleTabs().length > 1}>
+              <As
+                as="motionFragment"
+                role="tablist"
+                css={`return \`._id {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid \${args.theme.var.color.border};
+  padding-bottom: 0.25rem;
+}\`;`}
+              >
+                <For each={visibleTabs()}>
+                  {(tab, index) => (
+                    <As
+                      as="button"
+                      type="button"
+                      role="tab"
+                      aria-selected={activeTab() === index()}
+                      onClick={() => setActiveTab(index())}
+                      css={(args) => {
+                        const selected = activeTab() === index();
+                        return `return \`._id {
+  border: none;
+  border-radius: 0.25rem 0.25rem 0 0;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: ${selected ? args.theme.var.color.background_light_200 : "transparent"};
+  color: ${selected ? args.theme.var.color.text : args.theme.var.color.muted};
+  border-bottom: 2px solid ${selected ? args.theme.var.color.primary : "transparent"};
+  margin-bottom: -1px;
+}\`;`;
+                      }}
+                    >
+                      {tab.label}
+                    </As>
+                  )}
+                </For>
+              </As>
+            </Show>
+
             <As
               as="pre"
+              role="tabpanel"
               css={`return \`._id {
   margin: 0;
   font-size: 0.7rem;

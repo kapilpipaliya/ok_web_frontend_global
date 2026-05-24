@@ -585,6 +585,7 @@ The theme system supports any custom variables, not just colors. Access all them
 - Light shades: `_light_100` to `_light_900` (light_100 = close to base, light_900 = close to white)
 - Dark shades: `_dark_100` to `_dark_900` (dark_100 = close to base, dark_900 = close to black)
 - Text colors: Automatic with `_text` suffix (e.g., `primary_text`, `background_light_200_text`)
+- Hex colors (email / OKLCH-incompatible clients): Automatic with `_hex` suffix (e.g., `text_hex`, `primary_hex`, `primary_text_hex`) — follows **current color mode** (including dark mode and shade swap), returns `#rrggbb`
 - **Dark mode behavior**: Shades automatically swap (`_light_` becomes `_dark_` and vice versa)
 
 **Custom Theme Variables:**
@@ -745,11 +746,11 @@ Workshop apps can auto-generate stable reference strings (appointment numbers, i
 
 ## Workshop reports charts (`getConfigurableGraphData`)
 
-- **Setting**: `migrateContentTableSettings` creates/updates `Setting` key `WorkshopReports_charts_default`, `type: workshop_reports_charts`, whose `config` is a function body returning `{ graphs: { [graphKey]: { title, chartType, datasetLabel?, description?, cypher, cypherScoped?, labelField?, valueField? } } }`. Only Cypher stored in that setting is executed; the client passes **`graphKey`** / **`graphKeys`** (e.g. `"all"`), **`rangePreset`** (`7d` | `30d` | `90d` | `365d`), **`enableUserScoping`**, and optional **`settingKey`**.
+- **Setting**: `migrateDynamicPageSettings` creates/updates `Setting` key `WorkshopReports_charts_default`, `type: workshop_reports_charts`, whose `config` is a function body returning `{ graphs: { [graphKey]: { title, chartType, datasetLabel?, description?, cypher, cypherScoped?, labelField?, valueField? } } }`. Only Cypher stored in that setting is executed; the client passes **`graphKey`** / **`graphKeys`** (e.g. `"all"`), **`rangePreset`** (`7d` | `30d` | `90d` | `365d`), **`enableUserScoping`**, and optional **`settingKey`**.
 - **Server function**: `getConfigurableGraphData` loads the setting, evaluates `config` with `new Function`, merges **`since`** (date string) and **`userUuid`** (when scoped) into parameters, runs each query, and returns Chart.js-style `{ labels, datasets }` per graph under `data.charts`. **`operation: "manifest"`** returns titles/chart types only (no Cypher in the response).
 - **UI**: Page `WorkshopReports` at `/workshop/reports` uses `WorkshopLayout`, `WorkshopD3Chart`, and `WorkshopLoadingSpinner`. Re-run migration after editing graph definitions so the `Setting` vertex updates.
 
-## Dynamic table config (`loadFromSetting` / `migrateContentTableSettings`)
+## Dynamic table config (`loadFromSetting` / `migrateDynamicPageSettings`)
 
 When a page uses `DynamicPage` with `loadFromSetting: true`, the evaluated table config object (from the `Setting` `config` function body) drives how rows are loaded, saved, exported, and how FK-style selects behave.
 

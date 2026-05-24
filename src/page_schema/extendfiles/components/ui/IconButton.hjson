@@ -16,6 +16,7 @@
 const variant = args.contextData.props?.variant || "ghost";
 const size = args.contextData.props?.size || "md";
 const disabled = args.contextData.props?.disabled || false;
+const loading = args.contextData.props?.loading === true;
 
 // Size styles
 const sizeStyles = {
@@ -84,6 +85,16 @@ return `._id {
     cursor: not-allowed;
   }
 
+  &._loading icon,
+  &._loading [data-icon] {
+    animation: iconButtonSpin 0.8s linear infinite;
+  }
+
+  @keyframes iconButtonSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
   &:not(:disabled):active {
     transform: scale(0.95);
   }
@@ -91,6 +102,18 @@ return `._id {
   &:focus {
     outline: 2px solid ${args.theme.var.color.primary};
     outline-offset: 2px;
+  }
+
+  &._reason-info {
+    box-shadow: inset 0 0 0 1px ${args.theme.var.color.info};
+  }
+
+  &._reason-warning {
+    box-shadow: inset 0 0 0 1px ${args.theme.var.color.warning};
+  }
+
+  &._reason-danger {
+    box-shadow: inset 0 0 0 1px ${args.theme.var.color.error};
   }
 }`;
 '''
@@ -101,9 +124,18 @@ return `._id {
 const icon = args.contextData.props?.icon;
 const onClick = args.contextData.props?.onClick || (() => {});
 const disabled = args.contextData.props?.disabled || false;
+const loading = args.contextData.props?.loading === true;
 const size = args.contextData.props?.size || "md";
 const ariaLabel = args.contextData.props?.ariaLabel || args.contextData.props?.title || "";
 const title = args.contextData.props?.title || "";
+const reasonVariant = args.contextData.props?.reasonVariant;
+const reasonActive = args.contextData.props?.["data-reason-active"] === "true";
+const reasonKind = args.contextData.props?.["data-reason-kind"];
+const reasonClass =
+  reasonActive && reasonVariant
+    ? `_reason _reason-${reasonVariant}${reasonKind ? ` _reason-${reasonKind}` : ""}`
+    : "";
+const buttonClass = [loading ? "_loading" : "", reasonClass].filter(Boolean).join(" ") || undefined;
 
 const sizeStyles = {
   sm: 16,
@@ -115,9 +147,15 @@ const iconSize = sizeStyles[size] || sizeStyles.md;
 
 return {
   as: "button",
+  class: buttonClass,
   "aria-label": ariaLabel,
+  "aria-busy": loading ? true : undefined,
   title: title,
-  disabled: disabled,
+  disabled: disabled || loading,
+  "data-reason-active": args.contextData.props?.["data-reason-active"],
+  "data-reason-variant": args.contextData.props?.["data-reason-variant"],
+  "data-reason-kind": args.contextData.props?.["data-reason-kind"],
+  "data-reason-code": args.contextData.props?.["data-reason-code"],
   onClick: onClick
 };
 '''
@@ -166,6 +204,15 @@ return {
       P: {
         type: boolean
         key: disabled
+        defValue: false
+      }
+    }
+    {
+      id: "5a"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: loading
         defValue: false
       }
     }

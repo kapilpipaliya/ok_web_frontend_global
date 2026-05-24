@@ -1,0 +1,87 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: portalClockToggle
+        description: Portal clock in/out for the signed-in user. Creates an open time record or closes the latest open record on the subdomain database.
+        body:
+          '''
+const user = await args.getUserFromSession();
+if (!user?.P?.uuid) {
+  return { success: false, error: "Not signed in." };
+}
+const userUuid = String(user.P.uuid).trim();
+const nowIso = new Date().toISOString();
+
+try {
+  const action = await args.session.executeWrite(async (tx) => {
+    const openRes = await tx.run(
+      `MATCH (t:Time)-[:TimeEmployee]->(u:User {uuid: $userUuid})
+       WHERE t.clockOutAt IS NULL
+       RETURN t
+       ORDER BY t.clockInAt DESC
+       LIMIT 1`,
+      { userUuid }
+    );
+
+    if (openRes.records.length > 0) {
+      const node = openRes.records[0].get("t");
+      const tp = node?.properties || {};
+      const timeUuid = String(tp.uuid || "").trim();
+      if (!timeUuid) {
+        return { err: "Time record is missing uuid; contact support." };
+      }
+      const startMs = new Date(String(tp.clockInAt || nowIso)).getTime();
+      const totalHours = Math.max(
+        0,
+        Math.round(((Date.now() - startMs) / 3600000) * 100) / 100
+      );
+      await tx.run(
+        `MATCH (t:Time {uuid: $timeUuid})-[:TimeEmployee]->(:User {uuid: $userUuid})
+         SET t.clockOutAt = $outIso,
+             t.status = 'closed',
+             t.totalHours = $totalHours,
+             t.updatedAt = datetime()`,
+        {
+          userUuid,
+          timeUuid,
+          outIso: nowIso,
+          totalHours: String(totalHours)
+        }
+      );
+      return { action: "clocked_out" };
+    }
+
+    const timeUuid = args.uuidv7();
+    await tx.run(
+      `MATCH (u:User {uuid: $userUuid})
+       CREATE (t:Time {
+         uuid: $timeUuid,
+         clockInAt: $inIso,
+         status: 'open',
+         createdAt: datetime(),
+         updatedAt: datetime()
+       })
+       CREATE (t)-[:TimeEmployee]->(u)
+       MERGE (u)-[:UserTime]->(t)`,
+      { userUuid, timeUuid, inIso: nowIso }
+    );
+    return { action: "clocked_in" };
+  });
+
+  if (action?.err) {
+    return { success: false, error: action.err };
+  }
+  return { success: true, data: action };
+} catch (e) {
+  console.error("portalClockToggle", e);
+  return { success: false, error: e?.message || "Clock action failed." };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

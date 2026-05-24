@@ -1,0 +1,266 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Seeds default StoreTasks DynamicPage table_config Setting rows (StoreTask, User staff directory). Optional dryRun in contextData.
+        key: migrateDynamicPageSettings
+        body:
+          '''
+/**
+ * StoreTasks — migrate default table settings for DynamicPage (getUserContent / mutateUserContent).
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = args.contextData || {};
+
+console.log(`StoreTasks settings migration (dryRun: ${dryRun })`);
+
+const settingsConfigs = [
+  {
+    key: "StoreTask_settings_default",
+    tableVertexLabel: "StoreTask",
+    icon: "Check",
+    name: "Store tasks",
+    config: `return {
+  title: "Store tasks",
+  label: "Task",
+  icon: "ph:check-square",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __actions: "88px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  refetchIntervalWhenQueued: 5000,
+  columns: [
+    { key: "title", label: "Task", dataType: "text", renderer: "text", width: "260px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { todo: ["To do", "warning"], doing: ["Doing", "info"], blocked: ["Blocked", "critical"], done: ["Done", "success"] } },
+    { key: "priority", label: "Priority", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { low: ["Low", "neutral"], normal: ["Normal", "info"], high: ["High", "warning"], urgent: ["Urgent", "critical"] } },
+    { key: "dueAt", label: "Due", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "assigneeId", label: "Assignee", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+    { key: "orderId", label: "Order", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+    { key: "syncStatus", label: "Sync", dataType: "text", renderer: "badge", width: "110px", badgeKeyCase: "lower", badgeToneMap: { queued: ["Queued", "warning"], processing: ["Processing", "info"], done: ["Done", "success"], error: ["Error", "critical"] } }
+  ],
+  rowHeight: 50,
+  uniqueKeys: ["title", "dueAt"],
+  hooks: {
+    afterCreate: ["storeTasksQueueTaskReminder"],
+    afterUpdate: ["storeTasksQueueTaskReminder"]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "StoreTaskCategory",
+    toParentEdgeType: "StoreTaskCategoryItem",
+    rootKeys: {},
+    label: "Task lists",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "List",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar list/folder name." },
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", dataType: "number", renderer: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "task",
+        title: "Task",
+        gridColumns: 2,
+        fields: [
+          { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Short summary for the task list." },
+          { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Longer notes for the assignee." },
+          { key: "status", label: "Status", dataType: "select", renderer: "select", required: true, colSpan: 1, options: [
+            { value: "todo", label: "To do" },
+            { value: "doing", label: "Doing" },
+            { value: "blocked", label: "Blocked" },
+            { value: "done", label: "Done" }
+          ] },
+          { key: "priority", label: "Priority", dataType: "select", renderer: "select", colSpan: 1, options: [
+            { value: "low", label: "Low" },
+            { value: "normal", label: "Normal" },
+            { value: "high", label: "High" },
+            { value: "urgent", label: "Urgent" }
+          ] },
+          { key: "dueAt", label: "Due date", dataType: "date", renderer: "date", colSpan: 1, tooltip: "Used for reminders and overdue highlighting." },
+          { key: "remindAt", label: "Remind at", dataType: "date", renderer: "date", colSpan: 1, tooltip: "Optional: set a specific reminder time." },
+          { key: "assigneeId", label: "Assign to", dataType: "select", renderer: "select", colSpan: 2, selectConfig: { label: "User", labelField: "email", relationshipType: "StoreTaskAssignee", limit: 50, edgeOnly: true }, tooltip: "Assign to a staff account (User vertex). Stored as an edge, not a property." },
+          { key: "orderId", label: "Link order", dataType: "select", renderer: "select", colSpan: 2, selectConfig: { label: "ShopifyOrder", labelField: "name", relationshipType: "StoreTaskOrder", limit: 50, edgeOnly: true }, tooltip: "Optional: link this task to a Shopify order." }
+        ]
+      },
+      {
+        key: "comments",
+        title: "Notes / comments",
+        gridColumns: 1,
+        fields: [
+          { key: "comments", label: "Comments", dataType: "json", renderer: "nestedLineItems", colSpan: 2, tooltip: "Task comments (child nodes).", nestedLineItemsConfig: {
+            childLabel: "StoreTaskComment",
+            parentToChildRelationshipType: "StoreTaskStoreTaskComment",
+            parentElementIdPropOnChild: "taskElementId",
+            nestedLineItemsSyncRules: { quantityRule: { op: ">=", value: 0 } },
+            lineColumns: [
+              { key: "message", label: "Comment", columnType: "text", placeholder: "Write a comment...", defaultValue: "", gridMinmax: "minmax(10rem, 1fr)" },
+              { key: "authorEmail", label: "By", columnType: "text", placeholder: "email", defaultValue: "", gridMinmax: "minmax(8rem, 0.6fr)" },
+              { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }
+            ]
+          } }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "User_settings_default",
+    tableVertexLabel: "User",
+    icon: "Users",
+    name: "Staff (User)",
+    config: `return {
+  title: "Staff",
+  label: "Staff member",
+  icon: "ph:users-three",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __actions: "88px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: true,
+  enableUserScopingForContent: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "StoreTaskStaffCategory",
+    toParentEdgeType: "StoreTaskStaffCategoryUser",
+    rootKeys: {},
+    label: "Staff lists",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "List",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar list / group name." },
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "displayOrder", label: "Sort order", dataType: "number", renderer: "number", colSpan: 2, tooltip: "Lower numbers sort first among siblings." }
+          ]
+        }
+      ]
+    }
+  },
+  columns: [
+    { key: "email", label: "Email", dataType: "text", renderer: "text", width: "260px", required: true, overflowEllipsis: true },
+    { key: "name", label: "Name", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+    { key: "notes", label: "Notes", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true }
+  ],
+  rowHeight: 48,
+  uniqueKeys: ["email"],
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "staff",
+        title: "Staff member",
+        gridColumns: 2,
+        fields: [
+          { key: "email", label: "Email", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Email for this teammate (use the same email as their Shopify staff login when possible)." },
+          { key: "name", label: "Display name", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional display name." },
+          { key: "notes", label: "Notes", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Optional: role, department, or other context." }
+        ]
+      }
+    ]
+  }
+};`
+  }
+];
+
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+  console.log(`Processing ${name} (${icon})...`);
+
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      return { created: 0, updated: 1 };
+    }
+
+    await args.session.run(
+      `CREATE (s:Setting {
+        key: $key,
+        type: 'table_config',
+        tableVertexLabel: $tableVertexLabel,
+        config: $config,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      }) RETURN s`,
+      { key, config, tableVertexLabel }
+    );
+    return { created: 1, updated: 0 };
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+const stats = { created: 0, updated: 0, total: settingsConfigs.length };
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const r = await processSetting(settingsConfigs[i]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+return {
+  success: true,
+  message: dryRun ? "StoreTasks migration dry run" : "StoreTasks settings migration completed",
+  data: { ...stats, dryRun }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}
+

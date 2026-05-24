@@ -1,0 +1,215 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Seeds default HydrateMe DynamicPage table_config Setting rows (water log, circle, profile). Run via executeNamedServerFunction migrateDynamicPageSettings. Optional dryRun in contextData.
+        key: migrateDynamicPageSettings
+        body:
+          '''
+/**
+ * HydrateMe — migrate default table settings for DynamicPage (getUserContent / mutateUserContent).
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = args.contextData || {};
+
+console.log(`HydrateMe settings migration (dryRun: ${dryRun})`);
+
+const settingsConfigs = [
+  {
+    key: "HydrateMeWaterLog_settings_default",
+    tableVertexLabel: "HydrateMeWaterLog",
+    icon: "Drop",
+    name: "Water log",
+    config: `return {
+  title: "Water log",
+  label: "Entry",
+  icon: "ph:drop-half-bottom",
+  enableUserScopingForContent: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  columns: [
+    { key: "amountMl", label: "Amount (ml)", dataType: "number", renderer: "number", width: "120px" },
+    { key: "loggedDate", label: "Day", dataType: "text", renderer: "text", width: "110px" },
+    { key: "loggedAt", label: "Logged at", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+    { key: "source", label: "Source", dataType: "text", renderer: "badge", width: "100px", badgeKeyCase: "lower", badgeToneMap: { quick: ["Quick", "success"], manual: ["Manual", "info"] } },
+    { key: "note", label: "Note", dataType: "text", renderer: "text", width: "220px", overflowEllipsis: true }
+  ],
+  rowHeight: 48,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "log",
+        title: "Log water",
+        gridColumns: 2,
+        fields: [
+          { key: "amountMl", label: "Amount (ml)", dataType: "number", renderer: "number", required: true, min: 1, max: 5000, step: 50, colSpan: 1, defaultValue: 250, tooltip: "How much you drank in millilitres." },
+          { key: "loggedDate", label: "Day (YYYY-MM-DD)", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Filled automatically if empty when you save." },
+          { key: "loggedAt", label: "Time (ISO)", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Optional ISO timestamp; leave blank to use save time." },
+          { key: "source", label: "Source", dataType: "text", renderer: "text", colSpan: 1, defaultValue: "manual", tooltip: "quick or manual — quick adds from home use quick." },
+          { key: "note", label: "Note", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Optional context (e.g. after workout)." }
+        ]
+      }
+    ]
+  },
+  hooks: {
+    afterCreate: ["hydrateMeWaterLogNormalize"],
+    afterUpdate: ["hydrateMeWaterLogNormalize"]
+  }
+};`
+  },
+  {
+    key: "HydrateMeCircleMember_settings_default",
+    tableVertexLabel: "HydrateMeCircleMember",
+    icon: "Users",
+    name: "Hydrate Circle",
+    config: `return {
+  title: "Hydrate Circle",
+  label: "Circle member",
+  icon: "ph:users-three",
+  enableUserScopingForContent: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  columns: [
+    { key: "displayName", label: "Name", dataType: "text", renderer: "text", width: "180px" },
+    { key: "friendEmail", label: "Invite / email", dataType: "text", renderer: "text", width: "220px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "110px", badgeKeyCase: "lower", badgeToneMap: { active: ["Active", "success"], pending: ["Pending", "warning"] } },
+    { key: "lastRemindedAt", label: "Last nudge", dataType: "text", renderer: "text", width: "160px", overflowEllipsis: true }
+  ],
+  rowHeight: 48,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "member",
+        title: "Someone you hydrate with",
+        gridColumns: 2,
+        fields: [
+          { key: "displayName", label: "Display name", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "What you call them in the app." },
+          { key: "friendEmail", label: "Email or invite hint", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Optional — for invites or matching later." },
+          { key: "friendUserUuid", label: "Linked user UUID", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional when accounts are linked (advanced)." },
+          { key: "status", label: "Status", dataType: "text", renderer: "text", colSpan: 1, defaultValue: "active", tooltip: "active or pending" },
+          { key: "notes", label: "Notes", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Private notes for you." }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "HydrateMeUserProfile_settings_default",
+    tableVertexLabel: "HydrateMeUserProfile",
+    icon: "User",
+    name: "Hydrate profile",
+    config: `return {
+  title: "Your hydration profile",
+  label: "Profile",
+  icon: "ph:user-circle",
+  enableUserScopingForContent: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  enableLocalFilters: false,
+  enableLocalSort: false,
+  columns: [
+    { key: "displayName", label: "Name", dataType: "text", renderer: "text", width: "160px" },
+    { key: "weightKg", label: "Weight (kg)", dataType: "number", renderer: "number", width: "100px" },
+    { key: "dailyGoalMl", label: "Daily goal (ml)", dataType: "number", renderer: "number", width: "130px" },
+    { key: "reminderIntervalMinutes", label: "Reminder (min)", dataType: "number", renderer: "number", width: "130px" }
+  ],
+  rowHeight: 48,
+  uniqueKeys: ["profileKey"],
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "onboarding",
+        title: "Goals and reminders",
+        gridColumns: 2,
+        fields: [
+          { key: "profileKey", label: "Profile slot", dataType: "text", renderer: "text", required: true, colSpan: 2, defaultValue: "default", disabled: (ctx) => ctx.mode === "create", tooltip: "Keep default unless you know you need multiple slots." },
+          { key: "displayName", label: "Your name", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Shown on home and in your circle." },
+          { key: "weightKg", label: "Weight (kg)", dataType: "number", renderer: "number", min: 20, max: 300, step: 0.1, colSpan: 1, tooltip: "Optional — can inform goal suggestions later." },
+          { key: "dailyGoalMl", label: "Daily goal (ml)", dataType: "number", renderer: "number", required: true, min: 500, max: 8000, step: 100, colSpan: 1, defaultValue: 2000, tooltip: "Target intake for the day." },
+          { key: "reminderIntervalMinutes", label: "Reminder interval (minutes)", dataType: "number", renderer: "number", min: 30, max: 480, step: 15, colSpan: 1, defaultValue: 120, tooltip: "How often the app nudges you (local notifications later)." }
+        ]
+      }
+    ]
+  }
+};`
+  }
+];
+
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+  console.log(`Processing ${name} (${icon})...`);
+
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel },
+      );
+      console.log(`Updated ${name}`);
+      return { created: 0, updated: 1 };
+    }
+    await args.session.run(
+      `CREATE (s:Setting {
+        key: $key,
+        type: 'table_config',
+        tableVertexLabel: $tableVertexLabel,
+        config: $config,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      }) RETURN s`,
+      { key, config, tableVertexLabel },
+    );
+    console.log(`Created ${name}`);
+    return { created: 1, updated: 0 };
+  }
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+const stats = { created: 0, updated: 0, total: settingsConfigs.length };
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const r = await processSetting(settingsConfigs[i]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+return {
+  success: true,
+  message: dryRun ? "HydrateMe migration dry run" : "HydrateMe settings migration completed",
+  data: { ...stats, dryRun },
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

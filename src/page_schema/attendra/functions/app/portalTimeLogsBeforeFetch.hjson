@@ -1,0 +1,46 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: portalTimeLogsBeforeFetch
+        description: getUserContent beforeFetchData hook for staff portal My Time Logs — scopes the query to Time rows linked to the signed-in user via TimeEmployee.
+        body:
+          '''
+const {
+  tableVertexLabel,
+  queryModification,
+  sessionUser
+} = args.contextData || {};
+
+if (tableVertexLabel !== "Time") {
+  return { success: true, message: "Skip: not Time" };
+}
+
+if (!queryModification || typeof queryModification !== "object") {
+  return { success: true, message: "Skip: missing queryModification" };
+}
+
+const employeeRelationshipType = "TimeEmployee";
+const sessionUserUuid =
+  sessionUser?.P?.uuid != null ? String(sessionUser.P.uuid).trim() : "";
+
+if (sessionUserUuid === "") {
+  queryModification.forceEmptyResult = true;
+  return { success: true, message: "No session user — empty time log result" };
+}
+
+queryModification.leadingMatchSegments.push(
+  `MATCH (portalSessionUser:User {uuid: $portalSessionUserUuid})`,
+  `MATCH (c:Time)-[:${employeeRelationshipType}]->(portalSessionUser)`
+);
+queryModification.additionalQueryParameters.portalSessionUserUuid = sessionUserUuid;
+
+return { success: true, message: "Applied portal time log employee scope to query" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

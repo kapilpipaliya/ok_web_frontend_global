@@ -30,11 +30,16 @@ if (args.contextData.action === 'start') {
 
   await logMessage('info', 'Starting background database backup worker');
 
-  // Initialize queue helpers and Redis connection
-  const helpers = await args.executeNamedServerFunction({ functionName: 'queueHelpers', contextData: { functionLookupSubDomain: args.subDomain } });
+  // Initialize queue helpers and Redis connection (lookup in admin DB)
+  const helpers = await args.executeNamedServerFunction(
+    { functionName: 'queueHelpers', contextData: {} },
+    { functionLookupSubDomain: args.subDomain }
+  );
 
-  if (!helpers.result?.success) {
-    await logMessage('error', 'Failed to initialize queue helpers', { error: helpers.result?.error });
+  if (helpers.error || !helpers.result?.success) {
+    await logMessage('error', 'Failed to initialize queue helpers', {
+      error: helpers.error || helpers.result?.error
+    });
     throw new Error('Queue helpers initialization failed');
   }
 

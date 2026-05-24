@@ -53,8 +53,8 @@ Under `functions/dynamic_page/main_functions/hydrate/`:
 
 **Migration** (seeds `Setting` `table_config` rows used by DynamicPage):
 
-- `functions/dynamic_page/main_functions/migration/migrateHydrateMeSettings.hjson` — key **`migrateHydrateMeSettings`**.  
-- Call via `executeNamedServerFunction({ functionName: 'migrateHydrateMeSettings', contextData: { dryRun?: boolean } })` once per environment.
+- `functions/dynamic_page/main_functions/migration/migrateDynamicPageSettings.hjson` — key **`migrateDynamicPageSettings`**.  
+- Call via `executeNamedServerFunction({ functionName: 'migrateDynamicPageSettings', contextData: { dryRun?: boolean } })` once per environment.
 
 ## DynamicPage stack (shared)
 

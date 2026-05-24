@@ -1,0 +1,55 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: portalGetMyTime
+        description: Returns time records for the signed-in portal user only (subdomain DB). Requires session user.
+        body:
+          '''
+const user = await args.getUserFromSession();
+if (!user?.P?.uuid) {
+  return { success: false, error: "Not signed in." };
+}
+const userUuid = String(user.P.uuid).trim();
+
+try {
+  const logsRes = await args.session.run(
+    `MATCH (t:Time)-[:TimeEmployee]->(u:User {uuid: $userUuid})
+     RETURN t
+     ORDER BY t.clockInAt DESC
+     LIMIT 200`,
+    { userUuid }
+  );
+  const logs = logsRes.records.map((rec) => args.convertNodeToJson(rec.get("t")));
+
+  const openRes = await args.session.run(
+    `MATCH (t:Time)-[:TimeEmployee]->(u:User {uuid: $userUuid})
+     WHERE t.clockOutAt IS NULL
+     RETURN t
+     ORDER BY t.clockInAt DESC
+     LIMIT 1`,
+    { userUuid }
+  );
+  const openLog = openRes.records[0]
+    ? args.convertNodeToJson(openRes.records[0].get("t"))
+    : null;
+
+  return {
+    success: true,
+    data: {
+      logs,
+      openLog
+    }
+  };
+} catch (e) {
+  console.error("portalGetMyTime", e);
+  return { success: false, error: e?.message || "Failed to load time records." };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

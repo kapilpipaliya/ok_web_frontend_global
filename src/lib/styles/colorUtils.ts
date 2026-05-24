@@ -436,3 +436,20 @@ export function findAccessibleColor(
     return baseColor;
   }
 }
+
+/**
+ * Converts a CSS color string to #rrggbb hex for email clients that ignore OKLCH.
+ */
+export function colorToHex(
+  color: string | undefined,
+  fallback = "#000000",
+): string {
+  if (!color?.trim()) {
+    return fallback;
+  }
+  try {
+    return new Color(color.trim()).to("srgb").toString({ format: "hex" });
+  } catch {
+    return fallback;
+  }
+}

@@ -6,7 +6,6 @@ import { TableInputField } from "~/components/fields/table_field/TableInputField
 import { ZIndex } from "~/components/fields/ZIndex";
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
-import { FileUploader } from "../../styled/FileUploader";
 import { FilePickerModal } from "~/components/file_picker/FilePickerModal";
 
 export const componentsMap: Record<string, any> = {
@@ -15,7 +14,6 @@ export const componentsMap: Record<string, any> = {
   Slot: SlotField,
   // https://ark-ui.com/solid/docs/components/color-picker
   DynamicTable: TableInputField,
-  FileUploader: FileUploader,
   Form: FormField,
   Html: HtmlField,
   MultiSelect: SelectField,
