@@ -1,0 +1,2096 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Migrates or creates default table configuration settings for Book, AudioVideo, Category, ShopifyProduct, Shopify orders/draft orders (orders sync includes return data for ShopifyReturn), inventory items, inventory transfers, Support, and ShopifyShop. Updates existing settings if they already exist.
+        body:
+          '''
+/**
+ * Migration: Content Table Settings
+ *
+ * This migration creates or updates default table configuration settings
+ * for Book and AudioVideo content types.
+ *
+ * Parameters (via args.contextData):
+ * - dryRun: boolean (optional) - If true, only report what would be migrated without making changes
+ *
+ * Returns:
+ * - Statistics about the migration
+ */
+
+const { dryRun = false } = args.contextData;
+
+console.log(`🚀 Starting content table settings migration (dryRun: ${dryRun})`);
+
+// Define settings configurations
+const settingsConfigs = [
+  {
+    key: 'ShopifyProduct_settings_default',
+    tableVertexLabel: 'ShopifyProduct',
+    icon: '🛍️',
+    name: 'ShopifyProduct',
+    config: `return {
+  title: "Products",
+  label: "Product",
+  icon: "carbon:shopping-bag",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text", renderer: "imagePreview",
+      width: "100px",
+      sortable: false,
+      valueAccessor: (row) => {
+        // Try to parse media JSON string first
+        const mediaStr = row.P?.media || row.media;
+        if (mediaStr && typeof mediaStr === 'string') {
+          try {
+            const mediaArray = JSON.parse(mediaStr);
+            if (Array.isArray(mediaArray) && mediaArray.length > 0) {
+              // Get first image from media array
+              const firstMedia = mediaArray[0];
+              if (firstMedia?.preview?.image?.url) {
+                return firstMedia.preview.image.url;
+              }
+              if (firstMedia?.preview?.image?.src) {
+                return firstMedia.preview.image.src;
+              }
+            }
+          } catch (e) {
+            console.warn("Failed to parse media JSON:", e);
+          }
+        }
+        // Fallback: Try to get the first image from Shopify product images array
+        const images = row.P?.images || row.images;
+        if (images && Array.isArray(images) && images.length > 0) {
+          return images[0].src || images[0].url || images[0];
+        }
+        // Fallback to featuredImage if available
+        return row.P?.featuredImage || row.featuredImage || row.P?.image?.src || row.image?.src || null;
+      }
+    },
+    {
+      key: "title",
+      label: "Title",
+      dataType: "text", renderer: "text",
+      width: "250px",
+      required: true
+    },
+    {
+      key: "status",
+      label: "Status",
+      dataType: "text", renderer: "badge",
+      width: "120px",
+      badgeToneMap: {
+        ACTIVE: ["Active", "success"],
+        DRAFT: ["Draft", "info"],
+        ARCHIVED: ["Archived", "critical"]
+      }
+    },
+    {
+      key: "syncStatus",
+      label: "Sync",
+      dataType: "text", renderer: "badge",
+      width: "100px",
+      valueAccessor: (row) => row.P?.syncStatus,
+      badgeKeyCase: "lower",
+      badgeToneMap: {
+        complete: ["Synced", "success"],
+        queued: ["Syncing", "warning"],
+        failed: ["Failed", "critical"]
+      },
+      badgeTitleAccessor: (row) => row?.P?.syncError || undefined
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date", renderer: "date",
+      width: "150px",
+      valueAccessor: (row) => row.P?.createdAt
+    },
+    {
+      key: "updatedAt",
+      label: "Updated",
+      dataType: "date", renderer: "date",
+      width: "150px",
+      valueAccessor: (row) => row.P?.updatedAt
+    }
+  ],
+  rowHeight: 80,
+  showRowNumber: true,
+  showSelection: true,
+  actions: [],
+  rowClickable: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "basic",
+        title: "Product Details",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "title",
+            label: "Title",
+            dataType: "text", renderer: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: [],
+  usePolarisUI: true,
+  // Filters use Polaris search field (s-search-field) for select and date when usePolarisUI is true
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  refetchIntervalWhenQueued: 5000,
+  hooks: {
+    // Hooks for fetching data - syncs Shopify products when fetching uncategorized
+    beforeFetchData: "shopifyProductBeforeFetchData",
+    // afterFetchData: ["shopifyProductAfterFetchData", "shopifyProductLogFetch"],
+    // Hooks for creating items
+    // beforeCreate: "shopifyProductBeforeCreate",
+    // Hooks for creating - creates product in Shopify when new product is added
+    afterCreate: "shopifyProductAfterCreate",
+    // Hooks for updating items
+    // beforeUpdate: "shopifyProductBeforeUpdate",
+    // Hooks for updating - updates product in Shopify when product is updated
+    afterUpdate: "shopifyProductAfterUpdate",
+    // Hooks for deleting items
+    // beforeDelete: "shopifyProductBeforeDelete",
+    // Hooks for deleting - deletes product from Shopify when product is deleted
+    afterDelete: "shopifyProductAfterDelete",
+    // Hooks for moving items to category
+    // beforeMoveItemsToCategory: "shopifyProductBeforeMoveItemsToCategory",
+    // Hooks for moving items to category - updates Shopify product tags
+    afterMoveItemsToCategory: "shopifyProductAfterMoveItemsToCategory",
+    // Hooks for import/export operations
+    // beforeImport: "shopifyProductBeforeImport",
+    // afterImport: ["shopifyProductAfterImport", "shopifyProductLogImport"],
+    // beforeExport: "shopifyProductBeforeExport",
+    // afterExport: "shopifyProductAfterExport",
+    // Hooks for relationship and vertex operations
+    // beforeCreateRelationship: "shopifyProductBeforeCreateRelationship",
+    // Hooks for creating relationship - adds category tag to Shopify product
+    afterCreateRelationship: "shopifyProductAfterCreateRelationship",
+    // beforeGetUserVertices: "shopifyProductBeforeGetUserVertices",
+    // afterGetUserVertices: "shopifyProductAfterGetUserVertices",
+    // beforeGetVertexChildren: "shopifyProductBeforeGetVertexChildren",
+    // afterGetVertexChildren: ["shopifyProductAfterGetVertexChildren", "shopifyProductLogGetChildren"]
+  },
+  editLink: {
+    icon: "carbon:edit",
+    getHref: (row) => {
+      const raw = row.P?.id ?? '';
+      const num = typeof raw === 'number' ? String(raw) : (String(raw).match(/\\/Product\\/(\\d+)$/)?.[1] ?? String(raw).match(/^(\\d+)$/)?.[1] ?? raw);
+      const origin = typeof window !== 'undefined' && window.shopify?.origin ? window.shopify.origin : '';
+      return \`\${origin}/admin/products/\${num}\`;
+    },
+    onClick: (row, e) => {
+      var productId = row && row.P && row.P.id
+      if (productId && typeof window !== "undefined" && window.shopify && window.shopify.intents && window.shopify.intents.invoke) {
+        window.shopify.intents.invoke("edit:shopify/Product", { value: productId })
+      }
+    },
+    label: "Products page",
+    target: "_top",
+    rel: "noopener noreferrer",
+    style: "color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px;"
+  },
+  onEdit: (row, args) => {
+    var productId = row && row.P && row.P.id
+    if (productId && typeof window !== "undefined" && window.shopify && window.shopify.intents && window.shopify.intents.invoke) {
+      window.shopify.intents.invoke("edit:shopify/Product", { value: productId })
+    }
+  },
+  onAfterAdd: (result, args) => {
+    if (result?.success && result?.data) {
+      const productId = result.data.P?.id;
+      if (productId && typeof window !== 'undefined' && window.shopify?.config?.shop) {
+        const shopDomain = window.shopify.config.shop;
+        if (window.shopify?.environment?.embedded && args?.navigate) {
+          args.navigate(\`/admin/products/\${productId}\`);
+        } else {
+          window.open(\`https://\${shopDomain}/admin/products/\${productId}\`, '_blank');
+        }
+      }
+    }
+  },
+  onAfterEdit: (result, args) => {
+    // Optional: Handle after edit action
+    // For example, refresh data or navigate
+  },
+  onAfterDelete: (result, row, args) => {
+    // Optional: Handle after delete action
+    // For example, refresh data or navigate
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyProductCategory",
+    toParentEdgeType: "ProductCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    refetchIntervalWhenQueued: 5000,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {
+      // Hooks for creating category - creates collection in Shopify (menu jobs enqueued from within)
+      afterCreate: ["shopifyProductCategoryAfterCreate"],
+      // Hooks for updating category - updates collection in Shopify (menu jobs enqueued from within)
+      afterUpdate: ["shopifyProductCategoryAfterUpdate"],
+      // Hooks for deleting category - deletes collection in Shopify (menu jobs enqueued from within)
+      afterDelete: ["shopifyProductCategoryAfterDelete"],
+      // Hooks for moving category - updates menus when category is moved
+      afterMoveCategory: ["shopifyMenuAfterMoveCategory"]
+    }
+  }
+};`
+  },
+  {
+    key: 'ShopifyProductCategory_settings_default',
+    tableVertexLabel: 'ShopifyProductCategory',
+    icon: '📂',
+    name: 'ShopifyProductCategory',
+    config: `return {
+  title: "Shopify Product Categories",
+  columns: [
+    {
+      key: "name",
+      label: "Name",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      required: true
+    },
+    {
+      key: "key",
+      label: "Key",
+      dataType: "text", renderer: "text",
+      width: "150px"
+    },
+    {
+      key: "handle",
+      label: "Handle",
+      dataType: "text", renderer: "text",
+      width: "200px"
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "Basic Information",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "name",
+            label: "Name",
+            dataType: "text", renderer: "text",
+            required: true,
+            maxLength: 255,
+            colSpan: 2
+          },
+          {
+            key: "key",
+            label: "Key",
+            dataType: "text", renderer: "text",
+            maxLength: 100,
+            colSpan: 2
+          },
+          {
+            key: "handle",
+            label: "Handle",
+            dataType: "text", renderer: "text",
+            maxLength: 255,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  },
+  uniqueKeys: [],
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyProductCategory",
+    toParentEdgeType: "ParentCategory",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {
+      // Hooks for creating category - creates collection in Shopify (menu jobs enqueued from within)
+      afterCreate: ["shopifyProductCategoryAfterCreate"],
+      // Hooks for updating category - updates collection in Shopify (menu jobs enqueued from within)
+      afterUpdate: ["shopifyProductCategoryAfterUpdate"],
+      // Hooks for deleting category - deletes collection in Shopify (menu jobs enqueued from within)
+      afterDelete: ["shopifyProductCategoryAfterDelete"],
+      // Hooks for moving category - updates menus when category is moved
+      afterMoveCategory: ["shopifyMenuAfterMoveCategory"]
+    }
+  }
+};`
+  },
+  {
+    key: 'Support_settings_default',
+    tableVertexLabel: 'Support',
+    icon: '💬',
+    name: 'Support',
+    config: `return {
+  title: "Support Tickets",
+  label: "Support Ticket",
+  icon: "carbon:chat",
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "shop",
+      label: "Shop",
+      dataType: "text", renderer: "text",
+      width: "220px"
+    },
+    {
+      key: "subject",
+      label: "Subject",
+      dataType: "text", renderer: "text",
+      width: "260px",
+      required: false
+    },
+    {
+      key: "email",
+      label: "Email",
+      dataType: "text", renderer: "text",
+      width: "220px"
+    },
+    {
+      key: "unreadForAdmin",
+      label: "Unread",
+      dataType: "number", renderer: "number",
+      width: "90px"
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    }
+  ],
+  rowHeight: 60,
+  showRowNumber: true,
+  showSelection: false,
+  actions: [],
+  rowClickable: true,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "40px" },
+  formConfig: null,
+  uniqueKeys: [],
+  usePolarisUI: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  hooks: {},
+  sidebar: {
+    enabled: false
+  },
+  onRowClick: (row, args) => {
+    const supportTicketVertexId = row?.id;
+    if (!supportTicketVertexId) {
+      return;
+    }
+    const basePath = "/ShopifySupportConversation";
+    const searchParams = args.searchParams || {};
+    const nextParams = { ...searchParams, supportId: supportTicketVertexId };
+    const query = Object.entries(nextParams)
+      .filter(([, value]) => value != null && value !== "")
+      .map(([key, value]) => \`\${encodeURIComponent(key)}=\${encodeURIComponent(String(value))}\`)
+      .join("&");
+    const href = query ? \`\${basePath}?\${query}\` : basePath;
+
+    if (args.navigate) {
+      args.navigate(href);
+    } else if (typeof window !== "undefined") {
+      window.location.href = href;
+    }
+  }
+};`
+  },
+  {
+    key: 'ShopifyOrder_settings_default',
+    tableVertexLabel: 'ShopifyOrder',
+    icon: '📦',
+    name: 'ShopifyOrder',
+    config: `return {
+  title: "Orders",
+  label: "Order",
+  icon: "carbon:shopping-cart",
+  hideImportButtons: true,
+  hideExportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  onRowClick: (row, args) => {
+    const orderVertexId = row?.P?.id ?? row?.id;
+    if (!orderVertexId || typeof window === "undefined") {
+      return;
+    }
+    const shopifyNumericSuffix = /([0-9]+)$/;
+    const orderIdMatch = String(orderVertexId).match(shopifyNumericSuffix);
+    const numericOrderId = orderIdMatch ? orderIdMatch[1] : "";
+    if (!numericOrderId) {
+      return;
+    }
+    let shopifyAdminOrigin =
+      window.shopify && window.shopify.origin ? String(window.shopify.origin) : "";
+    if (!shopifyAdminOrigin) {
+      return;
+    }
+    if (shopifyAdminOrigin.endsWith("/")) {
+      shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+    }
+    const orderAdminUrl = shopifyAdminOrigin + "/orders/" + numericOrderId;
+    window.open(orderAdminUrl, "_blank", "noopener,noreferrer");
+  },
+  columns: [
+    { key: "name", label: "Order", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.name },
+    { key: "createdAt", label: "Created", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.createdAt },
+    { key: "processedAt", label: "Processed", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.processedAt },
+    { key: "displayFulfillmentStatus", label: "Fulfillment", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => row.P?.displayFulfillmentStatus, badgeKeyCase: "lower", badgeToneMap: { fulfilled: ["Fulfilled", "success"], unfulfilled: ["Unfulfilled", "warning"], partial: ["Partial", "info"], restocked: ["Restocked", "neutral"], pending_fulfillment: ["Pending", "warning"], scheduled: ["Scheduled", "info"], on_hold: ["On hold", "caution"] } },
+    { key: "displayFinancialStatus", label: "Payment", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => row.P?.displayFinancialStatus, badgeKeyCase: "lower", badgeToneMap: { paid: ["Paid", "success"], pending: ["Pending", "warning"], authorized: ["Authorized", "info"], partially_paid: ["Partial", "info"], refunded: ["Refunded", "neutral"], voided: ["Voided", "critical"], partially_refunded: ["Part ref", "caution"] } },
+    { key: "total", label: "Total", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.totalPriceAmount; const c = row.P?.totalPriceCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "subtotalAmount", label: "Subtotal", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.subtotalAmount; const c = row.P?.subtotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalTaxAmount", label: "Tax", dataType: "text", renderer: "text", width: "90px", valueAccessor: (row) => row.P?.totalTaxAmount },
+    { key: "totalShippingAmount", label: "Shipping", dataType: "text", renderer: "text", width: "90px", valueAccessor: (row) => row.P?.totalShippingAmount },
+    { key: "lineItemsCount", label: "Lines", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.lineItemsCount },
+    { key: "email", label: "Email", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.email },
+    { key: "phone", label: "Phone", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.phone },
+    { key: "tags", label: "Tags", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.tags },
+    { key: "fullyPaid", label: "Paid", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.fullyPaid ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "warning"] } },
+    { key: "testOrder", label: "Test", dataType: "text", renderer: "badge", width: "70px", valueAccessor: (row) => (row.P?.testOrder ? "test" : "live"), badgeKeyCase: "lower", badgeToneMap: { test: ["Test", "warning"], live: ["Live", "success"] } },
+    { key: "closed", label: "Closed", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.closed ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "neutral"], no: ["No", "info"] } },
+    { key: "cancelledAt", label: "Cancelled", dataType: "date", renderer: "date", width: "120px", valueAccessor: (row) => row.P?.cancelledAt },
+    { key: "closedAt", label: "Closed", dataType: "date", renderer: "date", width: "120px", valueAccessor: (row) => row.P?.closedAt },
+    { key: "note", label: "Note", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.note },
+    { key: "confirmationNumber", label: "Confirmation #", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.confirmationNumber },
+    { key: "legacyResourceId", label: "REST id", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.legacyResourceId },
+    { key: "orderNumber", label: "Order #", dataType: "text", renderer: "text", width: "90px", valueAccessor: (row) => row.P?.orderNumber },
+    { key: "currencyCode", label: "Currency", dataType: "text", renderer: "text", width: "80px", valueAccessor: (row) => row.P?.currencyCode },
+    { key: "presentmentCurrencyCode", label: "Presentment", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.presentmentCurrencyCode },
+    { key: "clientIp", label: "Client IP", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.clientIp },
+    { key: "customerLocale", label: "Locale", dataType: "text", renderer: "text", width: "80px", valueAccessor: (row) => row.P?.customerLocale },
+    { key: "poNumber", label: "PO #", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.poNumber },
+    { key: "sourceName", label: "Source", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.sourceName },
+    { key: "sourceIdentifier", label: "Source ID", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.sourceIdentifier },
+    { key: "discountCode", label: "Discount code", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.discountCode },
+    { key: "discountCodes", label: "Discount codes", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.discountCodes },
+    { key: "returnStatus", label: "Return status", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.returnStatus },
+    { key: "returnsCount", label: "Returns #", dataType: "number", renderer: "number", width: "80px", valueAccessor: (row) => row.P?.returnsCount },
+    { key: "cancelReason", label: "Cancel reason", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.cancelReason },
+    { key: "confirmed", label: "Inventory reserved", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => (row.P?.confirmed ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "edited", label: "Edited", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.edited ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+    { key: "fulfillable", label: "Fulfillable", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.fulfillable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "refundable", label: "Refundable", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.refundable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "requiresShipping", label: "Req. shipping", dataType: "text", renderer: "badge", width: "110px", valueAccessor: (row) => (row.P?.requiresShipping ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "unpaid", label: "Unpaid", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.unpaid ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "success"] } },
+    { key: "capturable", label: "Capturable", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.capturable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+    { key: "canMarkAsPaid", label: "Can mark paid", dataType: "text", renderer: "badge", width: "110px", valueAccessor: (row) => (row.P?.canMarkAsPaid ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "canNotifyCustomer", label: "Can notify", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.canNotifyCustomer ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "billingAddressMatchesShippingAddress", label: "Bill=ship addr", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => (row.P?.billingAddressMatchesShippingAddress ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "neutral"], no: ["No", "info"] } },
+    { key: "customerAcceptsMarketing", label: "Marketing opt-in", dataType: "text", renderer: "badge", width: "130px", valueAccessor: (row) => (row.P?.customerAcceptsMarketing ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "taxExempt", label: "Tax exempt", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.taxExempt ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "dutiesIncluded", label: "Duties in subtotal", dataType: "text", renderer: "badge", width: "130px", valueAccessor: (row) => (row.P?.dutiesIncluded ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "estimatedTaxes", label: "Tax estimated", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => (row.P?.estimatedTaxes ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "success"] } },
+    { key: "merchantEditable", label: "Order editable", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => (row.P?.merchantEditable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "merchantEditableErrors", label: "Edit errors", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.merchantEditableErrors, overflowEllipsis: true },
+    { key: "subtotalLineItemsQuantity", label: "Subtotal line qty", dataType: "number", renderer: "number", width: "120px", valueAccessor: (row) => row.P?.subtotalLineItemsQuantity },
+    { key: "currentSubtotalLineItemsQuantity", label: "Current subtotal qty", dataType: "number", renderer: "number", width: "130px", valueAccessor: (row) => row.P?.currentSubtotalLineItemsQuantity },
+    { key: "currentTotalWeight", label: "Weight (g, current)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => row.P?.currentTotalWeight },
+    { key: "totalWeight", label: "Weight (g, orig.)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => row.P?.totalWeight },
+    { key: "customerDisplayName", label: "Customer", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.customerDisplayName },
+    { key: "customerGraphId", label: "Customer ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customerGraphId, overflowEllipsis: true },
+    { key: "customerEmail", label: "Cust. email", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.customerEmail },
+    { key: "customerPhone", label: "Cust. phone", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.customerPhone },
+    { key: "orderStaffMemberName", label: "Staff", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.orderStaffMemberName || row.P?.orderStaffMemberId || "" },
+    { key: "appName", label: "App", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.appName },
+    { key: "channelName", label: "Channel", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.channelName },
+    { key: "channelHandle", label: "Channel handle", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.channelHandle },
+    { key: "businessEntityDisplayName", label: "Business entity", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.businessEntityDisplayName },
+    { key: "publicationName", label: "Publication", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.publicationName },
+    { key: "retailLocationName", label: "Retail location", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.retailLocationName },
+    { key: "riskRecommendation", label: "Risk", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.riskRecommendation },
+    { key: "shopifyProtectStatus", label: "Shopify Protect", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.shopifyProtectStatus },
+    { key: "statusPageUrl", label: "Status page URL", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.statusPageUrl, overflowEllipsis: true },
+    { key: "paymentGatewayNames", label: "Gateways", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.paymentGatewayNames },
+    { key: "fulfillmentsTotalCount", label: "Fulfillments #", dataType: "text", renderer: "text", width: "110px", valueAccessor: (row) => row.P?.fulfillmentsTotalCount },
+    { key: "transactionsTotalCount", label: "Transactions #", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.transactionsTotalCount },
+    { key: "originalTotalPriceAmount", label: "Orig. total", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalTotalPriceAmount; const c = row.P?.originalTotalPriceCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentTotalPriceAmount", label: "Current total", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.currentTotalPriceAmount; const c = row.P?.currentTotalPriceCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentSubtotalPriceAmount", label: "Current subtotal", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const a = row.P?.currentSubtotalPriceAmount; const c = row.P?.currentSubtotalPriceCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "netPaymentAmount", label: "Net payment", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.netPaymentAmount; const c = row.P?.netPaymentCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentTotalTaxAmount", label: "Current tax", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.currentTotalTaxAmount; const c = row.P?.currentTotalTaxCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentShippingPriceAmount", label: "Current shipping $", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => { const a = row.P?.currentShippingPriceAmount; const c = row.P?.currentShippingPriceCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "cartDiscountAmount", label: "Cart disc. (orig.)", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const a = row.P?.cartDiscountAmount; const c = row.P?.cartDiscountCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentCartDiscountAmount", label: "Cart disc. (curr.)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => { const a = row.P?.currentCartDiscountAmount; const c = row.P?.currentCartDiscountCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalDiscountsAmount", label: "Total disc. (orig.)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => { const a = row.P?.totalDiscountsAmount; const c = row.P?.totalDiscountsCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentTotalDiscountsAmount", label: "Total disc. (curr.)", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => { const a = row.P?.currentTotalDiscountsAmount; const c = row.P?.currentTotalDiscountsCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalOutstandingAmount", label: "Outstanding", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.totalOutstandingAmount; const c = row.P?.totalOutstandingCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalReceivedAmount", label: "Received", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.totalReceivedAmount; const c = row.P?.totalReceivedCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalRefundedAmount", label: "Refunded", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.totalRefundedAmount; const c = row.P?.totalRefundedCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalRefundedShippingAmount", label: "Ship. refunded", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const a = row.P?.totalRefundedShippingAmount; const c = row.P?.totalRefundedShippingCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalTipReceivedAmount", label: "Tips", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.totalTipReceivedAmount; const c = row.P?.totalTipReceivedCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalCapturableAmount", label: "Capturable $", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.totalCapturableAmount; const c = row.P?.totalCapturableCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "refundDiscrepancyAmount", label: "Refund discrep.", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.refundDiscrepancyAmount; const c = row.P?.refundDiscrepancyCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "originalTotalDutiesAmount", label: "Orig. duties", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.originalTotalDutiesAmount; const c = row.P?.originalTotalDutiesCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentTotalDutiesAmount", label: "Current duties", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.currentTotalDutiesAmount; const c = row.P?.currentTotalDutiesCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "originalTotalAdditionalFeesAmount", label: "Orig. add. fees", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalTotalAdditionalFeesAmount; const c = row.P?.originalTotalAdditionalFeesCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "currentTotalAdditionalFeesAmount", label: "Current add. fees", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const a = row.P?.currentTotalAdditionalFeesAmount; const c = row.P?.currentTotalAdditionalFeesCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "additionalFeesJson", label: "Additional fees (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.additionalFeesJson, overflowEllipsis: true },
+    { key: "billingAddressJson", label: "Billing addr (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.billingAddressJson, overflowEllipsis: true },
+    { key: "shippingAddressJson", label: "Shipping addr (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.shippingAddressJson, overflowEllipsis: true },
+    { key: "taxLinesJson", label: "Tax lines (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.taxLinesJson, overflowEllipsis: true },
+    { key: "currentTaxLinesJson", label: "Current tax lines (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.currentTaxLinesJson, overflowEllipsis: true },
+    { key: "transactionsJson", label: "Transactions (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.transactionsJson, overflowEllipsis: true },
+    { key: "fulfillmentsJson", label: "Fulfillments (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.fulfillmentsJson, overflowEllipsis: true },
+    { key: "discountApplicationsJson", label: "Order discounts (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.discountApplicationsJson, overflowEllipsis: true },
+    { key: "customAttributesJson", label: "Order attributes (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customAttributesJson, overflowEllipsis: true },
+    { key: "metafieldsJson", label: "Metafields (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.metafieldsJson, overflowEllipsis: true }
+  ],
+  rowHeight: 44,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __expand: "32px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  rowExpansion: [
+    {
+      childVertexLabel: "ShopifyOrderLineItem",
+      childParentFilterKey: "orderId",
+      parentIdField: "id",
+      expansionPanelHeight: 380,
+      expansionPanelMaxHeight: 520,
+      expandAccordionMaxWidth: 768,
+      expandOneRowAtATime: false,
+      usePolarisUI: false,
+      nestedTitle: "Products",
+      nestedShowIcon: false,
+      emptyNestedText: "No products for this order.",
+      nestedLoadingText: "Loading products…",
+      nestedSort: { column: "productTitle", direction: "asc" },
+      nestedColumns: [
+        { key: "lineImageUrl", label: "Image", dataType: "text", renderer: "image", width: "56px", valueAccessor: (row) => row.P?.lineImageUrl || "" },
+        { key: "orderName", label: "Order", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.orderName },
+        {
+          key: "lineItemName",
+          label: "Line name",
+          dataType: "text", renderer: "text",
+          width: "160px",
+          valueAccessor: (row) => row.P?.lineItemName,
+          overflowEllipsis: true,
+          render: (value, row) => {
+            const productGraphId = row?.P?.productGraphId;
+            const variantGraphId = row?.P?.variantGraphId;
+            const shopifyNumericSuffix = /([0-9]+)$/;
+            const productNumericMatch =
+              productGraphId != null
+                ? String(productGraphId).match(shopifyNumericSuffix)
+                : null;
+            const variantNumericMatch =
+              variantGraphId != null
+                ? String(variantGraphId).match(shopifyNumericSuffix)
+                : null;
+            const displayLabel =
+              value != null && value !== "" ? String(value) : "—";
+            if (!productNumericMatch || !variantNumericMatch) {
+              return displayLabel;
+            }
+            let shopifyAdminOrigin =
+              typeof window !== "undefined" &&
+              window.shopify &&
+              window.shopify.origin
+                ? String(window.shopify.origin)
+                : "";
+            if (shopifyAdminOrigin.endsWith("/")) {
+              shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+            }
+            if (!shopifyAdminOrigin) {
+              return displayLabel;
+            }
+            const productAdminId = productNumericMatch[1];
+            const variantAdminId = variantNumericMatch[1];
+            const productVariantAdminUrl =
+              shopifyAdminOrigin +
+              "/products/" +
+              productAdminId +
+              "/variants/" +
+              variantAdminId;
+            return {
+              type: "textLink",
+              text: displayLabel,
+              href: productVariantAdminUrl
+            };
+          }
+        },
+        {
+          key: "productTitle",
+          label: "Product",
+          dataType: "text", renderer: "text",
+          width: "160px",
+          valueAccessor: (row) => row.P?.productTitle,
+          overflowEllipsis: true,
+          render: (value, row) => {
+            const productGraphId = row?.P?.productGraphId;
+            const shopifyNumericSuffix = /([0-9]+)$/;
+            const productNumericMatch =
+              productGraphId != null
+                ? String(productGraphId).match(shopifyNumericSuffix)
+                : null;
+            const displayLabel =
+              value != null && value !== "" ? String(value) : "—";
+            if (!productNumericMatch) {
+              return displayLabel;
+            }
+            let shopifyAdminOrigin =
+              typeof window !== "undefined" &&
+              window.shopify &&
+              window.shopify.origin
+                ? String(window.shopify.origin)
+                : "";
+            if (shopifyAdminOrigin.endsWith("/")) {
+              shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+            }
+            if (!shopifyAdminOrigin) {
+              return displayLabel;
+            }
+            const productAdminId = productNumericMatch[1];
+            const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+            return {
+              type: "textLink",
+              text: displayLabel,
+              href: productAdminUrl
+            };
+          }
+        },
+        { key: "productGraphId", label: "Product ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId, overflowEllipsis: true },
+        { key: "variantTitle", label: "Variant", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
+        { key: "variantGraphId", label: "Variant ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId, overflowEllipsis: true },
+        { key: "sku", label: "SKU", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
+        { key: "variantSku", label: "Var. SKU", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.variantSku },
+        { key: "vendor", label: "Vendor", dataType: "text", renderer: "text", width: "110px", valueAccessor: (row) => row.P?.vendor },
+        //{ key: "lineItemGraphId", label: "Line item ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true },
+        { key: "subscriptionContractId", label: "Subscription contract", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.subscriptionContractId, overflowEllipsis: true },
+        { key: "subscriptionContractStatus", label: "Contract status", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.subscriptionContractStatus },
+        { key: "currentQuantity", label: "Current qty", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.currentQuantity },
+        { key: "quantity", label: "Qty ordered", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.quantity },
+        { key: "refundableQuantity", label: "Refundable qty", dataType: "number", renderer: "number", width: "100px", valueAccessor: (row) => row.P?.refundableQuantity },
+        { key: "nonFulfillableQuantity", label: "Non-fulfillable", dataType: "number", renderer: "number", width: "110px", valueAccessor: (row) => row.P?.nonFulfillableQuantity },
+        { key: "remainingQuantity", label: "To fulfill", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.remainingQuantity },
+        { key: "isGiftCard", label: "Gift card", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.isGiftCard ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+        { key: "merchantEditable", label: "Editable", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.merchantEditable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+        { key: "requiresShipping", label: "Ships", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.requiresShipping ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+        { key: "restockable", label: "Restockable", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.restockable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+        { key: "taxable", label: "Taxable", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.taxable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+        { key: "staffMemberName", label: "Staff", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.staffMemberName || row.P?.staffMemberId || "" },
+        {
+          key: "unitPriceTimesQty",
+          label: "Unit × qty",
+          dataType: "text", renderer: "text",
+          width: "120px",
+          valueAccessor: (row) => {
+            const a = row.P?.discountedUnitAmount;
+            const c = row.P?.discountedUnitCurrency || row.P?.originalUnitCurrency || "";
+            const q = row.P?.currentQuantity ?? row.P?.quantity;
+            const u = a != null && a !== "" ? String(a) + (c ? " " + c : "") : "";
+            if (u && q != null && q !== "") return u + " × " + String(q);
+            return u || (q != null ? String(q) : "");
+          }
+        },
+        { key: "originalUnitAmount", label: "Orig. unit", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalUnitAmount; const c = row.P?.originalUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "discountedUnitAmount", label: "Disc. unit", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.discountedUnitAmount; const c = row.P?.discountedUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "discountedUnitAfterAllAmount", label: "Unit (after all disc.)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => { const a = row.P?.discountedUnitAfterAllAmount; const c = row.P?.discountedUnitAfterAllCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "originalTotalAmount", label: "Orig. total", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalTotalAmount; const c = row.P?.originalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "discountedTotalAmount", label: "Disc. total", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.discountedTotalAmount; const c = row.P?.discountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "discountedTotalCodeAmount", label: "Disc. total (+codes)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => { const a = row.P?.discountedTotalCodeAmount; const c = row.P?.discountedTotalCodeCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "totalDiscountAmount", label: "Line discount", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.totalDiscountAmount; const c = row.P?.totalDiscountCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "unfulfilledOriginalTotalAmount", label: "Unfulf. orig.", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.unfulfilledOriginalTotalAmount; const c = row.P?.unfulfilledOriginalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "unfulfilledDiscountedTotalAmount", label: "Unfulf. disc.", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.unfulfilledDiscountedTotalAmount; const c = row.P?.unfulfilledDiscountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+        { key: "properties", label: "Properties", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.properties },
+        { key: "customAttributesJson", label: "Custom attrs (JSON)", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.customAttributesJson, overflowEllipsis: true },
+        { key: "discountAllocationsJson", label: "Discount allocations", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.discountAllocationsJson, overflowEllipsis: true },
+        { key: "dutiesJson", label: "Duties (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.dutiesJson, overflowEllipsis: true },
+        { key: "taxLinesJson", label: "Tax lines (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.taxLinesJson, overflowEllipsis: true },
+        { key: "lineItemGroupJson", label: "Line item group", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.lineItemGroupJson, overflowEllipsis: true },
+        { key: "sellingPlanJson", label: "Selling plan", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.sellingPlanJson, overflowEllipsis: true },
+        { key: "fulfillmentStatus", label: "Fulfillment", dataType: "text", renderer: "badge", width: "110px", valueAccessor: (row) => row.P?.fulfillmentStatus, badgeToneMap: { FULFILLED: ["Fulfilled", "success"], UNFULFILLED: ["Unfulfilled", "warning"], PARTIALLY_FULFILLED: ["Partial", "info"] } },
+        { key: "orderCreatedAt", label: "Order date", dataType: "date", renderer: "date", width: "120px", valueAccessor: (row) => row.P?.orderCreatedAt }
+      ]
+    },
+    {
+      expansionPanelHeight: 320,
+      expansionPanelMaxHeight: 440,
+      usePolarisUI: false,
+      nestedTitle: "Returns",
+      nestedShowIcon: false,
+      emptyNestedText: "No returns for this order.",
+      nestedLoadingText: "Loading returns…",
+      nestedColumns: [
+      { key: "name", label: "Return", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.name },
+      { key: "status", label: "Status", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.status },
+      { key: "createdAt", label: "Created", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.createdAt },
+      { key: "totalQuantity", label: "Return qty", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.totalQuantity },
+      { key: "returnLineItemsCount", label: "Return lines #", dataType: "number", renderer: "number", width: "100px", valueAccessor: (row) => row.P?.returnLineItemsCount ?? 0 },
+      { key: "refundsCount", label: "Refunds #", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.refundsCount ?? 0 },
+      { key: "reverseFulfillmentOrdersCount", label: "RFO #", dataType: "number", renderer: "number", width: "80px", valueAccessor: (row) => row.P?.reverseFulfillmentOrdersCount ?? 0 },
+      { key: "exchangeLineItemsCount", label: "Exchange #", dataType: "number", renderer: "number", width: "95px", valueAccessor: (row) => row.P?.exchangeLineItemsCount ?? 0 },
+      { key: "returnLineItemsJson", label: "ReturnLineItems (JSON)", dataType: "text", renderer: "text", width: "260px", valueAccessor: (row) => row.P?.returnLineItemsJson, overflowEllipsis: true },
+      { key: "refundsJson", label: "Refunds (JSON)", dataType: "text", renderer: "text", width: "240px", valueAccessor: (row) => row.P?.refundsJson, overflowEllipsis: true },
+      { key: "reverseFulfillmentOrdersJson", label: "ReverseFulfillmentOrders (JSON)", dataType: "text", renderer: "text", width: "280px", valueAccessor: (row) => row.P?.reverseFulfillmentOrdersJson, overflowEllipsis: true },
+      { key: "exchangeLineItemsJson", label: "ExchangeLineItems (JSON)", dataType: "text", renderer: "text", width: "260px", valueAccessor: (row) => row.P?.exchangeLineItemsJson, overflowEllipsis: true },
+      { key: "id", label: "Return ID", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+      ],
+      getNestedRows: (parentRow) => {
+        const rowsJson = parentRow?.P?.returnsJson;
+        let rows = [];
+        try {
+          const parsed = JSON.parse(rowsJson || "[]");
+          if (Array.isArray(parsed)) {
+            rows = parsed
+              .map((ret, idx) => {
+                const returnLineItems = Array.isArray(ret?.returnLineItems) ? ret.returnLineItems : [];
+                const refunds = Array.isArray(ret?.refunds) ? ret.refunds : [];
+                const rfos = Array.isArray(ret?.reverseFulfillmentOrders) ? ret.reverseFulfillmentOrders : [];
+                const exchanges = Array.isArray(ret?.exchangeLineItems) ? ret.exchangeLineItems : [];
+                if (returnLineItems.length === 0) return null;
+                return {
+                  id: ret?.id || ("return-" + idx),
+                  P: {
+                    id: ret?.id || "",
+                    name: ret?.name || "",
+                    status: ret?.status || "",
+                    createdAt: ret?.createdAt || "",
+                    totalQuantity: ret?.totalQuantity != null ? Number(ret.totalQuantity) : 0,
+                    returnLineItemsCount: returnLineItems.length,
+                    refundsCount: refunds.length,
+                    reverseFulfillmentOrdersCount: rfos.length,
+                    exchangeLineItemsCount: exchanges.length,
+                    returnLineItemsJson: JSON.stringify(returnLineItems),
+                    refundsJson: JSON.stringify(refunds),
+                    reverseFulfillmentOrdersJson: JSON.stringify(rfos),
+                    exchangeLineItemsJson: JSON.stringify(exchanges)
+                  }
+                };
+              })
+              .filter(Boolean);
+          }
+        } catch (e) {}
+        return rows;
+      }
+    }
+  ],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyOrderCategory",
+    toParentEdgeType: "OrderCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    beforeFetchData: "shopifyOrderBeforeFetchData"
+  }
+};`
+  },
+  {
+    key: 'ShopifyOrderLineItem_settings_default',
+    tableVertexLabel: 'ShopifyOrderLineItem',
+    icon: '📋',
+    name: 'ShopifyOrderLineItem',
+    config: `return {
+  title: "Order line items",
+  label: "Line Item",
+  icon: "carbon:document",
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  rowClickable: false,
+  columns: [
+    { key: "lineImageUrl", label: "Image", dataType: "text", renderer: "image", width: "56px", valueAccessor: (row) => row.P?.lineImageUrl || "" },
+    { key: "orderName", label: "Order", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.orderName },
+    { key: "orderCreatedAt", label: "Order date", dataType: "date", renderer: "date", width: "140px", valueAccessor: (row) => row.P?.orderCreatedAt },
+    {
+      key: "lineItemName",
+      label: "Line name",
+      dataType: "text", renderer: "text",
+      width: "160px",
+      valueAccessor: (row) => row.P?.lineItemName,
+      overflowEllipsis: true,
+      render: (value, row) => {
+        const productGraphId = row?.P?.productGraphId;
+        const variantGraphId = row?.P?.variantGraphId;
+        const shopifyNumericSuffix = /([0-9]+)$/;
+        const productNumericMatch =
+          productGraphId != null
+            ? String(productGraphId).match(shopifyNumericSuffix)
+            : null;
+        const variantNumericMatch =
+          variantGraphId != null
+            ? String(variantGraphId).match(shopifyNumericSuffix)
+            : null;
+        const displayLabel =
+          value != null && value !== "" ? String(value) : "—";
+        if (!productNumericMatch || !variantNumericMatch) {
+          return displayLabel;
+        }
+        let shopifyAdminOrigin =
+          typeof window !== "undefined" &&
+          window.shopify &&
+          window.shopify.origin
+            ? String(window.shopify.origin)
+            : "";
+        if (shopifyAdminOrigin.endsWith("/")) {
+          shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+        }
+        if (!shopifyAdminOrigin) {
+          return displayLabel;
+        }
+        const productAdminId = productNumericMatch[1];
+        const variantAdminId = variantNumericMatch[1];
+        const productVariantAdminUrl =
+          shopifyAdminOrigin +
+          "/products/" +
+          productAdminId +
+          "/variants/" +
+          variantAdminId;
+        return {
+          type: "textLink",
+          text: displayLabel,
+          href: productVariantAdminUrl
+        };
+      }
+    },
+    {
+      key: "productTitle",
+      label: "Product",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.productTitle,
+      overflowEllipsis: true,
+      render: (value, row) => {
+        const productGraphId = row?.P?.productGraphId;
+        const shopifyNumericSuffix = /([0-9]+)$/;
+        const productNumericMatch =
+          productGraphId != null
+            ? String(productGraphId).match(shopifyNumericSuffix)
+            : null;
+        const displayLabel =
+          value != null && value !== "" ? String(value) : "—";
+        if (!productNumericMatch) {
+          return displayLabel;
+        }
+        let shopifyAdminOrigin =
+          typeof window !== "undefined" &&
+          window.shopify &&
+          window.shopify.origin
+            ? String(window.shopify.origin)
+            : "";
+        if (shopifyAdminOrigin.endsWith("/")) {
+          shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+        }
+        if (!shopifyAdminOrigin) {
+          return displayLabel;
+        }
+        const productAdminId = productNumericMatch[1];
+        const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+        return {
+          type: "textLink",
+          text: displayLabel,
+          href: productAdminUrl
+        };
+      }
+    },
+    { key: "productGraphId", label: "Product ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId },
+    { key: "variantTitle", label: "Variant", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
+    { key: "variantGraphId", label: "Variant ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId },
+    { key: "sku", label: "SKU", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
+    { key: "variantSku", label: "Var. SKU", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.variantSku },
+    { key: "vendor", label: "Vendor", dataType: "text", renderer: "text", width: "110px", valueAccessor: (row) => row.P?.vendor },
+    //{ key: "lineItemGraphId", label: "Line item ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true },
+    { key: "subscriptionContractId", label: "Subscription contract", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.subscriptionContractId, overflowEllipsis: true },
+    { key: "subscriptionContractStatus", label: "Contract status", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.subscriptionContractStatus },
+    { key: "currentQuantity", label: "Current qty", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.currentQuantity },
+    { key: "quantity", label: "Qty ordered", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.quantity },
+    { key: "refundableQuantity", label: "Refundable qty", dataType: "number", renderer: "number", width: "100px", valueAccessor: (row) => row.P?.refundableQuantity },
+    { key: "nonFulfillableQuantity", label: "Non-fulfillable", dataType: "number", renderer: "number", width: "110px", valueAccessor: (row) => row.P?.nonFulfillableQuantity },
+    { key: "remainingQuantity", label: "Remaining", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.remainingQuantity },
+    { key: "isGiftCard", label: "Gift card", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.isGiftCard ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "merchantEditable", label: "Editable", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.merchantEditable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "requiresShipping", label: "Ships", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.requiresShipping ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "restockable", label: "Restockable", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.restockable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "taxable", label: "Taxable", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.taxable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "staffMemberName", label: "Staff", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.staffMemberName || row.P?.staffMemberId || "" },
+    { key: "originalUnitAmount", label: "Orig. unit", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.originalUnitAmount; const c = row.P?.originalUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedUnitAmount", label: "Disc. unit", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.discountedUnitAmount; const c = row.P?.discountedUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedUnitAfterAllAmount", label: "Unit (after all disc.)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => { const a = row.P?.discountedUnitAfterAllAmount; const c = row.P?.discountedUnitAfterAllCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "originalTotalAmount", label: "Orig. total", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.originalTotalAmount; const c = row.P?.originalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedTotalAmount", label: "Disc. total", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.discountedTotalAmount; const c = row.P?.discountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedTotalCodeAmount", label: "Disc. total (+codes)", dataType: "text", renderer: "text", width: "150px", valueAccessor: (row) => { const a = row.P?.discountedTotalCodeAmount; const c = row.P?.discountedTotalCodeCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalDiscountAmount", label: "Line discount", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.totalDiscountAmount; const c = row.P?.totalDiscountCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "unfulfilledOriginalTotalAmount", label: "Unfulf. orig.", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.unfulfilledOriginalTotalAmount; const c = row.P?.unfulfilledOriginalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "unfulfilledDiscountedTotalAmount", label: "Unfulf. disc.", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.unfulfilledDiscountedTotalAmount; const c = row.P?.unfulfilledDiscountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "properties", label: "Properties", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.properties },
+    { key: "customAttributesJson", label: "Custom attrs (JSON)", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.customAttributesJson, overflowEllipsis: true },
+    { key: "discountAllocationsJson", label: "Discount allocations", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.discountAllocationsJson, overflowEllipsis: true },
+    { key: "dutiesJson", label: "Duties (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.dutiesJson, overflowEllipsis: true },
+    { key: "taxLinesJson", label: "Tax lines (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.taxLinesJson, overflowEllipsis: true },
+    { key: "lineItemGroupJson", label: "Line item group", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.lineItemGroupJson, overflowEllipsis: true },
+    { key: "sellingPlanJson", label: "Selling plan", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.sellingPlanJson, overflowEllipsis: true },
+    { key: "fulfillmentStatus", label: "Status", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => row.P?.fulfillmentStatus, badgeToneMap: { FULFILLED: ["Fulfilled", "success"], UNFULFILLED: ["Unfulfilled", "warning"], PARTIALLY_FULFILLED: ["Partial", "info"] } }
+  ],
+  rowHeight: 40,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyOrderCategory",
+    toParentEdgeType: "OrderCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    beforeFetchData: "shopifyOrderBeforeFetchData"
+  }
+};`
+  },
+  {
+    key: 'ShopifyDraftOrder_settings_default',
+    tableVertexLabel: 'ShopifyDraftOrder',
+    icon: '📝',
+    name: 'ShopifyDraftOrder',
+    config: `return {
+  title: "Draft orders",
+  label: "Draft order",
+  icon: "carbon:document-add",
+  hideImportButtons: true,
+  hideExportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  onRowClick: (row, args) => {
+    const draftOrderVertexId = row?.P?.id ?? row?.id;
+    if (!draftOrderVertexId || typeof window === "undefined") {
+      return;
+    }
+    const shopifyNumericSuffix = /([0-9]+)$/;
+    const draftOrderIdMatch = String(draftOrderVertexId).match(shopifyNumericSuffix);
+    const numericDraftOrderId = draftOrderIdMatch ? draftOrderIdMatch[1] : "";
+    if (!numericDraftOrderId) {
+      return;
+    }
+    let shopifyAdminOrigin =
+      window.shopify && window.shopify.origin ? String(window.shopify.origin) : "";
+    if (!shopifyAdminOrigin) {
+      return;
+    }
+    if (shopifyAdminOrigin.endsWith("/")) {
+      shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+    }
+    const draftOrderAdminUrl =
+      shopifyAdminOrigin + "/draft_orders/" + numericDraftOrderId;
+    window.open(draftOrderAdminUrl, "_blank", "noopener,noreferrer");
+  },
+  columns: [
+    { key: "name", label: "Draft", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.name },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "130px", valueAccessor: (row) => row.P?.status, badgeKeyCase: "lower", badgeToneMap: { open: ["Open", "info"], invoice_sent: ["Invoice sent", "warning"], completed: ["Completed", "success"] } },
+    { key: "createdAt", label: "Created", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.createdAt },
+    { key: "updatedAt", label: "Updated", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.updatedAt },
+    { key: "totalPriceAmount", label: "Total (customer)", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const pa = row.P?.totalPricePresentmentAmount; const pc = row.P?.totalPricePresentmentCurrency || ""; const sa = row.P?.totalPriceAmount; const sc = row.P?.totalPriceCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "totalPriceShopMoney", label: "Total (shop)", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.totalPriceAmount; const c = row.P?.totalPriceCurrency || ""; return a != null && a !== "" ? String(a) + (c ? " " + c : "") : ""; } },
+    { key: "subtotalAmount", label: "Subtotal (customer)", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const pa = row.P?.subtotalPresentmentAmount; const pc = row.P?.subtotalPresentmentCurrency || ""; const sa = row.P?.subtotalAmount; const sc = row.P?.subtotalCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "subtotalShopMoney", label: "Subtotal (shop)", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.subtotalAmount; const c = row.P?.subtotalCurrency || ""; return a != null && a !== "" ? String(a) + (c ? " " + c : "") : ""; } },
+    { key: "totalTaxAmount", label: "Tax (customer)", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const pa = row.P?.totalTaxPresentmentAmount; const pc = row.P?.totalTaxPresentmentCurrency || ""; const sa = row.P?.totalTaxAmount; const sc = row.P?.totalTaxCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "totalShippingAmount", label: "Shipping (customer)", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const pa = row.P?.totalShippingPresentmentAmount; const pc = row.P?.totalShippingPresentmentCurrency || ""; const sa = row.P?.totalShippingAmount; const sc = row.P?.totalShippingCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "lineItemsCount", label: "Lines", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.lineItemsCount },
+    { key: "email", label: "Customer email", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.email },
+    { key: "phone", label: "Phone", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.phone },
+    { key: "customerDisplayName", label: "Customer", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.customerDisplayName },
+    { key: "customerGraphId", label: "Customer ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customerGraphId, overflowEllipsis: true },
+    { key: "customerJson", label: "Customer (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customerJson, overflowEllipsis: true },
+    { key: "legacyResourceId", label: "REST id", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.legacyResourceId },
+    { key: "defaultCursor", label: "Default cursor", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.defaultCursor, overflowEllipsis: true },
+    { key: "currencyCode", label: "Currency", dataType: "text", renderer: "text", width: "80px", valueAccessor: (row) => row.P?.currencyCode },
+    { key: "presentmentCurrencyCode", label: "Presentment", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.presentmentCurrencyCode },
+    { key: "completedAt", label: "Completed", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.completedAt },
+    { key: "invoiceSentAt", label: "Invoice sent", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.invoiceSentAt },
+    { key: "invoiceUrl", label: "Invoice URL", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.invoiceUrl, overflowEllipsis: true },
+    { key: "invoiceEmailTemplateSubject", label: "Invoice subject", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.invoiceEmailTemplateSubject, overflowEllipsis: true },
+    { key: "poNumber", label: "PO #", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.poNumber },
+    { key: "note2", label: "Note", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.note2, overflowEllipsis: true },
+    { key: "discountCodes", label: "Discount codes", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.discountCodes },
+    { key: "tags", label: "Tags", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.tags },
+    { key: "convertedOrderName", label: "Converted order", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.convertedOrderName },
+    { key: "convertedOrderId", label: "Order ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.convertedOrderId, overflowEllipsis: true },
+    { key: "paymentTermsId", label: "Payment terms", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.paymentTermsId },
+    { key: "acceptAutomaticDiscounts", label: "Auto discounts", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => (row.P?.acceptAutomaticDiscounts ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "allowDiscountCodesInCheckout", label: "Codes at checkout", dataType: "text", renderer: "badge", width: "130px", valueAccessor: (row) => (row.P?.allowDiscountCodesInCheckout ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "allVariantPricesOverridden", label: "All prices overridden", dataType: "text", renderer: "badge", width: "150px", valueAccessor: (row) => (row.P?.allVariantPricesOverridden ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+    { key: "anyVariantPricesOverridden", label: "Any price overridden", dataType: "text", renderer: "badge", width: "150px", valueAccessor: (row) => (row.P?.anyVariantPricesOverridden ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+    { key: "billingAddressMatchesShippingAddress", label: "Bill=ship", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.billingAddressMatchesShippingAddress ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "neutral"], no: ["No", "info"] } },
+    { key: "taxExempt", label: "Tax exempt", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.taxExempt ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "taxesIncluded", label: "Taxes in prices", dataType: "text", renderer: "badge", width: "120px", valueAccessor: (row) => (row.P?.taxesIncluded ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "ready", label: "Ready", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.ready ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "warning"] } },
+    { key: "hasTimelineComment", label: "Timeline comment", dataType: "text", renderer: "badge", width: "130px", valueAccessor: (row) => (row.P?.hasTimelineComment ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "visibleToCustomer", label: "Visible to customer", dataType: "text", renderer: "badge", width: "150px", valueAccessor: (row) => (row.P?.visibleToCustomer ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "totalQuantityOfLineItems", label: "Line qty sum", dataType: "number", renderer: "number", width: "100px", valueAccessor: (row) => row.P?.totalQuantityOfLineItems },
+    { key: "totalWeight", label: "Weight (g)", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.totalWeight },
+    { key: "transformerFingerprint", label: "Cart fingerprint", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.transformerFingerprint, overflowEllipsis: true },
+    { key: "reserveInventoryUntil", label: "Reserve inv. until", dataType: "date", renderer: "date", width: "150px", valueAccessor: (row) => row.P?.reserveInventoryUntil },
+    { key: "lineItemsSubtotalAmount", label: "Line items subtotal", dataType: "text", renderer: "text", width: "170px", valueAccessor: (row) => { const pa = row.P?.lineItemsSubtotalPresentmentAmount; const pc = row.P?.lineItemsSubtotalPresentmentCurrency || ""; const sa = row.P?.lineItemsSubtotalAmount; const sc = row.P?.lineItemsSubtotalCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "totalLineItemsPriceAmount", label: "Line items (pre-disc.)", dataType: "text", renderer: "text", width: "170px", valueAccessor: (row) => { const pa = row.P?.totalLineItemsPricePresentmentAmount; const pc = row.P?.totalLineItemsPricePresentmentCurrency || ""; const sa = row.P?.totalLineItemsPriceAmount; const sc = row.P?.totalLineItemsPriceCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "totalDiscountsAmount", label: "Total discounts", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const pa = row.P?.totalDiscountsPresentmentAmount; const pc = row.P?.totalDiscountsPresentmentCurrency || ""; const sa = row.P?.totalDiscountsAmount; const sc = row.P?.totalDiscountsCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "appliedDiscountTitle", label: "Order discount", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.appliedDiscountTitle },
+    { key: "appliedDiscountAmount", label: "Order discount $", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const pa = row.P?.appliedDiscountPresentmentAmount; const pc = row.P?.appliedDiscountPresentmentCurrency || ""; const sa = row.P?.appliedDiscountAmount; const sc = row.P?.appliedDiscountCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "shippingLineTitle", label: "Shipping line", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.shippingLineTitle },
+    { key: "shippingLineDiscountedAmount", label: "Shipping $", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const pa = row.P?.shippingLineDiscountedPresentmentAmount; const pc = row.P?.shippingLineDiscountedPresentmentCurrency || ""; const sa = row.P?.shippingLineDiscountedAmount; const sc = row.P?.shippingLineDiscountedCurrency || ""; if (pa != null && pa !== "") return String(pa) + (pc ? " " + pc : ""); if (sa != null && sa !== "") return String(sa) + (sc ? " " + sc : ""); return ""; } },
+    { key: "billingAddressJson", label: "Billing (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.billingAddressJson, overflowEllipsis: true },
+    { key: "shippingAddressJson", label: "Shipping (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.shippingAddressJson, overflowEllipsis: true },
+    { key: "taxLinesJson", label: "Tax lines (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.taxLinesJson, overflowEllipsis: true },
+    { key: "platformDiscountsJson", label: "Platform discounts (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.platformDiscountsJson, overflowEllipsis: true },
+    { key: "warningsJson", label: "Warnings (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.warningsJson, overflowEllipsis: true },
+    { key: "eventsJson", label: "Events (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.eventsJson, overflowEllipsis: true },
+    { key: "metafieldsJson", label: "Metafields (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.metafieldsJson, overflowEllipsis: true },
+    { key: "localizedFieldsJson", label: "Localized fields (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.localizedFieldsJson, overflowEllipsis: true },
+    { key: "customAttributesJson", label: "Attributes (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customAttributesJson, overflowEllipsis: true },
+    { key: "purchasingEntityJson", label: "Purchasing entity (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.purchasingEntityJson, overflowEllipsis: true }
+  ],
+  rowHeight: 44,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __expand: "32px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  rowExpansion: {
+    childVertexLabel: "ShopifyDraftOrderLineItem",
+    childParentFilterKey: "draftOrderId",
+    parentIdField: "id",
+    expansionPanelHeight: 360,
+    expansionPanelMaxHeight: 480,
+    expandAccordionMaxWidth: 768,
+    expandOneRowAtATime: false,
+    nestedTitle: "Products",
+    nestedShowIcon: false,
+    emptyNestedText: "No Products on this draft.",
+    nestedLoadingText: "Loading Products…",
+    nestedSort: { column: "productTitle", direction: "asc" },
+    nestedColumns: [
+      { key: "lineImageUrl", label: "Image", dataType: "text", renderer: "image", width: "56px", valueAccessor: (row) => row.P?.lineImageUrl || "" },
+      //{ key: "lineItemUuid", label: "UUID", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.lineItemUuid },
+      //{ key: "shopifyLineItemId", label: "Line item ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id },
+      { key: "draftOrderName", label: "Draft", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.draftOrderName },
+      {
+        key: "lineItemName",
+        label: "Line name",
+        dataType: "text", renderer: "text",
+        width: "180px",
+        valueAccessor: (row) => row.P?.lineItemName,
+        overflowEllipsis: true,
+        render: (value, row) => {
+          const productGraphId = row?.P?.productGraphId;
+          const variantGraphId = row?.P?.variantGraphId;
+          const shopifyNumericSuffix = /([0-9]+)$/;
+          const productNumericMatch =
+            productGraphId != null
+              ? String(productGraphId).match(shopifyNumericSuffix)
+              : null;
+          const variantNumericMatch =
+            variantGraphId != null
+              ? String(variantGraphId).match(shopifyNumericSuffix)
+              : null;
+          const displayLabel =
+            value != null && value !== "" ? String(value) : "—";
+          if (!productNumericMatch || !variantNumericMatch) {
+            return displayLabel;
+          }
+          let shopifyAdminOrigin =
+            typeof window !== "undefined" &&
+            window.shopify &&
+            window.shopify.origin
+              ? String(window.shopify.origin)
+              : "";
+          if (shopifyAdminOrigin.endsWith("/")) {
+            shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+          }
+          if (!shopifyAdminOrigin) {
+            return displayLabel;
+          }
+          const productAdminId = productNumericMatch[1];
+          const variantAdminId = variantNumericMatch[1];
+          const productVariantAdminUrl =
+            shopifyAdminOrigin +
+            "/products/" +
+            productAdminId +
+            "/variants/" +
+            variantAdminId;
+          return {
+            type: "textLink",
+            text: displayLabel,
+            href: productVariantAdminUrl
+          };
+        }
+      },
+      {
+        key: "productTitle",
+        label: "Product",
+        dataType: "text", renderer: "text",
+        width: "180px",
+        valueAccessor: (row) => row.P?.productTitle,
+        overflowEllipsis: true,
+        render: (value, row) => {
+          const productGraphId = row?.P?.productGraphId;
+          const shopifyNumericSuffix = /([0-9]+)$/;
+          const productNumericMatch =
+            productGraphId != null
+              ? String(productGraphId).match(shopifyNumericSuffix)
+              : null;
+          const displayLabel =
+            value != null && value !== "" ? String(value) : "—";
+          if (!productNumericMatch) {
+            return displayLabel;
+          }
+          let shopifyAdminOrigin =
+            typeof window !== "undefined" &&
+            window.shopify &&
+            window.shopify.origin
+              ? String(window.shopify.origin)
+              : "";
+          if (shopifyAdminOrigin.endsWith("/")) {
+            shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+          }
+          if (!shopifyAdminOrigin) {
+            return displayLabel;
+          }
+          const productAdminId = productNumericMatch[1];
+          const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+          return {
+            type: "textLink",
+            text: displayLabel,
+            href: productAdminUrl
+          };
+        }
+      },
+      { key: "productGraphId", label: "product", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId, overflowEllipsis: true },
+      { key: "variantGraphId", label: "variant", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId, overflowEllipsis: true },
+      { key: "variantTitle", label: "Variant title", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
+      { key: "sku", label: "SKU", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.sku },
+      { key: "quantity", label: "Qty", dataType: "number", renderer: "number", width: "80px", valueAccessor: (row) => row.P?.quantity },
+      { key: "lineItemTitle", label: "Title (custom)", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.lineItemTitle, overflowEllipsis: true },
+      { key: "custom", label: "Custom", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.custom ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+      { key: "customAttributesJson", label: "customAttributes", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customAttributesJson || "", overflowEllipsis: true },
+      { key: "customAttributesV2Json", label: "customAttributesV2", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customAttributesV2Json || "", overflowEllipsis: true },
+      { key: "appliedDiscountJson", label: "appliedDiscount", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.appliedDiscountJson || "", overflowEllipsis: true },
+      { key: "componentsJson", label: "components", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.componentsJson || "", overflowEllipsis: true },
+      { key: "originalUnitAmount", label: "originalUnitPriceSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalUnitAmount; const c = row.P?.originalUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "discountedUnitAmount", label: "approximateDiscountedUnitPriceSet", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => { const a = row.P?.discountedUnitAmount; const c = row.P?.discountedUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "originalTotalAmount", label: "originalTotalSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalTotalAmount; const c = row.P?.originalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "discountedTotalAmount", label: "discountedTotalSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.discountedTotalAmount; const c = row.P?.discountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "totalDiscountAmount", label: "totalDiscountSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.totalDiscountAmount; const c = row.P?.totalDiscountCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "originalUnitPriceWithCurrency", label: "originalUnitPriceWithCurrency", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const a = row.P?.originalUnitPriceWithCurrencyAmount; const c = row.P?.originalUnitPriceWithCurrencyCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "priceOverride", label: "priceOverride", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.priceOverrideAmount; const c = row.P?.priceOverrideCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+      { key: "fulfillmentServiceName", label: "fulfillmentService", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.fulfillmentServiceName },
+      { key: "requiresShipping", label: "requiresShipping", dataType: "text", renderer: "badge", width: "110px", valueAccessor: (row) => (row.P?.requiresShipping ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+      { key: "taxable", label: "taxable", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.taxable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+      { key: "isGiftCard", label: "isGiftCard", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.isGiftCard ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+      { key: "taxLinesJson", label: "taxLines", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.taxLinesJson || "", overflowEllipsis: true },
+      { key: "vendor", label: "vendor", dataType: "text", renderer: "text", width: "110px", valueAccessor: (row) => row.P?.vendor },
+      { key: "weightJson", label: "weight", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.weightJson || "", overflowEllipsis: true }
+    ]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyDraftOrderCategory",
+    toParentEdgeType: "DraftOrderCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    beforeFetchData: "shopifyDraftOrderBeforeFetchData"
+  }
+};`
+  },
+  {
+    key: 'ShopifyDraftOrderLineItem_settings_default',
+    tableVertexLabel: 'ShopifyDraftOrderLineItem',
+    icon: '📄',
+    name: 'ShopifyDraftOrderLineItem',
+    config: `return {
+  title: "Draft order line items",
+  label: "Draft line item",
+  icon: "carbon:document",
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  rowClickable: false,
+  columns: [
+    { key: "lineImageUrl", label: "Image", dataType: "text", renderer: "image", width: "56px", valueAccessor: (row) => row.P?.lineImageUrl || "" },
+    //{ key: "lineItemUuid", label: "UUID", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.lineItemUuid },
+    //{ key: "shopifyLineItemId", label: "Line item ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id },
+    { key: "draftOrderName", label: "Draft", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.draftOrderName },
+    { key: "draftOrderCreatedAt", label: "Draft created", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.draftOrderCreatedAt },
+    {
+      key: "lineItemName",
+      label: "Line name",
+      dataType: "text", renderer: "text",
+      width: "160px",
+      valueAccessor: (row) => row.P?.lineItemName,
+      overflowEllipsis: true,
+      render: (value, row) => {
+        const productGraphId = row?.P?.productGraphId;
+        const variantGraphId = row?.P?.variantGraphId;
+        const shopifyNumericSuffix = /([0-9]+)$/;
+        const productNumericMatch =
+          productGraphId != null
+            ? String(productGraphId).match(shopifyNumericSuffix)
+            : null;
+        const variantNumericMatch =
+          variantGraphId != null
+            ? String(variantGraphId).match(shopifyNumericSuffix)
+            : null;
+        const displayLabel =
+          value != null && value !== "" ? String(value) : "—";
+        if (!productNumericMatch || !variantNumericMatch) {
+          return displayLabel;
+        }
+        let shopifyAdminOrigin =
+          typeof window !== "undefined" &&
+          window.shopify &&
+          window.shopify.origin
+            ? String(window.shopify.origin)
+            : "";
+        if (shopifyAdminOrigin.endsWith("/")) {
+          shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+        }
+        if (!shopifyAdminOrigin) {
+          return displayLabel;
+        }
+        const productAdminId = productNumericMatch[1];
+        const variantAdminId = variantNumericMatch[1];
+        const productVariantAdminUrl =
+          shopifyAdminOrigin +
+          "/products/" +
+          productAdminId +
+          "/variants/" +
+          variantAdminId;
+        return {
+          type: "textLink",
+          text: displayLabel,
+          href: productVariantAdminUrl
+        };
+      }
+    },
+    {
+      key: "productTitle",
+      label: "Product",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.productTitle,
+      overflowEllipsis: true,
+      render: (value, row) => {
+        const productGraphId = row?.P?.productGraphId;
+        const shopifyNumericSuffix = /([0-9]+)$/;
+        const productNumericMatch =
+          productGraphId != null
+            ? String(productGraphId).match(shopifyNumericSuffix)
+            : null;
+        const displayLabel =
+          value != null && value !== "" ? String(value) : "—";
+        if (!productNumericMatch) {
+          return displayLabel;
+        }
+        let shopifyAdminOrigin =
+          typeof window !== "undefined" &&
+          window.shopify &&
+          window.shopify.origin
+            ? String(window.shopify.origin)
+            : "";
+        if (shopifyAdminOrigin.endsWith("/")) {
+          shopifyAdminOrigin = shopifyAdminOrigin.slice(0, -1);
+        }
+        if (!shopifyAdminOrigin) {
+          return displayLabel;
+        }
+        const productAdminId = productNumericMatch[1];
+        const productAdminUrl = shopifyAdminOrigin + "/products/" + productAdminId;
+        return {
+          type: "textLink",
+          text: displayLabel,
+          href: productAdminUrl
+        };
+      }
+    },
+    { key: "productGraphId", label: "product", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.productGraphId, overflowEllipsis: true },
+    { key: "variantGraphId", label: "variant", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.variantGraphId, overflowEllipsis: true },
+    { key: "variantTitle", label: "Variant title", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle },
+    { key: "sku", label: "SKU", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
+    { key: "quantity", label: "Qty", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.quantity },
+    { key: "lineItemTitle", label: "Title (custom)", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.lineItemTitle, overflowEllipsis: true },
+    { key: "custom", label: "Custom", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.custom ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+    { key: "customAttributesJson", label: "customAttributes", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customAttributesJson || "", overflowEllipsis: true },
+    { key: "customAttributesV2Json", label: "customAttributesV2", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customAttributesV2Json || "", overflowEllipsis: true },
+    { key: "appliedDiscountJson", label: "appliedDiscount", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.appliedDiscountJson || "", overflowEllipsis: true },
+    { key: "componentsJson", label: "components", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.componentsJson || "", overflowEllipsis: true },
+    { key: "originalUnitAmount", label: "originalUnitPriceSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalUnitAmount; const c = row.P?.originalUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedUnitAmount", label: "approximateDiscountedUnitPriceSet", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => { const a = row.P?.discountedUnitAmount; const c = row.P?.discountedUnitCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "originalTotalAmount", label: "originalTotalSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.originalTotalAmount; const c = row.P?.originalTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "discountedTotalAmount", label: "discountedTotalSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.discountedTotalAmount; const c = row.P?.discountedTotalCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "totalDiscountAmount", label: "totalDiscountSet", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.totalDiscountAmount; const c = row.P?.totalDiscountCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "originalUnitPriceWithCurrency", label: "originalUnitPriceWithCurrency", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => { const a = row.P?.originalUnitPriceWithCurrencyAmount; const c = row.P?.originalUnitPriceWithCurrencyCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "priceOverride", label: "priceOverride", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => { const a = row.P?.priceOverrideAmount; const c = row.P?.priceOverrideCurrency || ""; return a != null && a !== "" ? String(a) + " " + c : ""; } },
+    { key: "fulfillmentServiceName", label: "fulfillmentService", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.fulfillmentServiceName },
+    { key: "requiresShipping", label: "requiresShipping", dataType: "text", renderer: "badge", width: "110px", valueAccessor: (row) => (row.P?.requiresShipping ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "taxable", label: "taxable", dataType: "text", renderer: "badge", width: "80px", valueAccessor: (row) => (row.P?.taxable ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "isGiftCard", label: "isGiftCard", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.isGiftCard ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "warning"], no: ["No", "neutral"] } },
+    { key: "taxLinesJson", label: "taxLines", dataType: "text", renderer: "text", width: "220px", valueAccessor: (row) => row.P?.taxLinesJson || "", overflowEllipsis: true },
+    { key: "vendor", label: "vendor", dataType: "text", renderer: "text", width: "110px", valueAccessor: (row) => row.P?.vendor },
+    { key: "weightJson", label: "weight", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.weightJson || "", overflowEllipsis: true }
+  ],
+  rowHeight: 40,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyDraftOrderCategory",
+    toParentEdgeType: "DraftOrderCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "name",
+              label: "Name",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {
+    beforeFetchData: "shopifyDraftOrderBeforeFetchData"
+  }
+};`
+  },
+  {
+    key: 'ShopifyInventoryItem_settings_default',
+    tableVertexLabel: 'ShopifyInventoryItem',
+    icon: '📦',
+    name: 'ShopifyInventoryItem',
+    config: `return {
+  title: "Inventory",
+  label: "Inventory item",
+  icon: "carbon:cube",
+  hideImportButtons: true,
+  hideExportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  onRowClick: (row, args) => {
+    const productGraphId = row?.P?.productGraphId;
+    if (!productGraphId || typeof window === "undefined") return;
+    const shopifyNumericSuffix = /([0-9]+)$/;
+    const m = String(productGraphId).match(shopifyNumericSuffix);
+    const productId = m ? m[1] : "";
+    if (!productId) return;
+    let origin = window.shopify && window.shopify.origin ? String(window.shopify.origin) : "";
+    if (!origin) return;
+    if (origin.endsWith("/")) origin = origin.slice(0, -1);
+    window.open(origin + "/products/" + productId, "_blank", "noopener,noreferrer");
+  },
+  columns: [
+    { key: "sku", label: "SKU", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.sku },
+    { key: "productTitle", label: "Product", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.productTitle, overflowEllipsis: true },
+    { key: "variantTitle", label: "Variant", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
+    { key: "tracked", label: "Tracked", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.tracked ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "success"], no: ["No", "neutral"] } },
+    { key: "requiresShipping", label: "Ships", dataType: "text", renderer: "badge", width: "90px", valueAccessor: (row) => (row.P?.requiresShipping ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "locationsCountStored", label: "Locations", dataType: "text", renderer: "text", width: "90px", valueAccessor: (row) => row.P?.locationsCountStored },
+    { key: "unitCost", label: "Unit cost", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.unitCostAmount; const c = row.P?.unitCostCurrency || ""; return a != null && a !== "" ? String(a) + (c ? " " + c : "") : ""; } },
+    { key: "weight", label: "Weight", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => { const v = row.P?.weightValue; const u = row.P?.weightUnit || ""; return v != null && v !== "" ? String(v) + (u ? " " + u : "") : ""; } },
+    { key: "updatedAt", label: "Updated", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.updatedAt },
+    { key: "inventoryLevelsJson", label: "Levels (JSON)", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.inventoryLevelsJson, overflowEllipsis: true },
+    { key: "id", label: "GraphQL ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+  ],
+  rowHeight: 44,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyInventoryItemCategory",
+    toParentEdgeType: "InventoryItemCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, maxLength: 255, colSpan: 2 }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: { beforeFetchData: "shopifyInventoryItemBeforeFetchData" }
+};`
+  },
+  {
+    key: 'ShopifyInventoryTransfer_settings_default',
+    tableVertexLabel: 'ShopifyInventoryTransfer',
+    icon: '🚚',
+    name: 'ShopifyInventoryTransfer',
+    config: `return {
+  title: "Transfers",
+  label: "Transfer",
+  icon: "carbon:delivery",
+  hideImportButtons: true,
+  hideExportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  onRowClick: (row, args) => {
+    const vertexId = row?.P?.id ?? row?.id;
+    if (!vertexId || typeof window === "undefined") return;
+    const shopifyNumericSuffix = /([0-9]+)$/;
+    const m = String(vertexId).match(shopifyNumericSuffix);
+    const numericId = m ? m[1] : "";
+    if (!numericId) return;
+    let origin = window.shopify && window.shopify.origin ? String(window.shopify.origin) : "";
+    if (!origin) return;
+    if (origin.endsWith("/")) origin = origin.slice(0, -1);
+    window.open(origin + "/inventory/transfers/" + numericId, "_blank", "noopener,noreferrer");
+  },
+  columns: [
+    { key: "name", label: "Transfer", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.name },
+    { key: "status", label: "Status", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.status },
+    { key: "dateCreated", label: "Created", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.dateCreated },
+    { key: "originName", label: "From", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.originName },
+    { key: "destinationName", label: "To", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.destinationName },
+    { key: "totalQuantity", label: "Qty", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.totalQuantity },
+    { key: "receivedQuantity", label: "Received", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.receivedQuantity },
+    { key: "referenceName", label: "Reference", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => row.P?.referenceName },
+    { key: "tags", label: "Tags", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.tags },
+    { key: "hasTimelineComment", label: "Timeline", dataType: "text", renderer: "badge", width: "100px", valueAccessor: (row) => (row.P?.hasTimelineComment ? "yes" : "no"), badgeKeyCase: "lower", badgeToneMap: { yes: ["Yes", "info"], no: ["No", "neutral"] } },
+    { key: "note", label: "Note", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.note, overflowEllipsis: true },
+    { key: "id", label: "GraphQL ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+  ],
+  rowHeight: 44,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __expand: "32px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  rowExpansion: {
+    childVertexLabel: "ShopifyInventoryTransferLineItem",
+    childParentFilterKey: "inventoryTransferId",
+    parentIdField: "id",
+    expansionPanelHeight: 320,
+    expansionPanelMaxHeight: 440,
+    expandAccordionMaxWidth: 768,
+    expandOneRowAtATime: false,
+    nestedTitle: "Lines",
+    nestedShowIcon: false,
+    emptyNestedText: "No line items on this transfer.",
+    nestedLoadingText: "Loading lines…",
+    nestedSort: { column: "lineTitle", direction: "asc" },
+    nestedColumns: [
+      { key: "lineTitle", label: "Title", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.lineTitle, overflowEllipsis: true },
+      { key: "sku", label: "SKU", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
+      { key: "productTitle", label: "Product", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.productTitle, overflowEllipsis: true },
+      { key: "totalQuantity", label: "Qty", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.totalQuantity },
+      { key: "shippedQuantity", label: "Shipped", dataType: "number", renderer: "number", width: "80px", valueAccessor: (row) => row.P?.shippedQuantity },
+      { key: "shippableQuantity", label: "Shippable", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.shippableQuantity },
+      { key: "id", label: "Line ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+    ]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyInventoryTransferCategory",
+    toParentEdgeType: "InventoryTransferCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, maxLength: 255, colSpan: 2 }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: { beforeFetchData: "shopifyInventoryTransferBeforeFetchData" }
+};`
+  },
+  {
+    key: 'ShopifyInventoryTransferLineItem_settings_default',
+    tableVertexLabel: 'ShopifyInventoryTransferLineItem',
+    icon: '📄',
+    name: 'ShopifyInventoryTransferLineItem',
+    config: `return {
+  title: "Transfer line items",
+  label: "Transfer line",
+  icon: "carbon:document",
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  rowClickable: false,
+  columns: [
+    { key: "transferName", label: "Transfer", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.transferName },
+    { key: "lineTitle", label: "Title", dataType: "text", renderer: "text", width: "160px", valueAccessor: (row) => row.P?.lineTitle, overflowEllipsis: true },
+    { key: "sku", label: "SKU", dataType: "text", renderer: "text", width: "100px", valueAccessor: (row) => row.P?.sku },
+    { key: "productTitle", label: "Product", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.productTitle, overflowEllipsis: true },
+    { key: "variantTitle", label: "Variant", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.variantTitle, overflowEllipsis: true },
+    { key: "totalQuantity", label: "Qty", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.totalQuantity },
+    { key: "shippedQuantity", label: "Shipped", dataType: "number", renderer: "number", width: "80px", valueAccessor: (row) => row.P?.shippedQuantity },
+    { key: "pickedForShipmentQuantity", label: "Picked", dataType: "number", renderer: "number", width: "80px", valueAccessor: (row) => row.P?.pickedForShipmentQuantity },
+    { key: "inventoryTransferId", label: "Transfer ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.inventoryTransferId, overflowEllipsis: true },
+    { key: "id", label: "Line ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+  ],
+  rowHeight: 40,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyInventoryTransferCategory",
+    toParentEdgeType: "InventoryTransferCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, maxLength: 255, colSpan: 2 }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: { beforeFetchData: "shopifyInventoryTransferBeforeFetchData" }
+};`
+  },
+  {
+    key: 'ShopifyReturn_settings_default',
+    tableVertexLabel: 'ShopifyReturn',
+    icon: '↩️',
+    name: 'ShopifyReturn',
+    config: `return {
+  title: "Returns",
+  label: "Return",
+  icon: "carbon:rotate-counterclockwise",
+  hideImportButtons: true,
+  hideExportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  onRowClick: (row, args) => {
+    const orderGid = row?.P?.orderId;
+    const returnGid = row?.P?.id ?? row?.id;
+    if (!orderGid || !returnGid || typeof window === "undefined") return;
+    const shopifyNumericSuffix = /([0-9]+)$/;
+    const orderNum = String(orderGid).match(shopifyNumericSuffix);
+    const returnNum = String(returnGid).match(shopifyNumericSuffix);
+    if (!orderNum || !returnNum) return;
+    let origin = window.shopify && window.shopify.origin ? String(window.shopify.origin) : "";
+    if (!origin) return;
+    if (origin.endsWith("/")) origin = origin.slice(0, -1);
+    window.open(
+      origin + "/orders/" + orderNum[1] + "/returns/" + returnNum[1],
+      "_blank",
+      "noopener,noreferrer"
+    );
+  },
+  columns: [
+    { key: "name", label: "Return", dataType: "text", renderer: "text", width: "140px", valueAccessor: (row) => row.P?.name },
+    { key: "status", label: "Status", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.status },
+    { key: "orderName", label: "Order", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.orderName },
+    { key: "totalQuantity", label: "Qty", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.totalQuantity },
+    { key: "createdAt", label: "Created", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.createdAt },
+    { key: "requestApprovedAt", label: "Approved", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.requestApprovedAt },
+    { key: "closedAt", label: "Closed", dataType: "date", renderer: "date", width: "130px", valueAccessor: (row) => row.P?.closedAt },
+    { key: "staffMemberName", label: "Staff", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.staffMemberName },
+    { key: "orderId", label: "Order ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.orderId, overflowEllipsis: true },
+    { key: "id", label: "Return ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+  ],
+  rowHeight: 44,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px", __expand: "32px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  rowExpansion: {
+    childVertexLabel: "ShopifyReturnLineItem",
+    childParentFilterKey: "returnId",
+    parentIdField: "id",
+    expansionPanelHeight: 340,
+    expansionPanelMaxHeight: 460,
+    expandAccordionMaxWidth: 768,
+    expandOneRowAtATime: false,
+    nestedTitle: "Return lines",
+    nestedShowIcon: false,
+    emptyNestedText: "No return line items.",
+    nestedLoadingText: "Loading return lines…",
+    nestedSort: { column: "lineItemTitle", direction: "asc" },
+    nestedColumns: [
+      { key: "lineItemTitle", label: "Line", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.lineItemTitle, overflowEllipsis: true },
+      { key: "quantity", label: "Qty", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.quantity },
+      { key: "refundedQuantity", label: "Refunded", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.refundedQuantity },
+      { key: "lineTotal", label: "Line total", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => { const a = row.P?.lineTotalAmount; const c = row.P?.lineTotalCurrency || ""; return a != null && a !== "" ? String(a) + (c ? " " + c : "") : ""; } },
+      { key: "returnReasonNote", label: "Reason note", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.returnReasonNote, overflowEllipsis: true },
+      { key: "id", label: "Line ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+    ]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyReturnCategory",
+    toParentEdgeType: "ReturnCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, maxLength: 255, colSpan: 2 }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {}
+};`
+  },
+  {
+    key: 'ShopifyReturnLineItem_settings_default',
+    tableVertexLabel: 'ShopifyReturnLineItem',
+    icon: '📄',
+    name: 'ShopifyReturnLineItem',
+    config: `return {
+  title: "Return line items",
+  label: "Return line",
+  icon: "carbon:document",
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  rowClickable: false,
+  columns: [
+    { key: "returnName", label: "Return", dataType: "text", renderer: "text", width: "130px", valueAccessor: (row) => row.P?.returnName },
+    { key: "orderName", label: "Order", dataType: "text", renderer: "text", width: "120px", valueAccessor: (row) => row.P?.orderName },
+    { key: "lineItemTitle", label: "Line", dataType: "text", renderer: "text", width: "180px", valueAccessor: (row) => row.P?.lineItemTitle, overflowEllipsis: true },
+    { key: "quantity", label: "Qty", dataType: "number", renderer: "number", width: "70px", valueAccessor: (row) => row.P?.quantity },
+    { key: "refundableQuantity", label: "Refundable", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.refundableQuantity },
+    { key: "refundedQuantity", label: "Refunded", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.refundedQuantity },
+    { key: "processedQuantity", label: "Processed", dataType: "number", renderer: "number", width: "90px", valueAccessor: (row) => row.P?.processedQuantity },
+    { key: "customerNote", label: "Customer note", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.customerNote, overflowEllipsis: true },
+    { key: "returnId", label: "Return ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.returnId, overflowEllipsis: true },
+    { key: "id", label: "Line ID", dataType: "text", renderer: "text", width: "200px", valueAccessor: (row) => row.P?.id, overflowEllipsis: true }
+  ],
+  rowHeight: 40,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyReturnCategory",
+    toParentEdgeType: "ReturnCategory",
+    rootKeys: {},
+    label: "Category",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Basic Information",
+          gridColumns: 2,
+          fields: [
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, maxLength: 255, colSpan: 2 }
+          ]
+        }
+      ]
+    }
+  },
+  hooks: {}
+};`
+  },
+  {
+    key: 'ShopifyShop_settings_default',
+    tableVertexLabel: 'ShopifyShop',
+    icon: '🏪',
+    name: 'ShopifyShop',
+    config: `return {
+  title: "Shops",
+  label: "Shop",
+  icon: "carbon:store",
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "shop",
+      label: "Shop domain",
+      dataType: "text", renderer: "text",
+      width: "320px",
+      required: true
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    },
+    {
+      key: "updatedAt",
+      label: "Updated",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.updatedAt || row.updatedAt
+    },
+    {
+      key: "lastSynced",
+      label: "Last synced",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.lastSynced || ""
+    },
+    {
+      key: "syncStatus",
+      label: "Sync status",
+      dataType: "text", renderer: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.syncStatus || ""
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: false,
+  actions: [],
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "40px" },
+  formConfig: null,
+  uniqueKeys: [],
+  usePolarisUI: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  hooks: {},
+  sidebar: {
+    enabled: false
+  }
+};`
+  }
+];
+
+// Helper function to process a single setting
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+
+  console.log(`\n${icon} Processing ${name} settings...`);
+
+  // Check if setting exists
+  const checkResult = await args.session.run(
+    `MATCH (s:Setting {key: $key}) RETURN s`,
+    { key }
+  );
+
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      // Update existing
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`✅ Updated existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      // Create new
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'table_config',
+          tableVertexLabel: $tableVertexLabel,
+          config: $config,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, config, tableVertexLabel }
+      );
+      console.log(`✅ Created new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  } else {
+    // Dry run - just report
+    if (exists) {
+      console.log(`📋 Would update existing ${name} settings`);
+      return { created: 0, updated: 1 };
+    } else {
+      console.log(`📋 Would create new ${name} settings`);
+      return { created: 1, updated: 0 };
+    }
+  }
+}
+
+// Process all settings
+const stats = {
+  bookSettingsCreated: 0,
+  bookSettingsUpdated: 0,
+  audioVideoSettingsCreated: 0,
+  audioVideoSettingsUpdated: 0,
+  categorySettingsCreated: 0,
+  categorySettingsUpdated: 0,
+  shopifyProductSettingsCreated: 0,
+  shopifyProductSettingsUpdated: 0,
+  shopifyProductCategorySettingsCreated: 0,
+  shopifyProductCategorySettingsUpdated: 0,
+  shopifyShopSettingsCreated: 0,
+  shopifyShopSettingsUpdated: 0
+};
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const setting = settingsConfigs[i];
+  const result = await processSetting(setting);
+
+  // Update stats based on setting type
+  if (setting.tableVertexLabel === 'Book') {
+    stats.bookSettingsCreated += result.created;
+    stats.bookSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'AudioVideo') {
+    stats.audioVideoSettingsCreated += result.created;
+    stats.audioVideoSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'Category') {
+    stats.categorySettingsCreated += result.created;
+    stats.categorySettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyProduct') {
+    stats.shopifyProductSettingsCreated += result.created;
+    stats.shopifyProductSettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyProductCategory') {
+    stats.shopifyProductCategorySettingsCreated += result.created;
+    stats.shopifyProductCategorySettingsUpdated += result.updated;
+  } else if (setting.tableVertexLabel === 'ShopifyShop') {
+    stats.shopifyShopSettingsCreated += result.created;
+    stats.shopifyShopSettingsUpdated += result.updated;
+  }
+}
+
+// ==========================================
+// Summary
+// ==========================================
+console.log('\n📊 Migration Summary:');
+console.log('==========================================');
+console.log(`Book settings - Created: ${stats.bookSettingsCreated}, Updated: ${stats.bookSettingsUpdated}`);
+console.log(`AudioVideo settings - Created: ${stats.audioVideoSettingsCreated}, Updated: ${stats.audioVideoSettingsUpdated}`);
+console.log(`Category settings - Created: ${stats.categorySettingsCreated}, Updated: ${stats.categorySettingsUpdated}`);
+console.log(`ShopifyProduct settings - Created: ${stats.shopifyProductSettingsCreated}, Updated: ${stats.shopifyProductSettingsUpdated}`);
+console.log(`ShopifyProductCategory settings - Created: ${stats.shopifyProductCategorySettingsCreated}, Updated: ${stats.shopifyProductCategorySettingsUpdated}`);
+console.log(`ShopifyShop settings - Created: ${stats.shopifyShopSettingsCreated}, Updated: ${stats.shopifyShopSettingsUpdated}`);
+console.log('==========================================');
+
+return {
+  success: true,
+  message: dryRun
+    ? "Dry run completed - no changes made"
+    : "Content table settings migration completed successfully",
+  data: {
+    ...stats,
+    dryRun
+  }
+};
+'''
+        key: migrateDynamicPageSettings
+      }
+    }
+  ]
+  edges: []
+}

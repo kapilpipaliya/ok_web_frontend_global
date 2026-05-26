@@ -1,0 +1,321 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: FAQ - Decode Orders Organizer
+        key: FAQ
+        url: /faq
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        fns:
+          '''
+const [expandedIndex, setExpandedIndex] = args.createSignal(null);
+const toggleExpanded = (index) => {
+  setExpandedIndex((prev) => (prev === index ? null : index));
+};
+return {
+  expandedIndex,
+  setExpandedIndex,
+  toggleExpanded
+};
+'''
+        componentName: Html
+        key: faq_root
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Frequently asked questions"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''Common questions about **Decode Orders Organizer** (orders, draft orders, and categories).
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        contextName: faqItem
+        css:
+          '''return `._id {
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  overflow: hidden;
+}`;'''
+        loop: true
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div",
+  data: [
+    { index: 0, q: "What is the difference between Orders and Draft orders?", a: "Orders lists completed checkout orders from your store. Draft orders lists Shopify draft orders (quotes/invoices in progress). Each has its own table settings and category tree." },
+    { index: 1, q: "How do categories work?", a: "You create categories in the sidebar and link rows with drag-and-drop or the move action—same pattern as other Decode apps. Order categories and draft-order categories are separate so labels stay clear." },
+    { index: 2, q: "Why does expanding a row load line items?", a: "Line items are fetched when you expand so the main list stays fast. Nested columns come from your table Settings." },
+    { index: 3, q: "Sync or API errors?", a: "Check Shopify scopes include orders and draft orders, then try refreshing the page. If it persists, contact us from the Support page with your shop domain and approximate time." },
+    { index: 4, q: "Can I customize columns?", a: "Yes. Open Settings on the table to show or hide columns, resize, and adjust expansion panel height where supported." }
+  ]
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  width: 100%;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  padding: 1rem 2.5rem 1rem 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+._id::after {
+  content: "";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.text};
+  transition: transform 0.2s ease;
+}
+
+._id[data-expanded="true"]::after {
+  transform: translateY(-50%) rotate(225deg);
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.faqItem;
+const index = item?.index ?? -1;
+const isExpanded = args.fns.expandedIndex?.() === index;
+return {
+  as: "button",
+  type: "button",
+  text: item?.q || "",
+  "data-expanded": isExpanded ? "true" : "false",
+  onClick: () => args.fns.toggleExpanded?.(index)
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  padding: 0 1rem 1rem 1rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.faqItem;
+const index = item?.index ?? -1;
+return {
+  as: "p",
+  text: item?.a || "",
+  show: () => args.fns.expandedIndex?.() === index
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-top: 1.5rem;
+}`;'''
+        displayOrder: 4
+        textType: markdown
+        componentName: Html
+        text:
+          '''Need more help? Open **[Support](/support)** in the app to reach the team.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "6"
+      E: "8"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        description: Authenticates a Shopify admin app request, ensures per-shop database and migration, and updates session
+        body:
+          '''
+
+const params = args.contextData?.searchParams || {};
+
+const { valid, error } = await args.verifyShopifyAdminRequest(params);
+
+if (!valid) {
+  return {
+    success: false,
+    error: error || "Invalid Shopify admin app request",
+  };
+}
+
+const shopify = await args.getShopifyClient();
+
+const event = args.getRequestEvent();
+if (!event) {
+  throw new Error("No request context available");
+}
+const request = event.request;
+
+let dbSession;
+try {
+  // Authenticate the request using Shopify's admin authentication
+  // This verifies the OAuth session and ensures the user has proper permissions
+  // If authentication fails, the user will be redirected to login
+  const authResult = await shopify.authenticate.admin(request);
+  const shop = authResult.session.shop;
+
+  if (!shop) {
+    return {
+      success: false,
+      error: "shop not found",
+    };
+  }
+
+  // Save unique shop name in subdomain DB (caller passes useSessionShop: false so args.session is subdomain session)
+  await args.session.run(
+    `MERGE (s:ShopifyShop {shop: $shop})
+     ON CREATE SET s.createdAt = datetime(), s.updatedAt = datetime()
+     ON MATCH SET s.updatedAt = datetime()`,
+    { shop }
+  );
+
+  // Ensure dedicated database for this shop and run migration.
+  // After schema import, saveMigrationRequestForAllShops() sets a global flag so
+  // shouldRunMigrationForShop(shop) is true; migration runs here for the current shop.
+  // Migration "in progress" is stored in DB; if another process is migrating,
+  // this waits and retries up to 3 times with a time gap so migration can complete.
+  const result = await args.ensureShopDatabaseAndMigrate(shop, {
+    dryRun: false,
+    contextData: {
+      searchParams: params,
+    },
+    appSubDomain: args.rawSubDomain,
+    shopifyAdmin: authResult.admin,
+  });
+  dbSession = result.dbSession;
+  const { subDomain } = result;
+
+  return {
+    success: true,
+    shop,
+    subDomain,
+    message: "Shopify admin app request authenticated",
+  };
+} catch (errorOrResponse) {
+  if (errorOrResponse instanceof Response) {
+    if (errorOrResponse.status === 410 && errorOrResponse.statusText === "Gone") {
+      return {
+        success: false,
+        skipped: true,
+        reason: "shopify_bot_request",
+        status: 410,
+        message: "Shopify authentication skipped for bot request",
+      };
+    }
+
+    const ev = args.getRequestEvent();
+    if (ev && ev.response) {
+      errorOrResponse.headers.forEach((value, key) => {
+        ev.response.headers.set(key, value);
+      });
+    }
+  }
+  throw errorOrResponse;
+} finally {
+  if (dbSession) {
+    await dbSession.close();
+  }
+}
+'''
+        key: authShopifyAdminRequest
+      }
+    }
+  ]
+  edges: []
+}

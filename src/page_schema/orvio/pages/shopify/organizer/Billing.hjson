@@ -1,0 +1,135 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: "return { enabled: () => true }"
+        title: Billing - Decode Orders Organizer
+        key: Billing
+        url: /billing
+        props: "return { isNoPermissionCheck: true }"
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          "return `._id { max-width: 800px; margin: 0 auto; padding: ${args.theme.var.spacing?.lg || \"2rem\"}; color: ${args.theme.var.color.text}; } @media (max-width: 768px) { ._id { padding: ${args.theme.var.spacing?.md || \"1rem\"}; } }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"div\" }"
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 2rem; font-weight: 700; color: ${args.theme.var.color.text}; margin: 0 0 1rem 0; } @media (max-width: 768px) { ._id { font-size: 1.75rem; } }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h1\", text: \"Billing & plans\" }"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.muted}; margin-bottom: 1.5rem; }`;"
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: "Billing for **Decode Orders Organizer** is managed in your **Shopify admin** (app subscription and invoices)."
+        props: "return { as: \"p\" }"
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css: "return `._id { margin-top: 1.5rem; }`;"
+        displayOrder: 3
+        componentName: Html
+        props: "return { as: \"section\" }"
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 1.25rem; font-weight: 600; color: ${args.theme.var.color.text}; margin: 0 0 0.5rem 0; }`;"
+        displayOrder: 1
+        componentName: Html
+        props: "return { as: \"h2\", text: \"Manage your subscription\" }"
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          "return `._id { font-size: 0.9375rem; line-height: 1.6; color: ${args.theme.var.color.muted}; margin: 0; }`;"
+        displayOrder: 2
+        componentName: Html
+        props:
+          "return { as: \"p\", text: \"To upgrade, downgrade, cancel, or change payment method, use your store billing settings for installed apps in Shopify.\" }"
+      }
+    }
+    {
+      id: "8"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+  ]
+}

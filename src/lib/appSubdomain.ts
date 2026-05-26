@@ -4,7 +4,7 @@
  */
 export const APP_SUBDOMAIN_HOSTNAMES = [
   "decodeproduct.decodecommerce.com",
-  "decodeorder.decodecommerce.com",
+  "orvio.decodecommerce.com",
   "decodefile.decodecommerce.com",
   "storetasks.decodecommerce.com",
   "attendra.decodecommerce.com",
@@ -12,7 +12,7 @@ export const APP_SUBDOMAIN_HOSTNAMES = [
 
 /**
  * Returns true if the given hostname is one of the app subdomains
- * (decodeproduct, decodeorder, decodefile).
+ * (decodeproduct, orvio, decodefile).
  */
 export function isAppSubdomain(hostname: string): boolean {
   return (APP_SUBDOMAIN_HOSTNAMES as readonly string[]).includes(hostname);

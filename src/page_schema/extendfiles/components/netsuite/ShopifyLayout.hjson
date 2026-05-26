@@ -121,7 +121,7 @@ return {
           '''return {
   as: "meta",
   property: "og:url",
-  content: "https://decodeorder.decodecommerce.com" + (args.location?.pathname || "/")
+  content: "https://orvio.decodecommerce.com" + (args.location?.pathname || "/")
 }'''
       }
     }
@@ -135,7 +135,7 @@ return {
           '''return {
   as: "link",
   rel: "canonical",
-  href: "https://decodeorder.decodecommerce.com" + (args.location?.pathname || "/")
+  href: "https://orvio.decodecommerce.com" + (args.location?.pathname || "/")
 }'''
       }
     }
@@ -149,7 +149,7 @@ return {
           '''return {
   as: "meta",
   property: "og:image",
-  content: "https://decodeorder.decodecommerce.com/api/file/download/decode-orders-organizer-og.png"
+  content: "https://orvio.decodecommerce.com/api/file/download/decode-orders-organizer-og.png"
 }'''
       }
     }

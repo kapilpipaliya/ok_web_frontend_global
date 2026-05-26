@@ -74,6 +74,16 @@ try {
   };
 } catch (errorOrResponse) {
   if (errorOrResponse instanceof Response) {
+    if (errorOrResponse.status === 410 && errorOrResponse.statusText === "Gone") {
+      return {
+        success: false,
+        skipped: true,
+        reason: "shopify_bot_request",
+        status: 410,
+        message: "Shopify authentication skipped for bot request",
+      };
+    }
+
     const ev = args.getRequestEvent();
     if (ev && ev.response) {
       errorOrResponse.headers.forEach((value, key) => {

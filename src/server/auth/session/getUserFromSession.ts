@@ -18,7 +18,7 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 import { isUserInactiveForSignIn } from "~/lib/auth/userSignInEligibility";
 
 export async function getSessionUser(): Promise<undefined | Vertex> {
-  // Check if hostname is one of the app subdomains (decodeproduct, decodeorder, decodefile)
+  // Check if hostname is one of the app subdomains (decodeproduct, orvio, decodefile)
   const event = getRequestEvent();
   try {
     if (event) {

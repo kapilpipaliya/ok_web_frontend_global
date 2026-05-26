@@ -782,7 +782,7 @@ payload {
 {
     "shopifyAPIKey": "ce06108efb1b49fe4e2b07d321635271",
     "shopifyAPISecret": "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",
-    "shopifyAppUrl": "https://decodeorder.decodecommerce.com/",
+    "shopifyAppUrl": "https://orvio.decodecommerce.com/",
     "shopifyScopes": "write_products,read_assigned_fulfillment_orders,read_draft_orders,read_orders"
 }
 {
@@ -817,7 +817,7 @@ Some fields need extra scopes or return null (e.g. orderStaffMember, B2B purchas
 
 
 
-Summary: Table scroll layout (decodeorder Table.hjson + VirtualList.hjson)
+Summary: Table scroll layout (orvio Table.hjson + VirtualList.hjson)
 Problem
 Wide tables: the vertical scrollbar sat on the far right of the full grid width, so you had to scroll horizontally to reach it.
 Merging two divs in VirtualList broke virtualization (scroll ref and tall spacer must stay separate).
