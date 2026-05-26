@@ -5,7 +5,7 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: Support - StoreTasks
+        title: Support
         key: ShopifySupport
         url: /support
         props:

@@ -1,0 +1,192 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsSaveBar
+        fns:
+          '''
+const getSaveStrategy = () => args.contextData.props?.saveStrategy || args.fns.getSaveStrategy?.() || {};
+
+const [hasDirty, setHasDirty] = args.createSignal(false);
+const [isSaving, setIsSaving] = args.createSignal(false);
+
+args.createEffect(() => {
+  const pageStateVertexId = args.fns.pageStateVertexId;
+  if (!pageStateVertexId) {
+    setHasDirty(false);
+    return;
+  }
+  const dirtyIds = args.graph.vertexes[pageStateVertexId]?.P?.settingsDirtySectionIds;
+  setHasDirty(Array.isArray(dirtyIds) && dirtyIds.length > 0);
+});
+
+const hasDirtySections = () => hasDirty();
+
+const getDirtySectionIds = () => {
+  const pageStateVertexId = args.fns.pageStateVertexId;
+  if (!pageStateVertexId) return [];
+  const dirtyIds = args.graph.vertexes[pageStateVertexId]?.P?.settingsDirtySectionIds;
+  return Array.isArray(dirtyIds) ? dirtyIds : [];
+};
+
+const handleDiscard = async () => {
+  if (!hasDirtySections()) return;
+  const onDiscard = args.contextData.props?.onDiscard || args.fns.handleDiscardChanges;
+  if (typeof onDiscard === "function") await onDiscard();
+};
+
+const handleSave = async () => {
+  if (!hasDirtySections()) return;
+  const onSave = args.contextData.props?.onSave || args.fns.handleSaveAllDirtySections;
+  if (typeof onSave !== "function") return;
+  setIsSaving(true);
+  try {
+    await onSave();
+  } finally {
+    setIsSaving(false);
+  }
+};
+
+return {
+  hasDirtySections,
+  getDirtySectionIds,
+  isSaving,
+  handleDiscard,
+  handleSave,
+  getSaveStrategy
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const isVisible = args.fns.hasDirtySections();
+return `._id {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
+  background: ${args.theme.var.color.background};
+  border-top: 1px solid ${args.theme.var.color.border};
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(${isVisible ? "0" : "calc(100% + 1rem)"});
+  opacity: ${isVisible ? "1" : "0"};
+  pointer-events: ${isVisible ? "auto" : "none"};
+  transition: transform ${args.theme.var.animation.normal} ease, opacity ${args.theme.var.animation.fast} ease;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const saveStrategy = args.fns.getSaveStrategy();
+return {
+  as: "div",
+  hide: saveStrategy?.showSaveBar === false
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const dirtyCount = args.fns.getDirtySectionIds().length;
+const hasDirty = args.fns.hasDirtySections();
+return {
+  as: "span",
+  text: hasDirty
+    ? `Unsaved changes in ${dirtyCount} section${dirtyCount > 1 ? "s" : ""}`
+    : "No unsaved changes"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Discard",
+  onClick: args.fns.handleDiscard,
+  disabled: !args.fns.hasDirtySections() || args.fns.isSaving()
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: args.fns.isSaving() ? "Saving..." : "Save",
+  onClick: args.fns.handleSave,
+  disabled: !args.fns.hasDirtySections() || args.fns.isSaving()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "4", E: "5" }
+    { id: "e5", T: "Attr", S: "4", E: "6" }
+  ]
+}

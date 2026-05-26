@@ -1,0 +1,481 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: TableModal
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: flex-end;
+  }
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''const isOpen = args.contextData.props?.isOpen || false;
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.contextData.props?.onClose();
+    }
+  },
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 880px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    animation: slideUpMobile 0.3s ease;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}`;
+'''
+        displayOrder: 1
+        fns:
+          '''
+// Track form txnId for cleanup
+const [formTxnId, setFormTxnId] = args.createSignal(0);
+
+// Cleanup function to revert transaction
+const cleanup = () => {
+  const txnId = formTxnId();
+  if (txnId && txnId > 0) {
+    args.revertTransaction(txnId);
+    setFormTxnId(0);
+  }
+};
+
+return {
+  formTxnId,
+  setFormTxnId,
+  cleanup,
+  getUsePolarisUI: () => args.fns.getUsePolarisUI?.() === true
+};
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation(),
+  onCleanup: () => {
+    args.fns.cleanup();
+  }
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const mode = args.contextData.props?.mode || "add";
+const label = args.contextData.props?.label;
+const title = mode === "add" 
+  ? (label ? `Add New ${label}` : "Add New Item")
+  : mode === "view"
+  ? (label ? `View ${label}` : "View Item")
+  : (label ? `Edit ${label}` : "Edit Item");
+
+return {
+  as: "div",
+  text: title
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  cursor: pointer;
+  color: ${args.theme.var.color.muted};
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  const onClose = args.contextData.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24,
+  onClick: wrappedOnClose,
+  hide: args.fns.getUsePolarisUI?.() === true
+};
+'''
+      }
+    }
+    {
+      id: "6_polaris"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  const onClose = args.contextData.props?.onClose;
+  if (onClose) onClose();
+};
+
+return {
+  as: "s-button",
+  "attr:variant": "plain",
+  "attr:icon": "x",
+  "attr:accessibilityLabel": "Close",
+  onClick: wrappedOnClose,
+  hide: args.fns.getUsePolarisUI?.() !== true
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  padding: ${args.theme.var.spacing.lg};
+}`;
+'''
+        displayOrder: 2
+        componentName: FormManagement
+        props:
+          '''
+const formConfig = args.contextData.props?.formConfig;
+const mode = args.contextData.props?.mode || "add";
+const tableVertexLabel = args.contextData.props?.tableVertexLabel;
+const initialVertex = args.contextData.props?.initialVertex;
+const onSave = args.contextData.props?.onSave;
+const onClose = args.contextData.props?.onClose;
+
+// Wrap onSave to track txnId and pass through return value for FormManagement cleanup
+const wrappedOnSave = async (saveData) => {
+  // Get txnId from FormManagement (will be set via onFnsReady)
+  const txnId = args.fns?.formTxnId?.();
+  if (txnId && txnId > 0) {
+    args.fns.setFormTxnId(txnId);
+  }
+
+  // Call original onSave with vertex format and return result for FormManagement
+  if (onSave) {
+    return await onSave(saveData);
+  }
+  return false;
+};
+
+// Wrap onClose to cleanup transaction
+const wrappedOnClose = () => {
+  args.fns.cleanup();
+  if (onClose) {
+    onClose();
+  }
+};
+
+return {
+  formConfig: formConfig,
+  initialVertex: initialVertex,
+  mode: mode,
+  inModal: true,
+  vertexLabel: tableVertexLabel,
+  hide: () => !(args.contextData.props?.isOpen === true),
+  onSave: wrappedOnSave,
+  onClose: wrappedOnClose
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: ComponentVariant
+      P: {
+        type: boolean
+        key: isOpen
+        defValue: false
+      }
+    }
+    {
+      id: "9"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: tableVertexLabel
+      }
+    }
+    {
+      id: "10"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onClose
+      }
+    }
+    {
+      id: "11"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: initialVertex
+      }
+    }
+    {
+      id: "12"
+      L: ComponentVariant
+      P: {
+        type: function
+        key: onSave
+      }
+    }
+    {
+      id: "13"
+      L: ComponentVariant
+      P: {
+        type: object
+        key: formConfig
+      }
+    }
+    {
+      id: "14"
+      L: ComponentVariant
+      P: {
+        type: string
+        defValue: add
+        key: mode
+      }
+    }
+    {
+      id: "15"
+      L: ComponentVariant
+      P: {
+        type: string
+        key: label
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: ComponentVariant
+      S: "1"
+      E: "8"
+    }
+    {
+      id: e3
+      T: ComponentVariant
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e4
+      T: ComponentVariant
+      S: "1"
+      E: "10"
+    }
+    {
+      id: e5
+      T: ComponentVariant
+      S: "1"
+      E: "11"
+    }
+    {
+      id: e6
+      T: ComponentVariant
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e7
+      T: ComponentVariant
+      S: "1"
+      E: "13"
+    }
+    {
+      id: e8
+      T: ComponentVariant
+      S: "1"
+      E: "14"
+    }
+    {
+      id: e8a
+      T: ComponentVariant
+      S: "1"
+      E: "15"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "4"
+      E: "6"
+    }
+    {
+      id: e13a
+      T: Attr
+      S: "4"
+      E: "6_polaris"
+    }
+  ]
+}

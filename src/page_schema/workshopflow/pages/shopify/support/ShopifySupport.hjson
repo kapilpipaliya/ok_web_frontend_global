@@ -5,7 +5,7 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: Support - WorkshopFlow
+        title: Support
         key: ShopifySupport
         url: /support
         props:

@@ -1,0 +1,98 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: loadSettingsSection
+        description: Loads a single settings section document with defaults merged. Supports partial section loading for performance.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found" };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const {
+  pageId,
+  sectionId,
+  scopeVertexLabel,
+  scopeId,
+  sectionConfig
+} = args.contextData;
+
+if (!pageId || !sectionId) {
+  return { success: false, message: "pageId and sectionId are required" };
+}
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null) return fallback;
+  if (typeof value === "object") return value;
+  try { return JSON.parse(String(value)); } catch { return fallback; }
+};
+
+const effectiveScopeLabel = scopeVertexLabel || "User";
+const effectiveScopeId = scopeId || user.P.uuid;
+const edgeType = `${effectiveScopeLabel}HasSettingsSection`;
+
+let documentVertex = null;
+
+if (effectiveScopeLabel === "User") {
+  const query = `
+    MATCH (scope:User {uuid: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    RETURN doc LIMIT 1
+  `;
+  const result = await args.session.run(query, { scopeId: effectiveScopeId, pageId, sectionId });
+  if (result.records.length > 0) {
+    const vertices = args.processResult(result.records, args.context, "doc");
+    documentVertex = vertices[0];
+  }
+} else {
+  const scopeMatchProperty = args.contextData.scopeMatchProperty || "uuid";
+  const query = `
+    MATCH (scope:${effectiveScopeLabel} {${scopeMatchProperty}: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    RETURN doc LIMIT 1
+  `;
+  const result = await args.session.run(query, { scopeId: effectiveScopeId, pageId, sectionId });
+  if (result.records.length > 0) {
+    const vertices = args.processResult(result.records, args.context, "doc");
+    documentVertex = vertices[0];
+  }
+}
+
+const storedValues = documentVertex
+  ? parseJsonSafe(documentVertex.P?.values, {})
+  : {};
+
+let mergedValues = storedValues;
+if (sectionConfig && args.executeNamedServerFunction) {
+  const mergeResult = await args.executeNamedServerFunction({
+    functionName: "settingsEngineHelpers",
+    contextData: { action: "mergeDefaults", sectionConfig, values: storedValues }
+  });
+  if (mergeResult?.result?.success) {
+    mergedValues = mergeResult.result.data?.values || storedValues;
+  }
+}
+
+return {
+  success: true,
+  data: {
+    pageId,
+    sectionId,
+    values: mergedValues,
+    version: documentVertex?.P?.version ?? 0,
+    documentId: documentVertex?.id ?? null,
+    scopeVertexLabel: effectiveScopeLabel,
+    scopeId: effectiveScopeId,
+    exists: documentVertex != null
+  },
+  message: "Settings section loaded"
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

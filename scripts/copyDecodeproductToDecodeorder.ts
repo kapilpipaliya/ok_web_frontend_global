@@ -13,10 +13,10 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const SOURCE = path.join(ROOT, "src/page_schema/decodeproduct");
+const SOURCE = path.join(ROOT, "src/page_schema/certpulse");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["orvio", "decodefile", "extendfiles", "workshopflow", "hydrateme", "certpulse", "storetasks", "attendra", "ytorganizer"];
+const DEST_NAMES = ["orvio", "decodefile", "extendfiles", "workshopflow", "hydrateme", "decodeproduct", "storetasks", "attendra", "ytorganizer", "solvo"];
 
 const SKIP_DIRS = [
   //"functions",
@@ -36,6 +36,9 @@ const SKIP_DIRS = [
   "pages/shopify/admin",
   "pages/portal",
   "functions/app",
+
+  "functions/dynamic_page/main_functions/certpulse",
+  "pages/certpulse",
   
 ];
 
@@ -55,7 +58,7 @@ const SKIP_FILES = [
   "readme.md",
 
 
-   "pages/shopify/support/ShopifySupport.hjson"
+   //"pages/shopify/support/ShopifySupport.hjson"
 ];
 
 function shouldSkip(relativePath: string): boolean {

@@ -1,0 +1,231 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: saveSettingsSection
+        description: Generic settings section save with version concurrency check, validation, transforms, hooks, and audit logging.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "User session not found" };
+}
+
+const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const {
+  pageId,
+  sectionId,
+  values,
+  version,
+  scopeVertexLabel,
+  scopeId,
+  sectionConfig,
+  pageConfig,
+  auditEnabled
+} = args.contextData;
+
+if (!pageId || !sectionId) {
+  return { success: false, message: "pageId and sectionId are required" };
+}
+
+if (!values || typeof values !== "object") {
+  return { success: false, message: "values object is required" };
+}
+
+const effectiveScopeLabel = scopeVertexLabel || "User";
+const effectiveScopeId = scopeId || user.P.uuid;
+const edgeType = `${effectiveScopeLabel}HasSettingsSection`;
+const scopeMatchProperty = args.contextData.scopeMatchProperty || "uuid";
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null) return fallback;
+  if (typeof value === "object") return value;
+  try { return JSON.parse(String(value)); } catch { return fallback; }
+};
+
+let transformedValues = values;
+if (sectionConfig && args.executeNamedServerFunction) {
+  const transformResult = await args.executeNamedServerFunction({
+    functionName: "settingsEngineHelpers",
+    contextData: { action: "transformValues", sectionConfig, values }
+  });
+  if (transformResult?.result?.success) {
+    transformedValues = transformResult.result.data?.values || values;
+  }
+
+  const validateResult = await args.executeNamedServerFunction({
+    functionName: "settingsEngineHelpers",
+    contextData: { action: "validateSection", sectionConfig, values: transformedValues }
+  });
+  if (validateResult?.result?.success === false) {
+    return {
+      success: false,
+      message: validateResult.result.message || "Validation failed",
+      data: validateResult.result.data
+    };
+  }
+}
+
+let existingDocument = null;
+let existingQuery;
+if (effectiveScopeLabel === "User") {
+  existingQuery = `
+    MATCH (scope:User {uuid: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    RETURN doc LIMIT 1
+  `;
+} else {
+  existingQuery = `
+    MATCH (scope:${effectiveScopeLabel} {${scopeMatchProperty}: $scopeId})-[:${edgeType}]->(doc:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    RETURN doc LIMIT 1
+  `;
+}
+
+const existingResult = await args.session.run(existingQuery, {
+  scopeId: effectiveScopeId,
+  pageId,
+  sectionId
+});
+
+if (existingResult.records.length > 0) {
+  const existingVertices = args.processResult(existingResult.records, args.context, "doc");
+  existingDocument = existingVertices[0];
+}
+
+const currentVersion = existingDocument?.P?.version ?? 0;
+const expectedVersion = version != null ? Number(version) : currentVersion;
+
+if (existingDocument && expectedVersion !== currentVersion) {
+  return {
+    success: false,
+    message: "Conflict: settings were modified by another session",
+    errorCode: "CONFLICT",
+    data: { currentVersion, expectedVersion }
+  };
+}
+
+const beforeValues = existingDocument
+  ? parseJsonSafe(existingDocument.P?.values, {})
+  : {};
+
+const newVersion = currentVersion + 1;
+const valuesJson = JSON.stringify(transformedValues);
+const now = new Date().toISOString();
+const auditResource = pageConfig?.audit?.resource || `settings.${pageId}`;
+
+let saveQuery;
+let saveParams;
+
+if (existingDocument) {
+  const elementId = existingDocument.id;
+  saveQuery = `
+    MATCH (doc:SettingsSectionDocument)
+    WHERE elementId(doc) = $elementId
+    SET doc.values = $valuesJson,
+        doc.version = $newVersion,
+        doc.updatedAt = $now,
+        doc.updatedBy = $updatedBy
+    RETURN doc
+  `;
+  saveParams = {
+    elementId,
+    valuesJson,
+    newVersion,
+    now,
+    updatedBy: user.P.uuid
+  };
+} else {
+  if (effectiveScopeLabel === "User") {
+    saveQuery = `
+      MATCH (scope:User {uuid: $scopeId})
+      CREATE (doc:SettingsSectionDocument {
+        pageId: $pageId,
+        sectionId: $sectionId,
+        scopeVertexLabel: $scopeVertexLabel,
+        scopeId: $scopeId,
+        values: $valuesJson,
+        version: $newVersion,
+        createdAt: $now,
+        updatedAt: $now,
+        updatedBy: $updatedBy,
+        type: 'settings_section'
+      })
+      CREATE (scope)-[:${edgeType}]->(doc)
+      RETURN doc
+    `;
+  } else {
+    saveQuery = `
+      MATCH (scope:${effectiveScopeLabel} {${scopeMatchProperty}: $scopeId})
+      CREATE (doc:SettingsSectionDocument {
+        pageId: $pageId,
+        sectionId: $sectionId,
+        scopeVertexLabel: $scopeVertexLabel,
+        scopeId: $scopeId,
+        values: $valuesJson,
+        version: $newVersion,
+        createdAt: $now,
+        updatedAt: $now,
+        updatedBy: $updatedBy,
+        type: 'settings_section'
+      })
+      CREATE (scope)-[:${edgeType}]->(doc)
+      RETURN doc
+    `;
+  }
+  saveParams = {
+    scopeId: effectiveScopeId,
+    pageId,
+    sectionId,
+    scopeVertexLabel: effectiveScopeLabel,
+    valuesJson,
+    newVersion,
+    now,
+    updatedBy: user.P.uuid
+  };
+}
+
+const saveResult = await args.session.run(saveQuery, saveParams);
+if (saveResult.records.length === 0) {
+  return { success: false, message: "Failed to persist settings section" };
+}
+
+const savedVertices = args.processResult(saveResult.records, args.context, "doc");
+const savedDocument = savedVertices[0];
+
+let auditEntry = null;
+if (auditEnabled !== false && args.executeNamedServerFunction) {
+  const diffResult = await args.executeNamedServerFunction({
+    functionName: "settingsEngineHelpers",
+    contextData: { action: "buildAuditDiff", beforeValues, afterValues: transformedValues }
+  });
+  if (diffResult?.result?.success) {
+    auditEntry = {
+      resource: auditResource,
+      section: sectionId,
+      changedBy: user.P.uuid,
+      changedAt: now,
+      diff: diffResult.result.data?.diff,
+      changedKeys: diffResult.result.data?.changedKeys
+    };
+  }
+}
+
+return {
+  success: true,
+  data: {
+    pageId,
+    sectionId,
+    values: transformedValues,
+    version: newVersion,
+    documentId: savedDocument?.id,
+    audit: auditEntry
+  },
+  message: "Settings section saved successfully"
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

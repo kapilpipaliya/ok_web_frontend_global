@@ -21,7 +21,13 @@ args.addNewVertex(0, {
     selectedSidebarCategoryId: null,
     selectedRowsByCategory: {},
     sidebarWidth: 240,
-    rowsToRemoveVertexIds: null
+    rowsToRemoveVertexIds: null,
+    settingsSectionStateMap: {},
+    settingsDirtySectionIds: [],
+    settingsFormFnsMap: {},
+    settingsLoading: false,
+    settingsInitializing: false,
+    settingsPageId: null
   },
   IN: {},
   OUT: {}
@@ -51,6 +57,58 @@ const getUncategorizedVertexId = () => {
   return label ? '_' + label + '_uncategorized' : null;
 };
 const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
+const getPageMode = () => {
+  const fromProps = args.contextData.props?.pageMode;
+  if (fromProps === "settings" || fromProps === "table") return fromProps;
+  const { config } = getCachedConfig();
+  if (config?.pageMode === "settings") return "settings";
+  return "table";
+};
+const isSettingsPageMode = () => getPageMode() === "settings";
+const getDefaultSettingsPageIdFromConfig = (config) => {
+  if (!config || typeof config !== "object") return null;
+  const groups = config.sidebar?.groups;
+  if (Array.isArray(groups)) {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const items = groups[gi]?.items;
+      if (!Array.isArray(items)) continue;
+      for (let ii = 0; ii < items.length; ii++) {
+        const itemId = items[ii]?.id;
+        if (itemId != null && String(itemId).trim() !== "") return String(itemId).trim();
+      }
+    }
+  }
+  if (config.id != null && String(config.id).trim() !== "") return String(config.id).trim();
+  return null;
+};
+const getDefaultSettingsPageId = () => {
+  const { config } = getCachedConfig();
+  return getDefaultSettingsPageIdFromConfig(config);
+};
+const getSettingsPageId = () => {
+  const fromProps = args.contextData.props?.settingsPageId;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  const fromQuery = args.searchParams?.page;
+  if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
+  const fromState = pageP()?.settingsPageId;
+  if (fromState != null && String(fromState).trim() !== "") return String(fromState).trim();
+  return getDefaultSettingsPageId();
+};
+const getScopeConfig = () => {
+  const { config } = getCachedConfig();
+  return config?.scope || args.contextData.props?.scope || {
+    vertexLabel: "User",
+    idParam: "scopeId"
+  };
+};
+const getScopeId = () => {
+  const scopeConfig = getScopeConfig();
+  const fromProps = args.contextData.props?.scopeId;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  const fromSearch = args.searchParams?.[scopeConfig.idParam || "scopeId"];
+  if (fromSearch != null && String(fromSearch).trim() !== "") return String(fromSearch).trim();
+  return args.user?.P?.uuid || null;
+};
 const getConfigFunction = () => args.contextData.props?.configFunction;
 
 // Helper to get cached config (and trigger memo evaluation if needed)
@@ -224,6 +282,26 @@ const getGenericSettingsFunction = () => {
     } catch (error) {
       console.error("Error loading settings:", error);
       args.showErrorToast?.(error?.message || "Failed to load settings");
+    }
+    return { success: false, data: { setting: null } };
+  };
+};
+
+const getGenericSettingsPageConfigFunction = () => {
+  return async () => {
+    const settingsPageId = getSettingsPageId();
+    try {
+      const result = await args.fns.executeYTOFunction("getSettingsPageConfig", {
+        settingsPageId: settingsPageId || undefined,
+        settingsLabel: settingsPageId || undefined,
+        key: settingsPageId ? `${settingsPageId}_settings_page` : undefined
+      });
+      const errorMessage = extractError(result, true, "Failed to load settings page config");
+      if (errorMessage) return { success: false, data: { setting: null } };
+      if (result?.result?.success && result.result.data?.setting) return result.result;
+    } catch (error) {
+      console.error("Error loading settings page config:", error);
+      args.showErrorToast?.(error?.message || "Failed to load settings page config");
     }
     return { success: false, data: { setting: null } };
   };
@@ -706,6 +784,9 @@ const getDataFunction = () => {
 };
 const getSettingsFunction = () => {
   const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting && isSettingsPageMode()) {
+    return getGenericSettingsPageConfigFunction();
+  }
   if (loadFromSetting) {
     return getGenericSettingsFunction();
   }
@@ -1216,6 +1297,275 @@ const getTablePassthroughProps = () => {
   return passthrough;
 };
 
+// --- Settings Page Mode: orchestration, adapter, dirty tracking ---
+
+const getSettingsSidebarConfig = () => {
+  const config = evaluateConfig();
+  return config?.sidebar || null;
+};
+
+const getSaveStrategy = () => {
+  const config = evaluateConfig();
+  return config?.saveStrategy || { mode: "section", showSaveBar: true, warnOnLeave: true };
+};
+
+const isSettingsLoading = () => pageP()?.settingsLoading === true;
+
+const getSectionStateMap = () => pageP()?.settingsSectionStateMap || {};
+
+const getSectionState = (sectionId) => {
+  if (!sectionId) return null;
+  return getSectionStateMap()[sectionId] || null;
+};
+
+const patchSectionStateMap = (sectionId, sectionState) => {
+  const currentMap = { ...getSectionStateMap() };
+  currentMap[sectionId] = sectionState;
+  patchPageP({ settingsSectionStateMap: currentMap });
+};
+
+const getDirtySectionIds = () => {
+  const dirtyIds = pageP()?.settingsDirtySectionIds;
+  return Array.isArray(dirtyIds) ? dirtyIds : [];
+};
+
+const markSectionDirty = (sectionId) => {
+  if (!sectionId) return;
+  const current = getDirtySectionIds();
+  if (current.includes(sectionId)) return;
+  patchPageP({ settingsDirtySectionIds: [...current, sectionId] });
+};
+
+const markSectionClean = (sectionId, newValues, meta) => {
+  if (!sectionId) return;
+  const current = getDirtySectionIds().filter((id) => id !== sectionId);
+  patchPageP({ settingsDirtySectionIds: current });
+  const existingState = getSectionState(sectionId) || {};
+  patchSectionStateMap(sectionId, {
+    ...existingState,
+    values: newValues != null ? newValues : existingState.values,
+    initialValues: newValues != null ? { ...newValues } : existingState.initialValues,
+    version: meta?.version != null ? Number(meta.version) : existingState.version ?? 0,
+    documentId: meta?.documentId != null ? meta.documentId : existingState.documentId ?? null
+  });
+};
+
+const dirtyTracker = {
+  hasDirty: () => getDirtySectionIds().length > 0,
+  getDirtySectionIds,
+  registerSection: (sectionId) => sectionId,
+  markDirty: markSectionDirty,
+  markClean: markSectionClean
+};
+
+const registerSectionFormFns = (sectionId, formFns) => {
+  const currentMap = { ...(pageP()?.settingsFormFnsMap || {}) };
+  currentMap[sectionId] = formFns;
+  patchPageP({ settingsFormFnsMap: currentMap });
+};
+
+const settingsAdapter = {
+  loadPage: async () => {
+    const config = evaluateConfig();
+    const settingsPageId = getSettingsPageId();
+    const scopeConfig = getScopeConfig();
+    const scopeId = getScopeId();
+    if (!settingsPageId) return { success: false, message: "Missing settingsPageId" };
+
+    patchPageP({ settingsLoading: true });
+    try {
+      const result = await args.fns.executeYTOFunction("loadSettingsPage", {
+        pageId: settingsPageId,
+        scopeVertexLabel: scopeConfig.vertexLabel,
+        scopeId,
+        scopeMatchProperty: scopeConfig.matchProperty,
+        sections: config?.sections || []
+      });
+
+      const errorMessage = extractError(result, true, "Failed to load settings");
+      if (errorMessage) return { success: false, message: errorMessage };
+
+      if (result?.result?.success) {
+        const sectionsData = result.result.data?.sections || {};
+        const stateMap = {};
+        for (const sectionId in sectionsData) {
+          const sectionData = sectionsData[sectionId];
+          stateMap[sectionId] = {
+            values: sectionData.values || {},
+            initialValues: { ...(sectionData.values || {}) },
+            version: sectionData.version ?? 0,
+            documentId: sectionData.documentId ?? null
+          };
+        }
+        patchPageP({ settingsSectionStateMap: stateMap, settingsDirtySectionIds: [] });
+        return { success: true, data: sectionsData };
+      }
+    } catch (error) {
+      console.error("settingsAdapter.loadPage:", error);
+      args.showErrorToast?.(error?.message || "Failed to load settings");
+    } finally {
+      patchPageP({ settingsLoading: false });
+    }
+    return { success: false, message: "Failed to load settings" };
+  },
+
+  saveSection: async ({ sectionId, sectionConfig, values, version }) => {
+    const settingsPageId = getSettingsPageId();
+    const scopeConfig = getScopeConfig();
+    const scopeId = getScopeId();
+    const pageConfig = evaluateConfig();
+
+    const result = await args.fns.executeYTOFunction("saveSettingsSection", {
+      pageId: settingsPageId,
+      sectionId,
+      values,
+      version,
+      scopeVertexLabel: scopeConfig.vertexLabel,
+      scopeId,
+      scopeMatchProperty: scopeConfig.matchProperty,
+      sectionConfig,
+      pageConfig,
+      auditEnabled: pageConfig?.audit?.enabled !== false
+    });
+
+    const errorMessage = extractError(result, false, "Failed to save settings");
+    if (errorMessage) {
+      args.showErrorToast?.(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+
+    if (result?.result?.success) {
+      args.showSuccessToast?.(result.result.message || "Settings saved");
+      markSectionClean(sectionId, result.result.data?.values, {
+        version: result.result.data?.version,
+        documentId: result.result.data?.documentId
+      });
+      return result.result;
+    }
+    return { success: false, message: "Failed to save settings" };
+  },
+
+  resetSection: async ({ sectionId, sectionConfig }) => {
+    const settingsPageId = getSettingsPageId();
+    const scopeConfig = getScopeConfig();
+    const scopeId = getScopeId();
+
+    const result = await args.fns.executeYTOFunction("resetSettingsSection", {
+      pageId: settingsPageId,
+      sectionId,
+      scopeVertexLabel: scopeConfig.vertexLabel,
+      scopeId,
+      scopeMatchProperty: scopeConfig.matchProperty,
+      sectionConfig,
+      deleteDocument: false
+    });
+
+    if (result?.result?.success) {
+      markSectionClean(sectionId, result.result.data?.values, {
+        version: result.result.data?.version,
+        documentId: result.result.data?.documentId
+      });
+      args.showSuccessToast?.(result.result.message || "Settings reset");
+    }
+    return result?.result || { success: false };
+  }
+};
+
+const saveSettingsSection = async (payload) => settingsAdapter.saveSection(payload);
+
+const loadSettingsPageData = async () => settingsAdapter.loadPage();
+
+const handleSaveAllDirtySections = async () => {
+  const dirtySectionIds = getDirtySectionIds();
+  const config = evaluateConfig();
+  const sections = config?.sections || [];
+  const formFnsMap = pageP()?.settingsFormFnsMap || {};
+
+  for (let index = 0; index < dirtySectionIds.length; index++) {
+    const sectionId = dirtySectionIds[index];
+    const sectionConfig = sections.find((section) => section.id === sectionId);
+    const formFns = formFnsMap[sectionId];
+    if (formFns && typeof formFns.handleSave === "function") {
+      await formFns.handleSave();
+    } else {
+      const sectionState = getSectionState(sectionId);
+      await settingsAdapter.saveSection({
+        sectionId,
+        sectionConfig,
+        values: sectionState?.values || {},
+        version: sectionState?.version ?? 0
+      });
+    }
+  }
+};
+
+const handleDiscardChanges = async () => {
+  await loadSettingsPageData();
+  args.showSuccessToast?.("Changes discarded");
+};
+
+const initializeSettingsPage = async () => {
+  if (pageP()?.settingsInitializing === true) return;
+  patchPageP({ configLoading: true, settingsInitializing: true });
+  try {
+    const settingsFn = getSettingsFunction();
+    if (settingsFn) {
+      await loadSettings();
+      updateMemoizedConfig();
+    }
+    ensureSettingsPageQueryParam();
+    const settingsPageId = getSettingsPageId();
+    if (settingsPageId && pageP()?.settingsPageId !== settingsPageId) {
+      patchPageP({ settingsPageId });
+    }
+    await loadSettingsPageData();
+  } finally {
+    patchPageP({ configLoading: false, settingsInitializing: false });
+  }
+};
+
+const ensureSettingsPageQueryParam = () => {
+  const fromQuery = args.searchParams?.page;
+  if (fromQuery != null && String(fromQuery).trim() !== "") return;
+  const defaultId = getDefaultSettingsPageId();
+  if (defaultId) {
+    args.setSearchParams({ page: defaultId }, { replace: true });
+  }
+};
+
+const resetSettingsPageData = () => {
+  patchPageP({
+    settings: null,
+    evaluatedConfig: null,
+    memoizedConfig: null,
+    settingsSectionStateMap: {},
+    settingsDirtySectionIds: [],
+    settingsFormFnsMap: {}
+  });
+};
+
+args.createEffect(() => {
+  if (!isSettingsPageMode()) return;
+  getCachedConfig();
+
+  const nextPageId = getSettingsPageId();
+  if (!nextPageId) {
+    if (getLoadFromSetting()) {
+      void initializeSettingsPage();
+    } else {
+      patchPageP({ configLoading: false });
+    }
+    return;
+  }
+
+  const prevPageId = pageP()?.settingsPageId;
+  if (prevPageId === nextPageId) return;
+
+  if (prevPageId != null) resetSettingsPageData();
+  patchPageP({ settingsPageId: nextPageId });
+  void initializeSettingsPage();
+});
+
 // Exported API
 return {
   prop,
@@ -1239,8 +1589,29 @@ return {
   pageStateVertexId,
   loadSettings,
   initializeSettings,
+  initializeSettingsPage,
   handleOpenSettings,
   handleSaveSettings,
+  getPageMode,
+  isSettingsPageMode,
+  getSettingsPageId,
+  getScopeConfig,
+  getScopeId,
+  getSettingsSidebarConfig,
+  getSaveStrategy,
+  isSettingsLoading,
+  getSectionState,
+  markSectionClean,
+  markSectionDirty,
+  getDirtySectionIds,
+  dirtyTracker,
+  getDirtyTracker: () => dirtyTracker,
+  registerSectionFormFns,
+  settingsAdapter,
+  saveSettingsSection,
+  loadSettingsPageData,
+  handleSaveAllDirtySections,
+  handleDiscardChanges,
   getGenericDataFunction,
   fetchUserContentRows,
   refreshQueuedRows,
@@ -1269,7 +1640,9 @@ return {
           '''
 return {
   onMount: async () => {
-    await args.fns.initializeSettings();
+    if (!args.fns.isSettingsPageMode?.()) {
+      await args.fns.initializeSettings();
+    }
   },
   onCleanup: () => {
     args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
@@ -1337,9 +1710,10 @@ return `._id {
         props:
           '''
 const hasSidebar = args.fns.hasSidebar();
+const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: !hasSidebar
+  hide: !hasSidebar || isSettings
 };
 '''
       }
@@ -1413,9 +1787,10 @@ return {
 const hasSidebar = args.fns.hasSidebar();
 const vid = args.fns.pageStateVertexId;
 const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: hasSidebar || configLoading
+  hide: hasSidebar || configLoading || isSettings
 };
 '''
       }
@@ -1439,6 +1814,66 @@ return {
   setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
   ...args.fns.getTablePassthroughProps()
 }'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: settings_page_layout_wrapper
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = args.fns.isSettingsPageMode?.() === true;
+return {
+  as: "div",
+  hide: !isSettings || configLoading
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: calc(100vh - 4rem);
+  background: ${args.theme.var.color.background};
+}
+
+@media (min-width: 769px) {
+  ._id {
+    flex-wrap: nowrap;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsSidebar
+        key: settings_sidebar
+        props:
+          '''
+const config = args.fns.evaluateConfig?.();
+return {
+  sidebarConfig: config?.sidebar || null
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SettingsPageContent
+        key: settings_page_content
       }
     }
   ]
@@ -1480,10 +1915,28 @@ return {
       E: "6"
     }
     {
-      id: e7
+      id: e8
       T: Attr
       S: "7"
       E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
     }
   ]
 }

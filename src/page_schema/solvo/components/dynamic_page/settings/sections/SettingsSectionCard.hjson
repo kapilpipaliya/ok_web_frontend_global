@@ -1,0 +1,457 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsSectionCard
+        dynamicComponent: FormManagement
+        fns:
+          '''
+const getSectionConfig = () => args.contextData.props?.sectionConfig || null;
+
+const convertToFormConfig = (sectionConfig) => {
+  const formConfig = sectionConfig?.form;
+  if (!formConfig) return null;
+  if (Array.isArray(formConfig.groups)) return formConfig;
+  if (Array.isArray(formConfig.fields)) {
+    return {
+      gridColumns: formConfig.gridColumns || 2,
+      groups: [{ key: "default", title: "", fields: formConfig.fields }]
+    };
+  }
+  return null;
+};
+
+const buildInitialVertex = (values) => {
+  const sectionValues = values || {};
+  const vertexId = args.generateNewVertexId(args.graph, args.setGraph);
+  args.addNewVertex(0, {
+    id: vertexId,
+    L: ["SettingsFormData"],
+    P: { ...sectionValues },
+    IN: {},
+    OUT: {}
+  }, args.graph, args.setGraph);
+  return args.graph.vertexes[vertexId];
+};
+
+const collectFormFields = (sectionConfig) => {
+  const formConfig = convertToFormConfig(sectionConfig);
+  if (!formConfig?.groups) return [];
+  const fields = [];
+  for (let gi = 0; gi < formConfig.groups.length; gi++) {
+    const groupFields = formConfig.groups[gi]?.fields;
+    if (Array.isArray(groupFields)) fields.push(...groupFields);
+  }
+  return fields;
+};
+
+const buildValuesFromSnapshot = (snapshot = {}) => {
+  const sectionConfig = getSectionConfig();
+  const fields = collectFormFields(sectionConfig);
+  const values = {};
+  for (let fi = 0; fi < fields.length; fi++) {
+    const field = fields[fi];
+    if (!field?.key) continue;
+    if (Object.prototype.hasOwnProperty.call(snapshot, field.key)) {
+      values[field.key] = snapshot[field.key];
+    } else if (field.defaultValue !== undefined) {
+      values[field.key] = field.defaultValue;
+    } else if (field.dataType === "boolean" || field.renderer === "checkbox") {
+      values[field.key] = false;
+    } else {
+      values[field.key] = "";
+    }
+  }
+  return values;
+};
+
+const [initialVertex, setInitialVertex] = args.createSignal(null);
+const [formManagementFns, setFormManagementFns] = args.createSignal(null);
+const [isSaving, setIsSaving] = args.createSignal(false);
+const [isDirty, setIsDirty] = args.createSignal(false);
+const [initialValuesSnapshot, setInitialValuesSnapshot] = args.createSignal(null);
+
+const syncInitialVertexFromValues = (values) => {
+  if (!values) return;
+  const normalized = buildValuesFromSnapshot(values);
+  const existing = initialVertex();
+  if (existing?.id) {
+    args.mergeVertexProperties(0, existing.id, args.graph, args.setGraph, normalized);
+    setInitialVertex({ ...existing, P: { ...normalized } });
+  } else {
+    setInitialVertex(buildInitialVertex(normalized));
+  }
+  setInitialValuesSnapshot({ ...normalized });
+  baselineCaptured = true;
+  setIsDirty(false);
+};
+
+const getSectionState = () => {
+  const sectionId = getSectionConfig()?.id;
+  if (!sectionId) return null;
+  return args.fns.getSectionState?.(sectionId) || args.contextData.props?.sectionState || null;
+};
+
+let dirtyWatchRegistered = false;
+let baselineCaptured = false;
+
+const getSectionId = () => getSectionConfig()?.id || null;
+
+const isSectionDirty = () => isDirty();
+
+const markDirty = () => {
+  const sectionId = getSectionId();
+  setIsDirty(true);
+  if (sectionId && args.fns.markSectionDirty) {
+    args.fns.markSectionDirty(sectionId);
+  }
+};
+
+const markClean = (savedValues, meta) => {
+  const sectionId = getSectionId();
+  const normalizedValues = savedValues ? buildValuesFromSnapshot(savedValues) : null;
+  setIsDirty(false);
+  if (normalizedValues) {
+    syncInitialVertexFromValues(normalizedValues);
+  }
+  if (sectionId && args.fns.markSectionClean) {
+    args.fns.markSectionClean(sectionId, normalizedValues, meta);
+  }
+};
+
+const captureBaselineIfNeeded = (formFns) => {
+  if (baselineCaptured || !formFns?.formVertexId) return;
+  const vertexId = formFns.formVertexId();
+  if (!vertexId) return;
+  const liveProperties = args.graph.vertexes[vertexId]?.P || {};
+  const snapshot = buildValuesFromSnapshot(liveProperties);
+  setInitialValuesSnapshot(snapshot);
+  baselineCaptured = true;
+  setIsDirty(false);
+};
+
+const registerFormManagementFns = (formFns) => {
+  setFormManagementFns(formFns);
+  const sectionId = getSectionId();
+  if (sectionId && args.fns.registerSectionFormFns) {
+    args.fns.registerSectionFormFns(sectionId, formFns);
+  }
+
+  if (!dirtyWatchRegistered && typeof formFns?.formVertexId === "function") {
+    dirtyWatchRegistered = true;
+    args.createEffect(() => {
+      const vertexId = formFns.formVertexId();
+      if (!vertexId) return;
+      captureBaselineIfNeeded(formFns);
+    });
+  }
+
+  captureBaselineIfNeeded(formFns);
+};
+
+const ensureInitialVertex = () => {
+  const existing = initialVertex();
+  if (existing) return existing;
+  const sectionState = getSectionState();
+  const vertex = buildInitialVertex(buildValuesFromSnapshot(sectionState?.values || {}));
+  setInitialVertex(vertex);
+  return vertex;
+};
+
+const handleSectionSaveClick = async () => {
+  const formFns = formManagementFns();
+  if (!formFns?.handleSave) return;
+  setIsSaving(true);
+  try {
+    await formFns.handleSave();
+  } finally {
+    setIsSaving(false);
+  }
+};
+
+const handleSectionDiscardClick = () => {
+  const formFns = formManagementFns();
+  const formVertex = formFns?.getFormVertex?.();
+  if (!formVertex?.id) return;
+
+  const sectionState = getSectionState();
+  const snapshot = initialValuesSnapshot()
+    || buildValuesFromSnapshot(sectionState?.initialValues || sectionState?.values || {});
+  const resetValues = buildValuesFromSnapshot(snapshot);
+
+  args.mergeVertexProperties(0, formVertex.id, args.graph, args.setGraph, resetValues);
+  markClean(resetValues);
+};
+
+const showSectionActions = () => {
+  const sectionConfig = getSectionConfig();
+  if (!sectionConfig?.form) return false;
+  const saveStrategy = sectionConfig.saveStrategy || args.fns.getSaveStrategy?.() || {};
+  return saveStrategy.mode !== "page";
+};
+
+const handleSectionSave = async (savePayload) => {
+  const sectionConfig = getSectionConfig();
+  const sectionId = sectionConfig?.id;
+  if (!sectionId) return { success: false, message: "Missing section id" };
+
+  const values = savePayload?.vertex?.P || {};
+  const sectionState = getSectionState();
+  const saveHandler = args.fns.saveSettingsSection || args.contextData.props?.onSectionSave;
+
+  if (typeof saveHandler !== "function") {
+    return { success: false, message: "Save handler not configured" };
+  }
+
+  const result = await saveHandler({
+    sectionId,
+    sectionConfig,
+    values,
+    version: sectionState?.version ?? 0
+  });
+
+  if (result?.success) {
+    const savedValues = result.data?.values || values;
+    markClean(savedValues, {
+      version: result.data?.version,
+      documentId: result.data?.documentId
+    });
+  }
+
+  return result;
+};
+
+const isDangerVariant = () => getSectionConfig()?.variant === "danger";
+
+return {
+  getSectionConfig,
+  getSectionState,
+  convertToFormConfig,
+  ensureInitialVertex,
+  initialVertex,
+  markDirty,
+  markClean,
+  captureBaselineIfNeeded,
+  registerFormManagementFns,
+  handleSectionSave,
+  handleSectionSaveClick,
+  handleSectionDiscardClick,
+  isSectionDirty,
+  showSectionActions,
+  isSaving,
+  isDangerVariant
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const isDanger = args.fns.isDangerVariant?.() === true;
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${isDanger ? args.theme.var.color.error : args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  overflow: hidden;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+if (!sectionConfig) return { hide: true };
+args.fns.ensureInitialVertex();
+return {
+  as: "section",
+  "attr:data-section-id": sectionConfig.id
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+return {
+  as: "header",
+  hide: !sectionConfig?.title && !sectionConfig?.description
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+return {
+  as: "h2",
+  text: sectionConfig?.title || "",
+  hide: !sectionConfig?.title
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.5;
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+return {
+  as: "p",
+  text: sectionConfig?.description || "",
+  hide: !sectionConfig?.description
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormManagement
+        css:
+          '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+}`;
+'''
+        props:
+          '''
+const sectionConfig = args.fns.getSectionConfig();
+const formConfig = args.fns.convertToFormConfig(sectionConfig);
+const initialVertex = args.fns.initialVertex();
+return {
+  formConfig,
+  initialVertex,
+  mode: "edit",
+  vertexLabel: "SettingsFormData",
+  hideActionsBar: true,
+  afterSuccessfulSave: "reinitialize",
+  onSave: args.fns.handleSectionSave,
+  onFnsReady: args.fns.registerFormManagementFns,
+  onFieldChange: () => args.fns.markDirty(),
+  hide: !formConfig || !initialVertex
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 3
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
+  border-top: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_50};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.showSectionActions()
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "secondary",
+  text: "Discard",
+  onClick: args.fns.handleSectionDiscardClick,
+  disabled: !args.fns.isSectionDirty() || args.fns.isSaving()
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Button
+        props:
+          '''
+return {
+  variant: "primary",
+  text: args.fns.isSaving() ? "Saving..." : "Save",
+  onClick: args.fns.handleSectionSaveClick,
+  disabled: !args.fns.isSectionDirty() || args.fns.isSaving()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e6", T: "Attr", S: "2", E: "7" }
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+    { id: "e8", T: "Attr", S: "7", E: "9" }
+  ]
+}

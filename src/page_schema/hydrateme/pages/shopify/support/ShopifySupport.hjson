@@ -5,7 +5,7 @@
       L: Page
       P: {
         fns: return { enabled: () => true }
-        title: Support - HydrateMe
+        title: Support
         key: ShopifySupport
         url: /support
         props:

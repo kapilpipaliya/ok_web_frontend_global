@@ -1,0 +1,90 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        title: Shops
+        url: /ShopifyShops
+        key: ShopifyShops
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        key: shops_dynamic_page
+        props:
+          '''
+return {
+  tableVertexLabel: "ShopifyShop",
+  loadFromSetting: true,
+  actionHandlers: {
+    delete: async (row) => {
+      const shop = row?.P?.shop;
+      if (!shop) {
+        args.showErrorToast?.("Shop domain not found");
+        throw new Error("Shop domain not found");
+      }
+
+      const response = await args.executeNamedServerFunction({
+        functionName: "deleteShopifyShop",
+        contextData: { shop }
+      });
+      const result = response?.result;
+      if (!result?.success) {
+        const msg = result?.message || result?.error || response?.error || "Failed to delete shop";
+        args.showErrorToast?.(msg);
+        throw new Error(msg);
+      }
+
+      args.showSuccessToast?.(result.message || "Shop deleted");
+
+      const rowId = String(row?.id ?? "");
+      if (rowId && args.graph?.vertexes?.[rowId]) {
+        args.deleteVertex(0, rowId, args.graph, args.setGraph);
+      }
+      const tableStates = Object.values(args.graph?.vertexes || {}).filter(
+        (v) => v?.L?.includes("TableUiState")
+      );
+      for (let i = 0; i < tableStates.length; i++) {
+        const state = tableStates[i];
+        const data = Array.isArray(state?.P?.data) ? state.P.data : [];
+        const filtered = data.filter((id) => String(id) !== rowId);
+        if (filtered.length !== data.length) {
+          args.mergeVertexProperties(0, state.id, args.graph, args.setGraph, { data: filtered });
+        }
+      }
+    }
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+  ]
+}

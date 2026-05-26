@@ -1,0 +1,268 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: SettingsSidebar
+        fns:
+          '''
+const getSidebarConfig = () => args.contextData.props?.sidebarConfig || args.fns.getSettingsSidebarConfig?.() || null;
+
+const checkPermissions = (permissionConfig) => {
+  if (!permissionConfig) return true;
+  if (args.isNoPermissionCheck === true) return true;
+  if (args.hasFullPermission || args.hasEditPermission || args.hasViewPermission) return true;
+  return false;
+};
+
+const getVisibleGroups = () => {
+  const sidebarConfig = getSidebarConfig();
+  if (!sidebarConfig || !Array.isArray(sidebarConfig.groups)) return [];
+  return sidebarConfig.groups.filter((group) => {
+    if (!checkPermissions(group.permissions)) return false;
+    return true;
+  }).map((group) => ({
+    ...group,
+    items: (group.items || []).filter((item) => checkPermissions(item.permissions))
+  })).filter((group) => (group.items || []).length > 0);
+};
+
+const parseNavPath = (itemPath) => {
+  if (!itemPath) return { pathname: "", pageId: null };
+  const qIndex = itemPath.indexOf("?");
+  if (qIndex === -1) return { pathname: itemPath, pageId: null };
+  const pathname = itemPath.slice(0, qIndex);
+  const params = new URLSearchParams(itemPath.slice(qIndex + 1));
+  return { pathname, pageId: params.get("page") };
+};
+
+const isActivePath = (itemPath) => {
+  const currentPath = args.location?.pathname || "";
+  if (!itemPath) return false;
+
+  const parsed = parseNavPath(itemPath);
+  if (parsed.pageId) {
+    const onPath = currentPath === parsed.pathname;
+    if (!onPath) return false;
+    const currentPage = args.searchParams?.page || "general";
+    return currentPage === parsed.pageId;
+  }
+
+  if (itemPath === currentPath) return true;
+  return currentPath.startsWith(itemPath + "/");
+};
+
+const handleNavigate = (item) => {
+  if (!item?.path) return;
+  args.navigate(item.path);
+};
+
+return {
+  getSidebarConfig,
+  getVisibleGroups,
+  isActivePath,
+  handleNavigate,
+  sidebarTitle: () => getSidebarConfig()?.title || "Settings"
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid ${args.theme.var.color.border};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid ${args.theme.var.color.border};
+    max-height: 240px;
+  }
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "aside"
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  text: args.fns.sidebarTitle()
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+        componentName: Html
+        contextName: sidebarGroup
+        loop: true
+        props:
+          '''
+return {
+  as: "div",
+  data: args.fns.getVisibleGroups()
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.xs};
+  padding: 0 ${args.theme.var.spacing.sm};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const group = args.contextData.sidebarGroup;
+return {
+  as: "div",
+  text: group.label || "",
+  hide: !group.label
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xxs};
+}`;
+'''
+        componentName: Html
+        contextName: navItem
+        loop: true
+        props:
+          '''
+const group = args.contextData.sidebarGroup;
+return {
+  as: "nav",
+  data: group.items || []
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        css:
+          '''
+const item = args.contextData.navItem;
+const active = args.fns.isActivePath(item.path);
+return active
+  ? `._id {
+  display: block;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  color: ${args.theme.var.color.primary_text};
+  background: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  transition: background ${args.theme.var.animation.fast} ease;
+}`
+  : `._id {
+  display: block;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  transition: background ${args.theme.var.animation.fast} ease;
+}
+._id:hover {
+  background: ${args.theme.var.color.background_light_200};
+}`;
+'''
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.navItem;
+return {
+  as: "a",
+  href: item.path,
+  text: item.label,
+  onClick: (event) => {
+    event.preventDefault();
+    args.fns.handleNavigate(item);
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "4", E: "5" }
+    { id: "e5", T: "Attr", S: "4", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+  ]
+}

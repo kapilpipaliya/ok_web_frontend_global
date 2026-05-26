@@ -1,0 +1,1942 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        fns:
+          '''const pageStateVertexId = args.generateNewVertexId(args.graph, args.setGraph);
+args.addNewVertex(0, {
+  id: pageStateVertexId,
+  L: ["DynamicPageUiState"],
+  P: {
+    memoizedConfig: null,
+    memoizedLoadFromSetting: false,
+    isSettingsModalOpen: false,
+    settingsModalInitialConfig: null,
+    settings: null,
+    evaluatedConfig: null,
+    loading: false,
+    configLoading: true,
+    selectedSidebarCategoryId: null,
+    selectedRowsByCategory: {},
+    sidebarWidth: 240,
+    rowsToRemoveVertexIds: null,
+    settingsSectionStateMap: {},
+    settingsDirtySectionIds: [],
+    settingsFormFnsMap: {},
+    settingsLoading: false,
+    settingsInitializing: false,
+    settingsPageId: null
+  },
+  IN: {},
+  OUT: {}
+}, args.graph, args.setGraph);
+
+const patchPageP = (partial) => {
+  args.mergeVertexProperties(0, pageStateVertexId, args.graph, args.setGraph, partial);
+};
+const pageP = () => args.graph.vertexes[pageStateVertexId]?.P;
+
+const selectedSidebarItem = () => {
+  const id = pageP()?.selectedSidebarCategoryId;
+  if (id == null) return null;
+  return args.graph.vertexes[id] ?? null;
+};
+
+// Basic context/prop accessors
+const getTableVertexLabel = () => args.contextData.props?.tableVertexLabel;
+const getTableSettingsLabel = () => {
+  const raw = args.contextData.props?.tableSettingsLabel;
+  const fallback = getTableVertexLabel();
+  if (raw != null && String(raw).trim() !== "") return String(raw).trim();
+  return fallback;
+};
+const getUncategorizedVertexId = () => {
+  const label = getTableVertexLabel();
+  return label ? '_' + label + '_uncategorized' : null;
+};
+const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
+const getPageMode = () => {
+  const fromProps = args.contextData.props?.pageMode;
+  if (fromProps === "settings" || fromProps === "table") return fromProps;
+  const { config } = getCachedConfig();
+  if (config?.pageMode === "settings") return "settings";
+  return "table";
+};
+const isSettingsPageMode = () => getPageMode() === "settings";
+const getDefaultSettingsPageIdFromConfig = (config) => {
+  if (!config || typeof config !== "object") return null;
+  const groups = config.sidebar?.groups;
+  if (Array.isArray(groups)) {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const items = groups[gi]?.items;
+      if (!Array.isArray(items)) continue;
+      for (let ii = 0; ii < items.length; ii++) {
+        const itemId = items[ii]?.id;
+        if (itemId != null && String(itemId).trim() !== "") return String(itemId).trim();
+      }
+    }
+  }
+  if (config.id != null && String(config.id).trim() !== "") return String(config.id).trim();
+  return null;
+};
+const getDefaultSettingsPageId = () => {
+  const { config } = getCachedConfig();
+  return getDefaultSettingsPageIdFromConfig(config);
+};
+const getSettingsPageId = () => {
+  const fromProps = args.contextData.props?.settingsPageId;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  const fromQuery = args.searchParams?.page;
+  if (fromQuery != null && String(fromQuery).trim() !== "") return String(fromQuery).trim();
+  const fromState = pageP()?.settingsPageId;
+  if (fromState != null && String(fromState).trim() !== "") return String(fromState).trim();
+  return getDefaultSettingsPageId();
+};
+const getScopeConfig = () => {
+  const { config } = getCachedConfig();
+  return config?.scope || args.contextData.props?.scope || {
+    vertexLabel: "User",
+    idParam: "scopeId"
+  };
+};
+const getScopeId = () => {
+  const scopeConfig = getScopeConfig();
+  const fromProps = args.contextData.props?.scopeId;
+  if (fromProps != null && String(fromProps).trim() !== "") return String(fromProps).trim();
+  const fromSearch = args.searchParams?.[scopeConfig.idParam || "scopeId"];
+  if (fromSearch != null && String(fromSearch).trim() !== "") return String(fromSearch).trim();
+  return args.user?.P?.uuid || null;
+};
+const getConfigFunction = () => args.contextData.props?.configFunction;
+
+// Helper to get cached config (and trigger memo evaluation if needed)
+const getCachedConfig = () => {
+  const p = pageP();
+  const cached = p?.memoizedConfig;
+  if (cached !== null && cached !== undefined) {
+    return { config: cached, loadFromSetting: p?.memoizedLoadFromSetting === true };
+  }
+  updateMemoizedConfig();
+  const p2 = pageP();
+  return { config: p2?.memoizedConfig ?? null, loadFromSetting: p2?.memoizedLoadFromSetting === true };
+};
+
+const prop = (key, localProps) => {
+  const fromLocalProps = localProps?.[key];
+  if (fromLocalProps !== undefined) {
+    return fromLocalProps;
+  }
+  const fromProps = args.contextData.props?.[key];
+  if (fromProps !== undefined) {
+    return fromProps;
+  }
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config?.[key];
+  }
+};
+
+// Derive server payload from evaluated table config (see migrate default table_config return shape).
+const collectFormConfigFields = (config) => {
+  const groups = config?.formConfig?.groups;
+  if (!Array.isArray(groups)) return [];
+  const out = [];
+  for (let gi = 0; gi < groups.length; gi++) {
+    const fields = groups[gi]?.fields;
+    if (!Array.isArray(fields)) continue;
+    for (let fi = 0; fi < fields.length; fi++) out.push(fields[fi]);
+  }
+  return out;
+};
+
+const buildRelationshipPropertyBindings = (config) => {
+  if (!config || typeof config !== "object") return [];
+  const fields = collectFormConfigFields(config);
+  const seen = new Set();
+  const bindings = [];
+  const addBinding = (prop, rel) => {
+    if (!prop || !rel) return;
+    const k = `${prop}\0${rel}`;
+    if (seen.has(k)) return;
+    seen.add(k);
+    bindings.push({ prop, rel });
+  };
+  for (let i = 0; i < fields.length; i++) {
+    const f = fields[i];
+    if ((f?.dataType === "select" || f?.dataType === "relation") && f.selectConfig?.relationshipType && f.selectConfig?.edgeOnly === true) {
+      addBinding(f.key, f.selectConfig.relationshipType);
+    }
+  }
+  const cols = config.columns;
+  if (Array.isArray(cols)) {
+    for (let ci = 0; ci < cols.length; ci++) {
+      const c = cols[ci];
+      if (c?.dataType === "relation" && c.selectConfig?.relationshipType && c.selectConfig?.edgeOnly === true) {
+        addBinding(c.key, c.selectConfig.relationshipType);
+      }
+    }
+  }
+  const extra = config.relationshipPropertyBindings;
+  if (Array.isArray(extra)) {
+    for (let j = 0; j < extra.length; j++) {
+      const row = extra[j];
+      addBinding(row?.prop, row?.rel);
+    }
+  }
+  return bindings;
+};
+
+const buildNestedLinePropertyStripKeys = (config) => {
+  if (!config || typeof config !== "object") return [];
+  const fields = collectFormConfigFields(config);
+  const keys = [];
+  for (let i = 0; i < fields.length; i++) {
+    const f = fields[i];
+    if (f?.renderer === "nestedLineItems" && f.key) keys.push(String(f.key));
+  }
+  const extra = config.nestedLinePropertyStripKeys;
+  if (Array.isArray(extra)) {
+    for (let j = 0; j < extra.length; j++) {
+      const k = extra[j];
+      if (k != null && String(k) !== "" && !keys.includes(String(k))) keys.push(String(k));
+    }
+  }
+  return keys;
+};
+
+// Common function to extract error message from response
+// Returns error message string or null if no error
+// Optionally shows toast notification if showToast is true
+const extractError = (result, showToast = false, defaultMessage = null) => {
+  if (!result) return defaultMessage;
+
+  // Check top-level error
+  if (result.error) {
+    if (showToast) {
+      args.showErrorToast?.(result.error);
+    }
+    return result.error;
+  }
+
+  // Check result-level error
+  if (result.result?.error) {
+    if (showToast) {
+      args.showErrorToast?.(result.result.error);
+    }
+    return result.result.error;
+  }
+
+  // Check success: false with message
+  if (result.result && result.result.success === false) {
+    const errorMessage = result.result.message || result.result.error || defaultMessage;
+    if (errorMessage && showToast) {
+      args.showErrorToast?.(errorMessage);
+    }
+    return errorMessage;
+  }
+
+  return null;
+};
+
+const applyServerGraphToLocalGraph = (response) => {
+  const graphPayload = response?.result?.graph ?? response?.graph;
+  if (!graphPayload || typeof graphPayload !== "object") return;
+  const vertexes = graphPayload.vertexes || {};
+  const edges = graphPayload.edges || {};
+  const deleted_vertexes = graphPayload.deleted_vertexes;
+  const deleted_edges = graphPayload.deleted_edges;
+  const hasWork =
+    Object.keys(vertexes).length > 0 ||
+    Object.keys(edges).length > 0 ||
+    (Array.isArray(deleted_vertexes) && deleted_vertexes.length > 0) ||
+    (Array.isArray(deleted_edges) && deleted_edges.length > 0);
+  if (!hasWork) return;
+  args.setGraphData(0, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
+};
+
+// Functions invoked by "get*" which must be defined before their usages
+const getGenericSettingsFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async () => {
+    try {
+      const tableSettingsLabel = getTableSettingsLabel();
+      const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+        tableVertexLabel,
+        settingsLabel: tableSettingsLabel,
+        key: `${tableSettingsLabel}_settings`
+      });
+
+      // Check for errors and show toast
+      const errorMessage = extractError(result, true, "Failed to load settings");
+      if (errorMessage) {
+        return { success: false, data: { setting: null } };
+      }
+
+      // Return successful result
+      if (result?.result?.success && result.result.data?.setting) {
+        return result.result;
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+      args.showErrorToast?.(error?.message || "Failed to load settings");
+    }
+    return { success: false, data: { setting: null } };
+  };
+};
+
+const getGenericSettingsPageConfigFunction = () => {
+  return async () => {
+    const settingsPageId = getSettingsPageId();
+    try {
+      const result = await args.fns.executeYTOFunction("getSettingsPageConfig", {
+        settingsPageId: settingsPageId || undefined,
+        settingsLabel: settingsPageId || undefined,
+        key: settingsPageId ? `${settingsPageId}_settings_page` : undefined
+      });
+      const errorMessage = extractError(result, true, "Failed to load settings page config");
+      if (errorMessage) return { success: false, data: { setting: null } };
+      if (result?.result?.success && result.result.data?.setting) return result.result;
+    } catch (error) {
+      console.error("Error loading settings page config:", error);
+      args.showErrorToast?.(error?.message || "Failed to load settings page config");
+    }
+    return { success: false, data: { setting: null } };
+  };
+};
+const getGenericDataFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async (filters = {}) => {
+    try {
+      const sidebarItem = selectedSidebarItem();
+      const sidebarConfig = getSidebarConfig();
+
+      // Get config to check user scoping settings and hooks
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+      // Get config to check if local filters/sort are enabled
+      const enableLocalFilters = config?.enableLocalFilters === true;
+      const enableLocalSort = config?.enableLocalSort === true;
+
+      // Build filter parameters
+      // Skip filters/sort if local filtering/sorting is enabled
+      const filterParams = {
+        tableVertexLabel,
+        search: enableLocalFilters ? undefined : filters.search,
+        filters: enableLocalFilters ? undefined : filters.filters,
+        sort: enableLocalSort ? undefined : filters.sort,
+        enableUserScoping: enableUserScopingForContent,
+        tableSettingsLabel: getTableSettingsLabel()
+      };
+
+      // Add sidebar filtering if item is selected
+      if (sidebarItem && sidebarConfig) {
+        const rootKeys = sidebarConfig.rootKeys || {};
+        const rootKey = rootKeys.key;
+
+        // If root key or synthetic uncategorized is selected, show items without any category relationship
+        const uCat = getUncategorizedVertexId();
+        if (
+          sidebarItem.P?.key === rootKey ||
+          (uCat && (sidebarItem.id === uCat || sidebarItem.P?.key === uCat))
+        ) {
+          filterParams.showUnassigned = true;
+          filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+          filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+        } else {
+          // Filter by selected category
+          filterParams.categoryId = sidebarItem.id;
+          filterParams.parentVertexLabel = sidebarConfig.parentVertexLabel;
+          filterParams.toParentEdgeType = sidebarConfig.toParentEdgeType;
+        }
+      }
+
+      // Pass hooks to server function - hooks will be executed server-side
+      filterParams.hooks = config?.hooks;
+      filterParams.relationshipPropertyBindings = buildRelationshipPropertyBindings(config);
+
+      const result = await args.fns.executeYTOFunction("getUserContent", filterParams);
+      applyServerGraphToLocalGraph(result);
+
+      // Check for errors and show toast
+      const errorMessage = extractError(result, true, "Failed to load data");
+      if (errorMessage) {
+        return { data: [], relatedVertexIds: [] };
+      }
+
+      // Return successful result — only related vertex ids (full vertices live in args.graph after applyServerGraphToLocalGraph)
+      if (result?.result?.success && result.result.data) {
+        const data = Array.isArray(result.result.data) ? result.result.data : [];
+        const relatedVerticesRaw = Array.isArray(result.result.relatedVertices) ? result.result.relatedVertices : [];
+        const relatedVertexIds = relatedVerticesRaw
+          .map((relatedVertex) => relatedVertex?.id)
+          .filter((vertexId) => vertexId != null && vertexId !== "");
+        return { data, relatedVertexIds };
+      }
+
+      return { data: [], relatedVertexIds: [] };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    args.showErrorToast?.("Failed to load data");
+    return { data: [], relatedVertexIds: [] };
+  }
+  };
+};
+
+// Background refresh: fetch only rows that are no longer queued (no loader, no full reload)
+const refreshQueuedRows = async (elementIds) => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel || !Array.isArray(elementIds) || elementIds.length === 0) return { success: true, data: [] };
+  try {
+    const { config } = getCachedConfig();
+    const result = await args.fns.executeYTOFunction("getUserContent", {
+      tableVertexLabel,
+      elementIds,
+      onlyNotQueued: true,
+      relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
+      tableSettingsLabel: getTableSettingsLabel()
+    });
+    applyServerGraphToLocalGraph(result);
+    if (result?.result?.success && result.result.data) return { success: true, data: result.result.data };
+  } catch (e) { console.error("refreshQueuedRows:", e); }
+  return { success: true, data: [] };
+};
+
+// Ad-hoc fetch for another vertex label (e.g. nested line items). Skips sidebar/category scoping.
+const fetchUserContentRows = async (params = {}) => {
+  const { tableVertexLabel, search, filters, sort, hooks } = params;
+  if (!tableVertexLabel) return [];
+  const { config } = getCachedConfig();
+  const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+  try {
+    const result = await args.fns.executeYTOFunction("getUserContent", {
+      tableVertexLabel,
+      search,
+      filters,
+      sort,
+      enableUserScoping: enableUserScopingForContent,
+      hooks: hooks !== undefined ? hooks : config?.hooks,
+      relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
+      tableSettingsLabel: getTableSettingsLabel()
+    });
+    applyServerGraphToLocalGraph(result);
+    const errorMessage = extractError(result, false, null);
+    if (errorMessage) return [];
+    if (result?.result?.success && Array.isArray(result.result.data)) {
+      return result.result.data;
+    }
+  } catch (e) {
+    console.error("fetchUserContentRows:", e);
+  }
+  return [];
+};
+
+// Helper function to get sidebar config (needed by updateSidebarCategoryCount)
+// This is a simplified version that will be replaced by the full getSidebarConfig later
+const getSidebarConfigForCount = () => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config?.sidebar;
+  }
+  return args.contextData.props?.sidebar || config?.sidebar;
+};
+
+// Update sidebar category count after adding/deleting items
+// Note: This uses getSidebarConfigForCount which will be replaced by getSidebarConfig
+// when it's defined later. This ensures the function is available when getGenericSaveFunction is called.
+const updateSidebarCategoryCount = (categoryId, increment = 1) => {
+  if (!categoryId) return;
+
+  const sidebarConfig = getSidebarConfigForCount();
+  if (!sidebarConfig) return;
+
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+
+  const uCat = getUncategorizedVertexId();
+  if (categoryId === rootKey || (uCat && categoryId === uCat)) {
+    if (uCat) {
+      const uncategorizedVertex = args.graph?.vertexes?.[uCat];
+      if (uncategorizedVertex) {
+        const currentCount = uncategorizedVertex.P?.contentCount ?? 0;
+        const newCount = Math.max(0, currentCount + increment);
+        args.mergeVertexProperties(0, uCat, args.graph, args.setGraph, {
+          contentCount: newCount
+        });
+      }
+    }
+    return;
+  }
+
+  // For regular categories, update the count directly
+  const categoryVertex = args.graph?.vertexes?.[categoryId];
+  if (categoryVertex) {
+    const currentCount = categoryVertex.P?.contentCount ?? 0;
+    const newCount = Math.max(0, currentCount + increment);
+    args.mergeVertexProperties(0, categoryId, args.graph, args.setGraph, {
+      contentCount: newCount
+    });
+  }
+};
+
+/** True if content id is listed in any TableUiState P.data (row not yet in table after upload→promote). */
+const isContentInTableData = (contentId) => {
+  if (contentId == null || contentId === "") return false;
+  const cid = String(contentId);
+  for (const vid in args.graph.vertexes) {
+    const v = args.graph.vertexes[vid];
+    if (!v?.L?.includes("TableUiState")) continue;
+    const data = v.P?.data;
+    if (Array.isArray(data) && data.includes(cid)) return true;
+  }
+  return false;
+};
+
+const getGenericSaveFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async ({ mode, data, originalRow }) => {
+    const tableConfig = evaluateConfig();
+    let uniqueKeys = tableConfig?.uniqueKeys || [];
+    try {
+      let apiData;
+      if (mode === "delete") {
+        if (originalRow && (originalRow.L || originalRow.id)) {
+          apiData = {
+            vertex: originalRow,
+            relationships: {}
+          };
+        } else {
+          apiData = {
+            vertex: {
+              id: originalRow?.id,
+              L: originalRow?.L || [],
+              P: originalRow?.P || originalRow || {},
+              IN: originalRow?.IN || {},
+              OUT: originalRow?.OUT || {}
+            },
+            relationships: {}
+          };
+        }
+      } else {
+        apiData = data;
+      }
+
+      const enableUserScopingForContent = tableConfig?.enableUserScopingForContent === true;
+
+      const neoElementIdFromVertex = (v) => {
+        if (!v || v.id == null || v.id === undefined) return undefined;
+        const s = String(v.id).trim();
+        return s.includes(":") ? s : undefined;
+      };
+      const isLocalVertexId = (id) => {
+        if (id == null || id === undefined) return false;
+        return String(id).trim().startsWith("-");
+      };
+      const effectiveElementIdFromVertex = (v) =>
+        neoElementIdFromVertex(v) ??
+        (v?.id != null && !isLocalVertexId(v.id) ? String(v.id).trim() : undefined);
+
+      const resolvedMutateElementId =
+        effectiveElementIdFromVertex(originalRow) ??
+        effectiveElementIdFromVertex(apiData?.vertex);
+
+      // Add modal after graphFileUpload: File already exists in Neo4j — update metadata, do not CREATE again.
+      let operation =
+        mode === "add" ? "create" : mode === "edit" ? "update" : "delete";
+      if (operation === "create" && resolvedMutateElementId) {
+        operation = "update";
+      }
+
+      const result = await args.fns.executeYTOFunction("mutateUserContent", {
+        tableVertexLabel,
+        tableSettingsLabel: getTableSettingsLabel(),
+        operation,
+        data: apiData,
+        elementId: resolvedMutateElementId,
+        uniqueKeys: uniqueKeys,
+        enableUserScoping: enableUserScopingForContent,
+        hooks: tableConfig?.hooks,
+        nestedLinePropertyStripKeys: buildNestedLinePropertyStripKeys(tableConfig)
+      });
+      applyServerGraphToLocalGraph(result);
+
+      const savedContentId = String(
+        result?.result?.data?.id ?? ""
+      );
+      const shouldAssignSidebarCategory =
+        result?.result?.success &&
+        result.result.data &&
+        (!isContentInTableData(savedContentId));
+
+      if (shouldAssignSidebarCategory) {
+        const sidebarItem = selectedSidebarItem();
+        const sidebarConfig = getSidebarConfig();
+
+        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
+          const rootKeys = sidebarConfig.rootKeys || {};
+          const rootKey = rootKeys.key;
+
+          const uCatSave = getUncategorizedVertexId();
+          const isUncatSave =
+            uCatSave && (sidebarItem.id === uCatSave || sidebarItem.P?.key === uCatSave);
+          if (sidebarItem.P?.key !== rootKey && !isUncatSave) {
+            // Get config to check user scoping settings
+            const { config } = getCachedConfig();
+            const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+            const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+            // File -[toParentEdgeType]-> Folder (MERGE on server); merge graph + bump count on success
+            try {
+              if (!savedContentId) throw new Error("missing content id after save");
+              const relResult = await args.fns.executeYTOFunction("createSidebarContentRelationship", {
+                categoryId: sidebarItem.id,
+                contentId: savedContentId,
+                relationshipType: sidebarConfig.toParentEdgeType,
+                categoryLabel: sidebarConfig.parentVertexLabel,
+                contentLabel: tableVertexLabel,
+                enableUserScopingForSidebar: enableUserScopingForSidebar,
+                enableUserScopingForContent: enableUserScopingForContent,
+                hooks: config?.hooks
+              });
+              applyServerGraphToLocalGraph(relResult);
+              // Update category count - increment by 1
+              if (!extractError(relResult, false)) updateSidebarCategoryCount(sidebarItem.id, 1);
+            } catch (relError) {
+              console.error("Error creating sidebar relationship:", relError);
+              // Don't fail the whole operation if relationship creation fails
+            }
+          } else {
+            if (sidebarItem.P?.key === rootKey) {
+              updateSidebarCategoryCount(rootKey, 1);
+            } else {
+              const uKey = getUncategorizedVertexId();
+              if (uKey) updateSidebarCategoryCount(uKey, 1);
+            }
+          }
+        }
+      }
+
+      // If deleting an item, decrement the category count
+      if (mode === "delete" && result?.result?.success && originalRow) {
+        const sidebarItem = selectedSidebarItem();
+        const sidebarConfig = getSidebarConfig();
+
+        if (sidebarItem && sidebarConfig && sidebarConfig.toParentEdgeType) {
+          const rootKeys = sidebarConfig.rootKeys || {};
+          const rootKey = rootKeys.key;
+
+          // Use the currently selected sidebar item to determine which category to decrement
+          const uCatDel = getUncategorizedVertexId();
+          const isUncatDel =
+            uCatDel && (sidebarItem.id === uCatDel || sidebarItem.P?.key === uCatDel);
+          if (sidebarItem.P?.key === rootKey) {
+            updateSidebarCategoryCount(rootKey, -1);
+          } else if (isUncatDel && uCatDel) {
+            updateSidebarCategoryCount(uCatDel, -1);
+          } else if (sidebarItem.id) {
+            // Decrement the selected category's count
+            updateSidebarCategoryCount(sidebarItem.id, -1);
+          }
+        }
+      }
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to save");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, data: result.result.data };
+      }
+
+      return { success: false, message: "Failed to save" };
+    } catch (error) {
+      console.error("Error saving:", error);
+      return { success: false, message: error.message || "Failed to save" };
+    }
+  };
+};
+const getGenericSaveSettingsFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async (configText) => {
+    try {
+      const tableSettingsLabel = getTableSettingsLabel();
+      const result = await args.fns.executeYTOFunction("saveUserContentSetting", {
+        tableVertexLabel,
+        settingsLabel: tableSettingsLabel,
+        key: `${tableSettingsLabel}_settings`,
+        config: configText
+      });
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to save settings");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, message: result.result.message || "Settings saved successfully" };
+      }
+
+      return { success: false, message: "Failed to save settings" };
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      return { success: false, message: error?.message || "Failed to save settings" };
+    }
+  };
+};
+const getGenericImportFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async ({ data }) => {
+    try {
+      // Get config to check user scoping settings and hooks
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+      const result = await args.fns.executeYTOFunction("importUserContent", {
+        tableVertexLabel,
+        data,
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks,
+        tableSettingsLabel: getTableSettingsLabel()
+      });
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to import data");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return { success: true, message: result.result.message };
+      }
+
+      return { success: false, message: "Failed to import data" };
+    } catch (error) {
+      console.error("Error importing data:", error);
+      return { success: false, message: error.message || "Failed to import data" };
+    }
+  };
+};
+const getGenericExportFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async ({ data, columns }) => {
+    try {
+      const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+      // Get config to check user scoping settings and hooks
+      const { config } = getCachedConfig();
+      const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+      const result = await args.fns.executeYTOFunction("exportUserContent", {
+        tableVertexLabel,
+        format: "csv",
+        data: data,
+        columns: sanitizedColumns,
+        enableUserScoping: enableUserScopingForContent,
+        hooks: config?.hooks,
+        relationshipPropertyBindings: buildRelationshipPropertyBindings(config),
+        tableSettingsLabel: getTableSettingsLabel()
+      });
+
+      // Check for errors (don't show toast here, let caller handle it)
+      const errorMessage = extractError(result, false, "Failed to export data");
+      if (errorMessage) {
+        return { success: false, message: errorMessage };
+      }
+
+      // Return successful result
+      if (result?.result?.success) {
+        return {
+          success: true,
+          data: result.result.data,
+          tableVertexLabel: result.result.tableVertexLabel,
+          filename: result.result.filename
+        };
+      }
+
+      return { success: false, message: "Failed to export data" };
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      return { success: false, message: error.message || "Failed to export data" };
+    }
+  };
+};
+
+// Functions that may depend on previous definitions
+const getDataFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericDataFunction();
+  }
+  return prop('dataFunction');
+};
+const getSettingsFunction = () => {
+  const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting && isSettingsPageMode()) {
+    return getGenericSettingsPageConfigFunction();
+  }
+  if (loadFromSetting) {
+    return getGenericSettingsFunction();
+  }
+  return prop('settingsFunction');
+};
+const getFormConfig = () => {
+  const formConfig = prop('formConfig');
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting && formConfig && !formConfig.saveFunction) {
+    // Add generic save function to formConfig when loadFromSetting is true
+    return {
+      ...formConfig,
+      saveFunction: getGenericSaveFunction()
+    };
+  }
+  return formConfig;
+};
+const getSaveSettingsFunction = () => {
+  const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting) {
+    return getGenericSaveSettingsFunction();
+  }
+  return prop('saveSettingsFunction');
+};
+const getImportFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericImportFunction();
+  }
+  return prop('importFunction');
+};
+const getExportFunction = () => {
+  const { loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return getGenericExportFunction();
+  }
+  return prop('exportFunction');
+};
+
+// Core config evaluation and memo update functions
+const evaluateConfig = () => {
+  const cached = pageP()?.evaluatedConfig;
+  if (cached != null) return cached;
+
+  const loadFromSetting = getLoadFromSetting();
+  const currentSettings = pageP()?.settings;
+  let config = null;
+
+  // If loadFromSetting is true, only use settings (no props fallback)
+  if (loadFromSetting) {
+    if (currentSettings && typeof currentSettings === 'string') {
+      try {
+        const configFunction = new Function(currentSettings);
+        config = configFunction();
+        if (config && typeof config === 'object') {
+          patchPageP({ evaluatedConfig: config });
+          return config;
+        }
+      } catch (error) {
+        console.error("Error evaluating settings function body:", error);
+      }
+    }
+    // If loadFromSetting is true but no settings, return empty config
+    config = {};
+    patchPageP({ evaluatedConfig: config });
+    return config;
+  }
+
+  // If settings exist and it's a string (function body), evaluate it
+  if (currentSettings && typeof currentSettings === 'string') {
+    try {
+      const configFunction = new Function(currentSettings);
+      const evaluated = configFunction();
+      if (evaluated && typeof evaluated === 'object') {
+        patchPageP({ evaluatedConfig: evaluated });
+        return evaluated;
+      }
+    } catch (error) {
+      console.error("Error evaluating settings function body:", error);
+    }
+  }
+
+  // Fallback to configFunction
+  const configFn = getConfigFunction();
+  if (configFn) {
+    try {
+      const evaluated = configFn();
+      if (evaluated && typeof evaluated === 'object') {
+        patchPageP({ evaluatedConfig: evaluated });
+        return evaluated;
+      }
+    } catch (error) {
+      console.error("Error evaluating config function:", error);
+    }
+  }
+
+  // Fallback to props
+  config = {
+    columns: args.contextData.props?.columns || [],
+    formConfig: args.contextData.props?.formConfig,
+    uniqueKeys: [],
+    hooks: args.contextData.props?.hooks,
+    usePolarisUI: args.contextData.props?.usePolarisUI,
+    enableUserScopingForSidebar: args.contextData.props?.enableUserScopingForSidebar,
+    enableUserScopingForContent: args.contextData.props?.enableUserScopingForContent,
+    enableLocalFilters: args.contextData.props?.enableLocalFilters,
+    enableLocalSort: args.contextData.props?.enableLocalSort,
+    sidebar: args.contextData.props?.sidebar
+  };
+  patchPageP({ evaluatedConfig: config });
+  return config;
+};
+const updateMemoizedConfig = () => {
+  const config = evaluateConfig();
+  const loadFromSetting = getLoadFromSetting();
+  patchPageP({ memoizedConfig: config, memoizedLoadFromSetting: loadFromSetting });
+};
+
+// Fetch data from server
+const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
+  const dataFn = getDataFunction();
+  if (!dataFn) return;
+
+  // Capture the category item at the time of fetch
+  const categoryItemForFetch = selectedSidebarItem();
+
+  patchPageP({ loading: true });
+  try {
+    const result = await dataFn({
+      search: searchTerm,
+      filters: columnFilters,
+      sort: sortConfig
+    });
+    if (result?.data) {
+      callback(result.data, categoryItemForFetch, result.relatedVertexIds || []);
+    }
+  } catch (error) {
+    console.error("Error fetching table data:", error);
+    args.showErrorToast?.("Failed to load table data");
+  } finally {
+    patchPageP({ loading: false });
+  }
+};
+
+
+// Handle import
+const handleImport = async (dataToImport, callback) => {
+  const importFn = getImportFunction();
+  if (!importFn) {
+    args.showErrorToast?.("Import function not configured");
+    return;
+  }
+  if (!dataToImport) {
+    args.showErrorToast?.("Please provide data to import");
+    return;
+  }
+  try {
+    patchPageP({ loading: true });
+    const result = await importFn({ data: dataToImport });
+    if (result?.success) {
+      args.showSuccessToast?.(result.message || "Import completed successfully");
+      // Refresh data
+      callback?.();
+    } else {
+      args.showErrorToast?.(result?.message || result?.error || "Failed to import data");
+    }
+  } catch (error) {
+    console.error("Error importing:", error);
+    args.showErrorToast?.(error?.message || "Failed to import data");
+  } finally {
+    patchPageP({ loading: false });
+  }
+};
+
+// Handle export (all data)
+const handleExport = async (data = null) => {
+  const exportFn = getExportFunction();
+  if (!exportFn) {
+    args.showErrorToast?.("Export function not configured");
+    return;
+  }
+  try {
+    patchPageP({ loading: true });
+    const columns = prop('columns');
+    const sanitizedColumns = JSON.parse(JSON.stringify(columns));
+    const result = await exportFn({ data, columns: sanitizedColumns }); // null means export all data
+    if (result?.success && result?.data) {
+      // Fix line endings: replace '\n' with real newlines for CSV/text exports
+      let exportData = result.data;
+      if (
+        typeof exportData === "string" &&
+        (result.contentType === "text/csv" || result.contentType === "text/plain" || !result.contentType)
+      ) {
+        exportData = exportData.replace(/\\n/g, "\n");
+      }
+      const blob = new Blob([exportData], { type: result.contentType || "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename || "export.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      args.showSuccessToast?.("Export completed successfully");
+    } else {
+      args.showErrorToast?.(result?.message || "Failed to export data");
+    }
+  } catch (error) {
+    console.error("Error exporting:", error);
+    args.showErrorToast?.("Failed to export data");
+  } finally {
+    patchPageP({ loading: false });
+  }
+};
+
+// Settings management functions
+
+// Load settings - accepts options: { updateState: boolean } (default true)
+// When updateState: false, fetches config without updating state and returns config text
+const loadSettings = async (options = {}) => {
+  const updateState = options.updateState !== false;
+  const settingsFn = getSettingsFunction();
+  if (!settingsFn) return null;
+  try {
+    const result = await settingsFn();
+
+    // Handle error cases (result from settingsFn is already processed, check success flag)
+    if (result && result.success === false) {
+      if (result.message) {
+        args.showErrorToast?.(result.message);
+      }
+      return null;
+    }
+
+    if (result?.success && result?.data?.setting) {
+      const settingData = result.data.setting.P || {};
+      // Get the raw config text (function body) - don't evaluate it
+      const configText = settingData.config;
+      if (typeof configText === 'string') {
+        if (updateState) {
+          patchPageP({ settings: configText, evaluatedConfig: null, memoizedConfig: null });
+        }
+        return configText;
+      }
+    }
+  } catch (error) {
+    console.error("Error loading settings:", error);
+    args.showErrorToast?.(error?.message || "Failed to load settings");
+  }
+  return null;
+};
+
+// Initialize settings on mount
+const initializeSettings = async () => {
+  patchPageP({ configLoading: true });
+  try {
+    const settingsFn = getSettingsFunction();
+    if (settingsFn) {
+      await loadSettings();
+      // Initialize memoized config after loading settings
+      updateMemoizedConfig();
+    } else {
+      // Initialize memoized config even without settings
+      updateMemoizedConfig();
+    }
+  } finally {
+    patchPageP({ configLoading: false });
+  }
+};
+
+// Handle opening settings modal - load config without updating state to avoid table loading spinner
+const handleOpenSettings = async () => {
+  const configText = await loadSettings({ updateState: false });
+  patchPageP({ settingsModalInitialConfig: configText, isSettingsModalOpen: true });
+};
+
+// Handle saving settings
+const handleSaveSettings = async (configText, callback) => {
+  const saveFn = getSaveSettingsFunction();
+  if (!saveFn) {
+    args.showErrorToast?.("Save settings function not configured");
+    return;
+  }
+  try {
+    patchPageP({ loading: true });
+    // Save the raw function body text, not the evaluated config
+    const result = await saveFn(configText);
+    if (result?.success) {
+      args.showSuccessToast?.(result.message || "Settings saved successfully");
+      patchPageP({
+        isSettingsModalOpen: false,
+        settings: configText,
+        evaluatedConfig: null,
+        memoizedConfig: null
+      });
+      // Reload data to apply new settings
+      callback?.();
+    } else {
+      args.showErrorToast?.(result?.message || "Failed to save settings");
+    }
+  } catch (error) {
+    console.error("Error saving settings:", error);
+    args.showErrorToast?.("Failed to save settings");
+  } finally {
+    patchPageP({ loading: false });
+  }
+};
+
+// Sidebar config
+const getSidebarConfig = () => {
+  const { config, loadFromSetting } = getCachedConfig();
+  if (loadFromSetting) {
+    return config?.sidebar;
+  }
+  return args.contextData.props?.sidebar || config?.sidebar;
+};
+
+// Check if sidebar is enabled
+const hasSidebar = () => {
+  const sidebarConfig = getSidebarConfig();
+  return sidebarConfig && (sidebarConfig.enabled !== false);
+};
+
+// Check if Polaris UI should be used (table-level config)
+const getUsePolarisUI = () => {
+  const { config } = getCachedConfig();
+  return config?.usePolarisUI === true;
+};
+
+// Get category key for selected rows storage
+const getCategoryKey = (item) => {
+  const sidebarConfig = getSidebarConfig();
+  if (!item) {
+    // No sidebar or no item selected - use 'no-sidebar' key
+    return sidebarConfig ? null : 'no-sidebar';
+  }
+  if (!sidebarConfig) {
+    return 'no-sidebar';
+  }
+  const rootKeys = sidebarConfig.rootKeys || {};
+  const rootKey = rootKeys.key;
+
+  const uCatKey = getUncategorizedVertexId();
+  if (
+    item.P?.key === rootKey ||
+    (uCatKey && (item.id === uCatKey || item.P?.key === uCatKey))
+  ) {
+    return uCatKey ?? '__unassigned__';
+  }
+  return item.id || 'no-sidebar';
+};
+
+// Get selected rows for current category
+const getSelectedRows = () => {
+  const item = selectedSidebarItem();
+  const categoryKey = getCategoryKey(item);
+  if (categoryKey === null) return new Set();
+  const raw = pageP()?.selectedRowsByCategory?.[categoryKey];
+  if (!raw) return new Set();
+  return new Set(Array.isArray(raw) ? raw : []);
+};
+
+// Set selected rows for current category
+const setSelectedRows = (newSelected) => {
+  const item = selectedSidebarItem();
+  const categoryKey = getCategoryKey(item);
+  if (categoryKey === null) return;
+  const next = { ...(pageP()?.selectedRowsByCategory ?? {}) };
+  next[categoryKey] = Array.from(newSelected);
+  patchPageP({ selectedRowsByCategory: next });
+};
+
+// Clear selected rows for current category
+const clearSelectedRows = () => {
+  setSelectedRows(new Set());
+};
+
+// Handle sidebar item selection
+const handleSidebarItemSelect = (item) => {
+  patchPageP({ selectedSidebarCategoryId: item?.id ?? null });
+  // Persist selected category in URL so reload restores the same category (vertex id only)
+  if (item?.id != null && args.setSearchParams) {
+    const current = args.searchParams || {};
+    args.setSearchParams({ ...current, sidebarCategory: item.id }, { replace: true });
+  }
+};
+
+// Handle moving items to category
+const handleMoveItemsToCategory = async (contentIds, categoryId, sidebarConfig) => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel || !sidebarConfig) {
+    return { success: false, message: "Missing configuration" };
+  }
+
+  const { config } = getCachedConfig();
+  const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+  const enableUserScopingForContent = config?.enableUserScopingForContent === true;
+
+  const relationshipType = tableVertexLabel ? `User${tableVertexLabel}` : null;
+
+  try {
+    patchPageP({ loading: true });
+    const uCatMove = getUncategorizedVertexId();
+    const uncategorizedSlot = uCatMove ?? '__unassigned__';
+    const currentSelected = selectedSidebarItem();
+    const sourceCategoryId = currentSelected?.id ?? null;
+
+    const normalizeCategoryId = (id) =>
+      id === null || id === undefined || (uCatMove != null && id === uCatMove)
+        ? uncategorizedSlot
+        : id;
+    if (normalizeCategoryId(sourceCategoryId) === normalizeCategoryId(categoryId)) {
+      const label = prop('label') || 'Item';
+      const plural = label.endsWith('y') ? label.slice(0, -1) + 'ies' : label + (label.endsWith('s') ? '' : 's');
+      const msg = `${plural} are already in this category`;
+      args.showWarningToast?.(msg);
+      return { success: false, message: msg };
+    }
+
+    const contentLabelDisplay = prop('label') || 'Item';
+    const contextData = {
+      contentIds: contentIds,
+      categoryId: categoryId,
+      relationshipType: sidebarConfig.toParentEdgeType,
+      categoryLabel: sidebarConfig.parentVertexLabel,
+      contentLabel: tableVertexLabel,
+      contentLabelDisplay: contentLabelDisplay,
+      enableUserScopingForSidebar: enableUserScopingForSidebar,
+      enableUserScopingForContent: enableUserScopingForContent,
+      sourceCategoryId: sourceCategoryId,
+      hooks: config?.hooks
+    };
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "moveItemsToCategory",
+      contextData: contextData
+    });
+
+    // Check for errors and show toast
+    const errorMessage = extractError(result, true, "Failed to move items");
+    if (errorMessage) {
+      return { success: false, message: errorMessage };
+    }
+
+    // Clear table selection after move (moved items are gone from current view; avoids stale selection and draggable issues)
+    clearSelectedRows();
+
+    // Trigger table to remove moved rows (parent state, Table reacts - no reload needed)
+    if (result?.result?.success && contentIds?.length) {
+      patchPageP({ rowsToRemoveVertexIds: contentIds });
+    }
+
+    // Process graph data if available
+    if (result?.result?.success && result.result.data) {
+      if (result.graph && result.graph.vertexes) {
+        args.setGraphData(0, result.graph, {});
+      }
+    }
+
+    return result?.result || { success: false, message: "Failed to move items" };
+  } catch (error) {
+    console.error("Error moving items:", error);
+    const errorMessage = error.message || "Failed to move items";
+    args.showErrorToast?.(errorMessage);
+    return { success: false, message: errorMessage };
+  } finally {
+    patchPageP({ loading: false });
+  }
+};
+
+
+const getShowSelection = () => {
+  const value = prop("showSelection");
+  return value === true;
+};
+
+const getSelectionMode = () => {
+  const value = prop("selectionMode");
+  return value === "single" ? "single" : "multiple";
+};
+
+const getOnSelectionChange = () => prop("onSelectionChange");
+
+const getInitialSelectedRowIds = () => {
+  const value = prop("initialSelectedRowIds");
+  return Array.isArray(value) ? value : undefined;
+};
+
+const getTablePassthroughProps = () => {
+  const passthrough = {};
+  const showSelectionValue = prop("showSelection");
+  if (showSelectionValue !== undefined) {
+    passthrough.showSelection = showSelectionValue === true;
+  }
+  const selectionModeValue = prop("selectionMode");
+  if (selectionModeValue === "single" || selectionModeValue === "multiple") {
+    passthrough.selectionMode = selectionModeValue;
+  }
+  const onSelectionChange = getOnSelectionChange();
+  if (typeof onSelectionChange === "function") {
+    passthrough.onSelectionChange = onSelectionChange;
+  }
+  const initialSelectedRowIds = getInitialSelectedRowIds();
+  if (Array.isArray(initialSelectedRowIds)) {
+    passthrough.initialSelectedRowIds = initialSelectedRowIds;
+  }
+  return passthrough;
+};
+
+// --- Settings Page Mode: orchestration, adapter, dirty tracking ---
+
+const getSettingsSidebarConfig = () => {
+  const config = evaluateConfig();
+  return config?.sidebar || null;
+};
+
+const getSaveStrategy = () => {
+  const config = evaluateConfig();
+  return config?.saveStrategy || { mode: "section", showSaveBar: true, warnOnLeave: true };
+};
+
+const isSettingsLoading = () => pageP()?.settingsLoading === true;
+
+const getSectionStateMap = () => pageP()?.settingsSectionStateMap || {};
+
+const getSectionState = (sectionId) => {
+  if (!sectionId) return null;
+  return getSectionStateMap()[sectionId] || null;
+};
+
+const patchSectionStateMap = (sectionId, sectionState) => {
+  const currentMap = { ...getSectionStateMap() };
+  currentMap[sectionId] = sectionState;
+  patchPageP({ settingsSectionStateMap: currentMap });
+};
+
+const getDirtySectionIds = () => {
+  const dirtyIds = pageP()?.settingsDirtySectionIds;
+  return Array.isArray(dirtyIds) ? dirtyIds : [];
+};
+
+const markSectionDirty = (sectionId) => {
+  if (!sectionId) return;
+  const current = getDirtySectionIds();
+  if (current.includes(sectionId)) return;
+  patchPageP({ settingsDirtySectionIds: [...current, sectionId] });
+};
+
+const markSectionClean = (sectionId, newValues, meta) => {
+  if (!sectionId) return;
+  const current = getDirtySectionIds().filter((id) => id !== sectionId);
+  patchPageP({ settingsDirtySectionIds: current });
+  const existingState = getSectionState(sectionId) || {};
+  patchSectionStateMap(sectionId, {
+    ...existingState,
+    values: newValues != null ? newValues : existingState.values,
+    initialValues: newValues != null ? { ...newValues } : existingState.initialValues,
+    version: meta?.version != null ? Number(meta.version) : existingState.version ?? 0,
+    documentId: meta?.documentId != null ? meta.documentId : existingState.documentId ?? null
+  });
+};
+
+const dirtyTracker = {
+  hasDirty: () => getDirtySectionIds().length > 0,
+  getDirtySectionIds,
+  registerSection: (sectionId) => sectionId,
+  markDirty: markSectionDirty,
+  markClean: markSectionClean
+};
+
+const registerSectionFormFns = (sectionId, formFns) => {
+  const currentMap = { ...(pageP()?.settingsFormFnsMap || {}) };
+  currentMap[sectionId] = formFns;
+  patchPageP({ settingsFormFnsMap: currentMap });
+};
+
+const settingsAdapter = {
+  loadPage: async () => {
+    const config = evaluateConfig();
+    const settingsPageId = getSettingsPageId();
+    const scopeConfig = getScopeConfig();
+    const scopeId = getScopeId();
+    if (!settingsPageId) return { success: false, message: "Missing settingsPageId" };
+
+    patchPageP({ settingsLoading: true });
+    try {
+      const result = await args.fns.executeYTOFunction("loadSettingsPage", {
+        pageId: settingsPageId,
+        scopeVertexLabel: scopeConfig.vertexLabel,
+        scopeId,
+        scopeMatchProperty: scopeConfig.matchProperty,
+        sections: config?.sections || []
+      });
+
+      const errorMessage = extractError(result, true, "Failed to load settings");
+      if (errorMessage) return { success: false, message: errorMessage };
+
+      if (result?.result?.success) {
+        const sectionsData = result.result.data?.sections || {};
+        const stateMap = {};
+        for (const sectionId in sectionsData) {
+          const sectionData = sectionsData[sectionId];
+          stateMap[sectionId] = {
+            values: sectionData.values || {},
+            initialValues: { ...(sectionData.values || {}) },
+            version: sectionData.version ?? 0,
+            documentId: sectionData.documentId ?? null
+          };
+        }
+        patchPageP({ settingsSectionStateMap: stateMap, settingsDirtySectionIds: [] });
+        return { success: true, data: sectionsData };
+      }
+    } catch (error) {
+      console.error("settingsAdapter.loadPage:", error);
+      args.showErrorToast?.(error?.message || "Failed to load settings");
+    } finally {
+      patchPageP({ settingsLoading: false });
+    }
+    return { success: false, message: "Failed to load settings" };
+  },
+
+  saveSection: async ({ sectionId, sectionConfig, values, version }) => {
+    const settingsPageId = getSettingsPageId();
+    const scopeConfig = getScopeConfig();
+    const scopeId = getScopeId();
+    const pageConfig = evaluateConfig();
+
+    const result = await args.fns.executeYTOFunction("saveSettingsSection", {
+      pageId: settingsPageId,
+      sectionId,
+      values,
+      version,
+      scopeVertexLabel: scopeConfig.vertexLabel,
+      scopeId,
+      scopeMatchProperty: scopeConfig.matchProperty,
+      sectionConfig,
+      pageConfig,
+      auditEnabled: pageConfig?.audit?.enabled !== false
+    });
+
+    const errorMessage = extractError(result, false, "Failed to save settings");
+    if (errorMessage) {
+      args.showErrorToast?.(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+
+    if (result?.result?.success) {
+      args.showSuccessToast?.(result.result.message || "Settings saved");
+      markSectionClean(sectionId, result.result.data?.values, {
+        version: result.result.data?.version,
+        documentId: result.result.data?.documentId
+      });
+      return result.result;
+    }
+    return { success: false, message: "Failed to save settings" };
+  },
+
+  resetSection: async ({ sectionId, sectionConfig }) => {
+    const settingsPageId = getSettingsPageId();
+    const scopeConfig = getScopeConfig();
+    const scopeId = getScopeId();
+
+    const result = await args.fns.executeYTOFunction("resetSettingsSection", {
+      pageId: settingsPageId,
+      sectionId,
+      scopeVertexLabel: scopeConfig.vertexLabel,
+      scopeId,
+      scopeMatchProperty: scopeConfig.matchProperty,
+      sectionConfig,
+      deleteDocument: false
+    });
+
+    if (result?.result?.success) {
+      markSectionClean(sectionId, result.result.data?.values, {
+        version: result.result.data?.version,
+        documentId: result.result.data?.documentId
+      });
+      args.showSuccessToast?.(result.result.message || "Settings reset");
+    }
+    return result?.result || { success: false };
+  }
+};
+
+const saveSettingsSection = async (payload) => settingsAdapter.saveSection(payload);
+
+const loadSettingsPageData = async () => settingsAdapter.loadPage();
+
+const handleSaveAllDirtySections = async () => {
+  const dirtySectionIds = getDirtySectionIds();
+  const config = evaluateConfig();
+  const sections = config?.sections || [];
+  const formFnsMap = pageP()?.settingsFormFnsMap || {};
+
+  for (let index = 0; index < dirtySectionIds.length; index++) {
+    const sectionId = dirtySectionIds[index];
+    const sectionConfig = sections.find((section) => section.id === sectionId);
+    const formFns = formFnsMap[sectionId];
+    if (formFns && typeof formFns.handleSave === "function") {
+      await formFns.handleSave();
+    } else {
+      const sectionState = getSectionState(sectionId);
+      await settingsAdapter.saveSection({
+        sectionId,
+        sectionConfig,
+        values: sectionState?.values || {},
+        version: sectionState?.version ?? 0
+      });
+    }
+  }
+};
+
+const handleDiscardChanges = async () => {
+  await loadSettingsPageData();
+  args.showSuccessToast?.("Changes discarded");
+};
+
+const initializeSettingsPage = async () => {
+  if (pageP()?.settingsInitializing === true) return;
+  patchPageP({ configLoading: true, settingsInitializing: true });
+  try {
+    const settingsFn = getSettingsFunction();
+    if (settingsFn) {
+      await loadSettings();
+      updateMemoizedConfig();
+    }
+    ensureSettingsPageQueryParam();
+    const settingsPageId = getSettingsPageId();
+    if (settingsPageId && pageP()?.settingsPageId !== settingsPageId) {
+      patchPageP({ settingsPageId });
+    }
+    await loadSettingsPageData();
+  } finally {
+    patchPageP({ configLoading: false, settingsInitializing: false });
+  }
+};
+
+const ensureSettingsPageQueryParam = () => {
+  const fromQuery = args.searchParams?.page;
+  if (fromQuery != null && String(fromQuery).trim() !== "") return;
+  const defaultId = getDefaultSettingsPageId();
+  if (defaultId) {
+    args.setSearchParams({ page: defaultId }, { replace: true });
+  }
+};
+
+const resetSettingsPageData = () => {
+  patchPageP({
+    settings: null,
+    evaluatedConfig: null,
+    memoizedConfig: null,
+    settingsSectionStateMap: {},
+    settingsDirtySectionIds: [],
+    settingsFormFnsMap: {}
+  });
+};
+
+args.createEffect(() => {
+  if (!isSettingsPageMode()) return;
+  getCachedConfig();
+
+  const nextPageId = getSettingsPageId();
+  if (!nextPageId) {
+    if (getLoadFromSetting()) {
+      void initializeSettingsPage();
+    } else {
+      patchPageP({ configLoading: false });
+    }
+    return;
+  }
+
+  const prevPageId = pageP()?.settingsPageId;
+  if (prevPageId === nextPageId) return;
+
+  if (prevPageId != null) resetSettingsPageData();
+  patchPageP({ settingsPageId: nextPageId });
+  void initializeSettingsPage();
+});
+
+// Exported API
+return {
+  prop,
+  getShowSelection,
+  getSelectionMode,
+  getOnSelectionChange,
+  getInitialSelectedRowIds,
+  getTablePassthroughProps,
+  getTableVertexLabel,
+  getTableSettingsLabel,
+  getUncategorizedVertexId,
+  getLoadFromSetting,
+  getConfigFunction,
+  getSettingsFunction,
+  getFormConfig,
+  getSaveSettingsFunction,
+  evaluateConfig,
+  getCachedConfig,
+  updateMemoizedConfig,
+  fetchData,
+  pageStateVertexId,
+  loadSettings,
+  initializeSettings,
+  initializeSettingsPage,
+  handleOpenSettings,
+  handleSaveSettings,
+  getPageMode,
+  isSettingsPageMode,
+  getSettingsPageId,
+  getScopeConfig,
+  getScopeId,
+  getSettingsSidebarConfig,
+  getSaveStrategy,
+  isSettingsLoading,
+  getSectionState,
+  markSectionClean,
+  markSectionDirty,
+  getDirtySectionIds,
+  dirtyTracker,
+  getDirtyTracker: () => dirtyTracker,
+  registerSectionFormFns,
+  settingsAdapter,
+  saveSettingsSection,
+  loadSettingsPageData,
+  handleSaveAllDirtySections,
+  handleDiscardChanges,
+  getGenericDataFunction,
+  fetchUserContentRows,
+  refreshQueuedRows,
+  getGenericSaveFunction,
+  getGenericImportFunction,
+  getGenericExportFunction,
+  getImportFunction,
+  getExportFunction,
+  handleImport,
+  handleExport,
+  getSidebarConfig,
+  hasSidebar,
+  getUsePolarisUI,
+  selectedSidebarItem,
+  handleSidebarItemSelect,
+  handleMoveItemsToCategory,
+  getSelectedRows,
+  setSelectedRows,
+  clearSelectedRows,
+  extractError
+}
+
+'''
+        key: DynamicPage
+        props:
+          '''
+return {
+  onMount: async () => {
+    if (!args.fns.isSettingsPageMode?.()) {
+      await args.fns.initializeSettings();
+    }
+  },
+  onCleanup: () => {
+    args.deleteVertex(0, args.fns.pageStateVertexId, args.graph, args.setGraph);
+  }
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 16rem;
+  width: 100%;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+        displayOrder: 0
+        componentName: Html
+        key: config_loading_overlay
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+return {
+  as: "div",
+  hide: !configLoading
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "large",
+  color: "primary"
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''
+return `._id {
+  height: 100%;
+}`;
+'''
+        displayOrder: 1
+        componentName: Html
+        key: dynamic_page_wrapper
+        props:
+          '''
+const hasSidebar = args.fns.hasSidebar();
+const isSettings = args.fns.isSettingsPageMode?.() === true;
+return {
+  as: "div",
+  hide: !hasSidebar || isSettings
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Sidebar
+        key: sidebar_component
+        props:
+          '''
+const tableVertexLabel = args.fns.getTableVertexLabel();
+const tableSettingsLabel = args.fns.getTableSettingsLabel();
+const relationshipType = tableVertexLabel ? `User${tableSettingsLabel}` : null;
+
+// Get config to check user scoping settings and hooks
+const { config } = args.fns.getCachedConfig();
+const enableUserScopingForSidebar = config?.enableUserScopingForSidebar === true;
+
+const vid = args.fns.pageStateVertexId;
+return {
+  onItemSelect: args.fns.handleSidebarItemSelect,
+  tableVertexLabel: tableVertexLabel,
+  relationshipType: relationshipType,
+  enableUserScoping: enableUserScopingForSidebar,
+  onMoveItemsToCategory: args.fns.handleMoveItemsToCategory,
+  sidebarWidth: () => args.graph.vertexes[vid]?.P?.sidebarWidth ?? 240,
+  setSidebarWidth: (w) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { sidebarWidth: w }),
+  fetchRoot: args.fns.fetchRoot,
+  hooks: config?.sidebar?.hooks,
+  initialCategoryId: args.searchParams?.sidebarCategory,
+  contentLabel: args.fns.prop('label')
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        slotName: main
+        displayOrder: 1
+        fns: ""
+        componentName: Table
+        key: unique_1
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+return {
+  selectedSidebarItem: args.fns.selectedSidebarItem,
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
+  ...args.fns.getTablePassthroughProps()
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: dynamic_page_no_sidebar_wrapper
+        props:
+          '''
+const hasSidebar = args.fns.hasSidebar();
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = args.fns.isSettingsPageMode?.() === true;
+return {
+  as: "div",
+  hide: hasSidebar || configLoading || isSettings
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 1
+        fns: ""
+        componentName: Table
+        key: unique_2
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+return {
+  getSelectedRows: args.fns.getSelectedRows,
+  setSelectedRows: args.fns.setSelectedRows,
+  clearSelectedRows: args.fns.clearSelectedRows,
+  rowsToRemove: () => args.graph.vertexes[vid]?.P?.rowsToRemoveVertexIds ?? null,
+  setRowsToRemove: (ids) => args.mergeVertexProperties(0, vid, args.graph, args.setGraph, { rowsToRemoveVertexIds: ids }),
+  ...args.fns.getTablePassthroughProps()
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        key: settings_page_layout_wrapper
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+const isSettings = args.fns.isSettingsPageMode?.() === true;
+return {
+  as: "div",
+  hide: !isSettings || configLoading
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: calc(100vh - 4rem);
+  background: ${args.theme.var.color.background};
+}
+
+@media (min-width: 769px) {
+  ._id {
+    flex-wrap: nowrap;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: SettingsSidebar
+        key: settings_sidebar
+        props:
+          '''
+const config = args.fns.evaluateConfig?.();
+return {
+  sidebarConfig: config?.sidebar || null
+};
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: SettingsPageContent
+        key: settings_page_content
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "4"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "1"
+      E: "7"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "4"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "7"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "1"
+      E: "9"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+  ]
+}

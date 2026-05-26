@@ -551,6 +551,11 @@ const setFieldValue = (fieldKey, value) => {
   // Use mergeVertexProperties to update vertex in graph
   // The vertex will be automatically updated in the graph
   args.mergeVertexProperties(txnId, vertexId, args.graph, args.setGraph, { [fieldKey]: value });
+
+  const onFieldChange = args.contextData.props?.onFieldChange;
+  if (typeof onFieldChange === "function") {
+    onFieldChange(fieldKey, value);
+  }
 };
 
 // Validate form
@@ -820,18 +825,22 @@ const getFieldTooltipMeta = (field) => {
 
 // Expose fns to parent if onFnsReady callback is provided
 const onFnsReady = args.contextData.props?.onFnsReady;
+let lastReadyVertexId = null;
 if (onFnsReady && typeof onFnsReady === "function") {
-  // Call onFnsReady with the fns object after form is initialized
   args.createEffect(() => {
     const vertexId = formVertexId();
-    if (vertexId !== null) {
-      onFnsReady({
-        handleSave,
-        isSubmitting,
-        formTxnId,
-        validate
-      });
-    }
+    if (vertexId == null || vertexId === lastReadyVertexId) return;
+    lastReadyVertexId = vertexId;
+    onFnsReady({
+      handleSave,
+      isSubmitting,
+      formTxnId,
+      validate,
+      getFormVertex,
+      getFieldValue,
+      setFieldValue,
+      formVertexId
+    });
   });
 }
 
@@ -1183,7 +1192,7 @@ return `._id {
 const field = args.contextData.field;
 const tooltipMeta = args.fns.getFieldTooltipMeta(field);
 return {
-  as: "motion.div",
+  as: "div",
   id: `fm-field-hint-${field.key}`,
   text: tooltipMeta.body,
   hide: args.fns.getFieldRenderer(field) === "graphFileUpload" || !tooltipMeta.showBelow,
@@ -1608,7 +1617,7 @@ return `._id {
           '''
 return {
   as: "div",
-  hide: args.fns.getMode?.() === "view"
+  hide: args.fns.getMode?.() === "view" || args.contextData.props?.hideActionsBar === true
 };
 '''
       }

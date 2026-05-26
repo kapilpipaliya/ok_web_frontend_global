@@ -5013,7 +5013,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
   }
   if (cellContent.type === "actions") {
     return {
-      as: "motion.div",
+      as: "div",
       style: "display: flex; gap: 8px; align-items: center;"
     };
   }
@@ -5057,7 +5057,7 @@ if (typeof cellContent === "object" && cellContent !== null) {
 
 if (args.fns.getColumnRenderer(column) === "actions" && args.fns.getActions().some((a) => a.type === "edit")) {
   return {
-    as: "motion.div",
+    as: "div",
     style: "display: flex; gap: 8px; align-items: center;"
   };
 }
