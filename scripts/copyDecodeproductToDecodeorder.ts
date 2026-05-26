@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 /**
  * Copies every file from src/page_schema/decodeproduct to multiple destination
- * directories (decodeorder, decodefile, etc.) with the same folder structure.
+ * directories (orvio, decodefile, etc.) with the same folder structure.
  * Skips:
  *   - Directories listed in SKIP_DIRS (and everything inside them)
  *   - Individual files listed in SKIP_FILES (paths relative to decodeproduct)
@@ -16,7 +16,7 @@ const ROOT = path.resolve(__dirname, "..");
 const SOURCE = path.join(ROOT, "src/page_schema/decodeproduct");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["decodeorder", "decodefile", "extendfiles", "workshopflow", "hydrateme", "certpulse", "storetasks", "attendra", "ytorganizer"];
+const DEST_NAMES = ["orvio", "decodefile", "extendfiles", "workshopflow", "hydrateme", "certpulse", "storetasks", "attendra", "ytorganizer"];
 
 const SKIP_DIRS = [
   //"functions",

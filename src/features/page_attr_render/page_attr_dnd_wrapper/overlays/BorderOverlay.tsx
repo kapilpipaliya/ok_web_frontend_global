@@ -23,6 +23,7 @@ import {
 import { generateBoxShadow } from "~/lib/css/generateBoxShadow";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
+import { isLayoutPreviewHover } from "~/features/page_designer/functions/layout/previewHover";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -41,6 +42,8 @@ export function BorderOverlay(
     () => formStoreVertex()?.P.selectedId,
   );
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
+  const isPreviewHoverId = () =>
+    isLayoutPreviewHover(layoutStoreVertex()?.P, props.item.id);
   const activeItemChanged = createSelector(
     () => layoutStoreVertex()?.P.activeItem,
   );
@@ -64,7 +67,7 @@ export function BorderOverlay(
         ...styles,
         border: "1px solid purple",
       };
-    } else if (isSelectedHoverId(props.item.id)) {
+    } else if (isSelectedHoverId(props.item.id) || isPreviewHoverId()) {
       styles = {
         ...styles,
         border: "1px solid orange",

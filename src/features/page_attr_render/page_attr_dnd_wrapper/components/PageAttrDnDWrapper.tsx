@@ -23,6 +23,11 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
+import {
+  clearLayoutPreviewHover,
+  isLayoutPreviewHover,
+  setLayoutPreviewHover,
+} from "~/features/page_designer/functions/layout/previewHover";
 
 import { BorderOverlay } from "../overlays/BorderOverlay";
 import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
@@ -49,6 +54,10 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   );
   const [previewStore] = usePreviewContext();
   const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
+  const isPreviewHoverId = () =>
+    isLayoutPreviewHover(layoutStoreVertex()?.P, props.item.id);
+  const isHoveredItem = () =>
+    isSelectedHoverId(props.item.id) || isPreviewHoverId();
   const { showErrorToast } = useToast();
 
   const childrenAttrs = createMemo(() =>
@@ -77,6 +86,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: props.item.id,
     });
+    setLayoutPreviewHover(layoutStoreId, props.item.id, graph, setGraph);
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
@@ -84,6 +94,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: -1,
     });
+    clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
   };
 
   // debounce is giving error, node not found when running element.currentTarget and we must need it
@@ -152,7 +163,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       <Show
         when={
           isSelectedLayoutId(props.item.id) ||
-          isSelectedHoverId(props.item.id) ||
+          isHoveredItem() ||
           formStoreVertex()?.P.multiHighlight.includes(props.item.id)
         }
       >

@@ -32,6 +32,10 @@ import {
 } from "../../context/LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
+import {
+  clearLayoutPreviewHover,
+  setLayoutPreviewHover,
+} from "../../functions/layout/previewHover";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { HideShowIcon } from "./HideShowIcon";
 import { TreeItemContainer } from "./TreeItemContainer";
@@ -191,6 +195,7 @@ export function LayoutTreeItem(
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: props.metaVertex.id,
     });
+    setLayoutPreviewHover(layoutStoreId, props.metaVertex.id, graph, setGraph);
   };
 
   const handleMouseLeave = (e: MouseEvent) => {
@@ -198,6 +203,7 @@ export function LayoutTreeItem(
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       hoverId: -1,
     });
+    clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
   };
 
   const isAfter = createMemo(

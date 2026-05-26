@@ -11,6 +11,7 @@ import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { getChildrenAttrs } from "./getChildrenAttrs";
+import { clearLayoutPreviewHover } from "./previewHover";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -177,6 +178,13 @@ export function deleteLayoutAttr(
 
   // Clear selection if currently selected item is being deleted
   clearSelectedAndHoverIds(formStoreVertex, layoutVertex, graph, setGraph);
+
+  if (
+    layoutStoreId &&
+    graph.vertexes[layoutStoreId]?.P?.previewHoverId === layoutVertex.id
+  ) {
+    clearLayoutPreviewHover(layoutStoreId, graph, setGraph);
+  }
 
   // Delete the layout
   deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);

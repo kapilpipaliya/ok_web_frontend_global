@@ -11,8 +11,8 @@ The implementation is split into:
 - Server functions:
   - `functions/dynamic_page/main_functions/content/getUserContent.hjson`
   - `functions/dynamic_page/main_functions/content/mutateUserContent.hjson`
-  - `functions/dynamic_page/main_functions/settings/getUserContentSetting.hjson`
-  - `functions/dynamic_page/main_functions/settings/saveUserContentSetting.hjson`
+  - `functions/dynamic_page/main_functions/settings/config/getUserContentSetting.hjson`
+  - `functions/dynamic_page/main_functions/settings/config/saveUserContentSetting.hjson`
   - `functions/dynamic_page/main_functions/sidebar/getVertexChildren.hjson`
   - `functions/dynamic_page/main_functions/sidebar/saveSidebarVertex.hjson`
   - `functions/dynamic_page/main_functions/migration/migrateDynamicPageSettings.hjson` (Attendra defaults)

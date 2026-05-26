@@ -454,11 +454,51 @@ export function PageView(
     );
   };
 
+  // LayoutRenderer runs outside MainContentDataWrapper, so it needs its own
+  // PreviewContext or isDesignMode stays false and preview hover borders never mount.
+  const pagePreviewStore = createStore<PreviewStoreObject>({
+    get context() {
+      return props.context;
+    },
+    get hasFullPermission() {
+      return props.hasFullPermission ?? true;
+    },
+    get hasEditPermission() {
+      return props.hasEditPermission ?? true;
+    },
+    get hasCreatePermission() {
+      return props.hasCreatePermission ?? true;
+    },
+    get hasViewPermission() {
+      return props.hasViewPermission ?? true;
+    },
+    get id() {
+      return props.id;
+    },
+    get isDesignMode() {
+      return props.isDesignMode;
+    },
+    get isNoPermissionCheck() {
+      return props.isNoPermissionCheck ?? false;
+    },
+    get isViewOnly() {
+      return isViewOnlyForm();
+    },
+    get previewData() {
+      return props.data;
+    },
+    get previewMeta() {
+      return props.metaVertex;
+    },
+  });
+
   return (
     <Show when={props.metaVertex}>
-      <Show when={layouts().length > 0} fallback={<MainContentDataWrapper />}>
-        <LayoutRenderer index={0} />
-      </Show>
+      <PreviewContext.Provider value={pagePreviewStore}>
+        <Show when={layouts().length > 0} fallback={<MainContentDataWrapper />}>
+          <LayoutRenderer index={0} />
+        </Show>
+      </PreviewContext.Provider>
     </Show>
   );
 }

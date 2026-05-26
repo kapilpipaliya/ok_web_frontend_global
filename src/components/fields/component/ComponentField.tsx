@@ -242,9 +242,11 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
     };
 
     return (
-      <DataContext.Provider value={newDataContext}>
-        <ComponentContent />
-      </DataContext.Provider>
+      <PreviewContext.Provider value={[previewStoreProxy, setPreviewStore]}>
+        <DataContext.Provider value={newDataContext}>
+          <ComponentContent />
+        </DataContext.Provider>
+      </PreviewContext.Provider>
     );
   };
 

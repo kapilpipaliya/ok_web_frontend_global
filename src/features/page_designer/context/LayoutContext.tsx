@@ -61,6 +61,7 @@ export function getInitialDesignerLayoutStore() {
       | "left"
       | "right"
       | null,
+    previewHoverId: -1 as Id | number,
   };
 }
 
