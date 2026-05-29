@@ -1,0 +1,102 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''
+const isInIframe = args.atom(false);
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({ functionName, contextData: contextData || {} }),
+  isInIframe
+};
+'''
+        title: Employees
+        url: /employees
+        key: Employees
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+  onMount: () => args.fns.isInIframe(window.self !== window.top)
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        key: employees_dynamic_page
+        props:
+          '''return {
+  tableVertexLabel: "User",
+  tableSettingsLabel: "Employee",
+  loadFromSetting: true,
+  hide: !args.fns.isInIframe()
+};'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: unique_outside
+        as: "div"
+        css: "return `._id { font-size: 1rem; line-height: 1.6; color: ${args.theme.var.color.text}; padding: 1rem; }`;"
+        props: "return { show: args.fns.isInIframe() === false };"
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: unique_outside_p
+        text: "Please open **Solvo** inside your Shopify admin (embedded app)."
+        textType: "markdown"
+        props: "return { as: 'p' };"
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: "e1"
+      T: "Attr"
+      S: "1"
+      E: "2"
+    }
+    {
+      id: "e2"
+      T: "Attr"
+      S: "1"
+      E: "3"
+    }
+    {
+      id: "e3"
+      T: "Attr"
+      S: "3"
+      E: "4"
+    }
+    {
+      id: "e4"
+      T: "PageLayout"
+      S: "1"
+      E: "layout"
+    }
+  ]
+}
+

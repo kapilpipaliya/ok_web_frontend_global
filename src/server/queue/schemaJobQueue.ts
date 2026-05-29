@@ -1,5 +1,5 @@
 /**
- * BullMQ queue for schema export/import/sync jobs.
+ * BullMQ queue for schema export/import/sync/migrate jobs.
  */
 
 import { Job, Queue } from "bullmq";

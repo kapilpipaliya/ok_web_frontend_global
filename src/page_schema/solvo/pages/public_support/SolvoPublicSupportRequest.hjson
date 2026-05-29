@@ -1,0 +1,557 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        key: SolvoPublicSupportRequest
+        title: Support Request
+        url: /support/request
+        fns: return { enabled: () => true }
+        props:
+          '''return {
+  isNoPermissionCheck: true
+};'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        key: support_request_root
+        componentName: Html
+        displayOrder: 1
+        fns:
+          '''
+const [settings, setSettings] = args.createSignal(null);
+const [formValues, setFormValues] = args.createSignal({});
+const [fieldErrors, setFieldErrors] = args.createSignal({});
+const [loading, setLoading] = args.createSignal(true);
+const [submitting, setSubmitting] = args.createSignal(false);
+const [createdTicket, setCreatedTicket] = args.createSignal(null);
+const [trackingUrl, setTrackingUrl] = args.createSignal("");
+
+const loadSettings = async () => {
+  setLoading(true);
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "publicSupportGetSettings",
+      contextData: {}
+    });
+    const payload = response?.result?.data || response?.data || null;
+    setSettings(payload);
+    const initial = {};
+    const fields = getFieldsFromConfig(payload?.fieldSettings?.formConfig);
+    for (let i = 0; i < fields.length; i++) {
+      if (fields[i]?.defaultValue !== undefined) initial[fields[i].key] = fields[i].defaultValue;
+    }
+    if (args.searchParams?.email) initial.customerEmail = args.searchParams.email;
+    if (args.searchParams?.name) initial.customerName = args.searchParams.name;
+    if (args.searchParams?.order) initial.orderNumber = args.searchParams.order;
+    setFormValues(initial);
+  } catch (e) {
+    console.error("SolvoPublicSupportRequest.loadSettings", e);
+    args.showErrorToast?.("Failed to load support settings.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const getFieldsFromConfig = (formConfig) => {
+  const groups = formConfig?.groups;
+  const out = [];
+  if (!Array.isArray(groups)) return out;
+  for (let gi = 0; gi < groups.length; gi++) {
+    const fields = groups[gi]?.fields;
+    if (!Array.isArray(fields)) continue;
+    for (let fi = 0; fi < fields.length; fi++) {
+      if (fields[fi]?.key) out.push(fields[fi]);
+    }
+  }
+  return out;
+};
+
+const formFields = () => getFieldsFromConfig(settings()?.fieldSettings?.formConfig);
+const supportTheme = () => settings()?.supportTheme || {};
+const supportSystem = () => settings()?.supportSystem || {};
+
+const updateField = (key, value) => {
+  setFormValues((current) => ({ ...(current || {}), [key]: value }));
+  setFieldErrors((current) => ({ ...(current || {}), [key]: undefined }));
+};
+
+const submitTicket = async () => {
+  if (supportSystem().enabled === false) {
+    args.showErrorToast?.("Support is currently disabled.");
+    return;
+  }
+  setSubmitting(true);
+  setFieldErrors({});
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "publicSupportCreateTicket",
+      contextData: {
+        fields: formValues(),
+        sourceUrl: args.searchParams?.sourceUrl || args.searchParams?.url
+      }
+    });
+    const result = response?.result || response;
+    if (response?.error || result?.success === false) {
+      const errors = result?.data?.fieldErrors || {};
+      setFieldErrors(errors);
+      args.showErrorToast?.(response?.error || result?.message || "Failed to create support request.");
+      return;
+    }
+    const ticket = result?.data?.ticket || null;
+    setCreatedTicket(ticket);
+    setTrackingUrl(result?.data?.trackingUrl || ticket?.P?.trackingUrl || "");
+    args.showSuccessToast?.("Support request created.");
+    try {
+      window.parent?.postMessage?.({
+        type: "solvo:support-ticket-created",
+        serial: result?.data?.serial,
+        trackingUrl: result?.data?.trackingUrl
+      }, "*");
+    } catch {}
+  } catch (e) {
+    console.error("SolvoPublicSupportRequest.submitTicket", e);
+    args.showErrorToast?.("Failed to create support request.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+return {
+  settings,
+  formValues,
+  fieldErrors,
+  loading,
+  submitting,
+  createdTicket,
+  trackingUrl,
+  loadSettings,
+  formFields,
+  supportTheme,
+  supportSystem,
+  updateField,
+  submitTicket
+};
+'''
+        css:
+          '''
+const theme = args.fns.supportTheme?.() || {};
+return `._id {
+  width: 100%;
+  max-width: ${Number(theme.modalWidth || 640)}px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: ${args.theme.var.color.text};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 1rem;
+  box-sizing: border-box;
+}
+${theme.customCss || ""}`;
+'''
+        props:
+          '''return {
+  as: "main",
+  onMount: async () => {
+    await args.fns.loadSettings();
+  }
+};'''
+      }
+    }
+    {
+      id: "title"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''return `._id {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}`;'''
+        props:
+          '''return {
+  as: "h1",
+  text: "Create a support request",
+  hide: !!args.fns.createdTicket?.()
+};'''
+      }
+    }
+    {
+      id: "description"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''return `._id {
+  margin: 0 0 1.25rem 0;
+  color: ${args.theme.var.color.muted};
+  line-height: 1.5;
+}`;'''
+        props:
+          '''return {
+  as: "p",
+  text: "Tell us what happened. We will email you a tracking link after the request is created.",
+  hide: !!args.fns.createdTicket?.()
+};'''
+      }
+    }
+    {
+      id: "disabled"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 3
+        css:
+          '''return `._id {
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.warning || args.theme.var.color.border};
+  border-radius: 0.75rem;
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        props:
+          '''return {
+  as: "div",
+  text: "Support requests are currently disabled.",
+  hide: args.fns.loading?.() || args.fns.supportSystem?.().enabled !== false
+};'''
+      }
+    }
+    {
+      id: "success"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 4
+        css:
+          '''return `._id {
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.success || args.theme.var.color.border};
+  border-radius: 0.75rem;
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        props:
+          '''const ticket = args.fns.createdTicket?.();
+return {
+  as: "div",
+  hide: !ticket
+};'''
+      }
+    }
+    {
+      id: "success_title"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''const ticket = args.fns.createdTicket?.();
+return {
+  as: "h2",
+  text: ticket ? `Request ${ticket.P?.serial} created` : "Request created"
+};'''
+      }
+    }
+    {
+      id: "success_text"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        props:
+          '''return {
+  as: "p",
+  text: "We sent the tracking link to the email address on the request."
+};'''
+      }
+    }
+    {
+      id: "success_link"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 3
+        props:
+          '''return {
+  as: "a",
+  href: args.fns.trackingUrl?.() || "#",
+  target: "_blank",
+  text: "Open tracking link"
+};'''
+      }
+    }
+    {
+      id: "form"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 5
+        css:
+          '''return `._id {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+@media (max-width: 640px) {
+  ._id {
+    grid-template-columns: 1fr;
+  }
+}`;'''
+        props:
+          '''return {
+  as: "form",
+  onSubmit: (event) => {
+    event.preventDefault();
+    args.fns.submitTicket?.();
+  },
+  hide: args.fns.loading?.() || args.fns.createdTicket?.() || args.fns.supportSystem?.().enabled === false
+};'''
+      }
+    }
+    {
+      id: "field_loop"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        loop: true
+        contextName: field
+        props:
+          '''return {
+  as: "div",
+  data: args.fns.formFields?.() || []
+};'''
+      }
+    }
+    {
+      id: "field_wrap"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''const f = args.contextData.field || {};
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  grid-column: span ${Number(f.colSpan || 1)};
+}
+@media (max-width: 640px) {
+  ._id {
+    grid-column: span 1;
+  }
+}`;'''
+        props:
+          '''return {
+  as: "label"
+};'''
+      }
+    }
+    {
+      id: "field_label"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''return `._id {
+  font-size: 0.875rem;
+  font-weight: 600;
+}`;'''
+        props:
+          '''const f = args.contextData.field || {};
+return {
+  as: "span",
+  text: `${f.label || f.key}${f.required ? " *" : ""}`
+};'''
+      }
+    }
+    {
+      id: "field_input"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''return `._id {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  box-sizing: border-box;
+}
+._id[data-error="true"] {
+  border-color: ${args.theme.var.color.error};
+}`;'''
+        props:
+          '''const f = args.contextData.field || {};
+const values = args.fns.formValues?.() || {};
+const errors = args.fns.fieldErrors?.() || {};
+const renderer = f.renderer || "text";
+const isTextArea = renderer === "textArea" || renderer === "textarea";
+return {
+  as: isTextArea ? "textarea" : "input",
+  rows: isTextArea ? 5 : undefined,
+  type: f.dataType === "email" ? "email" : f.dataType === "number" ? "number" : "text",
+  value: values[f.key] || "",
+  placeholder: f.placeholder || "",
+  "data-error": errors[f.key] ? "true" : "false",
+  onInput: (event) => args.fns.updateField?.(f.key, event.currentTarget.value)
+};'''
+      }
+    }
+    {
+      id: "field_error"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 3
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.error};
+  font-size: 0.8rem;
+}`;'''
+        props:
+          '''const f = args.contextData.field || {};
+const errors = args.fns.fieldErrors?.() || {};
+return {
+  as: "span",
+  text: errors[f.key] || "",
+  hide: !errors[f.key]
+};'''
+      }
+    }
+    {
+      id: "submit"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''return `._id {
+  grid-column: 1 / -1;
+  border: 0;
+  border-radius: 0.6rem;
+  padding: 0.75rem 1rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-weight: 700;
+  cursor: pointer;
+}
+._id:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}`;'''
+        props:
+          '''const submitting = args.fns.submitting?.();
+return {
+  as: "button",
+  type: "submit",
+  disabled: submitting,
+  text: submitting ? "Creating..." : "Create support request"
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "page"
+      E: "root"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "root"
+      E: "title"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "root"
+      E: "description"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "root"
+      E: "disabled"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "root"
+      E: "success"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "success"
+      E: "success_title"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "success"
+      E: "success_text"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "success"
+      E: "success_link"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "root"
+      E: "form"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "form"
+      E: "field_loop"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "field_loop"
+      E: "field_wrap"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "field_wrap"
+      E: "field_label"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "field_wrap"
+      E: "field_input"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "field_wrap"
+      E: "field_error"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "form"
+      E: "submit"
+    }
+  ]
+}

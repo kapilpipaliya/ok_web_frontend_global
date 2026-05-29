@@ -13,11 +13,12 @@ import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
+import { PROPERTIES } from "../settings/constants";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
 import { createFormSubmitButton } from "~/pages/auth/functions/schema/createFormSubmitButton";
 import { createLinkButton } from "~/pages/auth/functions/schema/createLinkButton";
+import { createPasswordField } from "~/pages/auth/functions/schema/createPasswordField";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 
 // Define interfaces for API responses
@@ -250,7 +251,10 @@ export function ForgotPasswordForm() {
   const stepUserNameSchema: FieldAttribute = {
     as: "div",
     attributes: [
-      ...createFormHeader("Reset Password"),
+      ...createFormHeader(
+        "Reset Password",
+        "Enter your email or username and we'll send you a verification code.",
+      ),
       {
         attributes: [
           ...createTextField(
@@ -297,17 +301,23 @@ export function ForgotPasswordForm() {
   const stepOTPSchema: FieldAttribute = {
     as: "div",
     attributes: [
-      ...createFormHeader("Verify OTP"),
+      ...createFormHeader(
+        "Verify OTP",
+        "Enter the 6-digit code we sent to your email.",
+      ),
       {
         attributes: [
           {
-            as: "div",
+            as: "p",
             css: `return \`._id {
+  color: \${args.theme.var.color.text_light_400};
   text-align: center;
+  margin-top: 8px;
   margin-bottom: 16px;
+  font-size: 14px;
 }\`;`,
             componentName: "Html",
-            text: `We've sent a verification code to ${userState.email || "your email"}. Please enter it below.`,
+            text: `Sent to ${userState.email || "your email"}`,
           },
           ...createTextField(
             "otp",
@@ -343,11 +353,9 @@ export function ForgotPasswordForm() {
             },
           ),
         ],
-        css: SETTINGS_CONSTANTS.FORM_GRID_CSS,
         componentName: "Html",
       },
     ],
-    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
   };
 
@@ -355,7 +363,10 @@ export function ForgotPasswordForm() {
   const stepNewPasswordSchema: FieldAttribute = {
     as: "div",
     attributes: [
-      ...createFormHeader("Set New Password"),
+      ...createFormHeader(
+        "Set New Password",
+        "Choose a strong password for your account.",
+      ),
       {
         attributes: [
           // New password field
@@ -425,75 +436,20 @@ export function ForgotPasswordForm() {
             componentName: "Html",
           },
           getErrorSchema("newPassword"),
-
-          // Confirm password field
-          getPasswordLabelWithHintSchema("Confirm Password", "confirmPassword"),
-          {
-            as: "div",
-            attributes: [
-              {
-                css: PROPERTIES.Css.TextFieldCss,
-                componentName: "SystemTextInput",
-                key: "confirmPassword",
-                props: (options: ForgotPasswordFunctionArgumentType) => ({
-                  onInput: (e: Event) => {
-                    if (e.target instanceof HTMLInputElement) {
-                      options.updateValue(e.target.value);
-                    }
-                  },
-                  onKeyDown: async (e: KeyboardEvent) => {
-                    if (e.key === "Enter") {
-                      if (e.target instanceof HTMLInputElement) {
-                        options.updateValue(e.target.value);
-                      }
-                      if (options.contextData.submitState[0]?.isLoading) {
-                        return;
-                      }
-                      try {
-                        options.contextData.submitState[1]("isLoading", true);
-                        await handlePasswordResetSubmit(options);
-                      } finally {
-                        options.contextData.submitState[1]("isLoading", false);
-                      }
-                    }
-                  },
-                  type: showPassword.confirmPassword ? "text" : "password",
-                }),
-                validation: {
-                  required: true,
-                },
-              },
-              {
-                as: "div",
-                attributes: [
-                  {
-                    componentName: "Html",
-                    as: "icon",
-                    props: () => ({
-                      icon: showPassword.confirmPassword
-                        ? "ph:eye"
-                        : "ph:eye-slash",
-                      onClick: () => toggleVisibility("confirmPassword"),
-                    }),
-                  },
-                ],
-                css: `return \`._id {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-}\`;`,
-                componentName: "Html",
-              },
-            ],
-            css: `return \`._id {
-  position: relative;
-}\`;`,
-            componentName: "Html",
-          },
-          getErrorSchema("confirmPassword"),
-
+          ...createPasswordField(
+            "confirmPassword",
+            "Confirm Password",
+            showPassword,
+            toggleVisibility,
+            async (options: ForgotPasswordFunctionArgumentType) => {
+              try {
+                options.contextData.submitState[1]("isLoading", true);
+                await handlePasswordResetSubmit(options);
+              } finally {
+                options.contextData.submitState[1]("isLoading", false);
+              }
+            },
+          ),
           createFormSubmitButton(
             (options: ForgotPasswordFunctionArgumentType) =>
               options.contextData.submitState[0]?.isLoading
@@ -510,11 +466,9 @@ export function ForgotPasswordForm() {
             },
           ),
         ],
-        css: SETTINGS_CONSTANTS.FORM_GRID_CSS,
         componentName: "Html",
       },
     ],
-    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
   } as FieldAttribute;
 

@@ -1,0 +1,46 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: portalTasksBeforeFetch
+        description: getUserContent beforeFetchData hook for staff portal My tasks — scopes the query to Task rows assigned to the signed-in user via TaskAssignee.
+        body:
+          '''
+const {
+  tableVertexLabel,
+  queryModification,
+  sessionUser
+} = args.contextData || {};
+
+if (tableVertexLabel !== "Task") {
+  return { success: true, message: "Skip: not Task" };
+}
+
+if (!queryModification || typeof queryModification !== "object") {
+  return { success: true, message: "Skip: missing queryModification" };
+}
+
+const assigneeRelationshipType = "TaskAssignee";
+const sessionUserUuid =
+  sessionUser?.P?.uuid != null ? String(sessionUser.P.uuid).trim() : "";
+
+if (sessionUserUuid === "") {
+  queryModification.forceEmptyResult = true;
+  return { success: true, message: "No session user — empty task result" };
+}
+
+queryModification.leadingMatchSegments.push(
+  `MATCH (portalSessionUser:User {uuid: $portalSessionUserUuid})`,
+  `MATCH (c:Task)-[:${assigneeRelationshipType}]->(portalSessionUser)`
+);
+queryModification.additionalQueryParameters.portalSessionUserUuid = sessionUserUuid;
+
+return { success: true, message: "Applied portal task assignee scope to query" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

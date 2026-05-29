@@ -169,7 +169,10 @@ const normalizeAction = (action, index) => {
     reasonCode: action.reasonCode,
     reasonVariant: action.reasonVariant,
     loadingIcon: action.loadingIcon,
-    onClick: action.onClick
+    onClick: action.onClick,
+    href: action.href,
+    target: action.target,
+    rel: action.rel
   };
 };
 
@@ -354,6 +357,19 @@ const getActionReasonDataAttrs = (action, row) => {
   };
   if (state.code) attrs["data-reason-code"] = state.code;
   return attrs;
+};
+
+/** `href`: string | `({ row, action, … }) => string` — link for IconButton / open in new tab. */
+const getActionHref = (action, row) => {
+  if (!action) return undefined;
+  const raw = action.href;
+  if (raw == null || raw === "") return undefined;
+  if (typeof raw === "string") return String(raw);
+  if (typeof raw === "function") {
+    const result = invokeActionPredicate(raw, action, row, "getActionHref");
+    return result != null && result !== "" ? String(result) : undefined;
+  }
+  return undefined;
 };
 
 const getPrimaryActionsForRow = (row) =>
@@ -2394,6 +2410,7 @@ return {
   getActionReasonState,
   getActionTooltip,
   getActionReasonDataAttrs,
+  getActionHref,
   getPrimaryActionsForRow,
   getSecondaryActionsForRow,
   hasSecondaryActionsForRow,
@@ -4710,10 +4727,14 @@ const disabled = args.fns.isActionDisabled(action, rowData);
 const loading = args.fns.isActionRunning(action, rowData);
 const reason = args.fns.getActionReasonState(action, rowData);
 const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
+const hrefValue = args.fns.getActionHref(action, rowData);
 return {
   icon: loading ? (action.loadingIcon || "carbon:renew") : (action.icon || "carbon:overflow-menu-horizontal"),
   variant: action.variant || "ghost",
   size: "sm",
+  href: hrefValue,
+  target: action.target,
+  rel: action.rel,
   title: reason.text,
   ariaLabel: reason.text,
   reasonVariant: reason.active ? reason.variant : undefined,
@@ -4722,6 +4743,10 @@ return {
   ...reasonAttrs,
   onClick: (e) => {
     e.stopPropagation();
+    // Modifier or middle-click: keep native <a> behavior (open href in new tab/window).
+    if (hrefValue && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1)) return;
+    // Plain click: do not navigate; run configured row action (e.g. open modal).
+    if (hrefValue) e.preventDefault();
     if (disabled || loading) return;
     args.fns.runRowAction(action, rowData);
   }

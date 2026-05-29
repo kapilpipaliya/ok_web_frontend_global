@@ -22,6 +22,24 @@ if (!global.__schemaJobsQueueWorkerStartPromise) {
   global.__schemaJobsQueueWorkerStartPromise = undefined;
 }
 
+function normalizeSchemaJobError(error: unknown): Error {
+  if (error instanceof Error) {
+    const maybeHint =
+      "hint" in error && typeof error.hint === "string" ? error.hint.trim() : "";
+    if (!maybeHint) {
+      return error;
+    }
+    const message = `${error.message}\nHint: ${maybeHint}`;
+    const enriched = new Error(message);
+    enriched.name = error.name;
+    if (error.stack) {
+      enriched.stack = error.stack;
+    }
+    return enriched;
+  }
+  return new Error(String(error));
+}
+
 async function processSchemaJob(job: Job<SchemaJobQueueData>) {
   const startTime = Date.now();
   const bullJobId = String(job.id ?? "");
@@ -47,8 +65,9 @@ async function processSchemaJob(job: Job<SchemaJobQueueData>) {
     });
     return result;
   } catch (error) {
+    const normalizedError = normalizeSchemaJobError(error);
     const duration = Date.now() - startTime;
-    const message = error instanceof Error ? error.message : String(error);
+    const message = normalizedError.message;
     logger.logJob({
       jobId: bullJobId,
       jobName: "schema-job",
@@ -58,7 +77,7 @@ async function processSchemaJob(job: Job<SchemaJobQueueData>) {
       status: "failed",
       error: message,
     });
-    throw error;
+    throw normalizedError;
   }
 }
 

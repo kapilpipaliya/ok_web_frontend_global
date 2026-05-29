@@ -14,6 +14,7 @@ import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { createAppState } from "~/createAppState";
 import type { WebsiteSchemas } from "~/page_schema/loader";
+import type { SchemaParseIssue } from "~/page_schema/loader";
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
 
 type GraphType = ReturnType<typeof createAppState>[0];
@@ -385,6 +386,7 @@ async function importSingleSchema(
     : Object.keys(processedSchema.edges || {}).length;
 
   return {
+    importResult,
     commitData,
     vertexCount,
     edgeCount,
@@ -539,6 +541,7 @@ export function buildSuccessResponse(
   stats: ImportStats,
   deletedItems: string[],
   websiteSchemas: WebsiteSchemas,
+  parseIssues: SchemaParseIssue[] = [],
 ) {
   let message = `Successfully imported ${stats.importedItems.length} schemas from website: ${websiteName}`;
   if (deletedItems.length > 0) {
@@ -546,6 +549,9 @@ export function buildSuccessResponse(
   }
   if (stats.activatedTheme) {
     message += `. Theme "${stats.activatedTheme}" was automatically activated.`;
+  }
+  if (parseIssues.length > 0) {
+    message += ` ${parseIssues.length} schema file(s) failed to parse and were skipped.`;
   }
 
   return {
@@ -563,6 +569,8 @@ export function buildSuccessResponse(
       functions: Object.keys(websiteSchemas.functions || {}).length,
       emailTemplates: Object.keys(websiteSchemas.emailTemplates || {}).length,
       activatedTheme: stats.activatedTheme,
+      parseErrors: parseIssues,
+      parseErrorCount: parseIssues.length,
     },
   };
 }

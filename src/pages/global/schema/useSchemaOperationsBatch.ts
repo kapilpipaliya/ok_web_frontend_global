@@ -298,7 +298,11 @@ export function useSchemaOperationsBatch() {
   const jobOutputByDb = createMemo(() => {
     const map = new Map<
       string,
-      { import?: SchemaJobStatusRow; sync?: SchemaJobStatusRow }
+      {
+        import?: SchemaJobStatusRow;
+        sync?: SchemaJobStatusRow;
+        migrate?: SchemaJobStatusRow;
+      }
     >();
     for (const row of pipelineImportRows()) {
       const entry = map.get(row.databaseName) ?? {};
@@ -311,6 +315,8 @@ export function useSchemaOperationsBatch() {
         entry.import = row;
       } else if (row.operation === "sync") {
         entry.sync = row;
+      } else if (row.operation === "migrate") {
+        entry.migrate = row;
       }
       map.set(row.databaseName, entry);
     }

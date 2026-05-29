@@ -1,0 +1,84 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportCloseTicket
+        description: Closes a public support ticket by customer token or admin ticket id.
+        body:
+          '''
+const { serial, token, ticketId, closedBy } = args.contextData || {};
+
+const settingsResult = await args.executeNamedServerFunction({
+  functionName: "publicSupportGetSettings",
+  contextData: {}
+});
+const supportSystem = (settingsResult?.result?.data || settingsResult?.data || {}).supportSystem || {};
+
+let result;
+const now = new Date().toISOString();
+if (ticketId) {
+  const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+  if (!user) return { success: false, message: "Admin access is required." };
+  result = await args.session.run(
+    `
+    MATCH (t:PublicSupportTicket)
+    WHERE elementId(t) = $ticketId
+    SET t.status = 'closed',
+        t.closedAt = $now,
+        t.closedBy = 'admin',
+        t.updatedAt = $now
+    RETURN t
+    `,
+    { ticketId: String(ticketId), now }
+  );
+} else {
+  if (supportSystem.allowTicketCloseByCustomer === false) {
+    return { success: false, message: "Customers cannot close tickets for this store." };
+  }
+  if (!serial || !token) {
+    return { success: false, message: "Ticket serial and token are required." };
+  }
+  result = await args.session.run(
+    `
+    MATCH (t:PublicSupportTicket {serial: $serial, ticketAccessToken: $token})
+    SET t.status = 'closed',
+        t.closedAt = $now,
+        t.closedBy = $closedBy,
+        t.updatedAt = $now
+    RETURN t
+    `,
+    { serial: String(serial), token: String(token), closedBy: closedBy || "customer", now }
+  );
+}
+
+if (!result.records || result.records.length === 0) {
+  return { success: false, message: "Support ticket not found." };
+}
+
+const ticket = args.convertNodeToJson(result.records[0].get("t"));
+try {
+  await args.executeNamedServerFunction({
+    functionName: "publicSupportQueueNotification",
+    contextData: {
+      eventType: "ticket_closed",
+      ticketId: ticket.id,
+      serial: ticket.P?.serial
+    }
+  });
+} catch (e) {
+  console.error("publicSupportCloseTicket: failed to queue notification", e);
+}
+
+return {
+  success: true,
+  message: "Ticket closed.",
+  data: { ticket }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

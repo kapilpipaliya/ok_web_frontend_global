@@ -12,7 +12,7 @@ import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { PROPERTIES, SETTINGS_CONSTANTS, STYLES } from "../settings/constants";
+import { PROPERTIES, STYLES } from "../settings/constants";
 // Import all utilities from the index file
 import { useFormRefs } from "./functions/useFormRefs";
 import { useFormSubmit } from "./functions/useFormSubmit";
@@ -492,7 +492,6 @@ export function SignupForm() {
             componentName: "Html",
           },
         ],
-        css: SETTINGS_CONSTANTS.FORM_GRID_CSS,
         componentName: "Html",
       },
     ],

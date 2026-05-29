@@ -1,0 +1,141 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ConversationMessage
+      }
+    },
+    {
+      id: "2"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+const messageItem = args.contextData.message;
+const rowJustify = messageItem ? args.fns.getRowJustify?.(messageItem) : "flex-start";
+return `._id {
+  display: flex;
+  margin-bottom: 0.35rem;
+  justify-content: ${rowJustify};
+}`;
+'''
+        props:
+          '''
+const messageItem = args.contextData.message;
+if (!messageItem) return { as: "div" };
+const messageType = args.fns.getMessageType?.(messageItem) || "customer_message";
+const ownMessage = args.fns.isOwnMessage?.(messageItem) === true;
+return {
+  as: "div",
+  "data-message-type": messageType,
+  "data-own": ownMessage ? "true" : "false"
+};'''
+      }
+    },
+    {
+      id: "3"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+const messageItem = args.contextData.message;
+const messageType = messageItem ? args.fns.getMessageType?.(messageItem) : "customer_message";
+const ownMessage = messageItem ? args.fns.isOwnMessage?.(messageItem) === true : false;
+return `._id {
+  max-width: 80%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+._id[data-message-type="internal_note"] {
+  background: ${args.theme.var.color.background_light_300};
+  color: ${args.theme.var.color.text};
+  border: 1px dashed ${args.theme.var.color.warning};
+}
+
+._id[data-own="true"]:not([data-message-type="internal_note"]) {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+}
+
+._id[data-own="false"]:not([data-message-type="internal_note"]) {
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.background_light_200_text};
+}`;
+'''
+        props:
+          '''
+const messageItem = args.contextData.message;
+if (!messageItem) return { as: "div" };
+const messageType = args.fns.getMessageType?.(messageItem) || "customer_message";
+const ownMessage = args.fns.isOwnMessage?.(messageItem) === true;
+return {
+  as: "div",
+  "data-message-type": messageType,
+  "data-own": ownMessage ? "true" : "false"
+};'''
+      }
+    },
+    {
+      id: "4"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''
+const messageItem = args.contextData.message;
+return {
+  as: "div",
+  text: messageItem?.P?.message || ""
+};'''
+      }
+    },
+    {
+      id: "5"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}`;
+'''
+        props:
+          '''
+const messageItem = args.contextData.message;
+const createdAt = messageItem?.P?.createdAt;
+const messageType = messageItem ? args.fns.getMessageType?.(messageItem) : "";
+const label = messageType === "internal_note" ? "Internal • " : "";
+return {
+  as: "div",
+  text:
+    label +
+    (args.fns.formatMessageTime?.(createdAt) ||
+      args.fns.formatTimestamp?.(createdAt) ||
+      "")
+};'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+  ]
+}

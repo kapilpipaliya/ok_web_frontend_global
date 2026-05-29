@@ -7,6 +7,45 @@ import type { SchemaJobQueueData } from "~/lib/schema/schemaJobs/schemaJobTypes"
 import { parseSchemaJobIdParam, schemaJobQueue } from "~/server/queue/schemaJobQueue";
 import { validateUserAndPermissions } from "~/routes/api/schema/export/validation/validateUserAndPermissions";
 
+function getJobFailureDetails(job: Job<SchemaJobQueueData>): string | null {
+  if (!Array.isArray(job.stacktrace) || job.stacktrace.length === 0) {
+    return null;
+  }
+  return job.stacktrace.join("\n\n");
+}
+
+function getImportParseIssueSummary(result: unknown): {
+  message: string;
+  details: string | null;
+} | null {
+  if (!result || typeof result !== "object") {
+    return null;
+  }
+  const detailsObj = (result as { details?: unknown }).details;
+  if (!detailsObj || typeof detailsObj !== "object") {
+    return null;
+  }
+  const parseErrors = (detailsObj as { parseErrors?: unknown }).parseErrors;
+  if (!Array.isArray(parseErrors) || parseErrors.length === 0) {
+    return null;
+  }
+  const first = parseErrors[0] as {
+    websiteName?: string;
+    schemaType?: string;
+    fileName?: string;
+    message?: string;
+  };
+  const firstPath =
+    first?.websiteName && first?.schemaType && first?.fileName
+      ? `${first.websiteName}/${first.schemaType}/${first.fileName}`
+      : "unknown file";
+  const firstMessage = first?.message ? `: ${first.message}` : "";
+  return {
+    message: `${parseErrors.length} schema file(s) failed to parse and were skipped`,
+    details: `First parse error at ${firstPath}${firstMessage}`,
+  };
+}
+
 function mapBullState(
   state: string,
 ): "queued" | "running" | "success" | "failed" {
@@ -61,6 +100,7 @@ export async function GET({ request, params }: APIEvent) {
       status === "success" && job.returnvalue != null
         ? job.returnvalue
         : null;
+    const parseIssue = status === "success" ? getImportParseIssueSummary(result) : null;
 
     return new Response(
       JSON.stringify({
@@ -77,7 +117,12 @@ export async function GET({ request, params }: APIEvent) {
         finishedAt: job.finishedOn
           ? new Date(job.finishedOn).toISOString()
           : null,
-        error: status === "failed" ? job.failedReason : null,
+        error:
+          status === "failed" ? job.failedReason : parseIssue?.message ?? null,
+        errorDetails:
+          status === "failed"
+            ? getJobFailureDetails(job)
+            : parseIssue?.details ?? null,
         result,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },

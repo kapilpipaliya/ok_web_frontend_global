@@ -1,0 +1,698 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Solvo – Support Tickets & Helpdesk for Shopify stores
+        key: Home
+        url: /
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "description",
+  content: "Solvo – Support Tickets & Helpdesk helps you manage support tickets and customer conversations. View tickets by category. Available in the Shopify App Store."
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "main"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Solvo – Support Tickets & Helpdesk"
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "Organize your tickets in nested categories and view them by category with ease."
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 4
+        textType: markdown
+        componentName: Html
+        text: **Solvo – Support Tickets & Helpdesk** is a Shopify app that helps you organize your ticket catalog in nested categories and view tickets by category. Manage everything without leaving your Shopify admin.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 6
+        componentName: Html
+        key: unique_1
+      }
+    }
+    {
+      id: "9"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_move_to_categories.png
+        fileName: solvo_support_helpdesk_app_move_to_categories.png
+        fileSize: 134001
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_move_to_categories.png
+        checksum: e6c0677e93ff5a6643e7db4ae0f4c2c0c7ade27421311418090147abf222787c
+        mimeType: image/png
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+        displayOrder: 7
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Key features"
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''**Nested categories**: Organize your tickets in a hierarchy of categories. Add categories, build a parent-child tree, and assign tickets to categories. Choose a category to see its tickets—so you can browse and manage your catalog by category instead of one long list.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text:
+          '''**Automatic Collection & Menu Sync**:
+for each category a Shopify collection is created and for each root level category a Shopify menu is created, so you can use it in theme settings.
+All changes stay automatically synced with your store — when you update categories, collections and menus are updated instantly to match.'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 4
+        textType: markdown
+        componentName: Html
+        text: **Video guides:** Watch tutorials and updates from the Solvo support team.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 5
+        textType: markdown
+        componentName: Html
+        text:
+          '''**Settings:** Choose which columns to show so the table fits how you work.
+you can customize the functionality of the app by changing settings. for more help contact us at [Support](/support) page in Shopify admin.'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+        displayOrder: 6
+        textType: markdown
+        componentName: Html
+        text:
+          '''**Support and help:** Use the [Support](/support) page to contact the team, and check [FAQ](/faq), [Documentation](/docs), and [Tutorial](/tutorial) from the app for answers and step-by-step guidance.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+        displayOrder: 8
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "18"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "How it works"
+}'''
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: 1\. Install **Solvo – Support Tickets & Helpdesk** app from the [Shopify App Store]( https://apps.shopify.com/ ) and open it from your Shopify admin. Your store’s tickets are loaded into the app.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "2. Add categories, build your category tree, and choose a category. The table shows tickets in that category."
+}'''
+      }
+    }
+    {
+      id: "21"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "3. Use Settings to choose which columns to show in the table."
+}'''
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+        displayOrder: 9
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Benefits"
+}'''
+      }
+    }
+    {
+      id: "24"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return {
+  as: "p",
+  text: "You can organize tickets in nested categories and view tickets by category. The category tree keeps your catalog organized; the table shows tickets in the category you choose. Tailor columns in settings and get help from documentation and support when you need it."
+}'''
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-top: 2rem;
+}`;'''
+        displayOrder: 10
+        componentName: Html
+        props:
+          '''return {
+  as: "section"
+}'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Who it's for"
+}'''
+      }
+    }
+    {
+      id: "27"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''**Solvo – Support Tickets & Helpdesk** is for Shopify store owners and staff who want to organize tickets in nested categories and view tickets by category without leaving the admin. It suits stores of any size that want a clear category structure and a focused view of their catalog.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "28"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "1"
+      E: "3"
+    }
+    {
+      id: e3
+      T: PageLayout
+      S: "1"
+      E: "28"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "3"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "3"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "3"
+      E: "6"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "3"
+      E: "7"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "3"
+      E: "8"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "3"
+      E: "10"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "3"
+      E: "17"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "3"
+      E: "22"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "3"
+      E: "25"
+    }
+    {
+      id: e13
+      T: AttrSrc
+      S: "8"
+      E: "9"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "10"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "10"
+      E: "12"
+    }
+    {
+      id: e16
+      T: Attr
+      S: "10"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "10"
+      E: "14"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "10"
+      E: "15"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "10"
+      E: "16"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "17"
+      E: "19"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "17"
+      E: "20"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "17"
+      E: "21"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "22"
+      E: "23"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "22"
+      E: "24"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "25"
+      E: "26"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "25"
+      E: "27"
+    }
+  ]
+}

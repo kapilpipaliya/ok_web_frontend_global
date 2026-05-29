@@ -6,6 +6,7 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { assertUserCanChangePasswordLocally } from "~/lib/auth/systemUserPasswordChange";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 
@@ -30,6 +31,9 @@ export async function POST({ request }: APIEvent) {
     }
 
     const user = convertNodeToJson(userResult.records[0].get("u"));
+
+    assertUserCanChangePasswordLocally(user, subDomain);
+
     const email = user.P.email; // Get the actual email for sending
     const userUuid = user.P.uuid; // Get the user UUID for secure reference
 

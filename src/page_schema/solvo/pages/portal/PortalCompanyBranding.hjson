@@ -1,0 +1,408 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some((edgeId) => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge?.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+const logoUploadConfiguration = (attachFieldKey, logoName, acceptOverride) => ({
+  accept:
+    acceptOverride ||
+    "image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml",
+  uploadUrl: "/api/file/upload",
+  attachUploadedFileToFieldKey: attachFieldKey,
+  hidePreview: true,
+  enableDragDrop: false,
+  pickButtonLabel: `Upload ${logoName}`,
+  pickButtonVariant: "secondary",
+  fullWidth: false,
+  successToastMessage: "File uploaded",
+  uploadFailedMessage: "Upload failed",
+  noFileReturnedMessage: "Upload failed: no file returned",
+  notInGraphMessage: "Upload saved but file not found in graph",
+  onUploadSuccess: async ({ uploadedId, callbacks, configuration, syncPreview, showSuccess }) => {
+    const fieldKey = configuration.attachUploadedFileToFieldKey;
+    if (fieldKey && typeof callbacks.setFieldValue === "function") {
+      callbacks.setFieldValue(fieldKey, uploadedId);
+    }
+    syncPreview(uploadedId);
+    showSuccess();
+  },
+});
+
+const filePickerConfiguration = (modalTitle) => ({
+  chooseButtonLabel: "Select file…",
+  clearButtonLabel: "Clear",
+  modalTitle,
+  modalHintEmpty: "Select a file using the checkbox, then confirm.",
+  modalHintSelected: "Selected: {name} — confirm or choose another file.",
+  selectionMode: "single",
+  confirmButtonLabel: "Use selection",
+  cancelButtonLabel: "Cancel",
+  closeButtonLabel: "Close",
+  selectRowMessage: "Select a row in the list first.",
+  invalidTypeMessage: "This type does not match the configured selection.",
+  usePolarisUI: true,
+  targetVertexLabels: ["File"],
+  fileDownloadUrlPrefix: "/api/file/download",
+  showImagePreview: true,
+  buildSecondaryLabelFromVertex: true,
+  pickerBodyProps: {
+    tableVertexLabel: "File",
+    tableSettingsLabel: "File",
+    loadFromSetting: true
+  }
+});
+
+const companyBrandingFormConfiguration = {
+  gridColumns: 1,
+  groups: [
+    {
+      key: "rectangular_logo",
+      title: "Rectangular company logo",
+      gridColumns: 1,
+      fields: [
+        {
+          dataType: "file",
+          renderer: "graphFileUpload",
+          key: "rectangularLogoUpload",
+          uploadConfiguration: logoUploadConfiguration(
+            "rectangularLogo",
+            "Rectangular Logo"
+          ),
+        },
+        {
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          key: "rectangularLogo",
+          label: "Or choose from Files",
+          helpText: "Upload above or pick a file from the repository. Used in headers and wide layouts.",
+          selectConfig: {
+            label: "File",
+            relationshipType: "CompanyRectangularLogo",
+            edgeOnly: true,
+            propertyOnly: false
+          },
+          pickerConfiguration: filePickerConfiguration("Choose rectangular logo")
+        }
+      ]
+    },
+    {
+      key: "square_logo",
+      title: "Square company logo",
+      gridColumns: 1,
+      fields: [
+        {
+          dataType: "file",
+          renderer: "graphFileUpload",
+          key: "squareLogoUpload",
+          uploadConfiguration: logoUploadConfiguration(
+            "squareLogo",
+            "Square Logo"
+          ),
+        },
+        {
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          key: "squareLogo",
+          label: "Or choose from Files",
+          helpText: "Square logo for compact UI (portal sidebar, auth screens).",
+          selectConfig: {
+            label: "File",
+            relationshipType: "CompanySquareLogo",
+            edgeOnly: true,
+            propertyOnly: false
+          },
+          pickerConfiguration: filePickerConfiguration("Choose square logo")
+        }
+      ]
+    },
+    {
+      key: "favicon",
+      title: "Company favicon",
+      gridColumns: 1,
+      fields: [
+        {
+          dataType: "file",
+          renderer: "graphFileUpload",
+          key: "faviconUpload",
+          uploadConfiguration: logoUploadConfiguration(
+            "favicon",
+            "Favicon",
+            "image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml,image/x-icon,image/vnd.microsoft.icon"
+          ),
+        },
+        {
+          dataType: "relation",
+          renderer: "embeddedVertexPicker",
+          key: "favicon",
+          label: "Or choose from Files",
+          helpText: "Small icon shown in browser tabs.",
+          selectConfig: {
+            label: "File",
+            relationshipType: "CompanyFavicon",
+            edgeOnly: true,
+            propertyOnly: false
+          },
+          pickerConfiguration: filePickerConfiguration("Choose favicon")
+        }
+      ]
+    }
+  ]
+};
+
+const fileIdOrNull = (rawValue) => {
+  const trimmed = rawValue != null ? String(rawValue).trim() : "";
+  return trimmed !== "" ? trimmed : null;
+};
+
+const logoFileIdFromSavePayload = (savePayload, fieldKey, relationshipType) => {
+  const rel = savePayload?.relationships?.[fieldKey];
+  if (rel?.targetIds?.length > 0) {
+    return fileIdOrNull(rel.targetIds[0]);
+  }
+  const formVertex = savePayload?.vertex;
+  const edgeIds = formVertex?.OUT?.[relationshipType];
+  if (Array.isArray(edgeIds) && edgeIds.length > 0) {
+    const edge = args.graph?.edges?.[edgeIds[0]];
+    if (edge?.E != null) return fileIdOrNull(edge.E);
+  }
+  return null;
+};
+
+const saveCompanyBrandingForm = async (savePayload) => {
+  const rectangularLogo = logoFileIdFromSavePayload(
+    savePayload,
+    "rectangularLogo",
+    "CompanyRectangularLogo"
+  );
+  const squareLogo = logoFileIdFromSavePayload(
+    savePayload,
+    "squareLogo",
+    "CompanySquareLogo"
+  );
+  const favicon = logoFileIdFromSavePayload(savePayload, "favicon", "CompanyFavicon");
+  if (!(rectangularLogo || squareLogo || favicon)) {
+    args.showErrorToast?.("Select or upload at least one logo or favicon.");
+    return false;
+  }
+  try {
+    const response = await args.postAPI("/api/settings/updateCompanyLogo", {
+      rectangularLogo,
+      squareLogo,
+      favicon
+    });
+    if (response?.graph && typeof response.graph === "object") {
+      args.setGraphData(0, response.graph, {});
+    }
+    args.showSuccessToast?.(
+      (typeof response.message === "string" && response.message) ||
+        "Company branding updated successfully"
+    );
+    return true;
+  } catch (error) {
+    args.showErrorToast?.(error instanceof Error ? error.message : "Save failed");
+    return false;
+  }
+};
+
+return {
+  enabled: () => true,
+  checkAdminRole,
+  companyBrandingFormConfiguration,
+  saveCompanyBrandingForm,
+};
+'''
+        title: Company branding
+        url: /portal/company-branding
+        key: PortalCompanyBranding
+        dynamicComponent: FloatingHelpTooltip, VertexPicker, FileUploader, FormManagement
+        props:
+          '''let companyBrandingFilesMerged = false;
+
+const mergeCompanyBrandingFileVertices = () => {
+  if (companyBrandingFilesMerged) return;
+  companyBrandingFilesMerged = true;
+
+  const globalSettingId = args.graph?.vertexLabelIdMap?.GlobalSetting?.[0];
+  if (!globalSettingId) return;
+  const globalSetting = args.graph.vertexes[globalSettingId];
+  if (!globalSetting) return;
+
+  const logoFiles = [
+    args.evalExpression("->CompanyRectangularLogo", {
+      graph: args.graph,
+      vertexes: [globalSetting],
+    })?.[0],
+    args.evalExpression("->CompanySquareLogo", {
+      graph: args.graph,
+      vertexes: [globalSetting],
+    })?.[0],
+    args.evalExpression("->CompanyFavicon", {
+      graph: args.graph,
+      vertexes: [globalSetting],
+    })?.[0],
+  ].filter((file) => file?.id != null);
+
+  const vertexMap = {};
+  for (const file of logoFiles) {
+    if (!args.graph.vertexes[file.id]) {
+      vertexMap[file.id] = file;
+    }
+  }
+  if (Object.keys(vertexMap).length > 0) {
+    args.setGraphData(0, { vertexes: vertexMap }, {});
+  }
+};
+
+return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    if (!args.user) {
+      args.navigate("/auth/signin", { replace: true });
+      return;
+    }
+    if (!args.fns.checkAdminRole?.()) {
+      args.showErrorToast?.("Admin access required");
+      args.navigate("/portal/tickets", { replace: true });
+      return;
+    }
+    mergeCompanyBrandingFileVertices();
+  }
+};'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  max-width: 42rem;
+  margin: 0;
+  padding: ${args.theme.var.spacing?.md || "1rem"};
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-sizing: border-box;
+}`;'''
+        props:
+          '''return { as: "main" };'''
+      }
+    }
+    {
+      id: "title_row"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}`;'''
+        props:
+          '''return { as: "div" };'''
+      }
+    }
+    {
+      id: "h1"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+}`;'''
+        props:
+          '''return { as: "h1", text: "Company branding" };'''
+      }
+    }
+    {
+      id: "intro"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.text_dark_400};
+}`;'''
+        props:
+          '''return {
+  as: "p",
+  text: "Update rectangular logo, square logo, and favicon. Current files load into each field from GlobalSetting relationships in the graph."
+};'''
+      }
+    }
+    {
+      id: "branding_form"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: FormManagement
+        props:
+          '''const globalSettingId = args.graph?.vertexLabelIdMap?.GlobalSetting?.[0];
+const globalSetting = globalSettingId ? args.graph.vertexes[globalSettingId] : null;
+
+const initialVertex =
+  globalSetting != null
+    ? {
+        id: globalSetting.id,
+        L: globalSetting.L,
+        IN: globalSetting.IN,
+        OUT: globalSetting.OUT,
+        P: args.klona(globalSetting.P),
+      }
+    : null;
+
+return {
+  formConfig: args.fns.companyBrandingFormConfiguration,
+  initialVertex,
+  vertexLabel: "GlobalSetting",
+  mode: "edit",
+  onSave: args.fns.saveCompanyBrandingForm,
+  afterSuccessfulSave: "reinitialize",
+  hide: globalSetting == null,
+  class: "portal-company-branding-form"
+};'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: PortalLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_page_root", T: "Attr", S: "1", E: "root" }
+    { id: "e_root_title", T: "Attr", S: "root", E: "title_row" }
+    { id: "e_title_h1", T: "Attr", S: "title_row", E: "h1" }
+    { id: "e_title_intro", T: "Attr", S: "title_row", E: "intro" }
+    { id: "e_root_form", T: "Attr", S: "root", E: "branding_form" }
+    { id: "e_layout", T: "PageLayout", S: "1", E: "layout" }
+  ]
+}

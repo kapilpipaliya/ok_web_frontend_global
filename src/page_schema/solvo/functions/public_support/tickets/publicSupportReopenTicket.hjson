@@ -1,0 +1,75 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportReopenTicket
+        description: Reopens a public support ticket by secure customer token or admin ticket id.
+        body:
+          '''
+const { serial, token, ticketId, reopenedBy } = args.contextData || {};
+const now = new Date().toISOString();
+
+let result;
+if (ticketId) {
+  const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+  if (!user) return { success: false, message: "Admin access is required." };
+  result = await args.session.run(
+    `
+    MATCH (t:PublicSupportTicket)
+    WHERE elementId(t) = $ticketId
+    SET t.status = 'open',
+        t.reopenedAt = $now,
+        t.reopenedBy = 'admin',
+        t.updatedAt = $now
+    RETURN t
+    `,
+    { ticketId: String(ticketId), now }
+  );
+} else {
+  if (!serial || !token) {
+    return { success: false, message: "Ticket serial and token are required." };
+  }
+  result = await args.session.run(
+    `
+    MATCH (t:PublicSupportTicket {serial: $serial, ticketAccessToken: $token})
+    SET t.status = 'open',
+        t.reopenedAt = $now,
+        t.reopenedBy = $reopenedBy,
+        t.updatedAt = $now
+    RETURN t
+    `,
+    { serial: String(serial), token: String(token), reopenedBy: reopenedBy || "customer", now }
+  );
+}
+
+if (!result.records || result.records.length === 0) {
+  return { success: false, message: "Support ticket not found." };
+}
+
+const ticket = args.convertNodeToJson(result.records[0].get("t"));
+try {
+  await args.executeNamedServerFunction({
+    functionName: "publicSupportQueueNotification",
+    contextData: {
+      eventType: "ticket_reopened",
+      ticketId: ticket.id,
+      serial: ticket.P?.serial
+    }
+  });
+} catch (e) {
+  console.error("publicSupportReopenTicket: failed to queue notification", e);
+}
+
+return {
+  success: true,
+  message: "Ticket reopened.",
+  data: { ticket }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

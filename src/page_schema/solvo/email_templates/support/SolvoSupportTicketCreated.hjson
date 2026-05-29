@@ -1,0 +1,118 @@
+{
+  vertexes: [
+    {
+      id: "template"
+      L: EmailTemplate
+      P: {
+        key: SolvoSupportTicketCreated
+        title: Support Request Created
+        description: Sent to the customer when a public support request is created. Dynamic values are read from query parameters.
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''return `._id {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color: ${args.theme.var.color.text};
+}`;'''
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "title"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''return {
+  as: "h1",
+  text: "Support request created"
+};'''
+      }
+    }
+    {
+      id: "body"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        props:
+          '''return {
+  as: "p",
+  text: `Ticket ${args.searchParams?.serial || ""} was created. We received your message and will reply by email.`
+};'''
+      }
+    }
+    {
+      id: "message"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 3
+        props:
+          '''return {
+  as: "p",
+  text: args.searchParams?.message || ""
+};'''
+      }
+    }
+    {
+      id: "link"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 4
+        props:
+          '''return {
+  as: "a",
+  href: args.searchParams?.trackingUrl || "#",
+  text: "Track support request"
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "template"
+      E: "root"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "root"
+      E: "title"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "root"
+      E: "body"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "root"
+      E: "message"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "root"
+      E: "link"
+    }
+  ]
+}

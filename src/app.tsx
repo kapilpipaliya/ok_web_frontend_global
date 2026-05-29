@@ -7,10 +7,9 @@ import { App as CapacitorApp } from "@capacitor/app";
 
 // import "~/base.css";
 import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
-import { isServer } from "solid-js/web";
+import { NoHydration, isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
-import { isAppSubdomain } from "~/lib/appSubdomain";
 import { ThemeProvider } from "./lib/theme/ThemeProvider";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
@@ -21,16 +20,6 @@ import { HydrationLoader } from "./components/HydrationLoader";
 
 /** Above VertexPickerModal (10050) and other app overlays so toasts stay visible. */
 const TOAST_CONTAINER_Z_INDEX = 20000;
-
-const isAppRouteExcludedFromLoader = (pathname: string) =>
-  [
-    "/app",
-    "/orders",
-    "/draft-orders",
-    "/products",
-    "/files",
-    "/tasks",
-  ].includes(pathname);
 
 // Create a generic error fallback component
 const ErrorFallback = (props: {
@@ -61,7 +50,7 @@ export default function App() {
       // Set isHydrated to true after a short delay to ensure components are ready
       setTimeout(() => {
         setIsHydrated(true);
-      }, 3000);
+      }, 100);
       // Hide loader after hydration
       setShowLoader(false);
     }
@@ -75,9 +64,6 @@ export default function App() {
             const location = useLocation();
             const navigate = useNavigate();
 
-            const isExcludedFromLoader = () =>
-              isAppRouteExcludedFromLoader(location.pathname) &&
-              (isServer || isAppSubdomain(window.location.hostname));
 
             // Set up Capacitor deep linking listener
             onMount(() => {
@@ -148,7 +134,11 @@ export default function App() {
                     />
                     {/* </Show> */}
                   </Show>
-                  <HydrationLoader show={showLoader() && !isExcludedFromLoader()} />
+                  <NoHydration>
+                    <HydrationLoader
+                      show={showLoader()}
+                    />
+                  </NoHydration>
                 </ErrorBoundary>
               </MetaProvider>
             );

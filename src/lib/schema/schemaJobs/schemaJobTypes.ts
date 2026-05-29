@@ -13,7 +13,12 @@ export interface ImportJobPayload {
   currentShop: string | null;
 }
 
-/** Payload stored on BullMQ for schema export/import/sync workers. */
+export interface MigrateJobPayload {
+  dryRun: boolean;
+  functionName: string | null;
+}
+
+/** Payload stored on BullMQ for schema export/import/sync/migrate workers. */
 export type SchemaJobQueueData =
   | {
       operation: "export";
@@ -34,4 +39,11 @@ export type SchemaJobQueueData =
       databaseName: string;
       subDomain: string;
       userEmail: string;
+    }
+  | {
+      operation: "migrate";
+      databaseName: string;
+      subDomain: string;
+      userEmail: string;
+      payload: MigrateJobPayload;
     };

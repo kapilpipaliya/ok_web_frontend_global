@@ -4,6 +4,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
+import { assertUserCanChangePasswordLocally } from "~/lib/auth/systemUserPasswordChange";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
@@ -33,12 +34,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("User not found", 404);
     }
 
-    if (!user.password) {
-      throw new APIError(
-        "Admin user password changes not allowed through this interface",
-        403,
-      );
-    }
+    assertUserCanChangePasswordLocally(user, subDomain);
 
     // Verify current password
     const isValidPassword = await verifyPassword(

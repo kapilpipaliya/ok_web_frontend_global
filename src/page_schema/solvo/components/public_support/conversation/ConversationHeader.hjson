@@ -1,0 +1,68 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ConversationHeader
+      }
+    },
+    {
+      id: "2"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  padding-right: 2.25rem;
+}`;
+'''
+        props:
+          '''
+const hideHeader = args.contextData.props?.hideHeader === true;
+const ticketVertex = args.fns.ticketVertex?.();
+return {
+  as: "h2",
+  hide: hideHeader,
+  text: ticketVertex
+    ? `${ticketVertex?.P?.serial || ""}: ${ticketVertex?.P?.subject || "Support"}`
+    : "Support conversation"
+};'''
+      }
+    },
+    {
+      id: "3"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+        props:
+          '''
+const hideHeader = args.contextData.props?.hideHeader === true;
+return {
+  as: "p",
+  hide: hideHeader || args.fns.isLoadingConversation?.(),
+  text: args.fns.getMetaLineText?.() || ""
+};'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" }
+  ]
+}

@@ -1043,6 +1043,90 @@ const settingsConfigs = [
     }
   }
 };`
+  },
+  {
+    key: "Support_settings_default",
+    tableVertexLabel: "Support",
+    icon: "💬",
+    name: "Support",
+    config: `return {
+  title: "Support Tickets",
+  label: "Support Ticket",
+  icon: "carbon:chat",
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "shop",
+      label: "Shop",
+      dataType: "text", renderer: "text",
+      width: "220px"
+    },
+    {
+      key: "subject",
+      label: "Subject",
+      dataType: "text", renderer: "text",
+      width: "260px",
+      required: false
+    },
+    {
+      key: "email",
+      label: "Email",
+      dataType: "text", renderer: "text",
+      width: "220px"
+    },
+    {
+      key: "unreadForAdmin",
+      label: "Unread",
+      dataType: "number", renderer: "number",
+      width: "90px"
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    }
+  ],
+  rowHeight: 60,
+  showRowNumber: true,
+  showSelection: false,
+  actions: [],
+  rowClickable: true,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "40px" },
+  formConfig: null,
+  uniqueKeys: [],
+  usePolarisUI: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  hooks: {},
+  sidebar: {
+    enabled: false
+  },
+  onRowClick: (row, args) => {
+    if (!row?.id) return;
+    const ticketId = row.id;
+    const basePath = "/ShopifySupportConversation";
+    const searchParams = args.searchParams || {};
+    const nextParams = { ...searchParams, supportId: ticketId };
+    const query = Object.entries(nextParams)
+      .filter(([, value]) => value != null && value !== "")
+      .map(([key, value]) => \`\${encodeURIComponent(key)}=\${encodeURIComponent(String(value))}\`)
+      .join("&");
+    const href = query ? \`\${basePath}?\${query}\` : basePath;
+
+    if (args.navigate) {
+      args.navigate(href);
+    } else if (typeof window !== "undefined") {
+      window.location.href = href;
+    }
+  }
+};`
   }
 ];
 

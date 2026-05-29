@@ -11,10 +11,12 @@ import {
 import { runMigration } from "~/lib/schema/runMigration";
 import { saveMigrationRequestForAllShops } from "~/lib/shopify/shopMigrationRequest";
 import { ensureShopDatabaseAndMigrate } from "~/lib/shopify/shopifyHelpers";
-import { getWebsiteSchemasSync } from "~/page_schema/loader";
+import { getWebsiteSchemasSyncWithIssues } from "~/page_schema/loader";
 import type { WebsiteSchemas } from "~/page_schema/loader";
+import type { SchemaParseIssue } from "~/page_schema/loader";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { ImportJobPayload } from "~/lib/schema/schemaJobs/schemaJobTypes";
+import { validatePageUrlsForImport } from "~/lib/schema/validateDuplicatePageUrls";
 
 export function parseImportQueryParams(request: Request): {
   components: string[];
@@ -59,7 +61,7 @@ export function buildImportJobPayload(request: Request): ImportJobPayload {
   };
 }
 
-function filterWebsiteSchemasByParams(
+export function filterWebsiteSchemasByParams(
   websiteSchemas: WebsiteSchemas,
   includeComponentKeys: string[],
   includePageKeys: string[],
@@ -97,6 +99,53 @@ function filterWebsiteSchemasByParams(
   return filtered;
 }
 
+export function resolveWebsiteSchemasForImport(
+  websiteName: string,
+  options: {
+    filterOnly: boolean;
+    includeComponentKeys: string[];
+    includePageKeys: string[];
+    includeFunctionKeys: string[];
+  },
+): WebsiteSchemas {
+  let websiteSchemas = getWebsiteSchemasSyncWithIssues(websiteName).schemas;
+
+  if (options.filterOnly) {
+    websiteSchemas = filterWebsiteSchemasByParams(
+      websiteSchemas,
+      options.includeComponentKeys,
+      options.includePageKeys,
+      options.includeFunctionKeys,
+    );
+  }
+
+  return websiteSchemas;
+}
+
+function resolveWebsiteSchemasForImportWithIssues(
+  websiteName: string,
+  options: {
+    filterOnly: boolean;
+    includeComponentKeys: string[];
+    includePageKeys: string[];
+    includeFunctionKeys: string[];
+  },
+): { websiteSchemas: WebsiteSchemas; parseIssues: SchemaParseIssue[] } {
+  const loaded = getWebsiteSchemasSyncWithIssues(websiteName);
+  let websiteSchemas = loaded.schemas;
+
+  if (options.filterOnly) {
+    websiteSchemas = filterWebsiteSchemasByParams(
+      websiteSchemas,
+      options.includeComponentKeys,
+      options.includePageKeys,
+      options.includeFunctionKeys,
+    );
+  }
+
+  return { websiteSchemas, parseIssues: loaded.parseIssues };
+}
+
 export interface PerformSchemaImportInput {
   dbSession: Session;
   subDomain: string;
@@ -127,16 +176,17 @@ export async function performSchemaImport(
 
   const websiteName = subDomain;
 
-  let websiteSchemas = getWebsiteSchemasSync(websiteName);
+  const { websiteSchemas, parseIssues } = resolveWebsiteSchemasForImportWithIssues(
+    websiteName,
+    {
+    filterOnly,
+    includeComponentKeys,
+    includePageKeys,
+    includeFunctionKeys,
+    },
+  );
 
-  if (filterOnly) {
-    websiteSchemas = filterWebsiteSchemasByParams(
-      websiteSchemas,
-      includeComponentKeys,
-      includePageKeys,
-      includeFunctionKeys,
-    );
-  }
+  await validatePageUrlsForImport(dbSession, websiteSchemas.pages);
 
   if (
     !(
@@ -177,6 +227,7 @@ export async function performSchemaImport(
       stats,
       deletedItems,
       websiteSchemas,
+      parseIssues,
     ) as Record<string, unknown>;
   } catch (error: unknown) {
     await tx.rollback();

@@ -10,8 +10,8 @@ export const TERMINAL_STATUSES = new Set([
   "enqueue_failed",
 ]);
 
-export const APP_OPERATIONS = ["import", "export", "sync"] as const;
-export const SHOP_OPERATIONS = ["import", "export"] as const;
+export const APP_OPERATIONS = ["import", "export", "sync", "migrate"] as const;
+export const SHOP_OPERATIONS = ["import", "export", "migrate"] as const;
 
 export function isTerminal(status: string) {
   return TERMINAL_STATUSES.has(status);
@@ -25,6 +25,8 @@ export function operationLabel(op: SchemaOperation) {
       return "Import";
     case "sync":
       return "Sync";
+    case "migrate":
+      return "Migrate";
   }
 }
 
@@ -36,6 +38,8 @@ export function statusLabel(status: string) {
       return "Running";
     case "success":
       return "Complete";
+    case "complete_with_error":
+      return "Complete with error";
     case "failed":
       return "Failed";
     case "enqueue_failed":
@@ -59,8 +63,17 @@ export function getAppSubdomainSignInUrl(subdomainKey: string) {
   return `${API.auth.prepareAutoSignInUrl}?subdomain=${encodeURIComponent(subdomainKey)}`;
 }
 
+/** Admin tool pages for schema import/export/sync/migrate (current subdomain). */
+export const SCHEMA_ADMIN_TOOL_LINKS = [
+  { label: "Import", path: "/admin/SchemaImport" },
+  { label: "Export", path: "/admin/SchemaExport" },
+  { label: "Sync", path: "/admin/SchemaSync" },
+  { label: "Migrate", path: "/admin/SchemaMigrate" },
+] as const;
+
 /** Common Shopify admin pages opened from system Schema Operations (super admin). */
 export const SCHEMA_APP_DATABASE_ADMIN_LINKS = [
+  { label: "Schema migrate", path: "/admin/SchemaMigrate" },
   { label: "Shopify Shops", path: "/ShopifyShops" },
   { label: "Support conversation", path: "/ShopifySupportConversation" },
   { label: "Support tickets", path: "/ShopifySupportTickets" },

@@ -1,0 +1,123 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ConversationComposer
+      }
+    },
+    {
+      id: "2"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}`;
+'''
+        props:
+          '''
+const ticketState = args.fns.getTicketState?.() || {};
+return {
+  as: "div",
+  hide:
+    args.fns.isLoadingConversation?.() ||
+    !args.fns.hasCredentials?.() ||
+    !ticketState.canShowComposer
+};'''
+      }
+    },
+    {
+      id: "3"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.875rem;
+  resize: vertical;
+  color: ${args.theme.var.color.text};
+  background: ${args.theme.var.color.background};
+  min-width: 0;
+}`;
+'''
+        props:
+          '''
+const capabilities = args.fns.getCapabilities?.() || {};
+const replyText = args.fns.replyMessageText?.() || "";
+return {
+  as: "textarea",
+  rows: 2,
+  placeholder: capabilities.useTokenAuth ? "Write a reply..." : "Type your reply...",
+  value: replyText,
+  disabled: args.fns.isSendingReply?.(),
+  onInput: (event) => args.fns.setReplyMessageText?.(event.currentTarget.value),
+  onKeyDown: (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      void args.fns.sendReply?.();
+    }
+  }
+};'''
+      }
+    },
+    {
+      id: "4"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  border: none;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-self: flex-end;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`;
+'''
+        props:
+          '''
+const isSending = args.fns.isSendingReply?.();
+const hasText = Boolean((args.fns.replyMessageText?.() || "").trim());
+return {
+  as: "button",
+  type: "button",
+  text: isSending ? "Sending..." : "Send",
+  disabled: isSending || !hasText,
+  onClick: () => void args.fns.sendReply?.()
+};'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+  ]
+}

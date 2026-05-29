@@ -25,11 +25,14 @@ const TABLE_GRID =
   "2fr 1fr 1fr 1.5fr minmax(280px, 3fr)";
 
 function statusBadgeCss(
-  args: { theme: { var: { color: Record<string, string> } } },
+  args: any,
   status: string,
   showOutputHint: boolean,
 ) {
-  const isErr = status === "failed" || status === "enqueue_failed";
+  const isErr =
+    status === "failed" ||
+    status === "enqueue_failed" ||
+    status === "complete_with_error";
   const isOk = status === "success";
   const isRun = status === "running";
   let bg = args.theme.var.color.background_light_300;
@@ -61,7 +64,11 @@ function buildOutputTabs(
   row: () => SchemaJobStatusRow | undefined,
   jobOutputByDb: () => Map<
     string,
-    { import?: SchemaJobStatusRow; sync?: SchemaJobStatusRow }
+    {
+      import?: SchemaJobStatusRow;
+      sync?: SchemaJobStatusRow;
+      migrate?: SchemaJobStatusRow;
+    }
   >,
 ): SchemaJobOutputTab[] {
   const out = jobOutputByDb().get(databaseName);
@@ -71,6 +78,9 @@ function buildOutputTabs(
   }
   if (out?.sync) {
     tabs.push({ label: "Sync", row: out.sync });
+  }
+  if (out?.migrate) {
+    tabs.push({ label: "Migrate", row: out.migrate });
   }
   if (tabs.length === 0) {
     const single = row();
@@ -90,20 +100,30 @@ function JobStatusCell(props: {
   row: () => SchemaJobStatusRow | undefined;
   jobOutputByDb: () => Map<
     string,
-    { import?: SchemaJobStatusRow; sync?: SchemaJobStatusRow }
+    {
+      import?: SchemaJobStatusRow;
+      sync?: SchemaJobStatusRow;
+      migrate?: SchemaJobStatusRow;
+    }
   >;
 }) {
   const outputTabs = () =>
     buildOutputTabs(props.databaseName, props.row, props.jobOutputByDb);
+  const hasErrorOutput = () =>
+    outputTabs().some((tab) => Boolean(tab.row.error || tab.row.errorDetails));
+  const displayStatus = () =>
+    props.status === "success" && hasErrorOutput()
+      ? "complete_with_error"
+      : props.status;
 
   const badge = (
     <As
       as="span"
       css={(args) =>
-        statusBadgeCss(args, props.status, hasAnyJobOutput(outputTabs()))
+        statusBadgeCss(args, displayStatus(), hasAnyJobOutput(outputTabs()))
       }
     >
-      {statusLabel(props.status)}
+      {statusLabel(displayStatus())}
     </As>
   );
 
@@ -125,7 +145,11 @@ export interface SchemaDatabaseTableSectionProps {
   statusByDb: () => Map<string, SchemaJobStatusRow>;
   jobOutputByDb: () => Map<
     string,
-    { import?: SchemaJobStatusRow; sync?: SchemaJobStatusRow }
+    {
+      import?: SchemaJobStatusRow;
+      sync?: SchemaJobStatusRow;
+      migrate?: SchemaJobStatusRow;
+    }
   >;
   onRunAll: (operation: SchemaOperation) => void;
   onRunOne: (operation: SchemaOperation, databaseName: string) => void;

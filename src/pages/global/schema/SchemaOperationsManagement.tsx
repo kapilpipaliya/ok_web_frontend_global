@@ -1,5 +1,5 @@
 import { createAsync } from "@solidjs/router";
-import { createSignal, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
 import { useToast } from "~/components/styled/modal/Toast";
 import { As } from "~/components/As";
 import { listSchemaOperationDatabases } from "~/server/schema/schemaOperationsManagement";
@@ -10,6 +10,7 @@ import {
   getAppSubdomainAdminPageUrl,
   getAppSubdomainSignInUrl,
   getShopDatabaseSignInUrl,
+  SCHEMA_ADMIN_TOOL_LINKS,
   SCHEMA_APP_DATABASE_ADMIN_LINKS,
   schemaOpButtonCss,
   SHOP_OPERATIONS,
@@ -107,7 +108,47 @@ export function SchemaOperationsManagement() {
       >
         Export writes schema from a database to files; import loads files into a
         database. Sync runs on app databases and pushes schema to linked Shopify
-        shop databases. Use Import & Sync to run both in sequence.
+        shop databases. Migrate runs the app migration function (for example
+        table settings). Use Import & Sync to run both in sequence. Tool pages
+        run against the subdomain you open them on; use per-database Sign in
+        first when running migrate on a specific app.
+      </As>
+
+      <As
+        as="div"
+        css={`return \`._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}\`;`}
+      >
+        <As
+          as="span"
+          css={`return \`._id {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: \${args.theme.var.color.muted};
+  margin-right: 0.25rem;
+}\`;`}
+        >
+          Tool pages:
+        </As>
+        <For each={SCHEMA_ADMIN_TOOL_LINKS}>
+          {(link) => (
+            <As
+              as="a"
+              href={link.path}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Open ${link.label} (current subdomain host)`}
+              css={schemaOpButtonCss("link", "sm")}
+            >
+              {link.label}
+            </As>
+          )}
+        </For>
       </As>
 
       <Show when={batch.batchRows().length > 0}>

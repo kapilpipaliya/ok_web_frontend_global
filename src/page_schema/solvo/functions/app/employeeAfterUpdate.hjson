@@ -1,0 +1,44 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: employeeAfterUpdate
+        description: After staff User update in shop DB — strips obsolete shop/invite properties from persisted User rows.
+        body:
+          '''
+const { tableVertexLabel, operation } = args.contextData || {};
+if (tableVertexLabel !== "User" || operation !== "update") {
+  return { success: true, message: "Skip: not User update" };
+}
+
+const result = args.contextData?.result;
+const employee = result?.data;
+const elementId = employee?.id;
+if (!elementId) return { success: true, message: "Skip: missing employee elementId" };
+
+await args.session.run(
+  `MATCH (e:User) WHERE elementId(e) = $id
+   SET e.updatedAt = $nowIso
+   REMOVE e.shop, e.shopDomain, e.inviteCode, e.inviteLink
+   RETURN e`,
+  { id: elementId, nowIso: new Date().toISOString() }
+);
+
+try {
+  if (result?.data?.P) {
+    delete result.data.P.shop;
+    delete result.data.P.shopDomain;
+    delete result.data.P.inviteCode;
+    delete result.data.P.inviteLink;
+  }
+} catch {}
+
+return { success: true, message: "Employee record cleaned (no persisted shop/invite)" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

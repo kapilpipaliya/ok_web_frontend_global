@@ -1,0 +1,74 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ConversationTimeline
+        dynamicComponent: ConversationMessage
+      }
+    },
+    {
+      id: "2"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-height: 12rem;
+  overflow-y: auto;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+._id[data-loading="true"] {
+  opacity: 0.6;
+}`;
+'''
+        props:
+          '''
+const isLoading = args.fns.isLoadingConversation?.();
+return {
+  as: "div",
+  hide: !args.fns.hasCredentials?.(),
+  "data-loading": isLoading ? "true" : "false"
+};'''
+      }
+    },
+    {
+      id: "3"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        loop: true
+        contextName: message
+        props:
+          '''return {
+  as: "div",
+  data: args.fns.getVisibleMessages?.() || []
+};'''
+      }
+    },
+    {
+      id: "4"
+      L: Attr
+      P: {
+        componentName: ConversationMessage
+        displayOrder: 1
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+  ]
+}

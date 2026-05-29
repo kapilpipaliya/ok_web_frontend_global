@@ -1,0 +1,984 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        public: true
+        fns: return { enabled: () => true }
+        title: Documentation - Solvo Support Tickets & Helpdesk
+        url: /docs
+        key: Documentation
+        props:
+          '''return {
+  isNoPermissionCheck: true
+}'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing?.lg || "2rem"};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing?.md || "1rem"};
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h1",
+  text: "Documentation"
+}'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1.5rem;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''This guide explains how to use **Solvo – Support Tickets & Helpdesk** app in plain language. You don't need any technical knowledge—just follow along.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting around the app"
+}'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text: In the Shopify admin main sidebar you'll see a menu **Solvo – Support Tickets & Helpdesk** with links: [Support](/support), [Support](/support), [FAQ](/faq), [Documentation](/docs), [Billing](/billing), and [Privacy](/privacy). Click any link to go to that section.
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 3
+        textType: markdown
+        componentName: Html
+        text:
+          '''[Support](/support) is where you see and manage your ticket list. [Support](/support) is where you send a message to our team or see replies. [FAQ](/faq), [Documentation](/docs), and [Tutorial](/tutorial) are help pages you can read anytime. [Billing](/billing) and [Privacy](/privacy) are for your subscription and our privacy policy. You can bookmark or share a page if you want to come back to it later.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Getting started"
+}'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''First, go to the Shopify App Store and install the **Solvo – Support Tickets & Helpdesk** app.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 3
+        componentName: Html
+        key: unique_1
+      }
+    }
+    {
+      id: "13"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_install.png
+        fileName: solvo_support_helpdesk_app_install.png
+        fileSize: 152356
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_install.png
+        checksum: 89ecad8e20ec21d84718294d600569a2302c7412330f01458aba53be12765de9
+        mimeType: image/png
+      }
+    }
+    {
+      id: "14"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 5
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "15"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Tickets Page"
+}'''
+      }
+    }
+    {
+      id: "16"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''The [Support](/support) page shows all your Shopify tickets in a list. You can search and filter to find what you need. Click a row to open a ticket in a modal to see and edit all its details. In table settings you choose which columns appear and how the list is sorted.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "17"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 3
+        componentName: Html
+        key: unique_2
+      }
+    }
+    {
+      id: "18"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_home.png
+        fileName: solvo_support_helpdesk_app_home.png
+        fileSize: 161272
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_home.png
+        checksum: 5a1427a3742f46e2d3ee0c16b77e2778fe35af3c8be6005e633c56f99a830020
+        mimeType: image/png
+      }
+    }
+    {
+      id: "19"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 4
+        textType: markdown
+        componentName: Html
+        text: In the Support page sidebar, you can create categories and sub-categories.
+        key: unique_3
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "20"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 5
+        componentName: Html
+        key: unique_4
+      }
+    }
+    {
+      id: "21"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_categories.png
+        fileName: solvo_support_helpdesk_app_categories.png
+        fileSize: 108780
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_categories.png
+        checksum: 09fe5850647a6cd496f31c9e19ade541612be4a69213c7fd5802ee1c1b9638b4
+        mimeType: image/png
+      }
+    }
+    {
+      id: "22"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 6
+        textType: markdown
+        componentName: Html
+        text:
+          '''the **Uncategorized** category is always visible and cant be deleted and modified. It will display all the tickets that are not yet associated to any category.\
+\
+select the rows and drag and drop to a category in the sidebar to assign tickets to that category.
+'''
+        key: unique_5
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "23"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 7
+        componentName: Html
+        key: unique_6
+      }
+    }
+    {
+      id: "24"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_move_to_categories.png
+        fileName: solvo_support_helpdesk_app_move_to_categories.png
+        fileSize: 134001
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_move_to_categories.png
+        checksum: e6c0677e93ff5a6643e7db4ae0f4c2c0c7ade27421311418090147abf222787c
+        mimeType: image/png
+      }
+    }
+    {
+      id: "25"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 8
+        textType: markdown
+        componentName: Html
+        text: when you move the tickets to a different category, **each tickets is updated and the associated category name is added as a tag** in each tickets, if a ticket was already in a different category then previous category tag is removed first before adding a new tag.
+        key: unique_7
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "26"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 9
+        componentName: Html
+        key: unique_8
+      }
+    }
+    {
+      id: "27"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_move_mutate_tag.png
+        fileName: solvo_support_helpdesk_app_move_mutate_tag.png
+        fileSize: 165218
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_move_mutate_tag.png
+        checksum: bcf2decf329032e53aa3c4b166259a99c7d73f07b309155ccd48a6980480dd9c
+        mimeType: image/png
+      }
+    }
+    {
+      id: "28"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 10
+        textType: markdown
+        componentName: Html
+        text:
+          '''\
+**When you create a category, a smart collection is created too** in the Shopify that includes all the tickets that have specific tag.'''
+        key: unique_9
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "29"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 11
+        componentName: Html
+        key: unique_10
+      }
+    }
+    {
+      id: "30"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_smart_collections.png
+        fileName: solvo_support_helpdesk_app_smart_collections.png
+        fileSize: 159896
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_smart_collections.png
+        checksum: f5b91e32d007625e9820a0faaf2e4d7a5c7083a3690ed951fd97dde5ff896f37
+        mimeType: image/png
+      }
+    }
+    {
+      id: "31"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 12
+        textType: markdown
+        componentName: Html
+        text: when you rename existing category in the sidebar, the associated Shopify collection is modified too with new name and conditions and each tickets that have assigned to that category also updated for new category tag name and previous category name tag is removed.
+        key: unique_11
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "32"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  margin-bottom: 1.25rem;
+}`;'''
+        displayOrder: 6
+        componentName: Html
+        props:
+          '''return {
+  as: "div"
+}'''
+      }
+    }
+    {
+      id: "33"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;'''
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return {
+  as: "h2",
+  text: "Root level Categories and menus"
+}'''
+      }
+    }
+    {
+      id: "34"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 2
+        textType: markdown
+        componentName: Html
+        text:
+          '''**When you create a new root category, the new menu is also created** for that category in the Shopify. When you change or remove a category or a child category, the app updates or removes that part of the menu in Shopify. Any time you create, edit, delete, or move a category, the app keeps the menu in sync. All of this happens in the background so the app stays quick and easy to use.
+
+'''
+        key: unique_12
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "35"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 3
+        componentName: Html
+        key: unique_13
+      }
+    }
+    {
+      id: "36"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_menu_creation.png
+        fileName: solvo_support_helpdesk_app_menu_creation.png
+        fileSize: 89768
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_menu_creation.png
+        checksum: ade7e6c5bd828bb983bbe977bd798d51adfcf75204c1f7e7a8bac768263ce363
+        mimeType: image/png
+      }
+    }
+    {
+      id: "37"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 4
+        textType: markdown
+        componentName: Html
+        text:
+          '''you can use these menus in your theme settings.
+'''
+        key: unique_14
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "38"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;'''
+        displayOrder: 5
+        textType: markdown
+        componentName: Html
+        text: In addition to individual menu for each root category, one special menu **Categories** is created too which contains everything.
+        key: unique_15
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "39"
+      L: Attr
+      P: {
+        as: img
+        src: $1
+        displayOrder: 6
+        componentName: Html
+        key: unique_16
+      }
+    }
+    {
+      id: "40"
+      L: File
+      P: {
+        originalFileName: solvo_support_helpdesk_app_menu_categories_menu.png
+        fileName: solvo_support_helpdesk_app_menu_categories_menu.png
+        fileSize: 96549
+        subDomain: solvo
+        filePath: /root/UploadFiles/solvo/2026/02/23/solvo_support_helpdesk_app_menu_categories_menu.png
+        checksum: 2487b9280dfeb3b7978cf974962b9cf6eeb60925d6fc6cfd87a287509beda581
+        mimeType: image/png
+      }
+    }
+    {
+      id: "41"
+      L: Attr
+      P: {
+        css:
+          '''return `._id {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin-top: 1.5rem;
+}`;'''
+        displayOrder: 8
+        textType: markdown
+        componentName: Html
+        text:
+          '''Need more help? Go to [Support](/support) to send a message to our team. We'll reply in the same thread.
+'''
+        props:
+          '''return {
+  as: "p",
+}'''
+      }
+    }
+    {
+      id: "42"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e2
+      T: PageLayout
+      S: "1"
+      E: "42"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "2"
+      E: "3"
+    }
+    {
+      id: e4
+      T: Attr
+      S: "2"
+      E: "4"
+    }
+    {
+      id: e5
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e6
+      T: Attr
+      S: "2"
+      E: "9"
+    }
+    {
+      id: e7
+      T: Attr
+      S: "2"
+      E: "14"
+    }
+    {
+      id: e8
+      T: Attr
+      S: "2"
+      E: "32"
+    }
+    {
+      id: e9
+      T: Attr
+      S: "2"
+      E: "41"
+    }
+    {
+      id: e10
+      T: Attr
+      S: "5"
+      E: "6"
+    }
+    {
+      id: e11
+      T: Attr
+      S: "5"
+      E: "7"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "5"
+      E: "8"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "9"
+      E: "10"
+    }
+    {
+      id: e14
+      T: Attr
+      S: "9"
+      E: "11"
+    }
+    {
+      id: e15
+      T: Attr
+      S: "9"
+      E: "12"
+    }
+    {
+      id: e16
+      T: AttrSrc
+      S: "12"
+      E: "13"
+    }
+    {
+      id: e17
+      T: Attr
+      S: "14"
+      E: "15"
+    }
+    {
+      id: e18
+      T: Attr
+      S: "14"
+      E: "16"
+    }
+    {
+      id: e19
+      T: Attr
+      S: "14"
+      E: "17"
+    }
+    {
+      id: e20
+      T: Attr
+      S: "14"
+      E: "19"
+    }
+    {
+      id: e21
+      T: Attr
+      S: "14"
+      E: "20"
+    }
+    {
+      id: e22
+      T: Attr
+      S: "14"
+      E: "22"
+    }
+    {
+      id: e23
+      T: Attr
+      S: "14"
+      E: "23"
+    }
+    {
+      id: e24
+      T: Attr
+      S: "14"
+      E: "25"
+    }
+    {
+      id: e25
+      T: Attr
+      S: "14"
+      E: "26"
+    }
+    {
+      id: e26
+      T: Attr
+      S: "14"
+      E: "28"
+    }
+    {
+      id: e27
+      T: Attr
+      S: "14"
+      E: "29"
+    }
+    {
+      id: e28
+      T: Attr
+      S: "14"
+      E: "31"
+    }
+    {
+      id: e29
+      T: AttrSrc
+      S: "17"
+      E: "18"
+    }
+    {
+      id: e30
+      T: AttrSrc
+      S: "20"
+      E: "21"
+    }
+    {
+      id: e31
+      T: AttrSrc
+      S: "23"
+      E: "24"
+    }
+    {
+      id: e32
+      T: AttrSrc
+      S: "26"
+      E: "27"
+    }
+    {
+      id: e33
+      T: AttrSrc
+      S: "29"
+      E: "30"
+    }
+    {
+      id: e34
+      T: Attr
+      S: "32"
+      E: "33"
+    }
+    {
+      id: e35
+      T: Attr
+      S: "32"
+      E: "34"
+    }
+    {
+      id: e36
+      T: Attr
+      S: "32"
+      E: "35"
+    }
+    {
+      id: e37
+      T: Attr
+      S: "32"
+      E: "37"
+    }
+    {
+      id: e38
+      T: Attr
+      S: "32"
+      E: "38"
+    }
+    {
+      id: e39
+      T: Attr
+      S: "32"
+      E: "39"
+    }
+    {
+      id: e40
+      T: AttrSrc
+      S: "35"
+      E: "36"
+    }
+    {
+      id: e41
+      T: AttrSrc
+      S: "39"
+      E: "40"
+    }
+  ]
+}

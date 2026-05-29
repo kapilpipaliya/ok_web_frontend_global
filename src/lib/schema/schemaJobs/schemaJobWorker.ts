@@ -6,6 +6,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { performSchemaImport } from "~/lib/schema/performSchemaImport";
 import { performSchemaSync } from "~/lib/schema/performSchemaSync";
+import { runMigration } from "~/lib/schema/runMigration";
 import type {
   ExportJobPayload,
   SchemaJobQueueData,
@@ -59,6 +60,25 @@ export async function executeSchemaQueueJob(
         user,
       });
     }
+    if (data.operation === "migrate") {
+      const migrationResult = await runMigration(session, data.subDomain, user, {
+        dryRun: data.payload.dryRun,
+        functionName: data.payload.functionName ?? undefined,
+      });
+      if (!migrationResult.success) {
+        throw new Error(
+          migrationResult.error ||
+            `Migration failed for ${data.subDomain}`,
+        );
+      }
+      return {
+        success: true,
+        message: `Migration completed${data.payload.dryRun ? " (dry run)" : ""}`,
+        functionName: migrationResult.functionName,
+        dryRun: migrationResult.dryRun,
+        data: migrationResult.data,
+      };
+    }
     throw new Error(`Unknown operation: ${(data as { operation: string }).operation}`);
   } finally {
     await session.close();
@@ -109,6 +129,20 @@ async function runExport(
       : "Export completed for Components, Pages, Themes, Functions, and Email templates.",
     exportPath,
     details: stats,
+  };
+}
+
+/** Build migrate job payload from request query string. */
+export function buildMigrateJobPayload(request: Request): {
+  dryRun: boolean;
+  functionName: string | null;
+} {
+  const url = new URL(request.url);
+  const dryRunParam = url.searchParams.get("dryRun");
+  const functionName = url.searchParams.get("functionName")?.trim();
+  return {
+    dryRun: dryRunParam === "true" || dryRunParam === "1",
+    functionName: functionName || null,
   };
 }
 

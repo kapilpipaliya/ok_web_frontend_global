@@ -135,7 +135,7 @@ const reasonClass =
   reasonActive && reasonVariant
     ? `_reason _reason-${reasonVariant}${reasonKind ? ` _reason-${reasonKind}` : ""}`
     : "";
-const buttonClass = [loading ? "_loading" : "", reasonClass].filter(Boolean).join(" ") || undefined;
+const buttonClass = [args.contextData.props.class, loading ? "_loading" : "", reasonClass].filter(Boolean).join(" ") || undefined;
 
 const sizeStyles = {
   sm: 16,
@@ -179,12 +179,14 @@ const sizeStyles = {
 };
 
 const iconSize = sizeStyles[size] || sizeStyles.md;
+const width = args.contextData.props?.width ?? iconSize;
+const height = args.contextData.props?.height ?? iconSize;
 
 return {
   as: "icon",
   icon: icon,
-  width: iconSize,
-  height: iconSize,
+  width,
+  height,
   hide: !icon
 };
 '''

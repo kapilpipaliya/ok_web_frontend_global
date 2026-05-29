@@ -15,7 +15,7 @@ The implementation is split into:
   - `functions/dynamic_page/main_functions/settings/config/saveUserContentSetting.hjson`
   - `functions/dynamic_page/main_functions/sidebar/getVertexChildren.hjson`
   - `functions/dynamic_page/main_functions/sidebar/saveSidebarVertex.hjson`
-  - `functions/dynamic_page/main_functions/migration/migrateDynamicPageSettings.hjson` (Attendra defaults)
+  - `functions/dynamic_page/main_functions/migration/migrateDynamicPageSettings.hjson`
 
 ---
 

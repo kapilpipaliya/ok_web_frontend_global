@@ -5,21 +5,6 @@ export const SETTINGS_CONSTANTS = {
       display: grid;
       gap: 20px;
     }\`;`,
-  FORM_GRID_CSS: `return [
-    \`._id {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-      align-items: center;
-    }\`,
-    \`@media (min-width: 480px) {
-      ._id {
-        grid-template-columns: auto 1fr;
-        gap-y: 24px;
-        gap-x: 32px;
-      }
-    }\`
-  ];`,
   GRID_ITEM_CSS: `return \`._id {
       display: grid;
       grid-template-columns: 200px 400px;

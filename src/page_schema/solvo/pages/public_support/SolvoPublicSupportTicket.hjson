@@ -1,0 +1,67 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        key: SolvoPublicSupportTicket
+        title: Support Ticket
+        url: /support/ticket
+        fns: return { enabled: () => true }
+        props:
+          '''return {
+  isNoPermissionCheck: true
+};'''
+      }
+    },
+    {
+      id: "root"
+      L: Attr
+      P: {
+        key: support_ticket_root
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''return `._id {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: ${args.theme.var.color.text};
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+}`;'''
+        props:
+          '''return {
+  as: "main"
+};'''
+      }
+    },
+    {
+      id: "content"
+      L: Attr
+      P: {
+        componentName: PublicSupportConversationContent
+        displayOrder: 1
+        props:
+          '''return {
+  viewerRole: "customer"
+};'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "page"
+      E: "root"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "root"
+      E: "content"
+    }
+  ]
+}

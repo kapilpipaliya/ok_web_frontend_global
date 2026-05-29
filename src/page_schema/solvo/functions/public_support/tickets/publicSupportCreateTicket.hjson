@@ -1,0 +1,203 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportCreateTicket
+        description: Creates a public Shopify customer support ticket with serial number and non-guessable tracking token.
+        body:
+          '''
+const input = args.contextData || {};
+const fields = input.fields && typeof input.fields === "object" ? input.fields : input;
+
+const settingsResult = await args.executeNamedServerFunction({
+  functionName: "publicSupportGetSettings",
+  contextData: {}
+});
+const settings = settingsResult?.result?.data || settingsResult?.data || {};
+const supportSystem = settings.supportSystem || {};
+const fieldSettings = settings.fieldSettings || {};
+
+if (supportSystem.enabled === false) {
+  return { success: false, message: "Support requests are currently disabled." };
+}
+
+if (supportSystem.allowGuestTickets === false) {
+  const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+  if (!user) {
+    return { success: false, message: "Please sign in before creating a support request." };
+  }
+}
+
+const collectFields = (formConfig) => {
+  const out = [];
+  const groups = formConfig?.groups;
+  if (!Array.isArray(groups)) return out;
+  for (let gi = 0; gi < groups.length; gi++) {
+    const groupFields = groups[gi]?.fields;
+    if (!Array.isArray(groupFields)) continue;
+    for (let fi = 0; fi < groupFields.length; fi++) {
+      if (groupFields[fi]?.key) out.push(groupFields[fi]);
+    }
+  }
+  return out;
+};
+
+const formFields = collectFields(fieldSettings.formConfig);
+const errors = {};
+for (let i = 0; i < formFields.length; i++) {
+  const field = formFields[i];
+  const key = field.key;
+  const value = fields[key];
+  const empty = value == null || String(value).trim() === "";
+  if (field.required === true && empty) {
+    errors[key] = `${field.label || key} is required`;
+  }
+  if (!empty && (field.dataType === "email" || field.validation?.email === true)) {
+    const emailValue = String(value).trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      errors[key] = `${field.label || key} must be a valid email`;
+    }
+  }
+}
+
+if (Object.keys(errors).length > 0) {
+  return {
+    success: false,
+    message: "Please fix the highlighted fields.",
+    data: { fieldErrors: errors }
+  };
+}
+
+const normalize = (value, max) => String(value || "").trim().slice(0, max);
+const customerName = normalize(fields.customerName || fields.name, 160) || "Customer";
+const customerEmail = normalize(fields.customerEmail || fields.email, 320).toLowerCase();
+const subject = normalize(fields.subject, 220) || "Support request";
+const initialMessage = normalize(fields.message || fields.initialMessage, 8000);
+const orderNumber = normalize(fields.orderNumber, 100);
+const sourceUrl = normalize(input.sourceUrl || input.url || "", 1000);
+
+if (!customerEmail) {
+  return { success: false, message: "Customer email is required." };
+}
+if (!initialMessage) {
+  return { success: false, message: "Message is required." };
+}
+
+const prefix = normalize(supportSystem.serialPrefix || "SOL", 20).replace(/[^A-Z0-9]/gi, "").toUpperCase() || "SOL";
+const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+const seqKey = `${prefix}-${datePart}`;
+const seqResult = await args.session.run(
+  `
+  MERGE (seq:PublicSupportTicketSequence {key: $seqKey})
+  ON CREATE SET seq.value = 0, seq.createdAt = $now
+  SET seq.value = coalesce(seq.value, 0) + 1,
+      seq.updatedAt = $now
+  RETURN seq.value AS value
+  `,
+  { seqKey, now: new Date().toISOString() }
+);
+const rawSeq = seqResult.records[0]?.get("value");
+const nextNumber = typeof rawSeq?.toNumber === "function" ? rawSeq.toNumber() : Number(rawSeq || 1);
+const serial = `${prefix}-${datePart}-${String(nextNumber).padStart(6, "0")}`;
+const token = args.crypto.randomBytes(32).toString("hex");
+const now = new Date().toISOString();
+
+let origin = "";
+try {
+  origin = args.request?.url ? new URL(args.request.url).origin : "";
+} catch {}
+const trackingPath = `/support/ticket?serial=${encodeURIComponent(serial)}&token=${encodeURIComponent(token)}`;
+const trackingUrl = origin ? `${origin}${trackingPath}` : trackingPath;
+const emailThreadSubject = `[${serial}] ${subject}`;
+const status = normalize(supportSystem.defaultTicketStatus || "open", 80).toLowerCase() || "open";
+
+const createResult = await args.session.run(
+  `
+  CREATE (t:PublicSupportTicket {
+    serial: $serial,
+    ticketAccessToken: $token,
+    status: $status,
+    subject: $subject,
+    customerName: $customerName,
+    customerEmail: $customerEmail,
+    orderNumber: $orderNumber,
+    initialMessage: $initialMessage,
+    fieldsJson: $fieldsJson,
+    source: 'shopify_public',
+    sourceUrl: $sourceUrl,
+    trackingUrl: $trackingUrl,
+    emailThreadSubject: $emailThreadSubject,
+    unreadForAdmin: 1,
+    unreadForCustomer: 0,
+    lastMessageSender: 'customer',
+    createdAt: $now,
+    updatedAt: $now,
+    lastMessageAt: $now
+  })
+  CREATE (m:PublicSupportMessage {
+    ticketSerial: $serial,
+    senderType: 'customer',
+    authorName: $customerName,
+    authorEmail: $customerEmail,
+    message: $initialMessage,
+    attachmentsJson: $attachmentsJson,
+    createdAt: $now,
+    updatedAt: $now
+  })
+  CREATE (t)-[:PublicSupportTicketMessage]->(m)
+  RETURN t, m
+  `,
+  {
+    serial,
+    token,
+    status,
+    subject,
+    customerName,
+    customerEmail,
+    orderNumber,
+    initialMessage,
+    fieldsJson: JSON.stringify(fields || {}),
+    sourceUrl,
+    trackingUrl,
+    emailThreadSubject,
+    attachmentsJson: JSON.stringify(input.attachments || []),
+    now
+  }
+);
+
+const ticket = args.convertNodeToJson(createResult.records[0].get("t"));
+const message = args.convertNodeToJson(createResult.records[0].get("m"));
+
+try {
+  await args.executeNamedServerFunction({
+    functionName: "publicSupportQueueNotification",
+    contextData: {
+      eventType: "ticket_created",
+      ticketId: ticket.id,
+      messageId: message.id,
+      serial
+    }
+  });
+} catch (e) {
+  console.error("publicSupportCreateTicket: failed to queue notification", e);
+}
+
+return {
+  success: true,
+  message: "Support request created successfully.",
+  data: {
+    ticket,
+    message,
+    serial,
+    trackingUrl,
+    token
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

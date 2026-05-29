@@ -1,0 +1,238 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: processPublicSupportNotificationQueue
+        description: Worker: consumes public support ticket events and sends customer/merchant notification emails.
+        body:
+          '''
+if (args.contextData?.action !== "start") {
+  return { success: true, message: "Solvo public support notification worker is ready" };
+}
+
+const queueName = "solvo-public-support-notifications";
+
+const getRedisConnection = () => {
+  return args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379"),
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    maxLoadingRetryTime: 5000,
+    retryStrategy(times) {
+      if (times > 3) return null;
+      return Math.min(times * 200, 2000);
+    }
+  };
+};
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null || value === "") return fallback;
+  if (typeof value === "object") return value;
+  try { return JSON.parse(String(value)); } catch { return fallback; }
+};
+
+const escapeHtml = (value) =>
+  String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const loadSupportSettings = async (session) => {
+  const defaults = {
+    supportSystem: {
+      sendEmailNotifications: true
+    },
+    emailSettings: {
+      enabled: true,
+      sendTicketCreatedToCustomer: true,
+      sendCustomerReplyToMerchant: true,
+      sendAdminReplyToCustomer: true,
+      sendTicketClosedToCustomer: true,
+      merchantEmail: "",
+      replyToEmail: "",
+      fromName: "Solvo Support",
+      keepSameSubjectThread: true
+    }
+  };
+
+  const res = await session.run(
+    `
+    MATCH (g:GlobalSetting {key: 'Default'})
+    OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {pageId: 'support'})
+    RETURN doc
+    `
+  );
+
+  const sections = {};
+  for (let i = 0; i < res.records.length; i++) {
+    const node = res.records[i].get("doc");
+    if (!node) continue;
+    const doc = args.convertNodeToJson(node);
+    if (doc?.P?.sectionId) sections[doc.P.sectionId] = parseJsonSafe(doc.P.values, {});
+  }
+
+  return {
+    supportSystem: { ...defaults.supportSystem, ...(sections.supportGlobal || {}) },
+    emailSettings: { ...defaults.emailSettings, ...(sections.supportEmail || {}) }
+  };
+};
+
+const loadTicketAndMessage = async (session, ticketId, messageId) => {
+  const res = await session.run(
+    `
+    MATCH (t:PublicSupportTicket)
+    WHERE elementId(t) = $ticketId
+    OPTIONAL MATCH (m:PublicSupportMessage)
+    WHERE $messageId IS NOT NULL AND elementId(m) = $messageId
+    RETURN t, m
+    LIMIT 1
+    `,
+    { ticketId, messageId: messageId || null }
+  );
+  if (res.records.length === 0) return { ticket: null, message: null };
+  return {
+    ticket: args.convertNodeToJson(res.records[0].get("t")),
+    message: res.records[0].get("m") ? args.convertNodeToJson(res.records[0].get("m")) : null
+  };
+};
+
+const eventTitle = (eventType) => {
+  if (eventType === "ticket_created") return "Support Request Created";
+  if (eventType === "customer_replied") return "New Customer Reply";
+  if (eventType === "admin_replied") return "Support Team Replied";
+  if (eventType === "ticket_closed") return "Ticket Closed";
+  if (eventType === "ticket_reopened") return "Ticket Reopened";
+  return "Support Ticket Updated";
+};
+
+const eventTemplateKey = (eventType) => {
+  if (eventType === "ticket_created") return "SolvoSupportTicketCreated";
+  if (eventType === "customer_replied") return "SolvoSupportCustomerReply";
+  if (eventType === "admin_replied") return "SolvoSupportAdminReply";
+  if (eventType === "ticket_closed") return "SolvoSupportTicketClosed";
+  return "SolvoSupportTicketCreated";
+};
+
+const shouldSendForEvent = (eventType, emailSettings) => {
+  if (emailSettings.enabled === false) return false;
+  if (eventType === "ticket_created") return emailSettings.sendTicketCreatedToCustomer !== false;
+  if (eventType === "customer_replied") return emailSettings.sendCustomerReplyToMerchant !== false;
+  if (eventType === "admin_replied") return emailSettings.sendAdminReplyToCustomer !== false;
+  if (eventType === "ticket_closed") return emailSettings.sendTicketClosedToCustomer !== false;
+  if (eventType === "ticket_reopened") return true;
+  return true;
+};
+
+const recipientForEvent = (eventType, ticket, emailSettings) => {
+  if (eventType === "customer_replied") return String(emailSettings.merchantEmail || "").trim();
+  return String(ticket?.P?.customerEmail || "").trim();
+};
+
+const subjectForEvent = (eventType, ticket, emailSettings) => {
+  const serial = ticket?.P?.serial || "SUPPORT";
+  if (emailSettings.keepSameSubjectThread !== false && ticket?.P?.emailThreadSubject) {
+    return ticket.P.emailThreadSubject;
+  }
+  return `[${serial}] ${eventTitle(eventType)}`;
+};
+
+const buildContent = ({ eventType, templateKey, ticket, message }) => {
+  const p = ticket?.P || {};
+  const mp = message?.P || {};
+  const title = eventTitle(eventType);
+  const bodyMessage = mp.message || p.initialMessage || "";
+  return `
+    <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: #111827; line-height: 1.5;">
+      <div style="max-width: 640px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px;">
+        <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 13px;">Solvo Support</p>
+        <h1 style="margin: 0 0 16px 0; font-size: 22px;">${escapeHtml(title)}</h1>
+        <p style="margin: 0 0 12px 0;"><strong>Ticket:</strong> ${escapeHtml(p.serial)}</p>
+        <p style="margin: 0 0 12px 0;"><strong>Subject:</strong> ${escapeHtml(p.subject)}</p>
+        ${bodyMessage ? `<div style="margin: 16px 0; padding: 12px; background: #f9fafb; border-radius: 8px; white-space: pre-wrap;">${escapeHtml(bodyMessage)}</div>` : ""}
+        ${p.trackingUrl ? `<p style="margin: 16px 0;"><a href="${escapeHtml(p.trackingUrl)}" style="color: #2563eb;">Track this support request</a></p>` : ""}
+        <p style="margin: 16px 0 0 0; color: #6b7280; font-size: 12px;">Template: ${escapeHtml(templateKey)}. Dynamic template values are available as query parameters: serial, trackingUrl, subject, message, customerEmail, shop.</p>
+      </div>
+    </div>
+  `;
+};
+
+const processOne = async (job) => {
+  const session = await args.getSession();
+  try {
+    const payload = job?.data || {};
+    const eventType = payload.eventType;
+    const ticketId = payload.ticketId;
+    const messageId = payload.messageId || null;
+    if (!eventType || !ticketId) return { success: false, message: "Missing eventType or ticketId" };
+
+    const settings = await loadSupportSettings(session);
+    if (settings.supportSystem.sendEmailNotifications === false) {
+      return { success: true, skipped: true, reason: "support email notifications disabled" };
+    }
+
+    if (!shouldSendForEvent(eventType, settings.emailSettings)) {
+      return { success: true, skipped: true, reason: `${eventType} disabled` };
+    }
+
+    const { ticket, message } = await loadTicketAndMessage(session, ticketId, messageId);
+    if (!ticket) return { success: false, message: "Ticket not found" };
+
+    const to = recipientForEvent(eventType, ticket, settings.emailSettings);
+    if (!to) return { success: true, skipped: true, reason: "No recipient configured" };
+
+    const templateKey = eventTemplateKey(eventType);
+    const subject = subjectForEvent(eventType, ticket, settings.emailSettings);
+    const content = buildContent({ eventType, templateKey, ticket, message });
+
+    await args.sendEmail({
+      to,
+      subject,
+      content,
+      subDomain: args.subDomain
+    });
+
+    await session.run(
+      `
+      MATCH (t:PublicSupportTicket)
+      WHERE elementId(t) = $ticketId
+      SET t.lastNotificationEvent = $eventType,
+          t.lastNotificationAt = $now
+      RETURN t
+      `,
+      { ticketId, eventType, now: new Date().toISOString() }
+    );
+
+    return { success: true, data: { eventType, ticketId, templateKey, to } };
+  } finally {
+    try { await session.close(); } catch {}
+  }
+};
+
+const { Worker, QueueEvents } = args.bullmq;
+const connection = getRedisConnection();
+const worker = new Worker(queueName, async (job) => await processOne(job), { connection });
+const queueEvents = new QueueEvents(queueName, { connection });
+
+worker.on("completed", (job) => console.log(`[Solvo] public support notification completed id=${job?.id}`));
+worker.on("failed", (job, err) => console.error(`[Solvo] public support notification failed id=${job?.id}`, err));
+
+console.log(`[Solvo] public support notification worker started (${queueName})`);
+
+return {
+  stop: async () => {
+    try { await worker.close(); } catch {}
+    try { await queueEvents.close(); } catch {}
+    console.log("[Solvo] public support notification worker stopped");
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

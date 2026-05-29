@@ -35,3 +35,8 @@ export function getSchemaSyncPageUrl(): string {
   const base = typeof window !== "undefined" ? window.location.origin : "";
   return `${base}/admin/SchemaSync`;
 }
+
+export function getSchemaMigratePageUrl(): string {
+  const base = typeof window !== "undefined" ? window.location.origin : "";
+  return `${base}/admin/SchemaMigrate`;
+}

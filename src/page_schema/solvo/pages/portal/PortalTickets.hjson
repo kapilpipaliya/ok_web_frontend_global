@@ -1,0 +1,194 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Page
+      P: {
+        fns:
+          '''
+return {
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({ functionName, contextData: contextData || {} })
+};
+'''
+        title: My tickets - Solvo
+        url: /portal/tickets
+        key: PortalTickets
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    if (!args.user) {
+      args.navigate("/auth/signin", { replace: true });
+    }
+  }
+};'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: portal_tickets_page_root
+        fns:
+          '''
+const [conversationTicketId, setConversationTicketId] = args.createSignal(null);
+const [conversationTicketSerial, setConversationTicketSerial] = args.createSignal("");
+const [conversationTicketSubject, setConversationTicketSubject] = args.createSignal("");
+const [conversationModalOpen, setConversationModalOpen] = args.createSignal(false);
+
+const openConversationForRow = (ticketRow) => {
+  const ticketId = ticketRow?.id;
+  if (!ticketId) return;
+  setConversationTicketId(String(ticketId));
+  setConversationTicketSerial(String(ticketRow?.P?.serial || ""));
+  setConversationTicketSubject(String(ticketRow?.P?.subject || ""));
+  setConversationModalOpen(true);
+};
+
+const closeConversationModal = () => {
+  setConversationModalOpen(false);
+  setConversationTicketId(null);
+  setConversationTicketSerial("");
+  setConversationTicketSubject("");
+};
+
+return {
+  conversationTicketId,
+  conversationTicketSerial,
+  conversationTicketSubject,
+  conversationModalOpen,
+  openConversationForRow,
+  closeConversationModal,
+  openConversationInNewTab: (ticketRow) => {
+    const ticketId = ticketRow?.id;
+    if (!ticketId) return;
+    const url = `/public-support/conversation?ticketId=${encodeURIComponent(String(ticketId))}`;
+    if (typeof window !== "undefined" && typeof window.open === "function") {
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    args.navigate?.(url);
+  }
+};
+'''
+        css:
+          '''return `._id {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+}`;'''
+        props:
+          '''return {
+  as: "section"
+};'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        key: portal_support_tickets_dynamic_page
+        props:
+          '''return {
+  tableVertexLabel: "PublicSupportTicket",
+  tableSettingsLabel: "PublicSupportTicketPortal",
+  loadFromSetting: true,
+  rowClickable: true,
+  onRowClick: (ticketRow) => args.fns.openConversationForRow?.(ticketRow),
+  actionHandlers: {
+    conversation: async (ticketRow) => {
+      args.fns.openConversationForRow?.(ticketRow);
+    }
+  }
+};'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        key: portal_support_conversation_modal
+        componentName: ContentModal
+        displayOrder: 2
+        props:
+          '''
+const ticketSerial = args.fns.conversationTicketSerial?.();
+const ticketSubject = args.fns.conversationTicketSubject?.();
+const title = ticketSerial && ticketSubject
+  ? `${ticketSerial}: ${ticketSubject}`
+  : ticketSerial || "Support conversation";
+
+return {
+  isOpen: args.fns.conversationModalOpen?.() === true,
+  title,
+  showTitle: false,
+  usePolarisUI: true,
+  onClose: () => args.fns.closeConversationModal?.()
+};'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        key: portal_support_conversation_content
+        slotName: children
+        componentName: PublicSupportConversationContent
+        displayOrder: 1
+        props:
+          '''return {
+  viewerRole: "admin",
+  ticketId: args.fns.conversationTicketId?.(),
+  compact: true,
+  showCloseButton: true,
+  onClose: () => args.fns.closeConversationModal?.()
+};'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: PortalLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e_page_root
+      T: Attr
+      S: "1"
+      E: "2"
+    }
+    {
+      id: e_root_dynamic
+      T: Attr
+      S: "2"
+      E: "5"
+    }
+    {
+      id: e_root_modal
+      T: Attr
+      S: "2"
+      E: "6"
+    }
+    {
+      id: e_modal_panel
+      T: Attr
+      S: "6"
+      E: "7"
+    }
+    {
+      id: e_layout
+      T: PageLayout
+      S: "1"
+      E: "layout"
+    }
+  ]
+}

@@ -4,9 +4,10 @@ const content = [
   {
     as: "h1",
     css: `return \`._id {
+      color: \${args.theme.var.color.text_hex};
       font-size: 24px;
       font-weight: bold;
-      margin-bottom: 16;
+      margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
     displayOrder: 1,
@@ -15,6 +16,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
+      color: \${args.theme.var.color.text_hex};
       margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
@@ -24,6 +26,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
+      color: \${args.theme.var.color.text_hex};
       margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
@@ -33,6 +36,7 @@ const content = [
   {
     as: "p",
     css: `return \`._id {
+      color: \${args.theme.var.color.text_hex};
       margin-bottom: 16px;
     }\`;`,
     componentName: "Html",
@@ -42,18 +46,15 @@ const content = [
   {
     as: "a",
     css: `return \`._id {
-      background-color: \${args.theme.var.color.primary};
+      background-color: \${args.theme.var.color.primary_hex};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.text_light_900};
+      color: \${args.theme.var.color.primary_text_hex};
       cursor: pointer;
       display: inline-block;
       margin-top: 16px;
       padding: 8px 16px;
       text-decoration: none;
-      &:hover {
-        opacity: 0.9;
-      }
     }\`;`,
     componentName: "Html",
     displayOrder: 5,

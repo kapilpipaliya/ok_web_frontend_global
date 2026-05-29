@@ -1,0 +1,155 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportGetSettings
+        description: Loads app-wide Solvo public support settings from GlobalSetting(Default) settings section documents.
+        body:
+          '''
+const defaultFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "customer",
+      title: "Contact details",
+      gridColumns: 2,
+      fields: [
+        { key: "customerName", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+        { key: "customerEmail", label: "Email", dataType: "email", renderer: "text", required: true, colSpan: 1 },
+        { key: "orderNumber", label: "Order number", dataType: "text", renderer: "text", required: false, colSpan: 1 },
+        { key: "subject", label: "Subject", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+        { key: "message", label: "How can we help?", dataType: "text", renderer: "textArea", required: true, colSpan: 2 }
+      ]
+    }
+  ]
+};
+
+const defaults = {
+  supportSystem: {
+    enabled: true,
+    serialPrefix: "SOL",
+    allowGuestTickets: true,
+    allowTicketCloseByCustomer: true,
+    sendEmailNotifications: true,
+    publicTrackingEnabled: true,
+    defaultTicketStatus: "open"
+  },
+  fieldSettings: {
+    formConfig: defaultFormConfig,
+    fieldSettingsJson: JSON.stringify(defaultFormConfig, null, 2)
+  },
+  supportTheme: {
+    modalWidth: 640,
+    showLogo: true,
+    logoPosition: "top",
+    customCss: "",
+    themeJson: JSON.stringify({ modalWidth: 640, showLogo: true, logoPosition: "top", customCss: "" }, null, 2)
+  },
+  emailSettings: {
+    enabled: true,
+    sendTicketCreatedToCustomer: true,
+    sendCustomerReplyToMerchant: true,
+    sendAdminReplyToCustomer: true,
+    sendTicketClosedToCustomer: true,
+    merchantEmail: "",
+    replyToEmail: "",
+    fromName: "Solvo Support",
+    keepSameSubjectThread: true
+  }
+};
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null || value === "") return fallback;
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(String(value));
+  } catch {
+    return fallback;
+  }
+};
+
+let result = await args.session.run(
+  `
+  MATCH (g:GlobalSetting {key: 'Default'})
+  OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {pageId: 'support'})
+  RETURN doc
+  `
+);
+
+if (result.records.length === 0 && args.executeNamedServerFunction) {
+  try {
+    await args.executeNamedServerFunction({
+      functionName: "migrateDynamicPageSettings",
+      contextData: { dryRun: false }
+    });
+    result = await args.session.run(
+      `
+      MATCH (g:GlobalSetting {key: 'Default'})
+      OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {pageId: 'support'})
+      RETURN doc
+      `
+    );
+  } catch (e) {
+    console.error("publicSupportGetSettings: migration bootstrap failed", e);
+  }
+}
+
+const sections = {};
+for (let i = 0; i < result.records.length; i++) {
+  const node = result.records[i].get("doc");
+  if (!node) continue;
+  const doc = args.convertNodeToJson(node);
+  const sectionId = doc?.P?.sectionId;
+  if (!sectionId) continue;
+  sections[sectionId] = parseJsonSafe(doc.P?.values, {});
+}
+
+const supportSystem = {
+  ...defaults.supportSystem,
+  ...(sections.supportGlobal || {})
+};
+
+const fieldSettingsRaw = {
+  ...defaults.fieldSettings,
+  ...(sections.supportFields || {})
+};
+const formConfig = parseJsonSafe(fieldSettingsRaw.fieldSettingsJson, defaults.fieldSettings.formConfig);
+const fieldSettings = {
+  ...fieldSettingsRaw,
+  formConfig
+};
+
+const supportThemeRaw = {
+  ...defaults.supportTheme,
+  ...(sections.supportTheme || {})
+};
+const themeFromJson = parseJsonSafe(supportThemeRaw.themeJson, {});
+const supportTheme = {
+  ...supportThemeRaw,
+  ...themeFromJson
+};
+
+const emailSettings = {
+  ...defaults.emailSettings,
+  ...(sections.supportEmail || {})
+};
+
+return {
+  success: true,
+  data: {
+    supportSystem,
+    fieldSettings,
+    supportTheme,
+    emailSettings,
+    sections
+  },
+  message: "Public support settings loaded"
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

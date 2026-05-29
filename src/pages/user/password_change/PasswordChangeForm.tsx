@@ -12,6 +12,7 @@ import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getPasswordLabelWithHintSchema } from "~/lib/schema/passwordHintPopover";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -44,6 +45,10 @@ export function PasswordChangeForm() {
   const form = {
     as: "div",
     attributes: [
+      ...createFormHeader(
+        "Change Password",
+        "Update your password. You'll be signed out and need to sign in again.",
+      ),
       createPasswordFieldWithHint(
         "Current Password",
         "currentPassword",
@@ -87,12 +92,15 @@ export function PasswordChangeForm() {
                     if (validateFormData(formData, showErrorToast)) {
                       try {
                         options.contextData.saveState[1]("isLoading", true);
-                        await handlePasswordChange(
+                        const success = await handlePasswordChange(
                           formData,
                           graph,
                           showErrorToast,
                           showSuccessToast,
                         );
+                        if (!success) {
+                          return;
+                        }
                         // Redirect to signIn page as session is expired
                         navigate(API.urls.admin.signIn);
                       } finally {
@@ -203,7 +211,7 @@ async function handlePasswordChange(
   graph: GraphInterface,
   showErrorToast: (msg: string) => void,
   showSuccessToast: (msg: string) => void,
-) {
+): Promise<boolean> {
   try {
     const response = await postAPI(API.auth.changePasswordUrl, {
       currentPassword: formData.P.currentPassword,
@@ -212,12 +220,16 @@ async function handlePasswordChange(
     });
 
     if (response.error) {
-      showErrorToast(response.error as string);
-    } else {
-      showSuccessToast("Password changed successfully");
+      showErrorToast(String(response.error));
+      return false;
     }
+
+    showSuccessToast("Password changed successfully");
+    return true;
   } catch (error) {
-    showErrorToast(getErrorMessage(error));
+    const message = getErrorMessage(error);
+    showErrorToast(message || "Failed to change password");
+    return false;
   }
 }
 

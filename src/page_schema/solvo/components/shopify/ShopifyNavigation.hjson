@@ -8,19 +8,7 @@
         key: ShopifyNavigation
       }
     }
-    {
-      id: "2"
-      L: File
-      P: {
-        originalFileName: preview.png
-        fileName: preview.png
-        fileSize: 10927
-        subDomain: attendra
-        filePath: /root/UploadFiles/attendra/2026/05/08/preview.png
-        checksum: f43b96b8f635f0e5f7ebe55393cc7990941fb8b04814ab504f76735ae10fe5c0
-        mimeType: image/png
-      }
-    }
+
     {
       id: "3"
       L: Attr
@@ -95,21 +83,6 @@
       }
     }
     {
-      id: "13"
-      L: Attr
-      P: {
-        displayOrder: 4
-        componentName: Html
-        key: unique_logs
-        props:
-          '''return {
-  as: "s-link",
-  href: "/time-logs",
-  text: "Time Logs"
-}'''
-      }
-    }
-    {
       id: "18"
       L: Attr
       P: {
@@ -125,17 +98,32 @@
       }
     }
     {
-      id: "14"
+      id: "nav_public_support"
       L: Attr
       P: {
-        displayOrder: 5
+        displayOrder: 5.5
         componentName: Html
-        key: unique_settings
+        key: unique_public_support
         props:
           '''return {
   as: "s-link",
-  href: "/settings",
-  text: "Settings"
+  href: "/public-support/tickets",
+  text: "Public Support"
+}'''
+      }
+    }
+    {
+      id: "nav_support_settings"
+      L: Attr
+      P: {
+        displayOrder: 5.6
+        componentName: Html
+        key: unique_support_settings
+        props:
+          '''return {
+  as: "s-link",
+  href: "/settings?section=supportGlobal",
+  text: "Support Settings"
 }'''
       }
     }
@@ -278,12 +266,7 @@
     }
   ]
   edges: [
-    {
-      id: e1
-      T: ComponentPreview
-      S: "1"
-      E: "2"
-    }
+
     {
       id: e2
       T: Attr
@@ -315,22 +298,22 @@
       E: "nav_tasks"
     }
     {
-      id: e5
-      T: Attr
-      S: "3"
-      E: "13"
-    }
-    {
       id: e5_files
       T: Attr
       S: "3"
       E: "18"
     }
     {
-      id: e6
+      id: e_nav_public_support
       T: Attr
       S: "3"
-      E: "14"
+      E: "nav_public_support"
+    }
+    {
+      id: e_nav_support_settings
+      T: Attr
+      S: "3"
+      E: "nav_support_settings"
     }
     {
       id: e7

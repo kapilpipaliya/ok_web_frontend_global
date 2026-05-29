@@ -33,19 +33,25 @@ return {
         key: settings_dynamic_page
         props:
           '''
-const settingsPageId = args.searchParams?.page;
-
 return {
   pageMode: "settings",
-  settingsPageId,
+  settingsPageId: "support",
   loadFromSetting: true,
+  scopeId: "Default",
   scope: {
-    vertexLabel: "User",
-    matchProperty: "uuid",
+    vertexLabel: "GlobalSetting",
+    matchProperty: "key",
     idParam: "scopeId"
   }
 };
 '''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
       }
     }
   ]
@@ -55,6 +61,12 @@ return {
       T: Attr
       S: "1"
       E: "2"
+    }
+    {
+      id: e_layout
+      T: PageLayout
+      S: "1"
+      E: "layout"
     }
   ]
 }

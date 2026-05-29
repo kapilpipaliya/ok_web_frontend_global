@@ -73,6 +73,12 @@ export function AuthenticatedMenu(
         label: "Sync schema to shops",
         target: "_blank",
       });
+      adminMenuItems.push({
+        href: "/admin/SchemaMigrate",
+        icon: "ph:database",
+        label: "Run database migration",
+        target: "_blank",
+      });
     }
 
     return isAdminSubDomain()

@@ -505,6 +505,58 @@ const getEdgeRelationshipTargets = (vertex, relationshipType) => {
   return ids;
 };
 
+const vertexOutEdgeContainsTarget = (vertex, relationshipType, targetVertexId) => {
+  const outEdges = vertex?.OUT?.[relationshipType];
+  if (!Array.isArray(outEdges) || !args.graph?.edges) return false;
+  const target = String(targetVertexId).trim();
+  for (let i = 0; i < outEdges.length; i++) {
+    const edge = args.graph.edges[outEdges[i]];
+    if (edge && String(edge.E).trim() === target) return true;
+  }
+  return false;
+};
+
+const setEdgeRelationshipTargets = (txnId, vertex, relationshipType, targetIds) => {
+  if (!vertex?.id || !relationshipType) return;
+  const normalizedIds = (
+    Array.isArray(targetIds)
+      ? targetIds
+      : targetIds != null && String(targetIds).trim() !== ""
+        ? [String(targetIds).trim()]
+        : []
+  )
+    .map((id) => String(id).trim())
+    .filter((id) => id !== "");
+  const previousEdgeIds = Array.isArray(vertex.OUT?.[relationshipType])
+    ? [...vertex.OUT[relationshipType]]
+    : [];
+  for (let i = 0; i < previousEdgeIds.length; i++) {
+    const edgeId = previousEdgeIds[i];
+    const edge = args.graph.edges[edgeId];
+    if (!edge) continue;
+    if (normalizedIds.includes(String(edge.E).trim())) continue;
+    args.deleteEdge(txnId, edgeId, args.graph, args.setGraph);
+  }
+  const liveVertex = args.graph.vertexes[vertex.id] || vertex;
+  for (let j = 0; j < normalizedIds.length; j++) {
+    const targetVertexId = normalizedIds[j];
+    if (!args.graph.vertexes[targetVertexId]) continue;
+    if (vertexOutEdgeContainsTarget(liveVertex, relationshipType, targetVertexId)) continue;
+    args.addNewEdge(
+      txnId,
+      args.newEdge(
+        args.generateNewVertexId(args.graph, args.setGraph),
+        relationshipType,
+        {},
+        liveVertex.id,
+        targetVertexId
+      ),
+      args.graph,
+      args.setGraph
+    );
+  }
+};
+
 const fieldUsesEdgeOnlyRelationship = (field) =>
   !!(
     field &&
@@ -512,6 +564,10 @@ const fieldUsesEdgeOnlyRelationship = (field) =>
     field.selectConfig.edgeOnly === true &&
     field.selectConfig.propertyOnly !== true
   );
+
+const embeddedVertexPickerUsesRelationshipEdge = (field) =>
+  getFieldRenderer(field) === "embeddedVertexPicker" &&
+  field?.selectConfig?.relationshipType;
 
 // Get form field value from vertex
 const getFieldValue = (fieldKey) => {
@@ -530,6 +586,16 @@ const getFieldValue = (fieldKey) => {
     const ids = getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
     return ids.length > 0 ? ids[0] : "";
   }
+  if (embeddedVertexPickerUsesRelationshipEdge(field)) {
+    const ids = getEdgeRelationshipTargets(vertex, field.selectConfig.relationshipType);
+    const selectionMode =
+      field.pickerConfiguration?.selectionMode === "multiple" ? "multiple" : "single";
+    if (selectionMode === "multiple") return ids;
+    return ids.length > 0 ? ids[0] : "";
+  }
+  if (getFieldRenderer(field) === "embeddedVertexPicker") {
+    return "";
+  }
   return vertex?.P?.[fieldKey] ?? "";
 };
 
@@ -546,6 +612,34 @@ const setFieldValue = (fieldKey, value) => {
   if (!txnId || txnId === 0) {
     txnId = args.generateNewTxnId(args.graph, args.setGraph);
     setFormTxnId(txnId);
+  }
+
+  if (getFieldRenderer(nestedField) === "embeddedVertexPicker") {
+    if (embeddedVertexPickerUsesRelationshipEdge(nestedField)) {
+      const formVertex = args.graph.vertexes[vertexId];
+      if (!formVertex) return;
+      const selectionMode =
+        nestedField.pickerConfiguration?.selectionMode === "multiple" ? "multiple" : "single";
+      const targetIds =
+        selectionMode === "multiple"
+          ? Array.isArray(value)
+            ? value
+            : value != null && String(value).trim() !== ""
+              ? [String(value).trim()]
+              : []
+          : value;
+      setEdgeRelationshipTargets(
+        txnId,
+        formVertex,
+        nestedField.selectConfig.relationshipType,
+        targetIds
+      );
+      const onFieldChange = args.contextData.props?.onFieldChange;
+      if (typeof onFieldChange === "function") {
+        onFieldChange(fieldKey, value);
+      }
+    }
+    return;
   }
 
   // Use mergeVertexProperties to update vertex in graph
@@ -569,7 +663,9 @@ const validate = () => {
   for (const field of allFields) {
     if (!isFieldVisible(field)) continue;
     if (getFieldRenderer(field) === "graphFileUpload") continue;
-    const value = vertex.P[field.key];
+    const value = embeddedVertexPickerUsesRelationshipEdge(field)
+      ? getFieldValue(field.key)
+      : vertex.P[field.key];
     const rules = mergeValidationPreset(field);
 
     if (isFieldRequired(field) && (getFieldRenderer(field) === "multiSelect" || field.multiSelect === true)) {
@@ -679,6 +775,21 @@ const handleSave = async () => {
       for (const field of allFields) {
         if (!isFieldVisible(field)) continue;
         if (getFieldRenderer(field) === "graphFileUpload") continue;
+        if (embeddedVertexPickerUsesRelationshipEdge(field)) {
+          const pickerConfiguration = field.pickerConfiguration;
+          const selectionMode =
+            pickerConfiguration?.selectionMode === "multiple" ? "multiple" : "single";
+          const fromEdges = getEdgeRelationshipTargets(
+            vertex,
+            field.selectConfig.relationshipType
+          );
+          relationshipData[field.key] = {
+            relationshipType: field.selectConfig.relationshipType,
+            targetLabel: field.selectConfig.label,
+            targetIds: selectionMode === "multiple" ? fromEdges : fromEdges.slice(0, 1)
+          };
+          continue;
+        }
         if (getFieldRenderer(field) === "embeddedVertexPicker") continue;
         if (
           (getFieldRenderer(field) === "multiSelect" || field.multiSelect === true) &&

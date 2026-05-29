@@ -17,6 +17,14 @@ export interface WebsiteSchemas {
   emailTemplates?: Record<string, ExportedSchema>;
 }
 
+export interface SchemaParseIssue {
+  websiteName: string;
+  schemaType: SchemaFolderType;
+  fileName: string;
+  message: string;
+  hint?: string;
+}
+
 type AllWebsiteSchemas = Record<string, WebsiteSchemas>;
 
 /** Folder names under each website directory in page_schema */
@@ -120,6 +128,7 @@ function processSchemaFile(
   schemas: AllWebsiteSchemas | WebsiteSchemas,
   parsedPath: ParsedPath,
   content: string,
+  parseIssues?: SchemaParseIssue[],
 ): void {
   try {
     const schema = parseHjsonPreservingMultiline(content);
@@ -163,6 +172,17 @@ function processSchemaFile(
       allSchemas[parsedPath.websiteName][groupKey]![key] = schema;
     }
   } catch (error) {
+    const issue: SchemaParseIssue = {
+      websiteName: parsedPath.websiteName,
+      schemaType: parsedPath.schemaType,
+      fileName: parsedPath.fileName,
+      message: error instanceof Error ? error.message : String(error),
+      hint:
+        typeof (error as { hint?: unknown })?.hint === "string"
+          ? String((error as { hint?: string }).hint)
+          : undefined,
+    };
+    parseIssues?.push(issue);
     console.error(
       `Failed to parse schema at ${parsedPath.websiteName}/${parsedPath.schemaType}/${parsedPath.fileName}:`,
       error,
@@ -300,10 +320,20 @@ export function loadWebsiteSchemasFromDirectory(
 
 // Get specific website schemas synchronously with caching
 export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
+  return getWebsiteSchemasSyncWithIssues(websiteName).schemas;
+}
+
+export function getWebsiteSchemasSyncWithIssues(websiteName: string): {
+  schemas: WebsiteSchemas;
+  parseIssues: SchemaParseIssue[];
+} {
   "use server";
   // Check cache first
   if (websiteSchemaCache.has(websiteName)) {
-    return websiteSchemaCache.get(websiteName)!;
+    return {
+      schemas: websiteSchemaCache.get(websiteName)!,
+      parseIssues: [],
+    };
   }
 
   const schemas: WebsiteSchemas = {
@@ -313,6 +343,7 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
     functions: {},
     emailTemplates: {},
   };
+  const parseIssues: SchemaParseIssue[] = [];
 
   // Load all .hjson files from filesystem
   // Pattern matches: ./website/schemaType/**/*.hjson (any depth of nesting)
@@ -323,13 +354,13 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
     const parsedPath = parseModulePath(filePath);
     if (!parsedPath || parsedPath.websiteName !== websiteName) continue;
 
-    processSchemaFile(schemas, parsedPath, content);
+    processSchemaFile(schemas, parsedPath, content, parseIssues);
   }
 
   // Cache the result for future use
   // websiteSchemaCache.set(websiteName, schemas);
 
-  return schemas;
+  return { schemas, parseIssues };
 }
 
 // function to get schemas based on subdomain

@@ -118,7 +118,10 @@ export function ContactForm() {
     attributes: [
       {
         attributes: [
-          ...createFormHeader("Contact Us"),
+          ...createFormHeader(
+            "Contact Us",
+            "Have a question or need help? Fill out the form below.",
+          ),
           // Name field
           ...createTextField("name", "Full Name", undefined, undefined, {
             maxLength: 100,

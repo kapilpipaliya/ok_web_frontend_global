@@ -26,7 +26,7 @@ export interface SchemaDatabaseInfo {
 
 export type SchemaDatabaseScope = "app" | "shop";
 
-export type SchemaOperation = "export" | "import" | "sync";
+export type SchemaOperation = "export" | "import" | "sync" | "migrate";
 
 export type SchemaJobUiStatus =
   | "queued"
@@ -41,6 +41,7 @@ export interface SchemaJobStatusRow {
   jobId: string | null;
   status: SchemaJobUiStatus;
   error: string | null;
+  errorDetails?: string | null;
   result: unknown;
   startedAt: string | null;
   finishedAt: string | null;
@@ -63,6 +64,11 @@ const DEFAULT_IMPORT_PAYLOAD: ImportJobPayload = {
   currentShop: null,
 };
 
+const DEFAULT_MIGRATE_PAYLOAD = {
+  dryRun: false,
+  functionName: null as string | null,
+};
+
 function mapBullState(
   state: string,
 ): "queued" | "running" | "success" | "failed" {
@@ -79,6 +85,45 @@ function mapBullState(
     return "failed";
   }
   return "queued";
+}
+
+function getImportParseIssueSummary(result: unknown): {
+  message: string;
+  details: string | null;
+} | null {
+  if (!result || typeof result !== "object") {
+    return null;
+  }
+  const detailsObj = (result as { details?: unknown }).details;
+  if (!detailsObj || typeof detailsObj !== "object") {
+    return null;
+  }
+  const parseErrors = (detailsObj as { parseErrors?: unknown }).parseErrors;
+  if (!Array.isArray(parseErrors) || parseErrors.length === 0) {
+    return null;
+  }
+  const first = parseErrors[0] as {
+    websiteName?: string;
+    schemaType?: string;
+    fileName?: string;
+    message?: string;
+  };
+  const firstPath =
+    first?.websiteName && first?.schemaType && first?.fileName
+      ? `${first.websiteName}/${first.schemaType}/${first.fileName}`
+      : "unknown file";
+  const firstMessage = first?.message ? `: ${first.message}` : "";
+  return {
+    message: `${parseErrors.length} schema file(s) failed to parse and were skipped`,
+    details: `First parse error at ${firstPath}${firstMessage}`,
+  };
+}
+
+function getJobFailureDetails(job: Job<SchemaJobQueueData>): string | null {
+  if (!Array.isArray(job.stacktrace) || job.stacktrace.length === 0) {
+    return null;
+  }
+  return job.stacktrace.join("\n\n");
 }
 
 async function assertAdminAccess() {
@@ -293,6 +338,14 @@ export async function startSchemaOperations(input: {
         userEmail: access.userEmail,
         payload: DEFAULT_IMPORT_PAYLOAD,
       });
+    } else if (input.operation === "migrate") {
+      enqueued = await enqueueSchemaJob({
+        operation: "migrate",
+        databaseName,
+        subDomain,
+        userEmail: access.userEmail,
+        payload: DEFAULT_MIGRATE_PAYLOAD,
+      });
     } else {
       enqueued = await enqueueSchemaJob({
         operation: "sync",
@@ -365,6 +418,7 @@ export async function getSchemaOperationsStatus(input: {
         jobId: jobId || null,
         status: "enqueue_failed",
         error: "Missing job id",
+        errorDetails: null,
         result: null,
         startedAt: null,
         finishedAt: null,
@@ -381,6 +435,7 @@ export async function getSchemaOperationsStatus(input: {
           jobId,
           status: "success",
           error: null,
+          errorDetails: null,
           result: null,
           startedAt: null,
           finishedAt: null,
@@ -391,13 +446,22 @@ export async function getSchemaOperationsStatus(input: {
       const data = job.data as SchemaJobQueueData;
       const bullState = await job.getState();
       const status = mapBullState(bullState);
+      const parseIssue =
+        status === "success" ? getImportParseIssueSummary(job.returnvalue) : null;
 
       updated.push({
         databaseName,
         operation: data.operation ?? operation,
         jobId,
         status,
-        error: status === "failed" ? job.failedReason ?? "Job failed" : null,
+        error:
+          status === "failed"
+            ? job.failedReason ?? "Job failed"
+            : parseIssue?.message ?? null,
+        errorDetails:
+          status === "failed"
+            ? getJobFailureDetails(job)
+            : parseIssue?.details ?? null,
         result:
           status === "success" && job.returnvalue != null
             ? job.returnvalue
@@ -416,6 +480,7 @@ export async function getSchemaOperationsStatus(input: {
         jobId,
         status: "failed",
         error: e instanceof Error ? e.message : String(e),
+        errorDetails: e instanceof Error && e.stack ? e.stack : null,
         result: null,
         startedAt: null,
         finishedAt: null,

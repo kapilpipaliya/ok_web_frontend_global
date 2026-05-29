@@ -1,0 +1,54 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: portalFilesBeforeFetch
+        description: getUserContent beforeFetchData hook for portal My files and file pickers using FilePortal settings. Admin users see all files; other users only see files linked via UserFile.
+        body:
+          '''
+const {
+  tableVertexLabel,
+  queryModification,
+  sessionUser
+} = args.contextData || {};
+
+if (tableVertexLabel !== "File") {
+  return { success: true, message: "Skip: not File" };
+}
+
+if (!queryModification || typeof queryModification !== "object") {
+  return { success: true, message: "Skip: missing queryModification" };
+}
+
+const sessionUserUuid =
+  sessionUser?.P?.uuid != null ? String(sessionUser.P.uuid).trim() : "";
+
+if (sessionUserUuid === "") {
+  queryModification.forceEmptyResult = true;
+  return { success: true, message: "No session user - empty file result" };
+}
+
+const roleResult = await args.session.run(
+  `
+  MATCH (u:User {uuid: $uuid})
+  OPTIONAL MATCH (u)-[:UserRole]->(role:Role)
+  RETURN count(CASE WHEN role.key = 'Admin' THEN 1 END) > 0 AS isAdmin
+  `,
+  { uuid: sessionUserUuid }
+);
+
+const isAdmin = roleResult.records[0]?.get("isAdmin") === true;
+if (isAdmin) {
+  queryModification.bypassUserScoping = true;
+  return { success: true, message: "Admin portal user can view all files (uploads still use UserFile when created by non-admin)" };
+}
+
+return { success: true, message: "Non-admin portal user — UserFile scoping from enableUserScopingForContent" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

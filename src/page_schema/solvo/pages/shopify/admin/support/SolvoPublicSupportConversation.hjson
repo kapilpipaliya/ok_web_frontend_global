@@ -1,0 +1,113 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        key: SolvoPublicSupportConversation
+        title: Public Support Conversation
+        url: /public-support/conversation
+        fns: return { enabled: () => true }
+        props:
+          '''return {
+  isNoPermissionCheck: true
+};'''
+      }
+    },
+    {
+      id: "root"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        key: admin_public_support_root
+        css:
+          '''return `._id {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: ${args.theme.var.color.text};
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+}`;'''
+        props:
+          '''return {
+  as: "main"
+};'''
+      }
+    },
+    {
+      id: "back"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''return `._id {
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid ${args.theme.var.color.border};
+  background: transparent;
+  font-size: 0.875rem;
+  cursor: pointer;
+  align-self: flex-start;
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "← Back to tickets",
+  onClick: () => args.navigate?.("/public-support/tickets")
+};'''
+      }
+    },
+    {
+      id: "content"
+      L: Attr
+      P: {
+        componentName: PublicSupportConversationContent
+        displayOrder: 2
+        props:
+          '''return {
+  viewerRole: "admin",
+  ticketId: args.searchParams?.ticketId || args.searchParams?.supportId || ""
+};'''
+      }
+    },
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: ShopifyLayout
+      }
+    }
+  ]
+  edges: [
+    {
+      id: e1
+      T: Attr
+      S: "page"
+      E: "root"
+    }
+    {
+      id: e2
+      T: Attr
+      S: "root"
+      E: "back"
+    }
+    {
+      id: e3
+      T: Attr
+      S: "root"
+      E: "content"
+    }
+    {
+      id: e_layout
+      T: PageLayout
+      S: "page"
+      E: "layout"
+    }
+  ]
+}

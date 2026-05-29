@@ -1,0 +1,1623 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: migrateDynamicPageSettings
+        description: Seeds shared DynamicPage table configs (employees, roles, time, tasks, files, settings, Shopify shops), Solvo public support configs, support settings page config, and default GlobalSetting support documents.
+        body:
+          '''
+/**
+ * Solvo - migrate default DynamicPage table settings.
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = args.contextData || {};
+console.log(`Solvo settings migration (dryRun: ${dryRun})`);
+
+const nowIso = () => new Date().toISOString();
+
+const defaultPublicSupportFormConfig = {
+  gridColumns: 2,
+  groups: [
+    {
+      key: "customer",
+      title: "Contact details",
+      gridColumns: 2,
+      fields: [
+        { key: "customerName", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 1, validation: { maxLength: 120 } },
+        { key: "customerEmail", label: "Email", dataType: "email", renderer: "text", required: true, colSpan: 1, validation: { email: true, maxLength: 320 } },
+        { key: "orderNumber", label: "Order number", dataType: "text", renderer: "text", required: false, colSpan: 1, validation: { maxLength: 80 } },
+        { key: "subject", label: "Subject", dataType: "text", renderer: "text", required: true, colSpan: 2, validation: { maxLength: 200 } },
+        { key: "message", label: "How can we help?", dataType: "text", renderer: "textArea", required: true, colSpan: 2, validation: { maxLength: 4000 } }
+      ]
+    }
+  ]
+};
+
+const defaultSupportSystem = {
+  enabled: true,
+  serialPrefix: "SOL",
+  allowGuestTickets: true,
+  allowTicketCloseByCustomer: true,
+  sendEmailNotifications: true,
+  publicTrackingEnabled: true,
+  defaultTicketStatus: "open"
+};
+
+const defaultSupportTheme = {
+  theme: {
+    modalWidth: 640,
+    showLogo: true,
+    logoPosition: "top",
+    customCss: ""
+  }
+};
+
+const defaultEmailSettings = {
+  enabled: true,
+  sendTicketCreatedToCustomer: true,
+  sendCustomerReplyToMerchant: true,
+  sendAdminReplyToCustomer: true,
+  sendTicketClosedToCustomer: true,
+  merchantEmail: "",
+  replyToEmail: "",
+  fromName: "Solvo Support",
+  keepSameSubjectThread: true
+};
+
+const fieldSettingsJson = JSON.stringify(defaultPublicSupportFormConfig, null, 2);
+const themeJson = JSON.stringify(defaultSupportTheme.theme, null, 2);
+
+const settingsConfigs = [
+
+  {
+    key: "Employee_settings_default",
+    tableVertexLabel: "User",
+    icon: "Users",
+    name: "Employees",
+    config: `return {
+  title: "Employees",
+  label: "Employee",
+  icon: "ph:users-three",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete employee?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "email", label: "Email", dataType: "text", renderer: "text", width: "240px", required: true, overflowEllipsis: true },
+    { key: "name", label: "Name", dataType: "text", renderer: "text", width: "200px", overflowEllipsis: true },
+    { key: "username", label: "Username", dataType: "text", renderer: "text", width: "160px", overflowEllipsis: true },
+    { key: "role", label: "Roles", dataType: "relation", renderer: "text", multiSelect: true, width: "200px", overflowEllipsis: true, sortable: false, filterType: "text", selectConfig: { label: "Role", labelField: "key", relationshipType: "UserRole", limit: 200, edgeOnly: true, enableUserScoping: false } },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "130px", badgeKeyCase: "lower", badgeToneMap: { active: ["Active", "success"], inactive: ["Inactive", "critical"], invited: ["Invited", "attention"] } },
+  ],
+  rowHeight: 52,
+  uniqueKeys: ["email", "username"],
+  hooks: {
+    afterCreate: ["employeeAfterCreate"],
+    afterUpdate: ["employeeAfterUpdate"]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "EmployeeCategory",
+    toParentEdgeType: "EmployeeCategoryUser",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Group",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar group or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    fieldValidationByKey: {
+      username: {
+        pattern: "^[a-zA-Z0-9_-]+$",
+        patternMessage: "Username can only contain letters, numbers, underscores, and hyphens",
+        minLengthMessage: "Username must be at least 3 characters"
+      },
+      name: {
+        pattern: "^[a-zA-Z -]+$",
+        patternMessage: "Name can only contain letters, spaces, and hyphens",
+        minLengthMessage: "Name must be at least 2 characters",
+        maxLengthMessage: "Name must be at most 100 characters"
+      }
+    },
+    groups: [
+      {
+        key: "employee",
+        title: "Employee",
+        gridColumns: 2,
+        fields: [
+          { key: "email", label: "Email", dataType: "email", renderer: "text", required: true, colSpan: 2 },
+          { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 1, minLength: 2, maxLength: 100 },
+          { key: "username", label: "Username", dataType: "text", renderer: "text", required: true, colSpan: 1, minLength: 3, maxLength: 64 },
+          {
+            key: "role",
+            label: "Roles",
+            dataType: "relation", renderer: "multiSelect",
+            required: true,
+            colSpan: 2,
+            placeholder: "Select roles",
+            selectConfig: {
+              label: "Role",
+              labelField: "key",
+              relationshipType: "UserRole",
+              limit: 200,
+              edgeOnly: true,
+              enableUserScoping: false
+            }
+          },
+          {
+            key: "status",
+            label: "Status",
+            dataType: "select", renderer: "select",
+            visible: (ctx) => ctx.mode !== "create",
+            required: true,
+            colSpan: 1,
+            options: [
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" }
+            ],
+            tooltip: "Same choices as global user admin. Shown when editing an employee; new employees get status from the invite flow."
+          }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "Role_settings_default",
+    tableVertexLabel: "Role",
+    icon: "Shield",
+    name: "Roles",
+    config: `return {
+  title: "Roles",
+  label: "Role",
+  icon: "ph:shield-check",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete role?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  showAddButton: true,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "key", label: "Key", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true }
+  ],
+  rowHeight: 48,
+  uniqueKeys: ["key"],
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "role",
+        title: "Role",
+        gridColumns: 1,
+        fields: [
+          { key: "key", label: "Role key", dataType: "text", renderer: "text", required: true, colSpan: 1, tooltip: "Unique key (e.g. Staff). Used for UserRole assignment." }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "File_settings_default",
+    tableVertexLabel: "File",
+    icon: "File",
+    name: "Files",
+    config: `return {
+  title: "Files",
+  label: "File",
+  icon: "ph:file",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text", renderer: "imagePreview",
+      width: "150px",
+      sortable: false,
+      valueAccessor: (row) => {
+        const fileName = row.P?.fileName != null ? String(row.P.fileName).trim() : "";
+        if (fileName === "") return null;
+        const mime = String(row.P?.mimeType || row.P?.fileType || "");
+        if (mime && !mime.startsWith("image/")) return null;
+        return "/api/file/download/" + encodeURIComponent(fileName);
+      }
+    },
+    {
+      key: "fileName",
+      label: "Name",
+      dataType: "text", renderer: "text",
+      width: "240px",
+      valueAccessor: (row) => row.P?.fileName || "",
+      overflowEllipsis: true
+    },
+    {
+      key: "fileSize",
+      label: "Size (bytes)",
+      dataType: "text", renderer: "text",
+      width: "110px",
+      valueAccessor: (row) => (row.P?.fileSize != null ? String(row.P.fileSize) : "")
+    },
+    {
+      key: "fileType",
+      label: "Type",
+      dataType: "text", renderer: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.mimeType || row.P?.fileType || ""
+    },
+    { key: "uploadDate", label: "Uploaded", dataType: "date", renderer: "date", width: "130px" },
+    {
+      key: "description",
+      label: "Description",
+      dataType: "text", renderer: "text",
+      width: "220px",
+      valueAccessor: (row) => row.P?.description,
+      overflowEllipsis: true
+    }
+  ],
+  rowHeight: 64,
+  showRowNumber: true,
+  showSelection: true,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete file?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  showAddButton: true,
+  rowClickable: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Folder",
+    toParentEdgeType: "ParentFolder",
+    rootKeys: {},
+    label: "Folder",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "key",
+              label: "Key",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "description",
+              label: "Description",
+              dataType: "text", renderer: "textArea",
+              maxLength: 2000,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {}
+  },
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "File",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "__fileUpload",
+            dataType: "file", renderer: "graphFileUpload",
+            required: true,
+            colSpan: 2,
+            tooltip: "Choose a file to upload. It is stored in the repository and linked to your user (UserFile). Then set description and save.",
+            visible: "ctx.mode === 'create'",
+            uploadConfiguration: {
+              accept: "*/*",
+              uploadUrl: "/api/file/upload",
+              hidePreview: false,
+              enableDragDrop: true,
+              fullWidth: true,
+              previewMinHeight: "12.5rem",
+              previewMaxItemHeight: "16rem",
+              previewObjectFit: "contain",
+              fileDownloadUrlPrefix: "/api/file/download",
+              pickButtonLabel: "Choose file to upload",
+              successToastMessage: "File uploaded",
+              onUploadSuccess: async (hook) => {
+                hook.callbacks.assignFormVertex?.(hook.uploadedId);
+                hook.syncFormFields?.(hook.uploadedId);
+                hook.syncPreview(hook.uploadedId);
+                hook.showSuccess();
+              },
+            }
+          },
+          {
+            key: "fileName",
+            label: "File name",
+            dataType: "text", renderer: "text",
+            required: true,
+            maxLength: 512,
+            colSpan: 2,
+            tooltip: "Display name for the file.",
+            disabled: "ctx.mode === 'edit'"
+          },
+          {
+            key: "description",
+            label: "Description",
+            dataType: "text", renderer: "textArea",
+            required: false,
+            maxLength: 4000,
+            colSpan: 2
+          },
+          {
+            key: "fileSize",
+            label: "Size (bytes)",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "fileType",
+            label: "MIME type",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "uploadDate",
+            label: "Upload date",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "FilePortal_settings_default",
+    tableVertexLabel: "File",
+    icon: "File",
+    name: "Portal files",
+    config: `return {
+  title: "My files",
+  subtitle: "Your uploaded files.",
+  label: "File",
+  icon: "ph:file",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: true,
+  actions: [],
+  showAddButton: true,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: true,
+  hooks: {
+    beforeFetchData: ["portalFilesBeforeFetch"]
+  },
+  columns: [
+    {
+      key: "preview",
+      label: "Preview",
+      dataType: "text", renderer: "imagePreview",
+      width: "150px",
+      sortable: false,
+      valueAccessor: (row) => {
+        const fileName = row.P?.fileName != null ? String(row.P.fileName).trim() : "";
+        if (fileName === "") return null;
+        const mime = String(row.P?.mimeType || row.P?.fileType || "");
+        if (mime && !mime.startsWith("image/")) return null;
+        return "/api/file/download/" + encodeURIComponent(fileName);
+      }
+    },
+    {
+      key: "fileName",
+      label: "Name",
+      dataType: "text", renderer: "text",
+      width: "240px",
+      valueAccessor: (row) => row.P?.fileName || "",
+      overflowEllipsis: true
+    },
+    {
+      key: "fileSize",
+      label: "Size (bytes)",
+      dataType: "text", renderer: "text",
+      width: "100px",
+      valueAccessor: (row) => (row.P?.fileSize != null ? String(row.P.fileSize) : "")
+    },
+    {
+      key: "fileType",
+      label: "Type",
+      dataType: "text", renderer: "text",
+      width: "120px",
+      valueAccessor: (row) => row.P?.mimeType || row.P?.fileType || ""
+    },
+    { key: "uploadDate", label: "Uploaded", dataType: "date", renderer: "date", width: "130px" },
+    {
+      key: "description",
+      label: "Description",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.description,
+      overflowEllipsis: true
+    }
+  ],
+  rowHeight: 64,
+  uniqueKeys: [],
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "Folder",
+    toParentEdgeType: "ParentFolder",
+    rootKeys: {},
+    label: "Folder",
+    loadFullTree: true,
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Folder",
+          gridColumns: 2,
+          fields: [
+            {
+              key: "key",
+              label: "Key",
+              dataType: "text", renderer: "text",
+              required: true,
+              maxLength: 255,
+              colSpan: 2
+            },
+            {
+              key: "description",
+              label: "Description",
+              dataType: "text", renderer: "textArea",
+              maxLength: 2000,
+              colSpan: 2
+            }
+          ]
+        }
+      ]
+    },
+    hooks: {}
+  },
+  formConfig: {
+    gridColumns: 1,
+    groups: [
+      {
+        key: "basic",
+        title: "File",
+        gridColumns: 2,
+        fields: [
+          {
+            key: "__fileUpload",
+            dataType: "file", renderer: "graphFileUpload",
+            required: true,
+            colSpan: 2,
+            tooltip: "Choose a file to upload. It is stored in the repository and linked to your user (UserFile). Then set description and save.",
+            visible: "ctx.mode === 'create'",
+            uploadConfiguration: {
+              accept: "*/*",
+              uploadUrl: "/api/file/upload",
+              hidePreview: false,
+              enableDragDrop: true,
+              fullWidth: true,
+              previewMinHeight: "12.5rem",
+              previewMaxItemHeight: "16rem",
+              previewObjectFit: "contain",
+              fileDownloadUrlPrefix: "/api/file/download",
+              pickButtonLabel: "Choose file to upload",
+              successToastMessage: "File uploaded",
+              onUploadSuccess: async (hook) => {
+                hook.callbacks.assignFormVertex?.(hook.uploadedId);
+                hook.syncFormFields?.(hook.uploadedId);
+                hook.syncPreview(hook.uploadedId);
+                hook.showSuccess();
+              },
+            }
+          },
+          {
+            key: "fileName",
+            label: "File name",
+            dataType: "text", renderer: "text",
+            required: true,
+            maxLength: 512,
+            colSpan: 2,
+            tooltip: "Display name for the file.",
+            disabled: "ctx.mode === 'edit'"
+          },
+          {
+            key: "description",
+            label: "Description",
+            dataType: "text", renderer: "textArea",
+            required: false,
+            maxLength: 4000,
+            colSpan: 2
+          },
+          {
+            key: "fileSize",
+            label: "Size (bytes)",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "fileType",
+            label: "MIME type",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 1
+          },
+          {
+            key: "uploadDate",
+            label: "Upload date",
+            dataType: "text", renderer: "text",
+            disabled: true,
+            colSpan: 2
+          }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "Task_settings_default",
+    tableVertexLabel: "Task",
+    icon: "Check",
+    name: "Tasks",
+    config: `return {
+  title: "Tasks",
+  label: "Task",
+  icon: "ph:check-square",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete task?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  refetchIntervalWhenQueued: 5000,
+  columns: [
+    { key: "title", label: "Task", dataType: "text", renderer: "text", width: "260px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { todo: ["To do", "warning"], doing: ["Doing", "info"], blocked: ["Blocked", "critical"], done: ["Done", "success"] } },
+    { key: "priority", label: "Priority", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { low: ["Low", "neutral"], normal: ["Normal", "info"], high: ["High", "warning"], urgent: ["Urgent", "critical"] } },
+    { key: "dueAt", label: "Due", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "assigneeId", label: "Assignee", dataType: "relation", renderer: "text", filterType: "text", width: "200px", overflowEllipsis: true, sortable: false, selectConfig: { label: "User", labelField: "name", relationshipType: "TaskAssignee", limit: 50, edgeOnly: true, enableUserScoping: false } },
+    { key: "syncStatus", label: "Sync", dataType: "text", renderer: "badge", width: "110px", badgeKeyCase: "lower", badgeToneMap: { queued: ["Queued", "warning"], processing: ["Processing", "info"], done: ["Done", "success"], error: ["Error", "critical"] } }
+  ],
+  rowHeight: 50,
+  uniqueKeys: ["title", "dueAt"],
+  hooks: {
+    afterCreate: ["queueTaskReminder"],
+    afterUpdate: ["queueTaskReminder"]
+  },
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "TaskCategory",
+    toParentEdgeType: "TaskCategoryItem",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "List",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar list or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "task",
+        title: "Task",
+        gridColumns: 2,
+        fields: [
+          { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Short summary shown in the task list." },
+          { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, tooltip: "Longer notes for the assignee." },
+          { key: "status", label: "Status", dataType: "select", renderer: "select", required: true, colSpan: 1, defaultValue: "todo", options: [
+            { value: "todo", label: "To do" },
+            { value: "doing", label: "Doing" },
+            { value: "blocked", label: "Blocked" },
+            { value: "done", label: "Done" }
+          ] },
+          { key: "priority", label: "Priority", dataType: "select", renderer: "select", colSpan: 1, defaultValue: "normal", options: [
+            { value: "low", label: "Low" },
+            { value: "normal", label: "Normal" },
+            { value: "high", label: "High" },
+            { value: "urgent", label: "Urgent" }
+          ] },
+          { key: "dueAt", label: "Due date", dataType: "date", renderer: "date", colSpan: 1, tooltip: "Used for reminders and overdue highlighting." },
+          { key: "remindAt", label: "Remind at", dataType: "date", renderer: "date", colSpan: 1, tooltip: "Optional specific reminder time." },
+          { key: "assigneeId", label: "Assign to", dataType: "select", renderer: "select", colSpan: 2, selectConfig: { label: "User", labelField: "name", relationshipType: "TaskAssignee", limit: 50, edgeOnly: true, enableUserScoping: false }, tooltip: "Assign to an employee (User vertex). Stored as an edge." }
+        ]
+      },
+      {
+        key: "comments",
+        title: "Notes / comments",
+        gridColumns: 1,
+        fields: [
+          { key: "comments", label: "Comments", dataType: "json", renderer: "nestedLineItems", colSpan: 2, tooltip: "Task comments (child nodes).", nestedLineItemsConfig: {
+            childLabel: "TaskComment",
+            parentToChildRelationshipType: "TaskTaskComment",
+            parentElementIdPropOnChild: "taskElementId",
+            nestedLineItemsSyncRules: { quantityRule: { op: ">=", value: 0 } },
+            lineColumns: [
+              { key: "message", label: "Comment", columnType: "text", placeholder: "Write a comment...", defaultValue: "", gridMinmax: "minmax(10rem, 1fr)" },
+              { key: "authorEmail", label: "By", columnType: "text", placeholder: "email", defaultValue: "", gridMinmax: "minmax(8rem, 0.6fr)" },
+              { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }
+            ]
+          } }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "TaskPortal_settings_default",
+    tableVertexLabel: "Task",
+    icon: "Check",
+    name: "Portal tasks",
+    config: `return {
+  title: "My tasks",
+  subtitle: "Tasks assigned to you.",
+  label: "Task",
+  icon: "ph:check-square",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: true,
+  actions: [],
+  showAddButton: false,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "TaskCategory",
+    toParentEdgeType: "TaskCategoryItem",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "List",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Sidebar list or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  columns: [
+    { key: "title", label: "Task", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { todo: ["To do", "warning"], doing: ["Doing", "info"], blocked: ["Blocked", "critical"], done: ["Done", "success"] } },
+    { key: "priority", label: "Priority", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { low: ["Low", "neutral"], normal: ["Normal", "info"], high: ["High", "warning"], urgent: ["Urgent", "critical"] } },
+    { key: "dueAt", label: "Due", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true }
+  ],
+  rowHeight: 50,
+  uniqueKeys: [],
+  hooks: {
+    beforeFetchData: ["portalTasksBeforeFetch"]
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "task",
+        title: "Task",
+        gridColumns: 2,
+        fields: [
+          { key: "title", label: "Title", dataType: "text", renderer: "text", required: true, colSpan: 2, disabled: true },
+          { key: "description", label: "Description", dataType: "text", renderer: "textArea", colSpan: 2, disabled: true },
+          { key: "status", label: "Status", dataType: "select", renderer: "select", required: true, colSpan: 1, options: [
+            { value: "todo", label: "To do" },
+            { value: "doing", label: "Doing" },
+            { value: "blocked", label: "Blocked" },
+            { value: "done", label: "Done" }
+          ] },
+          { key: "priority", label: "Priority", dataType: "select", renderer: "select", colSpan: 1, disabled: true, options: [
+            { value: "low", label: "Low" },
+            { value: "normal", label: "Normal" },
+            { value: "high", label: "High" },
+            { value: "urgent", label: "Urgent" }
+          ] },
+          { key: "dueAt", label: "Due date", dataType: "date", renderer: "date", colSpan: 1, disabled: true },
+          { key: "remindAt", label: "Remind at", dataType: "date", renderer: "date", colSpan: 1, disabled: true }
+        ]
+      },
+      {
+        key: "comments",
+        title: "Notes / comments",
+        gridColumns: 1,
+        fields: [
+          { key: "comments", label: "Comments", dataType: "json", renderer: "nestedLineItems", colSpan: 2, nestedLineItemsConfig: {
+            childLabel: "TaskComment",
+            parentToChildRelationshipType: "TaskTaskComment",
+            parentElementIdPropOnChild: "taskElementId",
+            nestedLineItemsSyncRules: { quantityRule: { op: ">=", value: 0 } },
+            lineColumns: [
+              { key: "message", label: "Comment", columnType: "text", placeholder: "Write a comment...", defaultValue: "", gridMinmax: "minmax(10rem, 1fr)" },
+              { key: "authorEmail", label: "By", columnType: "text", placeholder: "email", defaultValue: "", gridMinmax: "minmax(8rem, 0.6fr)" },
+              { key: "_actions", label: "", columnType: "actions", gridMinmax: "minmax(3.75rem, auto)" }
+            ]
+          } }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "Setting_settings_default",
+    tableVertexLabel: "Setting",
+    icon: "Settings",
+    name: "Settings",
+    config: `return {
+  title: "Settings",
+  label: "Setting",
+  icon: "ph:gear",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  actions: [],
+  rowClickable: true,
+  showRowNumber: false,
+  showSelection: false,
+  resizableColumns: true,
+  enableLocalFilters: false,
+  enableLocalSort: false,
+  usePolarisUI: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  columns: [
+    { key: "timezone", label: "Business timezone", dataType: "text", renderer: "text", width: "240px" },
+    { key: "lateThresholdMinutes", label: "Late threshold (minutes)", dataType: "text", renderer: "text", width: "220px" },
+    { key: "autoClockOutHours", label: "Auto clock-out (hours)", dataType: "text", renderer: "text", width: "220px" }
+  ],
+  rowHeight: 52,
+  uniqueKeys: ["key"],
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "biz",
+        title: "Business settings",
+        gridColumns: 2,
+        fields: [
+          { key: "key", label: "Key", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Keep as 'default' for a single-settings row." },
+          { key: "timezone", label: "Business timezone", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Example: America/New_York" },
+          { key: "lateThresholdMinutes", label: "Late threshold (minutes)", dataType: "number", renderer: "number", colSpan: 1 },
+          { key: "autoClockOutHours", label: "Auto clock-out (hours)", dataType: "number", renderer: "number", colSpan: 1 },
+          { key: "workdayStart", label: "Workday start", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Example: 09:00" },
+          { key: "workdayEnd", label: "Workday end", dataType: "text", renderer: "text", colSpan: 1, tooltip: "Example: 17:00" }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "ShopifyShop_settings_default",
+    tableVertexLabel: "ShopifyShop",
+    icon: "Store",
+    name: "ShopifyShop",
+    config: `return {
+  title: "Shops",
+  label: "Shop",
+  icon: "carbon:store",
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "shop",
+      label: "Shop domain",
+      dataType: "text", renderer: "text",
+      width: "320px",
+      required: true
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    },
+    {
+      key: "updatedAt",
+      label: "Updated",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.updatedAt || row.updatedAt
+    },
+    {
+      key: "lastSynced",
+      label: "Last synced",
+      dataType: "text", renderer: "text",
+      width: "200px",
+      valueAccessor: (row) => row.P?.lastSynced || ""
+    },
+    {
+      key: "syncStatus",
+      label: "Sync status",
+      dataType: "text", renderer: "text",
+      width: "140px",
+      valueAccessor: (row) => row.P?.syncStatus || ""
+    }
+  ],
+  rowHeight: 50,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "40px", __actions: "80px" },
+  formConfig: null,
+  actions: [
+    {
+      key: "delete",
+      type: "delete",
+      confirm: {
+        title: "Delete shop",
+        message: "Delete this shop and drop its database? This cannot be undone.",
+        confirmText: "Delete",
+        cancelText: "Cancel",
+        variant: "danger"
+      }
+    }
+  ],
+  uniqueKeys: [],
+  usePolarisUI: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  hooks: {},
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "ShopifyShopCategory",
+    toParentEdgeType: "ParentShopifyShopCategory",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Group",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar group name (e.g. Production, Trial)." },
+          ]
+        }
+      ]
+    }
+  }
+};`
+  },
+  {
+    key: "Support_settings_default",
+    tableVertexLabel: "Support",
+    icon: "💬",
+    name: "Support",
+    config: `return {
+  title: "Support Tickets",
+  label: "Support Ticket",
+  icon: "carbon:chat",
+  hideExportButtons: false,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  columns: [
+    {
+      key: "shop",
+      label: "Shop",
+      dataType: "text", renderer: "text",
+      width: "220px"
+    },
+    {
+      key: "subject",
+      label: "Subject",
+      dataType: "text", renderer: "text",
+      width: "260px",
+      required: false
+    },
+    {
+      key: "email",
+      label: "Email",
+      dataType: "text", renderer: "text",
+      width: "220px"
+    },
+    {
+      key: "unreadForAdmin",
+      label: "Unread",
+      dataType: "number", renderer: "number",
+      width: "90px"
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      dataType: "date", renderer: "date",
+      width: "160px",
+      valueAccessor: (row) => row.P?.createdAt || row.createdAt
+    }
+  ],
+  rowHeight: 60,
+  showRowNumber: true,
+  showSelection: false,
+  actions: [],
+  rowClickable: true,
+  resizableColumns: true,
+  columnWidths: { __rowNumber: "40px" },
+  formConfig: null,
+  uniqueKeys: [],
+  usePolarisUI: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  hooks: {},
+  sidebar: {
+    enabled: false
+  },
+  onRowClick: (row, args) => {
+    if (!row?.id) return;
+    const ticketId = row.id;
+    const basePath = "/ShopifySupportConversation";
+    const searchParams = args.searchParams || {};
+    const nextParams = { ...searchParams, supportId: ticketId };
+    const query = Object.entries(nextParams)
+      .filter(([, value]) => value != null && value !== "")
+      .map(([key, value]) => \`\${encodeURIComponent(key)}=\${encodeURIComponent(String(value))}\`)
+      .join("&");
+    const href = query ? \`\${basePath}?\${query}\` : basePath;
+
+    if (args.navigate) {
+      args.navigate(href);
+    } else if (typeof window !== "undefined") {
+      window.location.href = href;
+    }
+  }
+};`
+  },
+  {
+    key: "PublicSupportTicket_settings_default",
+    tableVertexLabel: "PublicSupportTicket",
+    icon: "ph:lifebuoy",
+    name: "Public Support Tickets",
+    config: `return {
+  title: "Public support tickets",
+  label: "Ticket",
+  icon: "ph:lifebuoy",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  actions: [
+    {
+      key: "conversation",
+      type: "custom",
+      label: "Open",
+      icon: "carbon:chat",
+      title: "Open conversation (click: modal, Ctrl+click: new tab)",
+      ariaLabel: "Open conversation",
+      href: (row) => {
+        const ticketId = row?.id;
+        if (!ticketId) return "";
+        return "/public-support/conversation?ticketId=" + encodeURIComponent(String(ticketId));
+      },
+      target: "_blank",
+      rel: "noopener noreferrer"
+    },
+    { key: "edit", type: "edit" },
+    { key: "delete", type: "delete", confirm: { title: "Delete ticket?", message: "This removes the ticket and its local table row.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }
+  ],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "120px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "PublicSupportTicketCategory",
+    toParentEdgeType: "ParentTicketCategory",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Group",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar group or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  columns: [
+    { key: "serial", label: "Ticket", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { open: ["Open", "success"], pending: ["Pending", "warning"], closed: ["Closed", "neutral"] } },
+    { key: "subject", label: "Subject", dataType: "text", renderer: "text", width: "260px", overflowEllipsis: true },
+    { key: "customerEmail", label: "Customer email", dataType: "email", renderer: "text", width: "240px", overflowEllipsis: true },
+    { key: "assigneeId", label: "Assignee", dataType: "relation", renderer: "text", width: "200px", overflowEllipsis: true, sortable: false, selectConfig: { label: "User", labelField: "name", relationshipType: "PublicSupportTicketAssignee", limit: 50, edgeOnly: true, enableUserScoping: false } },
+    { key: "unreadForAdmin", label: "Unread", dataType: "number", renderer: "number", width: "90px" },
+    { key: "lastMessageSender", label: "Last sender", dataType: "text", renderer: "text", width: "120px" },
+    { key: "createdAt", label: "Created", dataType: "date", renderer: "date", width: "180px" },
+    { key: "lastMessageAt", label: "Last message", dataType: "date", renderer: "date", width: "180px" }
+  ],
+  rowHeight: 56,
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "ticket",
+        title: "Ticket",
+        gridColumns: 2,
+        fields: [
+          { key: "serial", label: "Serial", dataType: "text", renderer: "text", disabled: true, colSpan: 1 },
+          { key: "status", label: "Status", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+          { key: "subject", label: "Subject", dataType: "text", renderer: "text", required: true, colSpan: 2 },
+          { key: "customerName", label: "Customer name", dataType: "text", renderer: "text", colSpan: 1 },
+          { key: "customerEmail", label: "Customer email", dataType: "email", renderer: "text", required: true, colSpan: 1 },
+          { key: "assigneeId", label: "Assign to", dataType: "select", renderer: "select", colSpan: 2, selectConfig: { label: "User", labelField: "name", relationshipType: "PublicSupportTicketAssignee", limit: 50, edgeOnly: true, enableUserScoping: false }, tooltip: "Assign this ticket to a staff portal user. Stored as an edge." },
+          { key: "trackingUrl", label: "Tracking URL", dataType: "text", renderer: "text", colSpan: 2 },
+          { key: "initialMessage", label: "Initial message", dataType: "text", renderer: "textArea", colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "PublicSupportTicketPortal_settings_default",
+    tableVertexLabel: "PublicSupportTicket",
+    icon: "ph:lifebuoy",
+    name: "Portal support tickets",
+    config: `return {
+  title: "My tickets",
+  subtitle: "Tickets assigned to you (staff see all).",
+  label: "Ticket",
+  icon: "ph:lifebuoy",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: true,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  actions: [
+    {
+      key: "conversation",
+      type: "custom",
+      label: "Open",
+      icon: "carbon:chat",
+      title: "Open conversation (click: modal, Ctrl+click: new tab)",
+      ariaLabel: "Open conversation",
+      href: (row) => {
+        const ticketId = row?.id;
+        if (!ticketId) return "";
+        return "/public-support/conversation?ticketId=" + encodeURIComponent(String(ticketId));
+      },
+      target: "_blank",
+      rel: "noopener noreferrer"
+    },
+    { key: "edit", type: "edit" }
+  ],
+  showAddButton: false,
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: false,
+  resizableColumns: true,
+  columnWidths: { __actions: "120px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "PublicSupportTicketCategory",
+    toParentEdgeType: "ParentTicketCategory",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "List",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar list or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  columns: [
+    { key: "serial", label: "Ticket", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "status", label: "Status", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { open: ["Open", "success"], pending: ["Pending", "warning"], closed: ["Closed", "neutral"] } },
+    { key: "subject", label: "Subject", dataType: "text", renderer: "text", width: "280px", overflowEllipsis: true },
+    { key: "customerEmail", label: "Customer", dataType: "email", renderer: "text", width: "240px", overflowEllipsis: true },
+    { key: "lastMessageSender", label: "Last sender", dataType: "text", renderer: "text", width: "120px" },
+    { key: "lastMessageAt", label: "Last message", dataType: "date", renderer: "date", width: "180px" }
+  ],
+  rowHeight: 56,
+  uniqueKeys: [],
+  hooks: {
+    beforeFetchData: ["publicSupportPortalTicketsBeforeFetch"]
+  },
+  formConfig: {
+    gridColumns: 2,
+    groups: [
+      {
+        key: "ticket",
+        title: "Ticket",
+        gridColumns: 2,
+        fields: [
+          { key: "serial", label: "Serial", dataType: "text", renderer: "text", disabled: true, colSpan: 1 },
+          { key: "status", label: "Status", dataType: "text", renderer: "text", required: true, colSpan: 1 },
+          { key: "subject", label: "Subject", dataType: "text", renderer: "text", disabled: true, colSpan: 2 },
+          { key: "customerName", label: "Customer name", dataType: "text", renderer: "text", disabled: true, colSpan: 1 },
+          { key: "customerEmail", label: "Customer email", dataType: "email", renderer: "text", disabled: true, colSpan: 1 },
+          { key: "initialMessage", label: "Initial message", dataType: "text", renderer: "textArea", disabled: true, colSpan: 2 }
+        ]
+      }
+    ]
+  }
+};`
+  },
+  {
+    key: "PublicSupportMessage_settings_default",
+    tableVertexLabel: "PublicSupportMessage",
+    icon: "ph:chat-circle-text",
+    name: "Public Support Messages",
+    config: `return {
+  title: "Support messages",
+  label: "Message",
+  icon: "ph:chat-circle-text",
+  hideExportButtons: true,
+  hideImportButtons: true,
+  hideSettingsButton: false,
+  enableUserScopingForSidebar: false,
+  enableUserScopingForContent: false,
+  actions: [{ key: "delete", type: "delete", confirm: { title: "Delete message?", message: "This cannot be undone.", confirmText: "Delete", cancelText: "Cancel", variant: "danger" } }],
+  rowClickable: true,
+  showRowNumber: true,
+  showSelection: true,
+  resizableColumns: true,
+  columnWidths: { __selection: "36px", __actions: "88px", __rowNumber: "36px" },
+  enableLocalFilters: true,
+  enableLocalSort: true,
+  usePolarisUI: true,
+  sidebar: {
+    enabled: true,
+    parentVertexLabel: "PublicSupportMessageCategory",
+    toParentEdgeType: "ParentMessageCategory",
+    rootKeys: {},
+    label: "Category",
+    formConfig: {
+      gridColumns: 1,
+      groups: [
+        {
+          key: "basic",
+          title: "Group",
+          gridColumns: 2,
+          fields: [
+            { key: "key", label: "Key", dataType: "text", renderer: "text", colSpan: 2, tooltip: "Optional stable key (lowercase, hyphens)." },
+            { key: "name", label: "Name", dataType: "text", renderer: "text", required: true, colSpan: 2, tooltip: "Sidebar group or folder name." },
+          ]
+        }
+      ]
+    }
+  },
+  columns: [
+    { key: "ticketSerial", label: "Ticket", dataType: "text", renderer: "text", width: "180px", overflowEllipsis: true },
+    { key: "senderType", label: "Sender", dataType: "text", renderer: "badge", width: "120px", badgeKeyCase: "lower", badgeToneMap: { customer: ["Customer", "info"], admin: ["Admin", "success"], internal: ["Internal", "warning"] } },
+    { key: "authorEmail", label: "Email", dataType: "email", renderer: "text", width: "240px", overflowEllipsis: true },
+    { key: "message", label: "Message", dataType: "text", renderer: "text", width: "420px", overflowEllipsis: true },
+    { key: "createdAt", label: "Created", dataType: "date", renderer: "date", width: "180px" }
+  ],
+  formConfig: {
+    gridColumns: 2,
+    groups: [{
+      key: "message",
+      title: "Message",
+      gridColumns: 2,
+      fields: [
+        { key: "ticketSerial", label: "Ticket", dataType: "text", renderer: "text", disabled: true, colSpan: 1 },
+        { key: "senderType", label: "Sender", dataType: "text", renderer: "text", disabled: true, colSpan: 1 },
+        { key: "authorEmail", label: "Email", dataType: "email", renderer: "text", disabled: true, colSpan: 2 },
+        { key: "message", label: "Message", dataType: "text", renderer: "textArea", colSpan: 2 }
+      ]
+    }]
+  }
+};`
+  },
+];
+
+const settingsPageConfigs = [
+  {
+    key: "support_settings_page_default",
+    settingsPageId: "support",
+    name: "Support Settings",
+    config: `return {
+  pageMode: "settings",
+  id: "support",
+  route: "/settings?section=supportGlobal",
+  title: "Support",
+  description: "Configure the public support widget, ticket fields, email notifications, and customer tracking.",
+  version: 1,
+  scope: { vertexLabel: "GlobalSetting", matchProperty: "key", idParam: "scopeId" },
+  saveStrategy: { mode: "section", debounceMs: 1000, autosave: false, showSaveBar: true, warnOnLeave: true },
+  audit: { enabled: true, resource: "settings.support", includeDiff: true },
+  sidebar: {
+    title: "Support settings",
+    groups: [
+      {
+        id: "support",
+        label: "Support",
+        items: [
+          { id: "supportGlobal", label: "Global", path: "/settings?section=supportGlobal", icon: "settings" },
+          { id: "supportFields", label: "Fields", path: "/settings?section=supportFields", icon: "form" },
+          { id: "supportTheme", label: "Theme", path: "/settings?section=supportTheme", icon: "palette" },
+          { id: "supportEmail", label: "Email", path: "/settings?section=supportEmail", icon: "mail" }
+        ]
+      }
+    ]
+  },
+  sections: [
+    {
+      id: "supportGlobal",
+      type: "card",
+      title: "Global support settings",
+      description: "Controls whether public support is active and how ticket serials/tracking links behave.",
+      form: {
+        gridColumns: 2,
+        groups: [{
+          key: "supportSystem",
+          title: "",
+          gridColumns: 2,
+          fields: [
+            { key: "enabled", label: "Support system enabled", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "serialPrefix", label: "Serial prefix", dataType: "text", renderer: "text", required: true, defaultValue: "SOL", colSpan: 1, validation: { minLength: 2, maxLength: 12, pattern: "^[A-Z0-9]+$", patternMessage: "Use uppercase letters and numbers only." } },
+            { key: "allowGuestTickets", label: "Allow guest tickets", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "allowTicketCloseByCustomer", label: "Customer can close tickets", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "sendEmailNotifications", label: "Send email notifications", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "publicTrackingEnabled", label: "Public tracking enabled", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "defaultTicketStatus", label: "Default ticket status", dataType: "text", renderer: "text", defaultValue: "open", colSpan: 1 }
+          ]
+        }]
+      }
+    },
+    {
+      id: "supportFields",
+      type: "card",
+      title: "Public request fields",
+      description: "Edit JSON using the same FormManagement schema used by DynamicPage forms. Required flags here are enforced by publicSupportCreateTicket.",
+      form: {
+        gridColumns: 1,
+        groups: [{
+          key: "fieldSettings",
+          title: "",
+          gridColumns: 1,
+          fields: [
+            { key: "fieldSettingsJson", label: "Field schema JSON", dataType: "text", renderer: "textArea", required: true, colSpan: 1, defaultValue: ${JSON.stringify(fieldSettingsJson)} }
+          ]
+        }]
+      }
+    },
+    {
+      id: "supportTheme",
+      type: "card",
+      title: "Embedded modal theme",
+      description: "Configure the public support modal/page used by the Shopify Theme App Extension.",
+      form: {
+        gridColumns: 2,
+        groups: [{
+          key: "supportThemeSettings",
+          title: "",
+          gridColumns: 2,
+          fields: [
+            { key: "modalWidth", label: "Modal width", dataType: "number", renderer: "number", defaultValue: 640, min: 320, max: 1200, colSpan: 1 },
+            { key: "showLogo", label: "Show logo", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "logoPosition", label: "Logo position", dataType: "text", renderer: "text", defaultValue: "top", colSpan: 1 },
+            { key: "customCss", label: "Custom CSS", dataType: "text", renderer: "textArea", defaultValue: "", colSpan: 2 },
+            { key: "themeJson", label: "Theme JSON", dataType: "text", renderer: "textArea", defaultValue: ${JSON.stringify(themeJson)}, colSpan: 2 }
+          ]
+        }]
+      }
+    },
+    {
+      id: "supportEmail",
+      type: "card",
+      title: "Email notifications",
+      description: "Control customer and merchant/staff notification routing for ticket events.",
+      form: {
+        gridColumns: 2,
+        groups: [{
+          key: "emailSettings",
+          title: "",
+          gridColumns: 2,
+          fields: [
+            { key: "enabled", label: "Email notifications enabled", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "sendTicketCreatedToCustomer", label: "Ticket created → customer", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "sendCustomerReplyToMerchant", label: "Customer reply → merchant", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "sendAdminReplyToCustomer", label: "Admin reply → customer", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "sendTicketClosedToCustomer", label: "Ticket closed → customer", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "keepSameSubjectThread", label: "Keep same subject thread", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "merchantEmail", label: "Merchant/staff email", dataType: "email", renderer: "text", colSpan: 2, validation: { email: true } },
+            { key: "replyToEmail", label: "Reply-to email", dataType: "email", renderer: "text", colSpan: 2, validation: { email: true } },
+            { key: "fromName", label: "From name", dataType: "text", renderer: "text", defaultValue: "Solvo Support", colSpan: 2 }
+          ]
+        }]
+      }
+    }
+  ]
+};`
+  }
+];
+
+const defaultSectionDocuments = [
+  { pageId: "support", sectionId: "supportGlobal", values: defaultSupportSystem },
+  { pageId: "support", sectionId: "supportFields", values: { fieldSettingsJson } },
+  { pageId: "support", sectionId: "supportTheme", values: { ...defaultSupportTheme.theme, themeJson } },
+  { pageId: "support", sectionId: "supportEmail", values: defaultEmailSettings }
+];
+
+async function ensureGlobalSetting() {
+  if (dryRun) return;
+  await args.session.run(
+    `
+    MERGE (g:GlobalSetting {key: 'Default'})
+    ON CREATE SET g.createdAt = datetime(), g.name = 'Default'
+    SET g.updatedAt = datetime()
+    RETURN g
+    `
+  );
+}
+
+async function processSetting(setting) {
+  const { key, tableVertexLabel, icon, name, config } = setting;
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'table_config',
+             s.tableVertexLabel = $tableVertexLabel,
+             s.icon = $icon,
+             s.name = $name,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, tableVertexLabel, icon, name, config }
+      );
+    } else {
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'table_config',
+          tableVertexLabel: $tableVertexLabel,
+          config: $config,
+          icon: $icon,
+          name: $name,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, tableVertexLabel, icon, name, config }
+      );
+    }
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+async function processSettingsPageConfig(setting) {
+  const { key, settingsPageId, name, config } = setting;
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'settings_page_config',
+             s.settingsPageId = $settingsPageId,
+             s.name = $name,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, settingsPageId, name, config }
+      );
+    } else {
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'settings_page_config',
+          settingsPageId: $settingsPageId,
+          config: $config,
+          name: $name,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, settingsPageId, name, config }
+      );
+    }
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+async function processDefaultSectionDocument(doc) {
+  if (dryRun) {
+    return { created: 1, updated: 0 };
+  }
+  const valuesJson = JSON.stringify(doc.values || {});
+  const result = await args.session.run(
+    `
+    MATCH (g:GlobalSetting {key: 'Default'})
+    OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(existing:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    WITH g, existing
+    FOREACH (_ IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
+      CREATE (g)-[:GlobalSettingHasSettingsSection]->(:SettingsSectionDocument {
+        pageId: $pageId,
+        sectionId: $sectionId,
+        scopeVertexLabel: 'GlobalSetting',
+        scopeId: 'Default',
+        values: $valuesJson,
+        version: 1,
+        createdAt: $now,
+        updatedAt: $now,
+        createdBy: 'migration',
+        updatedBy: 'migration'
+      })
+    )
+    RETURN existing IS NULL AS created
+    `,
+    { pageId: doc.pageId, sectionId: doc.sectionId, valuesJson, now: nowIso() }
+  );
+
+  const created = result.records[0]?.get("created") === true;
+  return created ? { created: 1, updated: 0 } : { created: 0, updated: 0 };
+}
+
+const stats = {
+  created: 0,
+  updated: 0,
+  total: settingsConfigs.length + settingsPageConfigs.length + defaultSectionDocuments.length,
+  tableConfigs: settingsConfigs.length,
+  settingsPageConfigs: settingsPageConfigs.length,
+  defaultSectionDocuments: defaultSectionDocuments.length
+};
+
+await ensureGlobalSetting();
+
+for (let i = 0; i < settingsConfigs.length; i++) {
+  const r = await processSetting(settingsConfigs[i]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+for (let j = 0; j < settingsPageConfigs.length; j++) {
+  const r = await processSettingsPageConfig(settingsPageConfigs[j]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+for (let k = 0; k < defaultSectionDocuments.length; k++) {
+  const r = await processDefaultSectionDocument(defaultSectionDocuments[k]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+return {
+  success: true,
+  message: dryRun ? `Solvo settings migration dry run. Would touch ${stats.total} settings.` : `Solvo settings migration complete. Created ${stats.created}, updated ${stats.updated}.`,
+  stats
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

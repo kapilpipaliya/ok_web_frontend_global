@@ -1294,6 +1294,14 @@ const getTablePassthroughProps = () => {
   if (Array.isArray(initialSelectedRowIds)) {
     passthrough.initialSelectedRowIds = initialSelectedRowIds;
   }
+  const onRowClick = prop("onRowClick");
+  if (typeof onRowClick === "function") {
+    passthrough.onRowClick = onRowClick;
+  }
+  const actionHandlers = prop("actionHandlers");
+  if (actionHandlers && typeof actionHandlers === "object") {
+    passthrough.actionHandlers = actionHandlers;
+  }
   return passthrough;
 };
 
@@ -1525,6 +1533,8 @@ const initializeSettingsPage = async () => {
 };
 
 const ensureSettingsPageQueryParam = () => {
+  const fromProps = args.contextData.props?.settingsPageId;
+  if (fromProps != null && String(fromProps).trim() !== "") return;
   const fromQuery = args.searchParams?.page;
   if (fromQuery != null && String(fromQuery).trim() !== "") return;
   const defaultId = getDefaultSettingsPageId();

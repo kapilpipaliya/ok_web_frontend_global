@@ -1,0 +1,59 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportPortalTicketsBeforeFetch
+        description: getUserContent beforeFetchData hook for staff portal tickets. Admin users see all tickets; other staff only see tickets assigned via PublicSupportTicketAssignee.
+        body:
+          '''
+const {
+  tableVertexLabel,
+  queryModification,
+  sessionUser
+} = args.contextData || {};
+
+if (tableVertexLabel !== "PublicSupportTicket") {
+  return { success: true, message: "Skip: not PublicSupportTicket" };
+}
+
+if (!queryModification || typeof queryModification !== "object") {
+  return { success: true, message: "Skip: missing queryModification" };
+}
+
+const sessionUserUuid =
+  sessionUser?.P?.uuid != null ? String(sessionUser.P.uuid).trim() : "";
+
+if (sessionUserUuid === "") {
+  queryModification.forceEmptyResult = true;
+  return { success: true, message: "No session user - empty support ticket result" };
+}
+
+const roleResult = await args.session.run(
+  `
+  MATCH (u:User {uuid: $uuid})
+  OPTIONAL MATCH (u)-[:UserRole]->(role:Role)
+  RETURN count(CASE WHEN role.key = 'Admin' THEN 1 END) > 0 AS isAdmin
+  `,
+  { uuid: sessionUserUuid }
+);
+
+const isAdmin = roleResult.records[0]?.get("isAdmin") === true;
+if (isAdmin) {
+  return { success: true, message: "Admin portal user can view all support tickets" };
+}
+
+queryModification.leadingMatchSegments.push(
+  `MATCH (portalSessionUser:User {uuid: $portalSessionUserUuid})`,
+  `MATCH (c:PublicSupportTicket)-[:PublicSupportTicketAssignee]->(portalSessionUser)`
+);
+queryModification.additionalQueryParameters.portalSessionUserUuid = sessionUserUuid;
+
+return { success: true, message: "Applied portal support ticket assignee scope to query" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

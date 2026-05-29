@@ -4,7 +4,9 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { confirmUserEmailAcrossPlatform } from "~/lib/auth/confirmUserEmailAcrossPlatform";
 import { hashPassword } from "~/lib/auth/password";
+import { assertUserCanChangePasswordLocally } from "~/lib/auth/systemUserPasswordChange";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 
@@ -41,11 +43,14 @@ export async function POST({ request }: APIEvent) {
 
       const userVertex = convertNodeToJson(userResult.records[0].get("u"));
 
+      assertUserCanChangePasswordLocally(userVertex, subDomain);
+
       // Update password and clear reset-related fields
       await tx.run(
         `MATCH (u:User {uuid: $uuid})
          SET u.password = $hashedPassword,
              u.salt = $salt,
+             u.emailConfirmed = true,
              u.resetOTP = null,
              u.resetOTPExpiry = null,
              u.resetOTPVerified = null,
@@ -66,6 +71,13 @@ export async function POST({ request }: APIEvent) {
       );
 
       return userVertex;
+    });
+
+    await confirmUserEmailAcrossPlatform({
+      dbSession,
+      email: user.P.email,
+      subDomain,
+      uuid: user.P.uuid,
     });
 
     // Send notification email

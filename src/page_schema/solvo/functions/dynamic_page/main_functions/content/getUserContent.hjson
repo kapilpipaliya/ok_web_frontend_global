@@ -305,6 +305,10 @@ if (queryModification.forceEmptyResult === true) {
   };
 }
 
+// beforeFetchData may set bypassUserScoping (e.g. portalFilesBeforeFetch for Admin on FilePortal).
+const effectiveEnableUserScoping =
+  queryModification.bypassUserScoping === true ? false : enableUserScoping;
+
 const combinedWhereConditions = whereConditions.concat(
   Array.isArray(queryModification.additionalWhereConditions)
     ? queryModification.additionalWhereConditions
@@ -335,7 +339,7 @@ const buildStandardContentMatch = () =>
 
 // Optimized query with indexed user lookup first and related vertices
 let query = "";
-if (!enableUserScoping) {
+if (!effectiveEnableUserScoping) {
   if (useRealCategoryGraphMatch) {
     query = `
     MATCH (cat:${parentVertexLabel})
@@ -432,7 +436,7 @@ await args.executeHooks(hooks?.afterFetchData, {
   showUnassigned,
   parentVertexLabel,
   toParentEdgeType,
-  enableUserScoping,
+  enableUserScoping: effectiveEnableUserScoping,
   result: result
 });
 

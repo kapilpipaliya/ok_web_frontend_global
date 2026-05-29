@@ -1,0 +1,175 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ConversationStatusBar
+      }
+    },
+    {
+      id: "2"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+}`;
+'''
+        props:
+          '''
+return {
+  as: "div",
+  hide: !args.fns.hasCredentials?.() || args.fns.isLoadingConversation?.()
+};'''
+      }
+    },
+    {
+      id: "3"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid ${args.theme.var.color.border};
+  background: transparent;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+        props:
+          '''
+const ticketState = args.fns.getTicketState?.() || {};
+const showForm = args.fns.showInternalNoteForm?.() === true;
+return {
+  as: "button",
+  type: "button",
+  hide: !ticketState.canShowInternalNoteTools,
+  text: showForm ? "Cancel note" : "Add internal note",
+  onClick: () => args.fns.setShowInternalNoteForm?.(!showForm)
+};'''
+      }
+    },
+    {
+      id: "4"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''
+const capabilities = args.fns.getCapabilities?.() || {};
+return capabilities.useTokenAuth
+  ? `._id {
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: transparent;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  margin-left: auto;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`
+  : `._id {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid ${args.theme.var.color.error};
+  background: transparent;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.error};
+  cursor: pointer;
+  margin-left: auto;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`;
+'''
+        props:
+          '''
+const ticket = args.fns.ticketVertex?.();
+const ticketState = args.fns.getTicketState?.() || {};
+const capabilities = args.fns.getCapabilities?.() || {};
+const hideForCustomer = capabilities.useTokenAuth && !ticketState.canCloseTicket;
+return {
+  as: "button",
+  type: "button",
+  hide: !ticket || hideForCustomer,
+  text: ticketState.isClosed && !capabilities.useTokenAuth ? "Closed" : "Close ticket",
+  disabled:
+    args.fns.isSendingReply?.() ||
+    args.fns.isBusyStatus?.() ||
+    (ticketState.isClosed && !capabilities.useTokenAuth),
+  onClick: () => void args.fns.closeTicket?.()
+};'''
+      }
+    },
+    {
+      id: "5"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 3
+        css:
+          '''
+return `._id {
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: transparent;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`;
+'''
+        props:
+          '''
+const ticket = args.fns.ticketVertex?.();
+const ticketState = args.fns.getTicketState?.() || {};
+return {
+  as: "button",
+  type: "button",
+  hide: !ticket || !ticketState.canReopenTicket,
+  text: "Reopen ticket",
+  disabled: args.fns.isBusyStatus?.(),
+  onClick: () => void args.fns.reopenTicket?.()
+};'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+  ]
+}

@@ -107,7 +107,7 @@ return {
           '''return {
   as: "meta",
   property: "og:title",
-  content: "Attendra – Staff Time & Shift Tracking"
+  content: "Solvo – Support Tickets & Helpdesk"
 }'''
       }
     }
@@ -135,7 +135,7 @@ return {
           '''return {
   as: "meta",
   property: "og:url",
-  content: "https://attendra.decodecommerce.com" + (args.location?.pathname || "/")
+  content: "https://solvo.decodecommerce.com" + (args.location?.pathname || "/")
 }'''
       }
     }
@@ -149,7 +149,7 @@ return {
           '''return {
   as: "link",
   rel: "canonical",
-  href: "https://attendra.decodecommerce.com" + (args.location?.pathname || "/")
+  href: "https://solvo.decodecommerce.com" + (args.location?.pathname || "/")
 }'''
       }
     }
@@ -163,7 +163,7 @@ return {
           '''return {
   as: "meta",
   property: "og:image",
-  content: "https://attendra.decodecommerce.com/api/file/download/attendra-og.png"
+  content: "https://solvo.decodecommerce.com/api/file/download/solvo-og.png"
 }'''
       }
     }

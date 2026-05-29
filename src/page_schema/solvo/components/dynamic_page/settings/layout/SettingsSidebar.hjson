@@ -29,12 +29,15 @@ const getVisibleGroups = () => {
 };
 
 const parseNavPath = (itemPath) => {
-  if (!itemPath) return { pathname: "", pageId: null };
+  if (!itemPath) return { pathname: "", sectionId: null };
   const qIndex = itemPath.indexOf("?");
-  if (qIndex === -1) return { pathname: itemPath, pageId: null };
+  if (qIndex === -1) return { pathname: itemPath, sectionId: null };
   const pathname = itemPath.slice(0, qIndex);
   const params = new URLSearchParams(itemPath.slice(qIndex + 1));
-  return { pathname, pageId: params.get("page") };
+  return {
+    pathname,
+    sectionId: params.get("section")
+  };
 };
 
 const isActivePath = (itemPath) => {
@@ -42,11 +45,8 @@ const isActivePath = (itemPath) => {
   if (!itemPath) return false;
 
   const parsed = parseNavPath(itemPath);
-  if (parsed.pageId) {
-    const onPath = currentPath === parsed.pathname;
-    if (!onPath) return false;
-    const currentPage = args.searchParams?.page || "general";
-    return currentPage === parsed.pageId;
+  if (parsed.sectionId) {
+    return currentPath === parsed.pathname && args.searchParams?.section === parsed.sectionId;
   }
 
   if (itemPath === currentPath) return true;

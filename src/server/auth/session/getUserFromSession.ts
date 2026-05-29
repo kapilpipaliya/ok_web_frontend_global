@@ -8,7 +8,6 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { getDriver } from "~/cypher/core/driver";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getAdminUser } from "~/cypher/permissions/utils/getAdminUser";
-import { isAppSubdomain } from "~/lib/appSubdomain";
 import { getShopify } from "~/lib/shopify/shopify.server";
 import {
   getDBSessionForShop,
@@ -23,8 +22,7 @@ export async function getSessionUser(): Promise<undefined | Vertex> {
   try {
     if (event) {
       try {
-        const urlObj = new URL(event.request.url);
-        if (isAppSubdomain(urlObj.hostname) && event.request.headers.get("authorization")) {
+        if (event.request.headers.get("authorization")) {
           // Authenticate with Shopify to get shop
           const { dbSession: authDbSession, subDomain } = await getDBSessionForSubdomain(event.request);
           try {

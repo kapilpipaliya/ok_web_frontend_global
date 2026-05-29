@@ -1,0 +1,109 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportReplyAsAdmin
+        description: Adds an admin/staff reply to a public support ticket and queues a customer notification.
+        body:
+          '''
+const { ticketId, serial, message, attachments } = args.contextData || {};
+const safeMessage = String(message || "").trim().slice(0, 8000);
+
+if (!safeMessage) {
+  return { success: false, message: "Reply message is required." };
+}
+
+const user = args.getUserFromSession ? await args.getUserFromSession() : null;
+if (!user) {
+  return { success: false, message: "Admin access is required." };
+}
+
+const authorEmail = String(user.P?.email || "support@localhost").slice(0, 320);
+const authorName = String(user.P?.name || user.P?.username || "Support").slice(0, 160);
+
+let result;
+if (ticketId) {
+  result = await args.session.run(
+    `
+    MATCH (t:PublicSupportTicket)
+    WHERE elementId(t) = $ticketId
+    CREATE (m:PublicSupportMessage {
+      ticketSerial: t.serial,
+      senderType: 'admin',
+      authorName: $authorName,
+      authorEmail: $authorEmail,
+      message: $message,
+      attachmentsJson: $attachmentsJson,
+      createdAt: $now,
+      updatedAt: $now
+    })
+    CREATE (t)-[:PublicSupportTicketMessage]->(m)
+    SET t.updatedAt = $now,
+        t.lastMessageAt = $now,
+        t.lastMessageSender = 'admin',
+        t.unreadForCustomer = coalesce(t.unreadForCustomer, 0) + 1
+    RETURN t, m
+    `,
+    { ticketId: String(ticketId), authorName, authorEmail, message: safeMessage, attachmentsJson: JSON.stringify(attachments || []), now: new Date().toISOString() }
+  );
+} else if (serial) {
+  result = await args.session.run(
+    `
+    MATCH (t:PublicSupportTicket {serial: $serial})
+    CREATE (m:PublicSupportMessage {
+      ticketSerial: t.serial,
+      senderType: 'admin',
+      authorName: $authorName,
+      authorEmail: $authorEmail,
+      message: $message,
+      attachmentsJson: $attachmentsJson,
+      createdAt: $now,
+      updatedAt: $now
+    })
+    CREATE (t)-[:PublicSupportTicketMessage]->(m)
+    SET t.updatedAt = $now,
+        t.lastMessageAt = $now,
+        t.lastMessageSender = 'admin',
+        t.unreadForCustomer = coalesce(t.unreadForCustomer, 0) + 1
+    RETURN t, m
+    `,
+    { serial: String(serial), authorName, authorEmail, message: safeMessage, attachmentsJson: JSON.stringify(attachments || []), now: new Date().toISOString() }
+  );
+} else {
+  return { success: false, message: "ticketId or serial is required." };
+}
+
+if (!result.records || result.records.length === 0) {
+  return { success: false, message: "Support ticket not found." };
+}
+
+const ticket = args.convertNodeToJson(result.records[0].get("t"));
+const reply = args.convertNodeToJson(result.records[0].get("m"));
+
+try {
+  await args.executeNamedServerFunction({
+    functionName: "publicSupportQueueNotification",
+    contextData: {
+      eventType: "admin_replied",
+      ticketId: ticket.id,
+      messageId: reply.id,
+      serial: ticket.P?.serial
+    }
+  });
+} catch (e) {
+  console.error("publicSupportReplyAsAdmin: failed to queue notification", e);
+}
+
+return {
+  success: true,
+  message: "Reply sent successfully.",
+  data: { ticket, reply }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

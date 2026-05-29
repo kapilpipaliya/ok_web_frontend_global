@@ -1,0 +1,112 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: ConversationInternalNoteComposer
+      }
+    },
+    {
+      id: "2"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}`;
+'''
+        props:
+          '''
+const ticketState = args.fns.getTicketState?.() || {};
+const showForm = args.fns.showInternalNoteForm?.() === true;
+return {
+  as: "div",
+  hide: !ticketState.canShowInternalNoteTools || !showForm
+};'''
+      }
+    },
+    {
+      id: "3"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        css:
+          '''
+return `._id {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.875rem;
+  resize: vertical;
+  color: ${args.theme.var.color.text};
+  background: ${args.theme.var.color.background_light_50};
+  min-width: 0;
+}`;
+'''
+        props:
+          '''return {
+  as: "textarea",
+  rows: 2,
+  placeholder: "Internal note (staff only, not visible to customer)...",
+  value: args.fns.internalNoteText?.() || "",
+  disabled: args.fns.isSendingInternalNote?.(),
+  onInput: (event) => args.fns.setInternalNoteText?.(event.currentTarget.value)
+};'''
+      }
+    },
+    {
+      id: "4"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        css:
+          '''
+return `._id {
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  border: none;
+  background: ${args.theme.var.color.background_dark_300};
+  color: ${args.theme.var.color.background_dark_300_text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-self: flex-end;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+._id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`;
+'''
+        props:
+          '''
+const isSending = args.fns.isSendingInternalNote?.();
+const hasText = Boolean((args.fns.internalNoteText?.() || "").trim());
+return {
+  as: "button",
+  type: "button",
+  text: isSending ? "Saving..." : "Save note",
+  disabled: isSending || !hasText,
+  onClick: () => void args.fns.addInternalNote?.()
+};'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+  ]
+}
