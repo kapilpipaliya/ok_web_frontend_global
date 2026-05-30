@@ -46,8 +46,8 @@ const result = await args.session.run(query, {
 });
 
 if (result.records.length === 0) {
-  // No user setting found, try to get default setting
-  const defaultKey = `${labelForSettings}_settings_default`;
+  // No user setting found, try default setting key derived from requested key
+  const defaultKey = settingKey.endsWith("_default") ? settingKey : `${settingKey}_default`;
   let defaultResult = await args.session.run(
     `MATCH (s:Setting {key: $defaultKey}) RETURN s LIMIT 1`,
     { defaultKey }

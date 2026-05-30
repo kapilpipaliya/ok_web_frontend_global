@@ -13,10 +13,10 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
-const SOURCE = path.join(ROOT, "src/page_schema/certpulse");
+const SOURCE = path.join(ROOT, "src/page_schema/attendra");
 
 /** Destination directory names under src/page_schema (each gets a full copy). */
-const DEST_NAMES = ["orvio", "decodefile", "extendfiles", "workshopflow", "hydrateme", "decodeproduct", "storetasks", "attendra", "ytorganizer", "solvo"];
+const DEST_NAMES = ["solvo"];
 
 const SKIP_DIRS = [
   //"functions",
@@ -31,14 +31,10 @@ const SKIP_DIRS = [
   "pages/shopify/product",
   "functions/dynamic_page/main_functions/migration",
 
-  "components/portal",
-  "functions/jobs",
-  "pages/shopify/admin",
-  "pages/portal",
-  "functions/app",
 
-  "functions/dynamic_page/main_functions/certpulse",
-  "pages/certpulse",
+ 
+
+ 
   
 ];
 

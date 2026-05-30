@@ -1,0 +1,352 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardWidgetShell
+        fns:
+          '''
+const getWidgetConfig = () => args.contextData.props?.widgetConfig || null;
+const getRuntime = () => {
+  const fromProps = args.contextData.props?.dashboardRuntime;
+  if (typeof fromProps === "function") return fromProps();
+  return null;
+};
+
+const getWidgetUi = () => {
+  const widgetConfig = getWidgetConfig();
+  const runtime = getRuntime();
+  if (!widgetConfig || !runtime?.store) return { loading: true };
+  const state = runtime.store.getWidgetState(widgetConfig.id) || { loading: true };
+  return {
+    ...state,
+    widgetStateVertexId: runtime.store.getWidgetStateVertexId(widgetConfig.id)
+  };
+};
+
+const isCrudWidget = () => getWidgetConfig()?.type === "crudTable";
+
+const isEditMode = () => {
+  const runtime = getRuntime();
+  return runtime?.isEditMode?.() === true;
+};
+
+const canHideWidgets = () => {
+  const runtime = getRuntime();
+  return isEditMode() && runtime?.config?.personalization?.allowHideWidgets === true;
+};
+
+const isWidgetHidden = () => {
+  const widgetConfig = getWidgetConfig();
+  const runtime = getRuntime();
+  if (!widgetConfig || !runtime) return false;
+  return runtime.isWidgetHidden?.(widgetConfig.id) === true;
+};
+
+const toggleWidgetHidden = () => {
+  const widgetConfig = getWidgetConfig();
+  const runtime = getRuntime();
+  if (!widgetConfig || !runtime?.runtimeApi?.toggleWidgetHidden) return;
+  const hidden = runtime.isWidgetHidden?.(widgetConfig.id) === true;
+  runtime.runtimeApi.toggleWidgetHidden(widgetConfig.id, !hidden);
+};
+
+const refreshWidget = async () => {
+  const widgetConfig = getWidgetConfig();
+  const runtime = getRuntime();
+  if (!widgetConfig || !runtime?.runtimeApi) return;
+  if (isCrudWidget()) {
+    runtime.runtimeApi.refreshCrudWidget(widgetConfig.id);
+    return;
+  }
+  await runtime.runtimeApi.refreshWidget(widgetConfig.id, {
+    reason: "manual_refresh",
+    bypassCache: true
+  });
+};
+
+return {
+  getWidgetConfig,
+  getRuntime,
+  getWidgetUi,
+  isCrudWidget,
+  isEditMode,
+  canHideWidgets,
+  isWidgetHidden,
+  toggleWidgetHidden,
+  refreshWidget
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: widget_shell_root
+        props:
+          '''
+return { as: "section" };
+'''
+        css:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const theme = widgetConfig?.theme || {};
+const surface = theme.surface === "subdued"
+  ? args.theme.var.color.background_light_100
+  : args.theme.var.color.background;
+const hiddenInEdit =
+  args.fns.isEditMode?.() === true && args.fns.isWidgetHidden?.() === true;
+return `._id {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  background: ${surface};
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  overflow: hidden;
+  ${hiddenInEdit ? `
+    opacity: 0.55;
+    border-style: dashed;
+  ` : ""}
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: widget_shell_header
+        props:
+          '''
+return { as: "header" };
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+return {
+  as: "h3",
+  text: widgetConfig?.title || widgetConfig?.id || "Widget"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "11"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  hide: !args.fns.canHideWidgets?.(),
+  text: args.fns.isWidgetHidden?.() ? "Show" : "Hide",
+  onClick: () => args.fns.toggleWidgetHidden?.()
+};
+'''
+        css:
+          '''
+return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.text};
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  text: "Refresh",
+  onClick: () => { void args.fns.refreshWidget(); }
+};
+'''
+        css:
+          '''
+return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: widget_shell_body
+        props:
+          '''
+return { as: "div" };
+'''
+        css:
+          '''
+const isCrud = args.fns.isCrudWidget?.() === true;
+return `._id {
+  position: relative;
+  flex: 1;
+  min-height: 6rem;
+  padding: ${isCrud ? "0" : "0.75rem 1rem 1rem"};
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+const ui = args.fns.getWidgetUi();
+const isCrud = args.fns.isCrudWidget?.() === true;
+return {
+  size: "small",
+  color: "primary",
+  hide: isCrud || ui.loading !== true
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const ui = args.fns.getWidgetUi();
+const isCrud = args.fns.isCrudWidget?.() === true;
+return {
+  as: "p",
+  hide: isCrud || !ui.error,
+  text: ui.error || ""
+};
+'''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const ui = args.fns.getWidgetUi();
+const isCrud = args.fns.isCrudWidget?.() === true;
+return {
+  as: "p",
+  hide: isCrud || ui.loading === true || ui.error || ui.empty !== true,
+  text: "No data"
+};
+'''
+        css:
+          '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: DashboardWidgetRenderer
+        key: widget_renderer
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const runtime = args.fns.getRuntime();
+return {
+  widgetConfig,
+  dashboardRuntime: () => runtime
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e10", T: "Attr", S: "3", E: "11" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+    { id: "e7", T: "Attr", S: "6", E: "8" }
+    { id: "e8", T: "Attr", S: "6", E: "9" }
+    { id: "e9", T: "Attr", S: "6", E: "10" }
+  ]
+}

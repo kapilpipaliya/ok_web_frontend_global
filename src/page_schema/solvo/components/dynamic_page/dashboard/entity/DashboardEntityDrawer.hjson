@@ -1,0 +1,200 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardEntityDrawer
+        dynamicComponent: EntityRuntimeHost
+        fns:
+          '''
+const getRuntime = () => {
+  const fromProps = args.contextData.props?.dashboardRuntime;
+  if (typeof fromProps === "function") return fromProps();
+  return null;
+};
+
+const getDrawerState = () => {
+  const runtime = getRuntime();
+  return runtime?.store?.getSession?.()?.entityDrawer || { open: false };
+};
+
+const closeDrawer = () => {
+  getRuntime()?.runtimeApi?.closeEntityDrawer?.();
+};
+
+const getFullPageHref = () => {
+  const state = getDrawerState();
+  const runtime = getRuntime();
+  const profile = runtime?.config?.entityDrawer?.entityProfiles?.[state.entityType] || {};
+  let href = profile.fullPageHref || "";
+  if (!href || !state.entityId) return null;
+  href = String(href).replace(/\{\{entityId\}\}/g, String(state.entityId));
+  return href;
+};
+
+return { getRuntime, getDrawerState, closeDrawer, getFullPageHref };
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: drawer_backdrop
+        props:
+          '''
+return {
+  as: "div",
+  hide: args.fns.getDrawerState().open !== true,
+  onClick: () => args.fns.closeDrawer()
+};
+'''
+        css:
+          '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: drawer_panel
+        props:
+          '''
+return {
+  as: "aside",
+  hide: args.fns.getDrawerState().open !== true,
+  onClick: (e) => e.stopPropagation()
+};
+'''
+        css:
+          '''
+return `._id {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 201;
+  width: min(520px, 100vw);
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+  border-left: 1px solid ${args.theme.var.color.border};
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+  animation: dashboardDrawerSlideIn 0.25s ease;
+}
+
+@keyframes dashboardDrawerSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const fullPageHref = args.fns.getFullPageHref?.();
+return {
+  as: "a",
+  hide: !fullPageHref,
+  href: fullPageHref || "#",
+  text: "Open full page",
+  onClick: (e) => {
+    if (fullPageHref) {
+      e?.preventDefault?.();
+      args.navigate(fullPageHref);
+    }
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 2;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "button",
+  type: "button",
+  text: "Close",
+  onClick: () => args.fns.closeDrawer()
+};
+'''
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: EntityRuntimeHost
+        key: drawer_entity_runtime
+        props:
+          '''
+return {
+  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  hideHeader: false,
+  onClose: () => args.fns.closeDrawer()
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e5", T: "Attr", S: "3", E: "6" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+  ]
+}

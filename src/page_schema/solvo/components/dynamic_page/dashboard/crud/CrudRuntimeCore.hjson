@@ -1,0 +1,166 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: CrudRuntimeCore
+        fns:
+          '''
+// Shared CRUD runtime (no page chrome) — used by DashboardCrudEmbed and future standalone embeds.
+const getWidgetConfig = () => args.contextData.props?.widgetConfig || null;
+const getRuntime = () => {
+  const fromProps = args.contextData.props?.dashboardRuntime;
+  if (typeof fromProps === "function") return fromProps();
+  return null;
+};
+
+const getCrudConfigRef = () => {
+  const widgetConfig = getWidgetConfig();
+  return widgetConfig?.crudConfigRef || widgetConfig?.dataSource?.crudConfigRef || null;
+};
+
+const getTableVertexLabel = () => {
+  const ref = getCrudConfigRef();
+  return ref ? String(ref) : null;
+};
+
+const getTableSettingsLabel = () => getTableVertexLabel();
+const getWidgetId = () => String(getWidgetConfig()?.id || "crud_widget");
+
+const getWidgetStore = () => {
+  const runtime = getRuntime();
+  if (!runtime?.store) return null;
+  const widgetId = getWidgetId();
+  const state = runtime.store.getWidgetState(widgetId);
+  if (!state) {
+    runtime.store.patchWidgetState(widgetId, {
+      filters: {},
+      sorting: { column: null, direction: null },
+      pagination: { page: 1, pageSize: 25 },
+      selection: [],
+      expandedRows: {},
+      viewMode: "table",
+      loading: false,
+      error: null
+    });
+  }
+  return runtime.store.getWidgetState(widgetId) || {};
+};
+
+const getTableMode = () => {
+  const mode = args.contextData.props?.mode || args.contextData.props?.tableMode;
+  return mode === "embedded" || args.contextData.props?.embeddedMode === true ? "embedded" : "standalone";
+};
+
+const isEmbeddedMode = () => getTableMode() === "embedded";
+
+const composeWidgetQuery = () => {
+  const runtime = getRuntime();
+  const widgetConfig = getWidgetConfig();
+  const widgetStore = getWidgetStore();
+  if (runtime?.composeWidgetQuery && widgetConfig) {
+    const composed = runtime.composeWidgetQuery(widgetConfig);
+    return {
+      ...composed,
+      search: widgetStore?.search || "",
+      neqFilters: (widgetConfig?.queryOverrides?.filters || []).filter((row) => row?.operator === "neq")
+    };
+  }
+  return { filters: {}, sort: { column: null, direction: null }, limit: null, search: "", neqFilters: [] };
+};
+
+const applyNeqFilters = (rows, neqFilters) => {
+  if (!Array.isArray(rows) || !Array.isArray(neqFilters) || neqFilters.length === 0) return rows;
+  return rows.filter((row) => {
+    for (let index = 0; index < neqFilters.length; index++) {
+      const rule = neqFilters[index];
+      if (!rule?.field) continue;
+      const value = row?.P?.[rule.field];
+      if (String(value) === String(rule.value)) return false;
+    }
+    return true;
+  });
+};
+
+const dispatchRowInteraction = (interaction, row) => {
+  const runtime = getRuntime();
+  const widgetConfig = getWidgetConfig();
+  if (!runtime || !interaction) return;
+  const payload = { ...(interaction.payload || {}), row };
+  const action = String(interaction.action || interaction.type || "").toUpperCase();
+  if (action === "NAVIGATE") {
+    let href = payload.href || interaction.to;
+    if (href && row && args.dashboardPlatform?.interaction?.substitutePayload) {
+      href = args.dashboardPlatform.interaction.substitutePayload(
+        { href },
+        { row }
+      ).href;
+    } else if (href && row) {
+      href = String(href).replace(/\{\{row\.id\}\}/g, String(row.id || ""));
+    }
+    if (href) args.navigate(href);
+    return;
+  }
+  if (action === "OPEN_ENTITY_DRAWER") {
+    const drawerPayload = args.dashboardPlatform?.interaction?.substitutePayload
+      ? args.dashboardPlatform.interaction.substitutePayload(payload, { row })
+      : payload;
+    if (runtime.platformApi?.openEntity) {
+      void runtime.platformApi.openEntity(drawerPayload);
+      return;
+    }
+    if (runtime.runtimeApi?.dispatchInteraction) {
+      void runtime.runtimeApi.dispatchInteraction({
+        type: "OPEN_ENTITY_DRAWER",
+        sourceWidgetId: getWidgetId(),
+        payload: drawerPayload
+      });
+    }
+    return;
+  }
+  if (runtime.platformApi?.dispatchInteraction) {
+    void runtime.platformApi.dispatchInteraction({
+      type: "ROW_SELECTED",
+      sourceWidgetId: getWidgetId(),
+      payload: { row }
+    });
+  }
+  runtime.handleWidgetInteraction(widgetConfig, interaction, { row });
+};
+
+const dispatchRowSelected = (row) => {
+  const runtime = getRuntime();
+  const dispatch = runtime?.platformApi?.dispatchInteraction || runtime?.runtimeApi?.dispatchInteraction;
+  if (!dispatch) return;
+  void dispatch({
+    type: "ROW_SELECTED",
+    sourceWidgetId: getWidgetId(),
+    payload: { row }
+  });
+};
+
+return {
+  getWidgetConfig,
+  getRuntime,
+  getWidgetId,
+  getWidgetStore,
+  getCrudConfigRef,
+  getTableVertexLabel,
+  getTableSettingsLabel,
+  getTableMode,
+  isEmbeddedMode,
+  composeWidgetQuery,
+  applyNeqFilters,
+  dispatchRowInteraction,
+  dispatchRowSelected,
+  getLoadFromSetting: () => true,
+  hasSidebar: () => false,
+  getEmbeddedMode: () => isEmbeddedMode()
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

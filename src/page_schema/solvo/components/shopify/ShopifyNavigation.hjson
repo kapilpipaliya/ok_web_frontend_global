@@ -38,6 +38,21 @@
       }
     }
     {
+      id: "nav_overview"
+      L: Attr
+      P: {
+        displayOrder: 1.5
+        componentName: Html
+        key: unique_overview
+        props:
+          '''return {
+  as: "s-link",
+  href: "/overview",
+  text: "Overview"
+}'''
+      }
+    }
+    {
       id: "12"
       L: Attr
       P: {
@@ -278,6 +293,12 @@
       T: Attr
       S: "3"
       E: "4"
+    }
+    {
+      id: e_nav_overview
+      T: Attr
+      S: "3"
+      E: "nav_overview"
     }
     {
       id: e4

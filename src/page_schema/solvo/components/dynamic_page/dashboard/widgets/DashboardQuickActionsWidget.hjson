@@ -1,0 +1,73 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardQuickActionsWidget
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const widgetConfig = args.contextData.props?.widgetConfig || {};
+const actions = Array.isArray(widgetConfig.actions) ? widgetConfig.actions : [];
+return {
+  as: "div",
+  loop: true,
+  contextName: "quickAction",
+  data: actions
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const action = args.contextData.quickAction;
+return {
+  as: "button",
+  text: action.label || action.key || "Action",
+  onClick: () => {
+    if (action.to) args.navigate(action.to);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardFilterBar
+        dynamicComponent: TomSelect
+        fns:
+          '''
+const getRuntime = () => args.contextData.props?.dashboardRuntime?.() || null;
+
+const DATE_RANGE_OPTIONS = [
+  { value: "last_7_days", label: "Last 7 days" },
+  { value: "last_30_days", label: "Last 30 days" },
+  { value: "last_90_days", label: "Last 90 days" },
+  { value: "last_year", label: "Last year" }
+];
+
+const applyFilter = (filterKey, value) => {
+  const runtime = getRuntime();
+  if (!runtime?.store) return;
+  runtime.store.setFilters({ ...runtime.store.filters(), [filterKey]: value });
+  void runtime.runtimeApi.refreshAllWidgets();
+};
+
+const applyTimeRange = (value) => {
+  const runtime = getRuntime();
+  if (!runtime?.store) return;
+  runtime.store.setTimeRange(value);
+  void runtime.runtimeApi.refreshAllWidgets();
+};
+
+const getSelectOptions = (filter) => {
+  if (Array.isArray(filter.options) && filter.options.length > 0) {
+    return filter.options.map((row) => ({
+      value: row.value != null ? String(row.value) : "",
+      label: row.label != null ? String(row.label) : String(row.value)
+    }));
+  }
+  return [];
+};
+
+return {
+  getRuntime,
+  applyFilter,
+  applyTimeRange,
+  getSelectOptions,
+  DATE_RANGE_OPTIONS
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+const filters = runtime?.config?.filters || [];
+return {
+  as: "div",
+  hide: filters.length === 0,
+  loop: true,
+  contextName: "filterItem",
+  data: filters
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_100};
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const filter = args.contextData.filterItem;
+return {
+  as: "label",
+  text: `${filter.label || filter.key}:`
+};
+'''
+        css:
+          '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  min-width: 5rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: TomSelect
+        key: filter_tomselect
+        props:
+          '''
+const filter = args.contextData.filterItem;
+const runtime = args.fns.getRuntime();
+const current = runtime?.store?.filters?.()[filter.key];
+const options = args.fns.getSelectOptions(filter);
+const displayValue =
+  current == null || current === ""
+    ? []
+    : Array.isArray(current)
+      ? current
+      : [String(current)];
+return {
+  hide: filter.type !== "select",
+  value: displayValue,
+  options,
+  search: options.length > 10,
+  multiple: filter.multiple === true,
+  onChange: (newValue) => {
+    let value = newValue;
+    if (Array.isArray(newValue)) {
+      value = filter.multiple === true ? newValue : newValue[0];
+    }
+    args.fns.applyFilter(filter.key, value === "" ? undefined : value);
+  }
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: TomSelect
+        key: filter_date_range
+        props:
+          '''
+const filter = args.contextData.filterItem;
+const runtime = args.fns.getRuntime();
+const current = runtime?.store?.timeRange?.() || filter.default || "last_30_days";
+return {
+  hide: filter.type !== "dateRange",
+  value: [String(current)],
+  options: args.fns.DATE_RANGE_OPTIONS,
+  search: false,
+  multiple: false,
+  onChange: (newValue) => {
+    const value = Array.isArray(newValue) ? newValue[0] : newValue;
+    if (value) args.fns.applyTimeRange(String(value));
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "2", E: "4" }
+    { id: "e4", T: "Attr", S: "2", E: "5" }
+  ]
+}

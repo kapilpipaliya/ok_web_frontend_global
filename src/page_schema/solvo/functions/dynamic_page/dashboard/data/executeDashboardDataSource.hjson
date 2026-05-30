@@ -1,0 +1,481 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: executeDashboardDataSource
+        description: Executes abstract dashboard dataSource queries (no raw Cypher from client). Returns adapter-shaped widget data.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Authentication required", data: null };
+}
+
+await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+const {
+  widgetId,
+  widgetType,
+  dataSource,
+  dashboardFilters = {},
+  dashboardKey,
+  enableUserScoping,
+  timeRange,
+  widgetTrend,
+  timestampField: timestampFieldInput
+} = args.contextData || {};
+
+const RESERVED_FILTER_KEYS = new Set(["dateRange"]);
+
+const TIME_RANGE_MS = {
+  last_7_days: 7 * 24 * 60 * 60 * 1000,
+  last_30_days: 30 * 24 * 60 * 60 * 1000,
+  last_90_days: 90 * 24 * 60 * 60 * 1000,
+  last_year: 365 * 24 * 60 * 60 * 1000
+};
+
+const resolveTimeRangeSince = (preset) => {
+  const key = String(preset || "").trim();
+  const ms = TIME_RANGE_MS[key];
+  if (!ms) return null;
+  return new Date(Date.now() - ms).toISOString();
+};
+
+if (!dataSource || typeof dataSource !== "object") {
+  return { success: false, message: "dataSource is required", data: null };
+}
+
+const sourceType = String(dataSource.type || "static");
+
+const sanitizeLabel = (value) => {
+  if (value == null) return null;
+  const label = String(value).trim();
+  if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(label)) return null;
+  return label;
+};
+
+const sanitizeField = (value) => {
+  if (value == null) return null;
+  const field = String(value).trim();
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(field)) return null;
+  return field;
+};
+
+const mergeFilters = (queryFilters, runtimeFilters) => {
+  const merged = [];
+  if (Array.isArray(queryFilters)) merged.push(...queryFilters);
+  if (runtimeFilters && typeof runtimeFilters === "object") {
+    for (const key in runtimeFilters) {
+      if (!Object.prototype.hasOwnProperty.call(runtimeFilters, key)) continue;
+      if (RESERVED_FILTER_KEYS.has(key)) continue;
+      const value = runtimeFilters[key];
+      if (value == null || value === "") continue;
+      merged.push({ field: key, operator: "eq", value });
+    }
+  }
+  return merged;
+};
+
+const appendTimeRangeWhere = (whereParts, params, timeRangePreset, timestampField) => {
+  const field = sanitizeField(timestampField || "updatedAt");
+  if (!field) return;
+  const sinceIso = resolveTimeRangeSince(timeRangePreset);
+  if (!sinceIso) return;
+  params.timeRangeSince = sinceIso;
+  whereParts.push(`v.${field} >= datetime($timeRangeSince)`);
+};
+
+const compileAbstractQuery = (queryConfig, runtimeFilters, options) => {
+  const rootVertex = sanitizeLabel(queryConfig?.rootVertex || queryConfig?.vertex);
+  if (!rootVertex) return null;
+
+  const filters = mergeFilters(queryConfig?.filters, runtimeFilters);
+  const whereParts = [];
+  const params = { rootVertex };
+
+  appendTimeRangeWhere(
+    whereParts,
+    params,
+    options?.timeRange,
+    options?.timestampField || queryConfig?.timestampField
+  );
+
+  for (let filterIndex = 0; filterIndex < filters.length; filterIndex++) {
+    const filter = filters[filterIndex];
+    const field = sanitizeField(filter?.field);
+    if (!field) continue;
+    const paramKey = `f_${filterIndex}`;
+    const operator = String(filter?.operator || "eq");
+    if (operator === "eq") {
+      whereParts.push(`v.${field} = $${paramKey}`);
+      params[paramKey] = filter.value;
+    } else if (operator === "neq") {
+      whereParts.push(`v.${field} <> $${paramKey}`);
+      params[paramKey] = filter.value;
+    } else if (operator === "in" && Array.isArray(filter.value)) {
+      whereParts.push(`v.${field} IN $${paramKey}`);
+      params[paramKey] = filter.value;
+    } else if (operator === "gt") {
+      whereParts.push(`v.${field} > $${paramKey}`);
+      params[paramKey] = filter.value;
+    } else if (operator === "gte") {
+      whereParts.push(`v.${field} >= $${paramKey}`);
+      params[paramKey] = filter.value;
+    } else if (operator === "lt") {
+      whereParts.push(`v.${field} < $${paramKey}`);
+      params[paramKey] = filter.value;
+    } else if (operator === "lte") {
+      whereParts.push(`v.${field} <= $${paramKey}`);
+      params[paramKey] = filter.value;
+    } else if (operator === "contains" || operator === "like") {
+      whereParts.push(`toLower(toString(v.${field})) CONTAINS toLower($${paramKey})`);
+      params[paramKey] = String(filter.value ?? "");
+    } else if (operator === "startsWith") {
+      whereParts.push(`toLower(toString(v.${field})) STARTS WITH toLower($${paramKey})`);
+      params[paramKey] = String(filter.value ?? "");
+    } else if (operator === "isNull") {
+      whereParts.push(`v.${field} IS NULL`);
+    } else if (operator === "isNotNull") {
+      whereParts.push(`v.${field} IS NOT NULL`);
+    } else if (operator === "between" && Array.isArray(filter.value) && filter.value.length >= 2) {
+      whereParts.push(`v.${field} >= $${paramKey}_from AND v.${field} <= $${paramKey}_to`);
+      params[`${paramKey}_from`] = filter.value[0];
+      params[`${paramKey}_to`] = filter.value[1];
+    }
+  }
+
+  const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
+  const aggregation = queryConfig?.aggregation || (Array.isArray(queryConfig?.aggregations) ? queryConfig.aggregations[0] : null);
+
+  if (aggregation?.type === "count") {
+    return {
+      query: `MATCH (v:${rootVertex}) ${whereClause} RETURN count(v) AS value`,
+      params,
+      mode: "aggregate"
+    };
+  }
+
+  const limit = Math.min(Number(queryConfig?.limit || 100), 500);
+  const sort = Array.isArray(queryConfig?.sort) && queryConfig.sort.length > 0 ? queryConfig.sort[0] : null;
+  const sortField = sanitizeField(sort?.field);
+  const sortClause = sortField ? `ORDER BY v.${sortField} ${sort?.direction === "asc" ? "ASC" : "DESC"}` : "";
+
+  return {
+    query: `MATCH (v:${rootVertex}) ${whereClause} RETURN v ${sortClause} LIMIT ${limit}`,
+    params,
+    mode: "rows",
+    groupByField: sanitizeField(queryConfig?.groupBy?.[0]?.field || queryConfig?.groupBy)
+  };
+};
+
+const applyTransforms = (rows, transforms) => {
+  if (!Array.isArray(transforms) || transforms.length === 0) return rows;
+  let next = rows;
+  for (let transformIndex = 0; transformIndex < transforms.length; transformIndex++) {
+    const transform = transforms[transformIndex];
+    if (!transform || !transform.type) continue;
+    if (transform.type === "groupBy" && transform.field && Array.isArray(next)) {
+      const field = transform.field;
+      const grouped = {};
+      for (let rowIndex = 0; rowIndex < next.length; rowIndex++) {
+        const row = next[rowIndex];
+        const key = row?.P?.[field] ?? row?.[field] ?? "unknown";
+        if (!grouped[key]) grouped[key] = 0;
+        grouped[key] += 1;
+      }
+      next = Object.keys(grouped).map((key) => ({ key, value: grouped[key] }));
+    }
+  }
+  return next;
+};
+
+const adaptForWidget = (widgetType, payload) => {
+  const type = String(widgetType || "");
+  if (type === "metricCard") {
+    const value =
+      payload.aggregate != null
+        ? payload.aggregate
+        : Array.isArray(payload.rows)
+          ? payload.rows.length
+          : 0;
+    const out = {
+      value,
+      rows: payload.rows || []
+    };
+    if (payload.trend && typeof payload.trend === "object") {
+      out.trend = payload.trend;
+    }
+    return out;
+  }
+  if (type === "chart") {
+    const rows = Array.isArray(payload.rows) ? payload.rows : [];
+    const labels = [];
+    const values = [];
+    for (let index = 0; index < rows.length; index++) {
+      const row = rows[index];
+      if (row?.key != null) {
+        labels.push(String(row.key));
+        values.push(Number(row.value || 0));
+      } else if (row?.P) {
+        labels.push(String(row.P.status || row.P.key || row.id || index));
+        values.push(1);
+      }
+    }
+    return {
+      chart: {
+        labels,
+        datasets: [{ label: "Series", data: values }]
+      },
+      rows
+    };
+  }
+  if (type === "activityFeed" || type === "timeline" || type === "kanban") {
+    const rows = Array.isArray(payload.rows) ? payload.rows : [];
+    return { rows, count: rows.length };
+  }
+  return payload;
+};
+
+const ensureContextNodes = () => {
+  if (!args.context.nodes) args.context.nodes = {};
+  return args.context.nodes;
+};
+
+const staticRowsToVertices = (rows) => {
+  const nodes = ensureContextNodes();
+  const rowIds = [];
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    const row = rows[rowIndex];
+    if (row?.id && row?.P) {
+      nodes[row.id] = row;
+      rowIds.push(row.id);
+      continue;
+    }
+    const id = row?.id ? String(row.id) : `local:dashboard_static_row:${widgetId}:${rowIndex}`;
+    nodes[id] = {
+      id,
+      L: row?.L || ["DashboardStaticRow"],
+      P: row?.P || row || {},
+      IN: row?.IN || {},
+      OUT: row?.OUT || {}
+    };
+    rowIds.push(id);
+  }
+  return rowIds;
+};
+
+const createWidgetResultVertex = (presentation, rowVertexIds) => {
+  const nodes = ensureContextNodes();
+  const resultId = `local:dashboard_widget_result:${String(dashboardKey || "default")}:${String(widgetId || "widget")}:${Date.now()}`;
+  nodes[resultId] = {
+    id: resultId,
+    L: ["DashboardWidgetResult"],
+    P: {
+      widgetId,
+      dashboardKey,
+      widgetType: String(widgetType || ""),
+      value: presentation.value,
+      trend: presentation.trend,
+      chart: presentation.chart,
+      count: presentation.count,
+      crudConfigRef: presentation.crudConfigRef,
+      rowVertexIds
+    },
+    IN: {},
+    OUT: {}
+  };
+  return resultId;
+};
+
+const buildGraphFirstResult = (presentation, rowVertices, meta) => {
+  const rowIds = Array.isArray(rowVertices)
+    ? rowVertices.map((vertex) => vertex?.id).filter(Boolean)
+    : [];
+  const resultVertexId = createWidgetResultVertex(presentation, rowIds);
+  return {
+    success: true,
+    data: { resultVertexId, rowVertexIds: rowIds },
+    meta: meta || { widgetId, dashboardKey, rowCount: rowIds.length }
+  };
+};
+
+const UNSUPPORTED_SOURCE_TYPES = new Set([
+  "computed",
+  "pipeline",
+  "api",
+  "graphql",
+  "ai",
+  "realtime"
+]);
+
+const runAggregateCount = async (queryConfig, rangeOptions) => {
+  const built = compileAbstractQuery(queryConfig, dashboardFilters, rangeOptions);
+  if (!built || built.mode !== "aggregate") return 0;
+  const result = await args.session.run(built.query, built.params);
+  return Number(result.records[0]?.get("value") || 0);
+};
+
+const buildTrendPayload = (currentValue, previousValue) => {
+  const current = Number(currentValue || 0);
+  const previous = Number(previousValue || 0);
+  const delta = current - previous;
+  const deltaPercent =
+    previous === 0 ? (current > 0 ? 100 : 0) : Math.round((delta / previous) * 100);
+  return {
+    current,
+    previous,
+    delta,
+    deltaPercent,
+    direction: delta > 0 ? "up" : delta < 0 ? "down" : "flat"
+  };
+};
+
+const runNeo4jSource = async () => {
+  const queryConfig = dataSource.query || {};
+  const rangeOptions = {
+    timeRange,
+    timestampField: timestampFieldInput || queryConfig.timestampField
+  };
+  const built = compileAbstractQuery(queryConfig, dashboardFilters, rangeOptions);
+  if (!built) {
+    return { success: false, message: "Invalid abstract query", data: null };
+  }
+
+  const startedAt = Date.now();
+  const result = await args.session.run(built.query, built.params);
+  const durationMs = Date.now() - startedAt;
+
+  if (built.mode === "aggregate") {
+    const aggregateValue = Number(result.records[0]?.get("value") || 0);
+    let trend = null;
+    if (widgetTrend?.compareTo === "previous_period" && timeRange) {
+      const currentMs = TIME_RANGE_MS[String(timeRange).trim()];
+      if (currentMs) {
+        const previousPresetMs = currentMs;
+        const previousSince = new Date(Date.now() - previousPresetMs * 2).toISOString();
+        const previousUntil = new Date(Date.now() - previousPresetMs).toISOString();
+        const field = sanitizeField(rangeOptions.timestampField || "updatedAt");
+        if (field) {
+          const rootVertex = sanitizeLabel(queryConfig?.rootVertex || queryConfig?.vertex);
+          const filters = mergeFilters(queryConfig?.filters, dashboardFilters);
+          const whereParts = [
+            `v.${field} >= datetime($prevSince)`,
+            `v.${field} < datetime($prevUntil)`
+          ];
+          const params = { prevSince: previousSince, prevUntil: previousUntil };
+          for (let filterIndex = 0; filterIndex < filters.length; filterIndex++) {
+            const filter = filters[filterIndex];
+            const f = sanitizeField(filter?.field);
+            if (!f) continue;
+            const paramKey = `pf_${filterIndex}`;
+            const operator = String(filter?.operator || "eq");
+            if (operator === "eq") {
+              whereParts.push(`v.${f} = $${paramKey}`);
+              params[paramKey] = filter.value;
+            } else if (operator === "neq") {
+              whereParts.push(`v.${f} <> $${paramKey}`);
+              params[paramKey] = filter.value;
+            }
+          }
+          const prevQuery = `MATCH (v:${rootVertex}) WHERE ${whereParts.join(" AND ")} RETURN count(v) AS value`;
+          const prevResult = await args.session.run(prevQuery, params);
+          const previousValue = Number(prevResult.records[0]?.get("value") || 0);
+          trend = buildTrendPayload(aggregateValue, previousValue);
+        }
+      }
+    }
+    const adapted = adaptForWidget(widgetType, {
+      aggregate: aggregateValue,
+      rows: [],
+      trend
+    });
+    return buildGraphFirstResult(adapted, [], {
+      widgetId,
+      dashboardKey,
+      durationMs,
+      mode: "aggregate"
+    });
+  }
+
+  if (!args.context) {
+    return { success: false, message: "Server context unavailable", data: null };
+  }
+
+  const vertices = args.processResult(result.records, args.context, "v");
+  let rows = Array.isArray(vertices) ? vertices : [];
+  rows = applyTransforms(rows, dataSource.transform || []);
+
+  const adapted = adaptForWidget(widgetType, { aggregate: null, rows });
+  return buildGraphFirstResult(adapted, rows, {
+    widgetId,
+    dashboardKey,
+    durationMs,
+    mode: "rows",
+    rowCount: rows.length
+  });
+};
+
+const runStaticSource = () => {
+  if (!args.context) {
+    return { success: false, message: "Server context unavailable", data: null };
+  }
+  const rawRows = Array.isArray(dataSource.rows) ? dataSource.rows : [];
+  const rowIds = staticRowsToVertices(rawRows);
+  const nodes = ensureContextNodes();
+  const rowVertices = rowIds.map((rowId) => nodes[rowId]).filter(Boolean);
+  const adapted = adaptForWidget(widgetType, {
+    aggregate: dataSource.value != null ? Number(dataSource.value) : null,
+    rows: rowVertices
+  });
+  return buildGraphFirstResult(adapted, rowVertices, {
+    widgetId,
+    dashboardKey,
+    mode: "static",
+    rowCount: rowVertices.length
+  });
+};
+
+const runCrudSource = () => {
+  if (!args.context) {
+    return { success: false, message: "Server context unavailable", data: null };
+  }
+  const adapted = adaptForWidget(widgetType, {
+    crudConfigRef: dataSource.crudConfigRef || null,
+    rows: []
+  });
+  return buildGraphFirstResult(adapted, [], {
+    widgetId,
+    dashboardKey,
+    mode: "crud"
+  });
+};
+
+try {
+  if (sourceType === "static") return runStaticSource();
+  if (sourceType === "crud") return runCrudSource();
+  if (sourceType === "neo4j") return await runNeo4jSource();
+  if (UNSUPPORTED_SOURCE_TYPES.has(sourceType)) {
+    return {
+      success: false,
+      message: `Data source type "${sourceType}" is not implemented. Use neo4j, static, or crud.`,
+      data: null,
+      meta: { widgetId, dashboardKey, unsupportedType: sourceType }
+    };
+  }
+  return { success: false, message: `Unsupported dataSource type: ${sourceType}`, data: null };
+} catch (error) {
+  console.error("executeDashboardDataSource:", error);
+  return {
+    success: false,
+    message: error?.message || "Failed to execute dashboard data source",
+    data: null
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

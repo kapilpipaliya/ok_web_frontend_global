@@ -1,0 +1,60 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: loadDashboardPreference
+        description: Loads per-user dashboard preference state for a dashboard key.
+        body:
+          '''
+const user = await args.getUserFromSession();
+if (!user) {
+  return { success: false, message: "Authentication required", data: { state: null } };
+}
+
+const { dashboardKey } = args.contextData || {};
+if (!dashboardKey) {
+  return { success: false, message: "dashboardKey is required", data: { state: null } };
+}
+
+const userUuid = user.properties?.uuid || user.P?.uuid;
+const result = await args.session.run(
+  `
+  MATCH (u:User {uuid: $userUuid})-[:HAS_DASHBOARD_STATE]->(p:DashboardPreference {dashboardKey: $dashboardKey, userUuid: $userUuid})
+  RETURN p
+  LIMIT 1
+  `,
+  { userUuid, dashboardKey: String(dashboardKey) }
+);
+
+if (result.records.length === 0) {
+  return { success: true, data: { state: null } };
+}
+
+if (!args.context) {
+  return { success: false, message: "Server context unavailable", data: { state: null } };
+}
+
+const preferenceVertices = args.processResult(result.records, args.context, "p");
+const preference = preferenceVertices?.[0] || null;
+let parsedState = null;
+try {
+  parsedState = preference?.P?.state ? JSON.parse(preference.P.state) : null;
+} catch (error) {
+  parsedState = null;
+}
+
+return {
+  success: true,
+  data: {
+    state: parsedState,
+    preferenceVertexId: preference?.id || null
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

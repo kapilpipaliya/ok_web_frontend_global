@@ -1,0 +1,456 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: EntityRuntimeHost
+        dynamicComponent: FormManagement
+        fns:
+          '''
+// Entity runtime — container-agnostic (drawer, modal, page, split pane).
+const getRuntime = () => {
+  const fromProps = args.contextData.props?.dashboardRuntime;
+  if (typeof fromProps === "function") return fromProps();
+  return null;
+};
+
+const getEntityState = () => {
+  const runtime = getRuntime();
+  const fromProps = args.contextData.props?.entityState;
+  if (fromProps && typeof fromProps === "object") return fromProps;
+  return runtime?.store?.getSession?.()?.entityDrawer || { open: false };
+};
+
+const applyServerGraphToLocalGraph = (response) => {
+  const runtime = getRuntime();
+  const merge = runtime?.runtimeApi?.applyServerGraphToLocalGraph;
+  if (typeof merge === "function") {
+    merge(response);
+    return;
+  }
+  const graphPayload = response?.result?.graph ?? response?.graph;
+  if (!graphPayload?.vertexes) return;
+  const txnId = runtime?.txnId || runtime?.store?.txnId || 0;
+  args.setGraphData(txnId, graphPayload, {});
+};
+
+const executeYTO = async (functionName, contextData) => {
+  if (typeof args.fns.executeYTOFunction === "function") {
+    return args.fns.executeYTOFunction(functionName, contextData || {});
+  }
+  return args.executeNamedServerFunction({ functionName, contextData: contextData || {} });
+};
+
+let crudSettingsText = null;
+let memoizedConfig = null;
+let memoizedSettingsKey = null;
+
+const getCrudConfigRef = () => {
+  const state = getEntityState();
+  return state.crudConfigRef || state.entityType || null;
+};
+
+const loadTableSettings = async () => {
+  const label = getCrudConfigRef();
+  if (!label) return null;
+  const result = await executeYTO("getUserContentSetting", {
+    tableVertexLabel: label,
+    settingsLabel: label,
+    key: `${label}_settings`
+  });
+  const configText = result?.result?.data?.setting?.P?.config;
+  if (typeof configText === "string" && configText.trim() !== "") return configText;
+  return null;
+};
+
+const evaluateConfig = () => {
+  const label = getCrudConfigRef();
+  if (memoizedConfig && memoizedSettingsKey === label) return memoizedConfig;
+  const configText = crudSettingsText;
+  if (typeof configText === "string" && configText.trim() !== "") {
+    try {
+      const fn = new Function(configText);
+      const evaluated = fn();
+      if (evaluated && typeof evaluated === "object") {
+        memoizedConfig = evaluated;
+        memoizedSettingsKey = label;
+        return evaluated;
+      }
+    } catch (error) {
+      console.error("EntityRuntimeHost evaluateConfig:", error);
+    }
+  }
+  memoizedConfig = {};
+  return memoizedConfig;
+};
+
+const resolveEntityVertex = () => {
+  const state = getEntityState();
+  if (state.row) return state.row;
+  const entityId = state.entityId;
+  if (!entityId) return null;
+  return args.graph.vertexes[entityId] || null;
+};
+
+const getEntityProfile = () => {
+  const runtime = getRuntime();
+  const state = getEntityState();
+  return runtime?.config?.entityDrawer?.entityProfiles?.[state.entityType] || {};
+};
+
+const getTitle = () => {
+  const state = getEntityState();
+  if (state.title) return state.title;
+  const vertex = resolveEntityVertex();
+  const profile = getEntityProfile();
+  if (profile.titleField && vertex?.P?.[profile.titleField]) {
+    return String(vertex.P[profile.titleField]);
+  }
+  return state.entityType ? String(state.entityType) : "Details";
+};
+
+const getSubtitle = () => {
+  const vertex = resolveEntityVertex();
+  const profile = getEntityProfile();
+  if (profile.subtitleField && vertex?.P?.[profile.subtitleField]) {
+    return String(vertex.P[profile.subtitleField]);
+  }
+  return "";
+};
+
+const getFormMode = () => {
+  const state = getEntityState();
+  return state.view === "edit" ? "edit" : "view";
+};
+
+const loadEntityIfNeeded = async () => {
+  const runtime = getRuntime();
+  const state = getEntityState();
+  if (!state.open && !state.entityId) return;
+  if (state.row) return;
+  const entityId = state.entityId;
+  const crudConfigRef = getCrudConfigRef();
+  if (!entityId || !crudConfigRef) return;
+
+  const patch = (key, value) => {
+    if (!runtime?.store?.patchSession) return;
+    runtime.store.patchSession((session) => ({
+      ...session,
+      entityDrawer: {
+        ...(session.entityDrawer || {}),
+        [key]: value
+      }
+    }));
+  };
+
+  patch("loading", true);
+  patch("error", null);
+
+  try {
+    const config = evaluateConfig();
+    const result = await executeYTO("getUserContent", {
+      tableVertexLabel: crudConfigRef,
+      filters: { id: entityId },
+      tableSettingsLabel: crudConfigRef,
+      enableUserScoping: config?.enableUserScopingForContent === true,
+      hooks: config?.hooks
+    });
+    applyServerGraphToLocalGraph(result);
+    const rows = Array.isArray(result?.result?.data) ? result.result.data : [];
+    const row = rows.find((r) => String(r.id) === String(entityId)) || rows[0] || args.graph.vertexes[entityId];
+    if (row) {
+      patch("row", row);
+      const profile = getEntityProfile();
+      if (profile.titleField && row.P?.[profile.titleField]) {
+        patch("title", String(row.P[profile.titleField]));
+      }
+    } else {
+      patch("error", "Entity not found");
+    }
+  } catch (error) {
+    patch("error", error?.message || "Failed to load entity");
+  } finally {
+    patch("loading", false);
+  }
+};
+
+const publishEntityMutation = (mutationType) => {
+  const runtime = getRuntime();
+  const state = getEntityState();
+  const publish = runtime.platformApi?.publishMutation || runtime.runtimeApi?.publishMutation;
+  if (!publish) return;
+  void publish({
+    type: mutationType,
+    entityType: state.entityType,
+    entityId: state.entityId
+  });
+};
+
+return {
+  getRuntime,
+  getEntityState,
+  getCrudConfigRef,
+  getEntityProfile,
+  loadTableSettings,
+  evaluateConfig,
+  resolveEntityVertex,
+  loadEntityIfNeeded,
+  getTitle,
+  getSubtitle,
+  getFormMode,
+  getFormConfig: () => evaluateConfig()?.formConfig || null,
+  getGenericSaveFunction: () => {
+    const crudConfigRef = getCrudConfigRef();
+    if (!crudConfigRef) return null;
+    return async ({ mode, data, originalRow }) => {
+      const config = evaluateConfig();
+      const operation = mode === "add" ? "create" : mode === "edit" ? "update" : "delete";
+      const result = await executeYTO("mutateUserContent", {
+        tableVertexLabel: crudConfigRef,
+        tableSettingsLabel: crudConfigRef,
+        operation,
+        data: mode === "delete" ? { vertex: originalRow, relationships: {} } : data,
+        enableUserScoping: config?.enableUserScopingForContent === true,
+        hooks: config?.hooks
+      });
+      applyServerGraphToLocalGraph(result);
+      const mutationType = operation === "create" ? "ENTITY_CREATED" : operation === "delete" ? "ENTITY_DELETED" : "ENTITY_UPDATED";
+      publishEntityMutation(mutationType);
+      return result?.result || { success: false };
+    };
+  }
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: entity_runtime_root
+        props:
+          '''
+const state = args.fns.getEntityState();
+const hideHeader = args.contextData.props?.hideHeader === true;
+return {
+  as: "div",
+  hide: state.open === false && !state.entityId,
+  onMount: async () => {
+    crudSettingsText = await args.fns.loadTableSettings();
+    memoizedConfig = null;
+    await args.fns.loadEntityIfNeeded();
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: entity_header
+        props:
+          '''
+return {
+  as: "header",
+  hide: args.contextData.props?.hideHeader === true
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return { as: "div", text: args.fns.getTitle() };
+'''
+        css:
+          '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const subtitle = args.fns.getSubtitle();
+return { as: "p", hide: !subtitle, text: subtitle };
+'''
+        css:
+          '''
+return `._id {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: entity_body
+        props:
+          '''
+return { as: "div" };
+'''
+        css:
+          '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem 1.5rem;
+  min-height: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+const state = args.fns.getEntityState();
+return { size: "medium", color: "primary", hide: state.loading !== true };
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const state = args.fns.getEntityState();
+return { as: "p", hide: !state.error, text: state.error || "" };
+'''
+        css:
+          '''
+return `._id { color: ${args.theme.var.color.error}; font-size: 0.875rem; }`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: FormManagement
+        props:
+          '''
+const state = args.fns.getEntityState();
+const vertex = args.fns.resolveEntityVertex();
+const formConfig = args.fns.getFormConfig();
+const wrapped = formConfig ? { ...formConfig, saveFunction: args.fns.getGenericSaveFunction() } : null;
+return {
+  hide: state.loading === true || !!state.error || !vertex || !wrapped,
+  formConfig: wrapped,
+  initialVertex: vertex,
+  mode: args.fns.getFormMode(),
+  vertexLabel: args.fns.getCrudConfigRef(),
+  inModal: true
+};
+'''
+      }
+    }
+    {
+      id: "10"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        props:
+          '''
+const state = args.fns.getEntityState();
+const profile = args.fns.getEntityProfile?.() || {};
+let href = profile.fullPageHref;
+if (href && state.entityId) {
+  href = String(href).replace(/\{\{entityId\}\}/g, String(state.entityId));
+}
+return {
+  as: "a",
+  hide: !href || state.loading === true,
+  text: "Open full page",
+  href,
+  onClick: (e) => {
+    if (!href) return;
+    e.preventDefault();
+    args.navigate(href);
+    args.contextData.props?.onClose?.();
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "3", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+    { id: "e7", T: "Attr", S: "6", E: "8" }
+    { id: "e8", T: "Attr", S: "6", E: "9" }
+    { id: "e9", T: "Attr", S: "6", E: "10" }
+  ]
+}

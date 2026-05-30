@@ -1,0 +1,57 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: saveDashboardPreference
+        description: Persists per-user dashboard layout and filter state (DashboardPreference vertex).
+        body:
+          '''
+const user = await args.getUserFromSession();
+if (!user) {
+  return { success: false, message: "Authentication required" };
+}
+
+const { dashboardKey, state } = args.contextData || {};
+if (!dashboardKey) {
+  return { success: false, message: "dashboardKey is required" };
+}
+
+const userUuid = user.properties?.uuid || user.P?.uuid;
+if (!userUuid) {
+  return { success: false, message: "User uuid missing" };
+}
+
+const stateJson = JSON.stringify(state || {});
+const now = new Date().toISOString();
+
+const result = await args.session.executeWrite(async (tx) => {
+  const write = await tx.run(
+    `
+    MATCH (u:User {uuid: $userUuid})
+    MERGE (u)-[:HAS_DASHBOARD_STATE]->(p:DashboardPreference {dashboardKey: $dashboardKey, userUuid: $userUuid})
+    SET p.state = $stateJson,
+        p.updatedAt = $now
+    RETURN p
+    `,
+    { userUuid, dashboardKey: String(dashboardKey), stateJson, now }
+  );
+  return write.records[0]?.get("p");
+});
+
+return {
+  success: true,
+  message: "Dashboard preference saved",
+  data: {
+    dashboardKey,
+    updatedAt: now,
+    preference: result ? args.convertNodeToJson(result) : null
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

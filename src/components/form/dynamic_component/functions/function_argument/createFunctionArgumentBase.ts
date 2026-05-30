@@ -57,6 +57,7 @@ import { klona } from "klona";
 import { z } from "zod";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { findVertexByLabelAndPks, findVertexByLabelAndUniqueId, findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
+import { createDashboardPlatform } from "~/lib/dashboard";
 // Following Untitled-1 (11-21, 12-13): also import `combine`, `GroupDropIndicator`, `liveRegion`, `type Instruction`, and `triggerPostMoveFlash` non-directly (no direct imports).
 // Only import drag-and-drop modules and related utilities on the client, using dynamic import assignment.
 
@@ -329,6 +330,8 @@ export function createFunctionArgumentBase(
     postAPI,
     /** Zod — same library as server/schema helpers; safe for use in `props`, `fns`, `css` bodies. */
     z,
+    /** Dashboard platform contracts (interaction, query AST, cache, invalidation). */
+    dashboardPlatform: createDashboardPlatform(),
     floatingUI,
     debounce,
     focusTrap,

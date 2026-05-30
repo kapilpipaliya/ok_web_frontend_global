@@ -1,0 +1,117 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardActivityFeedWidget
+        fns:
+          '''
+const getRows = () => {
+  const widgetData = args.contextData.props?.widgetData || {};
+  const rows = Array.isArray(widgetData.rows) ? widgetData.rows : [];
+  return rows.map((row) => {
+    const p = row?.P || {};
+    return {
+      id: row?.id,
+      title: p.title || p.ticketSerial || p.name || p.subject || row?.id || "Item",
+      subtitle: p.status || p.type || "",
+      time: p.updatedAt || p.createdAt || ""
+    };
+  });
+};
+return { getRows };
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const rows = args.fns.getRows();
+return {
+  as: "ul",
+  hide: rows.length === 0,
+  loop: true,
+  contextName: "feedItem",
+  data: rows
+};
+'''
+        css:
+          '''
+return `._id {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 100%;
+  overflow-y: auto;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const item = args.contextData.feedItem;
+return {
+  as: "li",
+  text: `${item.title}${item.subtitle ? " · " + item.subtitle : ""}${item.time ? " · " + item.time : ""}`
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text};
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const rows = args.fns.getRows();
+return {
+  as: "p",
+  hide: rows.length > 0,
+  text: "No activity"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "4" }
+    { id: "e3", T: "Attr", S: "2", E: "3" }
+  ]
+}

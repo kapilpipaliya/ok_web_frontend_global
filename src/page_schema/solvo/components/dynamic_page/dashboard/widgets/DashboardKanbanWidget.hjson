@@ -1,0 +1,161 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardKanbanWidget
+        fns:
+          '''
+const getColumns = () => {
+  const widgetConfig = args.contextData.props?.widgetConfig || {};
+  const widgetData = args.contextData.props?.widgetData || {};
+  const configured = Array.isArray(widgetConfig.kanbanColumns)
+    ? widgetConfig.kanbanColumns
+    : ["open", "pending", "closed"];
+  const groupField = widgetConfig.kanbanGroupField || "status";
+  const rows = Array.isArray(widgetData.rows) ? widgetData.rows : [];
+  const buckets = {};
+  for (let ci = 0; ci < configured.length; ci++) {
+    buckets[String(configured[ci])] = [];
+  }
+  for (let ri = 0; ri < rows.length; ri++) {
+    const row = rows[ri];
+    const key = String(row?.P?.[groupField] ?? "unknown");
+    if (!buckets[key]) buckets[key] = [];
+    buckets[key].push({
+      id: row?.id,
+      title: row?.P?.ticketSerial || row?.P?.title || row?.P?.name || row?.id || "Card"
+    });
+  }
+  return configured.map((colKey) => ({
+    key: String(colKey),
+    label: String(colKey),
+    cards: buckets[String(colKey)] || []
+  }));
+};
+return { getColumns };
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+return {
+  as: "div",
+  loop: true,
+  contextName: "kanbanColumn",
+  data: args.fns.getColumns()
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 10rem;
+  overflow-x: auto;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const col = args.contextData.kanbanColumn;
+return {
+  as: "section",
+  text: `${col.label} (${col.cards.length})`
+};
+'''
+        css:
+          '''
+return `._id {
+  flex: 1;
+  min-width: 8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const col = args.contextData.kanbanColumn;
+return {
+  as: "div",
+  loop: true,
+  contextName: "kanbanCard",
+  data: col.cards
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const card = args.contextData.kanbanCard;
+return {
+  as: "div",
+  text: card.title
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "2", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "4", E: "5" }
+  ]
+}

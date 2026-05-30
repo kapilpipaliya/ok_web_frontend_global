@@ -1,0 +1,411 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardCrudEmbed
+        dynamicComponent: Table,CrudRuntimeCore
+        fns:
+          '''
+// Embedded CRUD widget — CrudRuntimeCore + Table (embedded mode); dashboard-owned filters/state.
+const getRuntime = () => {
+  const fromProps = args.contextData.props?.dashboardRuntime;
+  if (typeof fromProps === "function") return fromProps();
+  return null;
+};
+
+const getWidgetConfig = () => args.contextData.props?.widgetConfig || null;
+
+const composeWidgetQuery = () => {
+  const runtime = getRuntime();
+  const widgetConfig = getWidgetConfig();
+  if (runtime?.composeWidgetQuery && widgetConfig) {
+    const composed = runtime.composeWidgetQuery(widgetConfig);
+    const widgetStore = runtime.store?.getWidgetState?.(widgetConfig.id) || {};
+    return {
+      ...composed,
+      search: widgetStore.search || "",
+      neqFilters: (widgetConfig?.queryOverrides?.filters || []).filter((row) => row?.operator === "neq")
+    };
+  }
+  return { filters: {}, sort: { column: null, direction: null }, limit: null, search: "", neqFilters: [] };
+};
+
+const executeYTO = async (functionName, contextData) => {
+  if (typeof args.fns.executeYTOFunction === "function") {
+    return args.fns.executeYTOFunction(functionName, contextData || {});
+  }
+  return args.executeNamedServerFunction({ functionName, contextData: contextData || {} });
+};
+
+const extractError = (result, showToast, defaultMessage) => {
+  if (!result) return defaultMessage;
+  if (result.error) {
+    if (showToast) args.showErrorToast?.(result.error);
+    return result.error;
+  }
+  if (result.result?.error) {
+    if (showToast) args.showErrorToast?.(result.result.error);
+    return result.result.error;
+  }
+  return null;
+};
+
+const applyServerGraphToLocalGraph = (response) => {
+  const runtime = getRuntime();
+  const merge = runtime?.runtimeApi?.applyServerGraphToLocalGraph;
+  if (typeof merge === "function") {
+    merge(response);
+    return;
+  }
+  const graphPayload = response?.result?.graph ?? response?.graph;
+  if (!graphPayload || typeof graphPayload !== "object") return;
+  const vertexes = graphPayload.vertexes || {};
+  const edges = graphPayload.edges || {};
+  const deleted_vertexes = graphPayload.deleted_vertexes;
+  const deleted_edges = graphPayload.deleted_edges;
+  const hasWork =
+    Object.keys(vertexes).length > 0 ||
+    Object.keys(edges).length > 0 ||
+    (Array.isArray(deleted_vertexes) && deleted_vertexes.length > 0) ||
+    (Array.isArray(deleted_edges) && deleted_edges.length > 0);
+  if (!hasWork) return;
+  const txnId = runtime?.txnId || runtime?.store?.txnId || 0;
+  args.setGraphData(txnId, { vertexes, edges, deleted_vertexes, deleted_edges }, {});
+};
+
+const getCrudConfigRef = () => {
+  const widgetConfig = getWidgetConfig();
+  return widgetConfig?.crudConfigRef || widgetConfig?.dataSource?.crudConfigRef || null;
+};
+
+const getTableVertexLabel = () => {
+  const ref = getCrudConfigRef();
+  return ref ? String(ref) : null;
+};
+
+const getTableSettingsLabel = () => getTableVertexLabel();
+
+const getWidgetId = () => String(getWidgetConfig()?.id || "crud_widget");
+
+const applyNeqFilters = (rows, neqFilters) => {
+  if (!Array.isArray(rows) || !Array.isArray(neqFilters) || neqFilters.length === 0) return rows;
+  return rows.filter((row) => {
+    for (let index = 0; index < neqFilters.length; index++) {
+      const rule = neqFilters[index];
+      if (!rule?.field) continue;
+      const value = row?.P?.[rule.field];
+      if (String(value) === String(rule.value)) return false;
+    }
+    return true;
+  });
+};
+
+const dispatchRowInteraction = (interaction, row) => {
+  const runtime = getRuntime();
+  const widgetConfig = getWidgetConfig();
+  if (!runtime || !interaction) return;
+  const payload = { ...(interaction.payload || {}), row };
+  const action = String(interaction.action || interaction.type || "").toUpperCase();
+  if (action === "NAVIGATE") {
+    let href = payload.href || interaction.to;
+    if (href && row && args.dashboardPlatform?.interaction?.substitutePayload) {
+      href = args.dashboardPlatform.interaction.substitutePayload({ href }, { row }).href;
+    } else if (href && row) {
+      href = String(href).replace(/\{\{row\.id\}\}/g, String(row.id || ""));
+    }
+    if (href) args.navigate(href);
+    return;
+  }
+  if (action === "OPEN_ENTITY_DRAWER") {
+    const drawerPayload = args.dashboardPlatform?.interaction?.substitutePayload
+      ? args.dashboardPlatform.interaction.substitutePayload(payload, { row })
+      : payload;
+    if (runtime.platformApi?.openEntity) {
+      void runtime.platformApi.openEntity(drawerPayload);
+      return;
+    }
+    if (runtime.runtimeApi?.dispatchInteraction) {
+      void runtime.runtimeApi.dispatchInteraction({
+        type: "OPEN_ENTITY_DRAWER",
+        sourceWidgetId: getWidgetId(),
+        payload: drawerPayload
+      });
+    }
+    return;
+  }
+  if (runtime.platformApi?.dispatchInteraction) {
+    void runtime.platformApi.dispatchInteraction({
+      type: "ROW_SELECTED",
+      sourceWidgetId: getWidgetId(),
+      payload: { row }
+    });
+  }
+  runtime.handleWidgetInteraction?.(widgetConfig, interaction, { row });
+};
+
+const dispatchRowSelected = (row) => {
+  const runtime = getRuntime();
+  const dispatch = runtime?.platformApi?.dispatchInteraction || runtime?.runtimeApi?.dispatchInteraction;
+  if (!dispatch) return;
+  void dispatch({
+    type: "ROW_SELECTED",
+    sourceWidgetId: getWidgetId(),
+    payload: { row }
+  });
+};
+
+let memoizedConfig = null;
+let memoizedSettingsKey = null;
+let crudSettingsText = null;
+
+const loadTableSettings = async () => {
+  const label = args.fns.getTableSettingsLabel?.();
+  if (!label) return null;
+  const result = await executeYTO("getUserContentSetting", {
+    tableVertexLabel: label,
+    settingsLabel: label,
+    key: `${label}_settings`
+  });
+  const errorMessage = extractError(result, false);
+  if (errorMessage) return null;
+  const configText = result?.result?.data?.setting?.P?.config;
+  if (typeof configText === "string" && configText.trim() !== "") return configText;
+  return null;
+};
+
+const evaluateConfig = () => {
+  const label = args.fns.getTableSettingsLabel?.();
+  if (memoizedConfig && memoizedSettingsKey === label) return memoizedConfig;
+  const configText = crudSettingsText;
+  if (typeof configText === "string" && configText.trim() !== "") {
+    try {
+      const fn = new Function(configText);
+      const evaluated = fn();
+      if (evaluated && typeof evaluated === "object") {
+        memoizedConfig = evaluated;
+        memoizedSettingsKey = label;
+        return evaluated;
+      }
+    } catch (error) {
+      console.error("DashboardCrudEmbed evaluateConfig:", error);
+    }
+  }
+  memoizedConfig = {};
+  return memoizedConfig;
+};
+
+const buildRelationshipPropertyBindings = (config) => {
+  if (!config || typeof config !== "object") return [];
+  const fields = [];
+  const groups = config.formConfig?.groups;
+  if (Array.isArray(groups)) {
+    for (let gi = 0; gi < groups.length; gi++) {
+      const groupFields = groups[gi]?.fields;
+      if (!Array.isArray(groupFields)) continue;
+      for (let fi = 0; fi < groupFields.length; fi++) fields.push(groupFields[fi]);
+    }
+  }
+  const bindings = [];
+  const seen = new Set();
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i];
+    if ((field?.dataType === "select" || field?.dataType === "relation") && field.selectConfig?.relationshipType && field.selectConfig?.edgeOnly === true) {
+      const key = `${field.key}\0${field.selectConfig.relationshipType}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        bindings.push({ prop: field.key, rel: field.selectConfig.relationshipType });
+      }
+    }
+  }
+  return bindings;
+};
+
+const fetchData = async (searchTerm, columnFilters, sortConfig, callback) => {
+  const tableVertexLabel = args.fns.getTableVertexLabel?.();
+  if (!tableVertexLabel) return;
+  const composed = args.fns.composeWidgetQuery?.() || {};
+  const config = evaluateConfig();
+  const mergedFilters = { ...composed.filters, ...(columnFilters || {}) };
+  const widgetId = getWidgetConfig()?.id || "crud_widget";
+  const runtime = getRuntime();
+
+  runtime?.store?.patchWidgetState(widgetId, { loading: true, error: null });
+
+  try {
+    const result = await executeYTO("getUserContent", {
+      tableVertexLabel,
+      search: searchTerm || composed.search || undefined,
+      filters: mergedFilters,
+      sort: sortConfig?.column ? sortConfig : composed.sort,
+      enableUserScoping: config?.enableUserScopingForContent === true,
+      tableSettingsLabel: args.fns.getTableSettingsLabel?.(),
+      hooks: config?.hooks,
+      relationshipPropertyBindings: buildRelationshipPropertyBindings(config)
+    });
+    applyServerGraphToLocalGraph(result);
+    const errorMessage = extractError(result, true, "Failed to load data");
+    if (errorMessage) {
+      runtime?.store?.patchWidgetState(widgetId, { loading: false, error: errorMessage });
+      return;
+    }
+    let rows = Array.isArray(result?.result?.data) ? result.result.data : [];
+    rows = args.fns.applyNeqFilters?.(rows, composed.neqFilters) || rows;
+    if (composed.limit && rows.length > composed.limit) {
+      rows = rows.slice(0, composed.limit);
+    }
+    runtime?.store?.patchWidgetState(widgetId, { loading: false, error: null });
+    callback(rows, null, []);
+  } catch (error) {
+    console.error("DashboardCrudEmbed fetchData:", error);
+    runtime?.store?.patchWidgetState(widgetId, { loading: false, error: error?.message || "Failed to load" });
+    args.showErrorToast?.("Failed to load table data");
+  }
+};
+
+const registerRefreshAndWatchFilters = () => {
+  const runtime = getRuntime();
+  const widgetId = getWidgetConfig()?.id || "crud_widget";
+  if (runtime?.runtimeApi?.registerCrudRefresh && typeof args.fns.handleSearch === "function") {
+    runtime.runtimeApi.registerCrudRefresh(widgetId, () => args.fns.handleSearch());
+  }
+  if (typeof args.createEffect === "function" && runtime?.store?.filters) {
+    args.createEffect(() => {
+      runtime.store.filters();
+      if (typeof args.fns.handleSearch === "function") {
+        args.fns.handleSearch();
+      }
+    });
+  }
+};
+
+return {
+  getRuntime,
+  getWidgetConfig,
+  getCrudConfigRef,
+  getTableVertexLabel,
+  getTableSettingsLabel,
+  getWidgetId,
+  composeWidgetQuery,
+  evaluateConfig,
+  fetchData,
+  loadTableSettings,
+  applyNeqFilters,
+  dispatchRowInteraction,
+  dispatchRowSelected,
+  registerRefreshAndWatchFilters,
+  getLoadFromSetting: () => true,
+  isEmbeddedMode: () => true,
+  getEmbeddedMode: () => true,
+  getTableMode: () => "embedded",
+  hasSidebar: () => false,
+  prop: (key) => {
+    const config = evaluateConfig();
+    return config?.[key];
+  },
+  getCachedConfig: () => ({ config: evaluateConfig(), loadFromSetting: true }),
+  getGenericDataFunction: () => fetchData,
+  getImportFunction: () => null,
+  getExportFunction: () => null,
+  getSettingsFunction: () => null,
+  getGenericSaveFunction: () => {
+    const tableVertexLabel = args.fns.getTableVertexLabel?.();
+    if (!tableVertexLabel) return null;
+    return async ({ mode, data, originalRow }) => {
+      const config = evaluateConfig();
+      const operation = mode === "add" ? "create" : mode === "edit" ? "update" : "delete";
+      const result = await executeYTO("mutateUserContent", {
+        tableVertexLabel,
+        tableSettingsLabel: args.fns.getTableSettingsLabel?.(),
+        operation,
+        data: mode === "delete" ? { vertex: originalRow, relationships: {} } : data,
+        enableUserScoping: config?.enableUserScopingForContent === true,
+        hooks: config?.hooks
+      });
+      applyServerGraphToLocalGraph(result);
+      return result?.result || { success: false };
+    };
+  },
+  getFormConfig: () => {
+    const config = evaluateConfig();
+    const formConfig = config?.formConfig;
+    if (!formConfig) return null;
+    return { ...formConfig, saveFunction: args.fns.getGenericSaveFunction?.() };
+  },
+  getHideSettingsButton: () => true,
+  getHideImportButtons: () => true,
+  getHideExportButtons: () => true
+};
+'''
+        props:
+          '''
+const widgetConfig = args.contextData.props?.widgetConfig;
+return {
+  onMount: async () => {
+    crudSettingsText = await args.fns.loadTableSettings();
+    memoizedConfig = null;
+  },
+  mode: "embedded",
+  embeddedMode: true,
+  hidePageChrome: true,
+  tableMode: "embedded",
+  widgetConfig,
+  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  loadFromSetting: true,
+  enableLocalFilters: false
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Table
+        key: embedded_crud_table
+        props:
+          '''
+return {
+  mode: "embedded",
+  embeddedMode: true,
+  hidePageChrome: true,
+  tableVertexLabel: args.fns.getTableVertexLabel?.(),
+  loadFromSetting: true,
+  hideSettingsButton: true,
+  hideImportButtons: true,
+  hideExportButtons: true,
+  showAddButton: false,
+  widgetConfig: args.fns.getWidgetConfig?.(),
+  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  onMount: () => {
+    args.fns.registerRefreshAndWatchFilters?.();
+  },
+  onRowClick: (row) => {
+    const widgetConfig = args.fns.getWidgetConfig?.();
+    const interactions = widgetConfig?.interactions || [];
+    for (let index = 0; index < interactions.length; index++) {
+      const interaction = interactions[index];
+      if (interaction?.trigger === "rowClick") {
+        args.fns.dispatchRowInteraction?.(interaction, row);
+      }
+    }
+    args.fns.dispatchRowSelected?.(row);
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  height: 100%;
+  min-height: 0;
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+  ]
+}

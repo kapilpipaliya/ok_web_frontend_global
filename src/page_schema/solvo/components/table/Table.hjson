@@ -104,10 +104,12 @@ const getRowHeight = () => {
   return args.fns.prop('rowHeight', args.contextData.props) || 36;
 };
 const getTitle = () => {
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
   return args.fns.prop('title', args.contextData.props);
 };
 const getSubtitle = () => {
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableSubtitle ?? '';
   return args.fns.prop('subtitle', args.contextData.props);
 };
@@ -2368,6 +2370,14 @@ const getTableBodyMinWidthPx = () => {
 
 return {
   tableStateVertexId,
+  isEmbeddedMode: () => {
+    const mode = args.contextData.props?.mode || args.contextData.props?.tableMode;
+    return mode === "embedded" || args.contextData.props?.embeddedMode === true;
+  },
+  getTableMode: () => {
+    if (args.fns.isEmbeddedMode?.()) return "embedded";
+    return "standalone";
+  },
   getColumns,
   getRowHeight,
   getTitle,
@@ -2568,6 +2578,14 @@ return args.contextData.props?.nestedLinesMode === true
     })()
   };
 }`
+  : args.fns.isEmbeddedMode?.() === true
+  ? `._id {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 280px;
+  min-height: 0;
+}`
   : `._id {
   display: flex;
   flex-direction: column;
@@ -2615,7 +2633,8 @@ return `._id {
         props:
           '''
 return {
-  as: "div"
+  as: "div",
+  hide: args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false
 };
 '''
       }

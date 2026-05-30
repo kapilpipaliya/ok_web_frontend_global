@@ -1,0 +1,228 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardRenderer
+        fns:
+          '''
+const getRuntime = () => args.contextData.props?.dashboardRuntime?.() || null;
+
+return {
+  getRuntime
+};
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: dashboard_denied
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+return {
+  as: "div",
+  hide: !runtime || runtime.denied !== true,
+  text: "You do not have permission to view this dashboard."
+};
+'''
+        css:
+          '''
+return `._id {
+  padding: 2rem;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        key: dashboard_root
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+return {
+  as: "div",
+  hide: !runtime || runtime.denied === true
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-height: calc(100vh - 4rem);
+  padding: 1rem;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: dashboard_header
+        props:
+          '''
+return { as: "header" };
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+return {
+  as: "h1",
+  text: runtime?.config?.title || "Dashboard"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+const subtitle = runtime?.config?.subtitle;
+return {
+  as: "p",
+  hide: !subtitle,
+  text: subtitle || ""
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+const isEdit = runtime?.isEditMode?.() === true;
+const canEdit = runtime?.config?.personalization?.allowMoveWidgets !== false;
+return {
+  as: "button",
+  type: "button",
+  hide: !runtime || !canEdit,
+  text: isEdit ? "Done editing" : "Edit layout",
+  onClick: () => runtime?.runtimeApi?.setEditMode?.(!isEdit)
+};
+'''
+        css:
+          '''
+return `._id {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: DashboardFilterBar
+        key: dashboard_filter_bar
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+return {
+  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  runtimeKey: runtime?.config?.key || ""
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: DashboardLayoutRenderer
+        key: dashboard_layout
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+return {
+  dashboardRuntime: args.contextData.props?.dashboardRuntime,
+  runtimeKey: runtime?.config?.key || ""
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "3" }
+    { id: "e3", T: "Attr", S: "3", E: "4" }
+    { id: "e4", T: "Attr", S: "4", E: "5" }
+    { id: "e5", T: "Attr", S: "4", E: "6" }
+    { id: "e8", T: "Attr", S: "4", E: "9" }
+    { id: "e6", T: "Attr", S: "3", E: "7" }
+    { id: "e7", T: "Attr", S: "3", E: "8" }
+  ]
+}

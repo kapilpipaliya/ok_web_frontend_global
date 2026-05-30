@@ -1,0 +1,226 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardChartWidget
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: chart_container
+        fns:
+          '''
+let echarts = null;
+let chartInstance = null;
+let resizeTimeout = null;
+
+const loadECharts = async () => {
+  if (echarts) return echarts;
+  try {
+    const mod = await import("https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.esm.min.js");
+    echarts = mod.default || mod;
+    return echarts;
+  } catch (error) {
+    console.error("DashboardChartWidget: failed to load ECharts", error);
+    return null;
+  }
+};
+
+const buildOption = (data, chartType, theme) => {
+  const labels = data?.labels || [];
+  const values = data?.datasets?.[0]?.data || [];
+  const seriesLabel = data?.datasets?.[0]?.label || "Series";
+  const textColor = theme.var.color.text;
+  const muted = theme.var.color.muted;
+  const border = theme.var.color.border;
+  const bg = theme.var.color.background;
+  const primary = theme.var.color.primary;
+
+  const tooltip = {
+    trigger: chartType === "pie" ? "item" : "axis",
+    backgroundColor: bg,
+    borderColor: border,
+    textStyle: { color: textColor }
+  };
+
+  if (chartType === "pie") {
+    return {
+      tooltip,
+      legend: { bottom: 0, textStyle: { color: textColor } },
+      series: [
+        {
+          name: seriesLabel,
+          type: "pie",
+          radius: "60%",
+          data: labels.map((label, index) => ({
+            name: label,
+            value: values[index] ?? 0
+          })),
+          emphasis: {
+            itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0,0,0,0.25)" }
+          },
+          label: { color: textColor }
+        }
+      ]
+    };
+  }
+
+  const seriesType = chartType === "line" || chartType === "area" ? "line" : "bar";
+  const series = (data?.datasets || [{ label: seriesLabel, data: values }]).map((dataset) => ({
+    name: dataset.label || seriesLabel,
+    type: seriesType,
+    data: dataset.data || [],
+    smooth: seriesType === "line",
+    stack: chartType === "area" ? "total" : undefined,
+    areaStyle: chartType === "area" ? { opacity: 0.35 } : undefined,
+    itemStyle: {
+      color: dataset.backgroundColor || primary,
+      borderRadius: seriesType === "bar" ? [4, 4, 0, 0] : undefined
+    }
+  }));
+
+  return {
+    tooltip,
+    legend: { data: series.map((s) => s.name), textStyle: { color: textColor } },
+    grid: { left: "3%", right: "4%", bottom: "12%", containLabel: true },
+    xAxis: {
+      type: "category",
+      data: labels,
+      axisLine: { lineStyle: { color: border } },
+      axisLabel: { color: muted, rotate: labels.length > 6 ? 35 : 0, fontSize: 10 }
+    },
+    yAxis: {
+      type: "value",
+      axisLine: { lineStyle: { color: border } },
+      axisLabel: { color: muted },
+      splitLine: { lineStyle: { color: border, opacity: 0.3 } }
+    },
+    series
+  };
+};
+
+const renderChart = async () => {
+  const container = args.ref();
+  if (!container) return;
+
+  const widgetData = args.contextData.props?.widgetData || {};
+  const widgetConfig = args.contextData.props?.widgetConfig || {};
+  const chart = widgetData.chart || { labels: [], datasets: [{ data: [] }] };
+  const chartType = String(widgetConfig.chartType || "bar");
+  const runtime = args.contextData.props?.dashboardRuntime?.();
+  const interactions = widgetConfig.interactions || [];
+  const clickInteraction = interactions.find((item) => item?.trigger === "click");
+
+  if (!chart.labels?.length) {
+    container.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:' +
+      args.theme.var.color.muted +
+      '">No chart data</div>';
+    return;
+  }
+
+  const lib = await loadECharts();
+  if (!lib) {
+    container.innerHTML =
+      '<div style="color:' + args.theme.var.color.error + '">Failed to load chart library</div>';
+    return;
+  }
+
+  container.innerHTML = "";
+  const chartDiv = document.createElement("div");
+  chartDiv.style.width = "100%";
+  chartDiv.style.height = "100%";
+  chartDiv.style.minHeight = "160px";
+  container.appendChild(chartDiv);
+
+  if (chartInstance) {
+    chartInstance.dispose();
+    chartInstance = null;
+  }
+
+  chartInstance = lib.init(chartDiv);
+  chartInstance.setOption(buildOption(chart, chartType, args.theme));
+
+  if (clickInteraction && runtime) {
+    chartInstance.off("click");
+    chartInstance.on("click", (params) => {
+      const label = params?.name ?? params?.data?.name;
+      if (label == null) return;
+      void runtime.handleWidgetInteraction(widgetConfig, clickInteraction, {
+        clicked: { value: label, label: String(label), count: params?.value ?? 0 }
+      });
+    });
+  }
+
+  chartInstance.resize();
+};
+
+const handleResize = () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (chartInstance) chartInstance.resize();
+    else void renderChart();
+  }, 200);
+};
+
+const disposeChart = () => {
+  if (chartInstance) {
+    chartInstance.dispose();
+    chartInstance = null;
+  }
+};
+
+const setupReactiveRender = () => {
+  if (typeof args.createEffect !== "function") return;
+  args.createEffect(() => {
+    const data = args.contextData.props?.widgetData;
+    const version = args.contextData.props?.dataVersion;
+    void data;
+    void version;
+    void renderChart();
+  });
+};
+
+return { renderChart, handleResize, disposeChart, setupReactiveRender };
+'''
+        props:
+          '''
+return {
+  as: "div",
+  onMount: () => {
+    args.fns.setupReactiveRender?.();
+    void args.fns.renderChart();
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", args.fns.handleResize);
+    }
+  },
+  onCleanup: () => {
+    args.fns.disposeChart?.();
+    if (typeof window !== "undefined") {
+      window.removeEventListener("resize", args.fns.handleResize);
+    }
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  height: 100%;
+  min-height: 12rem;
+  position: relative;
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+  ]
+}

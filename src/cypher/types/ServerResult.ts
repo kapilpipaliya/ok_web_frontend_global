@@ -13,7 +13,4 @@ export interface ServerResult {
   error?: null | string;
   graph?: GraphData;
   result?: any; //Vertex[],
-  message?: string;
-  subdomain?: string;
-  domain?: string | null;
 }
