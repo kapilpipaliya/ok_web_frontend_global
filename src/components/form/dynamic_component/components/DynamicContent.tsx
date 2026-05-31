@@ -36,6 +36,29 @@ type ContentProps = {
   isNoPermissionCheck: () => boolean;
 };
 
+function resolveChildrenProps(
+  dynamicProps: DynamicPropsType,
+  parentChildren?: JSX.Element,
+) {
+  const { children: childrenFromProps, ...componentDynamicProps } = dynamicProps;
+  const childrenFn =
+    typeof childrenFromProps === "function" ? childrenFromProps : undefined;
+  const slotContent =
+    parentChildren ??
+    (childrenFromProps !== undefined &&
+    childrenFromProps !== null &&
+    typeof childrenFromProps !== "function"
+      ? (childrenFromProps as JSX.Element)
+      : undefined);
+
+  return {
+    componentDynamicProps,
+    childrenFn,
+    slotContent,
+    renderGraphChildren: !childrenFn && slotContent === undefined,
+  };
+}
+
 // The main content component
 export function Content(props: ContentProps) {
   const ignoreMetaKeys = [
@@ -56,6 +79,8 @@ export function Content(props: ContentProps) {
   ];
 
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
+  const resolved = () =>
+    resolveChildrenProps(props.dynamicProps(), props.children);
 
   return (
     <>
@@ -65,35 +90,48 @@ export function Content(props: ContentProps) {
           return <div>Error: {err.message}</div>;
         }}
       >
-        <Dynamic
-          {...otherProps}
-          {...props.dynamicProps()}
-          // remove extra props, to reduce ssr size
-          componentName={null}
-          hide={null}
-          {...props.mergedClasses()}
-          // {...props.permissions()}
-          component={props.component()}
-          text={props.processedText()}
-          // disabled={props.disabled || undefined}
-          // props={null}
-          ref={mergeRefs(props.setRef, props.dynamicProps().ref)}
-        >
-          <Show
-            fallback={
-              <Show when={props.meta.id}>
-                <PageAttrRender
-                  data={props.data}
-                  isNoPermissionCheck={props.isNoPermissionCheck()}
-                  metaVertex={props.meta}
-                />
+        <Switch>
+          <Match when={resolved().childrenFn != null}>
+            <Dynamic
+              {...otherProps}
+              {...resolved().componentDynamicProps}
+              componentName={null}
+              hide={null}
+              {...props.mergedClasses()}
+              component={props.component()}
+              text={props.processedText()}
+              ref={mergeRefs(props.setRef, props.dynamicProps().ref)}
+              children={resolved().childrenFn!}
+            />
+          </Match>
+          <Match when={true}>
+            <Dynamic
+              {...otherProps}
+              {...resolved().componentDynamicProps}
+              componentName={null}
+              hide={null}
+              {...props.mergedClasses()}
+              component={props.component()}
+              text={props.processedText()}
+              ref={mergeRefs(props.setRef, props.dynamicProps().ref)}
+            >
+              <Show
+                fallback={
+                  <Show when={resolved().renderGraphChildren && props.meta.id}>
+                    <PageAttrRender
+                      data={props.data}
+                      isNoPermissionCheck={props.isNoPermissionCheck()}
+                      metaVertex={props.meta}
+                    />
+                  </Show>
+                }
+                when={resolved().slotContent}
+              >
+                {resolved().slotContent}
               </Show>
-            }
-            when={props.children}
-          >
-            {props.children}
-          </Show>
-        </Dynamic>
+            </Dynamic>
+          </Match>
+        </Switch>
       </ErrorBoundary>
     </>
   );

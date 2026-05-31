@@ -1,4 +1,9 @@
 import { Transition, TransitionGroup } from "solid-transition-group";
+import {
+  Virtualizer,
+  VList,
+  WindowVirtualizer,
+} from "virtua/solid";
 import { SlotField } from "~/components/fields/component/SlotField";
 import { ComponentField } from "~/components/fields/component/ComponentField";
 import { SelectField } from "~/components/fields/select/SelectField";
@@ -25,4 +30,7 @@ export const componentsMap: Record<string, any> = {
   TransitionGroup,
   ZIndex,
   FilePickerModal,
+  Virtualizer,
+  VList,
+  WindowVirtualizer,
 };

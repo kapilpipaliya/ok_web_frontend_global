@@ -58,6 +58,8 @@ import { z } from "zod";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { findVertexByLabelAndPks, findVertexByLabelAndUniqueId, findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
 import { createDashboardPlatform } from "~/lib/dashboard";
+import { findLoopTemplateMeta } from "~/components/form/dynamic_component/components/LoopChildrenRenderer";
+import { createLoopRowRenderer } from "~/components/form/dynamic_component/functions/createLoopRowRenderer";
 // Following Untitled-1 (11-21, 12-13): also import `combine`, `GroupDropIndicator`, `liveRegion`, `type Instruction`, and `triggerPostMoveFlash` non-directly (no direct imports).
 // Only import drag-and-drop modules and related utilities on the client, using dynamic import assignment.
 
@@ -374,7 +376,24 @@ export function createFunctionArgumentBase(
     liveRegion,
     triggerPostMoveFlash,
     attachInstruction,
-    extractInstruction
-
+    extractInstruction,
+    createLoopRowRenderer: (
+      mapContextValue: (rowData: unknown, index: Accessor<number>) => unknown,
+    ) => {
+      const loopMeta = findLoopTemplateMeta(
+        hooks.graph,
+        hooks.setGraph,
+        props.meta,
+      );
+      if (!loopMeta) {
+        return () => null;
+      }
+      return createLoopRowRenderer({
+        loopMeta,
+        data: props.data,
+        isNoPermissionCheck: options.isNoPermissionCheck?.(),
+        mapContextValue,
+      });
+    },
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

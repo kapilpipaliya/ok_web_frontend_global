@@ -2344,7 +2344,7 @@ const handleTableHorizontalScroll = (e) => {
   syncTableHorizontalScroll(e.currentTarget);
 };
 
-// Approximate min width of the table grid so the body horizontal scroll region gets scrollWidth (virtual rows are position:absolute and do not expand it).
+// Approximate min width of the table grid so the body horizontal scroll region gets scrollWidth.
 const getTableBodyMinWidthPx = () => {
   const template = getGridTemplateColumns();
   const parts = template.trim().split(/\s+/).filter(Boolean);
@@ -4150,18 +4150,15 @@ return `._id {
         componentName: VirtualList
         props:
           '''
-const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
 return {
   getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
   getItemHeightAt: args.fns.getVirtualRowHeight,
   rowHasExpansion: (row) => ((args.fns.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
   containerClass: "table-body-list",
-  hide: isLoading,
   tabIndex: 0,
   role: "listbox",
   "attr:aria-label": "Table rows; Arrow keys to move, Shift+Arrow Up/Down to select range, Left/Right to collapse/expand group, Space to toggle selection",
-  // VirtualList reads scrollTop from 40wrap (parent), not the list root div
   getScrollContainerElement: () => args.fns.getScrollContainerElementForVirtualList(),
   getActiveIndex: () => args.fns.activeRowIndex?.(),
   setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
@@ -4273,15 +4270,9 @@ const gridRows =
 
 return [
 `._id {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: ${virtualItem.size}px;
-  transform: translate3d(0, ${virtualItem.start}px, 0);
-  will-change: transform;
-  contain: layout paint style;
-  backface-visibility: hidden;
+  min-height: ${virtualItem.size}px;
+  box-sizing: border-box;
 }`,
 `._id {
   display: grid;

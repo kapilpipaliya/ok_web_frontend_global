@@ -857,3 +857,10 @@ re_Pwtt4Hz7_DogCFDCf6eZJjMMyQqQzY6i9
 3001 -> Server Por
 7474 -> DB Browser Port.
 7687 -> Bolt Port.
+
+
+
+
+
+virtuallist:
+https://github.com/doeixd/create-virtualized-list-solid/blob/main/src/createVirtualizedList.ts

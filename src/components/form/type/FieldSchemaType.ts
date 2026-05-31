@@ -114,6 +114,10 @@ export interface FunctionArgumentBaseType {
   ) => Promise<Record<string, unknown>>;
   /** Zod namespace (`import { z } from "zod"`); exposed on dynamic component / page `args`. */
   z: typeof import("zod").z;
+  /** Build a virtua/render-prop row renderer from the loop + Slot graph template. */
+  createLoopRowRenderer: (
+    mapContextValue: (rowData: unknown, index: import("solid-js").Accessor<number>) => unknown,
+  ) => (rowData: unknown, index: import("solid-js").Accessor<number>) => import("solid-js").JSX.Element;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {
