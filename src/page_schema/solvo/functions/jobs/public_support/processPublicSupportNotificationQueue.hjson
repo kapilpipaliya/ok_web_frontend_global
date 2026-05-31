@@ -34,13 +34,23 @@ const parseJsonSafe = (value, fallback) => {
   try { return JSON.parse(String(value)); } catch { return fallback; }
 };
 
-const escapeHtml = (value) =>
-  String(value == null ? "" : value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+const buildTemplateQueryParams = ({ ticket, message, ticketId, assigneeUser }) => {
+  const p = ticket?.P || {};
+  const mp = message?.P || {};
+  const params = {
+    serial: String(p.serial || ""),
+    subject: String(p.subject || ""),
+    message: String(mp.message || p.initialMessage || ""),
+    customerEmail: String(p.customerEmail || ""),
+    trackingUrl: String(p.trackingUrl || ""),
+    adminUrl: ticketId
+      ? `/public-support/conversation?ticketId=${encodeURIComponent(String(ticketId))}`
+      : ""
+  };
+  const assigneeName = assigneeUser?.P?.name || assigneeUser?.P?.username || "";
+  if (assigneeName) params.assigneeName = String(assigneeName);
+  return params;
+};
 
 const loadSupportSettings = async (session) => {
   const defaults = {
@@ -53,6 +63,7 @@ const loadSupportSettings = async (session) => {
       sendCustomerReplyToMerchant: true,
       sendAdminReplyToCustomer: true,
       sendTicketClosedToCustomer: true,
+      sendTicketAssignedToAssignee: true,
       merchantEmail: "",
       replyToEmail: "",
       fromName: "Solvo Support",
@@ -101,12 +112,75 @@ const loadTicketAndMessage = async (session, ticketId, messageId) => {
   };
 };
 
+const loadAssigneeUser = async (session, assigneeUserId) => {
+  if (!assigneeUserId) return null;
+  const res = await session.run(
+    `
+    MATCH (u:User)
+    WHERE elementId(u) = $assigneeUserId
+    RETURN u
+    LIMIT 1
+    `,
+    { assigneeUserId }
+  );
+  if (res.records.length === 0) return null;
+  return args.convertNodeToJson(res.records[0].get("u"));
+};
+
+const loadUserVertexForEmail = async (session, email, displayName) => {
+  const trimmedEmail = String(email || "").trim();
+  if (!trimmedEmail) return null;
+
+  const res = await session.run(
+    `
+    MATCH (u:User)
+    WHERE toLower(trim(u.email)) = toLower(trim($email))
+    RETURN u
+    LIMIT 1
+    `,
+    { email: trimmedEmail }
+  );
+  if (res.records.length > 0) {
+    return args.convertNodeToJson(res.records[0].get("u"));
+  }
+
+  const name = String(displayName || "").trim();
+  return {
+    id: null,
+    L: ["User"],
+    P: {
+      email: trimmedEmail,
+      username: name || trimmedEmail,
+      name: name || trimmedEmail
+    },
+    IN: {},
+    OUT: {}
+  };
+};
+
+const resolveNotificationUser = async (session, eventType, ticket, emailSettings, assigneeUser) => {
+  if (eventType === "ticket_assigned") return assigneeUser;
+
+  if (eventType === "customer_replied") {
+    const merchantEmail = String(emailSettings.merchantEmail || "").trim();
+    return loadUserVertexForEmail(session, merchantEmail, "Merchant");
+  }
+
+  const customerEmail = String(ticket?.P?.customerEmail || "").trim();
+  return loadUserVertexForEmail(
+    session,
+    customerEmail,
+    ticket?.P?.customerName || customerEmail
+  );
+};
+
 const eventTitle = (eventType) => {
   if (eventType === "ticket_created") return "Support Request Created";
   if (eventType === "customer_replied") return "New Customer Reply";
   if (eventType === "admin_replied") return "Support Team Replied";
   if (eventType === "ticket_closed") return "Ticket Closed";
   if (eventType === "ticket_reopened") return "Ticket Reopened";
+  if (eventType === "ticket_assigned") return "Ticket Assigned";
   return "Support Ticket Updated";
 };
 
@@ -115,6 +189,7 @@ const eventTemplateKey = (eventType) => {
   if (eventType === "customer_replied") return "SolvoSupportCustomerReply";
   if (eventType === "admin_replied") return "SolvoSupportAdminReply";
   if (eventType === "ticket_closed") return "SolvoSupportTicketClosed";
+  if (eventType === "ticket_assigned") return "SolvoSupportTicketAssigned";
   return "SolvoSupportTicketCreated";
 };
 
@@ -124,13 +199,9 @@ const shouldSendForEvent = (eventType, emailSettings) => {
   if (eventType === "customer_replied") return emailSettings.sendCustomerReplyToMerchant !== false;
   if (eventType === "admin_replied") return emailSettings.sendAdminReplyToCustomer !== false;
   if (eventType === "ticket_closed") return emailSettings.sendTicketClosedToCustomer !== false;
+  if (eventType === "ticket_assigned") return emailSettings.sendTicketAssignedToAssignee !== false;
   if (eventType === "ticket_reopened") return true;
   return true;
-};
-
-const recipientForEvent = (eventType, ticket, emailSettings) => {
-  if (eventType === "customer_replied") return String(emailSettings.merchantEmail || "").trim();
-  return String(ticket?.P?.customerEmail || "").trim();
 };
 
 const subjectForEvent = (eventType, ticket, emailSettings) => {
@@ -141,26 +212,6 @@ const subjectForEvent = (eventType, ticket, emailSettings) => {
   return `[${serial}] ${eventTitle(eventType)}`;
 };
 
-const buildContent = ({ eventType, templateKey, ticket, message }) => {
-  const p = ticket?.P || {};
-  const mp = message?.P || {};
-  const title = eventTitle(eventType);
-  const bodyMessage = mp.message || p.initialMessage || "";
-  return `
-    <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: #111827; line-height: 1.5;">
-      <div style="max-width: 640px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px;">
-        <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 13px;">Solvo Support</p>
-        <h1 style="margin: 0 0 16px 0; font-size: 22px;">${escapeHtml(title)}</h1>
-        <p style="margin: 0 0 12px 0;"><strong>Ticket:</strong> ${escapeHtml(p.serial)}</p>
-        <p style="margin: 0 0 12px 0;"><strong>Subject:</strong> ${escapeHtml(p.subject)}</p>
-        ${bodyMessage ? `<div style="margin: 16px 0; padding: 12px; background: #f9fafb; border-radius: 8px; white-space: pre-wrap;">${escapeHtml(bodyMessage)}</div>` : ""}
-        ${p.trackingUrl ? `<p style="margin: 16px 0;"><a href="${escapeHtml(p.trackingUrl)}" style="color: #2563eb;">Track this support request</a></p>` : ""}
-        <p style="margin: 16px 0 0 0; color: #6b7280; font-size: 12px;">Template: ${escapeHtml(templateKey)}. Dynamic template values are available as query parameters: serial, trackingUrl, subject, message, customerEmail, shop.</p>
-      </div>
-    </div>
-  `;
-};
-
 const processOne = async (job) => {
   const session = await args.getSession();
   try {
@@ -168,7 +219,11 @@ const processOne = async (job) => {
     const eventType = payload.eventType;
     const ticketId = payload.ticketId;
     const messageId = payload.messageId || null;
+    const assigneeUserId = payload.assigneeUserId || null;
     if (!eventType || !ticketId) return { success: false, message: "Missing eventType or ticketId" };
+    if (eventType === "ticket_assigned" && !assigneeUserId) {
+      return { success: false, message: "Missing assigneeUserId for ticket_assigned" };
+    }
 
     const settings = await loadSupportSettings(session);
     if (settings.supportSystem.sendEmailNotifications === false) {
@@ -182,19 +237,37 @@ const processOne = async (job) => {
     const { ticket, message } = await loadTicketAndMessage(session, ticketId, messageId);
     if (!ticket) return { success: false, message: "Ticket not found" };
 
-    const to = recipientForEvent(eventType, ticket, settings.emailSettings);
-    if (!to) return { success: true, skipped: true, reason: "No recipient configured" };
+    const assigneeUser =
+      eventType === "ticket_assigned"
+        ? await loadAssigneeUser(session, assigneeUserId)
+        : null;
+    if (eventType === "ticket_assigned" && !assigneeUser) {
+      return { success: false, message: "Assignee user not found" };
+    }
+
+    const user = await resolveNotificationUser(
+      session,
+      eventType,
+      ticket,
+      settings.emailSettings,
+      assigneeUser
+    );
+    if (!user?.P?.email) {
+      return { success: true, skipped: true, reason: "No recipient configured" };
+    }
 
     const templateKey = eventTemplateKey(eventType);
     const subject = subjectForEvent(eventType, ticket, settings.emailSettings);
-    const content = buildContent({ eventType, templateKey, ticket, message });
+    const queryParams = buildTemplateQueryParams({ ticket, message, ticketId, assigneeUser });
+    const subDomain = payload.subDomain || args.subDomain;
 
-    await args.sendEmail({
-      to,
+    await args.sendNotificationEmail(
+      templateKey,
+      queryParams,
       subject,
-      content,
-      subDomain: args.subDomain
-    });
+      user,
+      subDomain
+    );
 
     await session.run(
       `
@@ -207,7 +280,7 @@ const processOne = async (job) => {
       { ticketId, eventType, now: new Date().toISOString() }
     );
 
-    return { success: true, data: { eventType, ticketId, templateKey, to } };
+    return { success: true, data: { eventType, ticketId, templateKey, to: user.P.email } };
   } finally {
     try { await session.close(); } catch {}
   }

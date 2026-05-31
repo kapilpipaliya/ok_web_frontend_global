@@ -1,0 +1,41 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportTicketBeforeUpdate
+        description: Hook before PublicSupportTicket update — stores previous assignee id for assignment notification comparison.
+        body:
+          '''
+const { tableVertexLabel, operation, elementId } = args.contextData || {};
+
+if (tableVertexLabel !== "PublicSupportTicket" || operation !== "update") {
+  return { success: true, message: "Skip: not PublicSupportTicket update" };
+}
+if (!elementId) {
+  return { success: true, message: "Skip: missing elementId" };
+}
+
+try {
+  await args.session.run(
+    `
+    MATCH (t:PublicSupportTicket)
+    WHERE elementId(t) = $elementId
+    OPTIONAL MATCH (t)-[:PublicSupportTicketAssignee]->(u:User)
+    SET t._prevAssigneeId = elementId(u)
+    RETURN t
+    `,
+    { elementId }
+  );
+} catch (e) {
+  console.error("publicSupportTicketBeforeUpdate: failed to capture previous assignee", e);
+}
+
+return { success: true, message: "Captured previous assignee" };
+'''
+      }
+    }
+  ]
+  edges: []
+}

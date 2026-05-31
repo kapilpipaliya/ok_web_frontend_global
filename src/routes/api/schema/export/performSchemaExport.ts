@@ -2,6 +2,7 @@ import { join } from "node:path";
 import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { APIError } from "~/lib/api/server/apiErrorHandler";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -58,7 +59,12 @@ async function fetchEntities(
     const entityVertex = convertNodeToJson(entity);
     const entityId = entityVertex.id;
     const entityKey = entityVertex.P.key;
-    if (!(entityKey && entityId)) continue;
+    if (!(entityKey && entityId)) {
+      throw new APIError(
+        `Failed to export ${entityType}: vertex is missing key or id`,
+        500,
+      );
+    }
 
     if (
       excludePublicPages &&
@@ -89,10 +95,14 @@ async function fetchEntities(
       undefined,
       undefined,
       true,
+      dbSession,
     );
 
     if (fetchResult.error || !fetchResult.data) {
-      continue;
+      throw new APIError(
+        `Failed to export ${entityType} "${entityKey}": ${fetchResult.error ?? "no graph data returned"}`,
+        500,
+      );
     }
 
     let vertexes: Vertex[] = [];

@@ -38,4 +38,18 @@ Reserved dashboard filter keys (not mapped to vertex fields): `dateRange` — us
 
 ### Time range presets
 
-`last_7_days`, `last_30_days`, `last_90_days`, `last_year` — applied to `timestampField` (default `updatedAt`).
+`last_7_days`, `last_30_days`, `last_90_days`, `last_year`, `all_time` — applied to `timestampField` (default `updatedAt`). ISO string properties are coerced with `datetime(toString(v.field))`.
+
+## `pollDashboardRealtimeEvents`
+
+Reads `realtimeConfig.entities` from the dashboard config (passed by `DashboardHost`). Each entity:
+
+```javascript
+{
+  vertexLabel: "MyEntity",
+  timestampField: "updatedAt",
+  logicalKeys: ["my_entities", "entity:MyEntity"]
+}
+```
+
+Optional `realtimeConfig.logicalKey` (defaults to `realtime:{channel}`).

@@ -9,7 +9,7 @@
         body:
           '''
 const queueName = "solvo-public-support-notifications";
-const { eventType, ticketId, messageId, serial } = args.contextData || {};
+const { eventType, ticketId, messageId, serial, assigneeUserId } = args.contextData || {};
 
 if (!eventType || !ticketId) {
   return { success: false, message: "eventType and ticketId are required" };
@@ -41,6 +41,7 @@ try {
       ticketId,
       messageId: messageId || null,
       serial: serial || null,
+      assigneeUserId: assigneeUserId || null,
       subDomain: args.subDomain,
       rawSubDomain: args.rawSubDomain || null
     },

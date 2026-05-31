@@ -19,9 +19,10 @@ import {
   stopSchemaJobsQueueWorker,
 } from "~/server/queue/workers/schemaJobsQueueWorker";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
+import { getAllDatabases } from "~/cypher/mutate/manage/getAllDatabases";
 import { getDriver } from "~/cypher/core/driver";
 import { executeNamedServerFunctionCore } from "~/cypher/get/executeNamedServerFunctionCore";
+import { isShopDatabaseName } from "~/lib/shopify/getDatabaseNameForShop";
 import { closeClusterCommunication } from "~/server/cluster/clusterCommunication";
 import { closeDriver } from "~/cypher/core/driver";
 /**
@@ -66,7 +67,7 @@ export const workerState = global.__workerState;
  */
 function getSubdomainWorkers(
   subdomain: string,
-): Map<string, { stop: () => Promise<void> }> {
+): Map<string, { stop: (force?: boolean) => Promise<void> }> {
   if (!workerState.activeWorkers.has(subdomain)) {
     workerState.activeWorkers.set(subdomain, new Map());
   }
@@ -314,12 +315,22 @@ export async function initSubdomainWorkers() {
             `[Workers] Initializing subdomain worker ${functionKey} for ${currentSubdomain}`,
           );
 
-          const workerResult = await executeNamedServerFunction({
-            functionName: functionKey,
-            contextData: {
-              action: "start",
+          const workerResult = await executeNamedServerFunctionCore(
+            {
+              functionName: functionKey,
+              contextData: {
+                action: "start",
+              },
             },
-          });
+            {
+              dbSession,
+              functionLookupSession: dbSession,
+              subDomain: currentSubdomain,
+              nodes: {},
+              relationships: {},
+              vertexes: undefined as any,
+            },
+          );
 
           if (workerResult.error) {
             console.error(
@@ -357,6 +368,53 @@ export async function initSubdomainWorkers() {
   workerState.subdomainInitPromises.set(subDomain, initPromise);
 
   return initPromise;
+}
+
+/**
+ * All Neo4j databases that may host synced worker Function vertices:
+ * app SubDomain databases plus per-shop Shopify databases (shop*).
+ */
+export async function getAllWorkerTargetDatabases(): Promise<string[]> {
+  const targets = new Set<string>();
+  const driver = await getDriver();
+  const adminSession = driver.session({ database: "admin" });
+
+  try {
+    const result = await adminSession.run(`
+      MATCH (s:SubDomain)
+      RETURN s.key AS subdomain
+      ORDER BY subdomain
+    `);
+    for (const record of result.records) {
+      const key = record.get("subdomain");
+      if (key) targets.add(String(key));
+    }
+  } catch (error) {
+    console.error("[Workers] Error listing SubDomain databases:", error);
+  } finally {
+    await adminSession.close();
+  }
+
+  try {
+    const databaseNames = await getAllDatabases();
+    for (const name of databaseNames) {
+      if (typeof name === "string" && isShopDatabaseName(name)) {
+        targets.add(name);
+      }
+    }
+  } catch (error) {
+    console.error("[Workers] Error listing shop databases:", error);
+  }
+
+  return [...targets].sort();
+}
+
+/**
+ * Stop and re-start all workers for one database (e.g. after schema sync to a shop).
+ */
+export async function restartSubdomainWorkersForSubdomain(subdomain: string) {
+  await stopWorkersForSubdomain(subdomain, true);
+  return initSubdomainWorkersForSubdomain(subdomain);
 }
 
 /**
@@ -399,6 +457,19 @@ export async function initSubdomainWorkersForSubdomain(subdomain: string) {
         const functionKey = functionVertex.properties.key;
 
         try {
+          const existingWorker = subdomainWorkers.get(functionKey);
+          if (existingWorker) {
+            try {
+              await existingWorker.stop(false);
+            } catch (stopError) {
+              console.warn(
+                `[Workers] Error stopping existing ${functionKey} for ${subdomain}:`,
+                stopError,
+              );
+            }
+            subdomainWorkers.delete(functionKey);
+          }
+
           console.log(
             `[Workers] Initializing worker ${functionKey} for ${subdomain}`,
           );
@@ -460,46 +531,35 @@ export async function initSubdomainWorkersForSubdomain(subdomain: string) {
 }
 
 /**
- * Initialize workers for all subdomains
- * Called at app startup to auto-start all subdomain workers
+ * Initialize workers for all app subdomains and synced Shopify shop databases.
+ * Called at app startup (middleware → initializeWorkersIfNeeded).
  */
 export async function initAllSubdomainWorkers() {
-  console.log("[Workers] Initializing workers for all subdomains...");
-
-  const driver = await getDriver();
-  const dbSession = driver.session({ database: "admin" });
+  console.log(
+    "[Workers] Initializing workers for all subdomains and shop databases...",
+  );
 
   try {
-    // Get all subdomains from the admin database
-    const result = await dbSession.run(`
-      MATCH (s:SubDomain)
-      RETURN s.key as subdomain
-      ORDER BY s.key
-    `);
-
-    const subdomains = result.records.map((record) => record.get("subdomain"));
+    const databases = await getAllWorkerTargetDatabases();
 
     console.log(
-      `[Workers] Found ${subdomains.length} subdomains: ${subdomains.join(", ")}`,
+      `[Workers] Found ${databases.length} worker target database(s): ${databases.join(", ")}`,
     );
 
-    // Initialize workers for each subdomain in parallel
     await Promise.all(
-      subdomains.map((subdomain) =>
-        initSubdomainWorkersForSubdomain(subdomain),
+      databases.map((databaseName) =>
+        initSubdomainWorkersForSubdomain(databaseName),
       ),
     );
 
     console.log(
-      `[Workers] All subdomain workers initialized successfully (${subdomains.length} subdomains)`,
+      `[Workers] All subdomain/shop workers initialized (${databases.length} database(s))`,
     );
   } catch (error) {
     console.error(
-      "[Workers] Error initializing workers for all subdomains:",
+      "[Workers] Error initializing workers for all subdomains/shops:",
       error,
     );
-  } finally {
-    await dbSession.close();
   }
 }
 

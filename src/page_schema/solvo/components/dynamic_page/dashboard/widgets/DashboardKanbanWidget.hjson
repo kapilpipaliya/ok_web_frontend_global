@@ -7,13 +7,26 @@
         key: DashboardKanbanWidget
         fns:
           '''
+const pickDisplayValue = (properties, fieldConfig, fallback) => {
+  const p = properties || {};
+  const keys = Array.isArray(fieldConfig)
+    ? fieldConfig
+    : typeof fieldConfig === "string" && fieldConfig.trim() !== ""
+      ? [fieldConfig]
+      : ["title", "name", "subject", "label", "serial", "key"];
+  for (let index = 0; index < keys.length; index++) {
+    const value = p[keys[index]];
+    if (value != null && String(value).trim() !== "") return String(value);
+  }
+  return fallback;
+};
+
 const getColumns = () => {
   const widgetConfig = args.contextData.props?.widgetConfig || {};
   const widgetData = args.contextData.props?.widgetData || {};
-  const configured = Array.isArray(widgetConfig.kanbanColumns)
-    ? widgetConfig.kanbanColumns
-    : ["open", "pending", "closed"];
+  const configured = Array.isArray(widgetConfig.kanbanColumns) ? widgetConfig.kanbanColumns : [];
   const groupField = widgetConfig.kanbanGroupField || "status";
+  const titleFields = widgetConfig.displayFields?.title;
   const rows = Array.isArray(widgetData.rows) ? widgetData.rows : [];
   const buckets = {};
   for (let ci = 0; ci < configured.length; ci++) {
@@ -25,8 +38,14 @@ const getColumns = () => {
     if (!buckets[key]) buckets[key] = [];
     buckets[key].push({
       id: row?.id,
-      title: row?.P?.ticketSerial || row?.P?.title || row?.P?.name || row?.id || "Card"
+      title: pickDisplayValue(row?.P, titleFields, row?.id || "Card")
     });
+  }
+  if (configured.length === 0) {
+    return [{ key: "all", label: "All", cards: rows.map((row) => ({
+      id: row?.id,
+      title: pickDisplayValue(row?.P, titleFields, row?.id || "Card")
+    })) }];
   }
   return configured.map((colKey) => ({
     key: String(colKey),

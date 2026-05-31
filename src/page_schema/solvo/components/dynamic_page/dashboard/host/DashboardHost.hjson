@@ -91,7 +91,7 @@ const buildDashboardGraphBootstrap = (dashboardKey, config, visibleWidgets) => {
   const widgetStateIds = {};
   const defaultTimeRange =
     config.filters.find((filterConfig) => filterConfig?.type === "dateRange")?.default ||
-    "last_30_days";
+    "last_year";
 
   vertexes[ids.runtime] = {
     id: ids.runtime,
@@ -223,7 +223,12 @@ const normalizeDashboardConfig = (rawConfig) => {
       enabled: config.realtime?.enabled === true,
       channel: String(config.realtime?.channel || "dashboard"),
       pollingIntervalMs: Number(config.realtime?.pollingIntervalMs || 30000),
-      staleWhileRevalidate: config.realtime?.staleWhileRevalidate !== false
+      staleWhileRevalidate: config.realtime?.staleWhileRevalidate !== false,
+      logicalKey:
+        typeof config.realtime?.logicalKey === "string" && config.realtime.logicalKey.trim() !== ""
+          ? String(config.realtime.logicalKey)
+          : undefined,
+      entities: Array.isArray(config.realtime?.entities) ? config.realtime.entities : []
     },
     personalization: {
       allowMoveWidgets: config.personalization?.allowMoveWidgets !== false,
@@ -342,7 +347,7 @@ const executeDataSource = async ({ widgetConfig, store, dashboardKey }) => {
 const buildInteractionRegistry = (config, visibleWidgets, runtimeApiRef) => ({
   SET_FILTER: (event, store) => {
     store.setFilters({ ...store.filters(), ...(event.payload || {}) });
-    runtimeApiRef.refreshAfterGlobalFilterChange();
+    void runtimeApiRef.refreshAllWidgets();
   },
   NAVIGATE: (event) => {
     const href = event?.to || event?.payload?.href;
@@ -396,6 +401,7 @@ const buildInteractionRegistry = (config, visibleWidgets, runtimeApiRef) => ({
   },
   SET_TIME_RANGE: (event, store) => {
     if (event?.value != null) store.setTimeRange(event.value);
+    void runtimeApiRef.refreshAllWidgets();
   },
   ROW_SELECTED: (event, store, runtimeApi) => {
     const row = event.payload?.row;
@@ -990,13 +996,16 @@ const createRuntime = async (rawDashboardConfig) => {
   const refreshAllWidgets = async () => {
     setUi("dashboard", "loading", true);
     const widgetIds = getDisplayWidgets().map((w) => w.id);
-    if (scheduler) {
-      scheduler.schedule(widgetIds, { reason: "refresh_all", priority: "high", debounceMs: 0 });
-      await scheduler.flush();
-    } else {
-      await executeScheduledRefresh(widgetIds, {});
+    try {
+      if (scheduler) {
+        scheduler.schedule(widgetIds, { reason: "refresh_all", priority: "high", debounceMs: 0 });
+        await scheduler.flush();
+      } else {
+        await executeScheduledRefresh(widgetIds, { reason: "refresh_all" });
+      }
+    } finally {
+      setUi("dashboard", "loading", false);
     }
-    setUi("dashboard", "loading", false);
   };
 
   let interactionActionRegistry = {};
@@ -1232,6 +1241,7 @@ const createRuntime = async (rawDashboardConfig) => {
     resolveWidgetLayout: resolveLayoutForWidget,
     handleWidgetInteraction,
     isEditMode: () => store.ui.dashboard.mode === "edit",
+    isDashboardLoading: () => store.ui.dashboard.loading === true,
     isDevtoolsEnabled: () => devtools?.enabled === true,
     getBreakpoint: () => breakpoint(),
     setBreakpoint,
@@ -1282,7 +1292,12 @@ const disposeDashboardRuntime = () => {
 const getDashboardRuntime = () => runtimeState();
 
 const mountDashboardHost = async () => {
-  installBreakpointListener();
+  if (!breakpointCleanup) installBreakpointListener();
+  let attempts = 0;
+  while (!args.contextData.props?.getDashboardConfig?.() && attempts < 100) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    attempts += 1;
+  }
   await initFromProps();
   const runtime = getDashboardRuntime();
   const realtime = runtime?.config?.realtime;

@@ -1,0 +1,102 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: publicSupportTicketAfterAssigneeChange
+        description: Hook after PublicSupportTicket create/update — queues assignee notification email when assignee changes.
+        body:
+          '''
+const { tableVertexLabel, operation, elementId, data, result } = args.contextData || {};
+
+if (tableVertexLabel !== "PublicSupportTicket") {
+  return { success: true, message: "Skip: not PublicSupportTicket" };
+}
+if (operation !== "create" && operation !== "update") {
+  return { success: true, message: `Skip: operation ${operation}` };
+}
+
+const ticketElementId = elementId || result?.data?.id;
+if (!ticketElementId) {
+  return { success: false, message: "publicSupportTicketAfterAssigneeChange: missing ticket elementId" };
+}
+
+const relationships = data?.relationships || {};
+const assigneeRel = relationships.assigneeId;
+if (!assigneeRel || assigneeRel.relationshipType !== "PublicSupportTicketAssignee") {
+  return { success: true, message: "Skip: assignee not in save payload" };
+}
+
+const newAssigneeId = Array.isArray(assigneeRel.targetIds)
+  ? String(assigneeRel.targetIds[0] || "").trim()
+  : "";
+if (!newAssigneeId) {
+  if (operation === "update") {
+    try {
+      await args.session.run(
+        `MATCH (t:PublicSupportTicket) WHERE elementId(t) = $elementId REMOVE t._prevAssigneeId RETURN t`,
+        { elementId: ticketElementId }
+      );
+    } catch {}
+  }
+  return { success: true, message: "Skip: assignee cleared" };
+}
+
+let previousAssigneeId = null;
+if (operation === "update") {
+  try {
+    const prevRes = await args.session.run(
+      `
+      MATCH (t:PublicSupportTicket)
+      WHERE elementId(t) = $elementId
+      RETURN t._prevAssigneeId AS prevAssigneeId
+      `,
+      { elementId: ticketElementId }
+    );
+    previousAssigneeId = prevRes.records[0]?.get("prevAssigneeId") || null;
+    if (previousAssigneeId != null) previousAssigneeId = String(previousAssigneeId);
+  } catch (e) {
+    console.error("publicSupportTicketAfterAssigneeChange: failed to read previous assignee", e);
+  }
+
+  try {
+    await args.session.run(
+      `MATCH (t:PublicSupportTicket) WHERE elementId(t) = $elementId REMOVE t._prevAssigneeId RETURN t`,
+      { elementId: ticketElementId }
+    );
+  } catch {}
+
+  if (previousAssigneeId && previousAssigneeId === newAssigneeId) {
+    return { success: true, message: "Skip: assignee unchanged" };
+  }
+}
+
+const serial = result?.data?.P?.serial || data?.vertex?.P?.serial || null;
+
+try {
+  await args.executeNamedServerFunction({
+    functionName: "publicSupportQueueNotification",
+    contextData: {
+      eventType: "ticket_assigned",
+      ticketId: ticketElementId,
+      assigneeUserId: newAssigneeId,
+      serial
+    }
+  });
+} catch (e) {
+  console.error("publicSupportTicketAfterAssigneeChange: failed to queue notification", e);
+  return { success: false, message: "Failed to queue assignment notification" };
+}
+
+return {
+  success: true,
+  message: "Assignment notification queued",
+  data: { ticketId: ticketElementId, assigneeUserId: newAssigneeId, eventType: "ticket_assigned" }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

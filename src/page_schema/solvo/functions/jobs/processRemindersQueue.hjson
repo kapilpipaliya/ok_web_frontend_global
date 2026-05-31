@@ -12,7 +12,7 @@ if (args.contextData?.action !== "start") {
   return { success: true, message: "Solvo reminders queue worker is ready" };
 }
 
-const queueName = "reminders";
+const queueName = `reminders-${args.subDomain}`;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const getRedisConnection = () => {
@@ -48,11 +48,12 @@ const sendReminderEmail = async ({ to, subject, html }) => {
 };
 
 const processOne = async (job) => {
+  const payload = job?.data || {};
+  const taskElementId = payload.taskElementId;
+  if (!taskElementId) return { success: false, message: "Missing taskElementId" };
+
   const dbSession = await args.getSession();
   try {
-    const payload = job?.data || {};
-    const taskElementId = payload.taskElementId;
-    if (!taskElementId) return { success: false, message: "Missing taskElementId" };
 
     await dbSession.run(
       `MATCH (t:Task) WHERE elementId(t) = $id
@@ -70,7 +71,7 @@ const processOne = async (job) => {
       { id: taskElementId }
     );
     if (res.records.length === 0) {
-      return { success: false, message: "Task not found" };
+      return { success: true, skipped: true, reason: "Task not found (deleted or invalid id)" };
     }
 
     const tNode = res.records[0].get("t");

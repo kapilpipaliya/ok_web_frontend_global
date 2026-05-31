@@ -38,9 +38,17 @@ const TIME_RANGE_MS = {
 
 const resolveTimeRangeSince = (preset) => {
   const key = String(preset || "").trim();
+  if (!key || key === "all_time") return null;
   const ms = TIME_RANGE_MS[key];
   if (!ms) return null;
   return new Date(Date.now() - ms).toISOString();
+};
+
+const timestampPropertyExpr = (fieldName) => {
+  const field = sanitizeField(fieldName || "updatedAt");
+  if (!field) return null;
+  // Vertices may store ISO date strings; coerce before datetime comparisons.
+  return `datetime(toString(v.${field}))`;
 };
 
 if (!dataSource || typeof dataSource !== "object") {
@@ -79,12 +87,12 @@ const mergeFilters = (queryFilters, runtimeFilters) => {
 };
 
 const appendTimeRangeWhere = (whereParts, params, timeRangePreset, timestampField) => {
-  const field = sanitizeField(timestampField || "updatedAt");
-  if (!field) return;
+  const timestampExpr = timestampPropertyExpr(timestampField || "updatedAt");
+  if (!timestampExpr) return;
   const sinceIso = resolveTimeRangeSince(timeRangePreset);
   if (!sinceIso) return;
   params.timeRangeSince = sinceIso;
-  whereParts.push(`v.${field} >= datetime($timeRangeSince)`);
+  whereParts.push(`${timestampExpr} >= datetime($timeRangeSince)`);
 };
 
 const compileAbstractQuery = (queryConfig, runtimeFilters, options) => {
@@ -356,13 +364,13 @@ const runNeo4jSource = async () => {
         const previousPresetMs = currentMs;
         const previousSince = new Date(Date.now() - previousPresetMs * 2).toISOString();
         const previousUntil = new Date(Date.now() - previousPresetMs).toISOString();
-        const field = sanitizeField(rangeOptions.timestampField || "updatedAt");
-        if (field) {
+        const timestampExpr = timestampPropertyExpr(rangeOptions.timestampField || "updatedAt");
+        if (timestampExpr) {
           const rootVertex = sanitizeLabel(queryConfig?.rootVertex || queryConfig?.vertex);
           const filters = mergeFilters(queryConfig?.filters, dashboardFilters);
           const whereParts = [
-            `v.${field} >= datetime($prevSince)`,
-            `v.${field} < datetime($prevUntil)`
+            `${timestampExpr} >= datetime($prevSince)`,
+            `${timestampExpr} < datetime($prevUntil)`
           ];
           const params = { prevSince: previousSince, prevUntil: previousUntil };
           for (let filterIndex = 0; filterIndex < filters.length; filterIndex++) {

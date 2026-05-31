@@ -20,7 +20,7 @@ if (operation !== "create" && operation !== "update") {
   return { success: true, message: `Skip: operation ${operation}` };
 }
 
-const queueName = "reminders";
+const queueName = `reminders-${args.subDomain}`;
 
 const getRedisConnection = () => {
   return args.bullmq.redisConnection || {

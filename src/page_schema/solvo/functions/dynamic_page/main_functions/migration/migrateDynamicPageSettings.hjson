@@ -5,16 +5,26 @@
       L: Function
       P: {
         key: migrateDynamicPageSettings
-        description: Seeds shared DynamicPage table configs (employees, roles, time, tasks, files, settings, Shopify shops), Solvo public support configs, support settings page config, and default GlobalSetting support documents.
+        description: Seeds shared DynamicPage table configs (employees, roles, time, tasks, files, settings, Shopify shops), Solvo public support configs, support settings page config, default GlobalSetting support documents, and optional demo PublicSupportTicket rows.
         body:
           '''
 /**
  * Solvo - migrate default DynamicPage table settings.
- * contextData: { dryRun?: boolean }
+ * contextData: {
+ *   dryRun?: boolean,
+ *   seedTickets?: boolean,
+ *   seedTicketCount?: number,
+ *   forceReseedTickets?: boolean
+ * }
  */
 
-const { dryRun = false } = args.contextData || {};
-console.log(`Solvo settings migration (dryRun: ${dryRun})`);
+const {
+  dryRun = false,
+  seedTickets = true,
+  seedTicketCount = 1000,
+  forceReseedTickets = false
+} = args.contextData || {};
+console.log(`Solvo settings migration (dryRun: ${dryRun}, seedTickets: ${seedTickets}, seedTicketCount: ${seedTicketCount})`);
 
 const nowIso = () => new Date().toISOString();
 
@@ -61,6 +71,7 @@ const defaultEmailSettings = {
   sendCustomerReplyToMerchant: true,
   sendAdminReplyToCustomer: true,
   sendTicketClosedToCustomer: true,
+  sendTicketAssignedToAssignee: true,
   merchantEmail: "",
   replyToEmail: "",
   fromName: "Solvo Support",
@@ -1144,6 +1155,11 @@ const settingsConfigs = [
     { key: "lastMessageAt", label: "Last message", dataType: "date", renderer: "date", width: "180px" }
   ],
   rowHeight: 56,
+  hooks: {
+    beforeUpdate: ["publicSupportTicketBeforeUpdate"],
+    afterCreate: ["publicSupportTicketAfterAssigneeChange"],
+    afterUpdate: ["publicSupportTicketAfterAssigneeChange"]
+  },
   formConfig: {
     gridColumns: 2,
     groups: [
@@ -1362,7 +1378,19 @@ const settingsConfigs = [
       }
     },
     filters: [
-      { key: "dateRange", label: "Date range", type: "dateRange", default: "last_30_days" },
+      {
+        key: "dateRange",
+        label: "Date range",
+        type: "dateRange",
+        default: "last_year",
+        options: [
+          { value: "all_time", label: "All time" },
+          { value: "last_7_days", label: "Last 7 days" },
+          { value: "last_30_days", label: "Last 30 days" },
+          { value: "last_90_days", label: "Last 90 days" },
+          { value: "last_year", label: "Last year" }
+        ]
+      },
       {
         key: "status",
         label: "Status",
@@ -1377,7 +1405,25 @@ const settingsConfigs = [
       }
     ],
     permissions: { roles: [] },
-    realtime: { enabled: true, channel: "publicSupportTickets", pollingIntervalMs: 30000, staleWhileRevalidate: true },
+    realtime: {
+      enabled: true,
+      channel: "supportOverview",
+      logicalKey: "realtime:supportOverview",
+      pollingIntervalMs: 30000,
+      staleWhileRevalidate: true,
+      entities: [
+        {
+          vertexLabel: "PublicSupportTicket",
+          timestampField: "updatedAt",
+          logicalKeys: [
+            "public_support_tickets",
+            "ticket_status_counts",
+            "open_tickets_recent",
+            "entity:PublicSupportTicket"
+          ]
+        }
+      ]
+    },
     devtools: { enabled: false },
     scheduler: { debounceMs: 50, batchWindowMs: 16 },
     personalization: { allowMoveWidgets: true, allowHideWidgets: true, saveLayouts: true },
@@ -1400,7 +1446,7 @@ const settingsConfigs = [
       {
         id: "openTickets",
         type: "metricCard",
-        logicalQueryKeys: ["ticket_status_counts", "realtime:publicSupportTickets"],
+        logicalQueryKeys: ["ticket_status_counts", "realtime:supportOverview"],
         title: "Open Tickets",
         subtitle: "Currently open",
         layout: { x: 0, y: 0, w: 3, h: 2 },
@@ -1408,6 +1454,7 @@ const settingsConfigs = [
           type: "neo4j",
           query: {
             vertex: "PublicSupportTicket",
+            timestampField: "createdAt",
             filters: [{ field: "status", operator: "eq", value: "open" }],
             aggregation: { type: "count" }
           },
@@ -1424,6 +1471,7 @@ const settingsConfigs = [
           type: "neo4j",
           query: {
             vertex: "PublicSupportTicket",
+            timestampField: "createdAt",
             filters: [{ field: "status", operator: "eq", value: "pending" }],
             aggregation: { type: "count" }
           }
@@ -1438,6 +1486,7 @@ const settingsConfigs = [
           type: "neo4j",
           query: {
             vertex: "PublicSupportTicket",
+            timestampField: "createdAt",
             filters: [{ field: "status", operator: "eq", value: "closed" }],
             aggregation: { type: "count" }
           }
@@ -1446,7 +1495,7 @@ const settingsConfigs = [
       {
         id: "ticketStatusChart",
         type: "chart",
-        logicalQueryKeys: ["ticket_status_counts", "realtime:publicSupportTickets"],
+        logicalQueryKeys: ["ticket_status_counts", "realtime:supportOverview"],
         title: "Tickets by status",
         chartType: "bar",
         layout: { x: 0, y: 2, w: 8, h: 4 },
@@ -1454,6 +1503,7 @@ const settingsConfigs = [
           type: "neo4j",
           query: {
             vertex: "PublicSupportTicket",
+            timestampField: "createdAt",
             limit: 200
           },
           transform: [{ type: "groupBy", field: "status" }]
@@ -1486,7 +1536,7 @@ const settingsConfigs = [
       {
         id: "ticketsTable",
         type: "crudTable",
-        logicalQueryKeys: ["open_tickets_recent", "public_support_tickets", "realtime:publicSupportTickets"],
+        logicalQueryKeys: ["open_tickets_recent", "public_support_tickets", "realtime:supportOverview"],
         title: "Recent tickets",
         layout: { x: 0, y: 6, w: 12, h: 6 },
         crudConfigRef: "PublicSupportTicket",
@@ -1627,6 +1677,7 @@ const settingsPageConfigs = [
             { key: "sendCustomerReplyToMerchant", label: "Customer reply → merchant", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
             { key: "sendAdminReplyToCustomer", label: "Admin reply → customer", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
             { key: "sendTicketClosedToCustomer", label: "Ticket closed → customer", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
+            { key: "sendTicketAssignedToAssignee", label: "Ticket assigned → assignee", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
             { key: "keepSameSubjectThread", label: "Keep same subject thread", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
             { key: "merchantEmail", label: "Merchant/staff email", dataType: "email", renderer: "text", colSpan: 2, validation: { email: true } },
             { key: "replyToEmail", label: "Reply-to email", dataType: "email", renderer: "text", colSpan: 2, validation: { email: true } },
@@ -1768,6 +1819,173 @@ async function processDefaultSectionDocument(doc) {
   return created ? { created: 1, updated: 0 } : { created: 0, updated: 0 };
 }
 
+const SEED_TICKET_SOURCE = "migration_seed";
+const SEED_STATUSES = ["open", "pending", "closed"];
+const SEED_SUBJECTS = [
+  "Order not received",
+  "Wrong item shipped",
+  "Refund request",
+  "Damaged product",
+  "Shipping delay",
+  "Account login issue",
+  "Discount code not working",
+  "Cancel order",
+  "Exchange size",
+  "Billing question"
+];
+const SEED_FIRST_NAMES = ["Alex", "Jordan", "Sam", "Taylor", "Morgan", "Casey", "Riley", "Jamie", "Avery", "Quinn"];
+const SEED_LAST_NAMES = ["Lee", "Patel", "Garcia", "Kim", "Nguyen", "Brown", "Davis", "Wilson", "Martinez", "Clark"];
+const SEED_MESSAGES = [
+  "Hi, I placed an order last week and have not received a shipping confirmation yet.",
+  "The package arrived but one item was missing from the box.",
+  "I would like to return this item and get a refund to my original payment method.",
+  "The product arrived with visible damage on the corner.",
+  "Tracking has not updated in several days — can you check with the carrier?",
+  "I cannot log into my account after resetting my password.",
+  "The promo code from your newsletter says it is invalid at checkout.",
+  "Please cancel order #{{order}} before it ships.",
+  "I need to exchange for a different size if possible.",
+  "I was charged twice for the same order — please advise."
+];
+
+const randomInt = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+
+const randomIsoInYear = (year) => {
+  const start = Date.UTC(year, 0, 1);
+  const end = Date.UTC(year + 1, 0, 1);
+  return new Date(start + Math.floor(Math.random() * (end - start))).toISOString();
+};
+
+const pick = (arr) => arr[randomInt(0, arr.length - 1)];
+
+async function seedPublicSupportTickets() {
+  const targetCount = Math.max(0, Math.min(Number(seedTicketCount) || 0, 10000));
+  if (!seedTickets || targetCount === 0) {
+    return { seeded: 0, skipped: true, reason: "disabled" };
+  }
+
+  const existingResult = await args.session.run(
+    `MATCH (t:PublicSupportTicket {source: $source}) RETURN count(t) AS c`,
+    { source: SEED_TICKET_SOURCE }
+  );
+  const rawExisting = existingResult.records[0]?.get("c");
+  const existing = typeof rawExisting?.toNumber === "function" ? rawExisting.toNumber() : Number(rawExisting || 0);
+
+  if (!forceReseedTickets && existing >= targetCount) {
+    return { seeded: 0, skipped: true, reason: "already_seeded", existing, targetCount };
+  }
+
+  const toCreate = forceReseedTickets ? targetCount : targetCount - existing;
+  const seedYear = new Date().getFullYear();
+  const serialPrefix = "SOL";
+
+  if (dryRun) {
+    return {
+      seeded: 0,
+      wouldSeed: toCreate,
+      skipped: false,
+      existing,
+      targetCount,
+      seedYear
+    };
+  }
+
+  if (forceReseedTickets && existing > 0) {
+    await args.session.run(
+      `
+      MATCH (t:PublicSupportTicket {source: $source})
+      OPTIONAL MATCH (t)-[:PublicSupportTicketMessage]->(m:PublicSupportMessage)
+      DETACH DELETE m, t
+      `,
+      { source: SEED_TICKET_SOURCE }
+    );
+  }
+
+  const startIndex = forceReseedTickets ? 1 : existing + 1;
+  const BATCH_SIZE = 50;
+  let seeded = 0;
+
+  for (let offset = 0; offset < toCreate; offset += BATCH_SIZE) {
+    const batchLen = Math.min(BATCH_SIZE, toCreate - offset);
+    const batch = [];
+    for (let b = 0; b < batchLen; b++) {
+      const idx = startIndex + offset + b;
+      const serial = `${serialPrefix}-SEED-${String(idx).padStart(6, "0")}`;
+      const token = args.crypto.randomBytes(16).toString("hex");
+      const status = pick(SEED_STATUSES);
+      const createdAt = randomIsoInYear(seedYear);
+      const subject = pick(SEED_SUBJECTS);
+      const customerName = `${pick(SEED_FIRST_NAMES)} ${pick(SEED_LAST_NAMES)}`;
+      const customerEmail = `seed.customer${idx}@example.com`;
+      const orderNumber = Math.random() < 0.65 ? `#${1000 + randomInt(1, 99999)}` : "";
+      const messageTemplate = pick(SEED_MESSAGES);
+      const initialMessage = messageTemplate.replace("{{order}}", orderNumber || "unknown");
+      const unreadForAdmin = status === "open" && Math.random() < 0.35 ? 1 : 0;
+      batch.push({
+        serial,
+        token,
+        status,
+        subject,
+        customerName,
+        customerEmail,
+        orderNumber,
+        initialMessage,
+        createdAt,
+        updatedAt: createdAt,
+        lastMessageAt: createdAt,
+        trackingUrl: `/support/ticket?serial=${encodeURIComponent(serial)}&token=${encodeURIComponent(token)}`,
+        emailThreadSubject: `[${serial}] ${subject}`,
+        unreadForAdmin,
+        unreadForCustomer: 0,
+        fieldsJson: "{}",
+        attachmentsJson: "[]"
+      });
+    }
+
+    await args.session.run(
+      `
+      UNWIND $batch AS row
+      CREATE (t:PublicSupportTicket {
+        serial: row.serial,
+        ticketAccessToken: row.token,
+        status: row.status,
+        subject: row.subject,
+        customerName: row.customerName,
+        customerEmail: row.customerEmail,
+        orderNumber: row.orderNumber,
+        initialMessage: row.initialMessage,
+        fieldsJson: row.fieldsJson,
+        source: $source,
+        sourceUrl: '',
+        trackingUrl: row.trackingUrl,
+        emailThreadSubject: row.emailThreadSubject,
+        unreadForAdmin: row.unreadForAdmin,
+        unreadForCustomer: row.unreadForCustomer,
+        lastMessageSender: 'customer',
+        createdAt: datetime(row.createdAt),
+        updatedAt: datetime(row.updatedAt),
+        lastMessageAt: datetime(row.lastMessageAt)
+      })
+      CREATE (m:PublicSupportMessage {
+        ticketSerial: row.serial,
+        senderType: 'customer',
+        authorName: row.customerName,
+        authorEmail: row.customerEmail,
+        message: row.initialMessage,
+        attachmentsJson: row.attachmentsJson,
+        createdAt: datetime(row.createdAt),
+        updatedAt: datetime(row.updatedAt)
+      })
+      CREATE (t)-[:PublicSupportTicketMessage]->(m)
+      `,
+      { batch, source: SEED_TICKET_SOURCE }
+    );
+    seeded += batchLen;
+  }
+
+  return { seeded, skipped: false, existing, targetCount, seedYear };
+}
+
 const stats = {
   created: 0,
   updated: 0,
@@ -1797,9 +2015,22 @@ for (let k = 0; k < defaultSectionDocuments.length; k++) {
   stats.updated += r.updated;
 }
 
+const ticketSeedStats = await seedPublicSupportTickets();
+stats.ticketSeed = ticketSeedStats;
+
+const ticketSeedNote = ticketSeedStats.skipped
+  ? ticketSeedStats.reason === "already_seeded"
+    ? ` Tickets: ${ticketSeedStats.existing} seed rows already present (skipped).`
+    : ""
+  : dryRun
+    ? ` Would seed ${ticketSeedStats.wouldSeed || 0} tickets across ${ticketSeedStats.seedYear}.`
+    : ` Seeded ${ticketSeedStats.seeded || 0} tickets across ${ticketSeedStats.seedYear}.`;
+
 return {
   success: true,
-  message: dryRun ? `Solvo settings migration dry run. Would touch ${stats.total} settings.` : `Solvo settings migration complete. Created ${stats.created}, updated ${stats.updated}.`,
+  message: (dryRun
+    ? `Solvo settings migration dry run. Would touch ${stats.total} settings.`
+    : `Solvo settings migration complete. Created ${stats.created}, updated ${stats.updated}.`) + ticketSeedNote,
   stats
 };
 '''

@@ -1,3 +1,5 @@
+import type { Session } from "neo4j-driver";
+
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
@@ -15,6 +17,7 @@ export async function fetchFormMetaData(
   pageKeyName?: string,
   url?: string,
   skipComponentData?: boolean,
+  dbSession?: Session,
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   let form: IFormMetaData | null = null;
@@ -46,6 +49,7 @@ export async function fetchFormMetaData(
     {
       nodes: {},
       relationships: {},
+      ...(dbSession ? { dbSession } : {}),
       // @ts-expect-error ignore error
       $urlFilter: { filter: { url: url } },
     },

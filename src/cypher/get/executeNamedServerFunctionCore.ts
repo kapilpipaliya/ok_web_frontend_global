@@ -51,6 +51,8 @@ import {
   encryptClientSecret,
 } from "~/lib/auth/tokenEncryption";
 import { sendEmail } from "~/lib/playwright/sendEmail";
+import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { sendInvitationEmail } from "~/routes/api/users/functions/sendInvitationEmail";
 import { createDatabaseBackup } from "~/lib/backup/createDatabaseBackup";
 import { restoreFromBackup } from "~/lib/backup/restoreFromBackup";
@@ -533,6 +535,8 @@ export async function executeNamedServerFunctionCore(
       decryptClientSecret,
       encryptClientSecret,
       sendEmail,
+      renderPageAsHtml,
+      sendNotificationEmail,
       // Backup/restore functions
       createDatabaseBackup,
       restoreFromBackup,

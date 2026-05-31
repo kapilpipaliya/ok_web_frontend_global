@@ -5,7 +5,7 @@
       L: Function
       P: {
         key: pollDashboardRealtimeEvents
-        description: Polls backend change watermarks and returns invalidation targets for dashboard realtime bridge (no row patching).
+        description: Polls backend change watermarks using dashboard realtime.entities config and returns invalidation targets for the realtime bridge.
         body:
           '''
 const actualUser = await args.getUserFromSession();
@@ -27,48 +27,47 @@ const sinceIso =
     ? watermark.trim()
     : new Date(Date.now() - 60000).toISOString();
 
-const CHANNEL_REGISTRY = {
-  publicSupportTickets: {
-    realtimeLogicalKey: "realtime:publicSupportTickets",
-    entities: [
-      {
-        vertexLabel: "PublicSupportTicket",
-        timestampField: "updatedAt",
-        logicalKeys: [
-          "public_support_tickets",
-          "ticket_status_counts",
-          "open_tickets_recent",
-          "entity:PublicSupportTicket"
-        ]
-      }
-    ]
-  }
+const sanitizeLabel = (value) => {
+  if (value == null) return null;
+  const label = String(value).trim();
+  if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(label)) return null;
+  return label;
 };
 
-const registry = CHANNEL_REGISTRY[channelKey];
-if (!registry) {
-  return {
-    success: false,
-    message: `Unknown realtime channel: ${channelKey}. Register it in CHANNEL_REGISTRY.`,
-    data: null
-  };
-}
+const sanitizeField = (value) => {
+  if (value == null) return null;
+  const field = String(value).trim();
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(field)) return null;
+  return field;
+};
 
+const timestampPropertyExpr = (fieldName) => {
+  const field = sanitizeField(fieldName || "updatedAt");
+  if (!field) return null;
+  return `datetime(toString(v.${field}))`;
+};
+
+const realtimeLogicalKey =
+  typeof realtimeConfig?.logicalKey === "string" && realtimeConfig.logicalKey.trim() !== ""
+    ? realtimeConfig.logicalKey.trim()
+    : `realtime:${channelKey}`;
+
+const entities = Array.isArray(realtimeConfig?.entities) ? realtimeConfig.entities : [];
 const events = [];
-const logicalKeySet = new Set([registry.realtimeLogicalKey]);
+const logicalKeySet = new Set([realtimeLogicalKey]);
 const querySignatureSet = new Set();
 
-for (let entityIndex = 0; entityIndex < registry.entities.length; entityIndex++) {
-  const entityConfig = registry.entities[entityIndex];
-  const vertexLabel = entityConfig.vertexLabel;
-  const timestampField = entityConfig.timestampField || "updatedAt";
-  if (!vertexLabel || !/^[A-Za-z][A-Za-z0-9_]*$/.test(vertexLabel)) continue;
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(timestampField)) continue;
+for (let entityIndex = 0; entityIndex < entities.length; entityIndex++) {
+  const entityConfig = entities[entityIndex];
+  const vertexLabel = sanitizeLabel(entityConfig?.vertexLabel || entityConfig?.vertex);
+  const timestampField = sanitizeField(entityConfig?.timestampField || "updatedAt");
+  const timestampExpr = timestampPropertyExpr(timestampField);
+  if (!vertexLabel || !timestampField || !timestampExpr) continue;
 
   const cypher = `
     MATCH (v:${vertexLabel})
     WHERE v.${timestampField} IS NOT NULL
-      AND v.${timestampField} > datetime($sinceIso)
+      AND ${timestampExpr} > datetime($sinceIso)
     RETURN elementId(v) AS id, v.${timestampField} AS changedAt
     ORDER BY changedAt DESC
     LIMIT 100
@@ -100,6 +99,7 @@ for (let entityIndex = 0; entityIndex < registry.entities.length; entityIndex++)
     for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
       logicalKeySet.add(String(keys[keyIndex]));
     }
+    logicalKeySet.add(`entity:${vertexLabel}`);
   }
 }
 

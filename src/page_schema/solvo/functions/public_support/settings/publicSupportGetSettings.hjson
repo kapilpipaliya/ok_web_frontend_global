@@ -53,6 +53,7 @@ const defaults = {
     sendCustomerReplyToMerchant: true,
     sendAdminReplyToCustomer: true,
     sendTicketClosedToCustomer: true,
+    sendTicketAssignedToAssignee: true,
     merchantEmail: "",
     replyToEmail: "",
     fromName: "Solvo Support",

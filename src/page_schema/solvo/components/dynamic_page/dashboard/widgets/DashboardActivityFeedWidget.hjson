@@ -7,16 +7,32 @@
         key: DashboardActivityFeedWidget
         fns:
           '''
+const pickDisplayValue = (properties, fieldConfig, fallback) => {
+  const p = properties || {};
+  const keys = Array.isArray(fieldConfig)
+    ? fieldConfig
+    : typeof fieldConfig === "string" && fieldConfig.trim() !== ""
+      ? [fieldConfig]
+      : ["title", "name", "subject", "label", "serial", "key"];
+  for (let index = 0; index < keys.length; index++) {
+    const value = p[keys[index]];
+    if (value != null && String(value).trim() !== "") return String(value);
+  }
+  return fallback;
+};
+
 const getRows = () => {
+  const widgetConfig = args.contextData.props?.widgetConfig || {};
+  const displayFields = widgetConfig.displayFields || {};
   const widgetData = args.contextData.props?.widgetData || {};
   const rows = Array.isArray(widgetData.rows) ? widgetData.rows : [];
   return rows.map((row) => {
     const p = row?.P || {};
     return {
       id: row?.id,
-      title: p.title || p.ticketSerial || p.name || p.subject || row?.id || "Item",
-      subtitle: p.status || p.type || "",
-      time: p.updatedAt || p.createdAt || ""
+      title: pickDisplayValue(p, displayFields.title, row?.id || "Item"),
+      subtitle: pickDisplayValue(p, displayFields.subtitle, ""),
+      time: pickDisplayValue(p, displayFields.time, "")
     };
   });
 };

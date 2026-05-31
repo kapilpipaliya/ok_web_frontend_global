@@ -15,18 +15,116 @@
       P: {
         componentName: Html
         displayOrder: 1
-        css:
-          '''return `._id {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 24px;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  color: ${args.theme.var.color.text};
-}`;'''
         props:
           '''return {
   as: "div"
 };'''
+        css:
+          '''return `._id {
+  min-height: 100vh;
+  background-color: ${args.theme.var.color.background_hex};
+  color: ${args.theme.var.color.text_hex};
+  padding: 32px;
+}`;'''
+      }
+    }
+    {
+      id: "container"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  max-width: 600px;
+  margin: auto;
+  padding: 32px;
+  background-color: ${args.theme.var.color.background_light_100_hex};
+  color: ${args.theme.var.color.text_hex};
+}`;'''
+      }
+    }
+    {
+      id: "logoSection"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "logoLink"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''return {
+  as: "a",
+  href: "/"
+};'''
+      }
+    }
+    {
+      id: "logoImg"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''return {
+  alt: "Logo",
+  as: "img",
+  src: (typeof window !== "undefined" ? window.location.origin : "") + "/api/file/downloadCompanyRectangularLogo"
+};'''
+        css:
+          '''return `._id {
+  height: 80px;
+  margin-bottom: 24px;
+}`;'''
+      }
+    }
+    {
+      id: "logoHr"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        props:
+          '''return {
+  as: "hr"
+};'''
+        css:
+          '''return `._id {
+  border: none;
+  border-top: 1px solid ${args.theme.var.color.border_hex};
+  margin-top: 24px;
+  margin-bottom: 24px;
+}`;'''
+      }
+    }
+    {
+      id: "content"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 2
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_hex};
+}`;'''
       }
     }
     {
@@ -40,10 +138,17 @@
   as: "h1",
   text: "Support request created"
 };'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_hex};
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}`;'''
       }
     }
     {
-      id: "body"
+      id: "serialRow"
       L: Attr
       P: {
         componentName: Html
@@ -51,12 +156,18 @@
         props:
           '''return {
   as: "p",
-  text: `Ticket ${args.searchParams?.serial || ""} was created. We received your message and will reply by email.`
+  text: `Ticket: ${args.searchParams?.serial || ""}`,
+  hide: () => !args.searchParams?.serial
 };'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_hex};
+  margin-bottom: 16px;
+}`;'''
       }
     }
     {
-      id: "message"
+      id: "subjectRow"
       L: Attr
       P: {
         componentName: Html
@@ -64,8 +175,56 @@
         props:
           '''return {
   as: "p",
-  text: args.searchParams?.message || ""
+  text: `Subject: ${args.searchParams?.subject || ""}`,
+  hide: () => !args.searchParams?.subject
 };'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_hex};
+  margin-bottom: 16px;
+}`;'''
+      }
+    }
+    {
+      id: "intro"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 4
+        props:
+          '''return {
+  as: "p",
+  text: "We received your message and will reply by email."
+};'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_hex};
+  margin-bottom: 16px;
+}`;'''
+      }
+    }
+    {
+      id: "messageBox"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 5
+        props:
+          '''return {
+  as: "div",
+  text: args.searchParams?.message || "",
+  hide: () => !String(args.searchParams?.message || "").trim()
+};'''
+        css:
+          '''return `._id {
+  background-color: ${args.theme.var.color.background_hex};
+  border: 1px solid ${args.theme.var.color.border_hex};
+  border-radius: 8px;
+  margin: 24px 0;
+  padding: 16px;
+  white-space: pre-wrap;
+  color: ${args.theme.var.color.text_hex};
+}`;'''
       }
     }
     {
@@ -73,46 +232,73 @@
       L: Attr
       P: {
         componentName: Html
-        displayOrder: 4
+        displayOrder: 6
         props:
           '''return {
   as: "a",
   href: args.searchParams?.trackingUrl || "#",
-  text: "Track support request"
+  text: "Track this support request",
+  hide: () => !args.searchParams?.trackingUrl
 };'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.primary_hex};
+  font-weight: 500;
+  text-decoration: none;
+}`;'''
+      }
+    }
+    {
+      id: "footer"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 3
+        props:
+          '''return {
+  as: "div"
+};'''
+        css:
+          '''return `._id {
+  margin-top: 32px;
+  text-align: center;
+}`;'''
+      }
+    }
+    {
+      id: "footerText"
+      L: Attr
+      P: {
+        componentName: Html
+        displayOrder: 1
+        props:
+          '''return {
+  as: "p",
+  text: `© 2025 ${args.globalSetting?.P?.appName || "Solvo"}. All rights reserved.`
+};'''
+        css:
+          '''return `._id {
+  color: ${args.theme.var.color.text_light_200_hex};
+  font-size: 12px;
+}`;'''
       }
     }
   ]
   edges: [
-    {
-      id: e1
-      T: Attr
-      S: "template"
-      E: "root"
-    }
-    {
-      id: e2
-      T: Attr
-      S: "root"
-      E: "title"
-    }
-    {
-      id: e3
-      T: Attr
-      S: "root"
-      E: "body"
-    }
-    {
-      id: e4
-      T: Attr
-      S: "root"
-      E: "message"
-    }
-    {
-      id: e5
-      T: Attr
-      S: "root"
-      E: "link"
-    }
+    { id: "e1", T: "Attr", S: "template", E: "root" }
+    { id: "e2", T: "Attr", S: "root", E: "container" }
+    { id: "e3", T: "Attr", S: "container", E: "logoSection" }
+    { id: "e4", T: "Attr", S: "logoSection", E: "logoLink" }
+    { id: "e5", T: "Attr", S: "logoLink", E: "logoImg" }
+    { id: "e6", T: "Attr", S: "logoSection", E: "logoHr" }
+    { id: "e7", T: "Attr", S: "container", E: "content" }
+    { id: "e8", T: "Attr", S: "content", E: "title" }
+    { id: "e9", T: "Attr", S: "content", E: "serialRow" }
+    { id: "e10", T: "Attr", S: "content", E: "subjectRow" }
+    { id: "e11", T: "Attr", S: "content", E: "intro" }
+    { id: "e12", T: "Attr", S: "content", E: "messageBox" }
+    { id: "e13", T: "Attr", S: "content", E: "link" }
+    { id: "e14", T: "Attr", S: "container", E: "footer" }
+    { id: "e15", T: "Attr", S: "footer", E: "footerText" }
   ]
 }

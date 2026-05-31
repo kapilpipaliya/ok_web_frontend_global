@@ -13,6 +13,13 @@ export type DashboardRealtimeConfig = {
   channel?: string;
   pollingIntervalMs?: number;
   staleWhileRevalidate?: boolean;
+  logicalKey?: string;
+  entities?: {
+    vertexLabel?: string;
+    vertex?: string;
+    timestampField?: string;
+    logicalKeys?: string[];
+  }[];
 };
 
 export type PollRealtimeEventsFn = (context: {

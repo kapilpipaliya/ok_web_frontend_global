@@ -21,6 +21,7 @@ import {
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { filterWebsiteSchemasForShopSync } from "~/lib/schema/filterSchemasForShopSync";
 import { performSchemaExport } from "~/routes/api/schema/export/performSchemaExport";
+import { restartSubdomainWorkersForSubdomain } from "~/server/queue/initWorkersCore";
 
 export interface SchemaSyncShopResult {
   shop: string;
@@ -185,6 +186,15 @@ export async function syncSchemaToSingleShop(
           shop,
           "success",
           nowIso,
+        );
+      }
+
+      try {
+        await restartSubdomainWorkersForSubdomain(shopDatabaseName);
+      } catch (workerError) {
+        console.error(
+          `[schema/sync] Worker restart failed for ${shopDatabaseName}:`,
+          workerError,
         );
       }
 

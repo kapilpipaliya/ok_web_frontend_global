@@ -23,15 +23,6 @@ export type MutationEvent = {
 };
 
 /** Map entity labels to logical query keys used in widget configs. */
-const ENTITY_LOGICAL_KEY_MAP: Record<string, string[]> = {
-  PublicSupportTicket: [
-    "public_support_tickets",
-    "ticket_status_counts",
-    "open_tickets_recent",
-  ],
-  SupportTicket: ["support_tickets", "ticket_status_counts"],
-};
-
 export function resolveMutationInvalidationTargets(event: MutationEvent): {
   querySignatures: string[];
   logicalKeys: string[];
@@ -40,8 +31,6 @@ export function resolveMutationInvalidationTargets(event: MutationEvent): {
   const logicalKeys = [...(event.logicalKeys || [])];
 
   if (event.entityType) {
-    const mapped = ENTITY_LOGICAL_KEY_MAP[event.entityType];
-    if (mapped) logicalKeys.push(...mapped);
     logicalKeys.push(`entity:${event.entityType}`);
   }
 

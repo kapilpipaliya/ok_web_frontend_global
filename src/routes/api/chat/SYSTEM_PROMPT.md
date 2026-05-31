@@ -585,7 +585,7 @@ The theme system supports any custom variables, not just colors. Access all them
 - Light shades: `_light_100` to `_light_900` (light_100 = close to base, light_900 = close to white)
 - Dark shades: `_dark_100` to `_dark_900` (dark_100 = close to base, dark_900 = close to black)
 - Text colors: Automatic with `_text` suffix (e.g., `primary_text`, `background_light_200_text`)
-- Hex colors (email / OKLCH-incompatible clients): Automatic with `_hex` suffix (e.g., `text_hex`, `primary_hex`, `primary_text_hex`) — follows **current color mode** (including dark mode and shade swap), returns `#rrggbb`
+- Hex colors (required for email templates / OKLCH-incompatible clients): Automatic with `_hex` suffix (e.g., `text_hex`, `primary_hex`, `background_light_100_hex`, `border_hex`, `primary_text_hex`) — follows **current color mode** (including dark mode and shade swap), returns `#rrggbb`. **Always use `_hex` theme colors in EmailTemplate schemas** — never use OKLCH theme variables directly in email CSS.
 - **Dark mode behavior**: Shades automatically swap (`_light_` becomes `_dark_` and vice versa)
 
 **Custom Theme Variables:**
@@ -609,6 +609,47 @@ return `._id {
 }`;
 '''
 ```
+
+## Email Templates
+
+Email templates are defined as hjson schemas under `src/page_schema/[website]/email_templates/` with root label `EmailTemplate`. Built-in auth/signup templates live in TypeScript (`src/routes/internal/page/(email)/`); follow the same layout and color rules for schema-based templates.
+
+**Reference files:**
+- `src/routes/internal/page/(email)/baseEmailTemplate.ts` — shared wrapper (logo, content area, footer)
+- `src/routes/internal/page/(email)/(templates)/(auth)/passwordResetSchema.ts` — content styling example
+
+**Required layout structure (Attr vertices):**
+1. **Outer wrapper** — full viewport background: `background_hex`, `text_hex`, `padding: 32px`
+2. **Inner container** — `max-width: 600px`, centered, `background_light_100_hex`, `padding: 32px`
+3. **Logo section** — linked company logo (`/api/file/downloadCompanyRectangularLogo`) + `<hr>` with `border_hex`
+4. **Content** — headings, paragraphs, highlight boxes, links
+5. **Footer** — centered copyright using `text_light_200_hex`, `font-size: 12px`, `args.globalSetting?.P?.appName`
+
+**Color rules for email CSS:**
+- Use **only** `_hex` theme variables (e.g. `${args.theme.var.color.text_hex}`), not OKLCH values like `text` or `primary`
+- Body text: `text_hex`
+- Headings: `text_hex`, `font-size: 24px`, `font-weight: bold`, `margin-bottom: 16px`
+- Links: `primary_hex`
+- Highlight / message boxes: `background_hex` background, `border_hex` border, `border-radius: 8px`
+- OTP / emphasis boxes (when needed): `primary_hex` border, `background_light_100_hex` background
+- Buttons (when needed): `primary_hex` background, `primary_text_hex` text
+
+**Dynamic values:** Read runtime data from `args.searchParams` (e.g. ticket serial, message, tracking URL). Use `hide: () => !value` to omit optional rows.
+
+**Example EmailTemplate root vertex:**
+```javascript
+{
+  id: "template",
+  L: "EmailTemplate",
+  P: {
+    key: "MyEmailTemplate",
+    title: "My Email",
+    description: "When this email is sent"
+  }
+}
+```
+
+Connect template content with `Attr` edges: `EmailTemplate -[Attr]-> root -[Attr]-> container -> logoSection | content | footer`.
 
 ## Component Variants
 
@@ -791,6 +832,7 @@ Use **`hooks.afterCreate` / `hooks.afterUpdate`** on the table config to denorma
 - Use numeric IDs for the graph
 - The graph must be a directed acyclic graph (DAG) to prevent circular dependencies
 - do not short variable name, use meaningful variable names.
+- Email templates must use `_hex` theme colors and follow the layout in `baseEmailTemplate.ts` (logo, 600px container, footer).
 
 ## Import Guidelines
 

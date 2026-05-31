@@ -7,16 +7,32 @@
         key: DashboardTimelineWidget
         fns:
           '''
+const pickDisplayValue = (properties, fieldConfig, fallback) => {
+  const p = properties || {};
+  const keys = Array.isArray(fieldConfig)
+    ? fieldConfig
+    : typeof fieldConfig === "string" && fieldConfig.trim() !== ""
+      ? [fieldConfig]
+      : ["title", "name", "subject", "label", "serial", "key"];
+  for (let index = 0; index < keys.length; index++) {
+    const value = p[keys[index]];
+    if (value != null && String(value).trim() !== "") return String(value);
+  }
+  return fallback;
+};
+
 const getEvents = () => {
+  const widgetConfig = args.contextData.props?.widgetConfig || {};
+  const displayFields = widgetConfig.displayFields || {};
   const widgetData = args.contextData.props?.widgetData || {};
   const rows = Array.isArray(widgetData.rows) ? widgetData.rows : [];
   return rows.map((row) => {
     const p = row?.P || {};
     return {
       id: row?.id,
-      label: p.title || p.ticketSerial || p.name || row?.id || "Event",
-      detail: p.status || "",
-      at: p.updatedAt || p.createdAt || ""
+      label: pickDisplayValue(p, displayFields.title, row?.id || "Event"),
+      detail: pickDisplayValue(p, displayFields.subtitle, ""),
+      at: pickDisplayValue(p, displayFields.time, "")
     };
   });
 };

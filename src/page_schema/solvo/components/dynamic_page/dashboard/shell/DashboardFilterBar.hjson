@@ -10,12 +10,23 @@
           '''
 const getRuntime = () => args.contextData.props?.dashboardRuntime?.() || null;
 
-const DATE_RANGE_OPTIONS = [
+const DEFAULT_DATE_RANGE_OPTIONS = [
+  { value: "all_time", label: "All time" },
   { value: "last_7_days", label: "Last 7 days" },
   { value: "last_30_days", label: "Last 30 days" },
   { value: "last_90_days", label: "Last 90 days" },
   { value: "last_year", label: "Last year" }
 ];
+
+const getDateRangeOptions = (filter) => {
+  if (Array.isArray(filter?.options) && filter.options.length > 0) {
+    return filter.options.map((row) => ({
+      value: row.value != null ? String(row.value) : "",
+      label: row.label != null ? String(row.label) : String(row.value)
+    }));
+  }
+  return DEFAULT_DATE_RANGE_OPTIONS;
+};
 
 const applyFilter = (filterKey, value) => {
   const runtime = getRuntime();
@@ -46,7 +57,8 @@ return {
   applyFilter,
   applyTimeRange,
   getSelectOptions,
-  DATE_RANGE_OPTIONS
+  getDateRangeOptions,
+  DEFAULT_DATE_RANGE_OPTIONS
 };
 '''
       }
@@ -157,11 +169,11 @@ return {
           '''
 const filter = args.contextData.filterItem;
 const runtime = args.fns.getRuntime();
-const current = runtime?.store?.timeRange?.() || filter.default || "last_30_days";
+const current = runtime?.store?.timeRange?.() || filter.default || "last_year";
 return {
   hide: filter.type !== "dateRange",
   value: [String(current)],
-  options: args.fns.DATE_RANGE_OPTIONS,
+  options: args.fns.getDateRangeOptions(filter),
   search: false,
   multiple: false,
   onChange: (newValue) => {
