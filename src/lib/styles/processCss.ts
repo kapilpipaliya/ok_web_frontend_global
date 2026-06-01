@@ -12,10 +12,16 @@ const ID_PLACEHOLDER_REGEX = /\._id/g;
  * @param uniqueId - The unique ID to replace '._id' placeholders with
  * @returns Processed CSS string
  */
+export type ProcessCssOptions = {
+  /** When true, keep `._id` placeholders (for hashing before scoping). */
+  skipIdReplace?: boolean;
+};
+
 export const processCssContent = (
   cssContent: CssType,
   functionArgs: FunctionArgumentType,
   uniqueId: string,
+  options?: ProcessCssOptions,
 ): string | undefined => {
   if (!cssContent) {
     return undefined;
@@ -28,8 +34,8 @@ export const processCssContent = (
       const cssItem = cssContent[i];
       const processed =
         typeof cssItem === "function"
-          ? processStyle(cssItem(functionArgs), functionArgs, uniqueId)
-          : processStyle(cssItem, functionArgs, uniqueId);
+          ? processStyle(cssItem(functionArgs), functionArgs, uniqueId, options)
+          : processStyle(cssItem, functionArgs, uniqueId, options);
 
       if (processed) {
         result += (result ? "\n" : "") + processed;
@@ -40,11 +46,11 @@ export const processCssContent = (
 
   // Handle function CSS
   if (typeof cssContent === "function") {
-    return processStyle(cssContent(functionArgs), functionArgs, uniqueId);
+    return processStyle(cssContent(functionArgs), functionArgs, uniqueId, options);
   }
 
   // Handle string CSS directly
-  return processStyle(cssContent, functionArgs, uniqueId);
+  return processStyle(cssContent, functionArgs, uniqueId, options);
 };
 
 /**
@@ -55,6 +61,7 @@ export const processStyle = (
   style: string | string[] | undefined,
   functionArgs: FunctionArgumentType,
   uniqueId: string,
+  options?: ProcessCssOptions,
 ): string => {
   if (!style) {
     return "";
@@ -63,7 +70,7 @@ export const processStyle = (
   if (Array.isArray(style)) {
     let result = "";
     for (let i = 0; i < style.length; i++) {
-      const processed = processStyle(style[i], functionArgs, uniqueId);
+      const processed = processStyle(style[i], functionArgs, uniqueId, options);
       if (processed) {
         result += (result ? "\n" : "") + processed;
       }
@@ -91,9 +98,14 @@ export const processStyle = (
 
     const evaluatedStyle = cssFunction(functionArgs);
 
+    const replaceId = (css: string) =>
+      options?.skipIdReplace
+        ? css
+        : css.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
+
     // Handle string result
     if (typeof evaluatedStyle === "string") {
-      return evaluatedStyle.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
+      return replaceId(evaluatedStyle);
     }
 
     // Handle array result (when function body returns an array)
@@ -103,7 +115,7 @@ export const processStyle = (
       for (let i = 0; i < evaluatedStyle.length; i++) {
         const item = evaluatedStyle[i];
         if (typeof item === "string") {
-          const processed = item.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
+          const processed = replaceId(item);
           if (processed) {
             result += (result ? "\n" : "") + processed;
           }

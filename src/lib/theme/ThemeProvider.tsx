@@ -1,5 +1,6 @@
 import { type Component, createMemo, type JSX } from "solid-js";
 import { StyleRenderer } from "~/components/StyleRenderer";
+import { ComponentStylesProvider } from "~/lib/styles/ComponentStylesContext";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
 import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
 import { themeConfig } from "../graph/get/sync/theme/themeConfig";
@@ -76,8 +77,10 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
 
   return (
     <ThemeContext.Provider value={themeProxy as ThemeContextType}>
-      <StyleRenderer cssContent={[themeCssVars()]} id="theme-variables" />
-      {props.children}
+      <ComponentStylesProvider>
+        <StyleRenderer cssContent={[themeCssVars()]} id="theme-variables" />
+        {props.children}
+      </ComponentStylesProvider>
     </ThemeContext.Provider>
   );
 };

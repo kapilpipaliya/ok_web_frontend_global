@@ -12,7 +12,7 @@ export function createMergedClasses(
   },
   options: {
     dynamicProps: () => DynamicPropsType;
-    styleId: string;
+    styleId: () => string | undefined;
     cssStyle: () => string | undefined;
   },
 ): () => Record<string, string> {
@@ -38,11 +38,12 @@ export function createMergedClasses(
       {} as Record<string, string>,
     );
 
-    if (style) {
+    const hashClass = options.styleId();
+    if (style && hashClass) {
       if (classes.class) {
-        classes.class = `${classes.class} ${options.styleId}`;
+        classes.class = `${classes.class} ${hashClass}`;
       } else {
-        classes.class = options.styleId;
+        classes.class = hashClass;
       }
     }
     if (props.class) {

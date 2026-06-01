@@ -46,7 +46,8 @@ import { createMergedClasses } from "~/components/form/dynamic_component/functio
 import { createValueUpdater } from "~/components/form/dynamic_component/functions/value/createValueUpdater";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { createStore } from "solid-js/store";
-import { Style2 } from "~/components/StyleRenderer";
+import { ComponentScopedStyle } from "~/components/ComponentScopedStyle";
+import { useComponentStylesMode } from "~/lib/styles/ComponentStylesContext";
 
 export type DynamicComponentProps = Readonly<{
   componentName?: string;
@@ -72,6 +73,7 @@ export type DynamicComponentProps = Readonly<{
  */
 export function DynamicComponent(props: DynamicComponentProps) {
   const [graph, setGraph] = useGraph();
+  const { usePerComponentStyles } = useComponentStylesMode();
   const formId = useFormContext();
   const formVertex = () =>
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
@@ -244,8 +246,8 @@ export function DynamicComponent(props: DynamicComponentProps) {
       }}
     >
       <Suspense>
-        <Show when={cssStyle()} keyed>
-          <Style2 cssContent={cssStyle()!} />
+        <Show when={cssStyle() && usePerComponentStyles()} keyed>
+          <ComponentScopedStyle cssContent={cssStyle()!} />
         </Show>
         {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>
         comp:{componentName()}

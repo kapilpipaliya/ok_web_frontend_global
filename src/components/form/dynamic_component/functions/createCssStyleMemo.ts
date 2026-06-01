@@ -1,20 +1,10 @@
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import { createUniqueId } from "~/lib/solid/createUniqueId";
 import { createMemo, type Accessor } from "solid-js";
-import { processCssContent } from "~/lib/styles/processCss";
 
-/**
- * Creates a memo for CSS styles
- *
- * @param props - Component props containing meta vertex
- * @param options - Options including function argument getter
- * @returns Object with cssStyle accessor (returns string | undefined) and styleId
- *
- * Note: CSS input can be string, array, or function returning either.
- * The output is always a single string (or undefined), as processCssContent
- * handles all array cases internally and joins them.
- */
+import { scopeComponentCss } from "~/lib/styles/scopeComponentCss";
+import { useComponentCssLifecycle } from "~/lib/styles/useComponentCssLifecycle";
+
 export function createCssStyleMemo(
   props: {
     meta: Vertex;
@@ -24,19 +14,19 @@ export function createCssStyleMemo(
   },
 ): {
   cssStyle: Accessor<string | undefined>;
-  styleId: string;
+  styleId: Accessor<string | undefined>;
 } {
-  const styleId = createUniqueId();
+  const scopedCss = createMemo(() =>
+    scopeComponentCss(
+      props.meta.P.css,
+      options.getFunctionArgumentWithValue(),
+    ),
+  );
 
-  const cssStyle = createMemo<string | undefined>(() => {
-    try {
-      const functionArgs = options.getFunctionArgumentWithValue();
-      return processCssContent(props.meta.P.css, functionArgs, styleId);
-    } catch (error) {
-      console.error("Error in css:", error);
-      return "";
-    }
-  });
+  useComponentCssLifecycle(scopedCss);
+
+  const cssStyle = () => scopedCss()?.scoped;
+  const styleId = () => scopedCss()?.hash;
 
   return { cssStyle, styleId };
 }
