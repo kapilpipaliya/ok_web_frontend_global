@@ -24,11 +24,10 @@ return `._id {
 '''
         props:
           '''
-const ticketState = args.fns.getTicketState?.() || {};
 const showForm = args.fns.showInternalNoteForm?.() === true;
 return {
   as: "div",
-  hide: !ticketState.canShowInternalNoteTools || !showForm
+  hide: !args.fns.canShowInternalNoteTools?.() || !showForm
 };'''
       }
     },

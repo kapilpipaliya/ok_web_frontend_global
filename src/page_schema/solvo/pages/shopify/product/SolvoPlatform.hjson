@@ -1,0 +1,63 @@
+{
+  vertexes: [
+    {
+      id: "page_root"
+      L: Page
+      P: {
+        key: SolvoPlatform
+        title: Solvo Platform — Page Runtime Engine
+        url: /platform
+        public: true
+        fns:
+          '''
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+'''
+        props:
+          '''return { isNoPermissionCheck: true };'''
+      }
+    }
+    {
+      id: "meta_desc"
+      L: Attr
+      P: {
+        displayOrder: 0
+        componentName: Html
+        props:
+          '''return {
+  as: "meta",
+  name: "description",
+  content: "Solvo Page Runtime Engine — config-driven marketing sites, documentation, portals, and CMS pages from JSON or server functions."
+};'''
+      }
+    }
+    {
+      id: "dynamic_page_attr"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DynamicPage
+        key: solvo_platform_dynamic_page
+        props:
+          '''
+return {
+  tableVertexLabel: "SolvoPlatform",
+  tableSettingsLabel: "SolvoPlatform",
+  loadFromSetting: true,
+  pageMode: "webpage"
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e0", T: "Attr", S: "page_root", E: "meta_desc" }
+    { id: "e1", T: "Attr", S: "page_root", E: "dynamic_page_attr" }
+  ]
+}

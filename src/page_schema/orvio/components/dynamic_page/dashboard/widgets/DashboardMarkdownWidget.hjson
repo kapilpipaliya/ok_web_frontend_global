@@ -1,0 +1,40 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardMarkdownWidget
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const widgetConfig = args.contextData.props?.widgetConfig || {};
+const content = widgetConfig.content || widgetConfig.markdown || widgetConfig.html || "";
+return {
+  as: "div",
+  text: content,
+  textType: widgetConfig.type === "html" ? "html" : "markdown"
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+  ]
+}

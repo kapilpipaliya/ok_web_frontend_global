@@ -53,7 +53,11 @@ const defaultSupportSystem = {
   allowTicketCloseByCustomer: true,
   sendEmailNotifications: true,
   publicTrackingEnabled: true,
-  defaultTicketStatus: "open"
+  defaultTicketStatus: "open",
+  portalLinkEnabled: true,
+  portalLinkLabel: "Staff portal",
+  portalSignInPath: "/auth/signin",
+  portalBaseUrl: ""
 };
 
 const defaultSupportTheme = {
@@ -1366,7 +1370,7 @@ const settingsConfigs = [
       version: 1
     },
     layout: {
-      type: "grid",
+      componentName: "Grid",
       columns: 12,
       rowHeight: 80,
       gap: 16,
@@ -1394,7 +1398,7 @@ const settingsConfigs = [
       {
         key: "status",
         label: "Status",
-        type: "select",
+        componentName: "Select",
         default: "",
         options: [
           { value: "", label: "All statuses" },
@@ -1442,6 +1446,19 @@ const settingsConfigs = [
         }
       }
     },
+    headerActions: [
+      {
+        key: "staffPortal",
+        type: "settingsLink",
+        resolveFunction: "getPortalLink",
+        enabledField: "portalLinkEnabled",
+        labelField: "portalLinkLabel",
+        hrefField: "portalSignInUrl",
+        openInNewTab: true,
+        showInIframeOnly: true,
+        variant: "secondary"
+      }
+    ],
     widgets: [
       {
         id: "openTickets",
@@ -1494,7 +1511,7 @@ const settingsConfigs = [
       },
       {
         id: "ticketStatusChart",
-        type: "chart",
+        componentName: "Chart",
         logicalQueryKeys: ["ticket_status_counts", "realtime:supportOverview"],
         title: "Tickets by status",
         chartType: "bar",
@@ -1523,12 +1540,12 @@ const settingsConfigs = [
         layout: { x: 8, y: 2, w: 4, h: 2 },
         actions: [
           { key: "allTickets", label: "All tickets", to: "/admin/support/tickets" },
-          { key: "settings", label: "Support settings", to: "/admin/support/settings" }
+          { key: "settings", label: "Settings", to: "/portal/settings" }
         ]
       },
       {
         id: "dashboardHelp",
-        type: "markdown",
+        componentName: "Markdown",
         title: "Notes",
         layout: { x: 8, y: 4, w: 4, h: 2 },
         content: "This dashboard is config-driven. Widget data is loaded via **executeDashboardDataSource** on the server."
@@ -1572,11 +1589,11 @@ const settingsPageConfigs = [
   {
     key: "support_settings_page_default",
     settingsPageId: "support",
-    name: "Support Settings",
+    name: "Settings",
     config: `return {
   pageMode: "settings",
   id: "support",
-  route: "/settings?section=supportGlobal",
+  route: "/portal/settings?section=supportGlobal",
   title: "Support",
   description: "Configure the public support widget, ticket fields, email notifications, and customer tracking.",
   version: 1,
@@ -1584,16 +1601,16 @@ const settingsPageConfigs = [
   saveStrategy: { mode: "section", debounceMs: 1000, autosave: false, showSaveBar: true, warnOnLeave: true },
   audit: { enabled: true, resource: "settings.support", includeDiff: true },
   sidebar: {
-    title: "Support settings",
+    title: "Settings",
     groups: [
       {
         id: "support",
         label: "Support",
         items: [
-          { id: "supportGlobal", label: "Global", path: "/settings?section=supportGlobal", icon: "settings" },
-          { id: "supportFields", label: "Fields", path: "/settings?section=supportFields", icon: "form" },
-          { id: "supportTheme", label: "Theme", path: "/settings?section=supportTheme", icon: "palette" },
-          { id: "supportEmail", label: "Email", path: "/settings?section=supportEmail", icon: "mail" }
+          { id: "supportGlobal", label: "Global", path: "/portal/settings?section=supportGlobal", icon: "settings" },
+          { id: "supportFields", label: "Fields", path: "/portal/settings?section=supportFields", icon: "form" },
+          { id: "supportTheme", label: "Theme", path: "/portal/settings?section=supportTheme", icon: "palette" },
+          { id: "supportEmail", label: "Email", path: "/portal/settings?section=supportEmail", icon: "mail" }
         ]
       }
     ]
@@ -1617,7 +1634,11 @@ const settingsPageConfigs = [
             { key: "allowTicketCloseByCustomer", label: "Customer can close tickets", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
             { key: "sendEmailNotifications", label: "Send email notifications", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
             { key: "publicTrackingEnabled", label: "Public tracking enabled", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 1 },
-            { key: "defaultTicketStatus", label: "Default ticket status", dataType: "text", renderer: "text", defaultValue: "open", colSpan: 1 }
+            { key: "defaultTicketStatus", label: "Default ticket status", dataType: "text", renderer: "text", defaultValue: "open", colSpan: 1 },
+            { key: "portalLinkEnabled", label: "Show staff portal link on Overview", dataType: "boolean", renderer: "checkbox", defaultValue: true, colSpan: 2 },
+            { key: "portalLinkLabel", label: "Portal link button label", dataType: "text", renderer: "text", defaultValue: "Staff portal", colSpan: 1, validation: { maxLength: 80 } },
+            { key: "portalSignInPath", label: "Portal sign-in path", dataType: "text", renderer: "text", defaultValue: "/auth/signin", colSpan: 1, helpText: "Appended to portal base URL (must start with /)." },
+            { key: "portalBaseUrl", label: "Portal base URL (optional)", dataType: "text", renderer: "text", defaultValue: "", colSpan: 2, helpText: "Leave empty to use https://{shop-subdomain}.decodecommerce.com" }
           ]
         }]
       }

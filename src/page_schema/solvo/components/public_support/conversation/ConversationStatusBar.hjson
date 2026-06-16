@@ -57,12 +57,11 @@ return `._id {
 '''
         props:
           '''
-const ticketState = args.fns.getTicketState?.() || {};
 const showForm = args.fns.showInternalNoteForm?.() === true;
 return {
   as: "button",
   type: "button",
-  hide: !ticketState.canShowInternalNoteTools,
+  hide: !args.fns.canShowInternalNoteTools?.(),
   text: showForm ? "Cancel note" : "Add internal note",
   onClick: () => args.fns.setShowInternalNoteForm?.(!showForm)
 };'''
@@ -76,8 +75,8 @@ return {
         displayOrder: 2
         css:
           '''
-const capabilities = args.fns.getCapabilities?.() || {};
-return capabilities.useTokenAuth
+const useToken = args.fns.usesTokenAuth?.() === true;
+return useToken
   ? `._id {
   padding: 0.35rem 0.75rem;
   border-radius: 0.5rem;
@@ -112,18 +111,16 @@ return capabilities.useTokenAuth
         props:
           '''
 const ticket = args.fns.ticketVertex?.();
-const ticketState = args.fns.getTicketState?.() || {};
-const capabilities = args.fns.getCapabilities?.() || {};
-const hideForCustomer = capabilities.useTokenAuth && !ticketState.canCloseTicket;
+const hideForCustomer = args.fns.usesTokenAuth?.() && !args.fns.canCloseTicketNow?.();
 return {
   as: "button",
   type: "button",
   hide: !ticket || hideForCustomer,
-  text: ticketState.isClosed && !capabilities.useTokenAuth ? "Closed" : "Close ticket",
+  text: args.fns.isTicketClosed?.() && !args.fns.usesTokenAuth?.() ? "Closed" : "Close ticket",
   disabled:
     args.fns.isSendingReply?.() ||
     args.fns.isBusyStatus?.() ||
-    (ticketState.isClosed && !capabilities.useTokenAuth),
+    (args.fns.isTicketClosed?.() && !args.fns.usesTokenAuth?.()),
   onClick: () => void args.fns.closeTicket?.()
 };'''
       }
@@ -154,11 +151,10 @@ return `._id {
         props:
           '''
 const ticket = args.fns.ticketVertex?.();
-const ticketState = args.fns.getTicketState?.() || {};
 return {
   as: "button",
   type: "button",
-  hide: !ticket || !ticketState.canReopenTicket,
+  hide: !ticket || !args.fns.canReopenTicketNow?.(),
   text: "Reopen ticket",
   disabled: args.fns.isBusyStatus?.(),
   onClick: () => void args.fns.reopenTicket?.()

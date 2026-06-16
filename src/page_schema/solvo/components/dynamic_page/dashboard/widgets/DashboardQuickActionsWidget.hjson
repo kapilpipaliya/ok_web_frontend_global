@@ -42,12 +42,18 @@ return `._id {
         componentName: Html
         props:
           '''
-const action = args.contextData.quickAction;
+const action = args.contextData.quickAction || {};
+const href = String(action.href || action.to || "").trim();
 return {
   as: "button",
   text: action.label || action.key || "Action",
   onClick: () => {
-    if (action.to) args.navigate(action.to);
+    if (!href || href === "#") return;
+    if (action.openInNewTab === true || action.external === true) {
+      window.open(href, "_blank", "noopener,noreferrer");
+      return;
+    }
+    args.navigate(href);
   }
 };
 '''

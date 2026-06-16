@@ -178,7 +178,7 @@ return {
         props:
           '''return {
   as: "section",
-  hide: args.fns.isInIframe() || ["/app", "/employees", "/roles", "/files", "/settings", "/public-support/tickets", "/public-support/conversation"].includes(args.location?.pathname)
+  hide: args.fns.isInIframe() || ["/overview", "/employees", "/public-support/tickets", "/public-support/conversation"].includes(args.location?.pathname)
 }'''
       }
     }

@@ -92,8 +92,32 @@ return { as: "header" };
           '''
 return `._id {
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  width: 100%;
+}`;
+'''
+      }
+    }
+    {
+      id: "header_main"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''return { as: "div" };'''
+        css:
+          '''
+return `._id {
+  display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
 }`;
 '''
       }
@@ -146,6 +170,66 @@ return `._id {
   color: ${args.theme.var.color.muted};
   font-size: 0.875rem;
 }`;
+'''
+      }
+    }
+    {
+      id: "header_actions"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+const actions = Array.isArray(runtime?.headerActions) ? runtime.headerActions : [];
+return {
+  as: "div",
+  hide: actions.length === 0,
+  loop: true,
+  contextName: "headerAction",
+  data: actions
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    }
+    {
+      id: "header_action_btn"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const action = args.contextData.headerAction || {};
+const isShopifyIframe = typeof window !== "undefined" && window.self !== window.top;
+const onClick = () => {
+  const href = String(action.href || "").trim();
+  if (!href || href === "#") return;
+  if (action.openInNewTab === true) {
+    window.open(href, "_blank", "noopener,noreferrer");
+    return;
+  }
+  args.navigate(href);
+};
+return {
+  as: isShopifyIframe ? "s-button" : "button",
+  type: isShopifyIframe ? undefined : "button",
+  text: action.label || "Open",
+  "attr:variant": isShopifyIframe ? (action.variant || "secondary") : undefined,
+  onClick
+};
 '''
       }
     }
@@ -301,9 +385,12 @@ return `._id {
     { id: "e1", T: "Attr", S: "1", E: "2" }
     { id: "e2", T: "Attr", S: "1", E: "3" }
     { id: "e3", T: "Attr", S: "3", E: "4" }
-    { id: "e4", T: "Attr", S: "4", E: "5" }
-    { id: "e5", T: "Attr", S: "4", E: "6" }
-    { id: "e8", T: "Attr", S: "4", E: "9" }
+    { id: "e_header_main", T: "Attr", S: "4", E: "header_main" }
+    { id: "e_header_actions", T: "Attr", S: "4", E: "header_actions" }
+    { id: "e4", T: "Attr", S: "header_main", E: "5" }
+    { id: "e5", T: "Attr", S: "header_main", E: "6" }
+    { id: "e8", T: "Attr", S: "header_main", E: "9" }
+    { id: "e_header_action_btn", T: "Attr", S: "header_actions", E: "header_action_btn" }
     { id: "e6", T: "Attr", S: "3", E: "7" }
     { id: "e7", T: "Attr", S: "3", E: "8" }
     { id: "e9", T: "Attr", S: "3", E: "10" }

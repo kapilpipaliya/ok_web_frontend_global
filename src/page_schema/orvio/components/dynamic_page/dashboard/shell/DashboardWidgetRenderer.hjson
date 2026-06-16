@@ -1,0 +1,208 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardWidgetRenderer
+        fns:
+          '''
+const getWidgetConfig = () => args.contextData.props?.widgetConfig || null;
+const getRuntime = () => {
+  const fromProps = args.contextData.props?.dashboardRuntime;
+  if (typeof fromProps === "function") return fromProps();
+  return null;
+};
+const getWidgetUi = () => {
+  const widgetConfig = getWidgetConfig();
+  const runtime = getRuntime();
+  if (!widgetConfig || !runtime?.store) return { loading: true };
+  const state = runtime.store.getWidgetState(widgetConfig.id) || {};
+  const widgetData = runtime.store.resolveWidgetPresentation(widgetConfig.id);
+  return {
+    ...state,
+    widgetStateVertexId: runtime.store.getWidgetStateVertexId(widgetConfig.id),
+    dataResultVertexId: state.dataResultVertexId,
+    widgetData
+  };
+};
+return { getWidgetConfig, getRuntime, getWidgetUi };
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DashboardMetricCard
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const ui = args.fns.getWidgetUi();
+return {
+  widgetConfig,
+  widgetData: ui.widgetData || {},
+  widgetStateVertexId: ui.widgetStateVertexId,
+  hide:
+    widgetConfig?.type !== "metricCard" ||
+    !!ui.error ||
+    (ui.loading === true && !ui.dataResultVertexId)
+};
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: DashboardChartWidget
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const ui = args.fns.getWidgetUi();
+const runtime = args.fns.getRuntime();
+const graphVertexCount = Object.keys(args.graph?.vertexes || {}).length;
+return {
+  widgetConfig,
+  widgetData: ui.widgetData || {},
+  dataVersion: ui.dataVersion ?? 0,
+  widgetStateVertexId: ui.widgetStateVertexId,
+  graphVertexCount,
+  dashboardRuntime: () => runtime,
+  hide:
+    widgetConfig?.type !== "chart" ||
+    !!ui.error ||
+    (ui.loading === true && !ui.dataResultVertexId)
+};
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: DashboardMarkdownWidget
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+return {
+  widgetConfig,
+  hide: widgetConfig?.type !== "markdown" && widgetConfig?.type !== "html"
+};
+'''
+      }
+    }
+    {
+      id: "5"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: DashboardQuickActionsWidget
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+return {
+  widgetConfig,
+  hide: widgetConfig?.type !== "quickActions"
+};
+'''
+      }
+    }
+    {
+      id: "7"
+      L: Attr
+      P: {
+        displayOrder: 6
+        componentName: DashboardActivityFeedWidget
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const ui = args.fns.getWidgetUi();
+return {
+  widgetConfig,
+  widgetData: ui.widgetData || {},
+  hide:
+    widgetConfig?.type !== "activityFeed" ||
+    !!ui.error ||
+    (ui.loading === true && !ui.dataResultVertexId)
+};
+'''
+      }
+    }
+    {
+      id: "8"
+      L: Attr
+      P: {
+        displayOrder: 7
+        componentName: DashboardTimelineWidget
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const ui = args.fns.getWidgetUi();
+return {
+  widgetConfig,
+  widgetData: ui.widgetData || {},
+  hide:
+    widgetConfig?.type !== "timeline" ||
+    !!ui.error ||
+    (ui.loading === true && !ui.dataResultVertexId)
+};
+'''
+      }
+    }
+    {
+      id: "9"
+      L: Attr
+      P: {
+        displayOrder: 8
+        componentName: DashboardKanbanWidget
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const ui = args.fns.getWidgetUi();
+return {
+  widgetConfig,
+  widgetData: ui.widgetData || {},
+  hide:
+    widgetConfig?.type !== "kanban" ||
+    !!ui.error ||
+    (ui.loading === true && !ui.dataResultVertexId)
+};
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 5
+        componentName: DashboardCrudEmbed
+        key: crud_embed
+        props:
+          '''
+const widgetConfig = args.fns.getWidgetConfig();
+const runtime = args.fns.getRuntime();
+const ui = args.fns.getWidgetUi();
+return {
+  widgetConfig,
+  dashboardRuntime: () => runtime,
+  hide: widgetConfig?.type !== "crudTable" || !!ui.error
+};
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "3" }
+    { id: "e3", T: "Attr", S: "1", E: "4" }
+    { id: "e4", T: "Attr", S: "1", E: "5" }
+    { id: "e5", T: "Attr", S: "1", E: "6" }
+    { id: "e6", T: "Attr", S: "1", E: "7" }
+    { id: "e7", T: "Attr", S: "1", E: "8" }
+    { id: "e8", T: "Attr", S: "1", E: "9" }
+  ]
+}

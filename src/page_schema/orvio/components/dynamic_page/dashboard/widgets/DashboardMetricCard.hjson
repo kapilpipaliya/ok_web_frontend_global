@@ -1,0 +1,85 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardMetricCard
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const widgetData = args.contextData.props?.widgetData || {};
+const value = widgetData.value != null ? widgetData.value : 0;
+return {
+  as: "div",
+  text: String(value)
+};
+'''
+        css:
+          '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const widgetConfig = args.contextData.props?.widgetConfig || {};
+const widgetData = args.contextData.props?.widgetData || {};
+const trend = widgetData.trend;
+const subtitle = widgetConfig.subtitle || "";
+const hideTrend = !trend || trend.deltaPercent == null;
+const hideSubtitle = hideTrend && !subtitle;
+let trendText = "";
+if (trend && trend.deltaPercent != null) {
+  const sign = trend.deltaPercent > 0 ? "+" : "";
+  trendText = `${sign}${trend.deltaPercent}% vs previous period`;
+}
+return {
+  as: "p",
+  hide: hideSubtitle && hideTrend,
+  text: hideTrend ? String(subtitle) : trendText
+};
+'''
+        css:
+          '''
+const widgetData = args.contextData.props?.widgetData || {};
+const trend = widgetData.trend;
+const direction = trend?.direction || "flat";
+const color =
+  direction === "up"
+    ? args.theme.var.color.success
+    : direction === "down"
+      ? args.theme.var.color.error
+      : args.theme.var.color.muted;
+return `._id {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: ${color};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "3" }
+  ]
+}

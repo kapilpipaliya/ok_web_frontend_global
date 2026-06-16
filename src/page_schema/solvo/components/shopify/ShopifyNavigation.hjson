@@ -23,25 +23,10 @@
       }
     }
     {
-      id: "4"
-      L: Attr
-      P: {
-        displayOrder: 1
-        componentName: Html
-        key: unique_2
-        props:
-          '''return {
-  as: "s-link",
-  href: "/app",
-  text: "Dashboard"
-}'''
-      }
-    }
-    {
       id: "nav_overview"
       L: Attr
       P: {
-        displayOrder: 1.5
+        displayOrder: 1
         componentName: Html
         key: unique_overview
         props:
@@ -68,21 +53,6 @@
       }
     }
     {
-      id: "17"
-      L: Attr
-      P: {
-        displayOrder: 3
-        componentName: Html
-        key: unique_roles
-        props:
-          '''return {
-  as: "s-link",
-  href: "/roles",
-  text: "Roles"
-}'''
-      }
-    }
-    {
       id: "nav_tasks"
       L: Attr
       P: {
@@ -98,21 +68,6 @@
       }
     }
     {
-      id: "18"
-      L: Attr
-      P: {
-        displayOrder: 4.5
-        componentName: Html
-        key: unique_files
-        props:
-          '''return {
-  as: "s-link",
-  href: "/files",
-  text: "Files"
-}'''
-      }
-    }
-    {
       id: "nav_public_support"
       L: Attr
       P: {
@@ -124,21 +79,6 @@
   as: "s-link",
   href: "/public-support/tickets",
   text: "Public Support"
-}'''
-      }
-    }
-    {
-      id: "nav_support_settings"
-      L: Attr
-      P: {
-        displayOrder: 5.6
-        componentName: Html
-        key: unique_support_settings
-        props:
-          '''return {
-  as: "s-link",
-  href: "/settings?section=supportGlobal",
-  text: "Support Settings"
 }'''
       }
     }
@@ -289,12 +229,6 @@
       E: "3"
     }
     {
-      id: e3
-      T: Attr
-      S: "3"
-      E: "4"
-    }
-    {
       id: e_nav_overview
       T: Attr
       S: "3"
@@ -307,34 +241,16 @@
       E: "12"
     }
     {
-      id: e4_roles
-      T: Attr
-      S: "3"
-      E: "17"
-    }
-    {
       id: e_nav_tasks
       T: Attr
       S: "3"
       E: "nav_tasks"
     }
     {
-      id: e5_files
-      T: Attr
-      S: "3"
-      E: "18"
-    }
-    {
       id: e_nav_public_support
       T: Attr
       S: "3"
       E: "nav_public_support"
-    }
-    {
-      id: e_nav_support_settings
-      T: Attr
-      S: "3"
-      E: "nav_support_settings"
     }
     {
       id: e7

@@ -36,7 +36,7 @@ export function createDynamicFunctions(
           try {
             return new Function("args", fns)(args);
           } catch (error) {
-            console.error("Error evaluating fns:", error);
+            console.error("Error evaluating fns:", error, fns);
             return undefined;
           }
         }

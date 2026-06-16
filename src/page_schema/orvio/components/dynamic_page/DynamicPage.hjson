@@ -59,9 +59,10 @@ const getUncategorizedVertexId = () => {
 const getLoadFromSetting = () => args.contextData.props?.loadFromSetting === true;
 const getPageMode = () => {
   const fromProps = args.contextData.props?.pageMode;
-  if (fromProps === "settings" || fromProps === "table") return fromProps;
+  if (fromProps === "settings" || fromProps === "table" || fromProps === "dashboard") return fromProps;
   const { config } = getCachedConfig();
   if (config?.pageMode === "settings") return "settings";
+  if (config?.pageMode === "dashboard") return "dashboard";
   return "table";
 };
 const isSettingsPageMode = () => getPageMode() === "settings";
@@ -282,6 +283,36 @@ const getGenericSettingsFunction = () => {
     } catch (error) {
       console.error("Error loading settings:", error);
       args.showErrorToast?.(error?.message || "Failed to load settings");
+    }
+    return { success: false, data: { setting: null } };
+  };
+};
+
+const getDashboardSettingKey = () => `${getTableSettingsLabel()}_dashboard`;
+
+const getGenericDashboardSettingsFunction = () => {
+  const tableVertexLabel = getTableVertexLabel();
+  if (!tableVertexLabel) return null;
+  return async () => {
+    try {
+      const tableSettingsLabel = getTableSettingsLabel();
+      const result = await args.fns.executeYTOFunction("getUserContentSetting", {
+        tableVertexLabel,
+        settingsLabel: tableSettingsLabel,
+        key: getDashboardSettingKey()
+      });
+
+      const errorMessage = extractError(result, true, "Failed to load dashboard config");
+      if (errorMessage) {
+        return { success: false, data: { setting: null } };
+      }
+
+      if (result?.result?.success && result.result.data?.setting) {
+        return result.result;
+      }
+    } catch (error) {
+      console.error("Error loading dashboard config:", error);
+      args.showErrorToast?.(error?.message || "Failed to load dashboard config");
     }
     return { success: false, data: { setting: null } };
   };
@@ -784,6 +815,9 @@ const getDataFunction = () => {
 };
 const getSettingsFunction = () => {
   const loadFromSetting = getLoadFromSetting();
+  if (loadFromSetting && isDashboardPageMode()) {
+    return getGenericDashboardSettingsFunction();
+  }
   if (loadFromSetting && isSettingsPageMode()) {
     return getGenericSettingsPageConfigFunction();
   }
@@ -827,9 +861,14 @@ const getExportFunction = () => {
 };
 
 // Core config evaluation and memo update functions
+const hasEvaluatedConfigContent = (value) => {
+  if (value == null || typeof value !== "object") return false;
+  return Object.keys(value).length > 0;
+};
+
 const evaluateConfig = () => {
   const cached = pageP()?.evaluatedConfig;
-  if (cached != null) return cached;
+  if (hasEvaluatedConfigContent(cached)) return cached;
 
   const loadFromSetting = getLoadFromSetting();
   const currentSettings = pageP()?.settings;
@@ -841,7 +880,7 @@ const evaluateConfig = () => {
       try {
         const configFunction = new Function(currentSettings);
         config = configFunction();
-        if (config && typeof config === 'object') {
+        if (hasEvaluatedConfigContent(config)) {
           patchPageP({ evaluatedConfig: config });
           return config;
         }
@@ -849,10 +888,7 @@ const evaluateConfig = () => {
         console.error("Error evaluating settings function body:", error);
       }
     }
-    // If loadFromSetting is true but no settings, return empty config
-    config = {};
-    patchPageP({ evaluatedConfig: config });
-    return config;
+    return null;
   }
 
   // If settings exist and it's a string (function body), evaluate it
@@ -860,7 +896,7 @@ const evaluateConfig = () => {
     try {
       const configFunction = new Function(currentSettings);
       const evaluated = configFunction();
-      if (evaluated && typeof evaluated === 'object') {
+      if (hasEvaluatedConfigContent(evaluated)) {
         patchPageP({ evaluatedConfig: evaluated });
         return evaluated;
       }
@@ -901,6 +937,7 @@ const evaluateConfig = () => {
 };
 const updateMemoizedConfig = () => {
   const config = evaluateConfig();
+  if (!hasEvaluatedConfigContent(config)) return;
   const loadFromSetting = getLoadFromSetting();
   patchPageP({ memoizedConfig: config, memoizedLoadFromSetting: loadFromSetting });
 };
@@ -1047,12 +1084,12 @@ const initializeSettings = async () => {
     const settingsFn = getSettingsFunction();
     if (settingsFn) {
       await loadSettings();
-      // Initialize memoized config after loading settings
       updateMemoizedConfig();
     } else {
-      // Initialize memoized config even without settings
       updateMemoizedConfig();
     }
+  } catch (error) {
+    console.error("[DynamicPage] initializeSettings error:", error);
   } finally {
     patchPageP({ configLoading: false });
   }
@@ -1294,6 +1331,14 @@ const getTablePassthroughProps = () => {
   if (Array.isArray(initialSelectedRowIds)) {
     passthrough.initialSelectedRowIds = initialSelectedRowIds;
   }
+  const onRowClick = prop("onRowClick");
+  if (typeof onRowClick === "function") {
+    passthrough.onRowClick = onRowClick;
+  }
+  const actionHandlers = prop("actionHandlers");
+  if (actionHandlers && typeof actionHandlers === "object") {
+    passthrough.actionHandlers = actionHandlers;
+  }
   return passthrough;
 };
 
@@ -1525,6 +1570,8 @@ const initializeSettingsPage = async () => {
 };
 
 const ensureSettingsPageQueryParam = () => {
+  const fromProps = args.contextData.props?.settingsPageId;
+  if (fromProps != null && String(fromProps).trim() !== "") return;
   const fromQuery = args.searchParams?.page;
   if (fromQuery != null && String(fromQuery).trim() !== "") return;
   const defaultId = getDefaultSettingsPageId();
@@ -1565,6 +1612,28 @@ args.createEffect(() => {
   patchPageP({ settingsPageId: nextPageId });
   void initializeSettingsPage();
 });
+
+// Dashboard mode helpers (rendering delegated to DashboardHost; no server queries here)
+const getDashboardConfig = () => {
+  const config = evaluateConfig();
+  const hasEvaluated = hasEvaluatedConfigContent(config);
+  if (!hasEvaluated) {
+    return null;
+  }
+  const dashboard =
+    config?.dashboardConfig && typeof config.dashboardConfig === "object"
+      ? config.dashboardConfig
+      : args.contextData.props?.dashboardConfig && typeof args.contextData.props.dashboardConfig === "object"
+        ? args.contextData.props.dashboardConfig
+        : null;
+  return dashboard;
+};
+
+const isDashboardPageMode = () => {
+  if (args.contextData.props?.pageMode === "dashboard") return true;
+  const config = evaluateConfig();
+  return config?.pageMode === "dashboard" || !!(config?.dashboardConfig && typeof config.dashboardConfig === "object");
+};
 
 // Exported API
 return {
@@ -1631,7 +1700,10 @@ return {
   getSelectedRows,
   setSelectedRows,
   clearSelectedRows,
-  extractError
+  extractError,
+  getDashboardConfig,
+  isDashboardPageMode,
+  patchPageP
 }
 
 '''
@@ -1713,7 +1785,7 @@ const hasSidebar = args.fns.hasSidebar();
 const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: !hasSidebar || isSettings
+  hide: !hasSidebar || isSettings || args.fns.isDashboardPageMode?.() === true
 };
 '''
       }
@@ -1790,7 +1862,7 @@ const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: hasSidebar || configLoading || isSettings
+  hide: hasSidebar || configLoading || isSettings || args.fns.isDashboardPageMode?.() === true
 };
 '''
       }
@@ -1830,7 +1902,7 @@ const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
 const isSettings = args.fns.isSettingsPageMode?.() === true;
 return {
   as: "div",
-  hide: !isSettings || configLoading
+  hide: !isSettings || configLoading || args.fns.isDashboardPageMode?.() === true
 };
 '''
         css:
@@ -1874,6 +1946,46 @@ return {
         displayOrder: 2
         componentName: SettingsPageContent
         key: settings_page_content
+      }
+    }
+    {
+      id: "12"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        key: dashboard_page_wrapper
+        props:
+          '''
+const vid = args.fns.pageStateVertexId;
+const configLoading = args.graph.vertexes[vid]?.P?.configLoading !== false;
+return {
+  as: "div",
+  hide: args.fns.isDashboardPageMode?.() !== true || configLoading
+};
+'''
+        css:
+          '''
+return `._id {
+  width: 100%;
+  min-height: calc(100vh - 4rem);
+}`;
+'''
+      }
+    }
+    {
+      id: "13"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: DashboardHost
+        key: dashboard_host
+        props:
+          '''
+return {
+  getDashboardConfig: args.fns.getDashboardConfig
+};
+'''
       }
     }
   ]
@@ -1937,6 +2049,18 @@ return {
       T: Attr
       S: "9"
       E: "11"
+    }
+    {
+      id: e12
+      T: Attr
+      S: "1"
+      E: "12"
+    }
+    {
+      id: e13
+      T: Attr
+      S: "12"
+      E: "13"
     }
   ]
 }

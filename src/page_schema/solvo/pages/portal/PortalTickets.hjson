@@ -4,6 +4,7 @@
       id: "1"
       L: Page
       P: {
+        signinRequired: true
         fns:
           '''
 return {
@@ -65,7 +66,7 @@ return {
   openConversationInNewTab: (ticketRow) => {
     const ticketId = ticketRow?.id;
     if (!ticketId) return;
-    const url = `/public-support/conversation?ticketId=${encodeURIComponent(String(ticketId))}`;
+    const url = `/portal/support/conversation?ticketId=${encodeURIComponent(String(ticketId))}`;
     if (typeof window !== "undefined" && typeof window.open === "function") {
       window.open(url, "_blank", "noopener,noreferrer");
       return;

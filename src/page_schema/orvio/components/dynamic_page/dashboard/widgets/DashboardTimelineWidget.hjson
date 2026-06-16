@@ -1,0 +1,142 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Component
+      P: {
+        key: DashboardTimelineWidget
+        fns:
+          '''
+const pickDisplayValue = (properties, fieldConfig, fallback) => {
+  const p = properties || {};
+  const keys = Array.isArray(fieldConfig)
+    ? fieldConfig
+    : typeof fieldConfig === "string" && fieldConfig.trim() !== ""
+      ? [fieldConfig]
+      : ["title", "name", "subject", "label", "serial", "key"];
+  for (let index = 0; index < keys.length; index++) {
+    const value = p[keys[index]];
+    if (value != null && String(value).trim() !== "") return String(value);
+  }
+  return fallback;
+};
+
+const getEvents = () => {
+  const widgetConfig = args.contextData.props?.widgetConfig || {};
+  const displayFields = widgetConfig.displayFields || {};
+  const widgetData = args.contextData.props?.widgetData || {};
+  const rows = Array.isArray(widgetData.rows) ? widgetData.rows : [];
+  return rows.map((row) => {
+    const p = row?.P || {};
+    return {
+      id: row?.id,
+      label: pickDisplayValue(p, displayFields.title, row?.id || "Event"),
+      detail: pickDisplayValue(p, displayFields.subtitle, ""),
+      at: pickDisplayValue(p, displayFields.time, "")
+    };
+  });
+};
+return { getEvents };
+'''
+      }
+    }
+    {
+      id: "2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const events = args.fns.getEvents();
+return {
+  as: "div",
+  hide: events.length === 0,
+  loop: true,
+  contextName: "timelineEvent",
+  data: events
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 1rem;
+  border-left: 2px solid ${args.theme.var.color.border};
+  max-height: 100%;
+  overflow-y: auto;
+}`;
+'''
+      }
+    }
+    {
+      id: "3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const ev = args.contextData.timelineEvent;
+return {
+  as: "div",
+  text: `${ev.label}${ev.detail ? " — " + ev.detail : ""}${ev.at ? "\n" + ev.at : ""}`
+};
+'''
+        css:
+          '''
+return `._id {
+  position: relative;
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text};
+  white-space: pre-wrap;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -1.125rem;
+    top: 0.35rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "4"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+return {
+  as: "p",
+  hide: args.fns.getEvents().length > 0,
+  text: "No timeline events"
+};
+'''
+        css:
+          '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+  ]
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" }
+    { id: "e2", T: "Attr", S: "1", E: "4" }
+    { id: "e3", T: "Attr", S: "2", E: "3" }
+  ]
+}

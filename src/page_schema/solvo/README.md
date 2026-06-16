@@ -31,7 +31,7 @@ Shared conversation UI (orchestrator + subcomponents):
 
 ```
 components/public_support/
-  PublicSupportConversationContent.hjson   # controller + layout
+  PublicSupportConversationContent.hjson   # shared fns + layout
   conversation/
     ConversationHeader.hjson
     ConversationTimeline.hjson
@@ -40,19 +40,19 @@ components/public_support/
     ConversationStatusBar.hjson
     ConversationInternalNoteComposer.hjson
     ConversationCredentialsNotice.hjson
-    hooks/README.md                          # capability / API module docs
+    hooks/README.md                          # shared fns reference
 ```
 
 | Prop | Values | Purpose |
 | --- | --- | --- |
-| `viewerRole` | `admin` (default) or `customer` | Derives capability flags and `conversationApi` transport (not used in UI directly). |
+| `viewerRole` | `admin` (default) or `customer` | Derives capability flags and server transport (via parent `fns`, not props). |
 | `ticketId` | string | Admin/staff load and actions. |
 | `serial`, `token` | string | Optional props; customer mode also reads URL query params. |
 | `compact` | boolean | Tighter padding for modals. |
 | `hideHeader` | boolean | Hide title/meta inside the component. |
 | `showInternalNote` | boolean | Admin-only internal note tools (default `true`). |
 
-Controller exposes `getCapabilities()`, `getTicketState()`, `conversationApi`, and `isOwnMessage(message)` for presentation components.
+Child components call flat helpers on **`args.fns`** (e.g. `usesTokenAuth()`, `canShowComposer()`, `isOwnMessage(message)`). See `conversation/hooks/README.md`.
 
 `components/shopify/ShopifyNavigation.hjson` links to public tickets and support settings.
 

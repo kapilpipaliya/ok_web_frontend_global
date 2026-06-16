@@ -1,0 +1,129 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: pollDashboardRealtimeEvents
+        description: Polls backend change watermarks using dashboard realtime.entities config and returns invalidation targets for the realtime bridge.
+        body:
+          '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  return { success: false, message: "Authentication required", data: null };
+}
+
+await args.getEffectiveUser(args.session, actualUser, args.contextData);
+
+const { dashboardKey, channel, watermark, realtimeConfig } = args.contextData || {};
+const channelKey = String(channel || realtimeConfig?.channel || "").trim();
+if (!channelKey) {
+  return { success: false, message: "channel is required", data: null };
+}
+
+const nowIso = new Date().toISOString();
+const sinceIso =
+  typeof watermark === "string" && watermark.trim() !== ""
+    ? watermark.trim()
+    : new Date(Date.now() - 60000).toISOString();
+
+const sanitizeLabel = (value) => {
+  if (value == null) return null;
+  const label = String(value).trim();
+  if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(label)) return null;
+  return label;
+};
+
+const sanitizeField = (value) => {
+  if (value == null) return null;
+  const field = String(value).trim();
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(field)) return null;
+  return field;
+};
+
+const timestampPropertyExpr = (fieldName) => {
+  const field = sanitizeField(fieldName || "updatedAt");
+  if (!field) return null;
+  return `datetime(toString(v.${field}))`;
+};
+
+const realtimeLogicalKey =
+  typeof realtimeConfig?.logicalKey === "string" && realtimeConfig.logicalKey.trim() !== ""
+    ? realtimeConfig.logicalKey.trim()
+    : `realtime:${channelKey}`;
+
+const entities = Array.isArray(realtimeConfig?.entities) ? realtimeConfig.entities : [];
+const events = [];
+const logicalKeySet = new Set([realtimeLogicalKey]);
+const querySignatureSet = new Set();
+
+for (let entityIndex = 0; entityIndex < entities.length; entityIndex++) {
+  const entityConfig = entities[entityIndex];
+  const vertexLabel = sanitizeLabel(entityConfig?.vertexLabel || entityConfig?.vertex);
+  const timestampField = sanitizeField(entityConfig?.timestampField || "updatedAt");
+  const timestampExpr = timestampPropertyExpr(timestampField);
+  if (!vertexLabel || !timestampField || !timestampExpr) continue;
+
+  const cypher = `
+    MATCH (v:${vertexLabel})
+    WHERE v.${timestampField} IS NOT NULL
+      AND ${timestampExpr} > datetime($sinceIso)
+    RETURN elementId(v) AS id, v.${timestampField} AS changedAt
+    ORDER BY changedAt DESC
+    LIMIT 100
+  `;
+
+  let records = [];
+  try {
+    const result = await args.session.run(cypher, { sinceIso });
+    records = result.records || [];
+  } catch (error) {
+    console.error("pollDashboardRealtimeEvents query error:", vertexLabel, error);
+    continue;
+  }
+
+  for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+    const record = records[recordIndex];
+    const entityId = record.get("id");
+    events.push({
+      type: "ENTITY_UPDATED",
+      entityType: vertexLabel,
+      entityId: entityId != null ? String(entityId) : undefined,
+      channel: channelKey,
+      changedAt: record.get("changedAt")
+    });
+  }
+
+  if (records.length > 0) {
+    const keys = Array.isArray(entityConfig.logicalKeys) ? entityConfig.logicalKeys : [];
+    for (let keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+      logicalKeySet.add(String(keys[keyIndex]));
+    }
+    logicalKeySet.add(`entity:${vertexLabel}`);
+  }
+}
+
+const hasChanges = events.length > 0;
+
+return {
+  success: true,
+  data: {
+    watermark: nowIso,
+    hasChanges,
+    events,
+    invalidation: {
+      logicalKeys: [...logicalKeySet],
+      querySignatures: [...querySignatureSet]
+    },
+    channel: channelKey,
+    dashboardKey: dashboardKey || null,
+    polledAt: nowIso,
+    since: sinceIso
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

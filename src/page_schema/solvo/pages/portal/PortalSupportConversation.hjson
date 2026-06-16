@@ -1,0 +1,124 @@
+{
+  vertexes: [
+    {
+      id: "page"
+      L: Page
+      P: {
+        key: PortalSupportConversation
+        title: Support conversation
+        url: /portal/support/conversation
+        fns:
+          '''
+return {
+  enabled: () => true,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({ functionName, contextData: contextData || {} })
+};
+'''
+        props:
+          '''return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    if (!args.user) {
+      const ticketId = String(args.searchParams?.ticketId || "").trim();
+      const returnPath = ticketId
+        ? `/portal/support/conversation?ticketId=${encodeURIComponent(ticketId)}`
+        : "/portal/tickets";
+      args.navigate(
+        `/auth/signin?redirectUrl=${encodeURIComponent(returnPath)}`,
+        { replace: true }
+      );
+    }
+  }
+};'''
+      }
+    }
+    {
+      id: "root"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        key: portal_support_conversation_root
+        css:
+          '''return `._id {
+  width: 100%;
+  max-width: 960px;
+  margin: 0;
+  padding: ${args.theme.var.spacing?.md || "1rem"};
+  color: ${args.theme.var.color.text};
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-sizing: border-box;
+}`;'''
+        props:
+          '''return {
+  as: "main"
+};'''
+      }
+    }
+    {
+      id: "back"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  align-self: flex-start;
+}
+._id:hover {
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  text: "← Back to tickets",
+  onClick: () => args.navigate("/portal/tickets")
+};'''
+      }
+    }
+    {
+      id: "content"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: PublicSupportConversationContent
+        key: portal_support_conversation_content
+        props:
+          '''return {
+  viewerRole: "admin",
+  ticketId: args.searchParams?.ticketId || args.searchParams?.supportId || "",
+  compact: false,
+  showCloseButton: false
+};'''
+      }
+    }
+    {
+      id: "layout"
+      L: PageLayout
+      P: {
+        componentName: PortalLayout
+      }
+    }
+  ]
+  edges: [
+    { id: "e_page_root", T: "Attr", S: "page", E: "root" }
+    { id: "e_back", T: "Attr", S: "root", E: "back" }
+    { id: "e_content", T: "Attr", S: "root", E: "content" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

@@ -15,7 +15,7 @@ import * as floatingUI from "@floating-ui/dom";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { SetStoreFunction } from "solid-js/store";
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import type { ThemeContext, ColorMode } from "~/lib/styles/types/types";
 import type { Navigator, useSearchParams } from "@solidjs/router";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
@@ -301,6 +301,7 @@ export function createFunctionArgumentBase(
     zIndex: hooks.zIndex,
     createSignal,
     createStore,
+    reconcile,
     createMemo,
     batch,
     createEffect,

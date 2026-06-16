@@ -91,6 +91,14 @@ const fetchRoot = async (options) => {
         setExpandedKeys([]);
       }
 
+      // Defer selection until graph + table DOM commit (sync select during setGraphData unmounts VirtualList → cleanNode crash)
+      const scheduleInitialSelection = (item) => {
+        if (!item) return;
+        queueMicrotask(() => {
+          args.batch(() => handleItemSelect(item));
+        });
+      };
+
       // Restore selection from URL (vertex id) so reload activates same category
       const initialCategoryId = args.contextData.props?.initialCategoryId;
       if (initialCategoryId && args.graph?.vertexes?.[initialCategoryId]) {
@@ -100,10 +108,9 @@ const fetchRoot = async (options) => {
           setExpandedKeys(keys => keys.includes(parent.id) ? keys : [...keys, parent.id]);
           parent = getParentCategory(parent.id);
         }
-        handleItemSelect(vertex);
+        scheduleInitialSelection(vertex);
       } else if (rootItems.length > 0 && !selectedItem()) {
-        const firstRootItem = rootItems[0];
-        handleItemSelect(firstRootItem);
+        scheduleInitialSelection(rootItems[0]);
       }
       startSidebarQueuedPollIfNeeded();
     }

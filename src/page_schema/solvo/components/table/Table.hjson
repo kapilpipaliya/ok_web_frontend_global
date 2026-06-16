@@ -782,15 +782,6 @@ const toggleRowExpansion = async (row) => {
   }
 };
 
-const getVirtualRowHeight = (index, row) => {
-  const base = getRowHeight();
-  if (isNestedLinesTable()) return base;
-  const rowExpansions = getRowExpansionConfigs();
-  if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !row?.id) return base;
-  if (isExpansionOpen(row.id)) return base + getExpansionPanelHeight(rowExpansions);
-  return base;
-};
-
 // Cache row objects by id so same row keeps same ref; cells then don't re-render when only expand/collapse changes
 let displayRowCache = {};
 const buildDisplayData = (filtered, groupByKey, collapsedList) => {
@@ -2484,7 +2475,6 @@ return {
   getGroupByConfig,
   getRowExpansionConfigs,
   getExpansionPanelHeight,
-  getVirtualRowHeight,
   toggleRowExpansion,
   isExpansionOpen,
   isNestedLinesTable,
@@ -4153,7 +4143,6 @@ return `._id {
 return {
   getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
-  getItemHeightAt: args.fns.getVirtualRowHeight,
   rowHasExpansion: (row) => ((args.fns.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
   containerClass: "table-body-list",
   tabIndex: 0,
@@ -4257,27 +4246,21 @@ const rowData = virtualItem.rowData;
 const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 const isActive = args.fns.activeRowId?.() === rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const rowHeightPx = args.fns.getRowHeight();
-const expansionPanelHeightPx =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowData?.id && args.fns.isExpansionOpen?.(rowData.id)
-    ? args.fns.getExpansionPanelHeight(rowExpansions)
-    : 0;
-const gridRows =
-  expansionPanelHeightPx > 0
-    ? `${rowHeightPx}px minmax(0, ${expansionPanelHeightPx}px)`
-    : `${rowHeightPx}px`;
 
 return [
 `._id {
   width: 100%;
-  min-height: ${virtualItem.size}px;
+  height: ${rowHeightPx}px;
+  max-height: ${rowHeightPx}px;
+  min-height: ${rowHeightPx}px;
   box-sizing: border-box;
+  overflow: hidden;
 }`,
 `._id {
   display: grid;
   grid-template-columns: ${args.fns.getGridTemplateColumns()};
-  grid-template-rows: ${gridRows};
+  grid-template-rows: ${rowHeightPx}px;
   grid-column: 1 / -1;
   border-bottom: 1px solid ${args.theme.var.color.border};
   background: ${isSelected ? args.theme.var.color.secondary_light_200 : "transparent"};

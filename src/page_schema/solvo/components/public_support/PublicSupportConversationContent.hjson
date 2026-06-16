@@ -18,23 +18,18 @@ const [isSendingInternalNote, setIsSendingInternalNote] = args.createSignal(fals
 const [isBusyStatus, setIsBusyStatus] = args.createSignal(false);
 const [showInternalNoteForm, setShowInternalNoteForm] = args.createSignal(false);
 
-// --- useConversationCapabilities ---
-const getCapabilities = () => {
-  const viewerRole = args.contextData.props?.viewerRole === "customer" ? "customer" : "admin";
-  const showInternalNoteProp = args.contextData.props?.showInternalNote !== false;
-  return {
-    viewerRole,
-    useTokenAuth: viewerRole === "customer",
-    useTicketIdAuth: viewerRole === "admin",
-    markAsReadFor: viewerRole === "customer" ? "customer" : "admin",
-    canReply: () => true,
-    canReplyWhenClosed: () => false,
-    canCloseTicket: () => true,
-    canReopenTicket: () => viewerRole === "customer",
-    canInternalNote: () => viewerRole === "admin" && showInternalNoteProp,
-    canSeeInternalNotes: () => viewerRole === "admin"
-  };
-};
+// --- capabilities (flat fns for children via args.fns) ---
+const viewerRole = () => (args.contextData.props?.viewerRole === "customer" ? "customer" : "admin");
+const usesTokenAuth = () => viewerRole() === "customer";
+const usesTicketIdAuth = () => viewerRole() === "admin";
+const markAsReadFor = () => (viewerRole() === "customer" ? "customer" : "admin");
+const canReply = () => true;
+const canReplyWhenClosed = () => false;
+const canCloseTicketCapability = () => true;
+const canReopenTicketCapability = () => viewerRole() === "customer";
+const canInternalNote = () => viewerRole() === "admin" && args.contextData.props?.showInternalNote !== false;
+const canSeeInternalNotes = () => viewerRole() === "admin";
+const getReplyPlaceholder = () => (usesTokenAuth() ? "Write a reply..." : "Type your reply...");
 
 // --- useConversationAuth ---
 const getTicketId = () => {
@@ -74,16 +69,14 @@ const getToken = () => {
 };
 
 const buildAuthContext = () => {
-  const capabilities = getCapabilities();
-  if (capabilities.useTokenAuth) {
+  if (usesTokenAuth()) {
     return { serial: getSerial(), token: getToken() };
   }
   return { ticketId: getTicketId() };
 };
 
 const hasCredentials = () => {
-  const capabilities = getCapabilities();
-  if (capabilities.useTokenAuth) {
+  if (usesTokenAuth()) {
     return Boolean(getSerial() && getToken());
   }
   return Boolean(getTicketId());
@@ -116,10 +109,7 @@ const normalizeMessage = (messageItem) => {
   };
 };
 
-const getViewerIdentity = () => {
-  const capabilities = getCapabilities();
-  return capabilities.useTokenAuth ? "customer" : "admin";
-};
+const getViewerIdentity = () => (usesTokenAuth() ? "customer" : "admin");
 
 const isOwnMessage = (messageItem) => {
   const messageType = getMessageType(messageItem);
@@ -143,9 +133,8 @@ const getRowJustify = (messageItem) => {
 };
 
 const getVisibleMessages = () => {
-  const capabilities = getCapabilities();
   const list = messages() || [];
-  if (capabilities.canSeeInternalNotes()) {
+  if (canSeeInternalNotes()) {
     return list;
   }
   return list.filter((messageItem) => getMessageType(messageItem) !== "internal_note");
@@ -193,13 +182,12 @@ const formatMessageTime = (timestamp) => {
 
 const getMetaLineText = () => {
   const ticket = ticketVertex();
-  const capabilities = getCapabilities();
   if (!ticket) {
-    return capabilities.useTokenAuth
+    return usesTokenAuth()
       ? "A valid ticket link is required."
       : "Select a ticket to view the conversation.";
   }
-  if (capabilities.useTokenAuth) {
+  if (usesTokenAuth()) {
     const status = ticket.P?.status || "open";
     const createdAt = ticket.P?.createdAt || ticket.P?.updatedAt;
     const createdText = formatTimestamp(createdAt);
@@ -208,24 +196,15 @@ const getMetaLineText = () => {
   return `${ticket.P?.customerEmail || ""} • ${ticket.P?.status || "open"} • ${ticket.P?.shop || "—"}`;
 };
 
-// --- ticket derived state ---
-const getTicketState = () => {
-  const ticket = ticketVertex();
-  const capabilities = getCapabilities();
-  const isClosed = ticket?.P?.status === "closed";
-  const canSendMessage =
-    capabilities.canReply() && (!isClosed || capabilities.canReplyWhenClosed());
-  return {
-    isClosed,
-    canSendMessage,
-    canShowComposer: canSendMessage,
-    canCloseTicket: capabilities.canCloseTicket() && !isClosed,
-    canReopenTicket: capabilities.canReopenTicket() && isClosed,
-    canShowInternalNoteTools: capabilities.canInternalNote()
-  };
-};
+// --- ticket derived state (flat fns) ---
+const isTicketClosed = () => ticketVertex()?.P?.status === "closed";
+const canSendMessage = () => canReply() && (!isTicketClosed() || canReplyWhenClosed());
+const canShowComposer = () => canSendMessage();
+const canCloseTicketNow = () => canCloseTicketCapability() && !isTicketClosed();
+const canReopenTicketNow = () => canReopenTicketCapability() && isTicketClosed();
+const canShowInternalNoteTools = () => canInternalNote();
 
-// --- useConversationApi ---
+// --- server helpers ---
 const executeServer = (functionName, contextData) =>
   args.executeNamedServerFunction({ functionName, contextData });
 
@@ -240,51 +219,48 @@ const parseServerResult = (response) => {
   return { ok: true, data: result?.data || {} };
 };
 
-const conversationApi = {
-  load: async () => {
-    const capabilities = getCapabilities();
-    return executeServer("publicSupportGetConversation", {
-      ...buildAuthContext(),
-      markAsReadFor: capabilities.markAsReadFor
-    });
-  },
-  reply: async (message) => {
-    const capabilities = getCapabilities();
-    if (capabilities.useTokenAuth) {
-      return executeServer("publicSupportReplyAsCustomer", {
-        ...buildAuthContext(),
-        message
-      });
-    }
-    return executeServer("publicSupportReplyAsAdmin", {
+// --- server API (internal; not exported on args.fns) ---
+const fetchConversation = async () =>
+  executeServer("publicSupportGetConversation", {
+    ...buildAuthContext(),
+    markAsReadFor: markAsReadFor()
+  });
+
+const sendConversationReply = async (message) => {
+  if (usesTokenAuth()) {
+    return executeServer("publicSupportReplyAsCustomer", {
       ...buildAuthContext(),
       message
-    });
-  },
-  addInternalNote: async (message) => {
-    return executeServer("publicSupportAddInternalNote", {
-      ...buildAuthContext(),
-      message
-    });
-  },
-  close: async () => {
-    const capabilities = getCapabilities();
-    const auth = buildAuthContext();
-    if (capabilities.useTokenAuth) {
-      return executeServer("publicSupportCloseTicket", {
-        ...auth,
-        closedBy: "customer"
-      });
-    }
-    return executeServer("publicSupportCloseTicket", auth);
-  },
-  reopen: async () => {
-    return executeServer("publicSupportReopenTicket", {
-      ...buildAuthContext(),
-      reopenedBy: "customer"
     });
   }
+  return executeServer("publicSupportReplyAsAdmin", {
+    ...buildAuthContext(),
+    message
+  });
 };
+
+const sendInternalNoteToServer = async (message) =>
+  executeServer("publicSupportAddInternalNote", {
+    ...buildAuthContext(),
+    message
+  });
+
+const closeConversationOnServer = async () => {
+  const auth = buildAuthContext();
+  if (usesTokenAuth()) {
+    return executeServer("publicSupportCloseTicket", {
+      ...auth,
+      closedBy: "customer"
+    });
+  }
+  return executeServer("publicSupportCloseTicket", auth);
+};
+
+const reopenConversationOnServer = async () =>
+  executeServer("publicSupportReopenTicket", {
+    ...buildAuthContext(),
+    reopenedBy: "customer"
+  });
 
 const loadConversation = async () => {
   if (!hasCredentials()) {
@@ -296,7 +272,7 @@ const loadConversation = async () => {
 
   setIsLoadingConversation(true);
   try {
-    const response = await conversationApi.load();
+    const response = await fetchConversation();
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
       args.showErrorToast?.(parsed.message || "Failed to load conversation.");
@@ -343,12 +319,11 @@ const loadConversation = async () => {
 
 const sendReply = async () => {
   const message = String(replyMessageText() || "").trim();
-  const ticketState = getTicketState();
-  if (!message || !hasCredentials() || !ticketState.canSendMessage) return;
+  if (!message || !hasCredentials() || !canSendMessage()) return;
 
   setIsSendingReply(true);
   try {
-    const response = await conversationApi.reply(message);
+    const response = await sendConversationReply(message);
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
       args.showErrorToast?.(parsed.message || "Failed to send reply.");
@@ -369,15 +344,14 @@ const sendReply = async () => {
 };
 
 const addInternalNote = async () => {
-  const capabilities = getCapabilities();
-  if (!capabilities.canInternalNote()) return;
+  if (!canInternalNote()) return;
 
   const message = String(internalNoteText() || "").trim();
   if (!message || !hasCredentials()) return;
 
   setIsSendingInternalNote(true);
   try {
-    const response = await conversationApi.addInternalNote(message);
+    const response = await sendInternalNoteToServer(message);
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
       args.showErrorToast?.(parsed.message || "Failed to add note.");
@@ -393,13 +367,12 @@ const addInternalNote = async () => {
 };
 
 const closeTicket = async () => {
-  const ticketState = getTicketState();
-  if (!hasCredentials() || !ticketState.canCloseTicket) return;
+  if (!hasCredentials() || !canCloseTicketNow()) return;
 
   setIsBusyStatus(true);
   setIsSendingReply(true);
   try {
-    const response = await conversationApi.close();
+    const response = await closeConversationOnServer();
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
       args.showErrorToast?.(parsed.message || "Failed to close ticket.");
@@ -419,12 +392,11 @@ const closeTicket = async () => {
 };
 
 const reopenTicket = async () => {
-  const ticketState = getTicketState();
-  if (!hasCredentials() || !ticketState.canReopenTicket) return;
+  if (!hasCredentials() || !canReopenTicketNow()) return;
 
   setIsBusyStatus(true);
   try {
-    const response = await conversationApi.reopen();
+    const response = await reopenConversationOnServer();
     const parsed = parseServerResult(response);
     if (!parsed.ok) {
       args.showErrorToast?.(parsed.message || "Failed to reopen ticket.");
@@ -464,9 +436,17 @@ return {
   isBusyStatus,
   showInternalNoteForm,
   setShowInternalNoteForm,
-  getCapabilities,
-  getTicketState,
-  conversationApi,
+  viewerRole,
+  usesTokenAuth,
+  usesTicketIdAuth,
+  canInternalNote,
+  canSeeInternalNotes,
+  getReplyPlaceholder,
+  isTicketClosed,
+  canShowComposer,
+  canCloseTicketNow,
+  canReopenTicketNow,
+  canShowInternalNoteTools,
   hasCredentials,
   getMessageType,
   isOwnMessage,

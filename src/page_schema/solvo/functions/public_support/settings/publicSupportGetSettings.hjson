@@ -34,7 +34,11 @@ const defaults = {
     allowTicketCloseByCustomer: true,
     sendEmailNotifications: true,
     publicTrackingEnabled: true,
-    defaultTicketStatus: "open"
+    defaultTicketStatus: "open",
+    portalLinkEnabled: true,
+    portalLinkLabel: "Staff portal",
+    portalSignInPath: "/auth/signin",
+    portalBaseUrl: ""
   },
   fieldSettings: {
     formConfig: defaultFormConfig,

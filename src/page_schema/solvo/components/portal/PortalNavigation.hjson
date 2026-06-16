@@ -83,7 +83,7 @@ const handleUserMenuDocumentClick = (clickEvent) => {
 
 const navigateFromUserMenu = (path) => {
   closeUserMenu();
-  args.navigate(path);
+  args.fns.navigateTo?.(path);
 };
 
 const navigateToLogout = () => {
@@ -124,6 +124,34 @@ const portalNavSectionsData = [
     title: "Admin",
     showIf: () => checkAdminRole(),
     items: [
+      {
+        id: "all_files",
+        href: "/portal/all-files",
+        label: "All files",
+        icon: "ph:folders",
+        pathCheck: (pathname) => String(pathname || "") === "/portal/all-files"
+      },
+      {
+        id: "employees",
+        href: "/portal/employees",
+        label: "Employees",
+        icon: "ph:users-three",
+        pathCheck: (pathname) => String(pathname || "") === "/portal/employees"
+      },
+      {
+        id: "roles",
+        href: "/portal/roles",
+        label: "Roles",
+        icon: "ph:shield-check",
+        pathCheck: (pathname) => String(pathname || "") === "/portal/roles"
+      },
+      {
+        id: "settings",
+        href: "/portal/settings",
+        label: "Settings",
+        icon: "ph:gear-six",
+        pathCheck: (pathname) => String(pathname || "").startsWith("/portal/settings")
+      },
       {
         id: "company_branding",
         href: "/portal/company-branding",
@@ -227,7 +255,7 @@ return {
           '''return {
   as: "button",
   type: "button",
-  onClick: () => args.navigate("/portal/tickets"),
+  onClick: () => args.fns.navigateTo?.("/portal/tickets"),
   "attr:aria-label": "Go to tickets"
 };'''
       }
@@ -532,7 +560,7 @@ return `._id {
 return {
   as: "button",
   type: "button",
-  onClick: () => args.navigate(item.href),
+  onClick: () => args.fns.navigateTo?.(item.href),
   "attr:aria-current": args.fns.isNavItemActive?.(item) ? "page" : undefined
 };'''
       }

@@ -24,13 +24,12 @@ return `._id {
 '''
         props:
           '''
-const ticketState = args.fns.getTicketState?.() || {};
 return {
   as: "div",
   hide:
     args.fns.isLoadingConversation?.() ||
     !args.fns.hasCredentials?.() ||
-    !ticketState.canShowComposer
+    !args.fns.canShowComposer?.()
 };'''
       }
     },
@@ -56,12 +55,11 @@ return `._id {
 '''
         props:
           '''
-const capabilities = args.fns.getCapabilities?.() || {};
 const replyText = args.fns.replyMessageText?.() || "";
 return {
   as: "textarea",
   rows: 2,
-  placeholder: capabilities.useTokenAuth ? "Write a reply..." : "Type your reply...",
+  placeholder: args.fns.getReplyPlaceholder?.() || "Type your reply...",
   value: replyText,
   disabled: args.fns.isSendingReply?.(),
   onInput: (event) => args.fns.setReplyMessageText?.(event.currentTarget.value),

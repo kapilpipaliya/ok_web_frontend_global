@@ -1,10 +1,9 @@
 import { type Owner, runWithOwner } from "solid-js";
 
 /**
- * Run a function with the current owner
- * @param owner The owner to run the function with
- * @param fn The function to run
- * @returns The result of the function, or undefined if an error occurred
+ * Like Solid's runWithOwner, but catches errors during teardown instead of crashing.
+ * All errors are logged — including disposal errors from VirtualList unmount or hide:true.
+ * Returns undefined when the owner is null or when fn throws.
  */
 export function runWithOwnerFunction<T>(
   owner: Owner | null,

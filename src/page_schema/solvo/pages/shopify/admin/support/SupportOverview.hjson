@@ -7,7 +7,6 @@
         key: SupportOverview
         title: Support Overview
         url: /overview
-        signinRequired: false
         fns:
           '''
 return {

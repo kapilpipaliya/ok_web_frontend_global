@@ -174,6 +174,7 @@ export interface FunctionArgumentBaseType {
   componentName: string;
   createSignal: any; // solid-js function: import { createSignal } from "solid-js";
   createStore: any; // solid-js function: import { createStore } from "solid-js/store";
+  reconcile: any; // solid-js/store;
   data: Vertex;
   contextData: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;
@@ -304,6 +305,7 @@ The HTML component can also includes data handling capabilities for repeating pa
   - In child components, access the current iteration item using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
 - For state management:
   - **Preferred**: Define state management functions in the 'fns' property using solid-js functions like 'args.createSignal' or 'args.createStore'
+  - For nested store updates (e.g. one key in a large object), prefer `setStore("bucket", "fieldKey", value)` or `setStore("bucket", args.reconcile(nextObject))` — do not spread-clone the whole bucket on every keystroke
   - Access state functions in the same item or child components within 'props', 'fns', or 'css' function bodies using 'args.fns' when defined in parent's fns
   - Example:
     ```javascript

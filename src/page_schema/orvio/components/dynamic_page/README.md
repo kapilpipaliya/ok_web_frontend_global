@@ -2,6 +2,161 @@
 
 This document explains how the **DynamicPage** system works and how to configure it for a new content type (e.g. `book`, `audioVideo`, `category`).
 
+---
+
+## Dashboard runtime (config-driven rendering)
+
+When `pageMode: "dashboard"` (or `dashboardConfig` on the evaluated setting), **DynamicPage** renders **DashboardHost** instead of table/sidebar layouts.
+
+| Layer | Component / function | Role |
+|-------|----------------------|------|
+| Orchestration | `dashboard/host/DashboardHost.hjson` | `normalizeDashboardConfig`, `createRuntime`, shared store, interaction bus |
+| Platform contracts | `src/lib/dashboard/` via `args.dashboardPlatform` | See `src/lib/dashboard/README.md` |
+| Entity workflow | `dashboard/entity/DashboardEntityDrawer.hjson` | `OPEN_ENTITY_DRAWER` → embedded FormManagement (no full-page nav) |
+| CRUD embed | `dashboard/crud/*` | Embedded `Table`, dashboard-owned filters |
+| Layout / shell | `dashboard/shell/*` | Grid layout, filter bar, widget shell/renderer |
+| Widgets | `dashboard/widgets/*` | Registry-driven presentation |
+| Data | `functions/.../dashboard/data/executeDashboardDataSource.hjson` | **Server-only** abstract Neo4j queries (no Cypher in client) |
+| Preferences | `functions/.../dashboard/preference/*` | Per-user layout/filter state |
+| Realtime | `functions/.../dashboard/realtime/pollDashboardRealtimeEvents.hjson` | Poll → invalidation bridge |
+
+Component/function file layout: `dashboard/README.md` and `functions/dynamic_page/dashboard/README.md`.
+
+### Interaction events (v1)
+
+Canonical types (see `src/lib/dashboard/contracts/interactionContracts.ts`): `SET_FILTER`, `NAVIGATE`, `OPEN_ENTITY_DRAWER`, `REFRESH_WIDGET`, `REFRESH_DASHBOARD`, `SET_TIME_RANGE`, `ROW_SELECTED`, `SELECT_ENTITY`.
+
+Widget interactions use **`trigger`** (UI event) + **`type`** (canonical event):
+
+Example — chart click → global filter:
+
+```json
+{
+  "trigger": "click",
+  "type": "SET_FILTER",
+  "payload": { "status": "{{clicked.value}}" }
+}
+```
+
+Example — table row → entity drawer:
+
+```json
+{
+  "trigger": "rowClick",
+  "type": "OPEN_ENTITY_DRAWER",
+  "payload": {
+    "entityType": "PublicSupportTicket",
+    "entityId": "{{row.id}}",
+    "view": "detail"
+  }
+}
+```
+
+Widget `type` must be canonical (`metricCard`, `chart`, `crudTable`, …) — no aliases.
+
+Dashboard `entityDrawer` config maps `entityType` → `crudConfigRef`, title/subtitle fields, optional `fullPageHref`.
+
+### Runtime scheduler + query subscriptions (v2)
+
+Invalidation no longer refreshes widgets immediately. Flow:
+
+```text
+invalidate / publishMutation
+  → resolve signatures + logicalQueryKeys via subscription graph
+  → scheduler queue (dedupe + debounce + batch)
+  → widget refresh → cache update
+```
+
+| Module | Path |
+|--------|------|
+| Scheduler | `src/lib/dashboard/runtime/scheduler.ts` |
+| Subscription graph | `src/lib/dashboard/query/subscriptionGraph.ts` |
+| Mutation contracts | `src/lib/dashboard/contracts/mutationContracts.ts` |
+| Widget lifecycle | `src/lib/dashboard/runtime/widgetLifecycle.ts` |
+| Runtime scopes | `src/lib/dashboard/runtime/runtimeScope.ts` |
+| Devtools | `dashboard/devtools/DashboardDevtools.hjson` — enable with `?dashboardDevtools=1` |
+
+Widgets declare `logicalQueryKeys` and/or computed `querySignature` from `composeWidgetQuery`.  
+`EntityRuntimeHost` is container-agnostic; `DashboardEntityDrawer` is only a shell.
+
+### Execution coordinator + lifetime tree (v3)
+
+Widget refresh follows a **commit phase** with generational ownership:
+
+```text
+begin execution → fetch → pending_commit → validate generation → commit → cache + widget state
+```
+
+Late async responses are rejected (`CANCELLED` / stale) — they cannot overwrite newer generations.
+
+| Module | Path |
+|--------|------|
+| Execution coordinator | `src/lib/dashboard/runtime/runtimeExecution.ts` |
+| Lifetime tree | `src/lib/dashboard/runtime/lifetimeTree.ts` |
+| Public API boundary | `src/lib/dashboard/runtime/platformApi.ts` — use `runtime.platformApi` from widgets |
+
+Lifecycle phases include `STALE_PENDING_REFRESH`, `PENDING_COMMIT`, `CANCELLED`, `DISPOSED`.
+
+Dispose cascades via `lifetimeTree.disposeAll()` on dashboard unmount.
+
+### Realtime invalidation bridge (v4)
+
+Invalidation-first realtime (no row patching):
+
+```text
+pollDashboardRealtimeEvents (server)
+  → ENTITY_* events + logicalKeys / querySignatures
+  → realtimeBridge.pollOnce()
+  → platformApi.invalidate({ staleWhileRevalidate: true })
+  → subscription graph → scheduler → execution coordinator
+```
+
+| Piece | Path |
+|-------|------|
+| Server poll | `functions/dynamic_page/dashboard/realtime/pollDashboardRealtimeEvents.hjson` |
+| Client bridge | `src/lib/dashboard/realtime/realtimeBridge.ts` |
+
+Dashboard `realtime` config: `{ enabled: true, channel: "publicSupportTickets", pollingIntervalMs: 30000 }`. Requires the realtime bridge (no blind invalidate fallback).
+
+Extend `CHANNEL_REGISTRY` in the server function when adding new domains.
+
+### Compression, causality, telemetry, replay (v5)
+
+Burst invalidations are merged before scheduler enqueue:
+
+```text
+50× ENTITY_UPDATED (realtime)
+  → InvalidationCompressionLayer (debounce window)
+  → 1× logicalKey fanout → widget targets
+  → scheduler (widget dedupe + batch)
+  → execution coordinator (generation-safe commit only)
+```
+
+| Module | Path |
+|--------|------|
+| Compression | `src/lib/dashboard/runtime/invalidationCompression.ts` |
+| Causality | `src/lib/dashboard/observability/runtimeCausality.ts` |
+| Telemetry | `src/lib/dashboard/observability/runtimeTelemetry.ts` |
+| Replay / timeline | `src/lib/dashboard/observability/runtimeEventLog.ts` |
+| Resource ownership | `src/lib/dashboard/runtime/resourceOwnership.ts` |
+
+**Kernel invariant:** only the execution coordinator commit phase may write widget data + cache after fetch. Realtime, mutations, and interactions must call `platformApi.invalidate()` — never patch widget rows directly.
+
+Devtools (`?dashboardDevtools=1`): `runtimeTimeline`, `executionWaterfall` (optional `?invalidationId=inv_…`), `telemetry` snapshot.
+
+Example page: `pages/shopify/admin/support/SupportOverview.hjson` at `/overview`  
+Example setting: `SupportOverview_dashboard_default` (loaded via key `SupportOverview_dashboard`) in `migrateDynamicPageSettings.hjson` (run migration after edits).
+
+```hjson
+props: '''
+return {
+  tableVertexLabel: "SupportOverview",
+  loadFromSetting: true,
+  pageMode: "dashboard"
+};
+'''
+```
+
 The implementation is split into:
 
 - Components:
@@ -15,7 +170,7 @@ The implementation is split into:
   - `functions/dynamic_page/main_functions/settings/config/saveUserContentSetting.hjson`
   - `functions/dynamic_page/main_functions/sidebar/getVertexChildren.hjson`
   - `functions/dynamic_page/main_functions/sidebar/saveSidebarVertex.hjson`
-  - `functions/dynamic_page/main_functions/migration/migrateDynamicPageSettings.hjson` (Attendra defaults)
+  - `functions/dynamic_page/main_functions/migration/migrateDynamicPageSettings.hjson`
 
 ---
 

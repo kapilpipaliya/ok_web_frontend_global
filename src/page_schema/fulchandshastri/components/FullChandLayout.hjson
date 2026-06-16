@@ -1,0 +1,90 @@
+{
+  vertexes: [
+    {
+      id: "fcl_root",
+      L: "Component",
+      P: {
+        key: "FullChandLayout",
+        description: "Shared layout with header, page content slot, and footer for Fulchand Shastri pages"
+      }
+    },
+    {
+      id: "fcl_shell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "fcl_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandHeader",
+        props: '''
+return {};
+'''
+      }
+    },
+    {
+      id: "fcl_main",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "fcl_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        slot: "1children"
+      }
+    },
+    {
+      id: "fcl_footer",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "FullChandFooter",
+        props: '''
+return {};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "fcl_e1", T: "Attr", S: "fcl_root", E: "fcl_shell" },
+    { id: "fcl_e2", T: "Attr", S: "fcl_shell", E: "fcl_header" },
+    { id: "fcl_e3", T: "Attr", S: "fcl_shell", E: "fcl_main" },
+    { id: "fcl_e4", T: "Attr", S: "fcl_shell", E: "fcl_footer" },
+    { id: "fcl_e5", T: "Attr", S: "fcl_main", E: "fcl_slot" }
+  ]
+}

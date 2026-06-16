@@ -75,7 +75,36 @@ const runtime = args.fns.getRuntime();
 const filters = runtime?.config?.filters || [];
 return {
   as: "div",
-  hide: filters.length === 0,
+  hide: filters.length === 0
+};
+'''
+        css:
+          '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_100};
+}`;
+'''
+      }
+    }
+    {
+      id: "6"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        props:
+          '''
+const runtime = args.fns.getRuntime();
+const filters = runtime?.config?.filters || [];
+return {
+  as: "div",
   loop: true,
   contextName: "filterItem",
   data: filters
@@ -84,13 +113,12 @@ return {
         css:
           '''
 return `._id {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  background: ${args.theme.var.color.background_light_100};
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: 100%;
 }`;
 '''
       }
@@ -113,11 +141,12 @@ return {
           '''
 return `._id {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
   color: ${args.theme.var.color.text};
-  min-width: 5rem;
+  white-space: nowrap;
 }`;
 '''
       }
@@ -143,6 +172,7 @@ const displayValue =
       : [String(current)];
 return {
   hide: filter.type !== "select",
+  class: "dashboard-filter-control",
   value: displayValue,
   options,
   search: options.length > 10,
@@ -155,6 +185,15 @@ return {
     args.fns.applyFilter(filter.key, value === "" ? undefined : value);
   }
 };
+'''
+        css:
+          '''
+return `._id {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 8rem;
+  max-width: 14rem;
+}`;
 '''
       }
     }
@@ -172,6 +211,7 @@ const runtime = args.fns.getRuntime();
 const current = runtime?.store?.timeRange?.() || filter.default || "last_year";
 return {
   hide: filter.type !== "dateRange",
+  class: "dashboard-filter-control",
   value: [String(current)],
   options: args.fns.getDateRangeOptions(filter),
   search: false,
@@ -182,13 +222,23 @@ return {
   }
 };
 '''
+        css:
+          '''
+return `._id {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 8rem;
+  max-width: 14rem;
+}`;
+'''
       }
     }
   ]
   edges: [
     { id: "e1", T: "Attr", S: "1", E: "2" }
-    { id: "e2", T: "Attr", S: "2", E: "3" }
-    { id: "e3", T: "Attr", S: "2", E: "4" }
-    { id: "e4", T: "Attr", S: "2", E: "5" }
+    { id: "e5", T: "Attr", S: "2", E: "6" }
+    { id: "e2", T: "Attr", S: "6", E: "3" }
+    { id: "e3", T: "Attr", S: "6", E: "4" }
+    { id: "e4", T: "Attr", S: "6", E: "5" }
   ]
 }

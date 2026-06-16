@@ -218,6 +218,7 @@ const normalizeDashboardConfig = (rawConfig) => {
     widgets: Array.isArray(config.widgets) ? config.widgets.map(normalizeWidgetConfig) : [],
     filters: Array.isArray(config.filters) ? config.filters : [],
     actions: Array.isArray(config.actions) ? config.actions : [],
+    headerActions: Array.isArray(config.headerActions) ? config.headerActions : [],
     permissions: config.permissions || { roles: [] },
     realtime: {
       enabled: config.realtime?.enabled === true,
@@ -315,6 +316,79 @@ const filterVisibleWidgets = (dashboardConfig) => {
     const context = { user: args.user, graph: args.graph, dashboard: dashboardConfig, widget: widgetConfig };
     return hasDashboardRolePermission(widgetConfig.permissions) && evaluateVisibilityRules(widgetConfig.visibility, context);
   });
+};
+
+const isInIframe = () => typeof window !== "undefined" && window.self !== window.top;
+
+const resolveHeaderActions = async (headerActions) => {
+  const actions = Array.isArray(headerActions) ? headerActions : [];
+  const resolved = [];
+
+  for (let index = 0; index < actions.length; index++) {
+    const action = actions[index];
+    if (!action || typeof action !== "object") continue;
+    if (action.showInIframeOnly === true && !isInIframe()) continue;
+
+    const type = String(action.type || "route").trim();
+
+    if (type === "route") {
+      const href = String(action.to || action.href || "").trim();
+      if (!href) continue;
+      resolved.push({
+        key: String(action.key || `route_${index}`),
+        label: String(action.label || action.key || "Open").trim() || "Open",
+        href,
+        openInNewTab: action.openInNewTab === true,
+        variant: action.variant || "secondary"
+      });
+      continue;
+    }
+
+    if (type === "external") {
+      const href = String(action.href || "").trim();
+      if (!href || href === "#") continue;
+      resolved.push({
+        key: String(action.key || `external_${index}`),
+        label: String(action.label || action.key || "Open").trim() || "Open",
+        href,
+        openInNewTab: action.openInNewTab !== false,
+        variant: action.variant || "secondary"
+      });
+      continue;
+    }
+
+    if (type === "settingsLink") {
+      const functionName = String(action.resolveFunction || "").trim();
+      if (!functionName) continue;
+      try {
+        const res = await args.executeNamedServerFunction({
+          functionName,
+          contextData: action.resolveContext || {}
+        });
+        const ok = res?.result?.success !== false && !res?.error;
+        if (!ok) continue;
+        const data = res?.result?.data || res?.data || {};
+        const enabledField = action.enabledField || "enabled";
+        if (data[enabledField] === false) continue;
+        const href = String(data[action.hrefField || "href"] || "").trim();
+        if (!href || href === "#") continue;
+        const label =
+          String(data[action.labelField || "label"] || action.label || action.key || "Open").trim() ||
+          "Open";
+        resolved.push({
+          key: String(action.key || `settings_${index}`),
+          label,
+          href,
+          openInNewTab: action.openInNewTab !== false,
+          variant: action.variant || "secondary"
+        });
+      } catch (error) {
+        console.warn("resolveHeaderActions settingsLink failed:", functionName, error);
+      }
+    }
+  }
+
+  return resolved;
 };
 
 const executeDataSource = async ({ widgetConfig, store, dashboardKey }) => {
@@ -480,6 +554,7 @@ const saveDashboardLayout = async (store, config) => {
 const createRuntime = async (rawDashboardConfig) => {
   const config = normalizeDashboardConfig(rawDashboardConfig);
   const visibleWidgets = filterVisibleWidgets(config);
+  const resolvedHeaderActions = await resolveHeaderActions(config.headerActions);
   const [selections, setSelections] = args.createSignal({});
 
   activeDashboardTxnId = args.generateNewTxnId(args.graph, args.setGraph);
@@ -1216,6 +1291,7 @@ const createRuntime = async (rawDashboardConfig) => {
 
   const runtime = {
     config,
+    headerActions: resolvedHeaderActions,
     txnId: activeDashboardTxnId,
     store,
     widgets: visibleWidgets,
@@ -1312,6 +1388,7 @@ const mountDashboardHost = async () => {
 
 return {
   normalizeDashboardConfig,
+  resolveHeaderActions,
   applyServerGraphToLocalGraph,
   crudWidgetAdapter,
   createRuntime,

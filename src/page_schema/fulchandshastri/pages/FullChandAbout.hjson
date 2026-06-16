@@ -12,40 +12,10 @@
       }
     },
     {
-      id: "rootAttr",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  min-height: 100vh;
-  background: ${args.theme.var.color.background};
-}`;
-'''
-      }
-    },
-    {
-      id: "header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "FullChandHeader",
-        props: '''
-return {};
-'''
-      }
-    },
-    {
       id: "heroSection",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
@@ -131,7 +101,7 @@ return `._id {
       id: "mainContent",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
@@ -870,25 +840,20 @@ return `._id {
       }
     },
     {
-      id: "footer",
-      L: "Attr",
+      id: "layout",
+      L: "PageLayout",
       P: {
-        displayOrder: 5,
-        componentName: "FullChandFooter",
-        props: '''
-return {};
-'''
+        displayOrder: 1,
+        componentName: "FullChandLayout"
       }
     }
   ],
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
-    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
-    { id: "e2", T: "Attr", S: "rootAttr", E: "heroSection" },
+    { id: "e0", T: "Attr", S: "page", E: "heroSection" },
     { id: "e3", T: "Attr", S: "heroSection", E: "heroContent" },
     { id: "e4", T: "Attr", S: "heroContent", E: "heroTitle" },
     { id: "e5", T: "Attr", S: "heroContent", E: "heroSubtitle" },
-    { id: "e6", T: "Attr", S: "rootAttr", E: "mainContent" },
+    { id: "e6", T: "Attr", S: "page", E: "mainContent" },
     { id: "e7", T: "Attr", S: "mainContent", E: "container" },
     { id: "e8", T: "Attr", S: "container", E: "introSection" },
     { id: "e9", T: "Attr", S: "introSection", E: "introContent" },
@@ -924,6 +889,6 @@ return {};
     { id: "e39", T: "Attr", S: "teaching4Icon", E: "teaching4IconSvg" },
     { id: "e40", T: "Attr", S: "teaching4", E: "teaching4Title" },
     { id: "e41", T: "Attr", S: "teaching4", E: "teaching4Text" },
-    { id: "e42", T: "Attr", S: "rootAttr", E: "footer" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }

@@ -101,13 +101,15 @@ const getColumns = () => {
 
 const getRowHeight = () => {
   if (isNestedLinesTable()) return args.contextData.props?.nestedRowHeight ?? 36;
-  return args.fns.prop('rowHeight', args.contextData.props) || 36;
+  return args.fns.prop('rowHeight', args.contextData.props) || 50;
 };
 const getTitle = () => {
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableTitle ?? '';
   return args.fns.prop('title', args.contextData.props);
 };
 const getSubtitle = () => {
+  if (args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false) return "";
   if (isNestedLinesTable()) return args.contextData.props?.nestedTableSubtitle ?? '';
   return args.fns.prop('subtitle', args.contextData.props);
 };
@@ -169,7 +171,10 @@ const normalizeAction = (action, index) => {
     reasonCode: action.reasonCode,
     reasonVariant: action.reasonVariant,
     loadingIcon: action.loadingIcon,
-    onClick: action.onClick
+    onClick: action.onClick,
+    href: action.href,
+    target: action.target,
+    rel: action.rel
   };
 };
 
@@ -354,6 +359,19 @@ const getActionReasonDataAttrs = (action, row) => {
   };
   if (state.code) attrs["data-reason-code"] = state.code;
   return attrs;
+};
+
+/** `href`: string | `({ row, action, … }) => string` — link for IconButton / open in new tab. */
+const getActionHref = (action, row) => {
+  if (!action) return undefined;
+  const raw = action.href;
+  if (raw == null || raw === "") return undefined;
+  if (typeof raw === "string") return String(raw);
+  if (typeof raw === "function") {
+    const result = invokeActionPredicate(raw, action, row, "getActionHref");
+    return result != null && result !== "" ? String(result) : undefined;
+  }
+  return undefined;
 };
 
 const getPrimaryActionsForRow = (row) =>
@@ -691,6 +709,16 @@ const clearExpansionStoresForDataReload = () => {
   patchTableP({ expansionOpen: [], expansionRows: [], expansionLoading: [] });
 };
 
+const cleanupOwnedTableStateVertex = () => {
+  if (!ownTableStateVertex || !tableStateVertexId) return;
+  const vid = tableStateVertexId;
+  queueMicrotask(() => {
+    if (args.graph?.vertexes?.[vid]) {
+      args.deleteVertex(0, vid, args.graph, args.setGraph);
+    }
+  });
+};
+
 const toggleRowExpansion = async (row) => {
   const rowExpansions = getRowExpansionConfigs();
   if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !row?.id) return;
@@ -769,7 +797,7 @@ const getVirtualRowHeight = (index, row) => {
   if (isNestedLinesTable()) return base;
   const rowExpansions = getRowExpansionConfigs();
   if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !row?.id) return base;
-  if (isExpansionOpen(row.id)) return base + getExpansionPanelHeight(rowExpansions);
+  if (isExpansionOpen(String(row.id))) return base + getExpansionPanelHeight(rowExpansions);
   return base;
 };
 
@@ -828,13 +856,25 @@ const buildDisplayData = (filtered, groupByKey, collapsedList) => {
   Object.keys(displayRowCache).forEach(k => { if (!usedIds.has(k)) delete displayRowCache[k]; });
   return result;
 };
+let displayListRef = [];
+const isSameDisplayList = (a, b) =>
+  a === b ||
+  (Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every((row, i) => row === b[i]));
+
 const getDisplayData = () => {
   const g = getGroupByConfig();
   const filtered = verticesFromRowIds(tableP()?.filteredData ?? []);
-  if (!g) return filtered;
-  const key = typeof g === 'string' ? g : (g.key || '');
-  if (!key) return filtered;
-  return buildDisplayData(filtered, key, tableP()?.collapsedKeys ?? []);
+  let next = filtered;
+  if (g) {
+    const key = typeof g === "string" ? g : g.key || "";
+    if (key) next = buildDisplayData(filtered, key, tableP()?.collapsedKeys ?? []);
+  }
+  if (isSameDisplayList(displayListRef, next)) return displayListRef;
+  displayListRef = next;
+  return displayListRef;
 };
 
 /** Row ids currently shown in the table body (excludes group-by parent rows). */
@@ -2326,7 +2366,7 @@ const handleTableHorizontalScroll = (e) => {
   syncTableHorizontalScroll(e.currentTarget);
 };
 
-// Approximate min width of the table grid so the body horizontal scroll region gets scrollWidth (virtual rows are position:absolute and do not expand it).
+// Approximate min width of the table grid so the body horizontal scroll region gets scrollWidth.
 const getTableBodyMinWidthPx = () => {
   const template = getGridTemplateColumns();
   const parts = template.trim().split(/\s+/).filter(Boolean);
@@ -2352,6 +2392,15 @@ const getTableBodyMinWidthPx = () => {
 
 return {
   tableStateVertexId,
+  cleanupOwnedTableStateVertex,
+  isEmbeddedMode: () => {
+    const mode = args.contextData.props?.mode || args.contextData.props?.tableMode;
+    return mode === "embedded" || args.contextData.props?.embeddedMode === true;
+  },
+  getTableMode: () => {
+    if (args.fns.isEmbeddedMode?.()) return "embedded";
+    return "standalone";
+  },
   getColumns,
   getRowHeight,
   getTitle,
@@ -2394,6 +2443,7 @@ return {
   getActionReasonState,
   getActionTooltip,
   getActionReasonDataAttrs,
+  getActionHref,
   getPrimaryActionsForRow,
   getSecondaryActionsForRow,
   hasSecondaryActionsForRow,
@@ -2517,7 +2567,7 @@ return {
     }
   },
   onCleanup: () => {
-    args.deleteVertex(0, args.fns.tableStateVertexId, args.graph, args.setGraph);
+    args.fns.cleanupOwnedTableStateVertex?.();
   }
 }'''
       }
@@ -2550,6 +2600,14 @@ return args.contextData.props?.nestedLinesMode === true
       return "100%";
     })()
   };
+}`
+  : args.fns.isEmbeddedMode?.() === true
+  ? `._id {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 280px;
+  min-height: 0;
 }`
   : `._id {
   display: flex;
@@ -2598,7 +2656,8 @@ return `._id {
         props:
           '''
 return {
-  as: "div"
+  as: "div",
+  hide: args.fns.isEmbeddedMode?.() === true && args.contextData.props?.hidePageChrome !== false
 };
 '''
       }
@@ -4114,18 +4173,15 @@ return `._id {
         componentName: VirtualList
         props:
           '''
-const isLoading = args.graph.vertexes[args.fns.pageStateVertexId]?.P?.loading === true;
 return {
   getItems: args.fns.getDisplayData,
   itemHeight: args.fns.getRowHeight(),
   getItemHeightAt: args.fns.getVirtualRowHeight,
   rowHasExpansion: (row) => ((args.fns.getRowExpansionConfigs?.() || []).length > 0) && !!row?.id,
   containerClass: "table-body-list",
-  hide: isLoading,
   tabIndex: 0,
   role: "listbox",
   "attr:aria-label": "Table rows; Arrow keys to move, Shift+Arrow Up/Down to select range, Left/Right to collapse/expand group, Space to toggle selection",
-  // VirtualList reads scrollTop from 40wrap (parent), not the list root div
   getScrollContainerElement: () => args.fns.getScrollContainerElementForVirtualList(),
   getActiveIndex: () => args.fns.activeRowIndex?.(),
   setActiveIndex: (n) => args.fns.setActiveRowIndex?.(n),
@@ -4224,12 +4280,16 @@ const rowData = virtualItem.rowData;
 const selectedRows = args.fns.getSelectedRows();
 const isSelected = rowData?.id ? selectedRows.has(rowData.id) : false;
 const isActive = args.fns.activeRowId?.() === rowData?.id;
-const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const rowHeightPx = args.fns.getRowHeight();
+const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const expansionPanelHeightPx =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowData?.id && args.fns.isExpansionOpen?.(rowData.id)
+  Array.isArray(rowExpansions) &&
+  rowExpansions.length > 0 &&
+  rowData?.id != null &&
+  args.fns.isExpansionOpen?.(String(rowData.id))
     ? args.fns.getExpansionPanelHeight(rowExpansions)
     : 0;
+const totalHeightPx = rowHeightPx + expansionPanelHeightPx;
 const gridRows =
   expansionPanelHeightPx > 0
     ? `${rowHeightPx}px minmax(0, ${expansionPanelHeightPx}px)`
@@ -4237,15 +4297,10 @@ const gridRows =
 
 return [
 `._id {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: ${virtualItem.size}px;
-  transform: translate3d(0, ${virtualItem.start}px, 0);
-  will-change: transform;
-  contain: layout paint style;
-  backface-visibility: hidden;
+  height: ${totalHeightPx}px;
+  min-height: ${rowHeightPx}px;
+  box-sizing: border-box;
 }`,
 `._id {
   display: grid;
@@ -4303,12 +4358,15 @@ return {
       args.fns.initTableDraggable(el);
     }
   },
-  onCleanup: () => {
-    const el = args.fns.getRowRef?.(rowIndex) ?? args.ref?.();
-    args.fns.setRowRef?.(rowIndex, null);
-    if (args.fns.cleanupTableDraggable && el) {
-      args.fns.cleanupTableDraggable(el);
-    }
+  onMount: () => {
+    const idx = rowIndex;
+    return () => {
+      const el = args.fns.getRowRef?.(idx) ?? null;
+      args.fns.setRowRef?.(idx, null);
+      if (args.fns.cleanupTableDraggable && el) {
+        args.fns.cleanupTableDraggable(el);
+      }
+    };
   },
   onClick: (event) => {
     args.mergeVertexProperties(0, args.fns.tableStateVertexId, args.graph, args.setGraph, { activeRowId: rowData?.id ?? null });
@@ -4332,7 +4390,10 @@ const rowData = virtualItem.rowData;
 const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 const rowId = rowData?.id;
 const isRowExpansionOpen =
-  Array.isArray(rowExpansions) && rowExpansions.length > 0 && rowId && args.fns.isExpansionOpen?.(rowId);
+  Array.isArray(rowExpansions) &&
+  rowExpansions.length > 0 &&
+  rowId != null &&
+  args.fns.isExpansionOpen?.(String(rowId));
 const t = args.theme.var.color;
 return `._id {
   grid-row: 2;
@@ -4356,11 +4417,8 @@ const rowData = virtualItem.rowData;
 const rowId = rowData?.id;
 const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 if (!Array.isArray(rowExpansions) || rowExpansions.length === 0 || !rowId) return { as: 'div', hide: true };
-const expansionRowKey = String(rowId);
-const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
 return {
   as: 'div',
-  hide: !isRowExpansionOpen,
   onClick: (e) => e.stopPropagation()
 };
 '''
@@ -4400,7 +4458,21 @@ if (!rowExpansion || !rowId) return { as: 'div', hide: true };
 const expansionRowKey = String(rowId);
 const expansionKey = "exp_0";
 const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
-if (!isRowExpansionOpen) return { as: 'div', hide: true };
+let everExpanded = isRowExpansionOpen;
+if (!everExpanded) {
+  const expP0 = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
+  const expRows0 = expP0?.expansionRows;
+  if (Array.isArray(expRows0)) {
+    for (let i = 0; i < expRows0.length; i++) {
+      const e0 = expRows0[i];
+      if (e0 && e0.id != null && String(e0.id) === expansionRowKey) {
+        everExpanded = true;
+        break;
+      }
+    }
+  }
+}
+if (!everExpanded) return { as: 'div', hide: true };
 const expP = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
 let rows;
 const expRows = expP?.expansionRows;
@@ -4455,8 +4527,22 @@ const rowExpansions = args.fns.getRowExpansionConfigs?.() || [];
 if (!rowId || !Array.isArray(rowExpansions) || rowExpansions.length === 0) return { as: "div", hide: true };
 const expansionRowKey = String(rowId);
 const isRowExpansionOpen = args.fns.isExpansionOpen?.(expansionRowKey);
+let everExpanded = isRowExpansionOpen;
+if (!everExpanded) {
+  const expP0 = args.graph.vertexes[args.fns.tableStateVertexId]?.P;
+  const expRows0 = expP0?.expansionRows;
+  if (Array.isArray(expRows0)) {
+    for (let i = 0; i < expRows0.length; i++) {
+      const e0 = expRows0[i];
+      if (e0 && e0.id != null && String(e0.id) === expansionRowKey) {
+        everExpanded = true;
+        break;
+      }
+    }
+  }
+}
 return {
-  hide: !isRowExpansionOpen,
+  hide: !everExpanded,
   data: rowExpansions.map((cfg, idx) => ({ ...cfg, _expansionIndex: idx }))
 };
 '''
@@ -4478,6 +4564,7 @@ const rowId = rowData?.id;
 const rowExpansion = args.contextData.expansionTable || {};
 if (!rowId || !rowExpansion || typeof rowExpansion !== "object") return { hide: true };
 const expansionRowKey = String(rowId);
+if (!args.fns.isExpansionOpen?.(expansionRowKey)) return { hide: true };
 const outerArgs = args;
 const tableVid = outerArgs.fns.tableStateVertexId;
 const expansionIndex = rowExpansion._expansionIndex != null ? Number(rowExpansion._expansionIndex) : 0;
@@ -4710,10 +4797,14 @@ const disabled = args.fns.isActionDisabled(action, rowData);
 const loading = args.fns.isActionRunning(action, rowData);
 const reason = args.fns.getActionReasonState(action, rowData);
 const reasonAttrs = args.fns.getActionReasonDataAttrs(action, rowData);
+const hrefValue = args.fns.getActionHref(action, rowData);
 return {
   icon: loading ? (action.loadingIcon || "carbon:renew") : (action.icon || "carbon:overflow-menu-horizontal"),
   variant: action.variant || "ghost",
   size: "sm",
+  href: hrefValue,
+  target: action.target,
+  rel: action.rel,
   title: reason.text,
   ariaLabel: reason.text,
   reasonVariant: reason.active ? reason.variant : undefined,
@@ -4722,6 +4813,10 @@ return {
   ...reasonAttrs,
   onClick: (e) => {
     e.stopPropagation();
+    // Modifier or middle-click: keep native <a> behavior (open href in new tab/window).
+    if (hrefValue && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1)) return;
+    // Plain click: do not navigate; run configured row action (e.g. open modal).
+    if (hrefValue) e.preventDefault();
     if (disabled || loading) return;
     args.fns.runRowAction(action, rowData);
   }

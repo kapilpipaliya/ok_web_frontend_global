@@ -12,40 +12,10 @@
       }
     },
     {
-      id: "rootAttr",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  min-height: 100vh;
-  background: ${args.theme.var.color.background};
-}`;
-'''
-      }
-    },
-    {
-      id: "header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "FullChandHeader",
-        props: '''
-return {};
-'''
-      }
-    },
-    {
       id: "pageHeader",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
@@ -91,7 +61,7 @@ return `._id {
       id: "mainContent",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
@@ -1068,23 +1038,18 @@ return `._id {
       }
     },
     {
-      id: "footer",
-      L: "Attr",
+      id: "layout",
+      L: "PageLayout",
       P: {
-        displayOrder: 5,
-        componentName: "FullChandFooter",
-        props: '''
-return {};
-'''
+        displayOrder: 1,
+        componentName: "FullChandLayout"
       }
     }
   ],
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
-    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
-    { id: "e2", T: "Attr", S: "rootAttr", E: "pageHeader" },
+    { id: "e0", T: "Attr", S: "page", E: "pageHeader" },
     { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
-    { id: "e4", T: "Attr", S: "rootAttr", E: "mainContent" },
+    { id: "e4", T: "Attr", S: "page", E: "mainContent" },
     { id: "e5", T: "Attr", S: "mainContent", E: "container" },
     { id: "e6", T: "Attr", S: "container", E: "yearSection" },
     { id: "e7", T: "Attr", S: "yearSection", E: "yearTitle" },
@@ -1127,6 +1092,6 @@ return {};
     { id: "e44", T: "Attr", S: "footerNote", E: "footerDesign" },
     { id: "e45", T: "Attr", S: "footerDesign", E: "designText" },
     { id: "e46", T: "Attr", S: "footerDesign", E: "designLink" },
-    { id: "e47", T: "Attr", S: "rootAttr", E: "footer" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }

@@ -101,6 +101,7 @@ return {
   display: flex;
   flex-direction: column;
   overflow: auto;
+  position: relative;
 }`;'''
         props:
           '''return {
@@ -116,6 +117,64 @@ return {
         componentName: Slot
         slot: 1children
         key: portal_slot
+      }
+    }
+    {
+      id: "pl_nav_overlay"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''
+const isNavigating = args.fns.isNavigating?.();
+
+return {
+  as: "div",
+  style: {
+    display: isNavigating ? "flex" : "none"
+  }
+};
+'''
+        css:
+          '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: ${args.theme.var.color.background};
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: ${args.theme.var.spacing.xxl};
+  z-index: 1;
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}`;
+'''
+      }
+    }
+    {
+      id: "pl_nav_spinner"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: LoadingSpinner
+        props:
+          '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
       }
     }
   ]
@@ -161,6 +220,18 @@ return {
       T: Attr
       S: "pl12"
       E: "pl13"
+    }
+    {
+      id: pl_e_nav_overlay
+      T: Attr
+      S: "pl12"
+      E: "pl_nav_overlay"
+    }
+    {
+      id: pl_e_nav_spinner
+      T: Attr
+      S: "pl_nav_overlay"
+      E: "pl_nav_spinner"
     }
   ]
 }

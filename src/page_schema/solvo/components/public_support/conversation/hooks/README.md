@@ -1,33 +1,14 @@
-# Conversation hooks (controller modules)
+# Conversation shared fns (parent `PublicSupportConversationContent`)
 
-Logic for public support conversations lives in `PublicSupportConversationContent` component `fns` (orchestrator). It is organized into these logical modules:
+State and behavior live in **`PublicSupportConversationContent.hjson` `fns`**. Child components use **`args.fns`** only (no controller object, no passing API bundles through props).
 
-| Module | Responsibility |
+| Concern | `args.fns` examples |
 | --- | --- |
-| **useConversationAuth** | `getSerial`, `getToken`, `getTicketId`, `hasCredentials`, `buildAuthContext` |
-| **useConversationCapabilities** | `getCapabilities()` — capability flags derived once from `viewerRole` + props |
-| **useConversationApi** | `conversationApi.load`, `.reply`, `.addInternalNote`, `.close`, `.reopen` |
-| **useConversationMessages** | `getMessageType`, `isOwnMessage`, `getVisibleMessages`, `normalizeMessage`, timestamps |
+| Auth / credentials | `usesTokenAuth()`, `hasCredentials()`, `viewerRole()` |
+| Capabilities | `canInternalNote()`, `canSeeInternalNotes()`, `getReplyPlaceholder()` |
+| Ticket UI state | `isTicketClosed()`, `canShowComposer()`, `canCloseTicketNow()`, `canReopenTicketNow()`, `canShowInternalNoteTools()` |
+| Messages | `getVisibleMessages()`, `getMessageType()`, `isOwnMessage()`, `getRowJustify()`, `formatMessageTime()` |
+| Actions | `sendReply()`, `addInternalNote()`, `closeTicket()`, `reopenTicket()` |
+| Signals | `ticketVertex()`, `replyMessageText()`, `setReplyMessageText()`, … |
 
-UI subcomponents use `args.fns` directly (inherited from `PublicSupportConversationContent` via parent render context). They must not call server functions directly.
-
-## Capabilities (derived from `viewerRole`)
-
-| Flag | Admin default | Customer default |
-| --- | --- | --- |
-| `canReply` | true | true |
-| `canReplyWhenClosed` | false | false |
-| `canCloseTicket` | true | true |
-| `canReopenTicket` | false | true |
-| `canInternalNote` | true (if `showInternalNote`) | false |
-| `canSeeInternalNotes` | true | false |
-
-## Message types
-
-Normalized on load:
-
-- `customer_message`
-- `admin_reply`
-- `internal_note`
-
-Customer timeline filters out `internal_note`. Bubble alignment uses `isOwnMessage(message)` (sender-based), not `viewerRole`.
+Server calls (`fetchConversation`, etc.) stay private to the parent `fns` body and are not exported on `args.fns`.

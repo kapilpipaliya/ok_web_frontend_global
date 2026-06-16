@@ -1,0 +1,81 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: getPortalLink
+        description: Resolves staff portal sign-in link from GlobalSetting supportGlobal (portal link settings).
+        body:
+          '''
+const dbName = String(args.subDomain || args.rawSubDomain || "").trim();
+
+const parseJsonSafe = (value, fallback) => {
+  if (value == null || value === "") return fallback;
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(String(value));
+  } catch {
+    return fallback;
+  }
+};
+
+const result = await args.session.run(
+  `
+  MATCH (g:GlobalSetting {key: 'Default'})
+  OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(doc:SettingsSectionDocument {pageId: 'support', sectionId: 'supportGlobal'})
+  RETURN doc
+  `
+);
+
+let supportGlobal = {};
+const node = result.records[0]?.get("doc");
+if (node) {
+  const doc = args.convertNodeToJson(node);
+  supportGlobal = parseJsonSafe(doc?.P?.values, {});
+}
+
+if (supportGlobal.portalLinkEnabled === false) {
+  return {
+    success: true,
+    data: {
+      portalLinkEnabled: false,
+      portalLinkLabel: "",
+      portalSignInPath: "",
+      portalSignInUrl: ""
+    }
+  };
+}
+
+const portalSignInPath =
+  String(supportGlobal.portalSignInPath || "/auth/signin").trim() || "/auth/signin";
+const portalLinkLabel =
+  String(supportGlobal.portalLinkLabel || "Staff portal").trim() || "Staff portal";
+const portalBaseUrl = String(supportGlobal.portalBaseUrl || "").trim();
+
+let portalSignInUrl = "";
+if (portalBaseUrl) {
+  const base = portalBaseUrl.replace(/\/$/, "");
+  const path = portalSignInPath.startsWith("/") ? portalSignInPath : `/${portalSignInPath}`;
+  portalSignInUrl = `${base}${path}`;
+} else if (dbName) {
+  portalSignInUrl = `https://${dbName}.decodecommerce.com${portalSignInPath}`;
+} else {
+  return { success: false, error: "Shop database subdomain is required." };
+}
+
+return {
+  success: true,
+  data: {
+    portalLinkEnabled: true,
+    portalLinkLabel,
+    portalSignInPath,
+    portalSignInUrl
+  }
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

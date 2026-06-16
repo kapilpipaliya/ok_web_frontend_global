@@ -19,6 +19,7 @@ export interface FunctionArgumentBaseType {
   componentName: string;
   createSignal: any; // solid-js function: import { createSignal } from "solid-js";
   createStore: any; // solid-js function: import { createStore } from "solid-js/store";
+  reconcile: any; // solid-js/store: import { reconcile } from "solid-js/store";
   data: Vertex;
   contextData: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;

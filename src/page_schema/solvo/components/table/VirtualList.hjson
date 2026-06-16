@@ -20,23 +20,7 @@ const getItems = () => {
   return args.contextData.props?.items || [];
 };
 
-const getItemHeight = () => args.contextData.props?.itemHeight || 90;
-const getHeightAtIndex = (i, items) => {
-  const fn = args.contextData.props?.getItemHeightAt;
-  if (typeof fn === "function") {
-    const h = fn(i, items[i]);
-    if (typeof h === "number" && !isNaN(h) && h >= 0) return h;
-  }
-  const uniform = getItemHeight();
-  return typeof uniform === "function" ? uniform() : uniform;
-};
-
-const getItemHeightHint = () => {
-  const h = getItemHeight();
-  return typeof h === "function" ? h() : h;
-};
-
-const getOverscan = () => args.contextData.props?.overscan || 15;
+const ROW_HEIGHT = () => args.contextData.props?.itemHeight ?? 50;
 
 let virtualizerHandle = null;
 const setVirtualizerHandle = (handle) => {
@@ -46,15 +30,12 @@ const setVirtualizerHandle = (handle) => {
 const [scrollElement, setScrollElement] = args.createSignal(null);
 const [listRootEl, setListRootEl] = args.createSignal(null);
 
-const renderRow = args.createLoopRowRenderer((rowData, index) => {
-  const i = index();
-  return {
-    index: i,
-    start: 0,
-    size: getHeightAtIndex(i, getItems()),
-    rowData,
-  };
-});
+const renderRow = args.createLoopRowRenderer((rowData, index) => ({
+  index: index(),
+  start: 0,
+  size: ROW_HEIGHT(),
+  rowData,
+}));
 
 const isTextInputTarget = (target) => {
   if (!target || typeof target !== "object") return false;
@@ -85,11 +66,6 @@ const getActiveIndex = () => args.contextData.props?.getActiveIndex?.() ?? -1;
 const setActiveIndex = (n) => args.contextData.props?.setActiveIndex?.(n);
 const getItemCount = () => getItems()?.length ?? 0;
 const useKeyNav = () => typeof args.contextData.props?.setActiveIndex === "function";
-
-const getKeepMounted = () => {
-  const i = getActiveIndex();
-  return i >= 0 ? [i] : undefined;
-};
 
 const focusList = () => {
   listRootEl()?.focus?.({ preventScroll: true });
@@ -188,9 +164,7 @@ return {
   scrollElement,
   setListRootEl,
   getItems,
-  getItemHeightHint,
-  getOverscan,
-  getKeepMounted,
+  ROW_HEIGHT,
   renderRow,
   setVirtualizerHandle,
   handleListKeyDown,
@@ -241,18 +215,14 @@ if (usesExternalScroll && !scrollEl) {
   return { hide: true };
 }
 
-const hint = args.fns.getItemHeightHint?.() || 90;
-const overscan = args.fns.getOverscan?.() || 15;
-const keepMounted = args.fns.getKeepMounted?.();
+const rowHeight = args.fns.ROW_HEIGHT?.() ?? 50;
 
 return {
   data: args.fns.getItems(),
   scrollRef: scrollEl || undefined,
-  itemSize: hint,
-  bufferSize: Math.max(200, overscan * hint),
+  itemSize: rowHeight,
   ref: args.fns.setVirtualizerHandle,
   children: args.fns.renderRow,
-  ...(keepMounted ? { keepMounted } : {}),
 };
 '''
       }
@@ -295,32 +265,7 @@ return { hide: true };
       P: {
         type: number
         key: itemHeight
-        defValue: 90
-      }
-    }
-    {
-      id: virtualList_variant_overscan
-      L: ComponentVariant
-      P: {
-        type: number
-        key: overscan
-        defValue: 15
-      }
-    }
-    {
-      id: virtualList_variant_onScroll
-      L: ComponentVariant
-      P: {
-        type: function
-        key: onScroll
-      }
-    }
-    {
-      id: virtualList_variant_getItemHeightAt
-      L: ComponentVariant
-      P: {
-        type: function
-        key: getItemHeightAt
+        defValue: 50
       }
     }
     {
@@ -351,24 +296,6 @@ return { hide: true };
       T: ComponentVariant
       S: virtualList_component
       E: virtualList_variant_itemHeight
-    }
-    {
-      id: virtualList_e_variant_overscan
-      T: ComponentVariant
-      S: virtualList_component
-      E: virtualList_variant_overscan
-    }
-    {
-      id: virtualList_e_variant_onScroll
-      T: ComponentVariant
-      S: virtualList_component
-      E: virtualList_variant_onScroll
-    }
-    {
-      id: virtualList_e_variant_getItemHeightAt
-      T: ComponentVariant
-      S: virtualList_component
-      E: virtualList_variant_getItemHeightAt
     }
     {
       id: virtualList_e_variant_items

@@ -12,38 +12,10 @@
       }
     },
     {
-      id: "rootAttr",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  min-height: 100vh;
-  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_light_50};
-  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_100 : args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "header",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "FullChandHeader"
-      }
-    },
-    {
       id: "hero",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
@@ -130,7 +102,7 @@ return `._id {
       id: "content",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
@@ -753,21 +725,19 @@ return `._id {
       }
     },
     {
-      id: "footer",
-      L: "Attr",
+      id: "layout",
+      L: "PageLayout",
       P: {
-        displayOrder: 4,
-        componentName: "FullChandFooter"
+        displayOrder: 1,
+        componentName: "FullChandLayout"
       }
     }
   ],
   edges: [
-    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
-    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
-    { id: "e2", T: "Attr", S: "rootAttr", E: "hero" },
+    { id: "e0", T: "Attr", S: "page", E: "hero" },
     { id: "e3", T: "Attr", S: "hero", E: "heroTitle" },
     { id: "e4", T: "Attr", S: "hero", E: "heroSubtitle" },
-    { id: "e5", T: "Attr", S: "rootAttr", E: "content" },
+    { id: "e5", T: "Attr", S: "page", E: "content" },
     { id: "e6", T: "Attr", S: "content", E: "introSection" },
     { id: "e7", T: "Attr", S: "introSection", E: "introTitle" },
     { id: "e8", T: "Attr", S: "introSection", E: "introText" },
@@ -797,6 +767,6 @@ return `._id {
     { id: "e32", T: "Attr", S: "joinSection", E: "joinButtons" },
     { id: "e33", T: "Attr", S: "joinButtons", E: "whatsappButton" },
     { id: "e34", T: "Attr", S: "joinButtons", E: "telegramButton" },
-    { id: "e35", T: "Attr", S: "rootAttr", E: "footer" }
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }

@@ -34,18 +34,22 @@ const parseJsonSafe = (value, fallback) => {
   try { return JSON.parse(String(value)); } catch { return fallback; }
 };
 
-const buildTemplateQueryParams = ({ ticket, message, ticketId, assigneeUser }) => {
+const buildTemplateQueryParams = ({ ticket, message, ticketId, assigneeUser, eventType }) => {
   const p = ticket?.P || {};
   const mp = message?.P || {};
+  const ticketIdStr = ticketId ? String(ticketId) : "";
+  const adminUrl = ticketIdStr
+    ? eventType === "ticket_assigned"
+      ? `/portal/support/conversation?ticketId=${encodeURIComponent(ticketIdStr)}`
+      : `/public-support/conversation?ticketId=${encodeURIComponent(ticketIdStr)}`
+    : "";
   const params = {
     serial: String(p.serial || ""),
     subject: String(p.subject || ""),
     message: String(mp.message || p.initialMessage || ""),
     customerEmail: String(p.customerEmail || ""),
     trackingUrl: String(p.trackingUrl || ""),
-    adminUrl: ticketId
-      ? `/public-support/conversation?ticketId=${encodeURIComponent(String(ticketId))}`
-      : ""
+    adminUrl
   };
   const assigneeName = assigneeUser?.P?.name || assigneeUser?.P?.username || "";
   if (assigneeName) params.assigneeName = String(assigneeName);
@@ -258,7 +262,7 @@ const processOne = async (job) => {
 
     const templateKey = eventTemplateKey(eventType);
     const subject = subjectForEvent(eventType, ticket, settings.emailSettings);
-    const queryParams = buildTemplateQueryParams({ ticket, message, ticketId, assigneeUser });
+    const queryParams = buildTemplateQueryParams({ ticket, message, ticketId, assigneeUser, eventType });
     const subDomain = payload.subDomain || args.subDomain;
 
     await args.sendNotificationEmail(
