@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/books"
+        contextName: "booksSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "books", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.booksSettings?.content;
 return {
   as: "h1",
-  text: "Books"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -64,9 +79,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.booksSettings?.content;
 return {
   as: "p",
-  text: "Explore our collection of spiritual texts and writings"
+  text: content?.pageSubtitle
 };
 ''',
         css: '''
@@ -124,97 +140,10 @@ return `._id {
         contextName: "books",
         loop: true,
         props: '''
+const items = args.contextData.booksSettings?.books?.books ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      title: "Atma Siddhi Shastra",
-      description: "A profound spiritual text offering deep insights into self-realization and the path to liberation. This masterpiece contains 142 verses that guide seekers on their spiritual journey.",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-page-Eng-e1548072132279.png",
-      language: "English",
-      pages: 200,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/atma-siddhi-shastra-english.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-english"
-    },
-    {
-      id: 2,
-      title: "आत्मसिद्धि शास्त्र",
-      description: "श्रीमद् राजचंद्र द्वारा रचित यह महान ग्रंथ आत्म-साक्षात्कार और मोक्ष के मार्ग को प्रकाशित करता है। १४२ श्लोकों में आध्यात्मिक ज्ञान का सार।",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-Page-Hin-e1548072172353.jpg",
-      language: "Hindi",
-      pages: 200,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/atma-siddhi-shastra-hindi.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-hindi"
-    },
-    {
-      id: 3,
-      title: "આત્મસિદ્ધિ શાસ્ત્ર",
-      description: "શ્રીમદ્ રાજચંદ્ર દ્વારા રચાયેલ આ મહાન ગ્રંથ આત્મ-સાક્ષાત્કાર અને મોક્ષના માર્ગને પ્રકાશિત કરે છે.",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/Atma-Siddhi-Shastra-Cover-Page-Guj-e1548072148982.jpg",
-      language: "Gujarati",
-      pages: 200,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/atma-siddhi-shastra-gujarati.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/atma-siddhi-shastra-gujarati"
-    },
-    {
-      id: 4,
-      title: "Self Realization - A Deep Study",
-      description: "An in-depth exploration of the concept of self-realization, examining various aspects of spiritual awakening and the journey towards enlightenment.",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/21-Self-Realization-A-Deep-Study-e1548072029235.jpg",
-      language: "English",
-      pages: 350,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/self-realization-deep-study.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/self-realization-deep-study"
-    },
-    {
-      id: 5,
-      title: "ज्ञान से ज्ञायक तक",
-      description: "ज्ञान की यात्रा से लेकर ज्ञाता बनने तक का मार्ग। यह पुस्तक साधकों को आत्म-बोध की गहराइयों में ले जाती है।",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/11-Gyaan-se-Gyaayak-tak-e1548071848682.jpg",
-      language: "Hindi",
-      pages: 280,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/gyan-se-gyayak-tak.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/gyan-se-gyayak-tak"
-    },
-    {
-      id: 6,
-      title: "મારણ નો હરણ",
-      description: "મૃત્યુના ભયને કેવી રીતે દૂર કરવો અને આત્માની અમરતાને સમજવી તેના પર આધારિત આધ્યાત્મિક માર્ગદર્શન.",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/14-Maran-ka-Haran-e1548071966275.jpg",
-      language: "Gujarati",
-      pages: 150,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/maran-no-haran.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/maran-no-haran"
-    },
-    {
-      id: 7,
-      title: "Multiple Viewpoints on Terrorism",
-      description: "A unique spiritual perspective on terrorism and violence, exploring the roots of hatred and the path to universal compassion and understanding.",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/23-Multiple-Viewpoints-on-Terrorism-e1548072092336.jpg",
-      language: "English",
-      pages: 180,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/multiple-viewpoints-terrorism.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/multiple-viewpoints-terrorism"
-    },
-    {
-      id: 8,
-      title: "वर्धमान से महावीर",
-      description: "भगवान महावीर के जीवन की यात्रा - एक राजकुमार से तीर्थंकर बनने तक की प्रेरणादायक कहानी।",
-      image: "https://www.fulchandshastri.com/wp-content/uploads/2018/01/16-Vardhamaan-se-Mahavira-e1546934165272.jpg",
-      language: "Hindi",
-      pages: 250,
-      price: "Free",
-      downloadUrl: "https://www.fulchandshastri.com/books/vardhaman-se-mahavir.pdf",
-      readUrl: "https://www.fulchandshastri.com/books/read/vardhaman-se-mahavir"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }

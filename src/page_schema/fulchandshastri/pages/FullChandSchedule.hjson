@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/schedule"
+        contextName: "scheduleSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "schedule", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "h1",
-  text: "Schedule"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -119,9 +134,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "h2",
-  text: "Upcoming events in 2025"
+  text: content?.yearTitle
 };
 ''',
         css: '''
@@ -234,9 +250,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Date"
+  text: content?.dateHeader
 };
 ''',
         css: '''
@@ -256,9 +273,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Place"
+  text: content?.placeHeader
 };
 ''',
         css: '''
@@ -278,9 +296,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Programme"
+  text: content?.programmeHeader
 };
 ''',
         css: '''
@@ -300,9 +319,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Details"
+  text: content?.detailsHeader
 };
 ''',
         css: '''
@@ -337,79 +357,10 @@ return {
         contextName: "events",
         loop: true,
         props: '''
+const items = args.contextData.scheduleSettings?.events?.events ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      date: "6 Jan - 8 Jan\nFri - Sun",
-      place: "Gajapantha",
-      programme: "Kibauk Ka Bodh Shibar",
-      details: "Contact:\nDharmendra Jain +91-9898245201"
-    },
-    {
-      id: 2,
-      date: "18 Jan - 21 Jan\nWed - Sat",
-      place: "Singapore",
-      programme: "Dharma Paryatan",
-      details: "Contact:\nDharmendra Jain +91-9898245201"
-    },
-    {
-      id: 3,
-      date: "3 Jul - 6 Jul\nThu - Sun",
-      place: "Chowai, USA",
-      programme: "JAINA Convention",
-      details: "Contact:\nDharmendra Jain +91-9898245201"
-    },
-    {
-      id: 4,
-      date: "16 Aug - 3 Sep\nSat - Tue",
-      place: "ASK Umarala",
-      programme: "Chaitanya Samaysar Paryushan Mahaparva 2025",
-      details: "Contact:\nDharmendra Jain +91-9898245201"
-    },
-    {
-      id: 5,
-      date: "30 May - 10 Apr\nSun - Thu",
-      place: "ASK Umarala",
-      programme: "Pratishtha Anniversary",
-      details: "Contact:\nASK Umarala +91-9825242501"
-    },
-    {
-      id: 6,
-      date: "29 Mar - 30 Mar\nFri - Sun",
-      place: "Mumbai",
-      programme: "Dharma Paryatan",
-      details: "Contact:\nASK Umarala +91-9825242501"
-    },
-    {
-      id: 7,
-      date: "24 Mar - 28 Mar\nMon - Fri",
-      place: "Gajapantha",
-      programme: "Atma Sadhana",
-      details: "Contact:\nASK Umarala +91-9825242501"
-    },
-    {
-      id: 8,
-      date: "21 Mar - 24 Mar\nFri - Mon",
-      place: "Surat (MP)",
-      programme: "Dharma Paryatan",
-      details: "Contact:\nASK Umarala +91-9825242501"
-    },
-    {
-      id: 9,
-      date: "16 Mar - 21 Mar\nTue - Fri",
-      place: "Chindbadi (MP)",
-      programme: "Atma Sadhana",
-      details: "Contact:\nASK Umarala +91-9825242501"
-    },
-    {
-      id: 10,
-      date: "14 Mar - 16 Mar\nSun - Tue",
-      place: "Gajapantha (MP)",
-      programme: "Atma Sadhana",
-      details: "Contact:\nASK Umarala +91-9825242501"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -556,9 +507,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "h2",
-  text: "Previous events in 2025"
+  text: content?.previousTitle
 };
 ''',
         css: '''
@@ -672,9 +624,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Date"
+  text: content?.prevDateHeader
 };
 ''',
         css: '''
@@ -694,9 +647,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Place"
+  text: content?.prevPlaceHeader
 };
 ''',
         css: '''
@@ -716,9 +670,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Programme"
+  text: content?.prevProgrammeHeader
 };
 ''',
         css: '''
@@ -738,9 +693,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "th",
-  text: "Details"
+  text: content?.prevDetailsHeader
 };
 ''',
         css: '''
@@ -775,44 +731,10 @@ return {
         contextName: "previousEvents",
         loop: true,
         props: '''
+const items = args.contextData.scheduleSettings?.previous_events?.previousEvents ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      date: "15 Feb\nSat",
-      place: "Delhi",
-      programme: "Dharma Paryatan",
-      details: "ASK Umarala +91-9825242501"
-    },
-    {
-      id: 2,
-      date: "12 Feb - 14 Feb\nWed - Fri",
-      place: "Jaipur (RJ)",
-      programme: "Dharma Paryatan",
-      details: "Contact for Registration:\nDharmendra Jain +91-9898245201"
-    },
-    {
-      id: 3,
-      date: "10 Feb - 11 Feb\nMon - Tue",
-      place: "Mumbai",
-      programme: "Dharma Paryatan",
-      details: "ASK Umarala +91-9825242501"
-    },
-    {
-      id: 4,
-      date: "4 Feb - 9 Feb\nTue - Sun",
-      place: "Aurangabad (MH)",
-      programme: "Dharma Paryatan",
-      details: "Contact for Registration:\nSanjay Randhir +91-8329406215"
-    },
-    {
-      id: 5,
-      date: "2 Feb - 4 Feb\nSun - Tue",
-      place: "Gajapantha (MH)",
-      programme: "Atma Sadhana",
-      details: "ASK Umarala +91-9825242501"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -963,9 +885,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "p",
-  text: "Copyright © 2025 Fulchand Shastri"
+  text: content?.footerCopyright
 };
 ''',
         css: '''
@@ -1003,9 +926,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "span",
-  text: "Design by "
+  text: content?.designText
 };
 '''
       }
@@ -1017,12 +941,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.scheduleSettings?.content;
 return {
   as: "a",
-  href: "https://askumarala.com",
-  text: "ASK Umarala",
-  target: "_blank",
-  rel: "noopener noreferrer"
+  text: content?.designLink
 };
 ''',
         css: '''

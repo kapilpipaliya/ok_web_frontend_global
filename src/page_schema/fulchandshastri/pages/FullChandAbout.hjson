@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/about-fulchand"
+        contextName: "aboutSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "about", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -58,9 +72,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "h1",
-  text: "About Fulchand"
+  text: content?.heroTitle
 };
 ''',
         css: '''
@@ -84,9 +99,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "An Enlightened Master Devoted to Spreading Divine Knowledge"
+  text: content?.heroSubtitle
 };
 ''',
         css: '''
@@ -179,9 +195,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "Fulchand is an enlightened master who has devoted his life to spreading the teachings of his spiritual guru, Shrimad Rajchandra, in more than 220 countries around the world. Born in Gujarat, India, his spiritual journey began at a young age when he encountered the profound teachings that would shape his life's mission."
+  text: content?.introPara1
 };
 ''',
         css: '''
@@ -198,9 +215,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "Though he is strongly rooted in the Jainism theory of Samyak Darshan (Enlightenment) and Moksha (Nirvana), he aims to share this divine knowledge with every soul in the world that is ready to acquire it, regardless of caste, creed, religious inclination, nationality, food habits, gender or any other differentials."
+  text: content?.introPara2
 };
 ''',
         css: '''
@@ -217,9 +235,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "His disciples think of him as an ocean of compassion as he has relentlessly sweated, toiled and even bled, just to spread the call of the divine to as many souls as he possibly can. He wishes he could communicate with trees and animals too and help them understand the Eternal Truth as well."
+  text: content?.introPara3
 };
 ''',
         css: '''
@@ -257,9 +276,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "h2",
-  text: "The Spiritual Journey"
+  text: content?.journeyTitle
 };
 ''',
         css: '''
@@ -366,9 +386,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "h2",
-  text: "Core Teachings"
+  text: content?.teachingsTitle
 };
 ''',
         css: '''
@@ -477,9 +498,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
-  text: "Samyak Darshan"
+  text: content?.teaching1Title
 };
 ''',
         css: '''
@@ -499,9 +521,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "Right perception and enlightenment"
+  text: content?.teaching1Text
 };
 ''',
         css: '''
@@ -586,9 +609,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
-  text: "Moksha"
+  text: content?.teaching2Title
 };
 ''',
         css: '''
@@ -608,9 +632,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "Liberation and ultimate freedom"
+  text: content?.teaching2Text
 };
 ''',
         css: '''
@@ -695,9 +720,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
-  text: "Universal Love"
+  text: content?.teaching3Title
 };
 ''',
         css: '''
@@ -717,9 +743,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "Compassion for all beings"
+  text: content?.teaching3Text
 };
 ''',
         css: '''
@@ -804,9 +831,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "h3",
-  text: "Self-Realization"
+  text: content?.teaching4Title
 };
 ''',
         css: '''
@@ -826,9 +854,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutSettings?.content;
 return {
   as: "p",
-  text: "Knowing one's true nature"
+  text: content?.teaching4Text
 };
 ''',
         css: '''

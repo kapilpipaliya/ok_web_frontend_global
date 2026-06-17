@@ -12,4 +12,9 @@ export type DynamicPropsType = Record<string, unknown> & {
   hide?: boolean | ((arg: FunctionArgumentType) => boolean);
   show?: boolean | ((arg: FunctionArgumentType) => boolean);
   text?: string;
+  data?: unknown;
+  expression?: string;
+  serverFunction?: string;
+  loop?: boolean;
+  contextName?: string;
 };

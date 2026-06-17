@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/atma-siddhi-shastra-mission"
+        contextName: "atmaSiddhiMissionSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "atma-siddhi-mission", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -51,9 +65,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "h1",
-  text: "Atma Siddhi Shastra Mission"
+  text: content?.heroTitle
 };
 ''',
         css: '''
@@ -79,9 +94,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "p",
-  text: "આત્મસિદ્ધિ શાસ્ત્રનો પ્રચાર અને પ્રસાર"
+  text: content?.heroSubtitle
 };
 ''',
         css: '''
@@ -144,9 +160,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
-  text: "મિશનનો ઉદ્દેશ્ય"
+  text: content?.missionTitle
 };
 ''',
         css: '''
@@ -166,9 +183,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "p",
-  text: "શ્રીમદ્ રાજચંદ્રજી દ્વારા રચિત આત્મસિદ્ધિ શાસ્ત્ર એ આધ્યાત્મિક સાધકો માટે અમૂલ્ય માર્ગદર્શક ગ્રંથ છે. આ મિશનનો મુખ્ય ઉદ્દેશ્ય આ પવિત્ર ગ્રંથના સંદેશને સમગ્ર વિશ્વમાં પહોંચાડવાનો છે. ફુલચંદ શાસ્ત્રીજીના માર્ગદર્શન હેઠળ, અમે આત્મસિદ્ધિના છ પદો દ્વારા મોક્ષના માર્ગને સરળ રીતે સમજાવવાનો પ્રયત્ન કરીએ છીએ."
+  text: content?.missionText
 };
 ''',
         css: '''
@@ -207,10 +225,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
-  text: "આત્મસિદ્ધિના છ પદ",
-  style: { textAlign: "center" }
+  text: content?.principlesTitle
 };
 ''',
         css: '''
@@ -252,45 +270,10 @@ return `._id {
         contextName: "principle",
         loop: true,
         props: '''
+const items = args.contextData.atmaSiddhiMissionSettings?.principle?.principle ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      number: "૧",
-      title: "આત્મા છે",
-      description: "આત્માનું અસ્તિત્વ નિર્વિવાદ છે. તે શાશ્વત, અવિનાશી અને ચૈતન્યસ્વરૂપ છે."
-    },
-    {
-      id: 2,
-      number: "૨",
-      title: "તે નિત્ય છે",
-      description: "આત્મા અનાદિ અને અનંત છે. તેનો ક્યારેય નાશ થતો નથી."
-    },
-    {
-      id: 3,
-      number: "૩",
-      title: "તે કર્તા છે",
-      description: "આત્મા પોતાના કર્મોનો કર્તા છે અને તેના ફળોનો ભોક્તા છે."
-    },
-    {
-      id: 4,
-      number: "૪",
-      title: "તે ભોક્તા છે",
-      description: "જીવ પોતાના કર્મોના ફળનો અનુભવ કરે છે."
-    },
-    {
-      id: 5,
-      number: "૫",
-      title: "મોક્ષ છે",
-      description: "કર્મબંધનમાંથી મુક્તિ એટલે મોક્ષ. તે આત્માની સ્વાભાવિક સ્થિતિ છે."
-    },
-    {
-      id: 6,
-      number: "૬",
-      title: "મોક્ષનો ઉપાય છે",
-      description: "સમ્યગ્દર્શન, સમ્યગ્જ્ઞાન અને સમ્યગ્ચારિત્ર દ્વારા મોક્ષની પ્રાપ્તિ થાય છે."
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -418,10 +401,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
-  text: "મિશનની પ્રવૃત્તિઓ",
-  style: { textAlign: "center" }
+  text: content?.activitiesTitle
 };
 ''',
         css: '''
@@ -467,33 +450,10 @@ return `._id {
         contextName: "activity",
         loop: true,
         props: '''
+const items = args.contextData.atmaSiddhiMissionSettings?.activity?.activity ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      icon: "carbon:book",
-      title: "સ્વાધ્યાય શિબિરો",
-      description: "આત્મસિદ્ધિ શાસ્ત્રના ઊંડાણપૂર્વક અભ્યાસ માટે નિયમિત શિબિરોનું આયોજન"
-    },
-    {
-      id: 2,
-      icon: "carbon:group-presentation",
-      title: "પ્રવચન શ્રેણી",
-      description: "વિદ્વાન વક્તાઓ દ્વારા આત્મસિદ્ધિના સિદ્ધાંતો પર પ્રવચનો"
-    },
-    {
-      id: 3,
-      icon: "carbon:translate",
-      title: "અનુવાદ કાર્ય",
-      description: "આત્મસિદ્ધિ શાસ્ત્રનો વિવિધ ભાષાઓમાં અનુવાદ અને પ્રકાશન"
-    },
-    {
-      id: 4,
-      icon: "carbon:education",
-      title: "શૈક્ષણિક કાર્યક્રમો",
-      description: "બાળકો અને યુવાનો માટે આધ્યાત્મિક શિક્ષણ કાર્યક્રમો"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -623,9 +583,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "h2",
-  text: "મિશનમાં જોડાવો"
+  text: content?.ctaTitle
 };
 ''',
         css: '''
@@ -644,9 +605,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "p",
-  text: "આત્મસિદ્ધિ શાસ્ત્રના પ્રચાર-પ્રસારમાં યોગદાન આપવા માટે અમારી સાથે જોડાવો"
+  text: content?.ctaText
 };
 ''',
         css: '''
@@ -665,10 +627,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSiddhiMissionSettings?.content;
 return {
   as: "a",
-  href: "/contact",
-  text: "સંપર્ક કરો"
+  text: content?.ctaButton
 };
 ''',
         css: '''

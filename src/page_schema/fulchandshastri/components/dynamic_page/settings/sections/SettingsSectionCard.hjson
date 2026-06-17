@@ -55,9 +55,15 @@ const buildValuesFromSnapshot = (snapshot = {}) => {
     const field = fields[fi];
     if (!field?.key) continue;
     if (Object.prototype.hasOwnProperty.call(snapshot, field.key)) {
-      values[field.key] = snapshot[field.key];
+      values[field.key] = field.renderer === "fieldArray"
+        ? (Array.isArray(snapshot[field.key]) ? snapshot[field.key] : [])
+        : snapshot[field.key];
     } else if (field.defaultValue !== undefined) {
       values[field.key] = field.defaultValue;
+    } else if (field.renderer === "fieldArray") {
+      values[field.key] = Array.isArray(field.fieldArrayConfig?.defaultItems)
+        ? field.fieldArrayConfig.defaultItems
+        : [];
     } else if (field.dataType === "boolean" || field.renderer === "checkbox") {
       values[field.key] = false;
     } else {

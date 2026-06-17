@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/contact"
+        contextName: "contactSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "contact", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "h1",
-  text: "Contact"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -64,9 +79,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "p",
-  text: "Get in touch with us"
+  text: content?.pageSubtitle
 };
 ''',
         css: '''
@@ -161,9 +177,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "h2",
-  text: "Contact Information"
+  text: content?.infoTitle
 };
 ''',
         css: '''
@@ -282,9 +299,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "h3",
-  text: "Address"
+  text: content?.addressTitle
 };
 ''',
         css: '''
@@ -304,9 +322,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "p",
-  text: "Atma Siddhi Kaivalya Kendra\nUmarala - 364210\nDistrict: Bhavnagar, Gujarat, India"
+  text: content?.addressText
 };
 ''',
         css: '''
@@ -404,9 +423,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "h3",
-  text: "Phone"
+  text: content?.phoneTitle
 };
 ''',
         css: '''
@@ -446,10 +466,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
-  href: "tel:+919825242501",
-  text: "+91 98252 42501"
+  text: content?.phone1
 };
 ''',
         css: '''
@@ -473,10 +493,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
-  href: "tel:+912844244142",
-  text: "+91 2844 244142"
+  text: content?.phone2
 };
 ''',
         css: '''
@@ -579,9 +599,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "h3",
-  text: "Email"
+  text: content?.emailTitle
 };
 ''',
         css: '''
@@ -601,10 +622,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "a",
-  href: "mailto:info@fulchandshastri.com",
-  text: "info@fulchandshastri.com"
+  text: content?.emailLink
 };
 ''',
         css: '''
@@ -641,9 +662,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "h2",
-  text: "Send us a Message"
+  text: content?.formTitle
 };
 ''',
         css: '''
@@ -714,9 +736,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.contactSettings?.content;
 return {
   as: "h2",
-  text: "Find Us on Map"
+  text: content?.mapTitle
 };
 ''',
         css: '''

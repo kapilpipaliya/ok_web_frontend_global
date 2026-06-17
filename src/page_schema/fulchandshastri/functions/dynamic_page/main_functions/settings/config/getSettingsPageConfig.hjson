@@ -9,11 +9,15 @@
         body:
           '''
 const actualUser = await args.getUserFromSession();
-if (!actualUser) {
+const allowPublicRead = args.contextData?.allowPublicRead === true;
+
+if (!actualUser && !allowPublicRead) {
   return { success: false, message: "User session not found. Please log in and try again." };
 }
 
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
+const user = actualUser
+  ? await args.getEffectiveUser(args.session, actualUser, args.contextData)
+  : null;
 const { settingsPageId, key, settingsLabel } = args.contextData;
 
 const labelForSettings = settingsLabel || settingsPageId;
@@ -52,18 +56,21 @@ const userQuery = `
   MATCH (u:User {uuid: $userUuid})-[:UserSetting]->(s:Setting {key: $settingKey})
   RETURN s LIMIT 1
 `;
-const userResult = await args.session.run(userQuery, {
-  userUuid: user.P.uuid,
-  settingKey
-});
 
-if (userResult.records.length > 0) {
-  const settingVertices = args.processResult(userResult.records, args.context, "s");
-  return {
-    success: true,
-    data: { setting: settingVertices[0], isDefault: false },
-    message: "Settings page config loaded"
-  };
+if (user) {
+  const userResult = await args.session.run(userQuery, {
+    userUuid: user.P.uuid,
+    settingKey
+  });
+
+  if (userResult.records.length > 0) {
+    const settingVertices = args.processResult(userResult.records, args.context, "s");
+    return {
+      success: true,
+      data: { setting: settingVertices[0], isDefault: false },
+      message: "Settings page config loaded"
+    };
+  }
 }
 
 let defaultResult = await args.session.run(

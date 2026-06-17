@@ -1,0 +1,107 @@
+{
+  vertexes: [
+    {
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandSettings",
+        url: "/settings",
+        title: "Site Settings",
+        fns: '''
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some((edgeId) => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge?.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+return {
+  enabled: () => true,
+  checkAdminRole,
+  executeYTOFunction: (functionName, contextData) =>
+    args.executeNamedServerFunction({
+      functionName,
+      contextData: contextData || {}
+    })
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  onMount: () => {
+    if (!args.user) {
+      args.navigate("/auth/signin", { replace: true });
+      return;
+    }
+    if (!args.fns.checkAdminRole?.()) {
+      args.showErrorToast?.("Admin access required");
+      args.navigate("/", { replace: true });
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "settingsShell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+}`;
+'''
+      }
+    },
+    {
+      id: "dynamicPage",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DynamicPage",
+        key: "fullchand_settings_dynamic_page",
+        props: '''
+const settingsPageId = args.searchParams?.page || "home";
+
+return {
+  pageMode: "settings",
+  settingsPageId,
+  loadFromSetting: true,
+  scopeId: "Default",
+  scope: {
+    vertexLabel: "GlobalSetting",
+    matchProperty: "key",
+    idParam: "scopeId"
+  },
+  hide: !args.fns.checkAdminRole?.()
+};
+'''
+      }
+    },
+    {
+      id: "layout",
+      L: "PageLayout",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandPortalLayout"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "page", E: "settingsShell" },
+    { id: "e2", T: "Attr", S: "settingsShell", E: "dynamicPage" },
+    { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
+  ]
+}

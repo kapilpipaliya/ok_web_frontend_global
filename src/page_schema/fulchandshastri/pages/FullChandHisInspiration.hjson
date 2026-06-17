@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/his-inspiration"
+        contextName: "hisInspirationSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "his-inspiration", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h1",
-  text: "His Inspiration"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -119,9 +134,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h2",
-  text: "Shrimad Rajchandra"
+  text: content?.shrimadTitle
 };
 ''',
         css: '''
@@ -230,9 +246,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
-  text: "Since childhood, Fulchand has been deeply inspired by Shrimad Rajchandra, who he considers his spiritual guru. Shrimad Rajchandra is considered to be the most spiritually progressive soul to have been on the earth in the last 2000 years. He had extraordinary powers of recollection and could expand his awareness to record 100 simultaneous tasks in his memory and recall every one of them without a single lapse."
+  text: content?.shrimadPara1
 };
 ''',
         css: '''
@@ -249,9 +266,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
-  text: "Shrimad, once, received a flow of divine knowledge, and intuitively penned a book in less than 90 minutes that is considered the most authentic scripture in Jainism to learn about the path to Moksha. This scripture was called Atma Siddhi Shastra and it was one of Shrimad's wish to spread this scripture around the world. Since he passed away at a young age of 33 years old, his dream remained unfulfilled. Fulchand believes he came to the earth to fulfill this dream of his Guru. Using his miraculous linguistic ability, he translated the scripture into hundreds of languages of the world and got the book established as 142 countries of the world (and the scripture has recently reached 143 entries, twice in the list as a benefactor)."
+  text: content?.shrimadPara2
 };
 ''',
         css: '''
@@ -281,9 +299,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "h2",
-  text: "Shri Kanjiswami"
+  text: content?.kanjiTitle
 };
 ''',
         css: '''
@@ -349,9 +368,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
-  text: "Pujya Gurudev Shri Kanjiswami was born in Umarala, Gujarat in V.S. 1946 (1889 AD). Kanjiswami was instrumental in starting a new revolution in the percept and practice of Jainism. Happy putting thousands of souls on the true path of salvation. The philosophy and truth have always been there since time immemorial but their true exponents were not in this modern age. It was already retained in the Agams, as propounded by the Tirthankara, especially Mahavir Bhagwan."
+  text: content?.kanjiPara1
 };
 ''',
         css: '''
@@ -368,9 +388,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
-  text: "However, the knowledge was clouded and in the absence of it's true interpretations, practitioners were led to believe and practice certain principles, which were not in accordance with what Mahavir Bhagwan had said. It was all a case of clinging to the form rather than the substance, and Kriyajada, false belief was reigning supreme."
+  text: content?.kanjiPara2
 };
 ''',
         css: '''
@@ -387,9 +408,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.hisInspirationSettings?.content;
 return {
   as: "p",
-  text: "Kanjiswami shed new light on what the Lord had preached and showed us the true eternal path. Gurudev gave the most correct interpretation of the Agams, and unveiled various principles. Using the glory of his own Self-Realisation, he showed how the soul was completely detached from each worldly surroundings and the true darshan, gnan and charitra were the basis of true religion. Nobody can understand true religion, unless he follows the three Fold basis in it's entirety."
+  text: content?.kanjiPara3
 };
 ''',
         css: '''

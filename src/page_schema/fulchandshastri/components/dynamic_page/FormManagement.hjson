@@ -5,7 +5,7 @@
       L: Component
       P: {
         key: FormManagement
-        dynamicComponent: FloatingHelpTooltip, VertexPicker, FileUploader, TomSelect, TextArea, FormNestedLineItems
+        dynamicComponent: FloatingHelpTooltip, VertexPicker, FileUploader, TomSelect, TextArea, FormNestedLineItems, FormFieldArray
       }
     }
     {
@@ -427,6 +427,16 @@ const initializeForm = () => {
       if (!isFieldVisible(field)) continue;
       if (getFieldRenderer(field) === "graphFileUpload") continue;
       if (getFieldRenderer(field) === "embeddedVertexPicker") continue;
+      if (getFieldRenderer(field) === "fieldArray") {
+        if (Array.isArray(field.defaultValue)) {
+          initialProperties[field.key] = field.defaultValue;
+        } else if (Array.isArray(field.fieldArrayConfig?.defaultItems)) {
+          initialProperties[field.key] = field.fieldArrayConfig.defaultItems;
+        } else {
+          initialProperties[field.key] = [];
+        }
+        continue;
+      }
       if (field.defaultValue !== undefined) {
         initialProperties[field.key] = field.defaultValue;
       } else {
@@ -596,6 +606,19 @@ const getFieldValue = (fieldKey) => {
   if (getFieldRenderer(field) === "embeddedVertexPicker") {
     return "";
   }
+  if (getFieldRenderer(field) === "fieldArray") {
+    const rawValue = vertex?.P?.[fieldKey];
+    if (Array.isArray(rawValue)) return rawValue;
+    if (typeof rawValue === "string" && rawValue.trim() !== "") {
+      try {
+        const parsed = JSON.parse(rawValue);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }
   return vertex?.P?.[fieldKey] ?? "";
 };
 
@@ -688,6 +711,31 @@ const validate = () => {
       const rows = getNestedLineVerticesForField(field);
       if (rows.length === 0) {
         newErrors[field.key] = `${field.label || field.key}: add at least one line`;
+      }
+      continue;
+    }
+
+    if (getFieldRenderer(field) === "fieldArray") {
+      const items = getFieldValue(field.key);
+      const itemFields = field.fieldArrayConfig?.itemFields || [];
+      if (isFieldRequired(field) && (!Array.isArray(items) || items.length === 0)) {
+        newErrors[field.key] = `${field.label || field.key}: add at least one item`;
+        continue;
+      }
+      if (Array.isArray(items)) {
+        for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+          const item = items[itemIndex] || {};
+          for (let fieldIndex = 0; fieldIndex < itemFields.length; fieldIndex++) {
+            const itemField = itemFields[fieldIndex];
+            if (!itemField?.required || !itemField?.key) continue;
+            const itemValue = item[itemField.key];
+            if (itemValue === undefined || itemValue === null || String(itemValue).trim() === "") {
+              newErrors[field.key] = `${field.label || field.key} ${itemIndex + 1}: ${itemField.label || itemField.key} is required`;
+              break;
+            }
+          }
+          if (newErrors[field.key]) break;
+        }
       }
       continue;
     }
@@ -1452,6 +1500,16 @@ if (args.fns.getFieldRenderer(field) === "embeddedVertexPicker") {
     },
     onClear: () => setFieldValue(field.key, selectionMode === "multiple" ? [] : ""),
     ...accessibility
+  };
+}
+
+if (args.fns.getFieldRenderer(field) === "fieldArray" && field.fieldArrayConfig) {
+  return {
+    componentName: "FormFieldArray",
+    field,
+    value: args.fns.getFieldValue(field.key),
+    disabled: fieldDisabled,
+    onChange: (nextItems) => args.fns.setFieldValue(field.key, nextItems)
   };
 }
 

@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/bhakti"
+        contextName: "bhaktiSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "bhakti", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.bhaktiSettings?.content;
 return {
   as: "h1",
-  text: "Bhakti"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -64,9 +79,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.bhaktiSettings?.content;
 return {
   as: "p",
-  text: "Devotional songs and prayers for spiritual upliftment"
+  text: content?.pageSubtitle
 };
 ''',
         css: '''
@@ -124,63 +140,10 @@ return `._id {
         contextName: "bhaktiItems",
         loop: true,
         props: '''
+const items = args.contextData.bhaktiSettings?.bhakti_items?.bhaktiItems ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      title: "Navkar Mantra",
-      description: "The most fundamental Jain prayer that pays respect to the five supreme beings",
-      audioUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/navkar-mantra.mp3",
-      downloadUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/navkar-mantra.pdf",
-      duration: "3:45",
-      language: "Sanskrit"
-    },
-    {
-      id: 2,
-      title: "Bhaktamar Stotra",
-      description: "A famous Jain Sanskrit prayer composed by Acharya Manatunga",
-      audioUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/bhaktamar-stotra.mp3",
-      downloadUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/bhaktamar-stotra.pdf",
-      duration: "45:30",
-      language: "Sanskrit"
-    },
-    {
-      id: 3,
-      title: "Atma Siddhi Shastra Bhajan",
-      description: "Devotional songs based on the teachings of Atma Siddhi Shastra",
-      audioUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/atma-siddhi-bhajan.mp3",
-      downloadUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/atma-siddhi-bhajan.pdf",
-      duration: "6:20",
-      language: "Gujarati"
-    },
-    {
-      id: 4,
-      title: "श्री जिन स्तुति",
-      description: "प्रभु महावीर की स्तुति में गाया जाने वाला भक्ति गीत",
-      audioUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/jin-stuti.mp3",
-      downloadUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/jin-stuti.pdf",
-      duration: "5:15",
-      language: "Hindi"
-    },
-    {
-      id: 5,
-      title: "Samyak Darshan Stavan",
-      description: "A prayer for attaining right perception and enlightenment",
-      audioUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/samyak-darshan-stavan.mp3",
-      downloadUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/samyak-darshan-stavan.pdf",
-      duration: "8:30",
-      language: "Gujarati"
-    },
-    {
-      id: 6,
-      title: "Mangal Deevo",
-      description: "An auspicious prayer sung during special occasions and ceremonies",
-      audioUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/mangal-deevo.mp3",
-      downloadUrl: "https://www.fulchandshastri.com/wp-content/uploads/bhakti/mangal-deevo.pdf",
-      duration: "4:45",
-      language: "Gujarati"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -466,9 +429,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.bhaktiSettings?.content;
 return {
   as: "span",
-  text: "Download Audio"
+  text: content?.downloadAudioText
 };
 '''
       }
@@ -533,9 +497,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.bhaktiSettings?.content;
 return {
   as: "span",
-  text: "Download Lyrics"
+  text: content?.downloadLyricsText
 };
 '''
       }

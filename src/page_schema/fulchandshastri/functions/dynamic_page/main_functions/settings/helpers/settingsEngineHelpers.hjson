@@ -45,8 +45,47 @@ const collectFormFields = (sectionConfig) => {
 };
 
 const getFieldDefaultValue = (field) => {
+  if (field?.renderer === "fieldArray") {
+    if (Array.isArray(field?.defaultValue)) return field.defaultValue;
+    if (Array.isArray(field?.fieldArrayConfig?.defaultItems)) return field.fieldArrayConfig.defaultItems;
+    return [];
+  }
   if (field?.defaultValue !== undefined) return field.defaultValue;
   return undefined;
+};
+
+const normalizeFieldArrayValue = (field, value) => {
+  if (field?.renderer !== "fieldArray") return value;
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const validateFieldArrayValue = (field, value) => {
+  const items = normalizeFieldArrayValue(field, value);
+  const itemFields = field?.fieldArrayConfig?.itemFields || [];
+  if (field?.required === true && items.length === 0) {
+    return `${field.key} requires at least one item`;
+  }
+  for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+    const item = items[itemIndex] || {};
+    for (let fieldIndex = 0; fieldIndex < itemFields.length; fieldIndex++) {
+      const itemField = itemFields[fieldIndex];
+      if (!itemField?.required || !itemField?.key) continue;
+      const itemValue = item[itemField.key];
+      if (itemValue === undefined || itemValue === null || String(itemValue).trim() === "") {
+        return `${field.key}[${itemIndex}].${itemField.key} is required`;
+      }
+    }
+  }
+  return null;
 };
 
 const validateFieldValue = (field, value) => {
@@ -106,6 +145,10 @@ const validateSectionValues = (sectionConfig, values) => {
     if (!fieldKey) continue;
     const errorMessage = validateFieldValue(field, values?.[fieldKey]);
     if (errorMessage) fieldErrors[fieldKey] = errorMessage;
+    if (!errorMessage && field?.renderer === "fieldArray") {
+      const arrayError = validateFieldArrayValue(field, values?.[fieldKey]);
+      if (arrayError) fieldErrors[fieldKey] = arrayError;
+    }
   }
   return fieldErrors;
 };
@@ -120,6 +163,8 @@ const mergeSectionDefaults = (sectionConfig, values) => {
     if (merged[fieldKey] === undefined) {
       const defaultValue = getFieldDefaultValue(field);
       if (defaultValue !== undefined) merged[fieldKey] = defaultValue;
+    } else if (field?.renderer === "fieldArray") {
+      merged[fieldKey] = normalizeFieldArrayValue(field, merged[fieldKey]);
     }
   }
   return merged;

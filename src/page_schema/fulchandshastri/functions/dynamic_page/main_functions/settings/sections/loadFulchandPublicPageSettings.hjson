@@ -1,0 +1,70 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: loadFulchandPublicPageSettings
+        description: Loads public Fulchand Shastri page settings from GlobalSetting scope. Returns section values keyed by section id.
+        body:
+          '''
+const { pageId, allowPublicRead = true } = args.contextData || {};
+
+if (!pageId) {
+  return { success: false, message: "pageId is required" };
+}
+
+try {
+  const configResult = await args.executeNamedServerFunction({
+    functionName: "getSettingsPageConfig",
+    contextData: { settingsPageId: pageId, allowPublicRead }
+  });
+
+  let sections = [];
+  const setting = configResult?.result?.data?.setting;
+  if (setting?.P?.config) {
+    const configFn = new Function(setting.P.config);
+    const pageConfig = configFn();
+    sections = pageConfig?.sections || [];
+  }
+
+  const loadResult = await args.executeNamedServerFunction({
+    functionName: "loadSettingsPage",
+    contextData: {
+      pageId,
+      scopeVertexLabel: "GlobalSetting",
+      scopeId: "Default",
+      scopeMatchProperty: "key",
+      sections,
+      allowPublicRead
+    }
+  });
+
+  if (!loadResult?.result?.success) {
+    return { success: false, message: loadResult?.result?.message || "Failed to load settings" };
+  }
+
+  const loadedSections = loadResult.result.data?.sections || {};
+  const sectionsById = {};
+  for (const sectionId of Object.keys(loadedSections)) {
+    sectionsById[sectionId] = loadedSections[sectionId]?.values ?? {};
+  }
+
+  return {
+    success: true,
+    data: { pageId, sections: sectionsById },
+    message: "Page settings loaded"
+  };
+} catch (error) {
+  console.error(`Error loading page settings (${pageId}):`, error);
+  return {
+    success: false,
+    message: error instanceof Error ? error.message : String(error)
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

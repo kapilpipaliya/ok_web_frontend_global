@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/donation"
+        contextName: "donationSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "donation", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "h1",
-  text: "Donation"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -64,9 +79,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Support our mission to spread spiritual knowledge"
+  text: content?.pageSubtitle
 };
 ''',
         css: '''
@@ -141,9 +157,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Your generous contributions help us continue our mission of spreading divine knowledge and supporting spiritual seekers worldwide. Every donation, regardless of size, makes a meaningful impact in our efforts to share the teachings of enlightenment."
+  text: content?.introText
 };
 ''',
         css: '''
@@ -260,9 +277,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "h3",
-  text: "Education Support"
+  text: content?.option1Title
 };
 ''',
         css: '''
@@ -282,9 +300,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Help us provide free spiritual education and resources to seekers around the world"
+  text: content?.option1Desc
 };
 ''',
         css: '''
@@ -303,9 +322,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Suggested: ₹5,000"
+  text: content?.option1Amount
 };
 ''',
         css: '''
@@ -399,9 +419,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "h3",
-  text: "Ashram Maintenance"
+  text: content?.option2Title
 };
 ''',
         css: '''
@@ -421,9 +442,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Support the upkeep and development of ASK Umarala for spiritual activities"
+  text: content?.option2Desc
 };
 ''',
         css: '''
@@ -442,9 +464,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Suggested: ₹10,000"
+  text: content?.option2Amount
 };
 ''',
         css: '''
@@ -538,9 +561,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "h3",
-  text: "Publication Fund"
+  text: content?.option3Title
 };
 ''',
         css: '''
@@ -560,9 +584,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Help us publish and distribute spiritual books and materials globally"
+  text: content?.option3Desc
 };
 ''',
         css: '''
@@ -581,9 +606,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Suggested: ₹25,000"
+  text: content?.option3Amount
 };
 ''',
         css: '''
@@ -624,9 +650,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "h2",
-  text: "General Donation"
+  text: content?.generalTitle
 };
 ''',
         css: '''
@@ -646,9 +673,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "You can also make a general donation of any amount. All contributions are used for spreading spiritual knowledge and supporting our various programs."
+  text: content?.generalDesc
 };
 ''',
         css: '''
@@ -722,9 +750,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
-  text: "₹1,000"
+  text: content?.amount1Text
 };
 '''
       }
@@ -767,9 +796,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
-  text: "₹5,000"
+  text: content?.amount2Text
 };
 '''
       }
@@ -812,9 +842,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
-  text: "₹10,000"
+  text: content?.amount3Text
 };
 '''
       }
@@ -857,9 +888,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
-  text: "Other Amount"
+  text: content?.amount4Text
 };
 '''
       }
@@ -903,9 +935,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "span",
-  text: "Donate Now"
+  text: content?.donateText
 };
 '''
       }
@@ -939,9 +972,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "h3",
-  text: "Bank Transfer Details"
+  text: content?.bankTitle
 };
 ''',
         css: '''
@@ -995,9 +1029,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Account Name:"
+  text: content?.bankLabel1
 };
 ''',
         css: '''
@@ -1016,9 +1051,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Atma Siddhi Kaivalya Kendra"
+  text: content?.bankValue1
 };
 ''',
         css: '''
@@ -1049,9 +1085,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Account Number:"
+  text: content?.bankLabel2
 };
 ''',
         css: '''
@@ -1070,9 +1107,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "1234567890"
+  text: content?.bankValue2
 };
 ''',
         css: '''
@@ -1103,9 +1141,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "IFSC Code:"
+  text: content?.bankLabel3
 };
 ''',
         css: '''
@@ -1124,9 +1163,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "SBIN0001234"
+  text: content?.bankValue3
 };
 ''',
         css: '''
@@ -1157,9 +1197,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "Bank Name:"
+  text: content?.bankLabel4
 };
 ''',
         css: '''
@@ -1178,9 +1219,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "State Bank of India"
+  text: content?.bankValue4
 };
 ''',
         css: '''
@@ -1242,9 +1284,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.donationSettings?.content;
 return {
   as: "p",
-  text: "All donations are eligible for tax exemption under Section 80G of the Income Tax Act"
+  text: content?.taxText
 };
 ''',
         css: '''

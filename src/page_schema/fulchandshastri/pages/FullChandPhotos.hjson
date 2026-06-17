@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/photos"
+        contextName: "photosSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "photos", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.photosSettings?.content;
 return {
   as: "h1",
-  text: "Photos"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -103,30 +118,10 @@ return `._id {
         contextName: "albums",
         loop: true,
         props: '''
+const items = args.contextData.photosSettings?.albums?.albums ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      title: "2019",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2019/01/2019-thumb.jpg",
-      count: 45,
-      link: "#"
-    },
-    {
-      id: 2,
-      title: "Shri Mahaveer Prasthatha Maha Mahotsav",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2019/04/mahaveer-thumb.jpg",
-      count: 120,
-      link: "#"
-    },
-    {
-      id: 3,
-      title: "Album one",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2018/12/album-one-thumb.jpg",
-      count: 78,
-      link: "#"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -349,9 +344,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.photosSettings?.content;
 return {
   as: "h2",
-  text: "Recent Photos"
+  text: content?.sectionTitle
 };
 ''',
         css: '''
@@ -374,45 +370,10 @@ return `._id {
         contextName: "photos",
         loop: true,
         props: '''
+const items = args.contextData.photosSettings?.photos?.photos ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      src: "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo1.jpg",
-      alt: "Spiritual gathering at ASK Umarala",
-      caption: "Spiritual gathering at ASK Umarala"
-    },
-    {
-      id: 2,
-      src: "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo2.jpg",
-      alt: "Discourse session",
-      caption: "Discourse session"
-    },
-    {
-      id: 3,
-      src: "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo3.jpg",
-      alt: "Meditation program",
-      caption: "Meditation program"
-    },
-    {
-      id: 4,
-      src: "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo4.jpg",
-      alt: "Book release ceremony",
-      caption: "Book release ceremony"
-    },
-    {
-      id: 5,
-      src: "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo5.jpg",
-      alt: "Youth spiritual camp",
-      caption: "Youth spiritual camp"
-    },
-    {
-      id: 6,
-      src: "https://www.fulchandshastri.com/wp-content/uploads/2019/01/photo6.jpg",
-      alt: "International conference",
-      caption: "International conference"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -604,9 +565,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.photosSettings?.content;
 return {
   as: "span",
-  text: "View All Photos"
+  text: content?.viewAllText
 };
 '''
       }

@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/atma-sadhana-nitya-kram"
+        contextName: "atmaSadhanaSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "atma-sadhana-nitya-kram", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -51,9 +65,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSadhanaSettings?.content;
 return {
   as: "h1",
-  text: "આત્મ સાધના નિત્ય ક્રમ"
+  text: content?.heroTitle
 };
 ''',
         css: '''
@@ -79,9 +94,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSadhanaSettings?.content;
 return {
   as: "p",
-  text: "દૈનિક આધ્યાત્મિક સાધનાનો વ્યવસ્થિત માર્ગ"
+  text: content?.heroSubtitle
 };
 ''',
         css: '''
@@ -144,9 +160,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSadhanaSettings?.content;
 return {
   as: "h2",
-  text: "નિત્ય ક્રમનું મહત્વ"
+  text: content?.introTitle
 };
 ''',
         css: '''
@@ -166,9 +183,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSadhanaSettings?.content;
 return {
   as: "p",
-  text: "આત્મ સાધના નિત્ય ક્રમ એ દૈનિક આધ્યાત્મિક અભ્યાસનો એક વ્યવસ્થિત કાર્યક્રમ છે જે સાધકને આત્મ-સાક્ષાત્કારના માર્ગે અગ્રસર કરે છે. આ ક્રમ અનુસાર દરરોજ નિયમિત રીતે સાધના કરવાથી મન શાંત થાય છે, એકાગ્રતા વધે છે અને આત્મિક શક્તિનો વિકાસ થાય છે."
+  text: content?.introText
 };
 ''',
         css: '''
@@ -207,10 +225,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSadhanaSettings?.content;
 return {
   as: "h2",
-  text: "દૈનિક સાધના ક્રમ",
-  style: { textAlign: "center" }
+  text: content?.scheduleTitle
 };
 ''',
         css: '''
@@ -251,64 +269,10 @@ return `._id {
         contextName: "schedule",
         loop: true,
         props: '''
+const items = args.contextData.atmaSadhanaSettings?.schedule?.schedule ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      time: "પ્રાતઃકાળ ૪:૦૦ - ૫:૦૦",
-      title: "બ્રહ્મમુહૂર્ત સાધના",
-      activities: [
-        "સ્નાન અને શુદ્ધિકરણ",
-        "ગુરુ વંદના",
-        "મંત્ર જાપ (૧૦૮ માળા)",
-        "પ્રાણાયામ (૧૫ મિનિટ)"
-      ]
-    },
-    {
-      id: 2,
-      time: "પ્રાતઃકાળ ૫:૦૦ - ૬:૩૦",
-      title: "ધ્યાન અને સ્વાધ્યાય",
-      activities: [
-        "ધ્યાન (૪૫ મિનિટ)",
-        "આત્મસિદ્ધિ શાસ્ત્ર પારાયણ",
-        "ગુરુવાણી અભ્યાસ",
-        "આત્મચિંતન"
-      ]
-    },
-    {
-      id: 3,
-      time: "સવાર ૬:૩૦ - ૮:૦૦",
-      title: "યોગ અને પ્રાર્થના",
-      activities: [
-        "સૂર્ય નમસ્કાર",
-        "યોગાસન (૩૦ મિનિટ)",
-        "પ્રભાત પ્રાર્થના",
-        "ભક્તિ ગીતો"
-      ]
-    },
-    {
-      id: 4,
-      time: "સાંજ ૬:૦૦ - ૭:૩૦",
-      title: "સંધ્યા સાધના",
-      activities: [
-        "સંધ્યા આરતી",
-        "મંત્ર જાપ",
-        "સત્સંગ પઠન",
-        "આત્મનિરીક્ષણ"
-      ]
-    },
-    {
-      id: 5,
-      time: "રાત્રિ ૮:૩૦ - ૯:૩૦",
-      title: "રાત્રિ સાધના",
-      activities: [
-        "દિવસની સમીક્ષા",
-        "ક્ષમા પ્રાર્થના",
-        "આગામી દિવસનું આયોજન",
-        "શયન પૂર્વ ધ્યાન (૧૫ મિનિટ)"
-      ]
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -498,10 +462,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSadhanaSettings?.content;
 return {
   as: "h2",
-  text: "નિત્ય ક્રમના લાભો",
-  style: { textAlign: "center" }
+  text: content?.benefitsTitle
 };
 ''',
         css: '''
@@ -543,45 +507,10 @@ return `._id {
         contextName: "benefit",
         loop: true,
         props: '''
+const items = args.contextData.atmaSadhanaSettings?.benefit?.benefit ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      icon: "carbon:face-satisfied",
-      title: "માનસિક શાંતિ",
-      description: "નિયમિત સાધનાથી મન શાંત અને સ્થિર થાય છે"
-    },
-    {
-      id: 2,
-      icon: "carbon:chart-line",
-      title: "આધ્યાત્મિક પ્રગતિ",
-      description: "આત્મજ્ઞાનના માર્ગે સતત અગ્રસર થવામાં મદદ મળે છે"
-    },
-    {
-      id: 3,
-      icon: "carbon:health-cross",
-      title: "શારીરિક સ્વાસ્થ્ય",
-      description: "યોગ અને પ્રાણાયામથી શરીર સ્વસ્થ રહે છે"
-    },
-    {
-      id: 4,
-      icon: "carbon:user-certification",
-      title: "આત્મશુદ્ધિ",
-      description: "વિકારોનો નાશ થઈ આત્મા શુદ્ધ બને છે"
-    },
-    {
-      id: 5,
-      icon: "carbon:idea",
-      title: "બુદ્ધિ વિકાસ",
-      description: "સ્વાધ્યાયથી બુદ્ધિ તીક્ષ્ણ અને વિવેકશીલ બને છે"
-    },
-    {
-      id: 6,
-      icon: "carbon:partnership",
-      title: "ગુરુ કૃપા",
-      description: "નિયમિત સાધનાથી ગુરુની વિશેષ કૃપા પ્રાપ્ત થાય છે"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -630,9 +559,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.atmaSadhanaSettings?.content;
 return {
   as: "h2",
-  text: "મહત્વપૂર્ણ સૂચનાઓ"
+  text: content?.guidelinesTitle
 };
 ''',
         css: '''
@@ -674,15 +604,10 @@ return `._id {
         contextName: "guideline",
         loop: true,
         props: '''
+const items = args.contextData.atmaSadhanaSettings?.guideline?.guideline ?? [];
 return {
-  data: [
-    { id: 1, text: "સાધના હંમેશા સ્વચ્છ સ્થાને અને શુદ્ધ વસ્ત્રો પહેરીને કરવી" },
-    { id: 2, text: "નિયમિતતા જાળવવી અત્યંત મહત્વપૂર્ણ છે - દરરોજ સમાન સમયે સાધના કરવી" },
-    { id: 3, text: "સાધના દરમિયાન મૌન પાળવું અને મનને એકાગ્ર રાખવું" },
-    { id: 4, text: "ગુરુની આજ્ઞા અને માર્ગદર્શન અનુસાર જ સાધના કરવી" },
-    { id: 5, text: "સાત્વિક આહાર લેવો અને બ્રહ્મચર્યનું પાલન કરવું" },
-    { id: 6, text: "સાધનાના અનુભવો ગુરુ સિવાય અન્ય કોઈને ન કહેવા" }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }

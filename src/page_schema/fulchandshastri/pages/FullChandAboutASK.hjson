@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/about-ask-umarala"
+        contextName: "aboutAskSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "about-ask", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -53,9 +67,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "h1",
-  text: "Atma Sadhana Kendra, Umarala"
+  text: content?.heroTitle
 };
 ''',
         css: '''
@@ -81,9 +96,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "p",
-  text: "અધ્યાત્મ સાધનાનું પવિત્ર સ્થાન"
+  text: content?.heroSubtitle
 };
 ''',
         css: '''
@@ -191,9 +207,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "h2",
-  text: "આત્મા સાધના કેન્દ્ર વિશે"
+  text: content?.introTitle
 };
 ''',
         css: '''
@@ -213,9 +230,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "p",
-  text: "આત્મા સાધના કેન્દ્ર, ઉમરાળા એ અધ્યાત્મ સાધકો માટે એક પવિત્ર સ્થાન છે. અહીં શ્રી ફુલચંદ શાસ્ત્રીજીના માર્ગદર્શન હેઠળ અનેક સાધકો આત્મ-સાક્ષાત્કારની યાત્રામાં પ્રગતિ કરે છે. આ કેન્દ્ર શાંત વાતાવરણ અને આધ્યાત્મિક શક્તિથી ભરપૂર છે."
+  text: content?.introText
 };
 ''',
         css: '''
@@ -253,10 +271,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "h2",
-  text: "કેન્દ્રની સુવિધાઓ",
-  style: { textAlign: "center" }
+  text: content?.facilitiesTitle
 };
 ''',
         css: '''
@@ -298,45 +316,10 @@ return `._id {
         contextName: "facility",
         loop: true,
         props: '''
+const items = args.contextData.aboutAskSettings?.facility?.facility ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      icon: "carbon:home",
-      title: "રહેવાની સુવિધા",
-      description: "સાધકો માટે સ્વચ્છ અને શાંત રહેવાની વ્યવસ્થા"
-    },
-    {
-      id: 2,
-      icon: "carbon:restaurant",
-      title: "સાત્વિક આહાર",
-      description: "શુદ્ધ શાકાહારી અને સાત્વિક ભોજનની વ્યવસ્થા"
-    },
-    {
-      id: 3,
-      icon: "carbon:book",
-      title: "પુસ્તકાલય",
-      description: "આધ્યાત્મિક પુસ્તકોનો સમૃદ્ધ સંગ્રહ"
-    },
-    {
-      id: 4,
-      icon: "carbon:group",
-      title: "સત્સંગ હૉલ",
-      description: "સામૂહિક ધ્યાન અને સત્સંગ માટે વિશાળ હૉલ"
-    },
-    {
-      id: 5,
-      icon: "carbon:tree",
-      title: "બગીચો",
-      description: "ધ્યાન માટે શાંત અને હરિયાળું વાતાવરણ"
-    },
-    {
-      id: 6,
-      icon: "carbon:health-cross",
-      title: "આરોગ્ય સેવા",
-      description: "પ્રાથમિક આરોગ્ય સુવિધા અને યોગ કેન્દ્ર"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -382,10 +365,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "h2",
-  text: "કેન્દ્રની તસવીરો",
-  style: { textAlign: "center" }
+  text: content?.galleryTitle
 };
 ''',
         css: '''
@@ -431,15 +414,10 @@ return `._id {
         contextName: "image",
         loop: true,
         props: '''
+const items = args.contextData.aboutAskSettings?.image?.image ?? [];
 return {
-  data: [
-    { id: 1, src: "https://fulchandshastri.com/wp-content/uploads/2024/01/Home-banner-2.jpg", alt: "ASK Umarala Building" },
-    { id: 2, src: "https://fulchandshastri.com/wp-content/uploads/2024/01/Home-banner-4.jpg", alt: "Meditation Hall" },
-    { id: 3, src: "https://fulchandshastri.com/wp-content/uploads/2024/01/Home-banner-5.jpg", alt: "Garden Area" },
-    { id: 4, src: "https://fulchandshastri.com/wp-content/uploads/2024/01/Home-banner-6.jpg", alt: "Library" },
-    { id: 5, src: "https://fulchandshastri.com/wp-content/uploads/2024/01/guruji.png", alt: "Spiritual Activities" },
-    { id: 6, src: "https://fulchandshastri.com/wp-content/uploads/2024/01/home-banner.png", alt: "Ashram View" }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -502,9 +480,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "h2",
-  text: "સંપર્ક માહિતી"
+  text: content?.contactTitle
 };
 ''',
         css: '''
@@ -576,9 +555,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "p",
-  text: "Atma Sadhana Kendra\nUmarala - 364330\nDist. Amreli, Gujarat"
+  text: content?.addressText
 };
 ''',
         css: '''
@@ -626,9 +606,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "p",
-  text: "Phone: +91 2792 222333\nMobile: +91 9825123456"
+  text: content?.phoneText
 };
 ''',
         css: '''
@@ -676,9 +657,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.aboutAskSettings?.content;
 return {
   as: "p",
-  text: "ask.umarala@gmail.com"
+  text: content?.emailText
 };
 '''
       }

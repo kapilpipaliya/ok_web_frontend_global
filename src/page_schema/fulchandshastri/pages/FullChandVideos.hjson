@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/videos"
+        contextName: "videosSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "videos", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.videosSettings?.content;
 return {
   as: "h1",
-  text: "Videos"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -153,9 +168,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
-  text: "All Videos"
+  text: content?.category1Text
 };
 '''
       }
@@ -196,9 +212,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
-  text: "Discourses"
+  text: content?.category2Text
 };
 '''
       }
@@ -239,9 +256,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
-  text: "Events"
+  text: content?.category3Text
 };
 '''
       }
@@ -282,9 +300,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
-  text: "Special Programs"
+  text: content?.category4Text
 };
 '''
       }
@@ -298,63 +317,10 @@ return {
         contextName: "videos",
         loop: true,
         props: '''
+const items = args.contextData.videosSettings?.videos?.videos ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      title: "Introduction to Atma Siddhi Shastra",
-      duration: "45:32",
-      views: "12.5K",
-      date: "2 days ago",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2024/01/video-thumb-1.jpg",
-      videoId: "dQw4w9WgXcQ"
-    },
-    {
-      id: 2,
-      title: "Path to Self-Realization - Part 1",
-      duration: "1:02:15",
-      views: "8.3K",
-      date: "1 week ago",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2024/01/video-thumb-2.jpg",
-      videoId: "dQw4w9WgXcQ"
-    },
-    {
-      id: 3,
-      title: "Understanding Moksha",
-      duration: "38:45",
-      views: "15.2K",
-      date: "2 weeks ago",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2024/01/video-thumb-3.jpg",
-      videoId: "dQw4w9WgXcQ"
-    },
-    {
-      id: 4,
-      title: "Jain Philosophy Explained",
-      duration: "52:18",
-      views: "6.7K",
-      date: "3 weeks ago",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2024/01/video-thumb-4.jpg",
-      videoId: "dQw4w9WgXcQ"
-    },
-    {
-      id: 5,
-      title: "Meditation Techniques for Beginners",
-      duration: "28:30",
-      views: "22.1K",
-      date: "1 month ago",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2024/01/video-thumb-5.jpg",
-      videoId: "dQw4w9WgXcQ"
-    },
-    {
-      id: 6,
-      title: "Questions & Answers Session",
-      duration: "1:15:42",
-      views: "9.8K",
-      date: "1 month ago",
-      thumbnail: "https://www.fulchandshastri.com/wp-content/uploads/2024/01/video-thumb-6.jpg",
-      videoId: "dQw4w9WgXcQ"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -629,9 +595,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
-  text: "•"
+  text: content?.separator
 };
 '''
       }
@@ -709,9 +676,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.videosSettings?.content;
 return {
   as: "span",
-  text: "Load More Videos"
+  text: content?.loadMoreText
 };
 '''
       }

@@ -9,11 +9,6 @@
         body:
           '''
 const actualUser = await args.getUserFromSession();
-if (!actualUser) {
-  return { success: false, message: "User session not found" };
-}
-
-const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 const {
   pageId,
   scopeVertexLabel,
@@ -21,12 +16,30 @@ const {
   sections
 } = args.contextData;
 
+const isPublicGlobalRead =
+  args.contextData?.allowPublicRead === true &&
+  scopeVertexLabel === "GlobalSetting" &&
+  scopeId != null &&
+  String(scopeId).trim() !== "";
+
+if (!actualUser && !isPublicGlobalRead) {
+  return { success: false, message: "User session not found" };
+}
+
+const user = actualUser
+  ? await args.getEffectiveUser(args.session, actualUser, args.contextData)
+  : null;
+
 if (!pageId) {
   return { success: false, message: "pageId is required" };
 }
 
 const effectiveScopeLabel = scopeVertexLabel || "User";
-const effectiveScopeId = scopeId || user.P.uuid;
+const effectiveScopeId = scopeId || (user ? user.P.uuid : null);
+
+if (!effectiveScopeId) {
+  return { success: false, message: "scopeId is required" };
+}
 const edgeType = `${effectiveScopeLabel}HasSettingsSection`;
 
 const parseJsonSafe = (value, fallback) => {

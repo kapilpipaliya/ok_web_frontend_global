@@ -64,8 +64,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Slot",
-        slot: "1children"
+        componentName: "Slot"
       }
     },
     {

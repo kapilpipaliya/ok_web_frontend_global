@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/discourses"
+        contextName: "discoursesSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "discourses", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -38,9 +52,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "h1",
-  text: "Discourses"
+  text: content?.pageTitle
 };
 ''',
         css: '''
@@ -64,9 +79,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "p",
-  text: "Watch and listen to thousands of hours of spiritual discourses"
+  text: content?.pageSubtitle
 };
 ''',
         css: '''
@@ -148,9 +164,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "label",
-  text: "Filter by:"
+  text: content?.filterLabel
 };
 ''',
         css: '''
@@ -196,10 +213,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "option",
-  value: "all",
-  text: "All Types"
+  text: content?.typeOption1
 };
 '''
       }
@@ -211,10 +228,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "option",
-  value: "video",
-  text: "Video"
+  text: content?.typeOption2
 };
 '''
       }
@@ -226,10 +243,10 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "option",
-  value: "audio",
-  text: "Audio"
+  text: content?.typeOption3
 };
 '''
       }
@@ -269,10 +286,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "option",
-  value: "all",
-  text: "All Languages"
+  text: content?.langOption1
 };
 '''
       }
@@ -284,10 +301,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "option",
-  value: "hindi",
-  text: "Hindi"
+  text: content?.langOption2
 };
 '''
       }
@@ -299,10 +316,10 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "option",
-  value: "gujarati",
-  text: "Gujarati"
+  text: content?.langOption3
 };
 '''
       }
@@ -314,10 +331,10 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "option",
-  value: "english",
-  text: "English"
+  text: content?.langOption4
 };
 '''
       }
@@ -456,9 +473,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "th",
-  text: "#"
+  text: content?.serialHeader
 };
 ''',
         css: '''
@@ -479,9 +497,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "th",
-  text: "Date"
+  text: content?.dateHeader
 };
 ''',
         css: '''
@@ -502,9 +521,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "th",
-  text: "Title"
+  text: content?.titleHeader
 };
 ''',
         css: '''
@@ -524,9 +544,10 @@ return `._id {
         displayOrder: 4,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "th",
-  text: "Location"
+  text: content?.locationHeader
 };
 ''',
         css: '''
@@ -546,9 +567,10 @@ return `._id {
         displayOrder: 5,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "th",
-  text: "Language"
+  text: content?.languageHeader
 };
 ''',
         css: '''
@@ -568,9 +590,10 @@ return `._id {
         displayOrder: 6,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "th",
-  text: "Type"
+  text: content?.typeHeader
 };
 ''',
         css: '''
@@ -590,9 +613,10 @@ return `._id {
         displayOrder: 7,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "th",
-  text: "Actions"
+  text: content?.actionsHeader
 };
 ''',
         css: '''
@@ -628,95 +652,10 @@ return {
         contextName: "discourses",
         loop: true,
         props: '''
+const items = args.contextData.discoursesSettings?.discourses?.discourses ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      serial: "001",
-      date: "2024-12-15",
-      title: "Atma Siddhi Shastra - Introduction",
-      location: "ASK Umarala",
-      language: "Hindi",
-      type: "Video",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-001.mp3"
-    },
-    {
-      id: 2,
-      serial: "002",
-      date: "2024-12-16",
-      title: "Understanding Self-Realization",
-      location: "ASK Umarala",
-      language: "Gujarati",
-      type: "Video",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-002.mp3"
-    },
-    {
-      id: 3,
-      serial: "003",
-      date: "2024-12-17",
-      title: "Path to Liberation - Part 1",
-      location: "Mumbai",
-      language: "Hindi",
-      type: "Audio",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-003.mp3"
-    },
-    {
-      id: 4,
-      serial: "004",
-      date: "2024-12-18",
-      title: "Samyak Darshan Explained",
-      location: "ASK Umarala",
-      language: "English",
-      type: "Video",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-004.mp3"
-    },
-    {
-      id: 5,
-      serial: "005",
-      date: "2024-12-19",
-      title: "મોક્ષનો માર્ગ",
-      location: "Ahmedabad",
-      language: "Gujarati",
-      type: "Video",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-005.mp3"
-    },
-    {
-      id: 6,
-      serial: "006",
-      date: "2024-12-20",
-      title: "जैन धर्म के सिद्धांत",
-      location: "Delhi",
-      language: "Hindi",
-      type: "Video",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-006.mp3"
-    },
-    {
-      id: 7,
-      serial: "007",
-      date: "2024-12-21",
-      title: "Universal Compassion",
-      location: "ASK Umarala",
-      language: "English",
-      type: "Audio",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-007.mp3"
-    },
-    {
-      id: 8,
-      serial: "008",
-      date: "2024-12-22",
-      title: "આત્મસિદ્ધિ શાસ્ત્ર - શ્લોક ૧-૧૦",
-      location: "ASK Umarala",
-      language: "Gujarati",
-      type: "Video",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      audioUrl: "https://www.fulchandshastri.com/audio/discourse-008.mp3"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -955,7 +894,7 @@ const discourse = args.contextData.discourses;
 const hasVideo = discourse.videoUrl ? true : false;
 return {
   as: hasVideo ? "a" : "fragment",
-  href: discourse.videoUrl || "#",
+  href: discourse?.videoUrl,
   target: "_blank",
   rel: "noopener noreferrer",
   title: "Watch Video"
@@ -1008,7 +947,7 @@ return {
 const discourse = args.contextData.discourses;
 return {
   as: "a",
-  href: discourse.audioUrl || "#",
+  href: discourse?.audioUrl,
   download: true,
   title: "Download Audio"
 };
@@ -1113,9 +1052,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "span",
-  text: "← Previous"
+  text: content?.prevText
 };
 '''
       }
@@ -1127,9 +1067,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "span",
-  text: "Page 1 of 10"
+  text: content?.pageInfo
 };
 ''',
         css: '''
@@ -1179,9 +1120,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.discoursesSettings?.content;
 return {
   as: "span",
-  text: "Next →"
+  text: content?.nextText
 };
 '''
       }

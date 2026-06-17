@@ -5,7 +5,6 @@ import {
   Switch,
   createSignal,
   onCleanup,
-  type Accessor,
 } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 
@@ -232,6 +231,17 @@ export function PageView(
       },
     );
 
+    const pageMeta = () => props.metaVertex?.P;
+
+    const hasPageDataFetch = createMemo(
+      () =>
+        !!(
+          pageMeta()?.data ||
+          pageMeta()?.expression ||
+          pageMeta()?.serverFunction
+        ),
+    );
+
     const isNoPermissionCheck = createMemo(
       () =>
         props.isNoPermissionCheck ||
@@ -328,13 +338,7 @@ export function PageView(
             isNoPermissionCheck={props.isNoPermissionCheck}
           />
         </Match>
-        <Match
-          when={
-            dynamicProps().data ||
-            dynamicProps().expression ||
-            dynamicProps().serverFunction
-          }
-        >
+        <Match when={hasPageDataFetch()}>
           <PageAttrRender
             data={props.data}
             isNoPermissionCheck={props.isNoPermissionCheck!}
@@ -360,19 +364,18 @@ export function PageView(
           <SimpleAlert type="error" message={validationError()} />
         </Show>
         <Switch>
-          <Match
-            when={
-              dynamicProps().data ||
-              dynamicProps().expression ||
-              dynamicProps().serverFunction
-            }
-          >
+          <Match when={hasPageDataFetch()}>
             <HtmlField
-              data={dynamicProps().data}
-              expression={dynamicProps().expression}
-              serverFunction={dynamicProps().serverFunction}
-              loop={dynamicProps().loop}
-              contextName={dynamicProps().contextName}
+              data={
+                pageMeta()?.data as
+                  | (() => unknown[])
+                  | unknown[]
+                  | undefined
+              }
+              expression={pageMeta()?.expression as string | undefined}
+              serverFunction={pageMeta()?.serverFunction as string | undefined}
+              loop={pageMeta()?.loop as boolean | undefined}
+              contextName={pageMeta()?.contextName as string | undefined}
               renderChildren
             >
               <MainContent />

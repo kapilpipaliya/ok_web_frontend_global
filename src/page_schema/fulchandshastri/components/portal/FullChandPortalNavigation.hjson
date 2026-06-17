@@ -1,0 +1,1089 @@
+{
+  vertexes: [
+    {
+      id: "pn1"
+      L: Component
+      P: {
+        title: FullChandPortalNavigation
+        key: FullChandPortalNavigation
+        fns:
+          '''
+const [userMenuOpen, setUserMenuOpen] = args.createSignal(false);
+const [userMenuTriggerRef, setUserMenuTriggerRef] = args.createSignal(null);
+const [userMenuPanelRef, setUserMenuPanelRef] = args.createSignal(null);
+const [menuHoverKey, setMenuHoverKey] = args.createSignal(null);
+let userMenuFloatingCleanup = null;
+
+const syncUserMenuWidth = (triggerElement, menuElement) => {
+  const triggerWidth = Math.round(triggerElement.getBoundingClientRect().width);
+  if (triggerWidth > 0) {
+    const widthPx = `${triggerWidth}px`;
+    menuElement.style.width = widthPx;
+    menuElement.style.minWidth = widthPx;
+    menuElement.style.maxWidth = widthPx;
+  }
+};
+
+const setMenuItemHover = (key) => setMenuHoverKey(key);
+const clearMenuItemHover = () => setMenuHoverKey(null);
+
+const setupUserMenuFloating = async () => {
+  const triggerElement = userMenuTriggerRef();
+  const menuElement = userMenuPanelRef();
+  if (!triggerElement || !menuElement || !args.floatingUI) return;
+  syncUserMenuWidth(triggerElement, menuElement);
+  const { computePosition, flip, shift, offset, autoUpdate } = args.floatingUI;
+  const updatePosition = async () => {
+    syncUserMenuWidth(triggerElement, menuElement);
+    const { x, y } = await computePosition(triggerElement, menuElement, {
+      placement: "top-start",
+      strategy: "fixed",
+      middleware: [offset(8), flip(), shift({ padding: 8 })]
+    });
+    Object.assign(menuElement.style, { left: `${x}px`, top: `${y}px` });
+  };
+  await updatePosition();
+  userMenuFloatingCleanup = autoUpdate(triggerElement, menuElement, updatePosition, {
+    ancestorScroll: true,
+    ancestorResize: true,
+    elementResize: true,
+    layoutShift: true
+  });
+};
+
+const toggleUserMenu = (clickEvent) => {
+  clickEvent?.preventDefault();
+  clickEvent?.stopPropagation();
+  const nextOpen = !userMenuOpen();
+  setUserMenuOpen(nextOpen);
+  if (nextOpen) {
+    requestAnimationFrame(() => void setupUserMenuFloating());
+  } else if (userMenuFloatingCleanup) {
+    userMenuFloatingCleanup();
+    userMenuFloatingCleanup = null;
+  }
+};
+
+const closeUserMenu = () => {
+  setUserMenuOpen(false);
+  if (userMenuFloatingCleanup) {
+    userMenuFloatingCleanup();
+    userMenuFloatingCleanup = null;
+  }
+};
+
+const handleUserMenuDocumentClick = (clickEvent) => {
+  const triggerElement = userMenuTriggerRef();
+  const menuElement = userMenuPanelRef();
+  if (!triggerElement || !menuElement) return;
+  if (!triggerElement.contains(clickEvent.target) && !menuElement.contains(clickEvent.target)) {
+    closeUserMenu();
+  }
+};
+
+const navigateFromUserMenu = (path) => {
+  closeUserMenu();
+  args.fns.navigateTo?.(path);
+};
+
+const navigateToLogout = () => {
+  navigateFromUserMenu("/auth/logout");
+};
+
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some((edgeId) => {
+    const edge = args.graph.edges[edgeId];
+    const role = args.graph.vertexes[edge?.E];
+    return role?.P?.key === "Admin";
+  });
+};
+
+const portalNavSectionsData = [
+  {
+    id: "site",
+    items: [
+      {
+        id: "view_site",
+        href: "/",
+        label: "View site",
+        icon: "ph:house",
+        pathCheck: (pathname) => String(pathname || "") === "/"
+      }
+    ]
+  },
+  {
+    id: "admin",
+    title: "Admin",
+    showIf: () => checkAdminRole(),
+    items: [
+      {
+        id: "home_settings",
+        href: "/settings?page=home",
+        label: "Home page",
+        icon: "ph:gear-six",
+        pathCheck: (pathname) => String(pathname || "").startsWith("/settings")
+      }
+    ]
+  }
+];
+
+const portalNavSections = args.createMemo(() =>
+  portalNavSectionsData.filter(
+    (section) => !section.showIf || section.showIf(),
+  ),
+);
+
+const isNavItemActive = (item) =>
+  item.pathCheck ? item.pathCheck(args.location?.pathname) : false;
+
+const onUserMenuMount = () => {
+  document.addEventListener("click", handleUserMenuDocumentClick);
+  return () => {
+    document.removeEventListener("click", handleUserMenuDocumentClick);
+    if (userMenuFloatingCleanup) userMenuFloatingCleanup();
+  };
+};
+
+return {
+  userMenuOpen,
+  menuHoverKey,
+  setUserMenuTriggerRef,
+  setUserMenuPanelRef,
+  setMenuItemHover,
+  clearMenuItemHover,
+  toggleUserMenu,
+  closeUserMenu,
+  navigateFromUserMenu,
+  navigateToLogout,
+  onUserMenuMount,
+  checkAdminRole,
+  portalNavSections,
+  isNavItemActive
+};
+'''
+      }
+    }
+    {
+      id: "pn2"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  width: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_100};
+  padding: 0.65rem;
+  gap: 0.15rem;
+  box-sizing: border-box;
+}`;'''
+        props:
+          '''return {
+  as: "aside",
+  onMount: () => args.fns.onUserMenuMount?.()
+};'''
+      }
+    }
+    {
+      id: "pn3"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 0.35rem;
+  padding: 0.35rem 0.4rem;
+  padding-bottom: 0.5rem;
+  border: none;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+._id:hover {
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  onClick: () => args.fns.navigateTo?.("/"),
+  "attr:aria-label": "Go to home"
+};'''
+      }
+    }
+    {
+      id: "pn_app_name"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  line-height: 1.2;
+}`;'''
+        props:
+          '''return { as: "span", text: "Fulchand Shastri" };'''
+      }
+    }
+    {
+      id: "pn_profile_row"
+      L: Attr
+      P: {
+        displayOrder: 10
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: auto;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  cursor: pointer;
+  text-align: left;
+}
+._id:hover {
+  background: ${args.theme.var.color.background_light_200};
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  ref: args.fns.setUserMenuTriggerRef,
+  onClick: args.fns.toggleUserMenu,
+  "attr:aria-expanded": args.fns.userMenuOpen?.() === true,
+  "attr:aria-haspopup": "menu",
+  "attr:aria-label": "Account menu"
+};'''
+      }
+    }
+    {
+      id: "pn_company_logo"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.375rem;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: ${args.theme.var.color.background_light_100};
+}`;'''
+        props:
+          '''return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "Company logo"
+};'''
+      }
+    }
+    {
+      id: "pn_profile_photo"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid ${args.theme.var.color.border};
+  background-size: cover;
+  background-position: center;
+  background-color: ${args.theme.var.color.background_light_200};
+  flex-shrink: 0;
+}`;'''
+        props:
+          '''const imageFileVertex = args.evalExpression("->UserProfileImage", {
+  graph: args.graph,
+  vertexes: [args.user]
+})?.[0];
+const fileName =
+  imageFileVertex?.P?.fileName != null ? String(imageFileVertex.P.fileName).trim() : "";
+const profileImageUrl =
+  fileName !== ""
+    ? `/api/file/download/${encodeURIComponent(fileName)}`
+    : "";
+const safeCssUrl = profileImageUrl.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+return {
+  as: "div",
+  hide: profileImageUrl === "",
+  style:
+    profileImageUrl !== "" ? `background-image: url("${safeCssUrl}")` : "",
+  "attr:role": "img",
+  "attr:aria-label": "Profile photo"
+};'''
+      }
+    }
+    {
+      id: "pn_profile_placeholder"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background_light_200};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: ${args.theme.var.color.text_dark_400};
+}`;'''
+        props:
+          '''const imageFileVertex = args.evalExpression("->UserProfileImage", {
+  graph: args.graph,
+  vertexes: [args.user]
+})?.[0];
+const fileName =
+  imageFileVertex?.P?.fileName != null ? String(imageFileVertex.P.fileName).trim() : "";
+const profileImageUrl =
+  fileName !== ""
+    ? `/api/file/download/${encodeURIComponent(fileName)}`
+    : "";
+return {
+  as: "icon",
+  icon: "ph:user-circle",
+  width: 24,
+  height: 24,
+  hide: profileImageUrl !== ""
+};'''
+      }
+    }
+    {
+      id: "pn_profile_username"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+  word-break: break-word;
+}`;'''
+        props:
+          '''const username =
+  args.user?.P?.username != null && String(args.user.P.username).trim() !== ""
+    ? String(args.user.P.username).trim()
+    : args.user?.P?.email != null && String(args.user.P.email).trim() !== ""
+      ? String(args.user.P.email).trim()
+      : "";
+return {
+  as: "div",
+  text: username
+};'''
+      }
+    }
+    {
+      id: "pn_nav_sections"
+      L: Attr
+      P: {
+        displayOrder: 2
+        contextName: navSection
+        loop: true
+        key: portal_nav_sections
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}`;'''
+        props:
+          '''return {
+  as: "nav",
+  "attr:aria-label": "Portal navigation",
+  data: args.fns.portalNavSections?.() ?? []
+};'''
+      }
+    }
+    {
+      id: "pn_nav_section_block"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+}`;'''
+        props:
+          '''return { as: "motionFragment" };'''
+      }
+    }
+    {
+      id: "pn_nav_section_title"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: ${args.theme.var.color.text_dark_400};
+  margin: 0.5rem 0 0.15rem 0;
+  padding: 0 0.4rem;
+}`;'''
+        props:
+          '''const section = args.contextData.navSection;
+return {
+  as: "h3",
+  text: section?.title ?? "",
+  hide: !section?.title
+};'''
+      }
+    }
+    {
+      id: "pn_nav_items"
+      L: Attr
+      P: {
+        displayOrder: 2
+        contextName: navItem
+        loop: true
+        componentName: Html
+        props:
+          '''const section = args.contextData.navSection;
+return {
+  as: "div",
+  data: section?.items ?? []
+};'''
+      }
+    }
+    {
+      id: "pn_nav_btn"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''const item = args.contextData.navItem;
+const active = args.fns.isNavItemActive?.(item);
+return `._id {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid ${active ? args.theme.var.color.primary : "transparent"};
+  background: ${active ? args.theme.var.color.primary_light_900 : "transparent"};
+  color: ${active ? args.theme.var.color.primary : args.theme.var.color.text};
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+._id:hover {
+  background: ${active ? args.theme.var.color.primary_light_800 : args.theme.var.color.background_light_300};
+  color: ${active ? args.theme.var.color.primary : args.theme.var.color.text};
+  border-color: ${active ? args.theme.var.color.primary_light_600 : args.theme.var.color.border};
+}`;'''
+        props:
+          '''const item = args.contextData.navItem;
+return {
+  as: "button",
+  type: "button",
+  onClick: () => args.fns.navigateTo?.(item.href),
+  "attr:aria-current": args.fns.isNavItemActive?.(item) ? "page" : undefined
+};'''
+      }
+    }
+    {
+      id: "pn_nav_icon"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: inherit;
+}`;'''
+        props:
+          '''const item = args.contextData.navItem;
+return {
+  as: "icon",
+  icon: item.icon,
+  width: 20,
+  height: 20,
+  style: "color: currentColor;"
+};'''
+      }
+    }
+    {
+      id: "pn_nav_label"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''const item = args.contextData.navItem;
+return { as: "span", text: item.label };'''
+      }
+    }
+    {
+      id: "pn_files"
+      L: Attr
+      P: {
+        displayOrder: 3
+        componentName: Html
+        css:
+          '''const active = String(args.location?.pathname || "") === "/portal/files";
+const hovered = args.fns.menuHoverKey?.() === "files";
+const hoverBg = args.theme.var.color.background_light_400;
+return `._id {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.375rem;
+  border: none;
+  background: ${active ? args.theme.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
+  color: ${active || hovered ? args.theme.var.color.primary : args.theme.var.color.text};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  role: "menuitem",
+  hide: true,
+  onMouseEnter: () => args.fns.setMenuItemHover?.("files"),
+  onMouseLeave: () => args.fns.clearMenuItemHover?.(),
+  onClick: () => args.fns.navigateFromUserMenu?.("/portal/files")
+};'''
+      }
+    }
+    {
+      id: "pn_files_i"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id { flex-shrink: 0; display: flex; align-items: center; color: inherit; }`;'''
+        props:
+          '''return {
+  as: "icon",
+  icon: "ph:folder",
+  width: 20,
+  height: 20
+};'''
+      }
+    }
+    {
+      id: "pn_files_t"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;'''
+        props:
+          '''return { as: "span", text: "My files" };'''
+      }
+    }
+    {
+      id: "pn9"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''const active = String(args.location?.pathname || "") === "/portal/profile";
+const hovered = args.fns.menuHoverKey?.() === "profile";
+const hoverBg = args.theme.var.color.background_light_400;
+return `._id {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.375rem;
+  border: none;
+  background: ${active ? args.theme.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
+  color: ${active || hovered ? args.theme.var.color.primary : args.theme.var.color.text};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  role: "menuitem",
+  hide: true,
+  onMouseEnter: () => args.fns.setMenuItemHover?.("profile"),
+  onMouseLeave: () => args.fns.clearMenuItemHover?.(),
+  onClick: () => args.fns.navigateFromUserMenu?.("/portal/profile")
+};'''
+      }
+    }
+    {
+      id: "pn9_i"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id { flex-shrink: 0; display: flex; align-items: center; color: inherit; }`;'''
+        props:
+          '''return {
+  as: "icon",
+  icon: "ph:user-circle",
+  width: 20,
+  height: 20
+};'''
+      }
+    }
+    {
+      id: "pn9_t"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;'''
+        props:
+          '''return { as: "span", text: "Profile" };'''
+      }
+    }
+    {
+      id: "pn10"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''const active = String(args.location?.pathname || "") === "/portal/password";
+const hovered = args.fns.menuHoverKey?.() === "password";
+const hoverBg = args.theme.var.color.background_light_400;
+return `._id {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.375rem;
+  border: none;
+  background: ${active ? args.theme.var.color.primary_light_900 : hovered ? hoverBg : "transparent"};
+  color: ${active || hovered ? args.theme.var.color.primary : args.theme.var.color.text};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  role: "menuitem",
+  hide: true,
+  onMouseEnter: () => args.fns.setMenuItemHover?.("password"),
+  onMouseLeave: () => args.fns.clearMenuItemHover?.(),
+  onClick: () => args.fns.navigateFromUserMenu?.("/portal/password")
+};'''
+      }
+    }
+    {
+      id: "pn10_i"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id { flex-shrink: 0; display: flex; align-items: center; color: inherit; }`;'''
+        props:
+          '''return {
+  as: "icon",
+  icon: "ph:lock-key",
+  width: 20,
+  height: 20
+};'''
+      }
+    }
+    {
+      id: "pn10_t"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;'''
+        props:
+          '''return { as: "span", text: "Change password" };'''
+      }
+    }
+    {
+      id: "pn7"
+      L: Attr
+      P: {
+        displayOrder: 9
+        componentName: Html
+        css:
+          '''return `._id {
+  flex: 1;
+  min-height: 1rem;
+}`;'''
+        props:
+          '''return {
+  as: "div"
+};'''
+      }
+    }
+    {
+      id: "pn_user_menu_portal"
+      L: Attr
+      P: {
+        displayOrder: 11
+        componentName: Html
+        props:
+          '''return { as: "portal" };'''
+      }
+    }
+    {
+      id: "pn_user_menu_panel"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id {
+  position: fixed;
+  z-index: 1100;
+  box-sizing: border-box;
+  padding: 0.35rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.background};
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}`;'''
+        props:
+          '''return {
+  as: "div",
+  hide: args.fns.userMenuOpen?.() !== true,
+  ref: args.fns.setUserMenuPanelRef,
+  "attr:role": "menu"
+};'''
+      }
+    }
+    {
+      id: "pn_logout_btn"
+      L: Attr
+      P: {
+        displayOrder: 4
+        componentName: Html
+        css:
+          '''return `._id {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.375rem;
+  border: none;
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+._id:hover {
+  background: ${args.theme.var.color.error_light_900};
+  color: ${args.theme.var.color.error};
+}`;'''
+        props:
+          '''return {
+  as: "button",
+  type: "button",
+  role: "menuitem",
+  onClick: args.fns.navigateToLogout
+};'''
+      }
+    }
+    {
+      id: "pn_logout_i"
+      L: Attr
+      P: {
+        displayOrder: 1
+        componentName: Html
+        css:
+          '''return `._id { flex-shrink: 0; display: flex; align-items: center; }`;'''
+        props:
+          '''return {
+  as: "icon",
+  icon: "ph:sign-out",
+  width: 18,
+  height: 18
+};'''
+      }
+    }
+    {
+      id: "pn_logout_t"
+      L: Attr
+      P: {
+        displayOrder: 2
+        componentName: Html
+        props:
+          '''return { as: "span", text: "Log out" };'''
+      }
+    }
+  ]
+  edges: [
+    {
+      id: pn_e1
+      T: Attr
+      S: "pn1"
+      E: "pn2"
+    }
+    {
+      id: pn_e2
+      T: Attr
+      S: "pn2"
+      E: "pn3"
+    }
+    {
+      id: pn_e_profile_row
+      T: Attr
+      S: "pn2"
+      E: "pn_profile_row"
+    }
+    {
+      id: pn_e_profile_photo
+      T: Attr
+      S: "pn_profile_row"
+      E: "pn_profile_photo"
+    }
+    {
+      id: pn_e_profile_placeholder
+      T: Attr
+      S: "pn_profile_row"
+      E: "pn_profile_placeholder"
+    }
+    {
+      id: pn_e_profile_username
+      T: Attr
+      S: "pn_profile_row"
+      E: "pn_profile_username"
+    }
+    {
+      id: pn_e_nav_sections
+      T: Attr
+      S: "pn2"
+      E: "pn_nav_sections"
+    }
+    {
+      id: pn_e_nav_section_block
+      T: Attr
+      S: "pn_nav_sections"
+      E: "pn_nav_section_block"
+    }
+    {
+      id: pn_e_nav_section_title
+      T: Attr
+      S: "pn_nav_section_block"
+      E: "pn_nav_section_title"
+    }
+    {
+      id: pn_e_nav_items
+      T: Attr
+      S: "pn_nav_section_block"
+      E: "pn_nav_items"
+    }
+    {
+      id: pn_e_nav_btn
+      T: Attr
+      S: "pn_nav_items"
+      E: "pn_nav_btn"
+    }
+    {
+      id: pn_e_nav_icon
+      T: Attr
+      S: "pn_nav_btn"
+      E: "pn_nav_icon"
+    }
+    {
+      id: pn_e_nav_label
+      T: Attr
+      S: "pn_nav_btn"
+      E: "pn_nav_label"
+    }
+    {
+      id: pn_e_header_logo
+      T: Attr
+      S: "pn3"
+      E: "pn_company_logo"
+    }
+    {
+      id: pn_e_header_name
+      T: Attr
+      S: "pn3"
+      E: "pn_app_name"
+    }
+    {
+      id: pn_e_menu_files
+      T: Attr
+      S: "pn_user_menu_panel"
+      E: "pn_files"
+    }
+    {
+      id: pn_e5_files_i
+      T: Attr
+      S: "pn_files"
+      E: "pn_files_i"
+    }
+    {
+      id: pn_e5_files_t
+      T: Attr
+      S: "pn_files"
+      E: "pn_files_t"
+    }
+    {
+      id: pn_e_menu_profile
+      T: Attr
+      S: "pn_user_menu_panel"
+      E: "pn9"
+    }
+    {
+      id: pn_e5a_i
+      T: Attr
+      S: "pn9"
+      E: "pn9_i"
+    }
+    {
+      id: pn_e5a_t
+      T: Attr
+      S: "pn9"
+      E: "pn9_t"
+    }
+    {
+      id: pn_e_menu_password
+      T: Attr
+      S: "pn_user_menu_panel"
+      E: "pn10"
+    }
+    {
+      id: pn_e5b_i
+      T: Attr
+      S: "pn10"
+      E: "pn10_i"
+    }
+    {
+      id: pn_e5b_t
+      T: Attr
+      S: "pn10"
+      E: "pn10_t"
+    }
+    {
+      id: pn_e6
+      T: Attr
+      S: "pn2"
+      E: "pn7"
+    }
+    {
+      id: pn_e_user_menu_portal
+      T: Attr
+      S: "pn2"
+      E: "pn_user_menu_portal"
+    }
+    {
+      id: pn_e_user_menu_panel
+      T: Attr
+      S: "pn_user_menu_portal"
+      E: "pn_user_menu_panel"
+    }
+    {
+      id: pn_e_logout_btn
+      T: Attr
+      S: "pn_user_menu_panel"
+      E: "pn_logout_btn"
+    }
+    {
+      id: pn_e_logout_i
+      T: Attr
+      S: "pn_logout_btn"
+      E: "pn_logout_i"
+    }
+    {
+      id: pn_e_logout_t
+      T: Attr
+      S: "pn_logout_btn"
+      E: "pn_logout_t"
+    }
+  ]
+}

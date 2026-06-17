@@ -1,0 +1,151 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: Function
+      P: {
+        key: migrateDynamicPageSettings
+        description: Seeds Fulchand Shastri settings_page_config and default GlobalSetting section documents for all public pages.
+        body:
+          '''
+/**
+ * Fulchand Shastri — migrate all public page settings configurations.
+ * contextData: { dryRun?: boolean }
+ */
+
+const { dryRun = false } = args.contextData || {};
+console.log(`Fulchand Shastri settings migration (dryRun: ${dryRun})`);
+
+const nowIso = () => new Date().toISOString();
+
+const definitionsResult = await args.executeNamedServerFunction({
+  functionName: "getFulchandPageSettingsDefinitions",
+  contextData: {}
+});
+
+if (!definitionsResult?.result?.success) {
+  return {
+    success: false,
+    message: definitionsResult?.result?.message || "Failed to load page settings definitions"
+  };
+}
+
+const { settingsPageConfigs, defaultSectionDocuments } = definitionsResult.result.data || {};
+
+async function ensureGlobalSetting() {
+  if (dryRun) return;
+  await args.session.run(
+    `
+    MERGE (g:GlobalSetting {key: 'Default'})
+    ON CREATE SET g.createdAt = datetime(), g.name = 'Default'
+    SET g.updatedAt = datetime()
+    RETURN g
+    `
+  );
+}
+
+async function processSettingsPageConfig(setting) {
+  const { key, settingsPageId, name, config } = setting;
+  const checkResult = await args.session.run(`MATCH (s:Setting {key: $key}) RETURN s`, { key });
+  const exists = checkResult.records.length > 0;
+
+  if (!dryRun) {
+    if (exists) {
+      await args.session.run(
+        `MATCH (s:Setting {key: $key})
+         SET s.config = $config,
+             s.type = 'settings_page_config',
+             s.settingsPageId = $settingsPageId,
+             s.name = $name,
+             s.updatedAt = datetime()
+         RETURN s`,
+        { key, settingsPageId, name, config }
+      );
+    } else {
+      await args.session.run(
+        `CREATE (s:Setting {
+          key: $key,
+          type: 'settings_page_config',
+          settingsPageId: $settingsPageId,
+          config: $config,
+          name: $name,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        RETURN s`,
+        { key, settingsPageId, name, config }
+      );
+    }
+  }
+
+  return exists ? { created: 0, updated: 1 } : { created: 1, updated: 0 };
+}
+
+async function processDefaultSectionDocument(doc) {
+  if (dryRun) {
+    return { created: 1, updated: 0 };
+  }
+  const valuesJson = JSON.stringify(doc.values || {});
+  const result = await args.session.run(
+    `
+    MATCH (g:GlobalSetting {key: 'Default'})
+    OPTIONAL MATCH (g)-[:GlobalSettingHasSettingsSection]->(existing:SettingsSectionDocument {pageId: $pageId, sectionId: $sectionId})
+    WITH g, existing
+    FOREACH (_ IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
+      CREATE (g)-[:GlobalSettingHasSettingsSection]->(:SettingsSectionDocument {
+        pageId: $pageId,
+        sectionId: $sectionId,
+        scopeVertexLabel: 'GlobalSetting',
+        scopeId: 'Default',
+        values: $valuesJson,
+        version: 1,
+        createdAt: $now,
+        updatedAt: $now,
+        createdBy: 'migration',
+        updatedBy: 'migration'
+      })
+    )
+    RETURN existing IS NULL AS created
+    `,
+    { pageId: doc.pageId, sectionId: doc.sectionId, valuesJson, now: nowIso() }
+  );
+
+  const created = result.records[0]?.get("created") === true;
+  return created ? { created: 1, updated: 0 } : { created: 0, updated: 0 };
+}
+
+const stats = {
+  created: 0,
+  updated: 0,
+  total: (settingsPageConfigs?.length || 0) + (defaultSectionDocuments?.length || 0),
+  settingsPageConfigs: settingsPageConfigs?.length || 0,
+  defaultSectionDocuments: defaultSectionDocuments?.length || 0
+};
+
+await ensureGlobalSetting();
+
+for (let j = 0; j < (settingsPageConfigs?.length || 0); j++) {
+  const r = await processSettingsPageConfig(settingsPageConfigs[j]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+for (let k = 0; k < (defaultSectionDocuments?.length || 0); k++) {
+  const r = await processDefaultSectionDocument(defaultSectionDocuments[k]);
+  stats.created += r.created;
+  stats.updated += r.updated;
+}
+
+return {
+  success: true,
+  message: dryRun
+    ? `Fulchand Shastri settings migration dry run. Would touch ${stats.total} records.`
+    : `Fulchand Shastri settings migration complete. Created ${stats.created}, updated ${stats.updated}.`,
+  stats
+};
+'''
+      }
+    }
+  ]
+  edges: []
+}

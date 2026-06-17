@@ -8,7 +8,21 @@
         key: "FullChandHome",
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
-        url: "/"
+        url: "/",
+        contextName: "homeSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "home", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -18,7 +32,8 @@
         displayOrder: 1,
         componentName: "FullChandHeroSection",
         props: '''
-return {};
+const hero = args.contextData.homeSettings?.hero;
+return hero;
 '''
       }
     },
@@ -85,9 +100,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const welcome = args.contextData.homeSettings?.welcome;
 return {
   as: "h1",
-  text: "Welcome to Fulchand Shastri's Spiritual Haven"
+  text: welcome?.welcomeTitle
 };
 ''',
         css: '''
@@ -112,9 +128,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const welcome = args.contextData.homeSettings?.welcome;
 return {
   as: "p",
-  text: "Fulchand is an enlightened master who has devoted his life to spreading the teachings of his spiritual guru, Shrimad Rajchandra, in more than 220 countries around the world. Though he is strongly rooted in the Jainism theory of Samyak Darshan (Enlightenment) and Moksha (Nirvana), he aims to share this divine knowledge with every soul in the world that is ready to acquire it."
+  text: welcome?.welcomeDesc
 };
 ''',
         css: '''
@@ -150,56 +167,33 @@ return `._id {
       }
     },
     {
-      id: "feature1",
+      id: "featureLoop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        loop: true,
+        contextName: "featureCard"
+        componentName: "Html",
+        props: '''
+const cards = args.contextData.homeSettings?.features?.featureCards ?? [];
+return {
+  as: "fragment",
+  data: cards.map((card) => ({
+    ...card,
+    align: card.align
+  }))
+};
+'''
+      }
+    },
+    {
+      id: "featureCard",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "FullChandFeatureCard",
         props: '''
-return {
-  icon: "carbon:book",
-  title: "Sacred Books",
-  description: "Access a comprehensive collection of spiritual texts and writings that guide souls on their journey to enlightenment.",
-  link: "/books",
-  linkText: "Explore Books",
-  align: "center"
-};
-'''
-      }
-    },
-    {
-      id: "feature2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "FullChandFeatureCard",
-        props: '''
-return {
-  icon: "carbon:video",
-  title: "Discourses",
-  description: "Watch thousands of hours of enlightening discourses available in multiple languages for seekers worldwide.",
-  link: "/discourses",
-  linkText: "Watch Discourses",
-  align: "center"
-};
-'''
-      }
-    },
-    {
-      id: "feature3",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "FullChandFeatureCard",
-        props: '''
-return {
-  icon: "carbon:calendar",
-  title: "Upcoming Events",
-  description: "Stay updated with the schedule of spiritual gatherings, discourses, and special programs across the globe.",
-  link: "/schedule",
-  linkText: "View Schedule",
-  align: "center"
-};
+return args.contextData.featureCard;
 '''
       }
     },
@@ -210,9 +204,10 @@ return {
         displayOrder: 3,
         componentName: "FullChandQuoteSection",
         props: '''
+const quote = args.contextData.homeSettings?.quote;
 return {
-  text: "The soul's journey towards enlightenment begins with a single step of self-realization. Every moment is an opportunity to awaken to your true nature.",
-  author: "Fulchand Shastri"
+  text: quote.quoteText,
+  author: quote.quoteAuthor
 };
 '''
       }
@@ -245,9 +240,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const mission = args.contextData.homeSettings?.mission;
 return {
   as: "h2",
-  text: "Our Mission"
+  text: mission?.missionTitle
 };
 ''',
         css: '''
@@ -283,7 +279,24 @@ return `._id {
       }
     },
     {
-      id: "missionItem1",
+      id: "missionItemLoop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        loop: true,
+        contextName: "missionItem"
+        componentName: "Html",
+        props: '''
+const items = args.contextData.homeSettings?.mission?.missionItems ?? [];
+return {
+  as: "div",
+  data: items
+};
+'''
+      }
+    },
+    {
+      id: "missionItem",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -296,87 +309,7 @@ return {
       }
     },
     {
-      id: "missionIcon1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 4rem;
-  height: 4rem;
-  background: ${args.theme.var.color.primary_light_100};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "missionIconSvg1",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:earth",
-  width: 32,
-  height: 32
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
-'''
-      }
-    },
-    {
-      id: "missionText1",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Spreading divine knowledge to souls across 220+ countries"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1rem;
-  line-height: 1.6;
-}`;
-'''
-      }
-    },
-    {
-      id: "missionItem2",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "missionIcon2",
+      id: "missionIcon",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -401,15 +334,16 @@ return `._id {
       }
     },
     {
-      id: "missionIconSvg2",
+      id: "missionIconSvg",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const item = args.contextData.missionItem;
 return {
   as: "icon",
-  icon: "carbon:education",
+  icon: item?.icon,
   width: 32,
   height: 32
 };
@@ -422,175 +356,16 @@ return `._id {
       }
     },
     {
-      id: "missionText2",
+      id: "missionText",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const item = args.contextData.missionItem;
 return {
   as: "p",
-  text: "Teaching the path of Samyak Darshan and Moksha"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1rem;
-  line-height: 1.6;
-}`;
-'''
-      }
-    },
-    {
-      id: "missionItem3",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "missionIcon3",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 4rem;
-  height: 4rem;
-  background: ${args.theme.var.color.primary_light_100};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "missionIconSvg3",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:user-multiple",
-  width: 32,
-  height: 32
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
-'''
-      }
-    },
-    {
-      id: "missionText3",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Welcoming all souls regardless of background or beliefs"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.text_light_200};
-  font-size: 1rem;
-  line-height: 1.6;
-}`;
-'''
-      }
-    },
-    {
-      id: "missionItem4",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "missionIcon4",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 4rem;
-  height: 4rem;
-  background: ${args.theme.var.color.primary_light_100};
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "missionIconSvg4",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:favorite",
-  width: 32,
-  height: 32
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.primary};
-}`;
-'''
-      }
-    },
-    {
-      id: "missionText4",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Compassionately guiding seekers on their spiritual journey"
+  text: item?.text
 };
 ''',
         css: '''
@@ -619,29 +394,17 @@ return `._id {
     { id: "e6", T: "Attr", S: "welcomeSection", E: "welcomeTitle" },
     { id: "e7", T: "Attr", S: "welcomeSection", E: "welcomeDesc" },
     { id: "e8", T: "Attr", S: "container", E: "featuresGrid" },
-    { id: "e9", T: "Attr", S: "featuresGrid", E: "feature1" },
-    { id: "e10", T: "Attr", S: "featuresGrid", E: "feature2" },
-    { id: "e11", T: "Attr", S: "featuresGrid", E: "feature3" },
+    { id: "e9", T: "Attr", S: "featuresGrid", E: "featureLoop" },
+    { id: "e9a", T: "Attr", S: "featureLoop", E: "featureCard" },
     { id: "e12", T: "Attr", S: "container", E: "quote" },
     { id: "e13", T: "Attr", S: "container", E: "missionSection" },
     { id: "e14", T: "Attr", S: "missionSection", E: "missionTitle" },
     { id: "e15", T: "Attr", S: "missionSection", E: "missionGrid" },
-    { id: "e16", T: "Attr", S: "missionGrid", E: "missionItem1" },
-    { id: "e17", T: "Attr", S: "missionItem1", E: "missionIcon1" },
-    { id: "e18", T: "Attr", S: "missionIcon1", E: "missionIconSvg1" },
-    { id: "e19", T: "Attr", S: "missionItem1", E: "missionText1" },
-    { id: "e20", T: "Attr", S: "missionGrid", E: "missionItem2" },
-    { id: "e21", T: "Attr", S: "missionItem2", E: "missionIcon2" },
-    { id: "e22", T: "Attr", S: "missionIcon2", E: "missionIconSvg2" },
-    { id: "e23", T: "Attr", S: "missionItem2", E: "missionText2" },
-    { id: "e24", T: "Attr", S: "missionGrid", E: "missionItem3" },
-    { id: "e25", T: "Attr", S: "missionItem3", E: "missionIcon3" },
-    { id: "e26", T: "Attr", S: "missionIcon3", E: "missionIconSvg3" },
-    { id: "e27", T: "Attr", S: "missionItem3", E: "missionText3" },
-    { id: "e28", T: "Attr", S: "missionGrid", E: "missionItem4" },
-    { id: "e29", T: "Attr", S: "missionItem4", E: "missionIcon4" },
-    { id: "e30", T: "Attr", S: "missionIcon4", E: "missionIconSvg4" },
-    { id: "e31", T: "Attr", S: "missionItem4", E: "missionText4" },
+    { id: "e16", T: "Attr", S: "missionGrid", E: "missionItemLoop" },
+    { id: "e17", T: "Attr", S: "missionItemLoop", E: "missionItem" },
+    { id: "e18", T: "Attr", S: "missionItem", E: "missionIcon" },
+    { id: "e19", T: "Attr", S: "missionIcon", E: "missionIconSvg" },
+    { id: "e20", T: "Attr", S: "missionItem", E: "missionText" },
     { id: "e_layout", T: "PageLayout", S: "page", E: "layout" }
   ]
 }

@@ -9,6 +9,20 @@
         fns: "return { enabled: () => true }",
         isNoPermissionCheck: true,
         url: "/gyaan-deepak-prajwalan"
+        contextName: "gyaanDeepakSettings"
+        serverFunction: '''
+try {
+  const result = await args.executeNamedServerFunction({
+    functionName: "loadFulchandPublicPageSettings",
+    contextData: { pageId: "gyaan-deepak", allowPublicRead: true }
+  });
+  if (!result?.result?.success) return {};
+  return result.result.data?.sections || {};
+} catch (error) {
+  console.error("Error loading page settings:", error);
+  return {};
+}
+'''
       }
     },
     {
@@ -51,9 +65,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "h1",
-  text: "જ્ઞાન દીપક ! પ્રજ્વલન"
+  text: content?.heroTitle
 };
 ''',
         css: '''
@@ -79,9 +94,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "p",
-  text: "આધ્યાત્મિક જ્ઞાનની જ્યોત પ્રગટાવવાનો અભિયાન"
+  text: content?.heroSubtitle
 };
 ''',
         css: '''
@@ -144,9 +160,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "h2",
-  text: "જ્ઞાન દીપક કાર્યક્રમ"
+  text: content?.introTitle
 };
 ''',
         css: '''
@@ -166,9 +183,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "p",
-  text: "જ્ઞાન દીપક ! પ્રજ્વલન એ એક અનોખો કાર્યક્રમ છે જે યુવાનોમાં આધ્યાત્મિક જાગૃતિ લાવવાનો પ્રયાસ કરે છે. આ કાર્યક્રમ દ્વારા અમે પરંપરાગત આધ્યાત્મિક જ્ઞાનને આધુનિક સંદર્ભમાં રજૂ કરીએ છીએ, જેથી નવી પેઢી સરળતાથી તેને સમજી શકે અને અપનાવી શકે."
+  text: content?.introText
 };
 ''',
         css: '''
@@ -207,10 +225,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "h2",
-  text: "કાર્યક્રમની વિશેષતાઓ",
-  style: { textAlign: "center" }
+  text: content?.featuresTitle
 };
 ''',
         css: '''
@@ -252,45 +270,10 @@ return `._id {
         contextName: "feature",
         loop: true,
         props: '''
+const items = args.contextData.gyaanDeepakSettings?.feature?.feature ?? [];
 return {
-  data: [
-    {
-      id: 1,
-      icon: "carbon:light",
-      title: "દૈનિક જ્ઞાન સંદેશ",
-      description: "દરરોજ સવારે પ્રેરણાદાયી અને જ્ઞાનવર્ધક સંદેશો મોકલવામાં આવે છે"
-    },
-    {
-      id: 2,
-      icon: "carbon:user-multiple",
-      title: "ઓનલાઈન સત્સંગ",
-      description: "સાપ્તાહિક ઓનલાઈન સત્સંગ દ્વારા વિશ્વભરના સાધકો સાથે જોડાણ"
-    },
-    {
-      id: 3,
-      icon: "carbon:chat-bot",
-      title: "પ્રશ્નોત્તરી સત્રો",
-      description: "આધ્યાત્મિક શંકાઓના સમાધાન માટે નિયમિત પ્રશ્નોત્તરી કાર્યક્રમો"
-    },
-    {
-      id: 4,
-      icon: "carbon:video",
-      title: "વિડિયો પ્રવચનો",
-      description: "આધ્યાત્મિક વિષયો પર ઊંડાણપૂર્વક વિડિયો પ્રવચન શ્રેણી"
-    },
-    {
-      id: 5,
-      icon: "carbon:notebook",
-      title: "અભ્યાસ સામગ્રી",
-      description: "મફત ડાઉનલોડ કરી શકાય તેવી અભ્યાસ સામગ્રી અને ઈ-બુક્સ"
-    },
-    {
-      id: 6,
-      icon: "carbon:certificate",
-      title: "પ્રમાણપત્ર કોર્સ",
-      description: "આધ્યાત્મિક વિષયોમાં પ્રમાણિત ઓનલાઈન કોર્સિસ"
-    }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -339,10 +322,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "h2",
-  text: "સાપ્તાહિક કાર્યક્રમ",
-  style: { textAlign: "center" }
+  text: content?.scheduleTitle
 };
 ''',
         css: '''
@@ -441,9 +424,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "th",
-  text: "દિવસ"
+  text: content?.th1
 };
 '''
       }
@@ -455,9 +439,10 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "th",
-  text: "સમય"
+  text: content?.th2
 };
 '''
       }
@@ -469,9 +454,10 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "th",
-  text: "કાર્યક્રમ"
+  text: content?.th3
 };
 '''
       }
@@ -498,16 +484,10 @@ return {
         contextName: "schedule",
         loop: true,
         props: '''
+const items = args.contextData.gyaanDeepakSettings?.schedule?.schedule ?? [];
 return {
-  data: [
-    { id: 1, day: "સોમવાર", time: "સવારે ૬:૦૦", program: "જ્ઞાન દીપક પ્રભાત સંદેશ" },
-    { id: 2, day: "મંગળવાર", time: "સાંજે ૭:૩૦", program: "યુવા સત્સંગ - ઓનલાઈન" },
-    { id: 3, day: "બુધવાર", time: "સવારે ૬:૦૦", program: "જ્ઞાન દીપક પ્રભાત સંદેશ" },
-    { id: 4, day: "ગુરુવાર", time: "સાંજે ૮:૦૦", program: "પ્રશ્નોત્તરી સત્ર" },
-    { id: 5, day: "શુક્રવાર", time: "સવારે ૬:૦૦", program: "જ્ઞાન દીપક પ્રભાત સંદેશ" },
-    { id: 6, day: "શનિવાર", time: "સાંજે ૫:૦૦", program: "વિશેષ પ્રવચન" },
-    { id: 7, day: "રવિવાર", time: "સવારે ૯:૦૦", program: "સામૂહિક ધ્યાન અને સત્સંગ" }
-  ]
+  as: "fragment",
+  data: items
 };
 '''
       }
@@ -600,9 +580,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "h2",
-  text: "જ્ઞાન દીપક પરિવારમાં જોડાવો"
+  text: content?.joinTitle
 };
 ''',
         css: '''
@@ -621,9 +602,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "p",
-  text: "અધ્યાત્મના પથ પર સાથે ચાલવા માટે આજે જ નોંધણી કરાવો"
+  text: content?.joinText
 };
 ''',
         css: '''
@@ -663,10 +645,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "a",
-  href: "https://wa.me/919825123456",
-  text: "WhatsApp પર જોડાવો"
+  text: content?.whatsappButton
 };
 ''',
         css: '''
@@ -697,10 +679,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const content = args.contextData.gyaanDeepakSettings?.content;
 return {
   as: "a",
-  href: "https://t.me/gyaandeepak",
-  text: "Telegram પર જોડાવો"
+  text: content?.telegramButton
 };
 ''',
         css: '''

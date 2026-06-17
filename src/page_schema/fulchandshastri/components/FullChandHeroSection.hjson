@@ -185,9 +185,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const hero = args.contextData.props || {};
 return {
   as: "iframe",
-  src: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  src: hero.leftVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
   width: 300,
   height: 200,
   frameborder: "0",
@@ -209,9 +210,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const hero = args.contextData.props || {};
 return {
   as: "h3",
-  text: "आत्मज्ञान की यात्रा"
+  text: hero.leftTitle || "आत्मज्ञान की यात्रा"
 };
 ''',
         css: '''
@@ -231,9 +233,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const hero = args.contextData.props || {};
 return {
   as: "p",
-  text: "श्रीमद् राजचंद्र के उपदेशों का प्रसार"
+  text: hero.leftDesc || "श्रीमद् राजचंद्र के उपदेशों का प्रसार"
 };
 ''',
         css: '''
@@ -334,9 +337,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const hero = args.contextData.props || {};
 return {
   as: "iframe",
-  src: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  src: hero.rightVideoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ",
   width: 300,
   height: 200,
   frameborder: "0",
@@ -358,9 +362,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const hero = args.contextData.props || {};
 return {
   as: "h2",
-  text: "WATCH OR LISTEN TO HIM ONLINE"
+  text: hero.watchButtonText || "WATCH OR LISTEN TO HIM ONLINE"
 };
 ''',
         css: '''
@@ -385,9 +390,10 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const hero = args.contextData.props || {};
 return {
   as: "p",
-  text: "You can watch and listen to thousands of hours of recordings of Fulchand's Discourses by clicking in this space. Videos can be streamed or downloaded from YouTube and audios can be downloaded from this site. This help is to save bandwidth."
+  text: hero.rightDesc || ""
 };
 ''',
         css: '''
